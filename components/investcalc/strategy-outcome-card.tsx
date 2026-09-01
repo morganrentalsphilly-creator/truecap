@@ -66,6 +66,7 @@ export function StrategyOutcomeCard({
   isOfferCeilingLoading,
   hasExactOfferCeilingAccess,
   offerCeilingError,
+  offerCeilingErrorCode = null,
   onTuneTargetsOpened,
   onReviewCriteria,
   onUpgrade,
@@ -84,6 +85,13 @@ export function StrategyOutcomeCard({
   isOfferCeilingLoading: boolean;
   hasExactOfferCeilingAccess: boolean;
   offerCeilingError: boolean;
+  /** RATE_LIMITED renders wait copy instead of retry advice. */
+  offerCeilingErrorCode?:
+    | "VALIDATION_ERROR"
+    | "RATE_LIMITED"
+    | "SERVER_ERROR"
+    | "NETWORK"
+    | null;
   onMaoTargetChange: (target: MaoTarget) => void;
   onTuneTargetsOpened?: () => void;
   onReviewCriteria?: () => void;
@@ -105,11 +113,16 @@ export function StrategyOutcomeCard({
         <OutcomeShell
           icon={Target}
           eyebrow="Wholesale / Offer Ceiling"
-          title="Offer Ceiling temporarily unavailable"
+          title={
+            offerCeilingErrorCode === "RATE_LIMITED"
+              ? "Hourly ceiling limit reached"
+              : "Offer Ceiling temporarily unavailable"
+          }
         >
           <p role="alert" className="text-sm text-muted-foreground">
-            The secure calculation could not be reached. Review the criteria
-            and run the analysis again.
+            {offerCeilingErrorCode === "RATE_LIMITED"
+              ? "You've reached the hourly limit for exact ceiling solves. It resets on its own — running the analysis again right now won't help, and the rest of your analysis is unaffected."
+              : "The secure calculation could not be reached. Review the criteria and run the analysis again."}
           </p>
           <ReviewTargetCriteriaButton
             onOpened={onTuneTargetsOpened}

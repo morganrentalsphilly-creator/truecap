@@ -109,6 +109,44 @@ function parseEntitlements(raw: unknown): PlanEntitlements | null {
 /**
  * Effective entitlements for a user: active/trialing/past_due subscription plan, else `free` plan row.
  */
+/**
+ * Thrown by getVerifiedEntitlementsForUser when the subscription read itself
+ * failed. MUTATION gates must not treat "could not verify the plan" as "not
+ * on the plan": the lenient getEntitlementsForUser falls through to the free
+ * bag on a DB blip, and every downstream gate then tells an already-paying
+ * Pro user "Upgrade to Pro" — wrong-actor advice that can never work. Render
+ * paths keep the lenient degrade-to-free behavior (a dashboard should render
+ * on a blip, not 500); paid-feature WRITES use the verified variant and map
+ * this error to retry-flavored copy via their existing catch handlers.
+ */
+export class EntitlementsUnavailableError extends Error {
+  constructor() {
+    super("Entitlements could not be verified (subscription read failed).");
+    this.name = "EntitlementsUnavailableError";
+  }
+}
+
+/** getEntitlementsForUser, but a failed subscription read THROWS instead of
+ *  silently substituting the free plan. Use at entitlement-gated mutations. */
+export async function getVerifiedEntitlementsForUser(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<PlanEntitlements> {
+  const { error: probeError } = await supabase
+    .from("subscriptions")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", userId)
+    .limit(1);
+  if (probeError) {
+    Sentry.captureException(probeError, {
+      tags: { feature: "entitlements" },
+      extra: { userId, query: "verified_subscriptions_probe" },
+    });
+    throw new EntitlementsUnavailableError();
+  }
+  return getEntitlementsForUser(supabase, userId);
+}
+
 export async function getEntitlementsForUser(
   supabase: SupabaseClient,
   userId: string

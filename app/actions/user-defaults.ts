@@ -76,7 +76,7 @@ export async function getUserAnalysisDefaultsAction(): Promise<UserDefaultsActio
       error.code === "42P01" ||
       /relation .* does not exist/i.test(error.message)
     ) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "user-defaults");
   }
@@ -120,7 +120,7 @@ export async function saveUserAnalysisDefaultsAction(
       error.code === "42P01" ||
       /relation .* does not exist/i.test(error.message)
     ) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "user-defaults");
   }

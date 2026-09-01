@@ -34,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import { friendlyToastError } from "@/lib/friendly-error";
 import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
 
 const profileSchema = z.object({
@@ -346,10 +347,14 @@ export function ProfileForm({
       revokeObjectUrl();
       closeCropDialog(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not upload avatar.";
+      // The last client-side Storage call site that toasted the raw SDK
+      // message ("new row violates row-level security policy") instead of
+      // mapping it — deal-documents and OAuth already use friendlyToastError.
+      // The crafted session-expiry throw above passes through unchanged: its
+      // message matches the mapper's session class.
       toast({
         title: "Avatar upload failed",
-        description: message,
+        description: friendlyToastError(error, { feature: "profile-avatar" }),
         variant: "destructive",
       });
     } finally {

@@ -65,7 +65,7 @@ export async function getDealLabelsAction(id: string): Promise<DealLabelsResult>
     .maybeSingle();
   if (error) {
     if (isMissingLabelColumn(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "deal-labels");
   }
@@ -104,7 +104,7 @@ export async function updateDealLabelsAction(
     .maybeSingle();
   if (error) {
     if (isMissingLabelColumn(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "deal-labels");
   }

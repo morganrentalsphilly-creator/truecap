@@ -51,6 +51,9 @@ const MONEY_FIELDS = [
   { key: "maxCashRequired", label: "Max cash required", step: "500", placeholder: "75000" },
 ] as const;
 
+/** The two criteria that live behind the offer-target migration. */
+const OFFER_TARGET_KEYS = new Set(["minIrrPct", "maxCashRequired"]);
+
 const PROPERTY_TYPES: BuyBoxPropertyType[] = ["single-family", "multi-family", "owner-occupant"];
 
 type NumericKey =
@@ -138,6 +141,9 @@ export function BuyBoxesCard() {
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [canUse, setCanUse] = useState(false);
+  // False while the offer-target columns are missing server-side; the two
+  // inputs render disabled with a hint instead of composing a doomed save.
+  const [supportsOfferTargets, setSupportsOfferTargets] = useState(true);
   const [migrationPending, setMigrationPending] = useState(false);
   const [boxes, setBoxes] = useState<NamedBuyBox[]>([]);
   // Agent Pro roster for the per-client selector. null = not an Agent Pro
@@ -194,9 +200,29 @@ export function BuyBoxesCard() {
     if (result.ok) {
       setBoxes(result.boxes);
       setCanUse(result.canUse);
+      if (result.supportsOfferTargets != null) {
+        setSupportsOfferTargets(result.supportsOfferTargets);
+      }
       return true;
     }
-    if (result.code === "MIGRATION_PENDING") setMigrationPending(true);
+    if (result.code === "MIGRATION_PENDING") {
+      // Containment: when the card has already loaded working boxes, a
+      // save-time MIGRATION_PENDING (the IRR/cash-target columns) must not
+      // swap the WHOLE card for a feature-unavailable notice - the feature
+      // is demonstrably available. Keep the card, disable the two doomed
+      // inputs, and say exactly which fields to clear.
+      if (boxes.length > 0 || canUse) {
+        setSupportsOfferTargets(false);
+        toast({
+          title: "Two criteria are not available yet",
+          description:
+            "Min IRR and Max cash required are not enabled on the server yet. Clear those two fields and save again - everything else in this box works.",
+          variant: "destructive",
+        });
+      } else {
+        setMigrationPending(true);
+      }
+    }
     else if (result.code !== "ENTITLEMENT_REQUIRED" && result.code !== "SIGN_IN_REQUIRED") {
       toast({ title: "Buy box error", description: result.message, variant: "destructive" });
     }
@@ -211,6 +237,7 @@ export function BuyBoxesCard() {
         if (result.ok) {
           setBoxes(result.boxes);
           setCanUse(result.canUse);
+          setSupportsOfferTargets(result.supportsOfferTargets ?? true);
         } else if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
         }
@@ -563,6 +590,7 @@ export function BuyBoxesCard() {
           onSave={handleSave}
           isOnlyBox={boxes.length === 0}
           clients={clients}
+          supportsOfferTargets={supportsOfferTargets}
         />
       )}
     </section>
@@ -577,6 +605,7 @@ function BoxEditorForm({
   onSave,
   isOnlyBox,
   clients,
+  supportsOfferTargets,
 }: {
   editor: EditorState;
   setEditor: (e: EditorState | null) => void;
@@ -586,6 +615,8 @@ function BoxEditorForm({
   isOnlyBox: boolean;
   /** Agent Pro roster; null hides the per-client selector. */
   clients: AgentClient[] | null;
+  /** False while the IRR/cash-target migration is unapplied server-side. */
+  supportsOfferTargets: boolean;
 }) {
   const [stateInput, setStateInput] = useState("");
 
@@ -672,6 +703,12 @@ function BoxEditorForm({
                 inputMode="decimal"
                 step={field.step}
                 placeholder={field.placeholder}
+                disabled={!supportsOfferTargets && OFFER_TARGET_KEYS.has(field.key)}
+                title={
+                  !supportsOfferTargets && OFFER_TARGET_KEYS.has(field.key)
+                    ? "Available after the next server update"
+                    : undefined
+                }
                 value={editor.fields[field.key]}
                 onChange={(e) => updateField(field.key, e.target.value)}
                 className="h-10 pr-9 text-sm"
@@ -698,6 +735,12 @@ function BoxEditorForm({
                 inputMode="numeric"
                 step={field.step}
                 placeholder={field.placeholder}
+                disabled={!supportsOfferTargets && OFFER_TARGET_KEYS.has(field.key)}
+                title={
+                  !supportsOfferTargets && OFFER_TARGET_KEYS.has(field.key)
+                    ? "Available after the next server update"
+                    : undefined
+                }
                 value={editor.fields[field.key]}
                 onChange={(e) => updateField(field.key, e.target.value)}
                 className="h-10 pl-7 text-sm"

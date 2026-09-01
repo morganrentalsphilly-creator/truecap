@@ -159,7 +159,7 @@ async function loadSettings(
   if (watchResult.error || preferencesResult.error) {
     const error = watchResult.error ?? preferencesResult.error;
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "saved-deal-watch");
   }
 
@@ -176,7 +176,7 @@ async function loadSettings(
       .maybeSingle();
     if (checkpointResult.error) {
       return isMigrationPending(checkpointResult.error)
-        ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+        ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
         : toServerErrorResult(checkpointResult.error, "saved-deal-watch");
     }
     const checkpoint = checkpointResult.data as { observed_at?: string | null } | null;
@@ -252,7 +252,7 @@ export async function setSavedDealWatchEnabledAction(
   );
   if (error) {
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "saved-deal-watch");
   }
 
@@ -294,7 +294,7 @@ export async function setSavedDealWatchPreferencesAction(
   );
   if (error) {
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "saved-deal-watch");
   }
 

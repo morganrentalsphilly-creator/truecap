@@ -81,7 +81,7 @@ export async function listDealCommentsAction(id: string): Promise<DealCommentsRe
     .order("created_at", { ascending: false });
   if (error) {
     if (isMissingCommentsTable(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "deal-comments");
   }
@@ -124,7 +124,7 @@ export async function addDealCommentAction(id: string, body: string): Promise<De
   });
   if (error) {
     if (isMissingCommentsTable(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "deal-comments");
   }
@@ -152,7 +152,7 @@ export async function deleteDealCommentAction(id: string, commentId: string): Pr
     .eq("analysis_id", dealId);
   if (error) {
     if (isMissingCommentsTable(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "deal-comments");
   }

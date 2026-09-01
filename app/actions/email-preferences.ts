@@ -99,7 +99,7 @@ export async function getEmailPreferencesAction(): Promise<EmailPrefsResult> {
       };
     }
     if (isMissingColumn(retry.error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(retry.error, "email-preferences");
   }
@@ -120,7 +120,7 @@ export async function setRateAlertEmailsAction(enabled: boolean): Promise<EmailP
     .eq("id", user.id);
   if (error) {
     if (isMissingColumn(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "email-preferences");
   }
@@ -143,7 +143,7 @@ export async function setWeeklySummaryEmailsAction(
     .eq("id", user.id);
   if (error) {
     if (isMissingColumn(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." };
     }
     return toServerErrorResult(error, "email-preferences");
   }

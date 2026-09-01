@@ -222,7 +222,7 @@ async function resolvePropertyId(
         ? {
             ok: false,
             code: "MIGRATION_PENDING",
-            message: "Schema migration pending.",
+            message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
           }
         : toServerErrorResult(findErr, "scenarios"),
     };
@@ -242,7 +242,7 @@ async function resolvePropertyId(
           ? {
               ok: false,
               code: "MIGRATION_PENDING",
-              message: "Schema migration pending.",
+              message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
             }
           : toServerErrorResult(createErr, "scenarios"),
       };
@@ -286,7 +286,7 @@ export async function listScenariosAction(
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
-          message: "Schema migration pending.",
+          message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         }
       : toServerErrorResult(error, "scenarios");
   }
@@ -313,7 +313,7 @@ export async function listScenariosAction(
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
-          message: "Schema migration pending.",
+          message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         }
       : toServerErrorResult(listErr, "scenarios");
   }
@@ -403,7 +403,7 @@ export async function addScenarioAction(
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
-          message: "Schema migration pending.",
+          message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         }
       : toServerErrorResult(loadErr, "scenarios");
   }
@@ -441,7 +441,7 @@ export async function addScenarioAction(
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
-          message: "Schema migration pending.",
+          message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         }
       : toServerErrorResult(clashErr, "scenarios");
   }
@@ -778,7 +778,7 @@ export async function addScenarioAction(
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
-          message: "Schema migration pending.",
+          message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         }
       : toServerErrorResult(insertErr, "scenarios");
   }

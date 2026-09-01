@@ -988,11 +988,16 @@ export function AnalysisDashboard({
     key: string | null;
     status: "idle" | "loading" | "ready" | "error";
     payload: OfferCeilingAccessPayload | null;
-  }>({ key: null, status: "idle", payload: null });
+    /** Failure shape, so the renderers can distinguish RATE_LIMITED (waiting
+     *  works, retrying now does not) from a transient error (retrying works).
+     *  Collapsing every failure to one bit made the UI advise "run it again"
+     *  to users who had just hit the rate limit. */
+    errorCode: "VALIDATION_ERROR" | "RATE_LIMITED" | "SERVER_ERROR" | "NETWORK" | null;
+  }>({ key: null, status: "idle", payload: null, errorCode: null });
   const [offerCeilingRetryNonce, setOfferCeilingRetryNonce] = useState(0);
   useEffect(() => {
     if (!offerCeilingRequestKey || !values || !activeMaoTarget) {
-      setOfferCeilingResolution({ key: null, status: "idle", payload: null });
+      setOfferCeilingResolution({ key: null, status: "idle", payload: null, errorCode: null });
       return;
     }
     let cancelled = false;
@@ -1000,6 +1005,7 @@ export function AnalysisDashboard({
       key: offerCeilingRequestKey,
       status: "loading",
       payload: null,
+      errorCode: null,
     });
     void resolveOfferCeilingAction({
       values,
@@ -1012,6 +1018,7 @@ export function AnalysisDashboard({
           key: offerCeilingRequestKey,
           status: resolved.ok ? "ready" : "error",
           payload: resolved.ok ? resolved.data : null,
+          errorCode: resolved.ok ? null : resolved.code,
         });
       })
       .catch(() => {
@@ -1020,6 +1027,7 @@ export function AnalysisDashboard({
           key: offerCeilingRequestKey,
           status: "error",
           payload: null,
+          errorCode: "NETWORK",
         });
       });
     return () => {
@@ -1648,6 +1656,7 @@ export function AnalysisDashboard({
             }
             isOfferCeilingLoading={offerCeilingIsLoading}
             offerCeilingError={offerCeilingHasError}
+            offerCeilingErrorCode={offerCeilingResolution.errorCode}
             onRetryOfferCeiling={() => {
               setOfferCeilingRetryNonce((current) => current + 1);
             }}
@@ -1728,6 +1737,7 @@ export function AnalysisDashboard({
               currentOfferCeilingPayload?.access === "exact"
             }
             offerCeilingError={offerCeilingHasError}
+            offerCeilingErrorCode={offerCeilingResolution.errorCode}
             onMaoTargetChange={handleMaoTargetChange}
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "wholesale_outcome" });

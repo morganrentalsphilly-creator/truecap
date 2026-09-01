@@ -449,10 +449,18 @@ export async function copyPublicShareToAccountAction(
           "Your current plan cannot save another analysis right now.",
       };
     }
+    // Do not erase saveDealAction's diagnosis. MIGRATION_PENDING and
+    // validation failures are deterministic — "Please try again." on them is
+    // advice that can never work; the upstream message is already
+    // user-appropriate (and the migration messages no longer name SQL files).
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: "This analysis could not be copied safely. Please try again.",
+      message:
+        (saved.code === "MIGRATION_PENDING" || saved.code === "VALIDATION_ERROR") &&
+        saved.message
+          ? saved.message
+          : "This analysis could not be copied safely. Please try again.",
     };
   }
 

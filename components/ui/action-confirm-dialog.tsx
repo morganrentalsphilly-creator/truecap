@@ -111,7 +111,13 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
   const enqueue = useCallback((request: PendingRequest) => {
     queueRef.current.push(request);
     setActive((current) => {
-      if (current) return current; // opens when the current one finishes closing
+      // An in-flight CLOSE is busy too: opening the next request mid-exit
+      // makes Radix cancel the first dialog's teardown, onCloseAutoFocus
+      // never fires for it, and the 400ms fallback gets cleaned up because
+      // active is non-null again — stranding the first caller's promise
+      // forever. finishSettle's openNext() pops the queue FIFO once the
+      // close fully completes.
+      if (current || settledRef.current) return current;
       const next = queueRef.current.shift() ?? null;
       setPromptValue(
         next?.kind === "prompt" ? (next.options.initialValue ?? "") : "",
@@ -149,6 +155,11 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     }
     const settled = settledRef.current;
     settledRef.current = null;
+    // Idempotence: both onCloseAutoFocus AND the 400ms fallback can fire for
+    // the same close (timer first, focus event late). Without this early
+    // return the second invocation still ran openNext() below and yanked a
+    // legitimately open next dialog out from under its caller.
+    if (!settled) return;
     // One more macrotask of separation: onCloseAutoFocus fires BEFORE Radix
     // finishes its unmount cleanup, and resolving synchronously here let the
     // caller's re-render race the aria-hidden restore — measured on

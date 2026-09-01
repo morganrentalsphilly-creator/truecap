@@ -2,7 +2,7 @@
 import { toServerErrorResult } from "@/lib/db-error";
 
 import { analysisTemplateSchema, type AnalysisTemplateBuyBox } from "@/lib/analysis-template-schema";
-import { getEntitlementsForUser } from "@/lib/entitlements";
+import { getVerifiedEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -205,7 +205,7 @@ export async function getTemplateAccessAction(): Promise<TemplateAccessResult> {
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return {
       allowed: false,
@@ -231,7 +231,7 @@ export async function listAnalysisTemplatesAction(): Promise<ListTemplatesResult
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return {
       ok: false,
@@ -333,7 +333,7 @@ export async function createAnalysisTemplateAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return {
       ok: false,
@@ -451,7 +451,7 @@ export async function updateAnalysisTemplateAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return {
       ok: false,
@@ -589,7 +589,7 @@ export async function deleteAnalysisTemplateAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return {
       ok: false,
@@ -652,7 +652,7 @@ export async function setDefaultTemplateAction(templateId: string): Promise<SetD
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage templates." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
   }
@@ -707,7 +707,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage templates." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
   }
@@ -832,7 +832,7 @@ export async function applyTemplateToDealAction(
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to apply templates." };
   }
@@ -922,7 +922,7 @@ export async function listTemplateVersionsAction(templateId: string): Promise<Li
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
   }
@@ -989,7 +989,7 @@ export async function restoreTemplateVersionAction(
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!entitlements.features.includes("template_manage")) {
     return { ok: false, code: "ENTITLEMENT_TEMPLATE", message: "Upgrade required to manage templates." };
   }

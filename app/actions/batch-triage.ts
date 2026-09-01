@@ -19,6 +19,7 @@ import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
+  getVerifiedEntitlementsForUser,
 } from "@/lib/entitlements";
 import {
   buyBoxHasCriteria,
@@ -90,7 +91,7 @@ export async function screenBatchAction(
   }
 
   const [entitlements, hasPaidPlan] = await Promise.all([
-    getEntitlementsForUser(supabase, user.id),
+    getVerifiedEntitlementsForUser(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   if (!hasPaidPlan || !hasPlanFeature(entitlements, "compare_deals")) {
@@ -286,7 +287,7 @@ export async function extractTriageListingsAction(
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
   const [entitlements, hasPaidPlan] = await Promise.all([
-    getEntitlementsForUser(supabase, user.id),
+    getVerifiedEntitlementsForUser(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   if (!hasPaidPlan || !hasPlanFeature(entitlements, "compare_deals")) {
