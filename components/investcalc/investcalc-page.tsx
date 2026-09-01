@@ -6978,7 +6978,7 @@ export function InvestCalcPage({
           title: "Saved-deal updates are temporarily paused",
           description:
             result.message ??
-            "Apply the saved-analysis concurrency migration before updating existing deals. Your edits are still on this screen.",
+            "Saving updates is temporarily unavailable while we finish a maintenance update. Your edits are still on this screen — try again in a few minutes.",
           variant: "destructive",
         });
         return;

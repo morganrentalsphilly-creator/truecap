@@ -14,6 +14,7 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
   hasSavedDealCapacity,
+  getVerifiedEntitlementsForUser,
 } from "@/lib/entitlements";
 import {
   INVESTCALC_SCHEMA_VERSION,
@@ -753,7 +754,7 @@ export async function saveDealAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "save_deal")) {
     return {
       ok: false,
@@ -792,7 +793,7 @@ export async function saveDealAction(
           ok: false,
           code: "MIGRATION_PENDING",
           message:
-            "Copying a shared analysis is paused until the copy-idempotency migration is applied.",
+            "Copying this analysis is temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         };
       }
       return toServerErrorResult(priorCopyError, "saved-analyses");
@@ -1197,7 +1198,7 @@ export async function saveDealAction(
           ok: false,
           code: "MIGRATION_PENDING",
           message:
-            "Saved-deal updates are paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+            "Saving updates is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
         };
       }
       return toServerErrorResult(existingErr, "saved-analyses");
@@ -1238,7 +1239,7 @@ export async function saveDealAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Saved-deal updates are paused until the concurrency migration is applied.",
+          "Saving updates is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
       };
     }
     if (storedUnderwritingRevision !== expectedUnderwritingRevision) {
@@ -1435,7 +1436,7 @@ export async function saveDealAction(
             ok: false,
             code: "MIGRATION_PENDING",
             message:
-              "Saved-deal updates are paused until the concurrency migration is applied.",
+              "Saving updates is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
           };
         }
         const collision = collisionLookup.rows[0];
@@ -1587,7 +1588,7 @@ export async function saveDealAction(
           ok: false,
           code: "MIGRATION_PENDING",
           message:
-            "Saved-deal updates are paused until the concurrency migration is applied.",
+            "Saving updates is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
         };
       }
       return toServerErrorResult(error, "saved-analyses");
@@ -1661,7 +1662,7 @@ export async function saveDealAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Saving is paused until the saved-analysis concurrency migration is applied.",
+          "Saving is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
       };
     }
     if (sameAddressLookup.rows.length > 0) {
@@ -1693,7 +1694,7 @@ export async function saveDealAction(
           ok: false,
           code: "MIGRATION_PENDING",
           message:
-            "Saving is paused until the saved-analysis concurrency migration is applied.",
+            "Saving is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
         };
       }
       const collision = collisionLookup.rows[0];
@@ -1808,7 +1809,7 @@ export async function saveDealAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Copying a shared analysis is paused until the copy-idempotency migration is applied.",
+          "Copying this analysis is temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     if (isMissingSavedAnalysisConcurrencyColumn(error)) {
@@ -1816,7 +1817,7 @@ export async function saveDealAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Saving is paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+          "Saving is temporarily unavailable while we finish a maintenance update. Your inputs stay on this screen — please try again in a few minutes.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -1873,7 +1874,7 @@ export async function getSavedDealForEditingAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Opening saved deals for editing is paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+          "Opening saved deals for editing is temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -2130,7 +2131,7 @@ export async function getSavedAnalysisPdfExportAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   const canGeneratePdf = hasPlanFeature(entitlements, "pdf_export");
 
   const savedDealId = id.trim();
@@ -2318,7 +2319,7 @@ export async function completeSavedAnalysisPdfExportAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pdf_export")) {
     return {
       ok: false,
@@ -2495,7 +2496,7 @@ export async function updateSavedDealNotesAction(
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Notes are temporarily disabled until migrations 20260524120000_saved_analyses_notes.sql and 20260825210000_saved_analysis_concurrency_revisions.sql are applied.",
+          "Notes are temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -2571,7 +2572,7 @@ export async function getSavedDealNotesAction(id: string): Promise<
       return {
         ok: false,
         code: "MIGRATION_PENDING",
-        message: "Schema migration pending.",
+        message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -2586,7 +2587,7 @@ export async function getSavedDealNotesAction(id: string): Promise<
     return {
       ok: false,
       code: "MIGRATION_PENDING",
-      message: "The notes concurrency migration has not been applied yet.",
+      message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
     };
   }
   return {
@@ -2815,7 +2816,7 @@ export async function updateSavedDealStageAction(
     };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pipeline")) {
     return {
       ok: false,
@@ -2984,7 +2985,7 @@ export async function updateSavedDealTagsAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pipeline")) {
     return {
       ok: false,
@@ -3055,7 +3056,7 @@ export async function setSavedDealClientAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid client." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "client_buy_box")) {
     return {
       ok: false,
@@ -3237,7 +3238,7 @@ export async function getDealDueDiligenceAction(
       return {
         ok: false,
         code: "MIGRATION_PENDING",
-        message: "Schema migration pending.",
+        message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -3330,7 +3331,7 @@ export async function updateDealDueDiligenceAction(
       return {
         ok: false,
         code: "MIGRATION_PENDING",
-        message: "Schema migration pending.",
+        message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
       };
     }
     // Another client created the row after this caller read "no row".
@@ -3488,7 +3489,7 @@ export async function bulkUpdateSavedDealsAction(
           ok: false,
           code: "MIGRATION_PENDING",
           message:
-            "Bulk archiving is not available until the latest Deal Log migration is applied.",
+            "Bulk archiving is temporarily unavailable while we finish a maintenance update. Please try again in a few minutes.",
         };
       }
       if (error.code === "42501") {

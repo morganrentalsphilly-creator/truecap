@@ -80,6 +80,14 @@ type Props = {
   exportHint?: string;
   isOfferCeilingLoading?: boolean;
   offerCeilingError?: boolean;
+  /** Failure shape from the resolver; null while ok/loading. RATE_LIMITED
+   *  must not render retry advice — waiting is the only thing that works. */
+  offerCeilingErrorCode?:
+    | "VALIDATION_ERROR"
+    | "RATE_LIMITED"
+    | "SERVER_ERROR"
+    | "NETWORK"
+    | null;
   onRetryOfferCeiling?: () => void;
   isScenarioActive?: boolean;
   onTargetChange: (target: MaoTarget) => void;
@@ -303,6 +311,7 @@ export function FocusedDecisionSummary({
   exportHint,
   isOfferCeilingLoading = false,
   offerCeilingError = false,
+  offerCeilingErrorCode = null,
   onRetryOfferCeiling,
   isScenarioActive = false,
   onTargetChange,
@@ -776,7 +785,9 @@ export function FocusedDecisionSummary({
         : isOfferCeilingLoading
           ? "Calculating…"
           : offerCeilingError
-            ? "Temporarily unavailable"
+            ? offerCeilingErrorCode === "RATE_LIMITED"
+              ? "Hourly limit reached"
+              : "Temporarily unavailable"
             : canShowPriceCeiling
               ? advocacyContractEnabled &&
                 ceilingSemanticStatus === "no-finite-ceiling-in-supported-range"
@@ -864,7 +875,13 @@ export function FocusedDecisionSummary({
               to record the current criteria with the analysis.
             </p>
           ) : null}
-          {offerCeilingError && onRetryOfferCeiling ? (
+          {offerCeilingError && offerCeilingErrorCode === "RATE_LIMITED" ? (
+            <p className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-[11px] leading-relaxed text-muted-foreground">
+              You&apos;ve reached the hourly limit for exact ceiling solves.
+              It resets on its own — no need to retry; the rest of this
+              analysis is unaffected.
+            </p>
+          ) : offerCeilingError && onRetryOfferCeiling ? (
             <button
               type="button"
               onClick={onRetryOfferCeiling}

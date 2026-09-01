@@ -39,6 +39,7 @@ import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
+  getVerifiedEntitlementsForUser,
 } from "@/lib/entitlements";
 import {
   recomputeSavedDealVerdict,
@@ -115,6 +116,10 @@ export type BuyBoxesActionResult =
       ok: true;
       boxes: NamedBuyBox[];
       canUse: boolean;
+      /** False while the IRR/cash-target migration is unapplied: the editor
+       *  disables those two inputs instead of letting a doomed save be
+       *  composed and then rejected. */
+      supportsOfferTargets?: boolean;
       /**
        * "X of your N active deals pass this box" save feedback — set only by
        * upsertBuyBoxAction, and only when the evaluation succeeded (additive:
@@ -155,7 +160,7 @@ async function requireProUser(
     return { ok: false, result: { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." } };
   }
   const [entitlements, hasPaidAccess] = await Promise.all([
-    getEntitlementsForUser(supabase, user.id),
+    getVerifiedEntitlementsForUser(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   if (!hasPlanFeature(entitlements, "buy_box")) {
@@ -206,7 +211,7 @@ async function fetchBoxes(
     return {
       ok: false,
       result: isMissingTable(error)
-        ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+        ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
         : toServerErrorResult(error, "user-buy-boxes"),
     };
   }
@@ -361,12 +366,17 @@ export async function listBuyBoxesAction(): Promise<BuyBoxesActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
   const canUse = hasPlanFeature(entitlements, "buy_box");
 
   const fetched = await fetchBoxes(supabase, user.id);
   if (!fetched.ok) return fetched.result;
-  return { ok: true, boxes: fetched.boxes, canUse };
+  return {
+    ok: true,
+    boxes: fetched.boxes,
+    canUse,
+    supportsOfferTargets: fetched.supportsOfferTargets,
+  };
 }
 
 /**
@@ -389,7 +399,7 @@ export async function listBuyBoxesForDealAction(
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
   const [entitlements, hasPaidAccess] = await Promise.all([
-    getEntitlementsForUser(supabase, user.id),
+    getVerifiedEntitlementsForUser(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   const hasBuyBoxFeature = hasPlanFeature(entitlements, "buy_box");
@@ -404,7 +414,12 @@ export async function listBuyBoxesForDealAction(
 
   const fetched = await fetchBoxes(supabase, user.id);
   if (!fetched.ok) return fetched.result;
-  return { ok: true, boxes: fetched.boxes, canUse };
+  return {
+    ok: true,
+    boxes: fetched.boxes,
+    canUse,
+    supportsOfferTargets: fetched.supportsOfferTargets,
+  };
 }
 
 /** Create (no id) or update (id) a buy box. Pro-gated. Returns the new list. */
@@ -500,7 +515,7 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
       .insert({ ...rowValues, sort_order: sortOrder });
     if (error) {
       return isMissingTable(error)
-        ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+        ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
         : toServerErrorResult(error, "user-buy-boxes");
     }
   } else {
@@ -514,7 +529,7 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
       .maybeSingle();
     if (error) {
       return isMissingTable(error)
-        ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+        ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
         : toServerErrorResult(error, "user-buy-boxes");
     }
     if (!data) return { ok: false, code: "NOT_FOUND", message: "Buy box not found." };
@@ -571,7 +586,7 @@ export async function deleteBuyBoxAction(id: unknown): Promise<BuyBoxesActionRes
     .eq("user_id", userId);
   if (error) {
     return isMissingTable(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "user-buy-boxes");
   }
 
@@ -605,7 +620,7 @@ export async function setDefaultBuyBoxAction(id: unknown): Promise<BuyBoxesActio
     .maybeSingle();
   if (error) {
     return isMissingTable(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "user-buy-boxes");
   }
   if (!data) return { ok: false, code: "NOT_FOUND", message: "Buy box not found." };

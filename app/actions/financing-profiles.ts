@@ -79,7 +79,7 @@ async function fetchProfiles(
 
   if (error) {
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "financing-profiles");
   }
 
@@ -184,7 +184,7 @@ export async function createFinancingProfileAction(
       await ensureDefault(supabase, auth.userId);
     }
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "financing-profiles");
   }
   return fetchProfiles(supabase, auth.userId);
@@ -220,7 +220,7 @@ export async function updateFinancingProfileAction(
     .maybeSingle();
   if (ownershipError) {
     return isMigrationPending(ownershipError)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(ownershipError, "financing-profiles");
   }
   if (!owned) {
@@ -277,7 +277,7 @@ export async function setDefaultFinancingProfileAction(
     .maybeSingle();
   if (ownershipError) {
     return isMigrationPending(ownershipError)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(ownershipError, "financing-profiles");
   }
   if (!owned) {
@@ -321,7 +321,7 @@ export async function deleteFinancingProfileAction(
     .maybeSingle();
   if (error) {
     return isMigrationPending(error)
-      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Temporarily unavailable while we finish a maintenance update. Please try again in a few minutes." }
       : toServerErrorResult(error, "financing-profiles");
   }
   if (!data) {

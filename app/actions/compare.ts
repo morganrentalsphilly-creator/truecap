@@ -10,7 +10,7 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { areMethodologyCohortsComparable } from "@/lib/compare-metrics";
-import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { getVerifiedEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { activeMeteredEvaluationComparisonGrantsAccess } from "@/lib/evaluation-access-server";
@@ -113,10 +113,11 @@ async function consumeComparisonSelection(
   return {
     ok: false,
     code: usage.code === "SERVER_ERROR" ? "SERVER_ERROR" : "ENTITLEMENT_REQUIRED",
-    message:
-      usage.code === "SERVER_ERROR"
-        ? "Could not verify comparison access. Try again."
-        : usage.message,
+    // Pass the cause-specific message through unchanged. This wrapper used to
+    // substitute a fixed "Try again." for every SERVER_ERROR, which turned
+    // deterministic failures (e.g. a missing RPC during a deploy window) into
+    // retry advice that could never work.
+    message: usage.message,
   };
 }
 
@@ -180,7 +181,7 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
   }
 
   if (selectedIds.length < 2) {
-    const entitlements = await getEntitlementsForUser(supabase, user.id);
+    const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
     if (!hasPlanFeature(entitlements, "compare_deals")) {
       return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
     }
@@ -229,7 +230,7 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
   }
 
   if (selectedIds.length < 2) {
-    const entitlements = await getEntitlementsForUser(supabase, user.id);
+    const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
     if (!hasPlanFeature(entitlements, "compare_deals")) {
       return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
     }
@@ -331,7 +332,7 @@ export async function removeCompareDealAction(id: string): Promise<CompareAction
 
   const ids = await getCompareIdsFromCookie();
   const [entitlements, meteredComparison] = await Promise.all([
-    getEntitlementsForUser(supabase, user.id),
+    getVerifiedEntitlementsForUser(supabase, user.id),
     activeMeteredEvaluationComparisonGrantsAccess(supabase, user.id, ids),
   ]);
   if (

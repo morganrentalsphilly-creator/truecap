@@ -64,7 +64,15 @@ export async function consumeProductEvaluationUsageAction(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Create an account to start the evaluation." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      // The only reachable audience here is a lapsed-session account holder:
+      // the analyzer calls this action only when isAuthenticated was true at
+      // page load, and compare.ts gates on getUser() with its own copy first.
+      // "Create an account" told people to create the account they already have.
+      message: "Your session has expired. Sign in again to continue.",
+    };
   }
 
   if (await hasPaidPlanSubscription(supabase, user.id)) {
@@ -122,7 +130,18 @@ export async function consumeProductEvaluationUsageAction(
       tags: { feature: "product-evaluation", stage: "consume" },
       extra: { userId: user.id, kind: parsed.data.kind },
     });
-    return { ok: false, code: "SERVER_ERROR", message: "Could not verify evaluation access. Try again." };
+    // A missing function (PGRST202 via PostgREST, 42883 from Postgres) is
+    // deterministic — retrying can never succeed, so "Try again" is the
+    // advice-that-cannot-work class this codebase has now shipped four times.
+    const deterministic =
+      error.code === "PGRST202" || error.code === "42883";
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: deterministic
+        ? "Evaluation access is temporarily unavailable while we finish an update — no action needed on your end."
+        : "Could not verify evaluation access. Try again.",
+    };
   }
 
   const row = (Array.isArray(data) ? data[0] : data) as
