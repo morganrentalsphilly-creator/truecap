@@ -388,12 +388,15 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   </td>
                   <td className="px-3 py-2.5 text-right text-foreground">
                     <div className="flex items-center justify-end gap-1 whitespace-nowrap font-mono font-bold tabular-nums">
-                      {money(deal.maxOffer)}
+                      {/* ⓘ BEFORE the number: digits stay flush on the
+                        column's right edge, so rows without a ceiling ("—")
+                        and rows with one share a single right edge. */}
                       {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
                         <OfferCriteriaNote
                           basisLabel={deal.maxOfferBasisLabel}
                         />
                       ) : null}
+                      {money(deal.maxOffer)}
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">

@@ -284,6 +284,10 @@ describe("My Deals methodology truth wiring", () => {
     expect(dashboardTableSource).toContain("<OfferCriteriaNote");
     expect(noteSource).toContain("How this Offer Ceiling is computed");
     expect(noteSource).toContain("Criteria: {basisLabel");
+    // The note also renders on the My Deals MOBILE card (via OfferLineRow),
+    // so its trigger must honor the repo's 44px touch-target contract —
+    // size-11 hit area, negative margin keeps the 24px layout footprint.
+    expect(noteSource).toContain("-m-2.5 inline-flex size-11");
     // The dashboard-home MOBILE card keeps its tap-sized disclosure.
     expect(dashboardTableSource).toContain("<details");
     expect(dashboardTableSource).toContain(

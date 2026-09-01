@@ -28,7 +28,12 @@ export function OfferCriteriaNote({
         <button
           type="button"
           aria-label="How this Offer Ceiling is computed"
-          className="inline-flex size-6 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          // size-11 = the repo's 44px touch-target contract (this control
+          // also renders on the My Deals MOBILE card via OfferLineRow); the
+          // -m-2.5 keeps its LAYOUT footprint at 24px so the dense desktop
+          // rows don't grow. The oversized hit area overlaps only
+          // non-interactive text.
+          className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
