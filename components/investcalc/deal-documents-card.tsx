@@ -10,13 +10,19 @@
  * provisioned yet.
  */
 import { useEffect, useRef, useState } from "react";
-import { Download, Loader2, Paperclip, Trash2, Upload } from "lucide-react";
+import { Download, Loader2, Paperclip, ScanSearch, Trash2, Upload } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
 import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useRouter } from "next/navigation";
+import {
+  applyExtractedValueAction,
+  extractDealDocumentAction,
+} from "@/app/actions/deal-document-extraction";
+import type { ExtractionCandidate } from "@/lib/document-extraction";
 
 const BUCKET = "deal-documents";
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB - matches the bucket limit
@@ -58,6 +64,91 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   // object delete with no versioning, so it is confirm-first like every
   // other irreversible action in the app.
   const [confirmPath, setConfirmPath] = useState<string | null>(null);
+  const router = useRouter();
+  // Extraction proposes, the user confirms: candidates render inline with
+  // their source snippet; nothing touches the deal until Apply is clicked.
+  const [extraction, setExtraction] = useState<{
+    path: string;
+    fileName: string;
+    status: "loading" | "ready" | "empty";
+    candidates: ExtractionCandidate[];
+  } | null>(null);
+  const [applyingField, setApplyingField] = useState<string | null>(null);
+
+  const handleExtract = async (path: string, label: string) => {
+    setExtraction({ path, fileName: label, status: "loading", candidates: [] });
+    try {
+      const result = await extractDealDocumentAction({ savedDealId, path });
+      if (!result.ok) {
+        setExtraction(null);
+        toast({
+          title:
+            result.code === "NO_TEXT_LAYER"
+              ? "No selectable text in this PDF"
+              : "Could not read this document",
+          description: result.message,
+          variant: result.code === "NO_TEXT_LAYER" ? "default" : "destructive",
+        });
+        return;
+      }
+      setExtraction({
+        path,
+        fileName: result.fileName,
+        status: result.candidates.length > 0 ? "ready" : "empty",
+        candidates: result.candidates,
+      });
+    } catch (error) {
+      setExtraction(null);
+      toast({
+        title: "Could not read this document",
+        description: friendlyToastError(error, { feature: "deal-document-extraction" }),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleApply = async (candidate: ExtractionCandidate) => {
+    setApplyingField(candidate.field);
+    try {
+      const result = await applyExtractedValueAction({
+        savedDealId,
+        field: candidate.field,
+        value: candidate.value,
+      });
+      if (!result.ok) {
+        toast({
+          title: "Could not apply the value",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: `${candidate.label} updated`,
+        description: `Set to $${candidate.value.toLocaleString()} from ${extraction?.fileName ?? "your document"}. The analysis has been re-run.`,
+        variant: "success",
+      });
+      setExtraction((current) =>
+        current
+          ? {
+              ...current,
+              candidates: current.candidates.filter(
+                (c) => c.field !== candidate.field,
+              ),
+            }
+          : current,
+      );
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Could not apply the value",
+        description: friendlyToastError(error, { feature: "deal-document-extraction" }),
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingField(null);
+    }
+  };
 
   const prefixFor = (uid: string) => `${uid}/${savedDealId}`;
 
@@ -356,6 +447,24 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                     min-h-11/min-w-11 gives each a real 44px target; the row's
                     py drops to 0.5 so the 44px band sets the row pitch and
                     neighbouring rows' targets never overlap. */}
+                {/* Extraction is PDF-only in v1 and always ends at a human
+                    confirm, so the affordance is safe to offer per row. */}
+                {doc.path.toLowerCase().endsWith(".pdf") ? (
+                  <button
+                    type="button"
+                    aria-label={`Extract numbers from ${label}`}
+                    title="Extract rent / tax / insurance numbers"
+                    onClick={() => void handleExtract(doc.path, label)}
+                    disabled={extraction?.status === "loading"}
+                    className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  >
+                    {extraction?.path === doc.path && extraction.status === "loading" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ScanSearch className="size-4" />
+                    )}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   aria-label={`Download ${label}`}
@@ -421,6 +530,76 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
           })}
         </ul>
       )}
+
+      {extraction && extraction.status !== "loading" ? (
+        <div className="mt-3 rounded-xl border border-primary/25 bg-primary/5 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Numbers found in {extraction.fileName}
+            </p>
+            <button
+              type="button"
+              aria-label="Dismiss extracted numbers"
+              onClick={() => setExtraction(null)}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              ×
+            </button>
+          </div>
+          {extraction.status === "empty" ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              The text was readable, but no rent, property-tax, or insurance
+              amounts matched a recognizable pattern. Enter the numbers
+              manually — extraction never guesses.
+            </p>
+          ) : (
+            <ul className="mt-2 space-y-2">
+              {extraction.candidates.map((candidate) => (
+                <li
+                  key={candidate.field}
+                  className="rounded-lg border border-border bg-card p-2.5"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-foreground">
+                      {candidate.label}:{" "}
+                      <span className="font-mono tabular-nums">
+                        ${Math.round(candidate.value).toLocaleString()}
+                        {candidate.field === "insuranceMonthly" || candidate.field === "monthlyRent"
+                          ? "/mo"
+                          : "/yr"}
+                      </span>
+                      {candidate.confidence === "weak" ? (
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+                          Verify — loose match
+                        </span>
+                      ) : null}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="min-h-11"
+                      disabled={applyingField != null}
+                      onClick={() => void handleApply(candidate)}
+                    >
+                      {applyingField === candidate.field ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        "Apply to analysis"
+                      )}
+                    </Button>
+                  </div>
+                  {/* The exact source text IS the trust mechanism: the user
+                      verifies the number against their own document before
+                      anything is written. */}
+                  <p className="mt-1.5 rounded bg-muted/50 px-2 py-1 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                    “…{candidate.snippet}…”
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
