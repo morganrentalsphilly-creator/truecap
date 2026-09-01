@@ -214,7 +214,7 @@ export function MortgageScenarioCompare({
                 }
               />
               <ScenarioRow
-                label="Cash required"
+                label="Cash to close"
                 cells={scenarios.map((s) => fmtUsd(s.result.totalCashRequired))}
               />
             </tbody>

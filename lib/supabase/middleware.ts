@@ -38,8 +38,9 @@ export async function updateSession(request: NextRequest, requestHeaders = reque
   // production: / → 200, /dashboard → 307 /auth/login, no loop, no 500).
   // The paired ERROR lines in Vercel come from auth-js's own console.error
   // inside _emitInitialSession; a catch here cannot silence them, and the
-  // Sentry ignore rule in sentry.edge.config.ts is what keeps them from
-  // outranking the money-path webhook clusters.
+  // Sentry ignore rule in sentry.server.config.ts is what keeps them from
+  // outranking the money-path webhook clusters (proxy.ts runs the NODE
+  // runtime — the edge config's copy of the rule never applied here).
   //
   // What this catch IS for: auth-js still rethrows NON-AuthError failures
   // (GoTrueClient `_getUser` → `throw error`). proxy.ts's matcher covers

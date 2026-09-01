@@ -1296,7 +1296,7 @@ export function FocusedDecisionSummary({
           >
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Cash needed
+                Cash to close
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
                 {money(result.totalCashRequired)}

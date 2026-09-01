@@ -25,6 +25,22 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
 
+  // Expected-noise filter (additive, per CLAUDE.md §3.9). A browser holding
+  // a stale/rotated refresh token makes @supabase/auth-js log this from
+  // inside its own session recovery. It is NOT an outage: auth-js returns
+  // { user: null }, clears the dead cookie, and the visitor continues
+  // anonymously. These four patterns shipped in sentry.edge.config.ts
+  // (ff05991) — but proxy.ts, the sole caller of updateSession and the only
+  // source of this noise, ALWAYS runs the Node runtime in Next 16, which
+  // loads THIS config. The edge copy only ever covered edge OG routes, so
+  // the filter had been dead since it shipped.
+  ignoreErrors: [
+    /Invalid Refresh Token/i,
+    /Refresh Token Not Found/i,
+    /refresh_token_not_found/i,
+    /AuthApiError: Refresh token is not valid/i,
+  ],
+
   beforeBreadcrumb(breadcrumb) {
     return scrubSentryBreadcrumbUrl(breadcrumb);
   },

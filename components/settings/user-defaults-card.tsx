@@ -178,6 +178,14 @@ export function UserDefaultsCard() {
   >({});
   const [loaded, setLoaded] = useState(false);
   const [migrationPending, setMigrationPending] = useState(false);
+  // A failed load must NOT render the editable form: the form would show
+  // every field blank, and Save REPLACES the whole stored preferences
+  // object — so "tweak one field in the falsely-blank form, hit Save"
+  // silently destroyed a user's other saved defaults behind a success
+  // toast. Failure renders a retry row instead, and Save refuses to run
+  // until a load has actually succeeded.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadNonce, setReloadNonce] = useState(0);
   const [isSaving, startSaving] = useTransition();
 
   useEffect(() => {
@@ -185,8 +193,7 @@ export function UserDefaultsCard() {
     // .catch shields the unhandled promise rejection that would
     // otherwise leak to Sentry as "Non-Error promise rejection captured"
     // noise if the action throws (transient Supabase outage, network
-    // blip, server crash). Settings load failing is non-critical — we
-    // just leave the card in its loading state.
+    // blip, server crash).
     void getUserAnalysisDefaultsAction()
       .then((result) => {
         if (cancelled) return;
@@ -202,22 +209,25 @@ export function UserDefaultsCard() {
           setValues(stringified);
         } else if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
+        } else {
+          setLoadFailed(true);
         }
         setLoaded(true);
       })
       .catch((err) => {
         if (!cancelled) {
           console.warn("[user-defaults] load failed:", err);
+          setLoadFailed(true);
           setLoaded(true);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadNonce]);
 
   const handleSave = () => {
-    if (migrationPending) return;
+    if (migrationPending || loadFailed) return;
     const payload: UserAnalysisDefaults = {};
     for (const f of FIELDS) {
       const raw = values[f.key];
@@ -271,6 +281,33 @@ export function UserDefaultsCard() {
             Personal defaults will be available once the latest schema update is
             applied.
           </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            <Sliders className="size-4" />
+            <span>
+              We couldn&apos;t load your saved defaults. Your stored values are
+              untouched.
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setLoadFailed(false);
+              setLoaded(false);
+              setReloadNonce((n) => n + 1);
+            }}
+            className="inline-flex min-h-11 items-center rounded-md border border-border bg-background px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted"
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
