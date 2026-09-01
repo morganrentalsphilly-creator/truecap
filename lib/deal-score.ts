@@ -282,6 +282,13 @@ export interface DealScoreBreakdown {
    * the historical 0% CoC sentinel earned or lost points.
    */
   applicabilityAdjustment?: number;
+  /**
+   * Present only when the risk penalty was compressed to preserve the
+   * near-miss ordering credit (the deal's raw risk factors exceeded the
+   * points it had left to lose). Consumers must not read a small or zero
+   * riskPenalty as "risk profile is clean" when this flag is set.
+   */
+  riskPenaltyLimited?: true;
 }
 
 export interface DealScoreResult {
@@ -898,10 +905,18 @@ export function computeDealScore(
     (cocScore === 1 ? 1 : 0) +
     (capRateScore === 1 ? 1 : 0) +
     (dscrScore === 1 ? 1 : 0);
+  const uncompressedRiskPenalty = riskPenalty;
+  // Flooring the clamp MAGNITUDE keeps the penalty integral (every raw
+  // penalty above is an integer; only the weighted component sum is
+  // fractional), preserving the pre-v1.4 contract that receipts and
+  // persisted snapshots always show whole points. The credit invariant
+  // still holds: nc - floor(nc - credit) >= credit.
   riskPenalty = Math.max(
     riskPenalty,
-    -Math.max(0, normalizedComponents - nearMissCredit),
+    -Math.max(0, Math.floor(normalizedComponents - nearMissCredit)),
   );
+  if (Object.is(riskPenalty, -0)) riskPenalty = 0;
+  const riskPenaltyLimited = riskPenalty !== uncompressedRiskPenalty;
 
   const rawScore = normalizedComponents + riskPenalty;
   let score = Math.max(0, Math.min(100, Math.round(rawScore)));
@@ -928,6 +943,9 @@ export function computeDealScore(
     totalReturnScore,
     riskPenalty,
     ...(input.cashOnCashApplicable ? {} : { applicabilityAdjustment }),
+    // Absent on uncompressed deals to preserve their historical result
+    // shape byte-for-byte (same convention as applicabilityAdjustment).
+    ...(riskPenaltyLimited ? { riskPenaltyLimited: true as const } : {}),
   };
 
   return {

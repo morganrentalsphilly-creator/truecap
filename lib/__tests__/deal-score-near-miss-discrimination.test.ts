@@ -66,6 +66,42 @@ describe("near-miss discrimination on the Screening Index", () => {
     expect(near.recommendation).toBe("Avoid");
   });
 
+  it("keeps riskPenalty integral and never -0 even when compressed", () => {
+    // The compression clamp bounds the penalty by the (fractional, weighted)
+    // component sum; flooring the clamp magnitude preserves the pre-v1.4
+    // contract that receipts and persisted snapshots show whole points.
+    for (const deal of [
+      barelyBad,
+      catastrophic,
+      { ...barelyBad, vacancyRate: 12, capexPct: 12, maintenancePct: 12 },
+    ]) {
+      const { riskPenalty } = computeDealScore(deal).breakdown;
+      expect(Number.isInteger(riskPenalty)).toBe(true);
+      expect(Object.is(riskPenalty, -0)).toBe(false);
+    }
+  });
+
+  it("flags a compressed penalty so no receipt can call the risk profile clean", () => {
+    // Stack risk factors on the near-miss deal: the raw penalty far exceeds
+    // the ~4 points the components leave to lose, so compression engages.
+    const stacked = computeDealScore({
+      ...barelyBad,
+      vacancyRate: 12,
+      capexPct: 12,
+      maintenancePct: 12,
+    });
+    expect(stacked.breakdown.riskPenaltyLimited).toBe(true);
+    // A clean deal must NOT carry the flag (historical shape preserved).
+    const clean = computeDealScore({
+      ...base,
+      monthlyCashFlow: 400,
+      cashOnCashReturn: 9,
+      capRate: 7,
+      dscr: 1.4,
+    });
+    expect("riskPenaltyLimited" in clean.breakdown).toBe(false);
+  });
+
   it("leaves the first real band of every component untouched", () => {
     // One representative per component sitting exactly in its lowest
     // NON-near-miss band: the pre-change values must be unchanged.

@@ -416,8 +416,12 @@ function ScoreBreakdownReceipts({
           : breakdown.totalReturnScore >= 8
             ? "5–8%/yr projected - modest total return"
             : "Below 5%/yr projected - limited long-term upside",
-    risk:
-      breakdown.riskPenalty === 0
+    risk: breakdown.riskPenaltyLimited
+      ? // The engine capped the penalty so near-miss credit could keep
+        // ordering bottom-tier deals; a small number here is NOT a clean
+        // risk profile.
+        "Penalty capped - risk factors exceed the points left to lose"
+      : breakdown.riskPenalty === 0
         ? "No penalty - risk profile is clean"
         : breakdown.riskPenalty > -10
           ? "Mild penalty for elevated risk factors"

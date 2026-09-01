@@ -10,7 +10,7 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { areMethodologyCohortsComparable } from "@/lib/compare-metrics";
-import { getVerifiedEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { requireVerifiedEntitlements, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { activeMeteredEvaluationComparisonGrantsAccess } from "@/lib/evaluation-access-server";
@@ -181,7 +181,9 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
   }
 
   if (selectedIds.length < 2) {
-    const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+    const verified = await requireVerifiedEntitlements(supabase, user.id);
+    if (!verified.ok) return verified;
+    const entitlements = verified.entitlements;
     if (!hasPlanFeature(entitlements, "compare_deals")) {
       return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
     }
@@ -230,7 +232,9 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
   }
 
   if (selectedIds.length < 2) {
-    const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+    const verified = await requireVerifiedEntitlements(supabase, user.id);
+    if (!verified.ok) return verified;
+    const entitlements = verified.entitlements;
     if (!hasPlanFeature(entitlements, "compare_deals")) {
       return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
     }
@@ -331,10 +335,12 @@ export async function removeCompareDealAction(id: string): Promise<CompareAction
   }
 
   const ids = await getCompareIdsFromCookie();
-  const [entitlements, meteredComparison] = await Promise.all([
-    getVerifiedEntitlementsForUser(supabase, user.id),
+  const [verified, meteredComparison] = await Promise.all([
+    requireVerifiedEntitlements(supabase, user.id),
     activeMeteredEvaluationComparisonGrantsAccess(supabase, user.id, ids),
   ]);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (
     !hasPlanFeature(entitlements, "compare_deals") &&
     !meteredComparison

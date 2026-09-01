@@ -38,8 +38,22 @@ describe("extraction action", () => {
   });
 
   it("apply reuses saveDealAction rather than a parallel persistence path", () => {
-    expect(action).toContain("await saveDealAction(next, savedDealId)");
+    expect(action).toContain("await saveDealAction(next, savedDealId, undefined, {");
     expect(action).not.toMatch(/\.from\("saved_analyses"\)\s*\.update\(/);
+  });
+
+  it("apply proves which revision it read — without this every apply dies STALE_DATA", () => {
+    // saveDealAction's update path hasOwnProperty-checks the option and
+    // refuses unconditionally when absent; the row select must carry the
+    // revision so the option can be populated, never fabricated.
+    expect(action).toContain(
+      'select("form_snapshot, property_type, underwriting_revision")',
+    );
+    expect(action).toContain("expectedUnderwritingRevision");
+    // A real concurrent edit still loses politely, with card-appropriate copy.
+    expect(action).toContain(
+      "This deal changed since the numbers were extracted.",
+    );
   });
 
   it("apply refuses multi-family rent instead of corrupting unit data", () => {
