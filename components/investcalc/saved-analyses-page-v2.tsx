@@ -352,20 +352,21 @@ function OfferLineRow({
             : "Clears your selected targets"
           : "Clears TrueCap’s default targets";
     return (
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
-        <span>
-          <span className="font-semibold text-success">{clearsLabel}</span>
-          {offer.maxPrice != null ? (
-            <>
-              {" · "}Offer Ceiling:{" "}
-              <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
-            </>
-          ) : null}
-        </span>
+      // The ⓘ lives INSIDE the text flow (not as a flex sibling) so when the
+      // narrow Property column wraps this line, the icon rides the last line
+      // of text instead of dropping onto a line of its own.
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        <span className="font-semibold text-success">{clearsLabel}</span>
+        {offer.maxPrice != null ? (
+          <>
+            {" · "}Offer Ceiling:{" "}
+            <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+          </>
+        ) : null}
         {offer.maxPrice != null && basisLabel ? (
           <OfferCriteriaNote basisLabel={basisLabel} />
         ) : null}
-      </div>
+      </p>
     );
   }
 
@@ -382,27 +383,26 @@ function OfferLineRow({
           : "to meet your selected targets"
         : "to meet TrueCap’s default targets";
   return (
-    <div className="mt-1.5 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
-      <span>
-        <span className="font-semibold text-foreground">
-          Offer Ceiling:{" "}
-          <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
-        </span>
-        {gap != null ? (
-          <>
-            {" · "}
-            <span className="tabular-nums text-[var(--metric-negative)]">
-              −{fmtMoney0(gap)}
-              {offer.discountPct != null && offer.discountPct > 0
-                ? ` (−${offer.discountPct}%)`
-                : ""}
-            </span>{" "}
-            {gapLabel}
-          </>
-        ) : null}
+    // Inline ⓘ for the same wrap-riding reason as the clears branch above.
+    <p className="mt-1.5 text-xs text-muted-foreground">
+      <span className="font-semibold text-foreground">
+        Offer Ceiling:{" "}
+        <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
       </span>
+      {gap != null ? (
+        <>
+          {" · "}
+          <span className="tabular-nums text-[var(--metric-negative)]">
+            −{fmtMoney0(gap)}
+            {offer.discountPct != null && offer.discountPct > 0
+              ? ` (−${offer.discountPct}%)`
+              : ""}
+          </span>{" "}
+          {gapLabel}
+        </>
+      ) : null}
       <OfferCriteriaNote basisLabel={basisLabel} />
-    </div>
+    </p>
   );
 }
 
