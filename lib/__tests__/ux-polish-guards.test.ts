@@ -129,7 +129,12 @@ describe("dashboard accessibility and recovery", () => {
 
   it("keeps document confirmation actions at least 44px tall", () => {
     const source = read("components/investcalc/deal-documents-card.tsx");
-    const confirmation = source.slice(source.indexOf("Delete this document?"));
+    // Scope to the confirm popover itself: the extraction panel added later
+    // in the file has its own min-h-11 buttons, which are not what this pin
+    // guards. Bound the slice at the popover's close.
+    const start = source.indexOf("Delete this document?");
+    const end = source.indexOf("</PopoverContent>", start);
+    const confirmation = source.slice(start, end);
     expect(confirmation.match(/className="min-h-11"/g)).toHaveLength(2);
   });
 });
