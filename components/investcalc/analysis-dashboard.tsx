@@ -3535,10 +3535,16 @@ function CashFlowTab({
                   here just creates visual duplication. */}
             </div>
 
-            {/* Total cash required */}
+            {/* Cash to close — ONE name for result.totalCashRequired across
+              every surface. This number rendered as "Total Cash Required",
+              "Total Investment", "Cash needed", "Cash required", and "Cash
+              to close" on five adjacent screens; a reader reconciling the
+              analyzer against their deal list had to guess they were one
+              number. "Cash to close" is the canonical label (the deal list
+              + dashboard already used it). */}
             <div className="mt-6 pt-5 border-t border-border">
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                Total Cash Required
+                Cash to Close
               </p>
               <div className="flex justify-between text-sm mb-1">
                 <div>
@@ -3586,7 +3592,7 @@ function CashFlowTab({
               })()}
               <div className="bg-primary rounded-xl p-4 flex justify-between items-center">
                 <p className="text-sm font-semibold text-primary-foreground">
-                  Total Investment
+                  Total cash to close
                 </p>
                 <p className="text-xl font-extrabold text-primary-foreground">
                   ${Math.round(result.totalCashRequired).toLocaleString()}

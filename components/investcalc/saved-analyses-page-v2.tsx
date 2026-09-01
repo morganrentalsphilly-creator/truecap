@@ -750,8 +750,10 @@ function toCurrency(value: number | null): string {
 
 function toPercent(value: number | null): string {
   if (value == null || Number.isNaN(value)) return "—";
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}%`;
+  // No forced "+": every consumer is a LEVEL metric (cap rate, CoC), and
+  // "+6.3%" beside the analyzer's unsigned "6.3%" read as a delta of some
+  // baseline rather than the rate itself. Negatives keep their minus.
+  return `${value.toFixed(1)}%`;
 }
 
 function toMonthCashFlow(value: number | null): string {
