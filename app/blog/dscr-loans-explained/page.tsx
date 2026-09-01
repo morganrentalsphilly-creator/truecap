@@ -35,7 +35,7 @@ const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
   "DSCR loans primarily underwrite a rental property's coverage instead of using personal DTI as the main ratio. Learn the borrower checks, program variation, costs, and trade-offs.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-08-21";
+const MODIFIED_AT = "2026-09-01";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -241,6 +241,18 @@ export default function BlogPost() {
               Service
             </div>
           </div>
+          <p>
+            If you don&apos;t have a lender quote yet, size the annual debt
+            service first with TrueCap&apos;s{" "}
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="text-primary font-semibold hover:underline"
+            >
+              mortgage payment calculator
+            </Link>{" "}
+            — the PITI total from that tool is the denominator in the DSCR
+            formula above.
+          </p>
           <p>
             A <em>DSCR loan</em> is a non-QM mortgage that qualifies the
             transaction primarily on property coverage instead of using personal
