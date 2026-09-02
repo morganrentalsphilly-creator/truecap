@@ -1024,7 +1024,11 @@ export function FocusedDecisionSummary({
             aria-expanded={tuneOpen}
             aria-controls={targetEditorId}
             disabled={targetBlocked}
-            className="h-11 w-full gap-2 rounded-xl sm:w-auto"
+            // Wrap-on-phones treatment (same as "Next deal" below): the
+            // 320-639px window renders this grid 2-up with ~145px cells,
+            // and the nowrap "Cancel criteria edits" state ran ~23px past
+            // the button border on each side.
+            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             {tuneOpen
@@ -1041,7 +1045,9 @@ export function FocusedDecisionSummary({
           <Button
             type="button"
             onClick={onUpgrade}
-            className="min-h-11 w-full gap-2 rounded-xl sm:w-auto"
+            // The conversion CTA crossed its own border below ~388px as a
+            // nowrap run; it wraps on phones like its siblings now.
+            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           >
             <LockKeyhole className="size-4" aria-hidden />
             Unlock target price
@@ -1053,7 +1059,9 @@ export function FocusedDecisionSummary({
           onClick={onEditAssumptions}
           disabled={resultActionsBlocked}
           title={resultActionsBlockedReason}
-          className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
+          // The old max-[250px] fallback could never fire: the grid is
+          // 2-up from 320px, and that whole window needed the wrap.
+          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
         >
           <Edit3 className="size-4" aria-hidden />
           Edit assumptions

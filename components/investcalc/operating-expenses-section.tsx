@@ -275,7 +275,11 @@ export function OperatingExpensesSection({
     // three glued-together products. Orange stays on the icon and the
     // field labels to preserve the "this is operating expenses" cue.
     // Controls use the shared AA boundary and focus tokens.
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+    // @container: the monthly-expenses grid below sizes off THIS card's
+    // width, not the viewport — the card renders in a ~726px pane beside
+    // the live preview, where 2xl:grid-cols-5 packed five ~122px columns
+    // and char-wrapped MAINTENANCE % into three-letter fragments.
+    <div className="@container rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
       <div className="mb-5 flex flex-col gap-3 min-[480px]:flex-row min-[480px]:items-start min-[480px]:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <span className="mt-0.5 inline-flex size-5 items-center justify-center rounded-full text-[var(--brand-orange)]">
@@ -777,14 +781,14 @@ export function OperatingExpensesSection({
           >
             Monthly Operating Expenses
           </p>
-          <div
-            className={cn(
-              "grid grid-cols-1 gap-3 sm:grid-cols-2",
-              showAdvanced
-                ? "xl:grid-cols-3 2xl:grid-cols-5"
-                : "xl:grid-cols-4",
-            )}
-          >
+          {/* Container-width steps (financing-section pattern): 3-up needs
+            ~@4xl (56rem) and 5-up only engages at @6xl (72rem) — i.e. the
+            full-width post-run layout, never the input-phase pane. The old
+            viewport-keyed 2xl:grid-cols-5 fired on every ≥1536px screen
+            while the card sat in a 726px pane. (The former !showAdvanced →
+            xl:grid-cols-4 branch was dead: every cell in this grid carries
+            `!showAdvanced && "hidden"` and the whole region is hidden too.) */}
+          <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-5">
             <SectionField
               className={cn(
                 "rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3",

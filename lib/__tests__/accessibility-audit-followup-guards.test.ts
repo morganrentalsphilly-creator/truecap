@@ -117,9 +117,11 @@ describe("accessibility audit follow-up guards", () => {
 
   it("keeps guidance controls separate from financing and expense field labels", () => {
     const financing = read("../../components/investcalc/financing-section.tsx");
-    expect(financing).toContain(
-      "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4",
-    );
+    // Container-query grid (the card renders in a ~670px pane beside the
+    // live preview, so viewport variants packed 4 columns into half the
+    // screen and char-wrapped the headers).
+    expect(financing).toContain("grid grid-cols-1 @xl:grid-cols-2");
+    expect(financing).toContain("@container");
     expect(financing).not.toMatch(/<Label[^>]*>\s*<GlossaryTip/);
     expect(financing).toContain('htmlFor="downPaymentPct"');
     expect(financing).toContain("Down Payment %");
