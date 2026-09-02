@@ -74,7 +74,13 @@ export function FinancingSection({
     // products. Green stays on the icon and labels to preserve the "this is
     // the financing section" cue; controls use the shared AA boundary/focus
     // tokens so their edges remain visible at zoom and in both color modes.
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
+    // @container: every grid in this section sizes off the CARD's width, not
+    // the viewport. The form renders in a ~670px pane beside the live
+    // preview on desktop, so viewport breakpoints lied — xl:grid-cols-4
+    // fired at 1440px viewport and packed four ~140px columns into the
+    // half-width pane, crushing the Closing Costs header into
+    // letter-by-letter wrapping.
+    <div className="@container bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-5">
         <DollarSign className="w-4 h-4 text-[var(--brand-green)]" />
         <span className="font-semibold text-sm text-foreground">Financing</span>
@@ -88,7 +94,11 @@ export function FinancingSection({
         />
       ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* One container-width step: 2-up once the CARD clears 36rem. Never
+        4-up — four columns needed ~14rem each before the uppercase headers
+        stopped wrapping mid-word, and the form pane rarely affords it. A
+        2×2 grid reads cleanly at every card width the product renders. */}
+      <div className="grid grid-cols-1 @xl:grid-cols-2 gap-4">
         <div>
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
@@ -384,7 +394,13 @@ export function FinancingSection({
 
       {pmiApplies ? (
         <div className="mt-4 rounded-xl border border-border bg-[var(--brand-green)]/[0.04] p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-4 sm:items-start">
+          {/* Two EQUAL columns, never [1fr_auto]: the amber rental-MI note
+            in the second slot has a ~700px max-content width, and a grid
+            `auto` track sizes to max-content — at pane widths below that,
+            the note seized the whole row and crushed the label/input
+            column to ~14px, wrapping "PMI / MIP RATE %" one letter per
+            line. minmax(0,1fr) on both makes the note wrap instead. */}
+          <div className="grid grid-cols-1 @xl:grid-cols-2 gap-4 @xl:items-start">
             <div>
               <Label
                 htmlFor="pmiAnnualRatePct"
@@ -434,7 +450,7 @@ export function FinancingSection({
             {usesOwnerOccupantPmiDefault ? (
               <label
                 htmlFor="pmiNoCancel"
-                className="flex min-h-11 min-w-0 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
+                className="flex min-h-11 min-w-0 cursor-pointer select-none items-center gap-2.5 @xl:mt-7"
               >
                 <input
                   {...register("pmiNoCancel")}
@@ -450,7 +466,7 @@ export function FinancingSection({
                 </span>
               </label>
             ) : (
-              <p className="rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-950 sm:mt-7 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+              <p className="rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-950 @xl:mt-7 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
                 Rental-loan mortgage insurance is conservatively modeled through payoff. Confirm any earlier cancellation in the written loan terms.
               </p>
             )}
