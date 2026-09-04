@@ -26,7 +26,7 @@ const SERP_TITLE = "CapEx & maintenance reserves for rentals (2026)";
 const DESCRIPTION =
   "The component-lifespan method for capex and maintenance reserves, worked numbers on a $220K rental, and what honest reserves do to NOI, DSCR, and cash flow.";
 const PUBLISHED_AT = "2026-06-11";
-const MODIFIED_AT = "2026-06-11";
+const MODIFIED_AT = "2026-09-04";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -201,10 +201,23 @@ export default function CapexReservesPost() {
             — share one fatal assumption: that wear scales with rent. It
             doesn&apos;t. A 30-year architectural shingle roof on a 1,400 sq
             ft house costs about $11,000 to replace whether that house rents
-            for $1,100 in Cleveland or $2,800 in Phoenix. At 8% of rent, the
-            Cleveland house banks $1,056/year toward capex; the Phoenix house
-            banks $2,688 — for the same roof, the same furnace, the same
-            water heater on the same clock.
+            for $1,100 in{" "}
+            <Link
+              href="/markets/cleveland"
+              className="text-primary font-semibold hover:underline"
+            >
+              Cleveland
+            </Link>{" "}
+            or $2,800 in{" "}
+            <Link
+              href="/markets/phoenix"
+              className="text-primary font-semibold hover:underline"
+            >
+              Phoenix
+            </Link>
+            . At 8% of rent, the Cleveland house banks $1,056/year toward
+            capex; the Phoenix house banks $2,688 — for the same roof, the
+            same furnace, the same water heater on the same clock.
           </p>
           <p>
             The result is systematic: <strong>percentage rules understate
@@ -326,8 +339,14 @@ export default function CapexReservesPost() {
             <li>
               <strong>With component-derived reserves ($300/month on this
               property&apos;s actual ages):</strong> NOI ≈ $12,216/year, cap
-              rate 5.6%, cash flow ≈ <strong>−$80/month</strong>, DSCR ≈{" "}
-              <strong>0.93</strong>
+              rate 5.6%, cash flow ≈ <strong>−$80/month</strong>,{" "}
+              <Link
+                href="/glossary/dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR
+              </Link>{" "}
+              ≈ <strong>0.93</strong>
             </li>
           </ul>
           <p>
