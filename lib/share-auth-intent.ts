@@ -23,9 +23,13 @@ export function resolveShareAuthReturnPath(
   context: ShareAuthIntentContext,
 ): string {
   const safePath = isSafeLocalPath(pathname) ? pathname : "/";
+  // A signed-in visitor never renders the public analyzer: "/" and "/analyze"
+  // (Phase 2, docs/site-overhaul.md) are rewritten through /home-authed to the
+  // in-app analyzer, so the return path must be where sign-in actually lands
+  // or the intent's route check discards it there.
   if (
     context === "analysis" &&
-    (safePath === "/" || safePath === "/home-authed")
+    (safePath === "/" || safePath === "/home-authed" || safePath === "/analyze")
   ) {
     return "/dashboard/new";
   }

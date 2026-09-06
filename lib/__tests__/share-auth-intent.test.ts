@@ -14,6 +14,14 @@ describe("share authentication intent", () => {
     expect(resolveShareAuthReturnPath("/home-authed", "analysis")).toBe(
       "/dashboard/new",
     );
+    // The public analyzer moved to /analyze (Phase 2); a signed-in return is
+    // rewritten to the in-app analyzer, so the intent must name that route.
+    expect(resolveShareAuthReturnPath("/analyze", "analysis")).toBe(
+      "/dashboard/new",
+    );
+    expect(resolveShareAuthReturnPath("/analyze", "client-report")).toBe(
+      "/analyze",
+    );
     expect(resolveShareAuthReturnPath("/", "client-report")).toBe("/");
     expect(resolveShareAuthReturnPath("/dashboard/new", "analysis")).toBe(
       "/dashboard/new",
