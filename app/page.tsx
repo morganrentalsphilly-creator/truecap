@@ -23,6 +23,7 @@
  */
 
 import type { Metadata } from "next";
+import { FounderCard } from "@/components/marketing/founder-card";
 import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
@@ -79,7 +80,7 @@ export const metadata: Metadata = {
     // social share of the homepage would render without a preview card.
     images: [
       {
-        url: "/home.jpg",
+        url: "/og/home",
         width: 1200,
         height: 630,
         alt: "TrueCap rental property calculator and Offer Ceiling workflow",
@@ -171,7 +172,15 @@ export default function Home() {
           comparison table stays on the dedicated /why-truecap page
           (linked in the footer) so it keeps its SEO + persuasion value
           without crowding this page. */}
+      {/* The homepage's main landmark — also the skip link's target now
+          that the analyzer (which carried <main id="main">) lives at /analyze. */}
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       <MarketingHero />
+      {/* Founder presence, facts only (Phase 4): name, one published
+          sentence, link to /about. No photo — see components/marketing/founder-card.tsx. */}
+      <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <FounderCard className="max-w-xl" />
+      </div>
       {/* The analyzer itself lives at /analyze (2026-09 overhaul): the hero
           captures an address or listing link and hands off there, so this
           page ships NO calculator JS. Keep it that way — Phase 7's homepage
@@ -195,6 +204,7 @@ export default function Home() {
             page only serves cold visitors. */}
         <StickyConversionBar />
       </div>
+      </main>
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}

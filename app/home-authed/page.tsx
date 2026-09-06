@@ -17,6 +17,7 @@
  */
 
 import type { Metadata } from "next";
+import { FounderCard } from "@/components/marketing/founder-card";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzePageContent } from "@/components/marketing/analyze-page-content";
@@ -186,7 +187,13 @@ export default async function AuthedHome({
           /analyze; the hero hands off there. MUST stay in lockstep with
           app/page.tsx — lib/__tests__/homepage-lockstep.test.ts enforces the
           section list and that neither page imports the analyzer. */}
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       {!user && <MarketingHero />}
+      {!user && (
+        <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+          <FounderCard className="max-w-xl" />
+        </div>
+      )}
       {!user && (
         <div className="truecap-marketing-tail contents">
           <DataSourcesSection />
@@ -200,6 +207,7 @@ export default async function AuthedHome({
           <StickyConversionBar />
         </div>
       )}
+      </main>
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}

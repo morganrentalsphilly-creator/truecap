@@ -12,6 +12,8 @@
  */
 
 import { Suspense } from "react";
+import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
+import { FounderCard } from "@/components/marketing/founder-card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
@@ -423,6 +425,48 @@ export default async function PricingPage() {
                 No card, no auto-renewal
               </strong>
             </span>
+          </div>
+        </section>
+
+        {/* What each tier produces — REAL screenshots from the sample flow
+            (Phase 4). One per tier; Agent Pro only when it is sold. */}
+        <section
+          aria-labelledby="pricing-shots-title"
+          className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16"
+        >
+          <h2
+            id="pricing-shots-title"
+            className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+          >
+            What you get at each tier
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
+            Real output from the free sample deal, not mockups.{" "}
+            <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">
+              Run it yourself →
+            </Link>
+          </p>
+          <div className={`mt-8 grid gap-8 md:grid-cols-2 ${agentProConfigured ? "lg:grid-cols-3" : ""}`}>
+            <ProductShot
+              shot={DECISION_SHOT}
+              alt="Free tier: the decision view for the sample deal — the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+              caption={<><strong className="text-foreground">Free.</strong> Your first full decision.</>}
+            />
+            <ProductShot
+              shot={RENT_BREAKDOWN_SHOT}
+              alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
+              caption={<><strong className="text-foreground">{proOfferName}.</strong> Every deal, saved, compared, and re-run.</>}
+            />
+            {agentProConfigured ? (
+              <ProductShot
+                shot={MEMO_SHOT}
+                alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+                caption={<><strong className="text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
+              />
+            ) : null}
+          </div>
+          <div className="mx-auto mt-10 max-w-xl">
+            <FounderCard />
           </div>
         </section>
 

@@ -10,6 +10,7 @@
  */
 
 import type { Metadata } from "next";
+import { ProductShot } from "@/components/marketing/product-shot";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -123,6 +124,14 @@ export default function ForHouseHackersPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal (Phase 4). */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="where-the-rent-goes"
+            alt="TrueCap's cash-flow breakdown for the sample deal: where each month's rent goes, from operating expenses and reserves to debt service and cash flow"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
+          />
+        </section>
         <section id="use-cases" className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             Why house hacks need a different analyzer

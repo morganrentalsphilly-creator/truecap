@@ -13,6 +13,7 @@
  */
 
 import type { Metadata } from "next";
+import { ProductShot } from "@/components/marketing/product-shot";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import {
@@ -223,6 +224,14 @@ export default async function ForAgentsPage() {
         <AgentProofSection />
 
         {/* Use cases */}
+        {/* Real product screenshot from the free sample deal (Phase 4). */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="memo"
+            alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+            caption={<>The memo you can hand a client, from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
+          />
+        </section>
         <section id="use-cases" className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             How agents use TrueCap

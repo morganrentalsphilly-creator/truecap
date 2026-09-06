@@ -124,3 +124,24 @@ test("at 375px the header is one row and the hero CTA is in the first viewport",
   await expect(page.getByRole("link", { name: "Pricing", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
 });
+
+test("the hero's LCP element is the real product screenshot, preloaded", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const shot = page.locator('[data-hero-product-shot=""] img').first();
+  await expect(shot).toBeVisible();
+  // next/image `priority`: the optimized WebP is preloaded from <head>.
+  await expect(shot).toHaveAttribute("src", /verdict-desktop\.webp/);
+  await expect(
+    page.locator('link[rel="preload"][as="image"][imagesrcset*="verdict-desktop.webp"]'),
+  ).toHaveCount(1);
+  const alt = await shot.getAttribute("alt");
+  expect(alt ?? "").toMatch(/Offer Ceiling/);
+  await expect(page.getByRole("link", { name: "Live sample →", exact: true })).toHaveAttribute(
+    "href",
+    "/analyze?sample=1",
+  );
+  // Founder card: facts only, no image.
+  const founder = page.getByRole("complementary", { name: "About the founder" });
+  await expect(founder).toBeVisible();
+  await expect(founder.locator("img")).toHaveCount(0);
+});

@@ -18,6 +18,8 @@
  */
 
 import { Check, Database, Target, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { ProductShot, findProductShot } from "@/components/marketing/product-shot";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
@@ -82,7 +84,7 @@ export function MarketingHero() {
           {/* This is an acquisition answer, not a duplicate calculator, so it
               remains useful proof on mobile as well as desktop. */}
           <div className="tc-rise-in tc-delay-2 min-w-0 w-full lg:justify-self-end">
-            <HeroProductMock
+            <HeroProductShot
               decisionPositioning={newHomepagePositioningEnabled}
             />
           </div>
@@ -180,6 +182,43 @@ const HERO_ANIM_CSS = `
   }
 }
 `;
+
+/**
+ * The hero visual: the REAL verdict screenshot from the no-account sample
+ * flow (scripts/capture-screenshots.ts), preloaded because it is the LCP
+ * element. Falls back to the computed card only when the pipeline has not
+ * produced the shot yet — never a placeholder image.
+ */
+function HeroProductShot({ decisionPositioning }: { decisionPositioning: boolean }) {
+  const shot = findProductShot("verdict", "desktop");
+  if (!shot) return <HeroProductMock decisionPositioning={decisionPositioning} />;
+  const { maxOffer } = calculateSampleDealOutcome();
+  const listPrice = SAMPLE_DEAL_FIXTURE.values.purchasePrice;
+  const gap = maxOffer ? Math.max(0, listPrice - maxOffer.maxPrice) : null;
+  const alt = maxOffer
+    ? `TrueCap's decision view for the sample deal: an Offer Ceiling of $${maxOffer.maxPrice.toLocaleString("en-US")} against a $${listPrice.toLocaleString("en-US")} asking price${gap ? ` ($${gap.toLocaleString("en-US")} above the ceiling)` : ""}, with cash flow after reserves, DSCR, the best next step, and the fastest paths to meet the targets`
+    : "TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR";
+  return (
+    <div data-hero-product-shot="">
+      <ProductShot
+        shot="verdict"
+        viewport="desktop"
+        alt={alt}
+        priority
+        sizes="(min-width: 1024px) 480px, 100vw"
+      />
+      <p className="mt-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span>Real output from the free sample deal.</span>
+        <Link
+          href="/analyze?sample=1"
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Live sample →
+        </Link>
+      </p>
+    </div>
+  );
+}
 
 function HeroProductMock({
   decisionPositioning,
