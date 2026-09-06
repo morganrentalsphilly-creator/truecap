@@ -1,7 +1,7 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-09-06T17:14:36.828Z",
+  "generatedAt": "2026-09-06T18:20:19.107Z",
   "files": {
     ".github/workflows/ci.yml": "0c331ae1fc002e4abbaeda51b9b3c12f810597f9d13ec0c8e7833078ec5b4e4c",
     "eslint.config.mjs": "50ef27101a8f02892b83d543ae9be26afa81e2fe4f0a87f1bfeebda77b8e22fc",
@@ -17,7 +17,7 @@
     "sentry.edge.config.ts": "14030b26f093eae180beead8b6edd09d4892f184e78cd864154f736d686e17c0",
     "sentry.server.config.ts": "8183a88488ece19c039e4313e327953afb148c86112d5493161bd98462cf112a",
     "tsconfig.json": "3793702e98a6da2c82b03ecfca1a48a25c79b170abacb97f23937784550e206b",
-    "vercel.json": "22d9867b5a9e312fb910c490e5b3c3538e35da3720d1edc814f8212e59f66fd6",
+    "vercel.json": "f6be76ae267543e798c79e46de9a87906789f20b9a22d478c4bfafbe3235b938",
     "vitest.config.ts": "a0ea6e1b86b04e882be1bd84e9fae697028f0421623e2c9d38948e01cae1faaa"
   },
   "_contentScannedReadme": "Build-executed files the SEO agent is deliberately allowed to write, so they are NOT hash-pinned above — a pin would be red on every content PR and would turn `--update` into a reflex, which is the one habit that empties this control of meaning. Their control is gate 1b (scripts/check-agent-blog-content.mjs), a heuristic token scan, NOT a proof. Listed here so the registry of build-executed files is complete: verify-build-integrity.mjs fails if one of these disappears or if .github/workflows/ci.yml stops naming it, i.e. if it silently loses its coverage.",
