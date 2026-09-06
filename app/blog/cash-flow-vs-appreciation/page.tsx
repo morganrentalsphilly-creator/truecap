@@ -18,6 +18,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -31,7 +32,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Cash flow vs appreciation: which wins in 2026?";
 const DESCRIPTION =
-  "Cash-flow investors and appreciation investors both think they're right. Both can be. A 10-year side-by-side that quantifies when each strategy wins — and the specific 2026 conditions that have flipped the historical math.";
+  "A 10-year side-by-side of cash flow vs. appreciation that shows when each strategy wins, and the 2026 conditions that have flipped the historical math.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 9;
@@ -105,7 +106,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -270,7 +271,7 @@ export default function BlogPost() {
               — net monthly income after all expenses + mortgage. Run any
               deal&apos;s number in 30 seconds in the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -542,6 +543,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

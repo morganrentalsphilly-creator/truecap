@@ -21,6 +21,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -32,7 +33,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Property tax reassessment for rentals (2026)";
 const DESCRIPTION =
-  "Buying a rental usually resets property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real number before you buy.";
+  "Buying a rental usually resets property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real bill before you buy.";
 const PUBLISHED_AT = "2026-06-27";
 const MODIFIED_AT = "2026-06-27";
 const READING_TIME = 10;
@@ -98,7 +99,7 @@ export default function PropertyTaxReassessmentPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -374,14 +375,14 @@ export default function PropertyTaxReassessmentPost() {
               On the seller&apos;s bill the deal looks like a thin but real
               winner: a 6.3%{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
               </Link>
               , a{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -471,7 +472,7 @@ export default function PropertyTaxReassessmentPost() {
               are exactly where an optimistic number hides a bad deal. Run the
               honest figure through the free{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -521,6 +522,7 @@ export default function PropertyTaxReassessmentPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

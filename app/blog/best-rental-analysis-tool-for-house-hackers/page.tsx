@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -16,7 +17,7 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "best-rental-analysis-tool-for-house-hackers";
 const TITLE = "Best rental analysis tool for house hackers (2026)";
 const DESCRIPTION =
-  "Honest 2026 ranking of the best calculators for house hackers — TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting requires that standard rental calculators miss.";
+  "Best calculators for house hackers in 2026: TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting needs that standard tools miss.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 8;
@@ -164,7 +165,7 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -370,7 +371,7 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               hack, check whether the rented units cover the debt and what the
               deal returns on your down payment — the free{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="font-semibold text-primary hover:underline"
               >
                 TrueCap analyzer
@@ -391,6 +392,8 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />
           </div>

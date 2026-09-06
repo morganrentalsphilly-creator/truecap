@@ -84,7 +84,9 @@ function findOffenders(): Offender[] {
       let match: RegExpExecArray | null;
       while ((match = anchor.exec(flat)) != null) {
         const [, href, inner, trailing] = match;
-        if (!href.startsWith("/#main") && !gatedToolHref(href)) continue;
+        // The analyzer moved from "/#main" to "/analyze" (site overhaul
+        // Phase 2); both spellings are analyzer links for this guard.
+        if (!href.startsWith("/#main") && !href.startsWith("/analyze") && !gatedToolHref(href)) continue;
 
         const label = inner.replace(/<[^>]+>/g, "").trim();
         if (!METRIC.test(label)) continue;

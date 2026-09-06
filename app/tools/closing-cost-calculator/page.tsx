@@ -13,6 +13,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 export const metadata: Metadata = {
   title: "Free Closing Cost Calculator — Every Line Item",
@@ -186,6 +187,7 @@ export default function ClosingCostCalculatorPage() {
 
 
         <ToolsConversionCta calculatorName="Closing cost calculator" />
+        <RelatedContent kind="tool" slug="closing-cost-calculator" title="Closing Cost Calculator" className="mt-10" />
       </main>
       <SiteFooter />
     </div>

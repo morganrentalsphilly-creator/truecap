@@ -19,6 +19,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -30,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "QuickBooks vs TrueCap for Rentals (2026)",
   description:
-    "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
+    "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. See what to use for accounting instead.",
   keywords: [
     "quickbooks for rentals",
     "quickbooks alternative landlord",
@@ -414,6 +415,8 @@ export default function VsQuickbooksRentalPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="quickbooks-rental" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

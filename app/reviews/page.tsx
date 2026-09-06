@@ -252,6 +252,24 @@ export default async function ReviewsPage() {
           </section>
         ) : null}
 
+        {/* What this page will never show — stated so the absence of quotes
+            reads as a policy, not a gap. */}
+        <section aria-labelledby="not-published-title" className="border-t border-border">
+          <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
+            <h2 id="not-published-title" className="text-xl font-extrabold tracking-tight text-foreground">
+              What you will not find here
+            </h2>
+            <ul className="mt-3 grid gap-2 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
+              <li>Star ratings or an average score. No one is asked to rate anything.</li>
+              <li>Logos, badges, or press strips.</li>
+              <li>User counts or &ldquo;deals analyzed&rdquo; figures that are not computed from the database.</li>
+              <li>Quotes edited for effect, paid for, or written by anyone but the person named.</li>
+              <li>Case studies without the customer&apos;s written approval of every number.</li>
+              <li>Stock photos of &ldquo;customers.&rdquo; If there is a face on this site, it is a real person who agreed to it.</li>
+            </ul>
+          </div>
+        </section>
+
         {/* (g) Founder */}
         <section
           aria-label="Who built this"

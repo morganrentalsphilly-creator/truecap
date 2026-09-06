@@ -525,3 +525,56 @@ Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl +
 3. **The `polyfills` chunk is not a real cost.** It is `noModule` and modern browsers never download it (Chromium confirmed); `browserslist` is set anyway so the build targets modern engines.
 4. **Two fonts stay.** DM Mono renders tabular numbers in 70 components; replacing it would be a visual change outside the brief.
 5. **No `next/dynamic` sweep of the analyzer's own imports** beyond what already existed (charts, PDF, dialogs are already dynamic): the analyzer file is 11,000 lines and a partial split risked the free first decision.
+
+## Phase 8 — SEO: thin pages fixed, good pages protected (branch `site-overhaul`)
+
+### Audit before / after (`scripts/seo-audit.ts` against the local production build)
+
+| Check | Before (Phase 7 build) | After (Phase 8 build) |
+| --- | --- | --- |
+| Sitemap URLs | 411 | 380 (12 bespoke market pages, 19 city + strategy pages, and nothing else left the sitemap; `/analyze` joined it in Phase 2) |
+| Non-200 sitemap URLs | 0 | 0 |
+| Indexable pages under 300 words | 81 (44 glossary, market/state/strategy templates, `/tools`, `/about`, `/reviews`, `/sample-decision-memo`) | 0 (9 list hubs under `/blog/topics` are exempt from the word rule and reported separately) |
+| Duplicate titles | 0 | 0 |
+| Sitemap entries without `lastmod` | 305 | 0 |
+| Pages without a self-canonical | 0 (the first run's mismatches were a localhost-origin artifact; the audit now compares paths) | 0 |
+| Broken internal links | 0 | 0 |
+| Titles over 60 characters (advisory) | 11 (all glossary) | 0 |
+| Descriptions over 155 characters (advisory) | 90 | 0 |
+| `feed.xml` | parses, 75 items | parses, 75 items |
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Markets: enrich where HUD data exists, noindex the rest.** Every `/markets/<city>` page with a HUD Fair Market Rent row (150 of 162) now renders FMR by bedroom count with the HUD fiscal year (plus small-area ZIP rows where SAFMR exists), a sample underwrite at a stated $265,000 sample price run through the real `calculateAnalysis` engine with the HUD 3-bedroom rent (cash flow, cap rate, DSCR; labeled "not a listing", assumptions printed from the sample fixture), three things to verify locally, glossary links, and related blog posts. The 12 bespoke city pages (Philadelphia, Dallas, Atlanta, Tampa, …) have no HUD row and carry `robots: noindex, follow`; they flip to indexable the day a row is added (`isMarketIndexable`) | `lib/markets/indexability.ts`, `components/marketing/safe-market-page.tsx`, `app/markets/[city]/page.tsx` |
+| **States: real content from the state record.** Each `/states/<slug>` page renders the pitch, market tier, landlord-tenant lean, and typical property-tax rate (each with a source label), a linked HUD-rent table of the state's market cities, bespoke city links, and verify-locally guidance; medians, eviction, income-tax, pros/cons and insurance figures stay withheld. All 33 states clear the 300-word bar from real content (estimate 368–500+ words; the guard measures the rendered `<main>` of every state) | `app/states/[slug]/page.tsx`, `lib/markets/indexability.ts` |
+| **Strategy pages noindexed.** `/markets/<city>/<strategy>` renders a ~240-word template; every one is `noindex, follow` and out of the sitemap behind a single flag (`STRATEGY_PAGES_INDEXABLE = false`) | `app/markets/[city]/[strategy]/page.tsx`, `app/sitemap.ts` |
+| Every "source-first boundary" paragraph on the four templates replaced by one line: "Data as of {year}; verify locally before you offer." (exactly once per page, tested) | `lib/markets/indexability.ts` (`buildDataAsOfLine`) |
+| **Sitemap lists only indexable pages** and carries `lastmod` on every entry (`SITE_OVERHAUL_LAST_MODIFIED` for pages touched by the overhaul, post dates for the blog) | `app/sitemap.ts` |
+| **Glossary: "How to check it before you rely on it."** 35 entries that were under 300 words gained a `howToCheck` field — which document, quote, or record to pull and what to look for — rendered as its own section and as a FAQ item; every glossary page also carries a category-level "Where this shows up in TrueCap" section (from earlier in the phase) and related content. Glossary titles are length-aware so `title + " | TrueCap"` stays ≤ 60 | `lib/glossary.ts`, `app/glossary/[slug]/page.tsx` |
+| `/about` ("How the numbers are built"), `/tools` ("How these fit the full analysis"), `/sample-decision-memo` ("What a decision memo is"), `/reviews` ("What you will not find here") each gained a real section instead of padding | the respective `page.tsx` files |
+| **Schema.** `Article.author` → the Morgan `Person` node (`@id: /about#morgan`, name, url) on all 75 posts (60 edited; 11 had an `Organization` author; the 3 source-first posts get it from the shared layout). `BreadcrumbList` on blog (already present), tools (20), vs (38), glossary, markets, states. `aggregateRating` stays out: `buildAggregateRating()` returns `null` below 5 published testimonials with numeric ratings and is wired nowhere | `components/marketing/breadcrumb-schema.tsx`, `lib/schema/aggregate-rating.ts`, `components/marketing/source-first-article.tsx`, `app/blog/*/page.tsx` |
+| **Related content engine.** Token-overlap matcher over tools, glossary, and posts: tools → glossary + two posts; glossary → tools + posts; blog → one tool + the analyzer; vs → pricing + the sample deal. Rendered on 11 tools, 38 vs pages, every glossary entry, all 75 posts | `lib/related-content.ts`, `components/marketing/related-content.tsx` |
+| Every remaining `href="/#main"` (the analyzer's old home) now points to `/analyze`: 33 posts, 11 tools, 38 vs, pricing, the memo page, the three persona pages, states. The link-honesty guard checks `/analyze` links the way it checked `/#main` | `lib/__tests__/calculator-link-honesty.test.ts` |
+| Meta descriptions: the truncation helper now caps at 155 (it produced 156–158 before); the state template is ≤ 135 for every state; hand-written blog and vs descriptions over 155 rewritten in the new voice without adding claims | `lib/utils.ts`, `app/states/[slug]/page.tsx`, `app/blog/*/page.tsx`, `app/vs/*/page.tsx` |
+| `robots.txt` unchanged (AI crawlers allowed, `llms.txt` allowed); `llms.txt` is generated from the live data at request time and now names the free analyzer at `/analyze`; `feed.xml` validates | `app/llms.txt/route.ts` |
+| Dashboard pages carry no canonical and are `noindex` (Phase 2) | `app/dashboard/layout.tsx` |
+| `scripts/seo-audit.ts` (`--base`, `--json`): crawls the sitemap of a local build; fails on non-200 URLs, thin indexable pages, duplicate titles, missing `lastmod`, non-self canonicals (path compare), broken internal links; reports title/description length and list-hub exemptions as advisories | `scripts/seo-audit.ts` |
+| Guards: indexability rules and rendered word counts for all 33 states and the engine parity of the sample underwrite (37 tests); sitemap filtered by the same helpers; related-content shapes; breadcrumb component; aggregate-rating guard | `lib/__tests__/markets-indexability.test.ts`, `lib/__tests__/site-overhaul-seo.test.ts` |
+
+### Decisions made in the founder's absence (Phase 8)
+
+1. **The 12 bespoke city pages, Philadelphia included, are `noindex, follow`.** They are 39-line wrappers around the same template as the programmatic cities and have no HUD row, so they are exactly the thin pages the brief describes. Fabricating rent figures was not an option; adding the HUD FY2026 rows for those 12 slugs to `lib/markets/hud-rents.ts` flips them to full, indexable pages automatically. This is the first item on the founder list.
+2. **Strategy pages are noindexed as a family, not per city.** Their template renders ~240 words regardless of city; indexing the six whose city has HUD data would have shipped thin pages. One constant flips them back when the template carries real content.
+3. **Glossary entries were enriched, not noindexed.** Each thin entry gained verification guidance (which bill, quote, schedule, or record to pull). The guidance is general practice and adds no new numeric claims; the existing definitions, benchmarks, and examples were not changed.
+4. **List hubs are exempt from the 300-word rule.** `/blog/topics` and its nine topic pages exist to link; their word count is the size of the list. The audit reports them separately instead of failing on them.
+5. **`Article.author` was normalized to the Morgan `Person` node on 11 roundup posts that had an `Organization` author.** The brief says every post; the byline is the same person on every post. If the Organization author was intentional for the roundups, revert those 11.
+6. **Titles and descriptions were fixed by template where a template caused them.** The 11 long titles and the 156-character descriptions came from two helpers; hand-written descriptions were rewritten one by one under a no-new-claims rule. Titles on other page families were already ≤ 60.
+7. **`llms.txt` still lists the 19 city + strategy guides.** It is a resource list for AI crawlers, not an index directive, and the pages remain crawlable (`follow`).
+
+### Deferred (Phase 8)
+
+- HUD FMR rows for the 12 bespoke cities (data entry from HUD's FY2026 tables; flips Philadelphia, Dallas, Atlanta, Tampa, Houston, Phoenix, Charlotte, Cleveland, Detroit, Indianapolis, Kansas City, Memphis to indexable).
+- Real content for the city + strategy template (then flip `STRATEGY_PAGES_INDEXABLE`).
+- Official assessor/permit links on market pages: the repo has no verified per-city URLs, so the verify-locally items name the office without a link.

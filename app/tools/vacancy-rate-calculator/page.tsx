@@ -13,6 +13,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -285,6 +286,7 @@ export default function VacancyRateCalculatorPage() {
 
 
         <ToolsConversionCta calculatorName="Vacancy rate calculator" />
+        <RelatedContent kind="tool" slug="vacancy-rate-calculator" title="Vacancy Rate Calculator" className="mt-10" />
       </main>
       <SiteFooter />
     </div>

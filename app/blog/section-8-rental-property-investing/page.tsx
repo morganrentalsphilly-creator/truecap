@@ -13,6 +13,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -90,7 +91,7 @@ export default function Section8RentalPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -192,7 +193,7 @@ export default function Section8RentalPost() {
             </p>
             <p>
               Run the annual numbers: $18,000 gross rent, minus $2,400 property tax, $1,200 insurance, $2,200 maintenance and capex reserves, $1,800 management (10%), and $720 vacancy (4%) — that&apos;s an NOI of about <strong>$9,680</strong>, a <strong>7.2% cap rate</strong>, a DSCR of roughly <strong>1.19</strong>, and cash flow near <strong>$126/month</strong> after debt service. Check the math yourself in the free{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>
               , which returns the NOI, cap rate, DSCR and cash flow from one
@@ -268,7 +269,7 @@ export default function Section8RentalPost() {
             </ul>
             <p>
               Then judge the deal on the same metrics as always — cash flow,{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">
                 cash-on-cash
               </Link>
               , cap rate, DSCR. The program changes the inputs, not the framework. If you need the framework itself, start with{" "}
@@ -312,6 +313,7 @@ export default function Section8RentalPost() {
             ))}
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

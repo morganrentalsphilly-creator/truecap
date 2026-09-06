@@ -8,6 +8,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
   description:
@@ -275,21 +276,21 @@ export default function OnePercentRulePage() {
               <li>
                 Run the full underwrite —{" "}
                 <Link
-                  href="/#main"
+                  href="/analyze"
                   className="text-primary font-semibold hover:underline"
                 >
                   cap rate
                 </Link>
                 ,{" "}
                 <Link
-                  href="/#main"
+                  href="/analyze"
                   className="text-primary font-semibold hover:underline"
                 >
                   CoC
                 </Link>
                 ,{" "}
                 <Link
-                  href="/#main"
+                  href="/analyze"
                   className="text-primary font-semibold hover:underline"
                 >
                   DSCR
@@ -383,6 +384,8 @@ export default function OnePercentRulePage() {
             calculatorName="1% rule calculator"
             hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Projections appear when your free trial or plan includes them."
           />
+
+          <RelatedContent kind="tool" slug="1-percent-rule-calculator" title="1% Rule Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

@@ -27,6 +27,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -543,6 +544,8 @@ export default function ArvCalculatorPage() {
           <ToolEmbedInvite slug="arv-calculator" />
 
           <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use the rental analyzer for stabilized cash flow and TrueCap's Offer Ceiling." />
+
+          <RelatedContent kind="tool" slug="arv-calculator" title="ARV Calculator (After-Repair Value + 70% Rule)" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

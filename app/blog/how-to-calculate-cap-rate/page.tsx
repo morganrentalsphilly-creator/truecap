@@ -17,6 +17,7 @@ import Link from "next/link";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -29,7 +30,7 @@ const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cap rate: worked examples (2026)";
 const DESCRIPTION =
-  "Cap rate = NOI ÷ purchase price. Learn the lender-style NOI convention, how vacancy and operating costs work, where CapEx belongs, and see three worked examples.";
+  "Cap rate = NOI ÷ purchase price. Learn the lender-style NOI convention, vacancy and operating costs, where CapEx belongs, plus three worked examples.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 7;
@@ -470,6 +471,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

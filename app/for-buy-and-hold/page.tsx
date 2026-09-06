@@ -262,7 +262,7 @@ export default function ForBuyAndHoldPage() {
             </Link>
             , and the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

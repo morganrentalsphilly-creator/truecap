@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -33,7 +34,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Negative leverage in real estate, explained (2026)";
 const DESCRIPTION =
-  "Negative leverage is when a mortgage lowers your return. Here's the loan constant vs cap rate rule, with worked 2026 examples and the deals it quietly traps.";
+  "Negative leverage is when a mortgage lowers your return. The loan constant vs cap rate rule, worked 2026 examples, and the deals it quietly traps.";
 const PUBLISHED_AT = "2026-06-28";
 const MODIFIED_AT = "2026-06-28";
 const READING_TIME = 11;
@@ -99,7 +100,7 @@ export default function NegativeLeveragePost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -249,7 +250,7 @@ export default function NegativeLeveragePost() {
             <p>
               The property&apos;s unlevered yield is its{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
@@ -272,7 +273,7 @@ export default function NegativeLeveragePost() {
             <p>
               You can make this exact rather than directional. Your levered{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -381,7 +382,7 @@ export default function NegativeLeveragePost() {
               <strong>1.17 DSCR</strong>. It is profitable. It is within shouting
               distance of the 1.20 to 1.25{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
@@ -626,6 +627,7 @@ export default function NegativeLeveragePost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

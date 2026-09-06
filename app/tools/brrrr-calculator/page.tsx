@@ -9,6 +9,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 export const metadata: Metadata = {
@@ -211,7 +212,7 @@ export default function BrrrrCalculatorPage() {
               The post-rehab rent matters in two ways: it has to support the new
               mortgage payment after refi ({" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -358,6 +359,8 @@ export default function BrrrrCalculatorPage() {
             calculatorName="BRRRR calculator"
             hook="In TrueCap, the BRRRR analyzer plugs into your real numbers (rent, op-ex, financing) and shows post-refi cash flow + cash-left-in-deal + infinite-return alerts. Save and share."
           />
+
+          <RelatedContent kind="tool" slug="brrrr-calculator" title="BRRRR Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

@@ -23,6 +23,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -314,7 +315,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               full cycle with the{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>, and
               check the rental math in the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
               — cap rate and DSCR together — before you commit.
             </p>
 
@@ -417,6 +418,8 @@ export default function SeventyPercentRuleCalculatorPage() {
           <ToolEmbedInvite slug="70-percent-rule-calculator" />
 
           <ToolsConversionCta calculatorName="70% rule calculator" hook="The 70% rule is an initial screen. TrueCap's rental analyzer adds itemized costs, stabilized cash flow, and TrueCap's Offer Ceiling under your Buy Box." />
+
+          <RelatedContent kind="tool" slug="70-percent-rule-calculator" title="70% Rule Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

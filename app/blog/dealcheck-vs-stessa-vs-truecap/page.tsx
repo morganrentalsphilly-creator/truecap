@@ -19,6 +19,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -31,7 +32,7 @@ const TITLE = "DealCheck vs Stessa vs TrueCap: which one do you actually need?";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "DealCheck vs Stessa vs TrueCap (2026)";
 const DESCRIPTION =
-  "A dated comparison of DealCheck, Stessa, and TrueCap. All three support acquisition analysis; Stessa also spans listing discovery and owned-property operations.";
+  "A dated comparison of DealCheck, Stessa, and TrueCap. All three analyze acquisitions; Stessa also covers listing discovery and owned-property operations.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT: string = "2026-08-27";
 const READING_TIME_MIN = 11;
@@ -101,7 +102,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -548,6 +549,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

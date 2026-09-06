@@ -14,6 +14,7 @@ import Link from "next/link";
 import { FileSignature } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -27,7 +28,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Seller financing & subject-to deals, explained";
 const DESCRIPTION =
-  "When bank financing is expensive or out of reach, creative structures move deals. How seller financing and subject-to actually work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply, and how to underwrite the 2026 rate arbitrage without ignoring the downside.";
+  "How seller financing and subject-to deals work, the due-on-sale risk, where Dodd-Frank applies, and how to underwrite the 2026 rate arbitrage.";
 const PUBLISHED_AT = "2026-06-23";
 const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 11;
@@ -97,7 +98,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -379,6 +380,7 @@ export default function BlogPost() {
             title company before entering one.
           </p>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

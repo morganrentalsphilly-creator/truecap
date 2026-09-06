@@ -22,6 +22,7 @@ import Link from "next/link";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -922,7 +923,7 @@ export default function BlogPost() {
             are worth reading before you assume the easier qualification is
             free, and the free{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -1001,7 +1002,7 @@ export default function BlogPost() {
             The cheap defence against both is arithmetic before offers.
             Underwriting a listing takes about a minute in the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -1112,6 +1113,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

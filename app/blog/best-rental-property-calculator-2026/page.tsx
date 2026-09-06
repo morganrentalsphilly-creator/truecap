@@ -13,6 +13,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -25,7 +26,7 @@ const TITLE = "Best rental property calculator 2026: 7 tools compared";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
-  "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.";
+  "2026 ranking of the 7 most popular rental property calculators (TrueCap, DealCheck, BiggerPockets and more) on free tier depth, pricing, mobile, and fit.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 12;
@@ -241,7 +242,7 @@ export default function BestRentalPropertyCalculator2026Post() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -570,6 +571,8 @@ export default function BestRentalPropertyCalculator2026Post() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

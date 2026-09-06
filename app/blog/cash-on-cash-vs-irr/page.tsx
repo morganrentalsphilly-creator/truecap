@@ -12,13 +12,14 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "cash-on-cash-vs-irr";
 const TITLE = "Cash-on-cash vs IRR: which one tells the truth?";
 const DESCRIPTION =
-  "Cash-on-cash and IRR are both return metrics, but they answer completely different questions. When each one is right, when each one lies, and which to trust on which type of deal.";
+  "Cash-on-cash and IRR answer different questions. Learn when each one is right, when each one misleads, and which to trust on which type of deal.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 7;
@@ -55,7 +56,7 @@ export default function CashOnCashVsIrrPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
@@ -283,6 +284,7 @@ export default function CashOnCashVsIrrPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

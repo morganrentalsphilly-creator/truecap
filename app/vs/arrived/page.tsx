@@ -19,6 +19,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
@@ -27,7 +28,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Arrived vs TrueCap (2026): Shares vs Ownership",
   description:
-    "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",
+    "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two different investing models — honest comparison.",
   keywords: [
     "arrived alternative",
     "arrived homes review",
@@ -72,7 +73,7 @@ export default function VsArrivedPage() {
     name: "Arrived vs TrueCap (2026): Shares vs Ownership",
     url: `${siteUrl}/vs/arrived`,
     description:
-      "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",
+      "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two different investing models — honest comparison.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -294,6 +295,8 @@ export default function VsArrivedPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="arrived" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

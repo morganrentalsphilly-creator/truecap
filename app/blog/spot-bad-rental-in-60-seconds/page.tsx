@@ -12,6 +12,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -22,7 +23,7 @@ const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to spot a bad rental deal: 7 red flags";
 const DESCRIPTION =
-  "Seven red flags that tell you a rental property doesn't pencil — before you waste hours running the full underwrite. The triage every experienced investor does in their head.";
+  "Seven red flags that tell you a rental doesn't pencil before you spend hours on a full underwrite — the triage experienced investors do in their head.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-08-29";
 const READING_TIME = 8;
@@ -60,7 +61,7 @@ export default function SpotBadRentalPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
@@ -318,6 +319,7 @@ export default function SpotBadRentalPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

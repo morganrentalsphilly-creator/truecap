@@ -13,6 +13,7 @@ import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from 
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
@@ -170,7 +171,7 @@ export default function VsRentometerPage() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            <Link href="/analyze" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
             {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
             {" "}lays out every line.
@@ -193,6 +194,8 @@ export default function VsRentometerPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="rentometer" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

@@ -39,7 +39,7 @@ const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 export const metadata: Metadata = {
   title: "Free Rental Property Analysis Spreadsheet",
   description:
-    "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
+    "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
   keywords: [
     "rental property spreadsheet",
     "rental property excel template",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
-      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
+      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
     url: "/tools/rental-property-spreadsheet",
     type: "website",
     images: [
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
-      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
+      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
     images: ["/home.jpg"],
   },
 };
@@ -297,7 +297,7 @@ export default function RentalPropertySpreadsheetPage() {
               The spreadsheet ships pre-filled with the same example deal we
               underwrite in the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

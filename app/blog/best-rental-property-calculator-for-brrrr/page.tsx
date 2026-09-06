@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -20,7 +21,7 @@ const TITLE = "Best rental property calculator for BRRRR investors (2026)";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best rental property calculator for BRRRR (2026)";
 const DESCRIPTION =
-  "Honest 2026 ranking of the best calculators for BRRRR — TrueCap, DealCheck, BiggerPockets, and what makes a BRRRR-specific calculator different from a standard rental analyzer.";
+  "A 2026 ranking of the best BRRRR calculators — TrueCap, DealCheck, BiggerPockets — and how a BRRRR calculator differs from a standard rental analyzer.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 9;
@@ -179,7 +180,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -394,7 +395,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
               , pressure-test lender-specific debt coverage by running the
               stabilized rent and refinance terms through the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="font-semibold text-primary hover:underline"
               >
                 TrueCap analyzer
@@ -415,6 +416,8 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />
           </div>

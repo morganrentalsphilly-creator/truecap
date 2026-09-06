@@ -304,14 +304,14 @@ export default function FiftyPercentRuleCalculatorPage() {
               is the cash-flow-market variant of the income screen. From there,
               replace the guesses with line items: the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 rental cash flow calculator
               </Link>{" "}
               itemizes every expense the 50% bundle compresses, and the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 NOI calculator

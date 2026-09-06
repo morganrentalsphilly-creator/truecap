@@ -7,6 +7,11 @@ import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { GLOSSARY } from "@/lib/glossary";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
+import {
+  isMarketIndexable,
+  isStateIndexable,
+  isStrategyIndexable,
+} from "@/lib/markets/indexability";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -91,14 +96,22 @@ const JUNE_2026_COMPARISON_PATHS = [
   "/vs/mashvisor-for-short-term-rentals",
 ] as const;
 
+/**
+ * Every URL carries a lastmod (docs/site-overhaul.md Phase 8.5). Blog posts
+ * keep their reviewed dates; comparison batches keep their release date;
+ * everything else changed in the 2026-09 site overhaul (voice pass,
+ * templates, product shots), so that date is the honest floor.
+ */
+export const SITE_OVERHAUL_LAST_MODIFIED = new Date("2026-09-06");
+
 function sitemapEntry(
   siteUrl: string,
   path: string,
-  lastModified?: Date,
+  lastModified: Date = SITE_OVERHAUL_LAST_MODIFIED,
 ): MetadataRoute.Sitemap[number] {
   return {
     url: path === "/" ? `${siteUrl}/` : `${siteUrl}${path}`,
-    ...(lastModified ? { lastModified } : {}),
+    lastModified,
   };
 }
 
@@ -114,18 +127,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const glossaryUrls = Object.values(GLOSSARY).map((entry) =>
     sitemapEntry(siteUrl, `/glossary/${entry.slug}`),
   );
-  const stateUrls = Object.values(STATES).map((state) =>
-    sitemapEntry(siteUrl, `/states/${state.slug}`),
-  );
-  const cityStrategyUrls = CITY_STRATEGY_COMBOS.map((combo) =>
+  // Programmatic market/state pages are listed only when they are indexable
+  // (docs/site-overhaul.md Phase 8): the page itself carries noindex,follow
+  // otherwise, and a sitemap must not advertise URLs it asks crawlers to skip.
+  const stateUrls = Object.values(STATES)
+    .filter((state) => isStateIndexable(state.slug))
+    .map((state) => sitemapEntry(siteUrl, `/states/${state.slug}`));
+  const cityStrategyUrls = CITY_STRATEGY_COMBOS.filter((combo) =>
+    isStrategyIndexable(combo.citySlug),
+  ).map((combo) =>
     sitemapEntry(siteUrl, `/markets/${combo.citySlug}/${combo.strategy}`),
   );
-  const marketCityUrls = MARKET_CITIES.map((city) =>
-    sitemapEntry(siteUrl, `/markets/${city.slug}`),
-  );
-  const bespokeMarketUrls = BESPOKE_MARKETS.map((city) =>
-    sitemapEntry(siteUrl, `/markets/${city.slug}`),
-  );
+  const marketCityUrls = MARKET_CITIES.filter((city) =>
+    isMarketIndexable(city.slug),
+  ).map((city) => sitemapEntry(siteUrl, `/markets/${city.slug}`));
+  const bespokeMarketUrls = BESPOKE_MARKETS.filter((city) =>
+    isMarketIndexable(city.slug),
+  ).map((city) => sitemapEntry(siteUrl, `/markets/${city.slug}`));
   const topicUrls = [
     sitemapEntry(siteUrl, "/blog/topics"),
     ...BLOG_TOPICS.map((topic) =>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
+import { SITE_OVERHAUL_LAST_MODIFIED } from "@/app/sitemap";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { HISTORICAL_TOOL_PATHS } from "@/lib/historical-tool-redirects";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
@@ -112,11 +113,18 @@ describe("sitemap URL uniqueness", () => {
         expect(actual, path).toBe(availablePosts.get(path));
       } else if (path === "/tools/rental-property-spreadsheet") {
         expect(actual).toBe(new Date("2026-07-14").toISOString());
+      } else if (
+        path.startsWith("/vs/") &&
+        actual === new Date("2026-06-07").toISOString()
+      ) {
+        // The June 2026 comparison batch keeps its release date.
       } else {
-        expect(path.startsWith("/vs/"), `Unreviewed lastmod on ${path}`).toBe(
-          true,
+        // Every other URL carries the 2026-09 site-overhaul date: the voice
+        // pass, the page templates, and the product shots changed on that
+        // day (docs/site-overhaul.md Phase 8.5). Never a deploy timestamp.
+        expect(actual, `Unreviewed lastmod on ${path}`).toBe(
+          SITE_OVERHAUL_LAST_MODIFIED.toISOString(),
         );
-        expect(actual).toBe(new Date("2026-06-07").toISOString());
       }
     }
   });

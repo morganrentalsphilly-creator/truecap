@@ -24,6 +24,7 @@ import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -32,7 +33,7 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "free-biggerpockets-calculator-alternatives";
 const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
 const DESCRIPTION =
-  "BiggerPockets' calculators stop after 5 free reports, then Pro is $390/yr. Six genuinely free alternatives for 2026 — and what each free tier really covers.";
+  "BiggerPockets' calculators stop after 5 free reports, then Pro is $390/yr. Six genuinely free alternatives for 2026 — and what each free tier covers.";
 const PUBLISHED_AT = "2026-07-14";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 10;
@@ -554,6 +555,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
+
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />
           </div>

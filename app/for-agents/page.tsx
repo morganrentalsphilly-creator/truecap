@@ -175,7 +175,7 @@ export default async function ForAgentsPage() {
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </TrackedMarketingLink>
             <Link
-              href="/#main"
+              href="/analyze"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
               Analyze a property free
@@ -340,7 +340,7 @@ export default async function ForAgentsPage() {
             </Link>
             , or the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

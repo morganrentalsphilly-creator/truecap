@@ -71,6 +71,23 @@ export default function SampleDecisionMemoPage() {
           </p>
         </header>
 
+        <section aria-labelledby="memo-what" className="mt-8">
+          <h2 id="memo-what" className="text-xs font-extrabold uppercase tracking-widest text-primary">
+            What a decision memo is
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            A decision memo is the written form of an analysis: the answer at
+            asking price, the Offer Ceiling with the targets that produced it,
+            the cash flow after reserves and the DSCR that drove the verdict,
+            the assumptions with their sources, the two inputs most likely to
+            change the outcome, and what to verify before you offer. It is
+            what you hand a partner, a lender, or a client so the numbers and
+            the reasoning travel together. This one is generated from the
+            sample deal by the same engine that runs every analysis, so what
+            you see here is exactly what a real deal produces.
+          </p>
+        </section>
+
         <section aria-labelledby="sample-decision" className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
           <article className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm sm:p-6">
             <h2 id="sample-decision" className="text-xs font-extrabold uppercase tracking-widest text-primary">
@@ -175,7 +192,7 @@ export default function SampleDecisionMemoPage() {
         </section>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href="/#main" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
+          <Link href="/analyze" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
             Analyze a Deal <ArrowRight className="ml-2 size-4" aria-hidden />
           </Link>
           <Link href="/pricing" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 font-bold">

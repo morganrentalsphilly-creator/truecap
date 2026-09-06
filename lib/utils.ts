@@ -30,7 +30,7 @@ export function scrollBehavior(): ScrollBehavior {
  * that costs CTR. Descriptions already within the limit pass through
  * untouched, so this is a no-op for hand-written copy that fits.
  */
-export function truncateMetaDescription(text: string, max = 158): string {
+export function truncateMetaDescription(text: string, max = 155): string {
   const trimmed = text.trim()
   if (trimmed.length <= max) return trimmed
   // Leave room for the ellipsis, then back up to the last full word.

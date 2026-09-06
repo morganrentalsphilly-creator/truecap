@@ -20,6 +20,7 @@ import Link from "next/link";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -33,7 +34,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
-  "DSCR loans primarily underwrite a rental property's coverage instead of using personal DTI as the main ratio. Learn the borrower checks, program variation, costs, and trade-offs.";
+  "DSCR loans underwrite mainly on a rental's coverage ratio, not your personal DTI. Learn the borrower checks, program variation, costs, and trade-offs.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-09-01";
 const READING_TIME_MIN = 10;
@@ -495,6 +496,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

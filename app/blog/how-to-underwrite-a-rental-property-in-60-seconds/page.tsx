@@ -18,6 +18,7 @@ import Link from "next/link";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -26,7 +27,7 @@ import { getSiteUrl } from "@/lib/site-url";
 const SLUG = "how-to-underwrite-a-rental-property-in-60-seconds";
 const TITLE = "How to screen a rental property in 60 seconds";
 const DESCRIPTION =
-  "A fast preliminary rental screen: organize five inputs, review four modeled metrics, and identify what still needs verification before a complete underwrite.";
+  "A fast rental screen: organize five inputs, review four modeled metrics, and see what still needs checking before a full underwrite.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-08-24";
 const READING_TIME_MIN = 9;
@@ -536,6 +537,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

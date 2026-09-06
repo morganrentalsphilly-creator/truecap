@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -21,7 +22,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best free rental property calculator 2026: 5 tools";
 const DESCRIPTION =
-  "A criteria-based 2026 ranking of five free rental-analysis options: TrueCap, DealCheck Starter, Stessa's calculator, spreadsheet templates, and Zillow's mortgage calculator.";
+  "A 2026 ranking of five free rental-analysis tools: TrueCap, DealCheck Starter, Stessa, spreadsheet templates, and Zillow's mortgage calculator.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 9;
@@ -201,7 +202,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -501,6 +502,8 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />
           </div>

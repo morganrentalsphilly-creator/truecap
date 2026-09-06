@@ -17,7 +17,7 @@ const pricingPlansSource = readFileSync(
 
 describe("pricing hero actions", () => {
   it("offers a primary free analysis and a secondary in-page plan jump", () => {
-    expect(pricingSource).toContain('href="/#main"');
+    expect(pricingSource).toContain('href="/analyze"');
     expect(pricingSource).toContain("Analyze a property free");
     expect(pricingSource).toContain('href="#pro"');
     expect(pricingSource).toContain("See Pro plans");
@@ -25,7 +25,7 @@ describe("pricing hero actions", () => {
   });
 
   it("never gates the Free-card analyzer behind account creation", () => {
-    expect(pricingButtonsSource).toContain('href="/#main"');
+    expect(pricingButtonsSource).toContain('href="/analyze"');
     expect(pricingButtonsSource).toContain("Analyze a property free");
     expect(pricingButtonsSource).not.toContain('href="/auth/sign-up"');
   });

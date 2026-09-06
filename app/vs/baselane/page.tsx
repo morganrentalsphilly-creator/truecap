@@ -19,6 +19,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -30,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Baselane vs TrueCap (2026): Banking vs Analysis",
   description:
-    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",
+    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
   keywords: [
     "baselane alternative",
     "baselane vs stessa",
@@ -160,7 +161,7 @@ export default function VsBaselanePage() {
     name: "Baselane vs TrueCap (2026): Banking vs Analysis",
     url: `${siteUrl}/vs/baselane`,
     description:
-      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",
+      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -439,6 +440,8 @@ export default function VsBaselanePage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="baselane" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

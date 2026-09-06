@@ -19,6 +19,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -30,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Crexi vs TrueCap (2026): Commercial vs Rental",
   description:
-    "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes — honest comparison.",
+    "Crexi is the commercial real-estate marketplace and intelligence platform. TrueCap is residential rental underwriting. See which fits your asset class.",
   keywords: [
     "crexi alternative",
     "crexi vs loopnet",
@@ -405,6 +406,8 @@ export default function VsCrexiPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="crexi" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

@@ -18,6 +18,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -31,7 +32,7 @@ const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Cap rate vs cash-on-cash vs DSCR: which matters?";
 const DESCRIPTION =
-  "Three different metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
+  "Three metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = "2026-06-01";
 const READING_TIME_MIN = 8;
@@ -107,8 +108,9 @@ export default function BlogPost() {
     dateModified: MODIFIED_AT,
     author: {
       "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
       name: "Morgan Page",
-      url: siteUrl,
+      url: `${siteUrl}/about`,
     },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
@@ -494,6 +496,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

@@ -90,7 +90,7 @@ describe("public funnel and trust guards", () => {
   });
 
   it("keeps repaired handoffs and removes the floating analysis email prompt", () => {
-    expect(read("app/sample-decision-memo/page.tsx")).toContain('href="/#main"');
+    expect(read("app/sample-decision-memo/page.tsx")).toContain('href="/analyze"');
     expect(read("app/sample-decision-memo/page.tsx")).not.toContain(
       'href="/#calculator"',
     );

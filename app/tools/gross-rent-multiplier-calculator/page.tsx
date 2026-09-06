@@ -15,11 +15,12 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 export const metadata: Metadata = {
   title: "Free GRM Calculator — Gross Rent Multiplier Screen",
   description:
-    "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. Plus a good GRM range.",
+    "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. And a good GRM range.",
   keywords: [
     "grm calculator",
     "gross rent multiplier",
@@ -108,7 +109,7 @@ export default function GrmCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. Plus a good GRM range.",
+      "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. And a good GRM range.",
     url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
     offers: {
       "@type": "Offer",
@@ -307,6 +308,8 @@ export default function GrmCalculatorPage() {
             calculatorName="GRM calculator"
             hook="GRM is a screening tool. TrueCap's free core analyzer adds editable cap rate, cash-on-cash, model DSCR, and cash flow. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
+
+          <RelatedContent kind="tool" slug="gross-rent-multiplier-calculator" title="Gross Rent Multiplier (GRM) Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

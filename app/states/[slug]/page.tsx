@@ -1,22 +1,38 @@
 /**
- * Dynamic state verification page at /states/[slug].
+ * Dynamic state page at /states/[slug].
  *
- * The state registry contains hand-curated tax, legal, insurance, market, and
- * strategy notes that are explicitly classified STALE_REVIEW_REQUIRED. Until
- * each claim has an authoritative state/county dependency and as-of date, this
- * template may use only the record's identity fields (name, abbreviation, and
- * slug). Exact registry facts must not enter visible copy or JSON-LD.
+ * Renders the state record's own starting numbers (lib/states.ts: pitch,
+ * market tier, landlord-tenant lean, typical effective property-tax rate)
+ * plus HUD Fair Market Rent for every market city in the state, linked. The
+ * page is `noindex, follow` unless lib/markets/indexability.ts confirms it
+ * clears STATE_PAGE_MIN_WORDS of real content with at least one HUD city.
+ * The record's median price/rent, eviction timeline, income-tax rate,
+ * pros/cons, strategy list, and insurance note are not rendered.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { MarketDataAsOf } from "@/components/marketing/safe-market-page";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import {
+  NOINDEX_FOLLOW,
+  STATE_PAGE_GUIDANCE,
+  buildStateFacts,
+  describeStateHudCity,
+  getStateBespokeMarkets,
+  getStateDataYear,
+  getStateHudCities,
+  isStateIndexable,
+} from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
+
+const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
 export async function generateStaticParams() {
   return Object.values(STATES).map((state) => ({ slug: state.slug }));
@@ -31,19 +47,21 @@ export async function generateMetadata({
   const state = getStateBySlug(slug);
   if (!state) return { title: "State not found" };
 
-  const title = `${state.name} rental-property verification guide`;
-  const description = `Review the property-specific rent, tax, insurance, legal, condition, expense, and financing evidence needed for a ${state.name} rental screen.`;
+  const title = `${state.name} rental property guide`;
+  const description = `${state.name} starting numbers for a rental screen: market tier, landlord-tenant lean, property tax, and HUD Fair Market Rent by city.`;
 
   return {
     title,
     description,
     keywords: [
       `${state.name.toLowerCase()} rental property analysis`,
-      `${state.name.toLowerCase()} property tax verification`,
-      `${state.name.toLowerCase()} landlord law sources`,
+      `${state.name.toLowerCase()} property tax rate`,
+      `${state.name.toLowerCase()} landlord tenant law`,
       `${state.abbr.toLowerCase()} rental property`,
     ],
     alternates: { canonical: `/states/${state.slug}` },
+    // Thin state pages stay crawlable but unindexed.
+    robots: isStateIndexable(state.slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
       title,
       description,
@@ -54,7 +72,7 @@ export async function generateMetadata({
           url: "/home.jpg",
           width: 1200,
           height: 630,
-          alt: `${state.name} rental-property verification guide`,
+          alt: `${state.name} rental property guide`,
         },
       ],
     },
@@ -73,7 +91,13 @@ export default async function StatePage({
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/states/${state.slug}`;
-  const description = `A source-first checklist for reviewing a specific ${state.name} rental property. This page doesn't publish statewide tax, legal, insurance, return, or strategy estimates.`;
+  const year = getStateDataYear(state.slug);
+  const facts = buildStateFacts(state);
+  const hudCities = getStateHudCities(state.name);
+  const bespoke = getStateBespokeMarkets(state.name);
+  const description = `${state.name} starting numbers for a rental screen: market tier, landlord-tenant lean, property tax, and HUD Fair Market Rent by city.`;
+  const cell =
+    "px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground";
 
   const placeLd = {
     "@context": "https://schema.org",
@@ -90,10 +114,10 @@ export default async function StatePage({
     "@context": "https://schema.org",
     "@type": "WebPage",
     "@id": `${canonicalUrl}#page`,
-    name: `${state.name} rental-property verification guide`,
+    name: `${state.name} rental property guide`,
     description,
     url: canonicalUrl,
-    dateModified: "2026-08-29",
+    dateModified: "2026-09-06",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -122,26 +146,34 @@ export default async function StatePage({
     mainEntity: [
       {
         "@type": "Question",
-        name: `Does this page say whether ${state.name} is a good rental-property market?`,
+        name: `Is ${state.name} a good state for rental property?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No. A state label doesn't establish a property's economics. Review the specific address, asking price, rent, expenses, condition, financing, and the rules that apply.`,
+          text: `${state.pitch} TrueCap lists ${state.name} as a ${state.tier.toLowerCase()} market with ${facts[1].value.toLowerCase()} landlord-tenant law. Whether a specific property works depends on its own price, rent, tax bill, and insurance.`,
         },
       },
       {
         "@type": "Question",
-        name: `What property-tax figure should I use for a ${state.name} property?`,
+        name: `What property-tax rate should I use for a ${state.name} rental?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Use the current parcel bill or a reviewed local effective rate, then check the assessment, exemption, transfer, and appeal rules with state and local sources. TrueCap does not auto-fill property tax; enter your local number.`,
+          text: `TrueCap's ${state.name} default is ${state.propertyTaxRatePct}% of value, a typical effective rate. Replace it with the parcel's current bill from the county assessor and check how the assessment resets after a sale.`,
         },
       },
       {
         "@type": "Question",
-        name: `Does TrueCap summarize ${state.name} landlord law?`,
+        name: `What is the rent benchmark for ${state.name} cities?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No. TrueCap doesn't publish a legal summary for ${state.name}. Check the controlling statute, court rules, agency guidance, and local ordinances with qualified counsel before relying on a legal timeline or classification.`,
+          text:
+            hudCities.length > 0
+              ? `HUD Fair Market Rent, FY${year}: ${hudCities
+                  .map(
+                    (city) =>
+                      `${city.name} ${usd(city.hud.rent2br)} (2BR) / ${usd(city.hud.rent3br)} (3BR)`,
+                  )
+                  .join("; ")}. Each figure is a housing-program benchmark for the county or metro, not a comp for one property.`
+              : `TrueCap has no published HUD rent benchmark for a ${state.name} city yet. Use current comparable leases for the property.`,
         },
       },
     ],
@@ -187,111 +219,151 @@ export default async function StatePage({
         </nav>
 
         <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          {state.abbr} · Source-first state guide
+          {state.abbr} · Rental property guide
         </p>
         <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          {state.name} rental-property verification guide
+          {state.name} rental property guide
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-foreground">
-          A statewide average or label can&apos;t determine a property&apos;s
-          rent, tax, insurance, legal constraints, operating costs, financing,
-          or investment fit. This page shows you what to verify. It doesn&apos;t
-          publish statewide tax rates, eviction timelines, or landlord rankings.
+          {state.pitch}
         </p>
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+          {STATE_PAGE_GUIDANCE.intro(state.name)}
+        </p>
+        <MarketDataAsOf year={year} />
 
-        <section className="mt-10 rounded-2xl border border-border bg-card p-6">
+        <section
+          data-state-facts=""
+          className="mt-10 rounded-2xl border border-border bg-card p-6"
+        >
           <h2 className="text-xl font-extrabold text-foreground">
-            Evidence to collect for a {state.name} property
+            {state.name} at a glance
           </h2>
-          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-foreground">
-            <li>
-              Current comparable leases, the existing lease, and collection
-              history.
-            </li>
-            <li>
-              The parcel bill plus the responsible assessor and taxing
-              jurisdictions.
-            </li>
-            <li>
-              Applicable assessment, exemption, transfer, appeal, and income-tax
-              rules from authoritative sources.
-            </li>
-            <li>
-              Property-specific insurance quotes, covered perils, exclusions,
-              deductibles, and replacement-cost assumptions.
-            </li>
-            <li>
-              Condition, inspections, utilities, HOA or association terms,
-              management scope, and planned work.
-            </li>
-            <li>
-              Written loan terms and the lender&apos;s own income, expense,
-              DSCR, reserve, and approval method.
-            </li>
-            <li>
-              Controlling state statutes, court rules, agency guidance, and
-              local ordinances reviewed with qualified counsel.
-            </li>
+          <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+            {facts.map((fact) => (
+              <div key={fact.label}>
+                <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {fact.label}
+                </dt>
+                <dd className="mt-1 text-lg font-extrabold text-foreground">
+                  {fact.value}
+                </dd>
+                <dd className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {fact.note}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section data-state-hud-cities="" className="mt-10">
+          <h2 className="text-2xl font-extrabold text-foreground">
+            HUD Fair Market Rent by {state.name} city
+          </h2>
+          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+            {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
+          </p>
+          {hudCities.length > 0 ? (
+            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+              <table className="w-full min-w-[24rem] text-sm">
+                <caption className="sr-only">
+                  HUD Fair Market Rent, FY{year}, by {state.name} market city
+                </caption>
+                <thead>
+                  <tr className="border-b border-border bg-muted/50 text-left">
+                    <th scope="col" className={cell}>
+                      City
+                    </th>
+                    <th scope="col" className={`${cell} text-right`}>
+                      2BR / month
+                    </th>
+                    <th scope="col" className={`${cell} text-right`}>
+                      3BR / month
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hudCities.map((city) => (
+                    <tr
+                      key={city.slug}
+                      className="border-b border-border last:border-b-0"
+                    >
+                      <td className="px-4 py-2.5 font-semibold">
+                        <Link
+                          href={`/markets/${city.slug}`}
+                          className="inline-flex min-h-11 items-center text-primary hover:underline"
+                          aria-label={describeStateHudCity(city)}
+                        >
+                          {city.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2.5 text-right text-foreground">
+                        {usd(city.hud.rent2br)}
+                      </td>
+                      <td className="px-4 py-2.5 text-right text-foreground">
+                        {usd(city.hud.rent3br)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              TrueCap has no published HUD rent benchmark for a {state.name}{" "}
+              city yet.
+            </p>
+          )}
+          {bespoke.length > 0 ? (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              More {state.name} city pages:{" "}
+              {bespoke.map((market, index) => (
+                <span key={market.slug}>
+                  {index > 0 ? ", " : ""}
+                  <Link
+                    href={`/markets/${market.slug}`}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    {market.name}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
+          ) : null}
+        </section>
+
+        <section data-state-verify-locally="" className="mt-10">
+          <h2 className="text-2xl font-extrabold text-foreground">
+            Three things to verify locally
+          </h2>
+          <ul className="mt-4 space-y-3">
+            {STATE_PAGE_GUIDANCE.verify.map((item) => (
+              <li
+                key={item.title}
+                className="flex gap-3 text-base leading-relaxed"
+              >
+                <CheckCircle2 className="mt-1 size-4 shrink-0 text-primary" />
+                <span>
+                  <strong className="text-foreground">{item.title}.</strong>{" "}
+                  <span className="text-muted-foreground">{item.body}</span>
+                </span>
+              </li>
+            ))}
           </ul>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
-          <h2 className="text-base font-extrabold text-foreground">
-            What this page doesn&apos;t publish
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-foreground">
-            Property-tax percentages, income-tax rates, eviction timelines,
-            landlord ratings, insurance trends, city rankings, strategy labels,
-            and market narratives are not on this page. A generic source list
-            doesn&apos;t back up state-specific claims, so we don&apos;t publish
-            them until each one has an official source and a fresh review.
-          </p>
-        </section>
-
-        <div className="mt-12">
+        <div className="mt-10">
           <SeoAnalyzerCta
             context={`a ${state.name} property`}
             utmSource="state-page"
-            supportingText={`Enter a supported address and asking price to start from labeled rent and rate benchmarks with editable assumptions. Enter ${state.name} property tax and insurance from local evidence.`}
+            supportingText={STATE_PAGE_GUIDANCE.run(state.name)}
           />
         </div>
 
-        <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-base font-extrabold text-foreground">
-            Review a {state.name} property in three steps
-          </h2>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
-            <li>
-              Collect the property-specific evidence above and record each
-              source and its date.
-            </li>
-            <li>
-              Enter a supported address and asking price in the{" "}
-              <Link
-                href="/#main"
-                className="font-semibold text-primary hover:underline"
-              >
-                TrueCap analyzer
-              </Link>
-              , then replace every generic or area-level starting assumption.
-            </li>
-            <li>
-              Read the{" "}
-              <Link
-                href="/methodology"
-                className="font-semibold text-primary hover:underline"
-              >
-                Methodology
-              </Link>{" "}
-              for how the model works, and get local tax, legal, insurance,
-              condition, and lending advice where you need it.
-            </li>
-          </ol>
-        </section>
-
         <section className="mt-12 border-t border-border pt-6">
           <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Other state verification guides
+            Other state guides
           </p>
           <div className="flex flex-wrap gap-2 text-sm">
             {Object.values(STATES)

@@ -8,19 +8,36 @@ import PhiladelphiaMarketPage from "@/app/markets/philadelphia/page";
 import PhoenixMarketPage from "@/app/markets/phoenix/page";
 import { getCityStrategyCombo } from "@/lib/city-strategy-combos";
 import { getMarketCity } from "@/lib/markets/cities";
-import { getStateBySlug } from "@/lib/states";
+import { HUD_RENTS } from "@/lib/markets/hud-rents";
+import {
+  DEFAULT_DATA_YEAR,
+  buildDataAsOfLine,
+} from "@/lib/markets/indexability";
+import { STATES, getStateBySlug } from "@/lib/states";
 
-describe("stale-review registry rendering boundary", () => {
-  it("renders checked-in HUD context without the city's hand-curated market claims", async () => {
+/**
+ * What each public template may and may not publish from its data record
+ * (docs/site-overhaul.md Phase 8.1–8.2). HUD rent, the sample underwrite,
+ * and the four state fields (pitch, tier, landlord lean, property-tax rate)
+ * are on the page; the hand-authored ranges, narratives, rankings, and
+ * legal timelines still are not.
+ */
+describe("public market and state rendering boundary", () => {
+  it("renders HUD rent and the sample underwrite without the city's hand-authored market claims", async () => {
     const city = getMarketCity("columbus");
     expect(city).not.toBeNull();
+    const hud = HUD_RENTS.columbus;
+    expect(hud).toBeDefined();
 
     const html = renderToStaticMarkup(
       await MarketCityPage({ params: Promise.resolve({ city: "columbus" }) }),
     );
 
-    expect(html).toContain("HUD 2BR area benchmark");
-    expect(html).toContain("intentionally omits unsourced cap-rate");
+    expect(html).toContain(`HUD Fair Market Rent, FY${hud.year}`);
+    expect(html).toContain("Sample underwrite at a stated");
+    expect(html).toContain("Three things to verify locally");
+    expect(html.match(/Data as of \d{4}; verify locally before you offer\./g)).toHaveLength(1);
+    expect(html).toContain(buildDataAsOfLine(hud.year));
     expect(html).not.toContain(city!.blurb);
     expect(html).not.toContain(city!.typicalPrice);
     expect(html).not.toContain(city!.typicalRent);
@@ -30,7 +47,7 @@ describe("stale-review registry rendering boundary", () => {
     }
   });
 
-  it("keeps state tax, law, insurance, strategy, and ranking records out of HTML and JSON-LD", async () => {
+  it("renders the four state fields and keeps eviction, insurance, strategy, median, and ranking records out of HTML and JSON-LD", async () => {
     const state = getStateBySlug("texas");
     expect(state).not.toBeNull();
 
@@ -38,11 +55,31 @@ describe("stale-review registry rendering boundary", () => {
       await StatePage({ params: Promise.resolve({ slug: "texas" }) }),
     );
 
-    expect(html).toMatch(/What this page doesn(?:'|&#x27;|&apos;)t publish/);
-    expect(html).not.toContain(state!.pitch);
-    expect(html).not.toContain(`${state!.propertyTaxRatePct}%`);
+    expect(html).toContain(state!.pitch);
+    expect(html).toContain(`${state!.propertyTaxRatePct}% of value`);
+    expect(html).toContain(state!.tier);
+    expect(html.match(/Data as of \d{4}; verify locally before you offer\./g)).toHaveLength(1);
     expect(html).not.toContain(`${state!.evictionTimelineDays} days`);
+    expect(html).not.toContain(state!.evictionTimelineDays);
     expect(html).not.toContain(state!.insuranceNote);
+    expect(html).not.toContain(state!.medianHomePrice.toLocaleString("en-US"));
+    expect(html).not.toContain(state!.medianRent.toLocaleString("en-US"));
+
+    // The income-tax rate stays off the page too. Texas's is 0, which any
+    // percentage would match, so check a state with a distinct non-zero rate.
+    const taxed = Object.values(STATES).find(
+      (candidate) =>
+        candidate.topStateIncomeTaxPct > 0 &&
+        !`${candidate.propertyTaxRatePct}`.includes(
+          `${candidate.topStateIncomeTaxPct}`,
+        ) &&
+        !candidate.pitch.includes(`${candidate.topStateIncomeTaxPct}%`),
+    )!;
+    const taxedHtml = renderToStaticMarkup(
+      await StatePage({ params: Promise.resolve({ slug: taxed.slug }) }),
+    );
+    expect(taxedHtml).toContain(taxed.pitch);
+    expect(taxedHtml).not.toContain(`${taxed.topStateIncomeTaxPct}%`);
     for (const claim of [
       ...state!.pros,
       ...state!.cons,
@@ -65,7 +102,10 @@ describe("stale-review registry rendering boundary", () => {
       }),
     );
 
-    expect(html).toMatch(/What this page doesn(?:'|&#x27;|&apos;)t publish/);
+    // Cleveland is a bespoke slug with no HUD rent, so the line dates itself
+    // by the default year.
+    expect(html.match(/Data as of \d{4}; verify locally before you offer\./g)).toHaveLength(1);
+    expect(html).toContain(buildDataAsOfLine(DEFAULT_DATA_YEAR));
     expect(html).toContain("this link does not preload market ranges");
     expect(html).not.toContain(combo!.pitch);
     expect(html).not.toContain(combo!.whyHereWhyNow);
@@ -87,7 +127,8 @@ describe("stale-review registry rendering boundary", () => {
       renderToStaticMarkup(<PhoenixMarketPage />),
     ].join("\n");
 
-    expect(html.match(/What this page doesn(?:'|&#x27;|&apos;)t publish/g)).toHaveLength(3);
+    expect(html.match(/Data as of \d{4}; verify locally before you offer\./g)).toHaveLength(3);
+    expect(html).not.toMatch(/What this page doesn(?:'|&#x27;|&apos;)t publish/);
     expect(html).not.toMatch(
       /3-5%|8-11%|1M\+ residents|500k\+ residents|top 5 US markets|MLS-derived medians|active TrueCap user analyses|Tax Foundation \(property tax\)/i,
     );

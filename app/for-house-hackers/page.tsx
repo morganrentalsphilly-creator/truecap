@@ -222,7 +222,7 @@ export default function ForHouseHackersPage() {
             — your effective housing cost after tenant rent, in seconds.
             Once you&apos;ve picked a property, ground the
             numbers in the{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
             — cap rate and DSCR for the rented portion — then run the year-1 screen

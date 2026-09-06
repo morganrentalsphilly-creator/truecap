@@ -13,6 +13,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -23,7 +24,7 @@ const TITLE = "Schedule E for rental property: a line-by-line walkthrough";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Schedule E for rental property, line by line";
 const DESCRIPTION =
-  "A general Schedule E walkthrough with a hypothetical rental example, recordkeeping prompts, and questions to verify against current IRS guidance and your tax return.";
+  "A Schedule E walkthrough with a hypothetical rental example, recordkeeping prompts, and questions to check against current IRS guidance and your return.";
 const PUBLISHED_AT = "2026-06-12";
 const MODIFIED_AT = "2026-08-29";
 const READING_TIME = 10;
@@ -88,7 +89,7 @@ export default function ScheduleEPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -375,7 +376,7 @@ export default function ScheduleEPost() {
               equals the $3,703 modeled loss. Sanity-check the pre-tax operating
               side in the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -524,6 +525,7 @@ export default function ScheduleEPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

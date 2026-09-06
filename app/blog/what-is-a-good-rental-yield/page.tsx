@@ -2,13 +2,14 @@ import {
   buildSourceFirstArticleMetadata,
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 const ARTICLE = {
   slug: "what-is-a-good-rental-yield",
   title: "What is a good rental yield? A consistent comparison method",
   seoTitle: "Rental yield: a consistent comparison method",
   description:
-    "Rental yield depends on the formula and evidence behind it. Compare gross and net yield with consistent property-specific inputs instead of a universal market threshold.",
+    "Rental yield depends on the formula and evidence behind it. Compare gross and net yield with consistent, property-specific inputs, not a market threshold.",
   publishedAt: "2026-05-24",
   modifiedAt: "2026-08-29",
   faqs: [
@@ -76,6 +77,8 @@ export default function GoodRentalYieldPost() {
         model—not an appraisal, lender approval, forecast, or investment
         recommendation.
       </p>
+
+      <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />
     </SourceFirstArticle>
   );
 }

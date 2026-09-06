@@ -24,11 +24,25 @@ import {
   type GlossaryEntry,
 } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
+import { RelatedContent } from "@/components/marketing/related-content";
+import type { GlossaryCategory } from "@/lib/glossary";
 import { truncateMetaDescription } from "@/lib/utils";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
   return Object.values(GLOSSARY).map((entry) => ({ slug: entry.slug }));
+}
+
+/**
+ * Longest tail that keeps `<title>` within 60 characters once the layout's
+ * " | TrueCap" suffix is appended (docs/site-overhaul.md Phase 8).
+ */
+const TITLE_SUFFIX_LENGTH = " | TrueCap".length;
+function glossaryTitle(term: string): string {
+  for (const tail of [" — definition, formula, example", " — definition and formula", " — definition", ""]) {
+    if (term.length + tail.length + TITLE_SUFFIX_LENGTH <= 60) return `${term}${tail}`;
+  }
+  return term;
 }
 
 export async function generateMetadata({
@@ -45,7 +59,7 @@ export async function generateMetadata({
     ? `${entry.definition} ${entry.benchmark}`
     : entry.definition;
   return {
-    title: `${entry.term} — definition, formula, example`,
+    title: glossaryTitle(entry.term),
     description: truncateMetaDescription(description),
     keywords: [
       entry.term.toLowerCase(),
@@ -77,6 +91,27 @@ export async function generateMetadata({
     },
   };
 }
+
+
+/**
+ * How each category of term is used by the analyzer — product description,
+ * the same for every entry in the category, so a reader learns where to
+ * look for the number they just read about.
+ */
+const IN_PRODUCT_BY_CATEGORY: Record<GlossaryCategory, string> = {
+  metric:
+    "The analyzer computes this metric on every run from the assumptions you see and can edit, shows it in the results view beside cash flow after reserves and DSCR, and uses your targets for it in Buy Box fit and in the Offer Ceiling — the highest price that still meets those targets. It appears in the written decision memo and the PDF with the same value and the same inputs.",
+  financing:
+    "Financing inputs sit in the analyzer's financing section: the rate can start from FRED's national 30-year benchmark and every term is editable. They drive the monthly payment, DSCR, and cash flow after reserves, so a change here moves the verdict and the Offer Ceiling; the results view names the financing assumptions most likely to change the decision.",
+  expense:
+    "Operating expenses are line items in the analyzer's expense section, each labeled with its source — a HUD or FRED benchmark, a TrueCap default you can replace, or your own number. Property tax is always your local figure. Together they produce NOI and cash flow after reserves, and the results view shows how much each one moves the decision.",
+  projection:
+    "Projection assumptions feed the 10-year view: rent and expense growth, appreciation, and the exit costs used in the sale scenarios. They do not change the first-year verdict; they change what the deal looks like over time, which is why they are kept editable and labeled separately from the current-year inputs.",
+  strategy:
+    "A strategy sets which inputs the analyzer asks for and which outputs lead the results view. The core buy-and-hold flow is what every free analysis runs; specialist flows reuse the same engine and the same labeled assumptions, so a number that appears in two strategies was computed the same way in both.",
+  fundamental:
+    "Property fundamentals are the facts you enter or confirm about the building itself — price, units, bedrooms, square footage — and the analyzer keeps them separate from assumptions. They decide which benchmarks apply (a 3-bedroom rent benchmark, for example) and appear at the top of every results view and memo so the reader knows exactly what was analyzed.",
+};
 
 export default async function GlossaryTermPage({
   params,
@@ -130,6 +165,12 @@ export default async function GlossaryTermPage({
     faqItems.push({
       q: `Why does ${entry.term} matter for rental property investing?`,
       a: entry.whyItMatters,
+    });
+  }
+  if (entry.howToCheck) {
+    faqItems.push({
+      q: `How do I check ${entry.term} before I rely on it?`,
+      a: entry.howToCheck,
     });
   }
   const faqLd = {
@@ -259,6 +300,18 @@ export default async function GlossaryTermPage({
             </section>
           ) : null}
 
+          {/* How to check it (Phase 8): the verification step for the number. */}
+          {entry.howToCheck ? (
+            <section className="mt-10" data-glossary-how-to-check>
+              <h2 className="text-xl font-extrabold text-foreground mb-3">
+                How to check {entry.term} before you rely on it
+              </h2>
+              <p className="text-foreground leading-relaxed">
+                {entry.howToCheck}
+              </p>
+            </section>
+          ) : null}
+
           {/* Related terms */}
           {relatedEntries.length > 0 ? (
             <section className="mt-10">
@@ -301,6 +354,17 @@ export default async function GlossaryTermPage({
               ← Back to full glossary
             </Link>
           </div>
+          {/* Where the term shows up in the product (true for every entry in
+              its category) + tag-driven related links (Phase 8.4). */}
+          <section className="mt-10" aria-labelledby="in-truecap">
+            <h2 id="in-truecap" className="text-xl font-extrabold text-foreground mb-3">
+              Where {entry.term} shows up in TrueCap
+            </h2>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              {IN_PRODUCT_BY_CATEGORY[entry.category]}
+            </p>
+          </section>
+          <RelatedContent kind="glossary" slug={entry.slug} title={entry.term} className="mt-10" />
         </article>
       </main>
 

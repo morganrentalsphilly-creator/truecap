@@ -22,6 +22,7 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -33,7 +34,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "BiggerPockets vs TrueCap for House Hacking (2026)",
   description:
-    "Both calculators run house-hack deals. Which one models owner-occupant unit usage, FHA financing, and 'effective rent saved' more cleanly? Honest house-hack-specific comparison.",
+    "Both calculators run house-hack deals. See which one models owner-occupant unit usage, FHA financing, and effective rent saved more cleanly.",
   keywords: [
     "biggerpockets house hacking",
     "house hacking calculator",
@@ -423,7 +424,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             walks through counting only the rental units&apos; income. To
             pressure-test the numbers on your own deal, our{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -468,6 +469,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="biggerpockets-for-house-hacking" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

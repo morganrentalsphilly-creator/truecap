@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -30,7 +31,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Return on equity (ROE) on a rental property";
 const DESCRIPTION =
-  "Return on equity measures what the equity trapped in a rental earns today — not the cash you put in. The formula, a 10-year decay example, and the refi test.";
+  "Return on equity is what the equity trapped in a rental earns today, not the cash you put in. The formula, a 10-year decay example, and the refi test.";
 const PUBLISHED_AT = "2026-07-01";
 const MODIFIED_AT = "2026-07-01";
 const READING_TIME = 11;
@@ -96,7 +97,7 @@ export default function ReturnOnEquityPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -258,7 +259,7 @@ export default function ReturnOnEquityPost() {
               lands at about $16,100 — a 6.4% cap rate and a 1.08 DSCR. Cash flow
               is thin: roughly $1,130 a year, about $94 a month, for a first-year{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -517,6 +518,7 @@ export default function ReturnOnEquityPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

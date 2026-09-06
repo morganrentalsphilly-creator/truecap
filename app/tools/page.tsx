@@ -92,6 +92,25 @@ export default function ToolsLandingPage() {
           </p>
         </header>
 
+        <section aria-labelledby="tools-how" className="mb-9 rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <h2 id="tools-how" className="text-lg font-extrabold text-foreground">
+            How these fit the full analysis
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Each calculator answers one question with one formula: is the rent
+            in range for the price, what does the loan cost, what does a rule
+            of thumb say before you spend an hour on a listing. They are
+            deliberately narrow. When you want the whole picture, the analyzer
+            runs every one of these numbers together on the same assumptions
+            &mdash; cash flow after reserves, DSCR, cap rate, cash-on-cash
+            return, Buy Box fit, and the Offer Ceiling &mdash; and shows which
+            inputs move the decision most. Several calculators can hand their
+            values straight into it, so nothing you typed here is typed twice.
+            Every formula is the same one the analyzer uses and is published on
+            the methodology page.
+          </p>
+        </section>
+
         {/* Grouped by job (registry categories) so investors can find the
             calculator for the question they're answering: screen a deal →
             finance it → model income/expenses → check returns → set an offer. */}
