@@ -174,7 +174,7 @@ describe("canonical decision output parity across safe adapters", () => {
       synthetic: true,
       targetProfile: {
         id: "truecap-synthetic-sample-target",
-        name: "Synthetic sample targets",
+        name: "Sample targets",
         version: "1.0",
         source: "selected-targets",
       },
@@ -188,7 +188,7 @@ describe("canonical decision output parity across safe adapters", () => {
     expect(targetContext).toEqual({
       contractVersion: DECISION_CONTRACT_VERSION,
       profileId: "truecap-synthetic-sample-target",
-      profileName: "Synthetic sample targets",
+      profileName: "Sample targets",
       profileVersion: "1.0",
       rulesSnapshotVersion:
         "rules-v1:%7B%22monthlyCashFlow%22%3A750%2C%22dscr%22%3A1.25%7D",
@@ -199,7 +199,7 @@ describe("canonical decision output parity across safe adapters", () => {
       rulesLabel: "cash flow ≥ $750/mo · DSCR ≥ 1.25",
     });
     expect(offerCeilingHelperCopy(targetContext)).toBe(
-      "Highest modeled price that still meets Synthetic sample targets under the assumptions shown.",
+      "The highest price that still meets Sample targets under the assumptions shown.",
     );
     expect(sample.dealScore).toEqual(directScore);
     expect(sample.maxOffer).toEqual(directCeiling);

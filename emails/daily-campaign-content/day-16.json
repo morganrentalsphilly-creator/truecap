@@ -9,7 +9,7 @@
     "For illustration only, applying 0.5% versus 2.5% to a $300,000 value produces $1,500 versus $7,500 per year. That arithmetic shows why the input matters; it is not a forecast or a claim about any named state.",
     "A transfer can affect assessed value or exemptions in some jurisdictions, but the timing and method vary. Do not assume the seller's bill will continue, and do not assume every assessment resets to purchase price.",
     "Review the current tax bill, assessor record, taxing jurisdictions, exemptions, and any transfer or reassessment rules with an authoritative local source. Model uncertain scenarios separately.",
-    "TrueCap keeps property tax as a manual local input. Enter the current parcel bill or a reviewed effective rate, then model any reassessment or appeal scenario separately. A blank field uses a disclosed generic preliminary fallback, not a state or county estimate."
+    "TrueCap keeps property tax as a manual local input. Enter the current parcel bill or a reviewed effective rate, then model any reassessment or appeal scenario separately. A blank field uses a disclosed generic default to replace with your local number, not a state or county estimate."
   ],
   "cta_text": "Check tax assumptions",
   "cta_url": "https://usetruecap.com/",

@@ -187,7 +187,7 @@ describe("nextActionFromVerdict", () => {
     it("no stage → byte-identical to today's output (backward compat snapshot)", () => {
       expect(nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400 })).toEqual({
         label: "Verify material assumptions",
-        reason: "the Screening Index is positive, but it does not record a decision",
+        reason: "the Deal score is positive, but it does not record a decision",
         tone: "ready",
       });
       expect(nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100 })).toEqual({

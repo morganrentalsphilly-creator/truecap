@@ -85,7 +85,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's actually in the spreadsheet?",
-    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for selected-rule fit.",
+    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for Buy Box fit.",
   },
   {
     q: "Why do NOI and DSCR exclude the CapEx reserve?",
@@ -97,7 +97,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Spreadsheet or the TrueCap analyzer — which should I use?",
-    a: "Use the spreadsheet when you want full control of every cell or need to work offline. Use the analyzer when you want speed: type an address and it pre-fills editable, labeled screening benchmarks, then layers on PMI modeling, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, selected-rule fit, and a secondary Screening Index. Neither output is lender approval or investment advice.",
+    a: "Use the spreadsheet when you want full control of every cell or need to work offline. Use the analyzer when you want speed: type an address and it pre-fills editable, labeled screening benchmarks, then layers on PMI modeling, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, Buy Box fit, and a Deal score.",
   },
   {
     q: "Can I share or modify the file?",
@@ -286,7 +286,7 @@ export default function RentalPropertySpreadsheetPage() {
               Plain-English definitions and &ldquo;what&apos;s a good
               number&rdquo; benchmarks for every metric in the workbook — cap
               rate, cash-on-cash, DSCR, NOI, the 1% rule, and each expense
-              reserve — plus the exact bands TrueCap&apos;s selected-rule
+              reserve — plus the exact bands TrueCap&apos;s Buy Box
               classifier uses to group modeled results as Strong, Solid, Mixed,
               Marginal, or Negative. It&apos;s the tab to hand someone who asks
               &ldquo;wait, what&apos;s DSCR?&rdquo;
@@ -395,7 +395,7 @@ export default function RentalPropertySpreadsheetPage() {
               spreadsheet makes painful — PMI drop-off modeling, 10-year
               projections with principal paydown and appreciation, downside
               sensitivity, Offer Ceiling, side-by-side deal comparison, and
-              selected-rule fit and a secondary Screening Index. It&apos;s free
+              Buy Box fit and a Deal score. It&apos;s free
               to start, and because the conventions match, your spreadsheet
               numbers carry over exactly. For the longer version of this
               comparison, see{" "}
@@ -458,7 +458,7 @@ export default function RentalPropertySpreadsheetPage() {
               can pre-fill editable rent and rate benchmarks, keeps property tax
               as a manual local input, runs the same math, and adds PMI
               modeling, 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, and a secondary Screening Index.
+              Offer Ceiling, and a Deal score.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -466,7 +466,7 @@ export default function RentalPropertySpreadsheetPage() {
                 "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "10-year projection with rent + expense growth (Pro)",
                 "Downside sensitivity and Offer Ceiling (Pro)",
-                "Screening Index with a factor breakdown for triage",
+                "Deal score (0–100) with a factor breakdown",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -491,7 +491,7 @@ export default function RentalPropertySpreadsheetPage() {
 
           <ToolsConversionCta
             calculatorName="Rental property spreadsheet"
-            hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, released projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+            hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

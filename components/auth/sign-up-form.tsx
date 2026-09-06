@@ -183,7 +183,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           id="evaluation-summary-title"
           className="mt-1 text-base font-bold text-foreground"
         >
-          Your {PRODUCT_EVALUATION_DAYS}-day product evaluation
+          Your {PRODUCT_EVALUATION_DAYS}-day free trial
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           Complete three Pro deal analyses and one full comparison.{" "}

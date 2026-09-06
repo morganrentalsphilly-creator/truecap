@@ -183,7 +183,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             >
               <option value="gap">Gap to ceiling</option>
               <option value="maxOffer">Offer Ceiling</option>
-              <option value="score">Screening Index</option>
+              <option value="score">Deal score</option>
               <option value="address">Property</option>
             </select>
           </label>
@@ -299,7 +299,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   </div>
                   <div className="rounded-lg border border-border p-3">
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Screening Index
+                      Deal score
                     </dt>
                     <dd className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
                       {deal.score ?? "—"}
@@ -326,7 +326,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
       <div data-deal-layout="table" className="hidden overflow-x-auto border-t border-border lg:block" tabIndex={0}>
         <table className="w-full min-w-[720px] text-sm">
           <caption className="sr-only">
-            Your saved deals with Offer Ceiling, asking price, the gap between them, and a secondary Screening Index that is not investment advice
+            Your saved deals with Offer Ceiling, asking price, the gap between them, and a Deal score
           </caption>
           <thead className="bg-muted/30">
             <tr>
@@ -339,7 +339,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
               <th scope="col" className="px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Screening result
               </th>
-              <SortableTh label="Screening Index" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
+              <SortableTh label="Deal score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
             </tr>
           </thead>
           <tbody>
@@ -453,10 +453,10 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           therefore explain the gap without pretending a mixed table shares
           one target basis. */}
       <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground sm:px-5">
-        Gap is the asking price minus the Offer Ceiling. A positive gap means the
-        asking price is above the highest modeled price that still meets the criteria
-        shown for that deal under its assumptions. The Screening Index is a secondary heuristic.
-        Neither output is a recommended offer, appraisal, or investment advice.
+        Gap is the asking price minus the Offer Ceiling, the highest price that
+        still meets the targets shown for that deal. A positive gap means the
+        asking price is above your ceiling. Deal score is a heuristic summary of
+        the modeled numbers, 0–100.
       </p>
     </section>
   );

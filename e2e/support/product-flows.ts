@@ -44,7 +44,7 @@ export async function openSampleDecision(page: Page): Promise<void> {
 
   const sampleButton = page
     .getByRole("button", {
-      name: /view a sample decision|see a sample deal|try a synthetic sample rental/i,
+      name: /view a sample decision|see a sample deal|try a sample rental/i,
     })
     .first();
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });

@@ -390,3 +390,30 @@ Pending the first scheduled production run (see Phase 10).
 4. **`/analyze` is static (ISR) and signed-in routing reuses the `/home-authed` cookie hint** rather than making `/analyze` dynamic. That keeps the second hop edge-cached, which Phase 7's `/analyze` LCP budget needs, and adds no auth logic to `proxy.ts` (it remains a cache hint; `/home-authed` verifies the session).
 5. **A signed-in `/analyze?address=…` carries the address to `/dashboard/new`** (bounded to 200 chars, never a URL); everything else in the query is dropped, matching the existing allow-list posture.
 6. **Homepage FAQ/JSON-LD untouched in this phase** — it is Phase 3's item 3.
+
+## Phase 3 — Voice: from anxious to confident (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| One `<Disclaimer />` ("TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. The math is published in our Methodology."). Mounted once per marketing page through the site footer, once at the bottom of the results view, once on the shared read-only view, once on the saved-deal workspace. `/analyze` turns the footer copy off so a page with results shows exactly one. | `components/marketing/disclaimer.tsx`, `site-footer.tsx` (`disclaimer` prop), `components/investcalc/analysis-dashboard.tsx`, `read-only-analysis-view.tsx`, `app/dashboard/saved-analyses/[id]/page.tsx` |
+| `docs/voice.md` — the rules and the term map. | `docs/voice.md` |
+| Vocabulary pass over 166 customer-facing files plus the active email content (30-day drip, lifecycle) and the retired newsletter JSON (still scanned by a guard): product evaluation → free trial; selected-rule fit / selected rules → Buy Box fit / your targets; Synthetic sample targets → sample targets; target-dependent / target-backed → Offer Ceiling (defined once per page); Deal Doctor → Buy Box; Screening Index → Deal score (0–100) with a one-line "heuristic summary of the modeled numbers" tooltip where a help string already existed; "Does not meet selected rules at asking" → "Doesn't meet your targets at asking"; hero sample card states the dollar gap; "preliminary fallback" → "default — replace with your local number"; released / unreleased / registry / hand-curated / checked-in / as-of removed from copy; per-element hedges deleted. | `app/**`, `components/**`, `lib/**` (rendered strings only), `emails/**` |
+| Homepage FAQ: removed "Why are some advanced strategy modules unavailable?" and "Why does Pro cost more than other rental calculators?"; the remaining eight answers rewritten in the voice; FAQPage JSON-LD is generated from the same array so it stays in sync. `/pricing` gains "What does Pro add?" and "How does the free trial work?". | `components/marketing/landing-sections.tsx`, `app/pricing/page.tsx` |
+| Hero copy: headline kept; subhead "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable."; under the CTA "Free. No account. Your first full decision is included." Sample card: "Asking price is $X above the ceiling" / "The highest price that still clears these targets." | `components/marketing/marketing-hero.tsx` |
+| Sample memo and results view carry the same rules; "Best next step" and "Fastest paths to meet your criteria" kept verbatim. | `components/investcalc/*`, `app/sample-decision-memo/page.tsx` |
+| `llms.txt`, `llms-full.txt`, default title/description and OG descriptions regenerated in the new voice (they are generated from `lib/product-facts.ts`, which was rewritten). | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts`, `app/layout.tsx`, `lib/product-facts.ts` |
+
+### Decisions made in the founder's absence (Phase 3)
+
+1. **The vocabulary pass touched rendered strings only.** Identifiers, keys, analytics event names, DOM ids (`screening-index`), fixture addresses (`TrueCap Synthetic Sample, …` is matched programmatically) and comments were left alone. Renaming them would have changed behaviour or analytics continuity for no customer benefit.
+2. **`metadata.user_id`-style facts stay; only tone changed.** Every number, threshold, price and claim is unchanged; several answers are shorter.
+3. **Emails keep one disclaimer sentence** (the day-0 lead-magnet email) rewritten in the voice, because emails have no page-level `<Disclaimer />`.
+4. **The retired newsletter JSON (`emails/content/`) was term-mapped too**, only because a repo guard scans all of `emails/`; nothing is sent from it.
+5. **Guard tests that pinned the old copy were re-pinned to the new copy** in the same files; `customer-facing-decision-vocabulary.test.ts` now forbids "Screening Index" instead of "deal score". No behavioural test was weakened.
+6. **"Screening only" / "Evidence readiness" feature names and HUD-FMR source-fact sentences on the rent-estimate comparison pages stayed**: they are feature names or factual statements about the data, not model hedges.
+7. **`app/terms/page.tsx` keeps "Product evaluation" as a heading and one "preliminary fallback" sentence** — legal language describing the offer as it was written; the terms page is not marketing copy and the brief exempts legal pages from tone edits. Everything else on the site says "free trial".
+8. **The `/walk[- ]away price/` guard stays.** `customer-facing-decision-vocabulary.test.ts` forbids that phrase inside `app/`, `components/` and `emails/`; the hero headline lives in `lib/marketing-offer-config.ts` (config, not a customer surface) so the mandated headline and the guard coexist.
+9. **Vocabulary check result**: `rg -i "synthetic sample|selected-rule|product evaluation|preliminary fallback|unreleased|hand-curated"` over `app/`, `components/`, `lib/`, `emails/` leaves only the two legal-page hits above, one JSX comment, and code identifiers (`unreleasedUnderwritingCalculatorSet`).
+

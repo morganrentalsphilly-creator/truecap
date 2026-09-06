@@ -80,7 +80,7 @@ export default async function CityStrategyPage({
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${combo.citySlug}/${combo.strategy}`;
-  const description = `Review property-specific evidence for a ${combo.strategyLabel} scenario in ${combo.cityName}. No hand-curated market range or neighborhood recommendation is published from the stale-review registry.`;
+  const description = `Review property-specific evidence for a ${combo.strategyLabel} scenario in ${combo.cityName}. TrueCap doesn't publish a market range or neighborhood recommendation for this city.`;
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
@@ -127,7 +127,7 @@ export default async function CityStrategyPage({
         name: `Does this page recommend ${combo.strategyLabel} in ${combo.cityName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No. The page preserves a strategy-specific verification workflow but does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
+          text: `No. This page gives you a strategy-specific verification checklist. It does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
         },
       },
       {
@@ -195,8 +195,8 @@ export default async function CityStrategyPage({
         <p className="mt-5 text-lg leading-relaxed text-foreground">
           A city-and-strategy label does not establish a property&apos;s price,
           rent, cap rate, neighborhood fit, legal eligibility, financing, or
-          outcome. This page keeps the review path public while hand-curated
-          registry claims remain hidden pending authoritative dependencies.
+          outcome. This page shows you what to verify.{" "}
+          TrueCap does not publish a market range or neighborhood pick for this city.
         </p>
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
@@ -230,13 +230,13 @@ export default async function CityStrategyPage({
 
         <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
           <h2 className="text-base font-extrabold text-foreground">
-            Stale-review boundary
+            What this page doesn&apos;t publish
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground">
-            The page intentionally omits hand-authored purchase-price, rent,
-            cap-rate, neighborhood, timing, legal, and strategy-fit statements.
-            Calling a range illustrative does not make an unsourced current
-            market claim publication-ready.
+            This page does not publish purchase-price, rent, cap-rate,
+            neighborhood, timing, legal, or strategy-fit figures for{" "}
+            {combo.cityName}. A range labeled &quot;illustrative&quot; is still
+            an unsourced market claim, so we leave it out.
           </p>
         </section>
 
@@ -245,11 +245,11 @@ export default async function CityStrategyPage({
             Start a {combo.cityName} {combo.strategyLabel} screen
           </h2>
           <p className="mb-5 mt-2 text-sm opacity-90 sm:text-base">
-            The handoff carries {combo.cityName}, {combo.state} and the closest
-            released analyzer strategy. Enter a supported property address and
-            asking price, then review labeled rent and rate benchmarks plus
-            editable assumptions. A 10-year planning view requires entitled
-            access; this link does not preload market ranges.
+            This link opens the analyzer with {combo.cityName}, {combo.state}{" "}
+            and the closest matching strategy. Enter a supported property
+            address and asking price, then review the labeled rent and rate
+            benchmarks and edit any assumption. The 10-year projection is a Pro
+            feature; this link does not preload market ranges.
           </p>
           <AnalyzerHandoffLink
             handoffHref={`${buildAnalyzerHandoffUrl(

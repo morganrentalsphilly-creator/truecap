@@ -67,10 +67,9 @@ const SEQUENCE: Array<{
       screen to a documented decision with independent verification:</p>
       <p><a href="${siteUrlHtml}${RESOURCE_PATH}"><strong>Read the First Offer Playbook</strong></a></p>
       <p>The playbook covers Buy Box criteria, input review, sensitivity, due
-      diligence, and adviser questions. It is not an appraisal, lender approval,
-      recommended offer, investment recommendation, or substitute for local
-      tax and legal advice.</p>
-      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds a target-dependent Offer Ceiling →</a></p>
+      diligence, and adviser questions. It's a model, not an appraisal, a
+      lender decision, or investment advice.</p>
+      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds your Offer Ceiling →</a></p>
     `,
   },
   {
@@ -87,13 +86,13 @@ const SEQUENCE: Array<{
   },
   {
     delayDays: 5,
-    subject: "How the target-dependent Offer Ceiling works",
+    subject: "How the Offer Ceiling works",
     build: ({ siteUrlHtml }) => `
-      <p>The Offer Ceiling is the highest modeled purchase price that still
-      meets a named target profile under the assumptions shown.</p>
-      <p>TrueCap Pro computes this target-dependent boundary on compatible
-      analyses, alongside the downside stress test, Buy Box rule fit, and a
-      report designed for review with advisers or a lender. It is not a recommended offer.</p>
+      <p>The Offer Ceiling is the highest price that still meets your targets
+      under the assumptions shown.</p>
+      <p>TrueCap Pro calculates it on compatible analyses, alongside the
+      downside stress test, Buy Box fit, and a report built for review with
+      advisers or a lender.</p>
       <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=mip-day5"><strong>See Pro plans</strong></a></p>
     `,
   },

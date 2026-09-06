@@ -102,10 +102,10 @@ export default function MarketsIndexPage() {
           Rental property markets
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          Browse {ALL.length}+ city guides that separate checked-in public
-          context from property-specific evidence. Unsourced cap-rate, price,
-          tax, neighborhood, and investment verdicts are not published from the
-          hand-curated registries.
+          Browse {ALL.length}+ city guides. Each one separates public context,
+          like HUD rent benchmarks, from the property-specific evidence you
+          still need to verify. TrueCap doesn&apos;t publish city-level cap
+          rates, prices, taxes, neighborhood picks, or investment verdicts.
         </p>
 
         <section className="mt-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
@@ -113,10 +113,9 @@ export default function MarketsIndexPage() {
             Already have an address?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5">
-            Skip the list: enter a supported address and asking price, review
-            labeled starting assumptions, and calculate a preliminary cap rate,
-            cash flow, and DSCR. The result is not an appraisal, lender
-            approval, or investment recommendation.
+            Skip the list. Enter a supported address and asking price, review
+            the labeled starting assumptions, and get cap rate, cash flow, and
+            DSCR. Every assumption is editable.
           </p>
           <Link
             href="/"

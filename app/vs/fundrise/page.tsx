@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Ownership model", truecap: "Direct ownership of whole property", fundrise: "Shares in diversified REIT funds", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", fundrise: "Not applicable (no individual property)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — per-property rent + expense + appreciation", fundrise: "Fund-level forward returns (historical 8-12%)", winner: "tie" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", fundrise: "Not applicable", winner: "truecap" },
+  { feature: "Deal score (0–100)", truecap: "Free — 0–100 score with factor breakdown", fundrise: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k)", fundrise: "$10 (Starter), $1k+ for higher tiers", winner: "fundrise" },
   { feature: "Time commitment", truecap: "Active — you source, underwrite, close, manage (or hire)", fundrise: "Passive — Fundrise allocates capital", winner: "fundrise" },
   { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Limited — quarterly redemption windows with potential gates", winner: "fundrise" },

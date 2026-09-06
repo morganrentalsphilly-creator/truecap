@@ -94,7 +94,7 @@ describe("specialist model release wiring", () => {
         "Steady-state rental analysis — use after renovation is complete.",
       );
       expect(page).toMatch(
-        /integrated .+ (?:is not currently released|models are not currently released)/,
+        /integrated .+ (?:isn't offered right now|aren't offered right now)/,
       );
       expect(page).not.toMatch(/strategy=(?:brrrr|fix-flip)/);
       expect(page).not.toContain("/tools/brrrr-calculator");

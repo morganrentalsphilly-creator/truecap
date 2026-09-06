@@ -3,7 +3,7 @@
   "preheader": "A plain reminder to check the date and amount Stripe showed at checkout.",
   "headline": "Check your subscription's billing date before the legacy trial ends.",
   "body": [
-    "This reminder applies only to a legacy Stripe trial attached to an earlier subscription checkout. It is separate from TrueCap's current no-card product evaluation, which does not auto-renew or schedule a charge.",
+    "This reminder applies only to a legacy Stripe trial attached to an earlier subscription checkout. It is separate from TrueCap's current no-card free trial, which does not auto-renew or schedule a charge.",
     "For the exact first-billing date and amount, use the subscription details Stripe showed at checkout or open billing from your profile. If you do not want the legacy subscription to continue, cancel it before that displayed date.",
     "Either way, the deals you've saved stay in your account — Free keeps them readable even if you downgrade later."
   ],

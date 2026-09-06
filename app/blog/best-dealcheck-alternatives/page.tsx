@@ -92,7 +92,7 @@ const TOOLS: Tool[] = [
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
       "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
-      "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
+      "Buy Box fit with each metric benchmarked inline, plus a Deal score",
       "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
     ],
     tradeoffs: [
@@ -134,7 +134,7 @@ const TOOLS: Tool[] = [
       "Accounting and landlord operations after acquisition",
     ],
     tradeoffs: [
-      "Broader operations suite rather than a narrowly target-backed decision workflow",
+      "Broader operations suite rather than a narrow decision workflow built around your targets",
       "The official sources reviewed do not describe a target-derived Offer Ceiling",
       "Schedule E and other reporting features are plan-dependent",
     ],

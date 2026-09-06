@@ -271,7 +271,7 @@ export default function ForBuyAndHoldPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100
-            Screening Index, and read-only share links for a first-pass screen.
+            Deal score, and read-only share links for a first-pass screen.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, saved-deal comparison, PDF exports, and co-branded
             share links.

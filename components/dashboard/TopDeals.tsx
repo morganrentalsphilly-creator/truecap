@@ -76,7 +76,7 @@ const scoreRingStrokeByRisk: Record<string, string> = {
 };
 
 const sortOptions = [
-  { id: "score", label: "Screening Index" },
+  { id: "score", label: "Deal score" },
   { id: "roi", label: "ROI" },
   { id: "cashFlow", label: "CF" },
   // Buy-box fit (PV-6) — the option only renders when ≥1 deal actually
@@ -164,7 +164,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
         <div>
           <h3 className="font-display text-lg font-semibold">Deal Screening List</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Sort saved deals by secondary screening metrics; these are not investment advice.
+            Sort your saved deals by Deal score, ROI, or cash flow.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -243,7 +243,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       users the score + risk as text. */}
                   <span className="sr-only">
                     {d.score != null
-                      ? `Secondary Screening Index ${d.score} out of 100; not investment advice`
+                      ? `Deal score ${d.score} out of 100`
                       : "Not screened"}
                     {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
                   </span>
@@ -321,7 +321,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
               <th scope="col" className="text-left px-6 py-3">Property</th>
-              <th scope="col" className="text-left px-3 py-3">Screening Index</th>
+              <th scope="col" className="text-left px-3 py-3">Deal score</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
               <th scope="col" className="text-right px-3 py-3">Cash Flow</th>
@@ -381,7 +381,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                         <div aria-hidden className="absolute inset-0 grid place-items-center text-[11px] font-bold">{d.score ?? "-"}</div>
                         <span className="sr-only">
                           {d.score != null
-                            ? `Secondary Screening Index ${d.score} out of 100; not investment advice`
+                            ? `Deal score ${d.score} out of 100`
                             : "Not screened"}
                           {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
                         </span>

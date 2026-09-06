@@ -124,7 +124,7 @@ export default async function MarketCityPage({
   const hud = HUD_RENTS[data.slug];
   const rentDisplay = hud
     ? `$${hud.rent2br.toLocaleString("en-US")}–$${hud.rent3br.toLocaleString("en-US")}/mo`
-    : "No checked-in HUD value";
+    : "No HUD value published";
 
   // ZIP-level Small Area FMR table (build-market-safmr) — only ~1/3 of
   // market cities sit in a HUD SAFMR entity; the section renders nothing
@@ -133,8 +133,8 @@ export default async function MarketCityPage({
 
   const verdictLead = `A citywide label cannot determine whether a ${data.name} property fits your criteria.`;
   const verdictDetail = hud
-    ? `HUD's FY${hud.year} area benchmark for 2–3 bedroom units is ${rentDisplay}. It is not a property rent comp, collected-rent claim, or investment conclusion.`
-    : "This page does not substitute an unsourced cap-rate, price, tax, or rent estimate for property-specific evidence.";
+    ? `HUD's FY${hud.year} area benchmark for 2–3 bedroom units is ${rentDisplay}. That is an area benchmark, not a rent comp for a specific property.`
+    : `This page doesn't publish a cap-rate, price, tax, or rent estimate for ${data.name}. Use property-specific evidence.`;
 
   // Cross-link to other programmatic markets + a few bespoke flagship markets.
   const otherMarkets = MARKET_CITIES.filter((c) => c.slug !== data.slug).slice(
@@ -207,7 +207,7 @@ export default async function MarketCityPage({
         name: `Is ${data.name} a good place to buy rental property in 2026?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${verdictLead} ${verdictDetail} For a supported address and asking price, TrueCap can calculate a preliminary cap rate, cash flow, and DSCR from labeled, editable assumptions. A 10-year planning view requires entitled access. No result is an appraisal, lender approval, or investment recommendation.`,
+          text: `${verdictLead} ${verdictDetail} Enter a supported address and asking price and TrueCap calculates cap rate, cash flow, and DSCR from labeled, editable assumptions. The 10-year projection is a Pro feature.`,
         },
       },
       {
@@ -215,7 +215,7 @@ export default async function MarketCityPage({
         name: `How should I evaluate a cap rate in ${data.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `There is no authoritative cap-rate figure in this page's checked-in sources. Calculate the property from verified income, operating expenses, and asking price, then compare it with dated local evidence using the same NOI convention.`,
+          text: `This page doesn't publish a cap-rate figure. Calculate the property's cap rate from verified income, operating expenses, and asking price, then compare it with dated local evidence that uses the same NOI convention.`,
         },
       },
       {
@@ -224,8 +224,8 @@ export default async function MarketCityPage({
         acceptedAnswer: {
           "@type": "Answer",
           text: hud
-            ? `HUD's FY${hud.year} Fair Market Rent area benchmark for 2–3 bedroom units is ${rentDisplay}. It is not an address-level comp, asking-rent forecast, payment standard, or collection promise. Verify it against current comparable leases and the specific property.`
-            : `This page does not publish an unsourced city rent estimate. Use current comparable leases and property-specific evidence. TrueCap may start with a labeled HUD area benchmark when available.`,
+            ? `HUD's FY${hud.year} Fair Market Rent area benchmark for 2–3 bedroom units is ${rentDisplay}. That is an area benchmark, not an address-level comp. Verify it against current comparable leases for the specific property.`
+            : `This page doesn't publish a city rent estimate. Use current comparable leases and property-specific evidence. When a HUD area benchmark is available, TrueCap starts from it and labels it HUD FMR.`,
         },
       },
       {
@@ -233,7 +233,7 @@ export default async function MarketCityPage({
         name: `What is the property tax rate in ${data.stateName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `This page does not publish a statewide rate as the property's tax. Enter a current parcel bill or reviewed local effective rate and investigate the applicable assessment, exemption, transfer, and appeal rules with authoritative local sources.`,
+          text: `This page doesn't publish a statewide rate as the property's tax. Enter the current parcel bill or a reviewed local effective rate, and check the assessment, exemption, transfer, and appeal rules with local sources.`,
         },
       },
     ],
@@ -301,14 +301,14 @@ export default async function MarketCityPage({
         <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           Review the specific address, asking price, rent evidence, parcel tax,
           insurance, condition, operating costs, financing, and local rules.
-          Hand-curated city estimates remain hidden until their source and as-of
-          dependencies are attached.
+          TrueCap doesn&apos;t publish a market range or neighborhood
+          recommendation for {data.name}.
         </p>
 
         {/* Checked-in public context */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
           <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-            {data.name} checked-in public context
+            {data.name} public rent context
           </p>
           {hud ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -331,13 +331,13 @@ export default async function MarketCityPage({
             </div>
           ) : (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              No checked-in HUD rent value is available for this page. No
-              hand-authored market estimate is substituted.
+              No HUD rent benchmark is available for this page, and TrueCap
+              doesn&apos;t substitute its own estimate.
             </p>
           )}
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            HUD FMR is an area housing-program benchmark, not a property rent
-            comp, asking-rent forecast, or collection promise. This template
+            HUD FMR is an area housing-program benchmark, not a rent comp for
+            a specific property. This page
             intentionally omits unsourced cap-rate, price, property-tax,
             appreciation, vacancy, and strategy-fit values.
           </p>
@@ -346,8 +346,8 @@ export default async function MarketCityPage({
               className="mt-4"
               sources={["HUD Fair Market Rent"]}
               updated={`HUD FY${hud.year}`}
-              note="Only the displayed HUD area benchmark is attributed to this source. No cap-rate, price, tax, legal, or investment conclusion is inferred from it."
-              confidence="Area-level housing-program benchmark; verify current property-specific comparable leases and program figures."
+              note="The HUD area benchmark is the only figure taken from this source."
+              confidence="Area-level housing-program benchmark. Verify against current comparable leases for the property."
             />
           ) : null}
         </section>
@@ -361,8 +361,8 @@ export default async function MarketCityPage({
             <p className="text-base leading-relaxed text-muted-foreground">
               HUD publishes ZIP-level Small Area Fair Market Rents for the{" "}
               {safmr.areaName}, the FMR region that includes {data.name}. These
-              housing-program benchmarks vary by ZIP and bedroom count; they are
-              not property rent comps or investment conclusions.
+              housing-program benchmarks vary by ZIP and bedroom count. They are
+              area benchmarks, not rent comps for a specific property.
             </p>
             <div className="mt-4 overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-[24rem] text-sm">
@@ -425,9 +425,9 @@ export default async function MarketCityPage({
               >
                 HUD FY{safmr.year} Small Area Fair Market Rents
               </a>
-              . For a supported {data.name} address, TrueCap starts with a HUD
-              rent benchmark at the ZIP level when available and otherwise uses
-              the broader FMR area; verify property-specific rent independently.
+              . For a supported {data.name} address, TrueCap starts from the
+              ZIP-level HUD benchmark when one exists and otherwise the broader
+              FMR area. Replace it with the property&apos;s own rent evidence.
             </p>
           </section>
         ) : null}
@@ -477,7 +477,7 @@ export default async function MarketCityPage({
             context={`a ${data.name} property`}
             handoff={{ address: `${data.name}, ${data.stateCode}` }}
             utmSource="market-page"
-            supportingText={`Start with safe ${data.name} market context, then verify the address, rent, property tax, insurance, and every other assumption before relying on the screen.`}
+            supportingText={`Start with ${data.name} context, then verify the address, rent, property tax, insurance, and every other assumption. Every assumption is labeled and editable.`}
           />
         </div>
 

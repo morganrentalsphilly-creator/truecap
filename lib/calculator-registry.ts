@@ -64,7 +64,7 @@ const ALL_CALCULATORS: CalculatorEntry[] = [
   { slug: "brrrr-calculator", title: "BRRRR Calculator", shortTitle: "BRRRR", description: "Buy, Rehab, Rent, Refinance — model the full strategy in one view.", category: "offer", embeddable: true, footerFeatured: true },
   { slug: "arv-calculator", title: "ARV Calculator (After-Repair Value + 70% Rule)", shortTitle: "ARV", description: "Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen.", category: "offer", embeddable: true },
   { slug: "house-hacking-calculator", title: "House Hacking Calculator", shortTitle: "House Hack", description: "Live in one unit, rent the rest — your effective housing cost after tenant rent.", category: "offer", embeddable: true },
-  { slug: "70-percent-rule-calculator", title: "70% Rule Calculator", shortTitle: "70% Rule", description: "70%-rule price screen = entered ARV × selected multiplier minus entered repairs — a starting screen, not a recommended offer.", category: "offer", embeddable: true },
+  { slug: "70-percent-rule-calculator", title: "70% Rule Calculator", shortTitle: "70% Rule", description: "70%-rule price screen = entered ARV × selected multiplier minus entered repairs — a starting screen.", category: "offer", embeddable: true },
   { slug: "rehab-cost-estimator", title: "Rehab Cost Estimator", shortTitle: "Rehab", description: "Line-item renovation budget by scope of work for early screening; replace estimates with contractor bids before committing.", category: "offer", embeddable: false },
 ];
 

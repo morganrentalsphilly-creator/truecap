@@ -46,7 +46,7 @@ import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Repeat with Pro",
-  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day no-card evaluation with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
+  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
@@ -74,15 +74,19 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. Offer Ceiling, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. Your first personalized decision includes asking-price cash flow, selected-rule fit, a target-backed Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and begin the no-card evaluation.",
+    a: "Yes. Your first decision includes asking-price cash flow, Buy Box fit, the Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and start the free trial.",
   },
   {
     q: "Can I cancel anytime?",
     a: "Yes. Cancel from your profile in one click. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
   },
   {
-    q: "How does the product evaluation work?",
-    a: `A new account receives ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+    q: "How does the free trial work?",
+    a: `A new account gets ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+  },
+  {
+    q: "What does Pro add?",
+    a: "A repeatable decision layer: the Offer Ceiling (the highest price that still meets your targets), Buy Box fit on every deal, downside stress tests, side-by-side comparisons, and a report you can hand to a partner or lender. If you only need metrics, the free analyzer already gives you those.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -109,7 +113,7 @@ const FEATURE_COMPARISON: Array<
   ["Unlimited preliminary core screens", true, true],
   ["Cap rate · CoC · DSCR · cash flow", true, true],
   ["Labeled HUD rent · FRED rate benchmarks", true, true],
-  ["Screening Index (0–100) with factor breakdown", true, true],
+  ["Deal score (0–100) with factor breakdown", true, true],
   ["Sale + rent comps from the address", "1 free", "50 / mo"],
   ["Offer Ceiling · downside sensitivity", "First complete decision", true],
   ["Shareable read-only deal links", true, true],
@@ -254,11 +258,11 @@ export default async function PricingPage() {
                 : activePaidPlanSlug || billingRecoveryRequired
                   ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
                   : pricingEvaluation.status === "active" && evaluationAllowance
-                    ? `Your no-card evaluation has ${evaluationAllowance}.`
+                    ? `Your free trial has ${evaluationAllowance}.`
                     : pricingEvaluation.status === "exhausted"
-                      ? "Your included evaluation runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                      ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
                       : pricingEvaluation.status === "expired"
-                        ? "Your no-card evaluation has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                        ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
                         : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
@@ -406,7 +410,7 @@ export default async function PricingPage() {
             </span>
             <span>
               <strong className="text-foreground">
-                {EVALUATION_FACTS.durationDays}-day evaluation ·{" "}
+                {EVALUATION_FACTS.durationDays}-day free trial ·{" "}
                 {EVALUATION_FACTS.dealLimit} Pro deals ·{" "}
                 {EVALUATION_FACTS.comparisonLimit} comparison
               </strong>
@@ -433,7 +437,7 @@ export default async function PricingPage() {
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
             Free answers whether the deal deserves attention. Pro shows the
-            target-dependent ceiling, what could break, and what to verify next.
+            Offer Ceiling, what could break, and what to verify next.
           </p>
           {/* Phones use stacked comparison cards; tablet and desktop keep the
               denser semantic table. No narrow viewport has to pan sideways. */}

@@ -400,12 +400,12 @@ export function deriveRuleFit(args: {
 
 export function ruleFitLabel(ruleFit: RuleFit): string {
   if (ruleFit === "meets_selected_rules") {
-    return "Meets selected rules at asking";
+    return "Meets your targets at asking";
   }
   if (ruleFit === "does_not_meet_selected_rules") {
-    return "Does not meet selected rules at asking";
+    return "Doesn't meet your targets at asking";
   }
-  return "Cannot determine rule fit yet";
+  return "Can't determine Buy Box fit yet";
 }
 
 export function userDecisionFromPipelineStage(stage: string | null | undefined): UserDecision {
@@ -431,7 +431,7 @@ export function userDecisionLabel(decision: UserDecision): string {
 }
 
 export function offerCeilingHelperCopy(target: DecisionTargetContext): string {
-  return `Highest modeled price that still meets ${target.profileName} under the assumptions shown.`;
+  return `The highest price that still meets ${target.profileName} under the assumptions shown.`;
 }
 
 export function offerCeilingSemanticStatus(args: {
@@ -460,7 +460,7 @@ export function buildSafeNextAction(args: {
     return {
       kind: "resolve-target",
       label: "Review the active target rules",
-      reason: "Rule fit cannot be determined until the target context is available.",
+      reason: "Buy Box fit can't be determined until your targets are available.",
     };
   }
 
@@ -499,7 +499,7 @@ export function buildSafeNextAction(args: {
     label: "Record your decision",
     reason:
       args.ruleFit === "meets_selected_rules"
-        ? "The model meets the selected rules; the investment decision is still yours."
-        : "The model does not meet the selected rules; record how you want to proceed.",
+        ? "The model meets your targets; the decision is still yours."
+        : "The model doesn't meet your targets; record how you want to proceed.",
   };
 }

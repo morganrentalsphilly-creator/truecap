@@ -84,8 +84,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     propstream: "Not applicable",
     winner: "truecap",
   },
@@ -353,12 +353,12 @@ export default function VsPropstreamPage() {
               area rent and the FRED owner-occupied rate can pre-fill as
               editable benchmarks; enter property tax from a local bill or
               reviewed rate. Run the analysis and review the Offer Ceiling under
-              your selected targets.
+              your targets.
             </li>
             <li>
               <strong>Verify, then record your decision.</strong> TrueCap&apos;s
-              Offer Ceiling solver (Pro) works backward from your selected
-              targets. It is a modeled boundary, not a recommended offer.
+              Offer Ceiling (Pro) works backward from your targets: the highest
+              price that still meets them.
             </li>
             <li>
               <strong>
@@ -502,7 +502,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s no-account preliminary screen covers cap rate,
+        Yes — TrueCap&apos;s free, no-account screen covers cap rate,
         cash-on-cash, DSCR, cash flow, and labeled address starting assumptions.
         No card is required. Complete-decision allowances and Pro terms are
         shown on TrueCap&apos;s live pricing page. PropStream is paid-only
@@ -510,7 +510,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap provides no-account preliminary screens with cap rate, CoC, DSCR, cash flow, and labeled address starting assumptions. Complete-decision allowances and Pro terms are on the live pricing page. Verify PropStream's current trial and paid terms on its official site.",
+      "Yes. TrueCap provides free, no-account screens with cap rate, CoC, DSCR, cash flow, and labeled address starting assumptions. Complete-decision allowances and Pro terms are on the live pricing page. Verify PropStream's current trial and paid terms on its official site.",
   },
   {
     question: "What&apos;s the best PropStream alternative for finding deals?",

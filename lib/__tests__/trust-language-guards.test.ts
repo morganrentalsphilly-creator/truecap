@@ -208,7 +208,11 @@ describe("trust-language guards", () => {
     expect(landing).toContain(
       "Package the underwrite for lenders, partners, clients, or internal review.",
     );
-    expect(landing).toContain("it is not an appraisal or approval");
+    // One page-level <Disclaimer /> carries the not-an-appraisal statement
+    // (docs/voice.md rule 3); the agent persona no longer repeats it, and it
+    // still makes no approval or "lender-ready" promise.
+    expect(landing).toContain("every assumption visible");
+    expect(landing).not.toMatch(/lender-approved|pre-approved/i);
     expect(changelog).not.toMatch(/tax strategy/i);
     expect(changelog).toContain("Historical tax-impact projection (retired)");
     expect(changelog).toContain(
@@ -253,7 +257,7 @@ describe("trust-language guards", () => {
       "does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome",
     );
     expect(cityStrategyPage).toContain(
-      "registry claims remain hidden pending authoritative dependencies",
+      "TrueCap does not publish a market range or neighborhood pick for this city",
     );
 
     expect(proForma).not.toMatch(/what you(?:'|&apos;)d actually achieve/i);

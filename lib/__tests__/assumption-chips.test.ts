@@ -46,10 +46,10 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     // Property tax is deliberately labeled a PRELIMINARY FALLBACK, not stated
     // as a rate of price: released underwriting never auto-fills a parcel bill
     // (see /methodology and lib/product-facts DATA_SOURCE_FACTS.propertyTax).
-    expect(byId(chips, "taxes").label).toBe("Taxes 1.1% preliminary fallback");
+    expect(byId(chips, "taxes").label).toBe("Taxes 1.1% default");
     expect(byId(chips, "taxes").badge).toEqual({
       kind: "default",
-      text: "verify locally",
+      text: "replace with your local number",
     });
     expect(byId(chips, "insurance").label).toBe("Insurance 0.5% of price/year");
     expect(byId(chips, "insurance").badge).toEqual({

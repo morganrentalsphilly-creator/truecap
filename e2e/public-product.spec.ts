@@ -628,7 +628,7 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   );
   await expect(
     page.getByRole("button", {
-      name: "Try a synthetic sample rental and preview a sample Pro report",
+      name: "Try a sample rental and preview a sample Pro report",
       exact: true,
     }),
   ).toBeVisible();
@@ -643,9 +643,9 @@ test("released operating tax and insurance modes cannot strand an invalid hidden
 
   await page
     .getByRole("button", {
-      // Property tax is labeled a PRELIMINARY FALLBACK with a "verify locally"
-      // badge — released underwriting never auto-fills a parcel bill.
-      name: /Taxes 1\.1% preliminary fallback verify locally/i,
+      // Property tax is labeled a TrueCap default with a "replace with your
+      // local number" badge — TrueCap never auto-fills a parcel bill.
+      name: /Taxes 1\.1% default replace with your local number/i,
     })
     .click();
 
@@ -695,7 +695,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(acceptCookies).toBeVisible();
   await acceptCookies.click();
   const sampleButton = page.getByRole("button", {
-    name: "Try a synthetic sample rental and preview a sample Pro report",
+    name: "Try a sample rental and preview a sample Pro report",
     exact: true,
   });
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
@@ -1017,7 +1017,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
 
   await page
     .getByRole("button", {
-      name: "Try a synthetic sample rental and preview a sample Pro report",
+      name: "Try a sample rental and preview a sample Pro report",
       exact: true,
     })
     .click();

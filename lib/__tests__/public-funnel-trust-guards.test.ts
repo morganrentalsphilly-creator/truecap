@@ -13,11 +13,12 @@ describe("public funnel and trust guards", () => {
     expect(config).toContain(
       'decision_system: "Know your walk-away price before you make the offer."',
     );
+    // Phase 3 voice (docs/voice.md): the mandated subhead + risk line.
     expect(hero).toContain(
-      "Paste a listing or enter an address. TrueCap shows cash flow, DSCR and the highest price that meets your buy box—plus which assumptions still need verification.",
+      "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable.",
     );
     expect(hero).toContain(
-      "No account or card. Your first complete Offer Ceiling is included.",
+      "Free. No account. Your first full decision is included.",
     );
     expect(form).toContain('"Analyze a deal free"');
     // The written memo moved to the footer (one primary + one secondary CTA

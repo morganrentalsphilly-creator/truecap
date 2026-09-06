@@ -109,7 +109,7 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>The evidence</strong> — replace every area-level benchmark with a property-specific quote, record, or inspection finding.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a secondary Screening Index, and selected-rule fit. The index is for triage—not evidence readiness, an appraisal, lender approval, or investment advice. Pro adds sensitivity, 10-year cash-flow and equity projections, comparison tools, and review reports. Review every starting assumption before relying on the result.
+    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a Deal score, and Buy Box fit. The Deal score is a heuristic summary of the modeled numbers, 0–100. Pro adds sensitivity, 10-year cash-flow and equity projections, comparison tools, and review reports. Review every starting assumption before relying on the result.
   </p>
   <div style="text-align:center;margin:24px 0;">
       <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Review another preliminary screen</a>
@@ -174,7 +174,7 @@ const SEQUENCE: SequenceEmail[] = [
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
   <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Ready for a repeatable review workflow?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Reviewing ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} with a lender, partner, or adviser? Pro adds selected-rule fit, a target-dependent Offer Ceiling, downside testing, 10-year cash-flow and equity projections, saved-deal comparison, and PDF reports. The Offer Ceiling is not a recommended offer.
+    Reviewing ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} with a lender, partner, or adviser? Pro adds Buy Box fit, your Offer Ceiling (the highest price that still meets your targets), downside testing, 10-year cash-flow and equity projections, saved-deal comparison, and PDF reports.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
     Compare Pro plans and current terms before starting checkout. New one-time report purchases are temporarily unavailable.

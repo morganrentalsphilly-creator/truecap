@@ -150,7 +150,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Underwriting context",
-    truecap: "Free — core economics + selected-rule fit",
+    truecap: "Free — core economics + Buy Box fit",
     zillow: "Rent estimate only",
     winner: "truecap",
   },
@@ -521,14 +521,14 @@ const ZILLOW_FAQ: FaqItem[] = [
       <>
         TrueCap takes rent, expenses, financing, and tax assumptions and runs
         cap rate, cash-on-cash, DSCR, and monthly cash flow, then shows
-        selected-rule fit based on transparent targets. The free analyzer also
-        includes a secondary Screening Index (0–100) with factor breakdown.
+        Buy Box fit against your targets. The free analyzer also
+        includes a Deal score (0–100) with factor breakdown.
         Zillow stops at the rent number — you have to do everything downstream
         by hand.
       </>
     ),
     plainTextAnswer:
-      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows selected-rule fit plus a free secondary 0–100 Screening Index. Zillow stops at the rent number. The index is for triage, not evidence readiness, an appraisal, or investment advice.",
+      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows Buy Box fit plus a free 0–100 Deal score. Zillow stops at the rent number.",
   },
 ];
 

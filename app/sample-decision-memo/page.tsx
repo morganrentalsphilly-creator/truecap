@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     url: "/sample-decision-memo",
     title: "Sample Rental Decision Memo | TrueCap",
     description:
-      "See a complete sample rental decision with its target-dependent Offer Ceiling, downside range, risks, and verification plan.",
+      "See a complete sample rental decision with its Offer Ceiling, downside range, risks, and verification plan.",
     images: [
       {
         url: "/home.jpg",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sample Rental Decision Memo | TrueCap",
     description:
-      "See a complete sample rental decision with its target-dependent Offer Ceiling, downside range, risks, and verification plan.",
+      "See a complete sample rental decision with its Offer Ceiling, downside range, risks, and verification plan.",
     images: ["/home.jpg"],
   },
 };
@@ -55,9 +55,8 @@ export default function SampleDecisionMemoPage() {
     <main id="main" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          <strong>Illustrative sample — not a customer result.</strong> The address and all
-          financial inputs below are illustrative demonstration assumptions. They are not verified
-          property facts, an appraisal, a lender decision, or investment advice.
+          <strong>Illustrative sample — not a customer result.</strong> The address and every
+          input below are illustrative assumptions, not verified property facts.
         </div>
 
         <header className="mt-8 border-b border-border pb-8">
@@ -65,7 +64,7 @@ export default function SampleDecisionMemoPage() {
             Sample Decision Memo
           </p>
           <h1 className="mt-3 text-balance text-3xl font-extrabold tracking-tight sm:text-5xl">
-            Does not meet selected rules at asking.
+            Doesn&apos;t meet your targets at asking.
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
             {SAMPLE_DEAL_FIXTURE.display.shortAddress} · asking {money(values.purchasePrice)}
@@ -85,7 +84,7 @@ export default function SampleDecisionMemoPage() {
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
               The asking price is {money(values.purchasePrice - maxOffer.maxPrice)} above this
-              target-dependent ceiling.
+              ceiling.
             </p>
             <dl className="mt-5 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
               <div>
@@ -108,8 +107,8 @@ export default function SampleDecisionMemoPage() {
               </div>
             </dl>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Highest modeled price that still meets {SAMPLE_DEAL_FIXTURE.targetProfile.name}{" "}
-              under the assumptions shown. This is not a recommended offer.
+              The highest price that still meets {SAMPLE_DEAL_FIXTURE.targetProfile.name}{" "}
+              under the assumptions shown.
             </p>
           </article>
 
@@ -131,8 +130,8 @@ export default function SampleDecisionMemoPage() {
               ))}
             </dl>
             <p className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground">
-              Screening Index {Math.round(dealScore.score)}/100 · secondary deterministic screen,
-              not a probability, appraisal, or lender approval.
+              Deal score {Math.round(dealScore.score)}/100 · a heuristic summary of the modeled
+              numbers.
             </p>
           </article>
         </section>
@@ -166,9 +165,9 @@ export default function SampleDecisionMemoPage() {
         <section className="mt-8 rounded-2xl border border-border bg-muted/30 p-5 text-sm sm:p-6">
           <h2 className="font-extrabold">Methodology and scope</h2>
           <p className="mt-2 leading-relaxed text-muted-foreground">
-            Generated from synthetic fixture {SAMPLE_DEAL_FIXTURE.fixtureVersion} using {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
+            Generated from sample fixture {SAMPLE_DEAL_FIXTURE.fixtureVersion} using {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
             Target profile: {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version}.
-            The same explicitly synthetic, deterministic fixture powers the homepage preview and opened sample analysis.
+            The same sample powers the homepage preview and the opened sample analysis.
           </p>
           <Link href="/methodology" className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
             Review the methodology <ArrowRight className="ml-1 size-4" aria-hidden />

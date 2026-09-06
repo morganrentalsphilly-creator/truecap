@@ -146,7 +146,7 @@ export default function AboutPage() {
           <p>
             Type an address and get a full underwrite in about 60 seconds:
             monthly cash flow, cap rate, cash-on-cash return, DSCR, 10-year
-            projections, a selected-rule fit, and a secondary Screening Index.
+            projections, Buy Box fit, and a Deal score.
             The{" "}
             <Link
               href="/"

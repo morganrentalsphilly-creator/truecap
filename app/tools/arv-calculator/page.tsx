@@ -66,7 +66,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the 70% rule?",
-    a: "A rule of thumb that calculates a screening boundary at 70% of ARV minus repairs. On a property modeled at a $300,000 renovated value with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This boundary is not a recommended offer or appraisal.",
+    a: "A rule of thumb that calculates a screening boundary at 70% of ARV minus repairs. On a property modeled at a $300,000 renovated value with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first.",
   },
   {
     q: "Is ARV just the purchase price plus the rehab budget?",
@@ -411,7 +411,7 @@ export default function ArvCalculatorPage() {
 
             <h2 className="text-2xl sm:text-3xl">Educational context: ARV and a future refinance</h2>
             <p>
-              TrueCap&apos;s released ARV calculator stops at the comp-based ARV
+              TrueCap&apos;s ARV calculator stops at the comp-based ARV
               and 70%-rule screen; it does not model a renovation-to-refinance
               lifecycle. As educational context, buy-and-hold investors may use
               the same ARV with a different destination. On a{" "}
@@ -473,13 +473,12 @@ export default function ArvCalculatorPage() {
               comps and a square footage produce the two numbers that decide
               whether the deal deserves another hour — the ARV and the max
               offer. When a property clears the screen and the endgame is a
-              rental, run the stabilized numbers through the full TrueCap
-              analyzer — its 70%-rule price screen card solves the rental version of this
+              rental, run the stabilized numbers through the full analyzer —
+              TrueCap&apos;s Offer Ceiling card solves the rental version of this
               question (the highest price that still hits your target cap
               rate, cash-on-cash, and DSCR), alongside cash flow, 10-year
-              projections, selected-rule fit, and a secondary Screening Index. None of this is
-              investment advice; verify comps, rehab scope, and lender terms
-              on any specific deal.
+              projections, Buy Box fit, and a Deal score. Verify comps, rehab
+              scope, and lender terms on any specific deal.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -506,21 +505,21 @@ export default function ArvCalculatorPage() {
           {/* CTA */}
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-              Continue with the released rental screen — free
+              Continue with the rental screen — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               ARV and the 70% rule are early screens, not a defensible offer by
               themselves. Use separate reviewed rehab and project ledgers for a
-              flip or BRRRR; TrueCap&apos;s released core analyzer can screen the
+              flip or BRRRR; TrueCap&apos;s core analyzer can screen the
               stabilized rental cash flow, cap rate, CoC, and DSCR.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
-                "70%-rule price screen — highest modeled price that meets your selected targets; not a recommended offer",
-                "Separate released rehab and stabilized-rental tools",
+                "TrueCap's Offer Ceiling — the highest price that still meets your targets",
+                "Separate rehab and stabilized-rental tools",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
-                "Downside sensitivity and 70%-rule price screen (Pro)",
+                "Downside sensitivity and TrueCap's Offer Ceiling (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -533,7 +532,7 @@ export default function ArvCalculatorPage() {
               href="/"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Open the released rental analyzer
+              Open the rental analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
@@ -543,7 +542,7 @@ export default function ArvCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="arv-calculator" />
 
-          <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use TrueCap's released rental analyzer for stabilized cash flow and a target-dependent Offer Ceiling. The boundary is not a recommended offer." />
+          <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use the rental analyzer for stabilized cash flow and TrueCap's Offer Ceiling." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

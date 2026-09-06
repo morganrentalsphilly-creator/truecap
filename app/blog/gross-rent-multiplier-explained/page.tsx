@@ -288,7 +288,7 @@ export default function GrossRentMultiplierPost() {
           </h2>
           <p>
             Because GRM is just price over rent, you can rearrange it into a
-            target-dependent Offer Ceiling once you select a target multiple:
+            an Offer Ceiling once you select a target multiple:
           </p>
           <p>
             <strong>Max price = target GRM × annual gross rent.</strong>
@@ -571,7 +571,7 @@ export default function GrossRentMultiplierPost() {
               implied cap rate
             </Link>
             , and when a listing survives the screen, run the whole thing — NOI,
-            cash flow, DSCR, projections, and selected-rule fit — through
+            cash flow, DSCR, projections, and Buy Box fit — through
             the{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer

@@ -223,7 +223,7 @@ function baseActionFromVerdict(input: {
   }
   return {
     label: "Verify material assumptions",
-    reason: "the Screening Index is positive, but it does not record a decision",
+    reason: "the Deal score is positive, but it does not record a decision",
     tone: "ready",
   };
 }

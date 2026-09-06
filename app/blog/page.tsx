@@ -468,9 +468,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-truecap-verdict-engine-works",
-    title: "How TrueCap classifies selected-rule fit",
+    title: "How TrueCap classifies Buy Box fit",
     excerpt:
-      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's secondary screening bands, plus how to interpret them without treating a label as advice.",
+      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's Buy Box fit bands, plus how to read them.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -948,10 +948,10 @@ export default function BlogIndexPage() {
             Want the calculator that powers these guides?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            TrueCap turns released underwriting concepts into an editable
-            preliminary screen — cap rate, cash flow, DSCR, selected-rule fit,
+            TrueCap turns these underwriting concepts into an editable
+            preliminary screen — cap rate, cash flow, DSCR, Buy Box fit,
             and Pro pre-tax cash-flow/equity projections. Tax and exit modules
-            are not released. Free to start.
+            aren&apos;t offered right now. Free to start.
           </p>
           <Link
             href="/"

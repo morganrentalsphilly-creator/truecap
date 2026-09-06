@@ -37,7 +37,7 @@ describe("personal analyzer Buy Box resolution", () => {
 
   it("fails Buy Box claims closed while preserving base-underwriting actions", () => {
     expect(card).toContain(
-      "No Buy Box fit or target-backed Offer Ceiling is being claimed.",
+      "No Buy Box fit or Offer Ceiling is being claimed.",
     );
     expect(dashboard).toContain(
       'buyBoxTargetResolutionState === "error"',

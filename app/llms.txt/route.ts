@@ -69,7 +69,7 @@ export async function GET() {
       ? planFacts.singleDeal
       : "New one-time report purchases are temporarily unavailable.",
   ].join(" ");
-  const summary = `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. ${planFacts.pro} ${availabilitySummary} The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
+  const summary = `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. ${planFacts.pro} ${availabilitySummary} The Deal score (0–100) is a heuristic summary of the modeled numbers; read it after Buy Box fit.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",

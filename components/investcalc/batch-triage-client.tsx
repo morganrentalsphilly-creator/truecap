@@ -133,8 +133,8 @@ function rowAssumptionLabel(row: TriageRowResult): string {
   const rateSource = context.rateSource === "fred" ? "FRED" : "default";
   const taxSource =
     context.taxSource === "state-static"
-      ? `${context.state ?? "state"} legacy estimate — verify locally`
-      : "generic preliminary fallback";
+      ? `${context.state ?? "state"} legacy estimate — replace with your local number`
+      : "default — replace with your local number";
   return `${context.interestRatePct.toFixed(2)}% rate (${rateSource}) · ${context.propertyTaxPct.toFixed(2)}% tax (${taxSource})`;
 }
 
@@ -441,7 +441,7 @@ export function BatchTriageClient({
   );
 
   const sortOptions: { id: TriageSort; label: string }[] = [
-    { id: "score", label: "Screening Index" },
+    { id: "score", label: "Deal score" },
     { id: "cashFlow", label: "Cash flow" },
     ...(result?.buyBoxActive
       ? [{ id: "fit" as const, label: "Buy-box fit" }]
@@ -714,8 +714,8 @@ export function BatchTriageClient({
                 : ""}
               <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
                 {result.buyBoxActive
-                  ? "Each Offer Ceiling is the highest modeled price that still meets the adopted Buy Box criteria shown on that row. It is not a recommended offer or appraisal."
-                  : "Core underwriting is shown without an Offer Ceiling. Adopt return targets in a Buy Box before TrueCap calculates modeled price thresholds."}
+                  ? "Each Offer Ceiling is the highest price that still meets the Buy Box criteria shown on that row."
+                  : "Core underwriting is shown without an Offer Ceiling. Adopt return targets in a Buy Box and TrueCap calculates one for every row."}
               </span>
             </p>
             <div className="flex flex-wrap items-center gap-2">
@@ -817,7 +817,7 @@ export function BatchTriageClient({
                         Screening result
                       </th>
                       <th scope="col" className="px-3 py-2.5 text-right">
-                        Screening Index
+                        Deal score
                       </th>
                       <th scope="col" className="px-3 py-2.5 text-right">
                         Cash flow
@@ -996,7 +996,7 @@ export function BatchTriageClient({
                               : "—"}
                           </span>
                           <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                            Screening Index {row.score ?? "—"}
+                            Deal score {row.score ?? "—"}
                           </span>
                         </div>
                       ) : (

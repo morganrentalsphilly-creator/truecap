@@ -222,14 +222,14 @@ const CURATED: Term[] = [
     term: "ARV",
     also: ["After Repair Value"],
     definition:
-      "An estimate of a property's value after a defined renovation scope is complete. It is not an appraisal, sale price, or guaranteed lender value. Comparable selection, condition, completion, appraisal methodology, and lender policy can all change the amount available for a sale or refinance.",
+      "An estimate of a property's value after a defined renovation scope is complete. Comparable selection, condition, completion, appraisal methodology, and lender policy can all change the amount available for a sale or refinance.",
   },
   {
     slug: "max-allowable-offer",
     term: "Offer Ceiling",
-    also: ["Target-dependent purchase-price boundary"],
+    also: ["Highest price that meets your targets"],
     definition:
-      "The highest modeled purchase price that still meets the selected released buy-and-hold targets under the assumptions shown, such as DSCR, cap rate, cash flow, cash-on-cash return, IRR, or cash required. It is not a recommended offer, appraisal, loan approval, or substitute for verification.",
+      "The highest purchase price that still meets your buy-and-hold targets under the assumptions shown — DSCR, cap rate, cash flow, cash-on-cash return, IRR, or cash required.",
   },
   {
     slug: "pro-forma",
@@ -241,7 +241,7 @@ const CURATED: Term[] = [
     slug: "1031-exchange",
     term: "1031 exchange",
     definition:
-      "A U.S. tax provision that may defer recognition of eligible gain when qualifying real property is exchanged under detailed like-kind, timing, identification, intermediary, and taxpayer rules. It does not erase tax and is outside TrueCap's released model; obtain transaction-specific tax and legal advice before relying on it.",
+      "A U.S. tax provision that may defer recognition of eligible gain when qualifying real property is exchanged under detailed like-kind, timing, identification, intermediary, and taxpayer rules. It does not erase tax, and TrueCap doesn't model it; get transaction-specific tax and legal advice before relying on it.",
   },
   {
     slug: "house-hack",

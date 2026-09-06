@@ -38,7 +38,7 @@ export default function AnalyzePage() {
     <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <AnalyzePageContent analyzerProps={ANON_ANALYZER_PROPS} />
-      <SiteFooter />
+      <SiteFooter disclaimer={false} />
     </div>
   );
 }

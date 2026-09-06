@@ -86,8 +86,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     avail: "Not applicable",
     winner: "truecap",
   },
@@ -485,11 +485,11 @@ const AVAIL_FAQ: FaqItem[] = [
         No — they cover different stages. Avail is post-purchase landlord
         operations: listing, screening, leases, rent collection, maintenance.
         TrueCap is pre-purchase underwriting: cap rate, CoC, DSCR, projection,
-        Screening Index. Most independent landlords end up using both.
+        Deal score. Most independent landlords end up using both.
       </>
     ),
     plainTextAnswer:
-      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Screening Index). Most independent landlords use both.",
+      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Deal score). Most independent landlords use both.",
   },
   {
     question: "Can TrueCap do what Avail's listing or screening does?",
@@ -533,7 +533,7 @@ const AVAIL_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Screening Index. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
+      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Deal score. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
   },
   {
     question: "Avail is owned by Realtor.com — does that matter?",

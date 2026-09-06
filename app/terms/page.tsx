@@ -78,7 +78,7 @@ export default function TermsPage() {
           <p>
             TrueCap provides software for analyzing rental real estate
             investments — cap rate, cash-on-cash return, debt service coverage,
-            multi-year operating projections, selected-rule fit, and related
+            multi-year operating projections, Buy Box fit, and related
             calculators. The Service includes free access and paid TrueCap Pro
             subscriptions. New one-time Deal Decision Pack purchases are
             currently unavailable; the Pack terms below continue to govern prior
@@ -244,7 +244,7 @@ export default function TermsPage() {
             TrueCap is a calculator. We are not a registered investment advisor,
             real estate broker, accountant, lender, attorney, or tax
             professional. The outputs of the Service — including projected cash
-            flow, cap rate, Screening Index, selected-rule fit, and operating
+            flow, cap rate, Deal score, Buy Box fit, and operating
             projections — are estimates based on the inputs you provide and
             standard real estate math. They are not advice, guarantees,
             appraisals, or substitutes for professional counsel.

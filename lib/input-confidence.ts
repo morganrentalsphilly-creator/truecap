@@ -606,7 +606,7 @@ export function buildInputConfidence(
             sourceClass: "property-specific",
             sourceLabel: "Entered year built",
             reason:
-              "Used in the Screening Index age-risk check, but not yet confirmed against property records.",
+              "Used in the Deal score age-risk check, but not yet confirmed against property records.",
             verifyAction: "Confirm year built from property records",
             offerReadyRequired: false,
           })
@@ -614,7 +614,7 @@ export function buildInputConfidence(
             sourceClass: "missing",
             sourceLabel: "Not provided",
             reason:
-              "Unknown age receives a conservative Screening Index uncertainty modifier.",
+              "Unknown age receives a conservative Deal score uncertainty modifier.",
             verifyAction: "Confirm year built from property records",
             offerReadyRequired: false,
           },

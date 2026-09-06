@@ -498,7 +498,7 @@ export default function PitiExplainedPost() {
               starts from a published rate benchmark and editable assumptions,
               asks you to enter a local tax bill or reviewed rate, layers in
               vacancy and reserves, and returns cash flow, DSCR, and a
-              selected-rule fit in one pass.
+              Buy Box fit in one pass.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

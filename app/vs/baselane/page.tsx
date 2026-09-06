@@ -84,8 +84,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     baselane: "Not applicable",
     winner: "truecap",
   },
@@ -241,7 +241,7 @@ export default function VsBaselanePage() {
                   equity.
                 </li>
                 <li>
-                  You want standardized economics and rule-fit context to
+                  You want standardized economics and Buy Box fit to
                   compare 2-3 deals side-by-side.
                 </li>
                 <li>

@@ -36,7 +36,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "What is a good DSCR for a rental property? (2026)";
 const DESCRIPTION =
-  "1.25 is a common lender screen, not an investor guarantee. DSCR bands explained, plus worked examples for loan size and a target-dependent Offer Ceiling.";
+  "1.25 is a common lender screen, not an investor guarantee. DSCR bands explained, plus worked examples for loan size and an Offer Ceiling.";
 const PUBLISHED_AT = "2026-07-18";
 const MODIFIED_AT = "2026-08-25";
 const READING_TIME_MIN = 10;
@@ -657,8 +657,8 @@ export default function BlogPost() {
           <p>
             Type in a price, rent, rate, and down payment, and TrueCap computes
             the DSCR alongside cash flow, cap rate, and cash-on-cash — then
-            stress-tests the whole underwrite and gives you a selected-rule fit
-            and secondary Screening Index. Takes about 60 seconds.
+            stress-tests the whole underwrite and gives you a Buy Box fit
+            and Deal score. Takes about 60 seconds.
           </p>
 
           <div className="not-prose"></div>

@@ -83,8 +83,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     landlordstudio: "Not applicable",
     winner: "truecap",
   },
@@ -224,7 +224,7 @@ export default function VsLandlordStudioPage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>
-                  You want standardized economics and rule-fit context to
+                  You want standardized economics and Buy Box fit to
                   compare 2-3 deals.
                 </li>
                 <li>You&apos;re not yet generating receipts to track.</li>

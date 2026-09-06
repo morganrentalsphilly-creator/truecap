@@ -84,8 +84,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     rentspree: "Not applicable",
     winner: "truecap",
   },
@@ -228,7 +228,7 @@ export default function VsRentspreePage() {
                   You&apos;re an agent sending a deal analysis to a buyer
                   client.
                 </li>
-                <li>You want cap rate, DSCR, projection, Screening Index.</li>
+                <li>You want cap rate, DSCR, projection, Deal score.</li>
                 <li>You&apos;re not the one screening the tenant.</li>
               </ul>
             </div>

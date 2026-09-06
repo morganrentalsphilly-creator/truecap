@@ -113,8 +113,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Screening Index with breakdown",
-    truecap: "Free — 0-100 screening score with subscore drill-down",
+    feature: "Deal score with breakdown",
+    truecap: "Free — 0–100 score with subscore drill-down",
     roofstock: "Confirm any rating methodology in the current offering",
     winner: "truecap",
   },
@@ -267,7 +267,7 @@ export default function VsRoofstockPage() {
                   year-one snapshot.
                 </li>
                 <li>
-                  You want a Screening Index with a transparent breakdown.
+                  You want a Deal score with a transparent breakdown.
                 </li>
               </ul>
             </div>
@@ -406,10 +406,9 @@ export default function VsRoofstockPage() {
               scenarios. The grid is decision support, not a forecast.
             </li>
             <li>
-              <strong>Review the Screening Index and its inputs.</strong> The
-              secondary index is a screening aid, not a buy, decline, appraisal,
-              or investment recommendation. Apply your own criteria and complete
-              diligence.
+              <strong>Review the Deal score and its inputs.</strong> It is a
+              heuristic summary of the modeled numbers, 0–100. Apply your own
+              criteria and complete diligence.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">

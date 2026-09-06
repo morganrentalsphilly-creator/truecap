@@ -65,7 +65,7 @@ interface PricingTogglePlansProps {
 // from reconciling the same twenty claims in three different places.
 const FREE_FEATURES = [
   "Unlimited cash-flow analyses",
-  "Cap rate, CoC, DSCR, cash flow, Screening Index, and screening context",
+  "Cap rate, CoC, DSCR, cash flow, Deal score, and screening context",
   "Auto-fill starting assumptions from the address",
   "Shareable read-only deal links",
   // Honest caveat: Free can create five saves, while editing a saved deal is
@@ -103,7 +103,7 @@ const AGENT_PRO_FEATURES: string[] = [
 const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   {
     outcome: "Find the right price",
-    detail: "Calculate a target-backed Offer Ceiling, then check the deal against your Buy Box and market comps.",
+    detail: "Calculate your Offer Ceiling — the highest price that still meets your targets — then check the deal against your Buy Box and market comps.",
   },
   {
     outcome: "See what could break",
@@ -120,8 +120,8 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
 ];
 
 const PRO_DECISION_ANSWERS = [
-  { answer: "Selected-rule fit", proof: "At asking price" },
-  { answer: "Offer Ceiling", proof: "Target-backed solver" },
+  { answer: "Buy Box fit", proof: "At asking price" },
+  { answer: "Offer Ceiling", proof: "Solved from your targets" },
   { answer: "What could break", proof: "Downside stress test" },
   { answer: "How to document it", proof: "Review report" },
 ] as const;
@@ -156,9 +156,9 @@ export function PricingTogglePlans({
         : evaluation.status === "active" && evaluationAllowance
           ? `${evaluationAllowance} · no card`
           : evaluation.status === "exhausted"
-            ? "Included evaluation runs complete"
+            ? "Free-trial runs complete"
             : evaluation.status === "expired"
-              ? "Evaluation ended · Free screening remains"
+              ? "Free trial ended · Free screening remains"
               : "Paid access available now";
   // Monthly-first for visitors and Free users: they arrive primed on the
   // advertised monthly price from ads/FAQ/marketing copy (the exact amount is
@@ -553,7 +553,7 @@ function PricingTrialTerms({
       <>
         <p className="mt-2.5 text-center text-xs text-muted-foreground">
           <strong className="text-foreground">New account: $0 today, no card.</strong>{" "}
-          The {PRODUCT_EVALUATION_DAYS}-day evaluation includes three complete Pro deals and one
+          The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
           comparison. Nothing auto-renews; subscribe only if you choose to later.
         </p>
       </>
@@ -565,7 +565,7 @@ function PricingTrialTerms({
     return (
       <>
         <p className="mt-2.5 text-center text-xs text-muted-foreground">
-          <strong className="text-foreground">Evaluation active: {allowance}.</strong>{" "}
+          <strong className="text-foreground">Free trial active: {allowance}.</strong>{" "}
           You can subscribe at the exact displayed price at any time. Saved work stays in your
           account if you downgrade.
         </p>
@@ -576,7 +576,7 @@ function PricingTrialTerms({
   if (evaluation.status === "exhausted") {
     return (
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Your included evaluation runs are complete.</strong>{" "}
+        <strong className="text-foreground">Your free-trial runs are complete.</strong>{" "}
         Free screening remains available; subscribe only when you choose to run another complete Pro decision.
       </p>
     );
@@ -585,7 +585,7 @@ function PricingTrialTerms({
   if (evaluation.status === "expired") {
     return (
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Your no-card evaluation has ended.</strong>{" "}
+        <strong className="text-foreground">Your no-card free trial has ended.</strong>{" "}
         Free screening remains available; subscribe only when you choose to continue with Pro.
       </p>
     );

@@ -218,7 +218,7 @@ describe("server-owned PDF report data", () => {
       generatedAt: NOW,
     });
     expect(passAtThisPrice.decision?.label).toBe(
-      "Does not meet selected rules at asking",
+      "Doesn't meet your targets at asking",
     );
     expect(passAtThisPrice.decision?.clearsSelectedTargets).toBe(false);
     expect(passAtThisPrice.decision?.targetSource).toBe("selected-targets");
@@ -231,7 +231,7 @@ describe("server-owned PDF report data", () => {
       generatedAt: NOW,
     });
     expect(screeningOnly.decision?.label).toBe(
-      "Meets selected rules at asking",
+      "Meets your targets at asking",
     );
     expect(screeningOnly.decision?.readiness).toBe("Screening only");
     expect(screeningOnly.maxOffer?.source).toBe("selected-targets");

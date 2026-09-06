@@ -841,8 +841,8 @@ const INPUT_TABS: {
   },
   {
     id: "deal-score",
-    label: "Screening Index",
-    mobileLabel: "Index",
+    label: "Deal score",
+    mobileLabel: "Score",
     isPro: true,
   },
 ];
@@ -6167,7 +6167,7 @@ export function InvestCalcPage({
       if (isAuthenticated && canUseMaxOffer && !isSampleRun) {
         if (!computedFingerprint) {
           toast({
-            title: "Could not verify evaluation usage",
+            title: "Could not verify free-trial usage",
             description:
               "Your inputs are still here. Review them and try again.",
             variant: "destructive",
@@ -6182,8 +6182,8 @@ export function InvestCalcPage({
           toast({
             title:
               usage.code === "LIMIT_REACHED" || usage.code === "EXPIRED"
-                ? "Product evaluation complete"
-                : "Could not verify evaluation access",
+                ? "Free trial complete"
+                : "Could not verify free-trial access",
             description: usage.message,
             variant: usage.code === "SERVER_ERROR" ? "destructive" : "warning",
           });
@@ -9468,7 +9468,7 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a synthetic sample rental and preview a sample Pro report"
+              aria-label="Try a sample rental and preview a sample Pro report"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />

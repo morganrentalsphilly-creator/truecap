@@ -7,13 +7,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
   description:
-    "Research a BRRRR deal stage by stage in the TrueCap analyzer — rehab budget, ARV, DSCR, and stabilized rental returns. The integrated BRRRR lifecycle model is not currently released.",
+    "Research a BRRRR deal stage by stage in the TrueCap analyzer — rehab budget, ARV, DSCR, and stabilized rental returns. An integrated BRRRR lifecycle model isn't offered right now.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/for-brrrr" },
   openGraph: {
     title: "BRRRR planning resources — TrueCap",
     description:
-      "Work through rehab, ARV, DSCR, and stabilized rental returns in the analyzer, with a clear boundary around the unreleased lifecycle model.",
+      "Work through rehab, ARV, DSCR, and stabilized rental returns in the analyzer, with a clear line around what it doesn't model.",
     url: "/for-brrrr",
     type: "website",
     images: [
@@ -81,7 +81,7 @@ export default function ForBrrrrPage() {
             TrueCap&apos;s analyzer covers rehab budget, ARV, DSCR, and stabilized
             rental returns as separate steps. Its integrated BRRRR lifecycle analysis—including acquisition
             financing, refinance proceeds, capital recovery, and post-refinance
-            returns—is not currently released.
+            returns—isn&apos;t offered right now.
           </p>
           <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground">
             <strong>Steady-state rental analysis — use after renovation is complete.</strong>{" "}
@@ -93,7 +93,7 @@ export default function ForBrrrrPage() {
 
         <section aria-labelledby="released-resources" className="mb-12 sm:mb-16">
           <h2 id="released-resources" className="text-2xl font-extrabold text-foreground sm:text-3xl">
-            Released resources you can use now
+            Resources you can use now
           </h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {RESOURCES.map(({ icon: Icon, title, body, href, cta }) => (

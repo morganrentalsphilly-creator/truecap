@@ -60,7 +60,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
   const canonicalUrl = `${siteUrl}/markets/${slug}`;
   const address = identity.analyzerAddress ?? `${city}, ${stateCode}`;
   const title = `${city} rental property analysis`;
-  const description = `A source-first starting point for a preliminary ${city}, ${stateCode} rental-property screen. Local market ranges and legal claims are intentionally omitted until supported by a current authoritative source.`;
+  const description = `Start a ${city}, ${stateCode} rental-property screen with labeled, editable assumptions. TrueCap doesn't publish local market ranges or legal claims for ${city}; verify those locally.`;
   const webpageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -140,14 +140,13 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
 
         <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-xl font-extrabold text-foreground">
-            Source-first boundary
+            What this page doesn&apos;t publish
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            This route intentionally does not publish hand-curated cap-rate,
-            rent, appreciation, population, tax, insurance, landlord-law, or
-            neighborhood rankings as current facts. Those values change, may
-            differ by parcel, and are not supported by a current authoritative
-            checked-in dataset here.
+            TrueCap doesn&apos;t publish cap-rate, rent, appreciation,
+            population, tax, insurance, landlord-law, or neighborhood rankings
+            for {city}. Those values change and can differ parcel by parcel,
+            so verify them locally.
           </p>
         </section>
 
@@ -174,8 +173,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
             >
               {stateName} analysis guide
             </Link>
-            . It likewise keeps local facts out of the page until they have a
-            reviewed source.
+            . It leaves local facts to your own verification, too.
           </p>
         </section>
 
@@ -183,7 +181,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
           context={`a ${city} property`}
           handoff={{ address }}
           utmSource="market"
-          supportingText={`Start with ${address} in the address field. Review every labeled starting assumption, replace it with property-specific evidence, and treat the output as a preliminary screen—not an appraisal, lender approval, or investment recommendation.`}
+          supportingText={`Start with ${address} in the address field. Review every labeled starting assumption and replace it with property-specific evidence.`}
         />
 
         <CityStrategyGuides citySlug={slug} cityName={city} />

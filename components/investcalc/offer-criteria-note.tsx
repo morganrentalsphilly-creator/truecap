@@ -46,8 +46,8 @@ export function OfferCriteriaNote({
           Criteria: {basisLabel ?? "Captured targets"}
         </p>
         <p className="mt-1 text-muted-foreground">
-          Highest modeled price that still meets these criteria under the
-          assumptions shown. This is not a recommended offer or appraisal.
+          The highest price that still meets these criteria under the
+          assumptions shown.
         </p>
       </PopoverContent>
     </Popover>

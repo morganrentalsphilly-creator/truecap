@@ -69,7 +69,7 @@ const RANKED_CALCULATORS = [
     pros: [
       "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
       "Editable HUD area-rent + FRED owner-occupied rate benchmarks, with manual local property tax",
-      "Selected-rule fit, with a secondary Screening Index",
+      "Buy Box fit, with a Deal score",
       "Paid Pro plans add 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and reports; see live pricing for current terms",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
     ],
@@ -205,7 +205,7 @@ const RANKED_CALCULATORS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD rent and FRED rate benchmarks, manual local property tax, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
+    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD rent and FRED rate benchmarks, manual local property tax, Buy Box fit, and a Deal score. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
   },
   {
     q: "What's the best free rental property calculator?",
@@ -477,7 +477,7 @@ export default function BestRentalPropertyCalculator2026Post() {
             <ul>
               <li>
                 <strong>
-                  &quot;I want address-first screening and a target-backed Offer
+                  &quot;I want address-first screening and an Offer
                   Ceiling.&quot;
                 </strong>{" "}
                 Evaluate TrueCap&apos;s current free and Investor Pro terms on

@@ -464,7 +464,7 @@ export default function BrrrrMethodPost() {
             liquid for cycle four. The same $60,000 deployed as a single 25%
             down payment buys exactly one turnkey property and then stops.
             That is the entire argument for BRRRR — and it only holds if every
-            deal in the chain clears its target-dependent Offer Ceiling. One
+            deal in the chain clears its Offer Ceiling. One
             overpriced deal doesn&apos;t just underperform; it traps the
             capital that was supposed to fund the next cycle. Actual timing,
             appraisal, approval, proceeds, and portfolio outcome may differ.
@@ -545,8 +545,8 @@ export default function BrrrrMethodPost() {
             >
               rehab cost estimator
             </Link>{" "}
-            helps anchor one early-stage input. TrueCap&apos;s integrated BRRRR
-            lifecycle model is not currently released; the core{" "}
+            helps anchor one early-stage input. TrueCap doesn&apos;t offer an
+            integrated BRRRR lifecycle model right now; the core{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}

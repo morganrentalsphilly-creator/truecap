@@ -19,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "DealCheck",
     tagline:
-      "Pricing, free tier depth, mobile, sharing, projections, Screening Index — what each tool does best and when to pick which.",
+      "Pricing, free tier depth, mobile, sharing, projections, Deal score — what each tool does best and when to pick which.",
     slug: "dealcheck",
   });
 }

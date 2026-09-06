@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Ownership model", truecap: "Direct ownership of whole property", arrived: "Fractional shares of a property", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", arrived: "Not applicable (you don't own debt)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", arrived: "Forward dividend + appreciation forecast", winner: "tie" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", arrived: "Not applicable", winner: "truecap" },
+  { feature: "Deal score (0–100)", truecap: "Free — 0–100 score with factor breakdown", arrived: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k typical)", arrived: "$100 per share", winner: "arrived" },
   { feature: "Time commitment", truecap: "Active — you find, underwrite, close, manage (or hire PM)", arrived: "Passive — Arrived handles everything", winner: "arrived" },
   { feature: "Liquidity", truecap: "Low — property sale takes months", arrived: "Limited secondary market (Arrived's platform)", winner: "arrived" },

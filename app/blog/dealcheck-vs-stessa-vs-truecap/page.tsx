@@ -77,7 +77,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is TrueCap a DealCheck alternative?",
-    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap provides no-account preliminary screens with selected-rule fit, a secondary Screening Index, and editable labeled starting assumptions. DealCheck Starter includes its core calculators and reports subject to its published limits. DealCheck has native iOS/Android apps; TrueCap is an installable PWA.",
+    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap provides no-account preliminary screens with Buy Box fit, a Deal score, and editable labeled starting assumptions. DealCheck Starter includes its core calculators and reports subject to its published limits. DealCheck has native iOS/Android apps; TrueCap is an installable PWA.",
   },
   {
     q: "Is Stessa free?",
@@ -211,8 +211,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <li>
                 <strong>TrueCap</strong> is the same kind of tool — a per-deal
                 rental underwriting calculator — built newer with unlimited free
-                core analyses, editable screening assumptions, selected-rule
-                fit, and a secondary Screening Index.
+                core analyses, editable screening assumptions, Buy Box
+                fit, and a Deal score.
               </li>
               <li>
                 <strong>Stessa</strong> is a property accounting and operations
@@ -320,11 +320,11 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <ul>
               <li>
                 <strong>TrueCap</strong>: unlimited no-signup core analyses,
-                selected-rule fit and a secondary Screening Index, portfolio
+                Buy Box fit, portfolio
                 rollup across saved deals, pre-tax operating cash flow and
                 loan-coverage screening, sensitivity grid (rent ±10%, vacancy
-                ±5pp, rate ±1pp), target-dependent Offer Ceiling, Screening
-                Index (0-100) with subscore breakdown, address auto-fill via
+                ±5pp, rate ±1pp), Offer Ceiling, Deal
+                score (0-100) with subscore breakdown, address auto-fill via
                 authoritative open data sources you can audit.
               </li>
               <li>
@@ -337,8 +337,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
 
             <p>
               For investors who prioritize unlimited no-signup core analyses,
-              editable screening assumptions, and a selected-rule fit and
-              secondary Screening Index, TrueCap may be the better fit.{" "}
+              editable screening assumptions, and a Buy Box fit and
+              Deal score, TrueCap may be the better fit.{" "}
               <Link href="/vs/dealcheck">
                 The full TrueCap vs DealCheck comparison page
               </Link>{" "}
@@ -489,9 +489,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
               <li>
                 <strong>
-                  &quot;I want selected-rule context, not just metrics.&quot;
+                  &quot;I want to know if it fits my targets, not just the metrics.&quot;
                 </strong>{" "}
-                TrueCap shows selected-rule fit with a secondary Screening Index
+                TrueCap shows Buy Box fit with a Deal score
                 breakdown.
               </li>
               <li>

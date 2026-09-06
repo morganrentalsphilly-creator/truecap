@@ -73,7 +73,7 @@ export default async function StatePage({
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/states/${state.slug}`;
-  const description = `A source-first checklist for reviewing a specific ${state.name} rental property. No statewide tax, legal, insurance, return, or strategy estimate on this page is a property fact.`;
+  const description = `A source-first checklist for reviewing a specific ${state.name} rental property. This page doesn't publish statewide tax, legal, insurance, return, or strategy estimates.`;
 
   const placeLd = {
     "@context": "https://schema.org",
@@ -125,7 +125,7 @@ export default async function StatePage({
         name: `Does this page say whether ${state.name} is a good rental-property market?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No. A state label does not establish a property's economics or recommend an investment. Review the specific address, asking price, rent, expenses, condition, financing, and applicable rules.`,
+          text: `No. A state label doesn't establish a property's economics. Review the specific address, asking price, rent, expenses, condition, financing, and the rules that apply.`,
         },
       },
       {
@@ -133,7 +133,7 @@ export default async function StatePage({
         name: `What property-tax figure should I use for a ${state.name} property?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Use the current parcel bill or a reviewed local effective rate, then investigate the applicable assessment, exemption, transfer, and appeal rules with authoritative state and local sources. TrueCap does not auto-fill a statewide or parcel tax estimate.`,
+          text: `Use the current parcel bill or a reviewed local effective rate, then check the assessment, exemption, transfer, and appeal rules with state and local sources. TrueCap does not auto-fill property tax; enter your local number.`,
         },
       },
       {
@@ -141,7 +141,7 @@ export default async function StatePage({
         name: `Does TrueCap summarize ${state.name} landlord law?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No current legal conclusion is published from the stale-review state registry. Check the controlling statute, court rules, agency guidance, and local ordinances with qualified counsel before relying on a legal timeline or classification.`,
+          text: `No. TrueCap doesn't publish a legal summary for ${state.name}. Check the controlling statute, court rules, agency guidance, and local ordinances with qualified counsel before relying on a legal timeline or classification.`,
         },
       },
     ],
@@ -193,11 +193,10 @@ export default async function StatePage({
           {state.name} rental-property verification guide
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-foreground">
-          A statewide average or label cannot determine a property&apos;s rent,
-          tax, insurance, legal constraints, operating costs, financing, or
-          investment fit. This page keeps the URL and review workflow public
-          while exact registry claims remain hidden pending authoritative
-          dependencies and as-of dates.
+          A statewide average or label can&apos;t determine a property&apos;s
+          rent, tax, insurance, legal constraints, operating costs, financing,
+          or investment fit. This page shows you what to verify. It doesn&apos;t
+          publish statewide tax rates, eviction timelines, or landlord rankings.
         </p>
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
@@ -238,15 +237,14 @@ export default async function StatePage({
 
         <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
           <h2 className="text-base font-extrabold text-foreground">
-            Stale-review boundary
+            What this page doesn&apos;t publish
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground">
-            Hand-curated property-tax percentages, income-tax rates, eviction
-            timelines, landlord ratings, insurance trends, city rankings,
-            strategy labels, and market narratives are not rendered here. A
-            generic source list does not substantiate those state-specific
-            claims. They require direct official dependencies and a fresh review
-            before publication.
+            Property-tax percentages, income-tax rates, eviction timelines,
+            landlord ratings, insurance trends, city rankings, strategy labels,
+            and market narratives are not on this page. A generic source list
+            doesn&apos;t back up state-specific claims, so we don&apos;t publish
+            them until each one has an official source and a fresh review.
           </p>
         </section>
 
@@ -254,7 +252,7 @@ export default async function StatePage({
           <SeoAnalyzerCta
             context={`a ${state.name} property`}
             utmSource="state-page"
-            supportingText={`For a supported address and asking price, start with labeled rent and rate benchmarks plus editable assumptions. Enter ${state.name} property tax and insurance from reviewed local evidence; the result is a preliminary screen, not an appraisal, lender approval, or investment recommendation.`}
+            supportingText={`Enter a supported address and asking price to start from labeled rent and rate benchmarks with editable assumptions. Enter ${state.name} property tax and insurance from local evidence.`}
           />
         </div>
 
@@ -265,7 +263,7 @@ export default async function StatePage({
           <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
             <li>
               Collect the property-specific evidence above and record each
-              source and as-of date.
+              source and its date.
             </li>
             <li>
               Enter a supported address and asking price in the{" "}
@@ -278,15 +276,15 @@ export default async function StatePage({
               , then replace every generic or area-level starting assumption.
             </li>
             <li>
-              Review the model&apos;s limits in the{" "}
+              Read the{" "}
               <Link
                 href="/methodology"
                 className="font-semibold text-primary hover:underline"
               >
-                public methodology
+                Methodology
               </Link>{" "}
-              and obtain appropriate local tax, legal, insurance, condition, and
-              lending advice.
+              for how the model works, and get local tax, legal, insurance,
+              condition, and lending advice where you need it.
             </li>
           </ol>
         </section>

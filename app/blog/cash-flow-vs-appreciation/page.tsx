@@ -522,7 +522,7 @@ export default function BlogPost() {
 
           <p>
             TrueCap screens pre-tax operating cash flow, loan coverage, and
-            selected-rule fit. Appreciation, disposition, and tax outcomes
+            Buy Box fit. Appreciation, disposition, and tax outcomes
             require separate, explicitly sourced scenarios and professional
             advice where appropriate.
           </p>

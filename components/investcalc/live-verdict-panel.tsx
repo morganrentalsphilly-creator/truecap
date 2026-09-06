@@ -273,7 +273,7 @@ export function LiveVerdictPanel({
             </p>
           ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-            Updating as you type — run the full analysis for a target-backed
+            Updating as you type — run the full analysis for your
             Offer Ceiling, sensitivity, and 10-year cash-flow and equity projections.
           </p>
         </div>

@@ -154,7 +154,7 @@ export default function ToolsLandingPage() {
             Single-purpose calculators are great for triaging deals. When
             you&apos;re ready to underwrite a stabilized rental, open the full
             TrueCap analyzer for cash flow, cap rate, cash-on-cash return,
-            DSCR, projections, sensitivity, and a target-dependent Offer
+            DSCR, projections, sensitivity, and an Offer
             Ceiling. Free to start.
           </p>
           <Link

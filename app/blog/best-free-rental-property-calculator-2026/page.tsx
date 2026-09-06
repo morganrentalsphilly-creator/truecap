@@ -64,7 +64,7 @@ const TOOLS = [
     freeCovers: [
       "Cap rate, CoC, DSCR, NCF, monthly cash flow",
       "Editable HUD rent + FRED owner-occupied rate benchmarks; manual local property tax",
-      "Selected-rule fit, with a secondary Screening Index",
+      "Buy Box fit, with a Deal score",
       "Unlimited preliminary core screens without signup",
       "Save up to 5 deals + dashboard access",
       "One sale and rent comps lookup",
@@ -167,7 +167,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I underwrite a BRRRR or flip on a free calculator?",
-    a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap splits the job: released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the no-signup analyzer screens the stabilized rental — cap rate, cash-on-cash, DSCR, and cash flow — once you enter the post-rehab rent and loan terms. There is no separate DSCR page to run the refinance test in; the integrated BRRRR and fix-and-flip lifecycle models are not currently released either, so keep a project ledger alongside.",
+    a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap splits the job: standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the no-signup analyzer screens the stabilized rental — cap rate, cash-on-cash, DSCR, and cash flow — once you enter the post-rehab rent and loan terms. There is no separate DSCR page to run the refinance test in, and TrueCap doesn't offer integrated BRRRR or fix-and-flip lifecycle models right now, so keep a project ledger alongside.",
   },
   {
     q: "How should I compare free calculator plans?",

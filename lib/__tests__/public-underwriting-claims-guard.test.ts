@@ -92,7 +92,7 @@ describe("public underwriting claims", () => {
     const generator = readFileSync(join(ROOT, "lib/pdf-generator.ts"), "utf8");
 
     expect(generator).toContain('doc.text("UNDERWRITING RESULT"');
-    expect(generator).toContain('doc.text("RULE FIT"');
+    expect(generator).toContain('doc.text("BUY BOX FIT"');
     expect(generator).not.toContain("ACQUISITION DECISION");
     expect(generator).not.toContain('doc.text("SCREENING INDEX"');
     // Stored score data remains part of the report contract for compatibility;

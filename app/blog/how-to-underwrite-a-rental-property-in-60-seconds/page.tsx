@@ -514,9 +514,9 @@ export default function BlogPost() {
             <strong>The shortcut:</strong> TrueCap computes the first-pass
             metrics consistently and can start from labeled HUD and
             published-rate benchmarks. Property tax is entered from a local
-            annual bill or reviewed rate; a blank field uses a disclosed generic
-            1.1% preliminary fallback. Every estimate stays editable and should
-            be replaced with property-specific evidence.
+            annual bill or reviewed rate; a blank field uses a 1.1% default —
+            replace it with your local number. Every estimate stays editable;
+            swap in property-specific evidence as you get it.
           </p>
 
           <div className="not-prose"></div>

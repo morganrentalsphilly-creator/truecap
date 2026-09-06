@@ -112,7 +112,7 @@ describe("comparison claim truth", () => {
       "no move-out-year switch",
     );
     expect(read("app/vs/roofstock/page.tsx")).toMatch(
-      /not a buy, decline, appraisal,\s+or investment recommendation/i,
+      /heuristic summary of the modeled numbers/i,
     );
     for (const file of ["app/vs/mashvisor/page.tsx", "app/vs/privy/page.tsx"]) {
       expect(read(file), file).toContain(

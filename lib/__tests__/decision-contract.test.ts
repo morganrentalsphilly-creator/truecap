@@ -64,7 +64,7 @@ describe("advocacy-first decision contract", () => {
     expect(first.rulesSnapshotVersion).toBe(same.rulesSnapshotVersion);
     expect(first.rulesSnapshotVersion).not.toBe(changed.rulesSnapshotVersion);
     expect(offerCeilingHelperCopy(first)).toBe(
-      "Highest modeled price that still meets TrueCap screening defaults under the assumptions shown."
+      "The highest price that still meets TrueCap screening defaults under the assumptions shown."
     );
   });
 
@@ -124,7 +124,7 @@ describe("advocacy-first decision contract", () => {
       })
     ).toBe("does_not_meet_selected_rules");
     expect(ruleFitLabel("does_not_meet_selected_rules")).toBe(
-      "Does not meet selected rules at asking"
+      "Doesn't meet your targets at asking"
     );
     expect(
       deriveRuleFit({
@@ -134,7 +134,7 @@ describe("advocacy-first decision contract", () => {
       })
     ).toBe("meets_selected_rules");
     expect(ruleFitLabel("meets_selected_rules")).toBe(
-      "Meets selected rules at asking"
+      "Meets your targets at asking"
     );
     expect(
       deriveRuleFit({

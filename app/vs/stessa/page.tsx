@@ -92,11 +92,11 @@ const MATRIX: Row[] = [
     winner: "tie",
   },
   {
-    feature: "Target-derived Offer Ceiling",
+    feature: "Offer Ceiling",
     truecap:
-      "Pro calculates the highest modeled price meeting selected targets",
+      "Pro — the highest price that still meets your targets",
     stessa:
-      "The reviewed official sources describe custom offer-price scenarios, not a target-derived Offer Ceiling",
+      "The reviewed official sources describe custom offer-price scenarios, not an Offer Ceiling",
     winner: "truecap",
   },
   {
@@ -129,7 +129,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Tax-time reporting",
-    truecap: "No tax-specific module currently released",
+    truecap: "No tax-specific module offered right now",
     stessa: "Schedule E report is listed on current Manage and Pro plans",
     winner: "stessa",
   },
@@ -193,7 +193,7 @@ export default function VsStessaPage() {
             Stessa now spans acquisition through owned-property operations: its
             marketplace includes discovery, buy boxes, comps, and editable
             underwriting. TrueCap stays focused on a source-labeled acquisition
-            decision and the target-dependent price that makes a deal work.
+            decision and the Offer Ceiling: the highest price that still meets your targets.
           </p>
           <p className="mt-3 text-xs font-semibold text-foreground/75">
             Reviewed August 27, 2026 against the official sources linked below.
@@ -232,7 +232,7 @@ export default function VsStessaPage() {
                 </li>
                 <li>You want each starting benchmark labeled and editable.</li>
                 <li>
-                  You want rule-fit context and a target-derived Offer Ceiling.
+                  You want Buy Box fit and an Offer Ceiling.
                 </li>
                 <li>
                   You want downside testing and a shareable decision record.
@@ -397,8 +397,7 @@ export default function VsStessaPage() {
           </h2>
           <p className="text-sm sm:text-base leading-relaxed text-foreground">
             Choose TrueCap when you bring your own listings and want a focused,
-            source-labeled acquisition review with a target-derived Offer
-            Ceiling.
+            source-labeled acquisition review with an Offer Ceiling.
           </p>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-foreground">
             Evaluate Stessa when you want listing discovery, buy-box alerts,
@@ -459,10 +458,9 @@ export default function VsStessaPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, model DSCR, NCF, monthly cash
             flow, up to five saves, read-only share links, and the due-diligence
-            checklist/document vault. Pro adds sensitivity, a target-dependent
-            Offer Ceiling, 10-year projections, focused comparison, Buy Box
-            screening, co-branding, and PDF reports. See live pricing for
-            current terms.
+            checklist/document vault. Pro adds sensitivity, the Offer Ceiling,
+            10-year projections, focused comparison, Buy Box screening,
+            co-branding, and PDF reports. See live pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -514,11 +512,11 @@ const STESSA_FAQ: FaqItem[] = [
         marketplace supports listing discovery, buy boxes, comps, and editable
         acquisition underwriting, then Stessa continues into accounting and
         landlord operations. TrueCap is narrower: a source-labeled acquisition
-        decision workflow built around user-selected targets.
+        decision workflow built around your targets.
       </>
     ),
     plainTextAnswer:
-      "They overlap during acquisition. Stessa supports listing discovery, buy boxes, comps, and editable underwriting, then continues into accounting and landlord operations. TrueCap is a narrower, source-labeled acquisition decision workflow built around user-selected targets.",
+      "They overlap during acquisition. Stessa supports listing discovery, buy boxes, comps, and editable underwriting, then continues into accounting and landlord operations. TrueCap is a narrower, source-labeled acquisition decision workflow built around your targets.",
   },
   {
     question: "Should I use Stessa or TrueCap?",
@@ -533,7 +531,7 @@ const STESSA_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Choose based on workflow. TrueCap is focused on target-backed acquisition decisions. Stessa connects marketplace discovery and acquisition analysis to accounting and operations. Some investors may use both, but a strict before/after split is inaccurate.",
+      "Choose based on workflow. TrueCap is focused on the acquisition decision against your targets. Stessa connects marketplace discovery and acquisition analysis to accounting and operations. Some investors may use both, but a strict before/after split is inaccurate.",
   },
   {
     question: "Is Stessa free?",

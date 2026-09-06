@@ -59,8 +59,8 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a listing or enter an address. TrueCap shows cash flow, DSCR and the highest price that meets your buy box—plus which assumptions still need verification."
-                : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds a target-dependent Offer Ceiling. Starting benchmarks are not property-specific facts or quotes."}
+                ? "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable."
+                : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
 
             {/* Primary action — the address input. Hands off to the
@@ -75,7 +75,7 @@ export function MarketingHero() {
                 aria-hidden
                 className="size-3.5 shrink-0 text-[var(--metric-positive)]"
               />
-              <span>No account or card. Your first complete Offer Ceiling is included.</span>
+              <span>Free. No account. Your first full decision is included.</span>
             </p>
           </div>
 
@@ -107,8 +107,8 @@ export function MarketingHero() {
                 <strong className="text-foreground">
                   No black-box inputs.
                 </strong>{" "}
-                Every starting assumption is labeled with its source or as your
-                input, stays editable, and carries a clear verification step.
+                Every assumption is labeled with its source — HUD FMR, FRED
+                rate, TrueCap default, or your input — and stays editable.
               </p>
             </div>
           </div>
@@ -292,8 +292,10 @@ function HeroProductMock({
               }`}
             >
                {askingClears
-                 ? "Asking meets the sample targets"
-                 : "Asking misses the sample targets"}
+                 ? "Asking price clears the sample targets"
+                 : gap != null && gap > 0
+                   ? `Asking price is $${gap.toLocaleString("en-US")} above the ceiling`
+                   : "Asking price is above the ceiling"}
              </span>
            </div>
         </div>
@@ -316,11 +318,10 @@ function HeroProductMock({
             </div>
           ) : null}
            <p className="mt-1 text-xs text-foreground/80">
-             Example criteria · {targetLabel}.
+             Sample targets · {targetLabel}.
            </p>
            <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
-             Highest modeled price meeting these example criteria. This is not
-             a recommended offer.
+             The highest price that still clears these targets.
            </p>
         </div>
 
@@ -369,10 +370,10 @@ function HeroProductMock({
               className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]"
             />
             <span>
-              <strong>Selected-rule fit:</strong>{" "}
+              <strong>Buy Box fit:</strong>{" "}
               {maxOffer && gap != null && gap > 0
-                ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling and misses the example $${targetCashFlow}/mo cash-flow target.`
-                : "The asking price meets the example targets under the illustrative assumptions. Verify the material inputs before recording a decision."}
+                ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling, so it misses the sample targets.`
+                : "The asking price meets the sample targets under the assumptions shown."}
             </span>
           </div>
         ) : null}

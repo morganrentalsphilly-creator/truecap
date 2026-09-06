@@ -479,10 +479,9 @@ export function WeeklyDigestEmail({
                 fontSize: "13px",
               }}
             >
-              The secondary Screening Index and selected-rule fit are free. TrueCap Pro adds your buy box
+              The Deal score and Buy Box fit are free. TrueCap Pro adds your Buy Box
               (each deal shown against YOUR criteria), sensitivity grids,
-              10-year projections, an Offer Ceiling calculator, and PDF reports. The Offer Ceiling is
-              target-dependent and is not a recommended offer. Underwrite a
+              10-year projections, the Offer Ceiling, and PDF reports. Underwrite a
               property in less time than it takes to open Excel.
             </Text>
             <Link href={`${SITE_URL}/pricing`} style={styles.ctaButton}>

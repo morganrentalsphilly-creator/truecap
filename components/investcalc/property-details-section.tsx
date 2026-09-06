@@ -322,7 +322,7 @@ export function YearBuiltField({
         )}
       />
       <p className="mt-1 text-[11px] text-muted-foreground">
-        Used in the Screening Index age-risk check. If left blank, a
+        Used in the Deal score age-risk check. If left blank, a
         conservative uncertainty modifier applies. It does not auto-adjust your
         expense assumptions.
       </p>

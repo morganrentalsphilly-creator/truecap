@@ -55,7 +55,7 @@ function strategyDisplay(strategy: InvestorStrategy) {
   return {
     label: wholesale ? "Wholesale / Offer Ceiling" : strategy.label,
     tagline: wholesale
-      ? "Offer Ceiling for the selected rules"
+      ? "Offer Ceiling for your targets"
       : strategy.tagline,
   };
 }

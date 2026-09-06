@@ -1525,7 +1525,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
           ) : null}
           <div className="mb-5 rounded-2xl border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
             <p>
-              Relative modeled comparison only. When every deal uses the same calculation cohort, subtle row shading marks the highest or lowest displayed value according to that metric&apos;s direction. Tied values share the same shading; no hidden tie-breaker uses Screening Index, ROI, save date, or source order. A highlighted value does not establish safety or make an investment recommendation.
+              Relative modeled comparison only. When every deal uses the same calculation cohort, subtle row shading marks the highest or lowest displayed value according to that metric&apos;s direction. Tied values share the same shading; no hidden tie-breaker uses Deal score, ROI, save date, or source order. A highlighted value does not establish safety or make an investment recommendation.
             </p>
           </div>
           {!methodologiesComparable ? (

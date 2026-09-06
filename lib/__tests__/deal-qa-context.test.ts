@@ -326,7 +326,7 @@ describe("buildGroundedDealContext", () => {
     expect(text).not.toContain("undefined");
     expect(text).not.toContain("Infinity");
     // The unusable MAO piece is treated as absent.
-    expect(text).not.toContain("OFFER CEILING (a target-dependent modeled boundary):");
+    expect(text).not.toContain("OFFER CEILING (the highest price that still meets the targets):");
     expect(text.slice(text.indexOf("NOT PROVIDED"))).toContain("Offer Ceiling");
     // The projection anchors (years/profit) are fine → section renders, bad fields skipped.
     expect(text).toContain("10-YEAR PROJECTION");

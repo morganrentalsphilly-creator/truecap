@@ -84,8 +84,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     dealmachine: "Not applicable",
     winner: "truecap",
   },
@@ -359,12 +359,11 @@ export default function VsDealmachinePage() {
               <strong>Underwrite in TrueCap.</strong> Paste the address. HUD
               area rent and the FRED owner-occupied rate can pre-fill as
               editable benchmarks; property tax remains a manual local input.
-              Review the Offer Ceiling under your selected targets.
+              Review the Offer Ceiling under your targets.
             </li>
             <li>
               <strong>Verify, then record your decision.</strong> TrueCap&apos;s
-              Offer Ceiling solver (Pro) works backward from your target return.
-              It is not a recommended offer.
+              Offer Ceiling (Pro) works backward from your target return.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -516,12 +515,12 @@ const DEALMACHINE_FAQ: FaqItem[] = [
       <>
         One possible workflow is to source a property in DealMachine, then
         underwrite the entered assumptions in TrueCap. Pro calculates an Offer
-        Ceiling under the selected targets. Verify the material inputs and
+        Ceiling under your targets. Verify the material inputs and
         record your own decision before any transaction step.
       </>
     ),
     plainTextAnswer:
-      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under selected targets; verify the material inputs and record your own decision.",
+      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under your targets; verify the material inputs and record your own decision.",
   },
 ];
 

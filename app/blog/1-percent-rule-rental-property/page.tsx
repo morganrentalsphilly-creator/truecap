@@ -193,8 +193,7 @@ export default function OnePercentRulePost() {
             </p>
             <p>
               Flip it around and it becomes a rule-of-thumb Offer Ceiling:
-              <strong>100 × the monthly rent</strong>. This is a screening
-              boundary, not a recommended offer. A house that rents for
+              <strong>100 × the monthly rent</strong>. A house that rents for
               $1,800/month &quot;passes&quot; at any price up to $180,000; one
               that rents for $2,500 passes up to $250,000. That is the whole
               mechanic — no financing, no expenses, no condition. Which is the
@@ -492,7 +491,7 @@ export default function OnePercentRulePost() {
               starts from a published rate benchmark and editable assumptions,
               asks you to enter a local tax bill or reviewed rate, layers in
               vacancy and reserves, and hands back cash flow, cap rate,
-              cash-on-cash, DSCR, and selected-rule fit — the entire underwrite
+              cash-on-cash, DSCR, and Buy Box fit — the entire underwrite
               the 1% rule was only ever pretending to be a stand-in for. The
               rule is the napkin; this is the spreadsheet.
             </p>

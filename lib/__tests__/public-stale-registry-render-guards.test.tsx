@@ -38,7 +38,7 @@ describe("stale-review registry rendering boundary", () => {
       await StatePage({ params: Promise.resolve({ slug: "texas" }) }),
     );
 
-    expect(html).toContain("Stale-review boundary");
+    expect(html).toMatch(/What this page doesn(?:'|&#x27;|&apos;)t publish/);
     expect(html).not.toContain(state!.pitch);
     expect(html).not.toContain(`${state!.propertyTaxRatePct}%`);
     expect(html).not.toContain(`${state!.evictionTimelineDays} days`);
@@ -65,7 +65,7 @@ describe("stale-review registry rendering boundary", () => {
       }),
     );
 
-    expect(html).toContain("Stale-review boundary");
+    expect(html).toMatch(/What this page doesn(?:'|&#x27;|&apos;)t publish/);
     expect(html).toContain("this link does not preload market ranges");
     expect(html).not.toContain(combo!.pitch);
     expect(html).not.toContain(combo!.whyHereWhyNow);
@@ -87,7 +87,7 @@ describe("stale-review registry rendering boundary", () => {
       renderToStaticMarkup(<PhoenixMarketPage />),
     ].join("\n");
 
-    expect(html.match(/Source-first boundary/g)).toHaveLength(3);
+    expect(html.match(/What this page doesn(?:'|&#x27;|&apos;)t publish/g)).toHaveLength(3);
     expect(html).not.toMatch(
       /3-5%|8-11%|1M\+ residents|500k\+ residents|top 5 US markets|MLS-derived medians|active TrueCap user analyses|Tax Foundation \(property tax\)/i,
     );

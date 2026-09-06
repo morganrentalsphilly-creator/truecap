@@ -8,7 +8,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 export const metadata: Metadata = {
   title: "Create account",
   description:
-    "Create a TrueCap account for a 21-day, no-card product evaluation.",
+    "Create a TrueCap account and start your 21-day free trial. No card.",
   alternates: { canonical: "/auth/sign-up" },
   robots: { index: false, follow: false },
 };

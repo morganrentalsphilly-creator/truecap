@@ -14,9 +14,9 @@ import Link from "next/link";
 import { Target, Activity, ShieldCheck, BarChart3, GitCompareArrows, FileText, Users, Handshake } from "lucide-react";
 
 const PRO_STACK = [
-  [Target, "Offer Ceiling", "Highest modeled price that still meets the selected targets under the assumptions shown."],
+  [Target, "Offer Ceiling", "The highest price that still meets your targets."],
   [Activity, "Downside Stress Test", "See the deal at higher vacancy, higher rates, and lower rent — before the bank does."],
-  [ShieldCheck, "Buy Box screening", "Your criteria screen every deal automatically — rule fit with reasons, separate from your decision."],
+  [ShieldCheck, "Buy Box screening", "Your targets screen every deal automatically — pass or miss, with reasons."],
   [BarChart3, "10-Year Wealth View", "Modeled cash flow and equity across a decade of ownership."],
   [GitCompareArrows, "Comparison + Pipeline", "Every candidate ranked side by side, and nothing slips between research and offer."],
   [FileText, "Lender-Facing Review Reports", "Bring a transparent input summary for your lender to review."],

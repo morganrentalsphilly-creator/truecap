@@ -321,16 +321,16 @@ export function buildCanonicalReportData(
         : clearsSelectedTargets
           ? targetSource === "starter-criteria"
             ? "Meets TrueCap starter criteria at asking"
-            : "Meets selected rules at asking"
+            : "Meets your targets at asking"
           : targetSource === "starter-criteria"
             ? "Does not meet TrueCap starter criteria at asking"
-            : "Does not meet selected rules at asking",
+            : "Doesn't meet your targets at asking",
       readiness: "Screening only",
       clearsSelectedTargets,
       targetSource,
       targetBasis,
       rationale: !targetAdopted
-        ? "No acquisition targets were adopted for this underwrite. Review the operating results, verify material assumptions, and set at least one target before calculating a modeled price threshold."
+        ? "No acquisition targets were adopted for this underwrite. Review the operating results, verify material assumptions, and set at least one target before calculating an Offer Ceiling."
         : clearsSelectedTargets
           ? `The asking price clears ${decisionSourceLabel}, but material inputs remain screening assumptions and must be verified before a user-recorded decision.`
           : `The asking price does not clear ${decisionSourceLabel}: ${targetBasis}.`,

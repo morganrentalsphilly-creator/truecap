@@ -61,7 +61,7 @@ const STEPS = [
     paragraphs: [
       "Analysis paralysis is almost never a math problem — it's a criteria problem. If you don't know what a good deal means to you, every deal is a maybe, and maybes don't get offers. Your Buy Box is the fix: the small set of numbers a property must clear before it deserves another minute of your attention.",
       "Write down five numbers: the most cash you can deploy (down payment + closing + reserves), your minimum monthly cash flow after ALL expenses (including the vacancy, maintenance, and CapEx reserves most spreadsheets skip), your minimum cash-on-cash return, the property types you'll actually manage, and the markets you're hunting in. That's it. Three of them will feel arbitrary — write them down anyway; you can revise them after ten analyses, but you can't revise a blank page.",
-      "In TrueCap, save these as your Buy Box (a Pro feature) and each analysis shows which selected rules the inputs meet or miss — or keep them on a sticky note and check each analysis by hand. The tool matters less than the commitment: deals are measured against your stated criteria, not against your mood.",
+      "In TrueCap, save these as your Buy Box (a Pro feature) and each analysis shows which of your targets the inputs meet or miss — or keep them on a sticky note and check each analysis by hand. The tool matters less than the commitment: deals are measured against your stated criteria, not against your mood.",
     ],
     action: "Write the five numbers down. Today, before the next listing.",
   },
@@ -85,7 +85,7 @@ const STEPS = [
     paragraphs: [
       "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD area benchmark and rate from a labeled FRED national series; property tax is a manual local input with a disclosed generic fallback when blank. These are editable screening starting points, not verified facts or quotes for the property.",
       "Replace four numbers with local evidence before you believe any verdict: the rent (pull 3 comparable actual rentals, not asking rents), the tax bill (the county has the real number), insurance (one phone call), and the rate (a written quote for an investor loan, which is not the owner-occupant headline rate). Everything else — vacancy, maintenance, CapEx, management — keep conservative defaults until the property tells you otherwise.",
-      "Then read three outputs in order: modeled cash flow with reserves, DSCR against your selected screening threshold, and the downside scenario. A lender may calculate DSCR differently and will apply its own eligibility, valuation, and reserve rules.",
+      "Then read three outputs in order: modeled cash flow with reserves, DSCR against your Buy Box threshold, and the downside scenario. A lender may calculate DSCR differently and will apply its own eligibility, valuation, and reserve rules.",
     ],
     action:
       "For your best candidate: verify rent, tax, insurance, and rate with real evidence.",
@@ -96,7 +96,7 @@ const STEPS = [
     short: "Offer Ceiling",
     title: "Review the Offer Ceiling before negotiation",
     paragraphs: [
-      "The Offer Ceiling is the highest modeled purchase price that still meets the named target profile under the assumptions shown. It is a target-dependent screening boundary—not a recommended offer, appraisal, or substitute for diligence.",
+      "The Offer Ceiling is the highest price that still meets your targets under the assumptions shown.",
       "The solver works backward from the selected cash-flow, cash-on-cash, cap-rate, DSCR, and price constraints that apply. TrueCap Pro computes this boundary on each compatible analysis and includes it in Pro reports.",
       "If the Offer Ceiling is below asking, the page reports the gap. That comparison does not tell you to make, submit, or avoid an offer. Verify rent, property costs, condition, financing, title, and local requirements, then decide with the advisers relevant to your situation.",
     ],
@@ -111,7 +111,7 @@ const STEPS = [
     paragraphs: [
       "Offer terms, contingencies, deposits, deadlines, and legal effect vary by transaction and jurisdiction. Review the actual agreement with your agent and attorney where appropriate; do not assume a contingency or cancellation right exists unless it is written and enforceable.",
       'A neutral prompt for your agent: "I have completed an initial underwrite for [address]. Please help me verify the assumptions, comparable evidence, property disclosures, and financing terms, then review the risks and appropriate contract protections with me before I decide whether and how to offer."',
-      "For an off-market conversation, keep screening estimates separate from verified facts. A report can document the assumptions, selected rules, gaps, and verification plan, but it does not establish property value, proof of funds, lender approval, or an appropriate offer price.",
+      "For an off-market conversation, keep screening estimates separate from verified facts. A report can document the assumptions, your targets, gaps, and verification plan, but it does not establish property value, proof of funds, lender approval, or an appropriate offer price.",
       "Then — win or lose — go back to Step 2. The pipeline is the strategy; any single deal is just a rep.",
     ],
     action:

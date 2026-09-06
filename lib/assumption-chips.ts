@@ -304,7 +304,7 @@ export function buildAssumptionChips(
     label: taxAnnualMode
       ? `Taxes $${fmtMoney(taxAnnual)}/yr`
       : taxUsesGenericFallback
-        ? "Taxes 1.1% preliminary fallback"
+        ? "Taxes 1.1% default"
         : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}% of price/year`,
     badge: taxIsState
       ? {
@@ -317,7 +317,7 @@ export function buildAssumptionChips(
           ? { kind: "play", text: play.label }
           : provenance.propertyTaxPct || taxIsCustom
             ? { kind: "yours", text: "yours" }
-            : { kind: "default", text: "verify locally" },
+            : { kind: "default", text: "replace with your local number" },
     target: "expenses",
     focusFieldId: "propertyTaxAmount",
     pulseKey: null,

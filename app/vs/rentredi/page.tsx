@@ -96,13 +96,13 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Screening Index (0-100)",
+    feature: "Deal score (0–100)",
     truecap: "Free — with subscore breakdown",
     rentredi: "Not modeled",
     winner: "truecap",
   },
   {
-    feature: "Selected-rule fit",
+    feature: "Buy Box fit",
     truecap: "Yes — named targets with supporting economics",
     rentredi: "Not applicable",
     winner: "truecap",

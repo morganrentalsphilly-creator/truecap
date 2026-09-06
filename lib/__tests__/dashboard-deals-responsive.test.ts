@@ -23,7 +23,7 @@ describe("dashboard deal list responsive contract", () => {
   it("preserves all sort choices and a reversible direction on cards", () => {
     expect(source).toContain('<option value="gap">Gap to ceiling</option>');
     expect(source).toContain('<option value="maxOffer">Offer Ceiling</option>');
-    expect(source).toContain('<option value="score">Screening Index</option>');
+    expect(source).toContain('<option value="score">Deal score</option>');
     expect(source).toContain('<option value="address">Property</option>');
     expect(source).toContain("setDesc((current) => !current)");
   });

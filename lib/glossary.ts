@@ -176,26 +176,26 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   mao: {
     term: "Offer Ceiling",
     slug: "max-allowable-offer",
-    also: ["Target-dependent modeled price boundary"],
+    also: ["Highest price that meets your targets"],
     category: "metric",
     definition:
-      "The highest modeled purchase price that still meets your selected targets under the assumptions shown. It is not a recommended offer.",
+      "The highest purchase price that still meets your targets under the assumptions shown.",
     formula:
       "Offer Ceiling = work backward from your selected target metrics using the property's modeled NOI and your financing assumptions.",
     example:
       "With $32,000 of modeled NOI and a selected 7.5% cap-rate floor, the cap-rate-only Offer Ceiling is $32,000 ÷ 0.075 = $426,666; other selected targets may produce a lower boundary.",
     whyItMatters:
-      "The Offer Ceiling shows where the model stops meeting the selected targets. Verify rent, financing, taxes, insurance, property condition, and material costs before using it in a negotiation or purchase decision.",
+      "The Offer Ceiling shows where the model stops meeting your targets. Verify rent, financing, taxes, insurance, property condition, and material costs before using it in a negotiation or purchase decision.",
     related: ["capRate", "coc", "dealScore"],
   },
   dealScore: {
-    term: "Screening Index",
+    term: "Deal score",
     slug: "deal-score",
     category: "metric",
     definition:
-      "A secondary 0–100 composite of modeled cap rate, cash-on-cash, monthly cash flow, DSCR, and projected return for consistent triage.",
+      "A 0–100 heuristic summary of the modeled cap rate, cash-on-cash, monthly cash flow, DSCR, and projected return, for consistent triage.",
     whyItMatters:
-      "The Screening Index can help sort analyses for deeper review, but it is not selected-rule fit, evidence readiness, a probability of success, an appraisal, or investment advice. Read it after the selected rules and underlying metrics.",
+      "The Deal score helps you sort analyses for deeper review. It is not your Buy Box fit; read it after your targets and the underlying metrics.",
     related: ["capRate", "coc", "dscr", "cashFlow"],
   },
   taxSavings: {
@@ -263,7 +263,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     example:
       "Map acquisition uses, renovation funding and downtime, stabilized operations, the original-loan payoff, refinance fees and proceeds, and the new loan schedule before estimating capital remaining in the deal.",
     whyItMatters:
-      "A simple ARV-times-LTV shortcut can overstate refinance proceeds and understate capital at risk. TrueCap keeps its BRRRR model unreleased until the full lifecycle reconciles across every result and report surface.",
+      "A simple ARV-times-LTV shortcut can overstate refinance proceeds and understate capital at risk. TrueCap doesn't offer an integrated BRRRR model right now.",
     related: ["arv", "ltv", "capRate"],
     postUrl: "/blog/brrrr-method-explained",
   },
@@ -396,7 +396,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "property-tax",
     category: "expense",
     definition:
-      "Annual property tax as a percent of value. Released underwriting accepts a local annual bill or reviewed local effective rate entered by the user; a blank field uses a disclosed generic 1.1% preliminary fallback.",
+      "Annual property tax as a percent of value. Enter a local annual bill or a reviewed local effective rate; a blank field uses a TrueCap default of 1.1% — replace it with your local number.",
     whyItMatters:
       "Property tax is the second-largest expense after mortgage on most deals. State rates vary wildly: 0.3% in Hawaii vs 2.5%+ in some Texas MUD zones. Always pull the ACTUAL current tax bill from the county appraisal district — don't trust Zillow's estimate.",
     related: ["noi", "capRate"],
@@ -581,7 +581,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "appreciation-rate",
     category: "projection",
     definition:
-      "Editable annual property-value change assumption; it is not an appraisal or forecast.",
+      "Your editable assumption for annual property-value change.",
     whyItMatters:
       "Small assumed rates compound into large modeled exit differences. Build the base case from current local evidence and include flat and declining-value scenarios; no market tier guarantees appreciation.",
     related: ["irr", "rentGrowth"],

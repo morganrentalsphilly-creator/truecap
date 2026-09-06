@@ -83,8 +83,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     batchleads: "Not applicable",
     winner: "truecap",
   },
@@ -341,9 +341,8 @@ export default function VsBatchleadsPage() {
             </li>
             <li>
               <strong>Verify, then record your decision.</strong> Use
-              TrueCap&apos;s Offer Ceiling solver (Pro) to calculate the modeled
-              boundary under your selected targets; it is not a recommended
-              offer.
+              TrueCap&apos;s Offer Ceiling (Pro) to find the highest price that
+              still meets your targets.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -491,14 +490,14 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "Can I use BatchLeads + TrueCap together?",
     answer: (
       <>
-        Yes — BatchLeads can surface off-market leads, and TrueCap can screen
-        user-entered assumptions. The secondary Screening Index supports triage,
-        while the target-dependent Offer Ceiling shows a modeled boundary for
-        review. Neither is a recommended offer.
+        Yes — BatchLeads surfaces off-market leads, and TrueCap screens the
+        assumptions you enter. The Deal score helps you triage the list, and
+        the Offer Ceiling shows the highest price that still meets your
+        targets.
       </>
     ),
     plainTextAnswer:
-      "BatchLeads can surface off-market leads; TrueCap can screen user-entered assumptions. Its secondary Screening Index supports triage, and its target-dependent Offer Ceiling is a modeled boundary—not a recommended offer.",
+      "BatchLeads surfaces off-market leads; TrueCap screens the assumptions you enter. The Deal score helps you triage the list, and the Offer Ceiling shows the highest price that still meets your targets.",
   },
 ];
 

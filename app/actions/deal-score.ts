@@ -11,7 +11,7 @@ export type DealScoreActionResult =
 export async function getDealScoreAction(input: unknown): Promise<DealScoreActionResult> {
   const parsed = dealScoreInputSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid Screening Index input." };
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid Deal score input." };
   }
 
   // Screening Index is a FREE feature for every user (moved to the free tier in

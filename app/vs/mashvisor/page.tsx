@@ -69,14 +69,14 @@ const MATRIX: Row[] = [
   {
     feature: "Primary job",
     truecap:
-      "Per-deal underwriting — how does this property fit my selected rules?",
+      "Per-deal underwriting — does this property fit my Buy Box?",
     mashvisor: "Market research — WHERE should I invest?",
     winner: "tie",
   },
   {
     feature: "Free tier depth",
     truecap:
-      "Core cap rate, CoC, DSCR, cash flow, Screening Index, and selected-rule fit",
+      "Core cap rate, CoC, DSCR, cash flow, Deal score, and Buy Box fit",
     mashvisor: "Limited free preview; most data requires paid plan",
     winner: "truecap",
   },
@@ -129,12 +129,12 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Offer Ceiling solver",
-    truecap: "Pro — works backward from selected targets",
+    truecap: "Pro — works backward from your targets",
     mashvisor: "Not a primary feature",
     winner: "truecap",
   },
   {
-    feature: "Screening Index + breakdown",
+    feature: "Deal score + breakdown",
     truecap: "Free — 0–100 score with per-subscore explanation",
     mashvisor: "Their own metric",
     winner: "tie",

@@ -184,15 +184,15 @@ describe("verdict sentence — the results headline states the modeled relations
   it("degrades without an Offer Ceiling without inventing a decision", () => {
     expect(
       buildVerdictSentence({ recommendation: "Avoid", purchasePrice: 310_000, maxOffer: null }).text
-    ).toBe("Review the selected rules and assumptions at the $310,000 asking price.");
+    ).toBe("Review your targets and assumptions at the $310,000 asking price.");
     expect(
       buildVerdictSentence({ recommendation: "Buy", purchasePrice: 310_000, maxOffer: null }).text
-    ).toBe("Review the selected rules and assumptions at the $310,000 asking price.");
+    ).toBe("Review your targets and assumptions at the $310,000 asking price.");
   });
 
   it("degrades to the label alone when nothing else is known", () => {
     expect(
       buildVerdictSentence({ recommendation: "Neutral", purchasePrice: null, maxOffer: null }).text
-    ).toBe("Review the selected rules and assumptions.");
+    ).toBe("Review your targets and assumptions.");
   });
 });

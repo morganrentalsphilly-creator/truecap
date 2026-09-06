@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { Disclaimer } from "@/components/marketing/disclaimer";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -654,10 +655,10 @@ export function ReadOnlyAnalysisView({
       : criteriaMet
         ? maoTargetSource === "starter-criteria"
           ? "Meets TrueCap starter criteria at asking"
-          : "Meets selected rules at asking"
+          : "Meets your targets at asking"
         : maoTargetSource === "starter-criteria"
           ? "Does not meet TrueCap starter criteria at asking"
-          : "Does not meet selected rules at asking";
+          : "Doesn't meet your targets at asking";
   const ceilingDisplay = offerCeiling
     ? fmtCash(offerCeiling.ceiling)
     : offerCeilingAccess?.access === "exact" && maoTarget
@@ -819,9 +820,8 @@ export function ReadOnlyAnalysisView({
             )}
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               {adoptedMaoTarget
-                ? "Highest modeled price that still meets the targets captured with this share under the assumptions shown."
-                : "A supported Offer Ceiling requires captured target criteria."}{" "}
-              This is not a recommended offer or an appraisal.
+                ? "The highest price that still meets the targets captured with this share under the assumptions shown."
+                : "A supported Offer Ceiling requires captured target criteria."}
             </p>
           </div>
         </div>
@@ -1116,14 +1116,9 @@ export function ReadOnlyAnalysisView({
         </span>
       </Link>
 
-      {/* Advice guardrail - this page is shared to lenders/partners/clients and
-          shows verdict + recommendation language, but has no SiteFooter. */}
-      <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-        This shared analysis is an automated estimate for screening only, not an
-        appraisal, and not financial, tax, or investment advice. Figures depend
-        on assumptions that may be out of date; verify independently before
-        making any decision.
-      </p>
+      {/* THE disclaimer (docs/voice.md rule 3) — this page is shared to
+          lenders/partners/clients and has no SiteFooter, so it mounts here. */}
+      <Disclaimer className="mt-4 px-2 text-center" />
     </div>
   );
 }

@@ -67,7 +67,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Calculator,
     title: "Review the investment case at the showing",
-    body: "Paste the address, review the assumptions, and see selected-rule fit, cash flow, cap rate, cash-on-cash return, and DSCR while the property is still in front of you.",
+    body: "Paste the address, review the assumptions, and see Buy Box fit, cash flow, cap rate, cash-on-cash return, and DSCR while the property is still in front of you.",
   },
   {
     icon: Share2,
@@ -77,7 +77,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: FileDown,
     title: "Send a co-branded analysis clients can review",
-    body: "Share a polished PDF or co-branded deal link with the assumptions, selected-rule fit, projections, and context for that buyer.",
+    body: "Share a polished PDF or co-branded deal link with the assumptions, Buy Box fit, projections, and context for that buyer.",
   },
   {
     icon: ShieldCheck,
@@ -260,7 +260,7 @@ export default async function ForAgentsPage() {
               "Open TrueCap on your phone or laptop at the showing.",
               "Paste the listing address. HUD area rent and the FRED owner-occupied mortgage-rate benchmark can fill as editable starting values; enter a local property-tax bill or reviewed rate manually.",
               "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
-              "Run the analysis, then review selected-rule fit, the Offer Ceiling, and downside before presenting the result.",
+              "Run the analysis, then review Buy Box fit, the Offer Ceiling, and downside before presenting the result.",
               "Assign the opportunity to the right client, then send a co-branded link or report.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
@@ -295,8 +295,8 @@ export default async function ForAgentsPage() {
             </li>
             <li>
               <strong>Client context.</strong> Maintain per-client Buy Boxes and
-              show the specific reason a property meets or misses selected
-              criteria.
+              show the specific reason a property meets or misses their
+              targets.
             </li>
             <li>
               <strong>Brand presence.</strong> Put your logo, colors, and
@@ -381,7 +381,7 @@ export default async function ForAgentsPage() {
               &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
               screens better than most of what we looked at in [month].
               I&apos;ve attached my underwrite: rent benchmark, cash flow, and
-              the modeled price threshold under your selected targets. Worth 15
+              the highest price that still meets your targets. Worth 15
               minutes this week?&rdquo;
             </li>
             <li>
@@ -390,9 +390,9 @@ export default async function ForAgentsPage() {
               </strong>{" "}
               &ldquo;Before you get ten opinions from the internet: here&apos;s
               the analysis for [address] — every assumption is labeled and you
-              can change any of them. At asking it [meets / misses] the selected
-              rules; the Offer Ceiling shows the modeled threshold for those
-              targets. Tell me which assumption you&apos;d challenge.&rdquo;
+              can change any of them. At asking it [meets / misses] your
+              targets; the Offer Ceiling shows the highest price that still
+              does. Tell me which assumption you&apos;d challenge.&rdquo;
             </li>
             <li>
               <strong className="text-foreground">

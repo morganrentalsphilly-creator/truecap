@@ -354,7 +354,7 @@ export default function OnePercentRulePage() {
                 "Cap rate + CoC + DSCR + monthly cash flow",
                 "10-year projection with rent growth (Pro)",
                 "Downside sensitivity grid (Pro)",
-                "Target-dependent Offer Ceiling (Pro)",
+                "Offer Ceiling (Pro)",
                 "Editable operating and financing assumptions",
                 "Free to start",
               ].map((line) => (
@@ -381,7 +381,7 @@ export default function OnePercentRulePage() {
 
           <ToolsConversionCta
             calculatorName="1% rule calculator"
-            hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Released projections appear only when your evaluation or plan access includes them."
+            hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Projections appear when your free trial or plan includes them."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

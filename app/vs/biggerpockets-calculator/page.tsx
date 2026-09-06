@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   {
     workflow: "Underwriting sequence",
     truecap:
-      "Connects selected-rule fit, Buy Box, Offer Ceiling, downside, and presentation.",
+      "Connects Buy Box fit, Offer Ceiling, downside, and presentation.",
     bp: "Centers on a detailed calculator and the investor's interpretation of its report.",
   },
   {
@@ -74,9 +74,9 @@ const MATRIX: Row[] = [
     bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs.",
   },
   {
-    workflow: "Modeled boundary",
+    workflow: "Offer Ceiling",
     truecap:
-      "Offer Ceiling works backward from the selected target and shows threshold alternatives; it is not a recommended offer.",
+      "Offer Ceiling works backward from your target and shows threshold alternatives.",
     bp: "The calculator supports an offer-price input inside a broader rental analysis.",
   },
   {
@@ -140,7 +140,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             BiggerPockets has been the default real estate analysis tool for two
             decades. Their calculator is solid. We built TrueCap because we
             wanted an address-first workflow that connects the initial screen to
-            selected-rule fit, an Offer Ceiling, downside, and presentation.
+            Buy Box fit, an Offer Ceiling, downside, and presentation.
             BiggerPockets may be the better choice when its community and
             education ecosystem are part of what you value. Here is the workflow
             comparison.
@@ -182,7 +182,7 @@ export default function VsBiggerPocketsCalculatorPage() {
                   assumptions.
                 </li>
                 <li>
-                  You want a Screening Index with plain-English breakdown.
+                  You want a Deal score with a plain-English breakdown.
                 </li>
                 <li>You want a portfolio rollup across saved deals.</li>
               </ul>
@@ -307,9 +307,9 @@ export default function VsBiggerPocketsCalculatorPage() {
               ecosystem.
             </li>
             <li>
-              <strong>Connect the outputs.</strong> TrueCap&apos;s selected-rule
-              fit leads into Buy Box, Offer Ceiling, downside, and reporting
-              instead of treating each as a separate destination.
+              <strong>Connect the outputs.</strong> TrueCap&apos;s Buy Box fit
+              leads into the Offer Ceiling, downside, and reporting instead of
+              treating each as a separate destination.
             </li>
           </ul>
         </section>
@@ -340,7 +340,7 @@ export default function VsBiggerPocketsCalculatorPage() {
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             If you only need one number — not a full calculator suite —
-            TrueCap&apos;s released single-purpose tools cover the screening end
+            TrueCap&apos;s free single-purpose tools cover the screening end
             for free: the{" "}
             <Link
               href="/tools/1-percent-rule-calculator"
@@ -490,14 +490,14 @@ const BP_FAQ: FaqItem[] = [
       <>
         TrueCap is an address-first alternative: it can pre-fill editable HUD
         rent and the FRED owner-occupied mortgage-rate benchmark, keeps property
-        tax manual, and shows selected-rule fit plus a secondary Screening Index
+        tax manual, and shows Buy Box fit plus a Deal score
         alongside the standard metrics. BiggerPockets&apos; calculator is a
         detailed analysis workflow inside a much larger community and education
         ecosystem.
       </>
     ),
     plainTextAnswer:
-      "TrueCap is an address-first alternative that labels editable HUD rent and FRED mortgage-rate benchmarks, keeps property tax manual, and shows standard metrics and selected-rule fit.",
+      "TrueCap is an address-first alternative that labels editable HUD rent and FRED mortgage-rate benchmarks, keeps property tax manual, and shows standard metrics and Buy Box fit.",
   },
   {
     question: "How much is TrueCap vs BiggerPockets Pro?",
@@ -549,11 +549,11 @@ const BP_FAQ: FaqItem[] = [
         Stick with BiggerPockets if its community, education, and existing
         calculator workflow are central to how you invest. Choose TrueCap if you
         want a focused address-to-underwrite experience with labeled starting
-        assumptions, selected-rule fit, an Offer Ceiling, downside, and
+        assumptions, Buy Box fit, an Offer Ceiling, downside, and
         presentation in one sequence.
       </>
     ),
     plainTextAnswer:
-      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-underwrite sequence with labeled assumptions, selected-rule fit, a target-dependent Offer Ceiling, downside, and presentation.",
+      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-underwrite sequence with labeled assumptions, Buy Box fit, an Offer Ceiling, downside, and presentation.",
   },
 ];

@@ -171,7 +171,7 @@ export default async function AuthedHome({
             advocacyContractEligible: false,
           }}
         />
-        <SiteFooter />
+        <SiteFooter disclaimer={false} />
       </div>
     );
   }

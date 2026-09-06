@@ -302,9 +302,9 @@ export function BuyBoxVerdictCard({
           <div>
             <p className="font-bold">Buy Box rules are temporarily unavailable</p>
             <p className="mt-1 text-xs leading-relaxed text-amber-900/80">
-              No Buy Box fit or target-backed Offer Ceiling is being claimed.
+              No Buy Box fit or Offer Ceiling is being claimed.
               You can still save, share, or export the base underwriting;
-              explicitly selected targets remain labeled separately.
+              your own targets stay labeled separately.
             </p>
           </div>
           <button
@@ -340,15 +340,15 @@ export function BuyBoxVerdictCard({
   })();
 
   const headline = r.passes
-    ? "Meets selected rules at asking"
+    ? "Meets your targets at asking"
     : r.failedLabels.length > 0
-      ? "Does not meet selected rules at asking"
-      : "Cannot determine rule fit yet";
+      ? "Doesn't meet your targets at asking"
+      : "Can't determine Buy Box fit yet";
   const applicableCount = r.checks.filter((c) => c.pass !== null).length;
 
   return (
     <section
-      aria-label="Selected-rule fit"
+      aria-label="Buy Box fit"
       className={cn(
         "rounded-2xl border p-4 sm:p-5",
         r.passes
@@ -424,14 +424,9 @@ export function BuyBoxVerdictCard({
             <span className="font-bold text-foreground">
               Offer Ceiling: {money(yourNumber.maxPrice)}
             </span>{" "}
-            — highest modeled price that still meets {primary.box.name} under the assumptions shown.
+            — the highest price that still meets {primary.box.name} under the assumptions shown.
             {yourNumberCriteria ? (
-              <>
-                <span className="mt-0.5 block">Criteria: {yourNumberCriteria}</span>
-                <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                  This is not a recommended offer or an appraisal.
-                </span>
-              </>
+              <span className="mt-0.5 block">Criteria: {yourNumberCriteria}</span>
             ) : null}
           </p>
         ) : (
