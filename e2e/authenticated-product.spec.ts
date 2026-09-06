@@ -18,11 +18,13 @@ test.beforeEach(() => {
 });
 
 async function openSampleDecision(page: Page) {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  // Since Phase 2 (docs/site-overhaul.md) the analyzer and its sample
+  // button live on /analyze; the homepage only links there.
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await acceptCookiesIfShown(page);
   const sampleButton = page
     .getByRole("button", {
-      name: /view a sample decision|see a sample deal/i,
+      name: /sample rental|view a sample decision|see a sample deal/i,
     })
     .first();
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
