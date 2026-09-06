@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -98,6 +99,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
 
   async function onSubmit(values: SignUpInput) {
     trackEvent("signup_started", { method: "email" });
+    track("signup_started", { method: "email" });
     setIsSubmitting(true);
     try {
       // Pass the validated ?next so the confirmation EMAIL's link also
@@ -127,6 +129,8 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       // substitute for acquisition attribution.
       trackEvent("account_created");
       trackEvent("product_evaluation_started");
+      track("signup_completed", { method: "email" });
+      track("trial_started", { method: "email" });
       // Conversion-friendly post-signup flow:
       //  - If Supabase auto-signed the user in (email confirmation OFF):
       //    send them straight to the calculator so they get to value

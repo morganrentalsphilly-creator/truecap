@@ -9,6 +9,7 @@ import {
   useTransition,
 } from "react";
 import Link from "next/link";
+import { track } from "@/lib/analytics/site-events";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import {
@@ -2748,6 +2749,7 @@ export function SavedAnalysesPage({
             variant: "success",
           });
           dispatchProofMoment("pdf_export");
+          track("report_exported", { report_type: "saved_deal_pdf" });
           return;
         }
 

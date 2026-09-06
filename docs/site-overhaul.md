@@ -464,3 +464,21 @@ Pending the first scheduled production run (see Phase 10).
 4. **Prompt availability is decided by the tables, not a feature flag.** The old `testimonial_collection` flag (default off) gated a review-by-hand workflow; the new prompt shows only when the server can claim the once-per-user row, and hides itself if the migration is not applied yet.
 5. **Migration apply remains founder-owed** (no database credential is exportable here); every read and write tolerates the missing tables.
 6. **Ratings / `aggregateRating` stay out** (none exist).
+
+## Phase 6 — Funnel analytics (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| `@vercel/analytics` was already installed and mounted (`TrueCapVercelAnalytics`, with sensitive-URL stripping). A typed `track()` fans each funnel event out to Vercel Web Analytics (cookieless, always), to GTM/GA4 via `window.dataLayer` (only after the visitor accepted cookies), and to an in-page buffer (`window.__tcEvents`) browser tests read. `trackServer()` covers server-only events through `@vercel/analytics/server`. | `lib/analytics/site-events.ts`, `lib/analytics/site-events-server.ts` |
+| Thirteen events with minimal, non-PII properties: `analysis_started` (source, input_type), `analysis_completed` (verdict, has_ceiling), `sample_viewed`, `signup_started` (method), `signup_completed` (method), `trial_started`, `checkout_started` (plan, interval), `checkout_completed` (server-side, from the webhook, once per synced checkout — never on duplicates or foreign events), `report_exported`, `deal_saved`, `compare_used`, `testimonial_prompt_shown`, `testimonial_submitted`. | analyzer, sign-up form, Google button, OAuth callback, pricing buttons, webhook route, saved-deal page, hero/sample entry, testimonial prompt |
+| `docs/analytics.md`: the events, where they fire, the five weekly ratios (visit → analysis_started → analysis_completed → signup_completed → trial_started → checkout_completed), the consent rule, how to verify locally. | `docs/analytics.md` |
+| Tests: `track()` unit test (buffer, Vercel call, dataLayer only with consent, no-op on the server), webhook test asserting `checkout_completed` fires once and never for a duplicate or foreign event, Playwright test asserting `sample_viewed`, `analysis_started`, `analysis_completed` on the sample flow with no GTM push before consent. | `lib/__tests__/site-events.test.ts`, `stripe-webhook-route-binding.test.ts`, `e2e/site-overhaul-conversion.spec.ts` |
+
+### Decisions made in the founder's absence (Phase 6)
+
+1. **PostHog stays as the rich event stream; the thirteen funnel events are a separate, stable, typed set.** Merging them into the existing 90-name PostHog union would have made the weekly ratios depend on an event dictionary that changes often.
+2. **GTM receives events only after consent.** `track()` checks the banner's stored decision before pushing to `dataLayer`; Phase 7 makes the GTM/Ads scripts themselves load only after consent. Vercel Analytics is cookieless and always on, so the funnel stays measurable for visitors who reject cookies.
+3. **`trial_started` fires with `signup_completed`** because every new account starts the no-card free trial; a separate server flag would have added a query to the sign-up path for no extra information.
+4. **The "mocked transport" for the browser test is the in-page buffer**, not a network interception: Vercel's client SDK does not send from local builds, and intercepting GTM would have required accepting cookies in the test — which is exactly what the test asserts does not happen by default.

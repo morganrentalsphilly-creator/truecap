@@ -15,6 +15,7 @@
  */
 
 import { useEffect } from "react";
+import { track } from "@/lib/analytics/site-events";
 import {
   dispatchHeroAnalyzeWithFallback,
   HERO_ANALYZE_EVENT,
@@ -59,6 +60,7 @@ export function AnalyzeEntryFromQuery() {
 
     if (params.get("sample") === "1") {
       trackEvent("hero_sample_opened");
+      track("sample_viewed", { source: "link" });
       dispatch({ token, address: "", sample: true });
       scrub(params, ["sample"]);
       return;

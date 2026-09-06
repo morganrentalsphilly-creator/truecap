@@ -145,3 +145,26 @@ test("the hero's LCP element is the real product screenshot, preloaded", async (
   await expect(founder).toBeVisible();
   await expect(founder.locator("img")).toHaveCount(0);
 });
+
+test("the sample flow fires analysis_started and analysis_completed through track()", async ({
+  page,
+}) => {
+  await page.goto("/analyze?sample=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-result-next-action=""]')).toBeVisible({ timeout: 45_000 });
+  const events = await page.evaluate(
+    () => (window as unknown as { __tcEvents?: Array<{ event: string; props: Record<string, unknown> }> }).__tcEvents ?? [],
+  );
+  const names = events.map((e) => e.event);
+  expect(names).toContain("sample_viewed");
+  expect(names).toContain("analysis_started");
+  expect(names).toContain("analysis_completed");
+  const started = events.find((e) => e.event === "analysis_started");
+  expect(started?.props).toMatchObject({ source: "sample", input_type: "sample" });
+  const completed = events.find((e) => e.event === "analysis_completed");
+  expect(typeof completed?.props.has_ceiling).toBe("boolean");
+  // No GTM push without consent (the banner was not accepted in this test).
+  const dataLayer = await page.evaluate(
+    () => (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? [],
+  );
+  expect(dataLayer.filter((e) => typeof e === "object" && e && "event" in e && (e as { event: string }).event === "analysis_started")).toHaveLength(0);
+});

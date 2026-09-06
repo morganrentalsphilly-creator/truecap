@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/refs, react-hooks/immutability, react-hooks/preserve-manual-memoization -- This legacy, hook-dense calculator intentionally uses refs as async workflow guards. React Compiler is not enabled for the app; keep rules-of-hooks and exhaustive-deps active while the component is incrementally decomposed. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -6096,6 +6097,10 @@ export function InvestCalcPage({
       route_category: "analyzer",
       calculator_slug: "rental-property",
     });
+    track("analysis_started", {
+      source: isSampleRun ? "sample" : isAuthenticated ? "dashboard" : "analyze_page",
+      input_type: inputMethod,
+    });
     const dirty = form.formState.dirtyFields as Record<string, unknown>;
     const assumptionsChanged =
       computeExpensesEdited(dirty) ||
@@ -6258,6 +6263,10 @@ export function InvestCalcPage({
       trackEvent("analysis_completed", {
         route_category: "analyzer",
         calculator_slug: "rental-property",
+      });
+      track("analysis_completed", {
+        verdict: getDealTier(result),
+        has_ceiling: Boolean(canUseMaxOffer),
       });
       try {
         const firstAnalysisKey = "truecap_first_analysis_completed_v1";
@@ -6789,6 +6798,7 @@ export function InvestCalcPage({
           trackEvent("deal_saved", {
             property_type: currentValues.propertyType,
           });
+          track("deal_saved", { property_type: currentValues.propertyType });
         }
         // The persisted baseline is the payload the server actually stored
         // (currentValues) — never a fresh form.getValues(): recording
@@ -7569,6 +7579,7 @@ export function InvestCalcPage({
       // A completed export is the other high-signal testimonial moment
       // (the prompt component self-caps to once per browser, ever).
       dispatchProofMoment("pdf_export");
+      track("report_exported", { report_type: String(mode) });
       trackEvent("report_generated", { report_type: mode });
       trackEvent("decision_memo_generated", {
         surface: "analyzer",
@@ -8308,6 +8319,7 @@ export function InvestCalcPage({
       });
       trackEvent("deal_compared", { source: "analysis_result" });
       trackEvent("comparison_completed", { count_bucket: "2" });
+      track("compare_used", { count_bucket: "2" });
       router.push("/dashboard/compare");
     } catch {
       toast({

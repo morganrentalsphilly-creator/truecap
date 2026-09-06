@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
@@ -35,6 +36,10 @@ export function PricingPlanButtons({
   const [pending, setPending] = useState(false);
 
   const startCheckout = (planSlug: CheckoutPlanSlug) => {
+    track("checkout_started", {
+      plan: planSlug,
+      interval: planSlug.includes("annual") ? "annual" : "monthly",
+    });
     setPending(true);
     startTransition(async () => {
       try {

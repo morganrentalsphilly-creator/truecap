@@ -26,6 +26,7 @@
  */
 
 import { useState } from "react";
+import { track } from "@/lib/analytics/site-events";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { safeInternalNextPath } from "@/lib/auth-schema";
@@ -74,6 +75,7 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
 
     try {
       const supabase = createBrowserSupabaseClient();
+      track("signup_started", { method: "google" });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

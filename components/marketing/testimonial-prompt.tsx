@@ -34,6 +34,7 @@ import {
   type FormEvent,
 } from "react";
 import { MessageSquareQuote, X } from "lucide-react";
+import { track } from "@/lib/analytics/site-events";
 import {
   claimTestimonialPromptAction,
   dismissTestimonialPromptAction,
@@ -166,6 +167,7 @@ export function TestimonialForm({
         source: trigger,
         consented: consent,
       });
+      track("testimonial_submitted", { consent });
       onSubmitted?.();
       return;
     }
@@ -374,6 +376,7 @@ export function TestimonialPrompt() {
               setSource(nextSource);
               setOpen(true);
               trackEvent("testimonial_prompt_shown", { source: nextSource });
+              track("testimonial_prompt_shown", { source: nextSource });
             } else if (result.reason === "already_shown") {
               rememberPromptSettled();
             }

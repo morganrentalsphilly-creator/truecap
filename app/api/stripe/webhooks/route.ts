@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { trackServer } from "@/lib/analytics/site-events-server";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import * as Sentry from "@sentry/nextjs";
@@ -328,6 +329,15 @@ export async function POST(req: Request) {
           // awaited but capped to a few seconds by the SDK, and errors
           // are swallowed inside captureServerEvent so they can't
           // corrupt the webhook idempotency contract.
+          // Site funnel (docs/analytics.md): the only event the browser can't see.
+          await trackServer("checkout_completed", {
+            plan: session.metadata?.plan_slug ?? "unknown",
+            interval: (session.metadata?.plan_slug ?? "").includes("annual")
+              ? "annual"
+              : (session.metadata?.plan_slug ?? "").includes("monthly")
+                ? "monthly"
+                : "unknown",
+          });
           const analyticsCaptured = await captureServerEvent({
             distinctId,
             event: "subscription_started",

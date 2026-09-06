@@ -18,6 +18,7 @@
  */
 
 import Link from "next/link";
+import { track } from "@/lib/analytics/site-events";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
@@ -240,6 +241,7 @@ export function HeroAddressForm() {
           onClick={() => {
             trackEvent("hero_sample_clicked");
             trackEvent("hero_sample_opened");
+            track("sample_viewed", { source: "hero" });
           }}
           className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
