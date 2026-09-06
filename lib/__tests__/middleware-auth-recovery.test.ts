@@ -115,6 +115,41 @@ describe("middleware never lets a session failure take down the site", () => {
     expect(policy).not.toContain("httpOnly: true");
   });
 
+  it("expires every Supabase auth cookie when the refresh token is dead (refresh_token_not_found)", async () => {
+    // The production "Invalid Refresh Token: Refresh Token Not Found" line
+    // repeats for the same visitor because the browser keeps replaying the
+    // dead token. Clearing the cookie on the response ends that loop.
+    getUser.mockResolvedValue({
+      data: { user: null },
+      error: { __isAuthError: true, name: "AuthApiError", status: 400, code: "refresh_token_not_found", message: "Invalid Refresh Token: Refresh Token Not Found" },
+    });
+    const response = await updateSession(requestWithAuthCookies());
+    expect(clearedCookieNames(response)).toEqual([
+      "sb-cpfbtvblaufrnxsrvmnm-auth-token.0",
+      "sb-cpfbtvblaufrnxsrvmnm-auth-token.1",
+    ]);
+    // Unrelated cookies are never touched.
+    expect(response.cookies.getAll().map((c) => c.name)).not.toContain("unrelated-preference");
+    const cleared = response.cookies.get("sb-cpfbtvblaufrnxsrvmnm-auth-token.0");
+    expect(cleared?.maxAge).toBe(0);
+    expect(cleared?.path).toBe("/");
+  });
+
+  it("classifies dead sessions by message when the error carries no code (older auth-js)", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: { message: "Invalid Refresh Token: Already Used" } });
+    const response = await updateSession(requestWithAuthCookies());
+    expect(clearedCookieNames(response)).toHaveLength(2);
+  });
+
+  it("does not clear cookies for an unrelated auth error (e.g. a rate limit)", async () => {
+    getUser.mockResolvedValue({
+      data: { user: null },
+      error: { __isAuthError: true, status: 429, code: "over_request_rate_limit", message: "Request rate limit reached" },
+    });
+    const response = await updateSession(requestWithAuthCookies());
+    expect(clearedCookieNames(response)).toEqual([]);
+  });
+
   it("propagates cookie writes the auth library makes (its own stale-token cleanup)", async () => {
     // Real auth-js clears a dead token via setAll() rather than by throwing.
     // That path must reach the outgoing response, or the browser keeps

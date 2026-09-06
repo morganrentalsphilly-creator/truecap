@@ -112,6 +112,11 @@ function buildSubscriptionCheckoutSessionParams(args: {
     success_url: `${siteUrl}/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
     metadata: {
+      // `supabase_user_id` is the binding key the webhook resolves FIRST;
+      // `user_id` is the legacy stamp kept for every reader that still reads
+      // it. Same value, two keys, so a resolver on either side never misses.
+      supabase_user_id: intent.user_id,
+      app: "truecap",
       checkout_intent_id: intent.id,
       checkout_price_id: intent.stripe_price_id,
       checkout_discount_coupon_id: intent.stripe_discount_coupon_id ?? "none",
@@ -126,6 +131,8 @@ function buildSubscriptionCheckoutSessionParams(args: {
     subscription_data: {
       metadata: {
         user_id: intent.user_id,
+        supabase_user_id: intent.user_id,
+        app: "truecap",
         plan_slug: intent.plan_slug,
       },
       ...(intent.trial_days > 0

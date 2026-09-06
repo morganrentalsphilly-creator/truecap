@@ -386,6 +386,15 @@ test for "is this financed"; use `!== 0`. Don't simplify this away.
 5. On success: `update set processed_at = now(), error_message = null`.
    On failure: stash `error_message` and return 500 so Stripe retries.
 
+6. User ↔ customer binding goes through the ordered resolver in
+   `lib/stripe/billing-user-resolution.ts` (checkout stamp →
+   `client_reference_id` → `profiles.stripe_customer_id` → exactly-one
+   confirmed `auth.users` email → subscription metadata). The Stripe
+   account is SHARED with another product: its events are stamped
+   `skipped: foreign_app` and never bound. A paid event that still can't
+   be bound lands in `billing_unresolved_events` (never dropped) and pages
+   Sentry with the event id. `docs/site-overhaul.md` Phase 1 has the why.
+
 Stripe API version is pinned to `2026-04-22.dahlia` in `lib/stripe/client.ts`.
 Bumping it requires reading the Stripe changelog.
 
