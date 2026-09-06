@@ -205,6 +205,7 @@ export async function POST(req: Request) {
         const checkoutSyncResult = await handleCheckoutSessionCompleted(
           admin,
           session,
+          { eventId: event.id, eventType: event.type, payload: event },
         );
         syncSkippedReason = checkoutSyncResult.synced
           ? null
@@ -416,6 +417,8 @@ export async function POST(req: Request) {
           subscriptionSyncResult = await upsertSubscriptionFromStripe(
             admin,
             freshSubscription,
+            null,
+            { eventId: event.id, eventType: event.type, payload: event },
           );
         } catch (err) {
           const stripeCode = (err as { code?: string } | null)?.code;
@@ -465,6 +468,7 @@ export async function POST(req: Request) {
         const invoiceSyncResult = await upsertSubscriptionFromInvoice(
           admin,
           event.data.object as Stripe.Invoice,
+          { eventId: event.id, eventType: event.type, payload: event },
         );
         syncSkippedReason = invoiceSyncResult.synced
           ? null
@@ -476,6 +480,7 @@ export async function POST(req: Request) {
           await upsertSubscriptionFromInvoicePayment(
             admin,
             event.data.object as Stripe.InvoicePayment,
+            { eventId: event.id, eventType: event.type, payload: event },
           );
         syncSkippedReason = invoicePaymentSyncResult.synced
           ? null

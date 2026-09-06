@@ -6,6 +6,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
 import { planSlugFromPriceId } from "@/lib/stripe/plan-prices";
+import {
+  isForeignAppMetadata,
+  isForeignSubscription,
+  recordUnresolvedBillingEvent,
+  resolveBillingUser,
+  type BillingEventContext,
+} from "@/lib/stripe/billing-user-resolution";
 
 type ProfileBindingRow = {
   id: string;
@@ -28,6 +35,17 @@ export type SubscriptionSyncResult =
   | { synced: false; reason: string };
 
 const SYNCED: SubscriptionSyncResult = { synced: true };
+
+/**
+ * The Stripe account is SHARED with another product. Its events reach this
+ * endpoint too and are not ours to bind: skip quietly (no Sentry alarm, no
+ * unresolved row). Stamped as `skipped: foreign_app` on the ledger row.
+ */
+export const FOREIGN_APP_SKIP_REASON = "foreign_app";
+const FOREIGN_SKIP: SubscriptionSyncResult = {
+  synced: false,
+  reason: FOREIGN_APP_SKIP_REASON,
+};
 
 /**
  * User-binding rejections are intentional security decisions — we refuse to
@@ -70,19 +88,6 @@ async function getProfileById(
   return (data as ProfileBindingRow | null) ?? null;
 }
 
-async function getProfileByStripeCustomerId(
-  admin: SupabaseClient,
-  customerId: string,
-): Promise<ProfileBindingRow | null> {
-  const { data, error } = await admin
-    .from("profiles")
-    .select("id, stripe_customer_id")
-    .eq("stripe_customer_id", customerId)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as ProfileBindingRow | null) ?? null;
-}
-
 function getSubscriptionCustomerId(
   subscription: Stripe.Subscription,
 ): string | null {
@@ -99,151 +104,84 @@ function getCheckoutCustomerId(
     : (session.customer?.id ?? null);
 }
 
+type SubscriptionUserResolution =
+  | { userId: string; bindCustomer: boolean }
+  | { userId: null; reason: string };
+
+/**
+ * Ordered resolver for subscription-level events (see
+ * lib/stripe/billing-user-resolution.ts for the order and the reasoning).
+ * `fallbackUserId` is a user id ALREADY verified by the caller for this same
+ * event (checkout → subscription) and ranks with the explicit checkout stamps.
+ */
 async function resolveVerifiedUserIdForSubscription(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
   fallbackUserId?: string | null,
-): Promise<string | null> {
+): Promise<SubscriptionUserResolution> {
   const customerId = getSubscriptionCustomerId(subscription);
-  const metadataUserId = subscription.metadata?.user_id ?? null;
-  const trustedFallbackUserId = fallbackUserId ?? null;
-
-  if (
-    metadataUserId &&
-    trustedFallbackUserId &&
-    metadataUserId !== trustedFallbackUserId
-  ) {
+  const metadata = subscription.metadata ?? {};
+  const resolution = await resolveBillingUser(admin, {
+    trustedUserId: fallbackUserId ?? null,
+    metadataUserId: metadata.supabase_user_id ?? null,
+    customerId,
+    loadCustomerEmail: customerId
+      ? () => loadStripeCustomerEmail(customerId)
+      : undefined,
+    subscriptionMetadataUserId: metadata.user_id ?? null,
+  });
+  if (resolution.userId === null) {
     console.error(
-      "[billing] Rejecting subscription sync: metadata.user_id does not match fallback user id",
+      `[billing] Skipping subscription sync: user binding could not be verified (${resolution.reason})`,
     );
-    return null;
+    return resolution;
   }
-
-  const candidateUserId = trustedFallbackUserId ?? metadataUserId ?? null;
-
-  if (customerId) {
-    const profileByCustomer = await getProfileByStripeCustomerId(
-      admin,
-      customerId,
-    );
-    if (profileByCustomer) {
-      if (candidateUserId && candidateUserId !== profileByCustomer.id) {
-        console.error(
-          "[billing] Rejecting subscription sync: candidate user does not own Stripe customer",
-        );
-        return null;
-      }
-      return profileByCustomer.id;
-    }
-  }
-
-  if (!candidateUserId) {
-    console.error(
-      "[billing] Skipping subscription sync: cannot resolve verified user for unbound customer",
-    );
-    return null;
-  }
-
-  const profileByUser = await getProfileById(admin, candidateUserId);
-  if (!profileByUser) {
-    console.error(
-      "[billing] Skipping subscription sync: candidate user not found",
-    );
-    return null;
-  }
-
-  if (profileByUser.stripe_customer_id) {
-    if (!customerId || profileByUser.stripe_customer_id !== customerId) {
-      console.error(
-        "[billing] Rejecting subscription sync: stored stripe_customer_id mismatch",
-      );
-      return null;
-    }
-    return profileByUser.id;
-  }
-
-  if (trustedFallbackUserId && trustedFallbackUserId === profileByUser.id) {
-    return profileByUser.id;
-  }
-
-  console.error(
-    "[billing] Skipping subscription sync: user has no Stripe customer binding and no trusted fallback",
-  );
-  return null;
+  return { userId: resolution.userId, bindCustomer: resolution.bindCustomer };
 }
+
+/** Email on the Stripe Customer object — the step-4 signal. Never logged. */
+async function loadStripeCustomerEmail(
+  customerId: string,
+): Promise<string | null> {
+  const stripe = getStripe();
+  const customer = await stripe.customers.retrieve(customerId);
+  if (!customer || customer.deleted) return null;
+  return customer.email ?? null;
+}
+
+type CheckoutBindingResolution =
+  | { userId: string; customerId: string; bindCustomer: boolean }
+  | { userId: null; reason: string };
 
 async function resolveVerifiedCheckoutBinding(
   admin: SupabaseClient,
   session: Stripe.Checkout.Session,
-): Promise<{ userId: string; customerId: string } | null> {
+): Promise<CheckoutBindingResolution> {
   const customerId = getCheckoutCustomerId(session);
-  const metadataUserId = session.metadata?.user_id ?? null;
-  const clientReferenceUserId = session.client_reference_id ?? null;
-
   if (!customerId) {
     console.error("[billing] checkout.session.completed missing customer id");
-    return null;
+    return { userId: null, reason: "missing_customer_id" };
   }
-
-  if (
-    metadataUserId &&
-    clientReferenceUserId &&
-    metadataUserId !== clientReferenceUserId
-  ) {
-    console.error(
-      "[billing] checkout.session.completed has mismatched metadata.user_id and client_reference_id",
-    );
-    return null;
-  }
-
-  const candidateUserId = clientReferenceUserId ?? metadataUserId;
-  if (!candidateUserId) {
-    console.error(
-      "[billing] checkout.session.completed missing resolvable user id",
-    );
-    return null;
-  }
-
-  const profileByCustomer = await getProfileByStripeCustomerId(
-    admin,
+  const metadata = session.metadata ?? {};
+  const resolution = await resolveBillingUser(admin, {
+    metadataUserId: metadata.supabase_user_id ?? metadata.user_id ?? null,
+    clientReferenceId: session.client_reference_id ?? null,
     customerId,
-  );
-  if (profileByCustomer) {
-    if (profileByCustomer.id !== candidateUserId) {
-      console.error(
-        "[billing] checkout.session.completed customer is already bound to a different user",
-      );
-      return null;
-    }
-    return { userId: profileByCustomer.id, customerId };
-  }
-
-  const profileByUser = await getProfileById(admin, candidateUserId);
-  if (!profileByUser) {
+    customerEmail:
+      session.customer_details?.email ?? session.customer_email ?? null,
+    loadCustomerEmail: () => loadStripeCustomerEmail(customerId),
+  });
+  if (resolution.userId === null) {
     console.error(
-      "[billing] checkout.session.completed candidate user profile not found",
+      `[billing] checkout.session.completed user/customer binding could not be verified (${resolution.reason})`,
     );
-    return null;
+    return resolution;
   }
-
-  if (
-    profileByUser.stripe_customer_id &&
-    profileByUser.stripe_customer_id !== customerId
-  ) {
-    console.error(
-      "[billing] checkout.session.completed profile has mismatched existing Stripe customer id",
-    );
-    return null;
-  }
-
-  if (!clientReferenceUserId) {
-    console.error(
-      "[billing] checkout.session.completed without client_reference_id cannot safely bind new customer",
-    );
-    return null;
-  }
-
-  return { userId: profileByUser.id, customerId };
+  return {
+    userId: resolution.userId,
+    customerId,
+    bindCustomer: resolution.bindCustomer,
+  };
 }
 
 function isSubscriptionScheduledToCancel(
@@ -320,27 +258,67 @@ async function getExistingSubscriptionPlanId(
   return (data as { plan_id: string | null } | null)?.plan_id ?? null;
 }
 
+function isPaidSubscriptionStatus(status: string): boolean {
+  return ["active", "trialing", "past_due"].includes(status);
+}
+
+/** Recurring amount of the primary item (unit_amount × quantity), if known. */
+function subscriptionAmountCents(
+  subscription: Stripe.Subscription,
+): number | null {
+  const item = subscription.items?.data?.[0];
+  const price = item?.price;
+  if (!price || typeof price === "string") return null;
+  if (typeof price.unit_amount !== "number") return null;
+  return price.unit_amount * (item?.quantity ?? 1);
+}
+
 export async function upsertSubscriptionFromStripe(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
   fallbackUserId?: string | null,
+  eventContext?: BillingEventContext | null,
 ): Promise<SubscriptionSyncResult> {
-  const userId = await resolveVerifiedUserIdForSubscription(
+  // Shared-account guard FIRST: another product's subscription must never
+  // reach the email step and bind to one of our users.
+  if (await isForeignSubscription(admin, subscription)) {
+    return FOREIGN_SKIP;
+  }
+
+  const resolution = await resolveVerifiedUserIdForSubscription(
     admin,
     subscription,
     fallbackUserId,
   );
-  if (!userId) {
-    console.error(
-      "[billing] Skipping subscription sync: user binding could not be verified",
-    );
+  if (resolution.userId === null) {
     reportUserBindingSkip("subscription_sync", {
       subscription_status: subscription.status,
       has_customer_binding: Boolean(getSubscriptionCustomerId(subscription)),
       has_metadata_user_id: Boolean(subscription.metadata?.user_id),
       has_trusted_fallback: Boolean(fallbackUserId),
+      reason: resolution.reason,
     });
-    return { synced: false, reason: "user binding could not be verified" };
+    // A PAID subscription we cannot bind is money without an entitlement.
+    // Never let it evaporate: record it durably before the route 200s.
+    if (eventContext && isPaidSubscriptionStatus(subscription.status)) {
+      await recordUnresolvedBillingEvent(admin, {
+        ...eventContext,
+        customerId: getSubscriptionCustomerId(subscription),
+        customerEmail: null,
+        amountCents: subscriptionAmountCents(subscription),
+        currency: subscription.currency ?? null,
+        reason: resolution.reason,
+      });
+    }
+    return {
+      synced: false,
+      reason: `user binding could not be verified (${resolution.reason})`,
+    };
+  }
+  const userId = resolution.userId;
+  const customerIdToBind = getSubscriptionCustomerId(subscription);
+  if (resolution.bindCustomer && customerIdToBind) {
+    await linkStripeCustomerToProfile(admin, userId, customerIdToBind);
   }
 
   const primaryItem = subscription.items.data[0];
@@ -537,6 +515,7 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
 export async function upsertSubscriptionFromInvoice(
   admin: SupabaseClient,
   invoice: Stripe.Invoice,
+  eventContext?: BillingEventContext | null,
 ): Promise<SubscriptionSyncResult> {
   const subscriptionId = getInvoiceSubscriptionId(invoice);
   // Not a subscription invoice (e.g. a one-off charge) — nothing to sync.
@@ -544,12 +523,13 @@ export async function upsertSubscriptionFromInvoice(
 
   const stripe = getStripe();
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  return upsertSubscriptionFromStripe(admin, subscription);
+  return upsertSubscriptionFromStripe(admin, subscription, null, eventContext);
 }
 
 export async function upsertSubscriptionFromInvoicePayment(
   admin: SupabaseClient,
   invoicePayment: Stripe.InvoicePayment,
+  eventContext?: BillingEventContext | null,
 ): Promise<SubscriptionSyncResult> {
   let invoice: Stripe.Invoice | null = null;
 
@@ -561,7 +541,7 @@ export async function upsertSubscriptionFromInvoicePayment(
 
   if (!invoice) return SYNCED;
 
-  return upsertSubscriptionFromInvoice(admin, invoice);
+  return upsertSubscriptionFromInvoice(admin, invoice, eventContext);
 }
 
 export async function linkStripeCustomerToProfile(
@@ -588,21 +568,55 @@ export async function linkStripeCustomerToProfile(
 export async function handleCheckoutSessionCompleted(
   admin: SupabaseClient,
   session: Stripe.Checkout.Session,
+  eventContext?: BillingEventContext | null,
 ): Promise<SubscriptionSyncResult> {
+  // Shared-account guard, BEFORE any binding: the other product's Checkout
+  // Sessions carry their own `metadata.app`, and their subscriptions fail the
+  // price/marker test. Checking the subscription first matters — once
+  // linkStripeCustomerToProfile has run, a bound customer would read as ours.
+  if (isForeignAppMetadata(session.metadata)) {
+    return FOREIGN_SKIP;
+  }
+  const subscriptionId =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id;
+  let checkoutSubscription: Stripe.Subscription | null = null;
+  if (subscriptionId) {
+    checkoutSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
+    if (await isForeignSubscription(admin, checkoutSubscription)) {
+      return FOREIGN_SKIP;
+    }
+  }
+
   const verifiedBinding = await resolveVerifiedCheckoutBinding(admin, session);
-  if (!verifiedBinding) {
-    console.error(
-      "[billing] checkout.session.completed skipped due to unverifiable user/customer binding",
-    );
+  if (verifiedBinding.userId === null) {
     reportUserBindingSkip("checkout_completed", {
       has_customer_binding: Boolean(getCheckoutCustomerId(session)),
       has_subscription: Boolean(session.subscription),
       has_metadata_user_id: Boolean(session.metadata?.user_id),
       has_client_reference_id: Boolean(session.client_reference_id),
+      reason: verifiedBinding.reason,
     });
+    // Paid money with no owner: record it durably (table, or the ledger row
+    // + Sentry until the migration is applied) BEFORE the route returns 200.
+    const paid =
+      session.payment_status === "paid" ||
+      session.payment_status === "no_payment_required";
+    if (eventContext && paid) {
+      await recordUnresolvedBillingEvent(admin, {
+        ...eventContext,
+        customerId: getCheckoutCustomerId(session),
+        customerEmail:
+          session.customer_details?.email ?? session.customer_email ?? null,
+        amountCents: session.amount_total ?? null,
+        currency: session.currency ?? null,
+        reason: verifiedBinding.reason,
+      });
+    }
     return {
       synced: false,
-      reason: "checkout user/customer binding could not be verified",
+      reason: `checkout user/customer binding could not be verified (${verifiedBinding.reason})`,
     };
   }
 
@@ -612,14 +626,13 @@ export async function handleCheckoutSessionCompleted(
     verifiedBinding.customerId,
   );
 
-  const subscriptionId =
-    typeof session.subscription === "string"
-      ? session.subscription
-      : session.subscription?.id;
-  if (subscriptionId) {
-    const stripe = getStripe();
-    const sub = await stripe.subscriptions.retrieve(subscriptionId);
-    return upsertSubscriptionFromStripe(admin, sub, verifiedBinding.userId);
+  if (checkoutSubscription) {
+    return upsertSubscriptionFromStripe(
+      admin,
+      checkoutSubscription,
+      verifiedBinding.userId,
+      eventContext,
+    );
   }
 
   return SYNCED;

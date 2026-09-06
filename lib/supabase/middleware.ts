@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  authCookieNamesToClear,
+  isDeadSessionAuthError,
+} from "@/lib/supabase/auth-cookie-recovery";
 
 export async function updateSession(request: NextRequest, requestHeaders = request.headers) {
   let supabaseResponse = NextResponse.next({
@@ -49,7 +53,33 @@ export async function updateSession(request: NextRequest, requestHeaders = reque
   // correct fail-closed outcome — every page re-verifies its own session,
   // and viewing a share link needs no session at all.
   try {
-    await supabase.auth.getUser();
+    const { error } = await supabase.auth.getUser();
+    // Dead session (refresh token revoked/rotated/expired): auth-js already
+    // returns { user: null } here, but whether it also emitted the cookie
+    // clear depends on which internal path raised. Make the outcome explicit
+    // — expire every sb-*-auth-token cookie on the response so the browser
+    // stops replaying the dead token on every request (which is what kept
+    // the "Invalid Refresh Token" line firing for the same visitor for days).
+    // Scoped to DEAD-session codes only; a transient outage must not sign
+    // healthy users out.
+    if (isDeadSessionAuthError(error)) {
+      const names = authCookieNamesToClear(
+        request.cookies.getAll().map((cookie) => cookie.name)
+      );
+      if (names.length > 0) {
+        for (const name of names) request.cookies.delete(name);
+        supabaseResponse = NextResponse.next({
+          request: { headers: requestHeaders },
+        });
+        for (const name of names) {
+          supabaseResponse.cookies.set(name, "", {
+            ...SUPABASE_COOKIE_OPTIONS,
+            path: "/",
+            maxAge: 0,
+          });
+        }
+      }
+    }
   } catch {
     // Intentionally not clearing cookies: for the throwing class we cannot
     // tell a dead token from a transient outage, and signing out healthy
