@@ -106,12 +106,14 @@ const nextConfig = {
       // label/slug divergence is what makes /dashboard/screen guessable:
       // the nav says "Screen a shortlist", the route is /dashboard/triage.
       //
-      // /analyze intentionally lands on "/" rather than a specific
-      // analyzer: proxy.ts already rewrites "/" to the authed home for
-      // signed-in users, so one target serves both audiences. (next.config
-      // redirects cannot read cookies, so an auth-dependent destination
-      // would have to be a page-level redirect instead.)
-      { source: "/analyze", destination: "/", permanent: false },
+      // /analyze is a real page now (app/analyze/page.tsx — the public
+      // analyzer moved off the homepage in the 2026-09 site overhaul);
+      // proxy.ts routes signed-in visitors from it the same way it does "/".
+      //
+      // /guarantee received traffic while serving a 404 (no public
+      // guarantee is configured — the page fails closed). Send that traffic
+      // to the pricing page, which carries the actual terms of the offer.
+      { source: "/guarantee", destination: "/pricing", permanent: true },
       {
         source: "/deals",
         destination: "/dashboard/saved-analyses",

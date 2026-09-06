@@ -8,11 +8,10 @@ describe("canonical touch targets", () => {
   it("keeps every homepage entry action at least 44 CSS pixels tall", () => {
     const hero = read("components/marketing/hero-address-form.tsx");
     const sampleAction = hero.slice(
-      hero.indexOf('href="/sample-decision-memo"'),
-      hero.indexOf("</Link>", hero.indexOf('href="/sample-decision-memo"'))
+      hero.indexOf('data-hero-sample-link=""'),
+      hero.indexOf("</Link>", hero.indexOf('data-hero-sample-link=""'))
     );
 
-    expect(sampleAction).toContain('href="/sample-decision-memo"');
     expect(sampleAction).toContain("min-h-11");
   });
 

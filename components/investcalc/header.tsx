@@ -13,7 +13,7 @@ import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
 import { UserMenu } from "@/components/auth/user-menu";
-import { MarketingNav, MarketingNavMobile } from "@/components/marketing/marketing-nav";
+import { MarketingMobileMenu, MarketingNav } from "@/components/marketing/marketing-nav";
 
 type HeaderUser = Pick<User, "id" | "email" | "user_metadata">;
 
@@ -461,7 +461,7 @@ export function Header({
 
 
                {/* Divider (desktop only) */}
-               <div className="hidden sm:block w-px h-5 bg-border/60 mr-1" />
+               <div className="hidden lg:block w-px h-5 bg-border/60 mr-1" />
 
           {!authLoaded ? (
             <div className="h-10 w-10 rounded-full bg-muted animate-pulse" aria-hidden />
@@ -476,34 +476,45 @@ export function Header({
             />
           ) : (
             <>
-              <Button variant="ghost" 
-              className="h-11 px-3 sm:h-9 sm:px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              {/* Desktop (lg+): Log in + Sign Up Free beside the marketing nav. */}
+              <Button variant="ghost"
+              className="hidden lg:inline-flex h-9 px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
              asChild>
                 <Link href="/auth/login">
-                  <LogIn className="w-4 h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Log in</span>
-                  <span className="sm:hidden">Login</span>
+                  <LogIn className="w-4 h-4 mr-1" />
+                  Log in
                 </Link>
               </Button>
               <Button
                 asChild
                 className={cn(
-                  "h-11 px-4 sm:h-9 sm:px-5 rounded-full text-[13px] font-semibold",
+                  "hidden lg:inline-flex h-9 px-5 rounded-full text-[13px] font-semibold",
                   "bg-primary hover:bg-primary/90 text-primary-foreground",
                   "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)] hover:shadow-[0_4px_12px_0_rgba(0,112,196,0.45)]",
                   "transition-all duration-200 active:scale-[0.98]",
                 )}
               >
-                <Link href="/auth/sign-up">
-                  <span className="hidden sm:inline">Sign Up Free</span>
-                  <span className="sm:hidden">Sign Up</span>
-                </Link>
+                <Link href="/auth/sign-up">Sign Up Free</Link>
               </Button>
+              {/* Phones + tablets (<lg): ONE row — the primary Analyze action
+                  and a hamburger for everything else. */}
+              <Button
+                asChild
+                data-header-analyze-cta=""
+                className={cn(
+                  "lg:hidden h-11 px-4 rounded-full text-[13px] font-bold",
+                  "bg-primary hover:bg-primary/90 text-primary-foreground",
+                  "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)]",
+                  "transition-all duration-200 active:scale-[0.98]",
+                )}
+              >
+                <Link href="/analyze">Analyze</Link>
+              </Button>
+              <MarketingMobileMenu />
             </>
           )}
         </div>
       </div>
-      {!user ? <MarketingNavMobile /> : null}
     </header>
     </div>
   );

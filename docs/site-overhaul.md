@@ -355,3 +355,38 @@ Add `--apply` to bind and backfill; `--cap=N` limits the Stripe listing. Needs t
 ### Reconcile results
 
 Pending the first scheduled production run (see Phase 10).
+
+## Phase 10 (part 1) — Phase 1 deploy record
+
+| Step | Result |
+| --- | --- |
+| PR | [#89](https://github.com/morganrentalsphilly-creator/truecap/pull/89), squash-merged to `main` as `6dac625` after all six checks passed (build-chain-guard, check, browser-regressions, Vercel, Vercel Preview Comments, CodeRabbit) |
+| Preview smoke (`truecap-git-billing-fix-…vercel.app`, behind Vercel SSO; accessed through a share link) | 8/8: `/` 200, `/pricing` 200, `/auth/login` 200, webhook without signature 400, `/api/cron/billing-reconcile` without bearer 401, `/api/cron/reconcile-stripe` without bearer 401, sitemap 200, robots 200; hero + sample card render |
+| Production deploy | `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` (`truecap-9oll3rbnm`), READY |
+| Production smoke (`https://usetruecap.com`) | 8/8 identical checks OK; `/api/cron/billing-reconcile` live (401 without bearer) |
+| Migration `20260906170000_billing_unresolved_events.sql` | **Not applied by this run** (no database credential is exportable here — see Phase 1 decision 3). The webhook tolerates the missing table and stamps `unresolved: <reason>` on the ledger row meanwhile. Founder: run the file in the Supabase SQL editor. |
+| Reconcile run | Cannot run locally (no keys). The daily cron `/api/cron/billing-reconcile` (17:30 UTC, `BILLING_RECONCILE_MODE` default `dry`) produces the counts inside production; results are recorded below when the first run has logged. |
+
+## Phase 2 — Conversion mechanics (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Hero CTA always actionable.** One field accepts an address or a Zillow/Redfin/Realtor/Homes/Trulia link; the submit button is never disabled or dimmed. Empty submit → focus + inline helper "Paste an address or a Zillow/Redfin link" + "or try the sample deal →". Enter submits. Before hydration the form is a plain `GET /analyze?address=…`. | `components/marketing/hero-address-form.tsx` |
+| **One primary CTA per screen.** Hero: primary "Analyze a deal free", secondary "See the sample deal →" (`/analyze?sample=1`). Removed from the hero: "View a sample decision" button, "Read the written memo" link (now in the footer's Learn column), the Street address / Listing link mode toggle. With the analyzer gone from `/`, "Try a sample rental / Preview a sample Pro report", both "Analyze deal & calculate ceiling" buttons and "Analyze cash flow without an Offer Ceiling" no longer appear on the homepage. Final section keeps "Analyze a property free" (now a real link to `/analyze`); the sticky bar (only visible after scrolling past the hero) links to `/analyze`. | `hero-address-form.tsx`, `landing-sections.tsx` (`FinalCta`), `sticky-conversion-bar.tsx`, `analyze-cta-link.tsx`, `site-footer.tsx` |
+| **`/analyze` route.** Static ISR page with the full analyzer (`ANON_ANALYZER_PROPS`, one object). The homepage no longer imports the analyzer bundle (guarded by `homepage-lockstep.test.ts`). Handoff: sessionStorage (JS), `?address=` (consumed by the existing pre-analytics bootstrap), `?url=` and `?sample=1` (new `AnalyzeEntryFromQuery` island, params scrubbed from the URL). Signed-in visitors: `proxy.ts` rewrites `/analyze` → `/home-authed?tc_from=analyze`, which redirects a verified user to `/dashboard/new` (forwarding a bounded `address`) and renders the anonymous analyzer for a stale cookie. | `app/analyze/page.tsx`, `components/marketing/analyze-page-content.tsx`, `analyze-entry-from-query.tsx`, `proxy.ts`, `app/home-authed/page.tsx`, `app/sitemap.ts` |
+| **Mobile header: one row.** Below `lg`: logo · primary "Analyze" button · hamburger (Sheet with Analyze, Pricing, the five Learn pages, Log in, Sign up). The second nav row is gone. Desktop unchanged. | `components/investcalc/header.tsx`, `components/marketing/marketing-nav.tsx` |
+| **Redirects.** `/guarantee` → `/pricing` (308) in `next.config.mjs`; the old `/analyze → /` redirect removed (it would have shadowed the new page). A repo-wide audit of 197 internal `href` targets found no other dead paths. | `next.config.mjs` |
+| **Cookie banner.** Compact single row on phones (~60 px: text + Reject/Accept + dismiss), full copy from `sm`. GTM/Ads gating stays in Phase 7. | `components/marketing/cookie-consent-banner.tsx` |
+| **Dashboard metadata.** `app/dashboard/layout.tsx` now declares `robots: noindex, nofollow` and `alternates: { canonical: null }`, so `/dashboard/*` pages without their own self-canonical no longer inherit the root layout's `https://usetruecap.com` canonical. | `app/dashboard/layout.tsx` |
+| **Tests.** Unit guards updated to the new contract (hero, footer memo link, header classes, homepage without analyzer, redirect sources, description length). Playwright: the 13 calculator-driven public specs now run on `/analyze`; new `e2e/site-overhaul-conversion.spec.ts` covers the four done-when checks (empty submit, typed address → `/analyze` prefill, sample → full result, `/guarantee` 308, 375 px one-row header with CTA in the first viewport and above the cookie bar). | `lib/__tests__/*`, `e2e/*` |
+
+### Decisions made in the founder's absence (Phase 2)
+
+1. **The written memo link moved to the footer.** The brief allows one secondary hero CTA and names the sample; three guard tests required `/sample-decision-memo` to stay linked (it is in the sitemap). The footer's Learn column keeps it crawlable without competing in the hero.
+2. **Single hero field instead of the address/listing toggle.** The brief's helper text ("Paste an address or a Zillow/Redfin link") implies one field; dropping the toggle also saved ~60 px of the first mobile viewport, which the 375 px CTA rule needed.
+3. **`/guarantee` redirects permanently even though the page was a deliberate fail-closed 404.** The brief is explicit (permanent redirect in `next.config`). The page file stays (no route deletions); the redirect wins because Next evaluates redirects before routes.
+4. **`/analyze` is static (ISR) and signed-in routing reuses the `/home-authed` cookie hint** rather than making `/analyze` dynamic. That keeps the second hop edge-cached, which Phase 7's `/analyze` LCP budget needs, and adds no auth logic to `proxy.ts` (it remains a cache hint; `/home-authed` verifies the session).
+5. **A signed-in `/analyze?address=…` carries the address to `/dashboard/new`** (bounded to 200 chars, never a URL); everything else in the query is dropped, matching the existing allow-list posture.
+6. **Homepage FAQ/JSON-LD untouched in this phase** — it is Phase 3's item 3.

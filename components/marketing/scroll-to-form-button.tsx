@@ -11,6 +11,7 @@
  */
 
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { scrollBehavior } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
@@ -36,6 +37,7 @@ export function ScrollToFormButton({
   analyticsSource,
   children,
 }: Props) {
+  const router = useRouter();
   const handleClick = () => {
     if (analyticsSource) {
       trackEvent("homepage_primary_cta", { source: analyticsSource });
@@ -46,7 +48,12 @@ export function ScrollToFormButton({
     // future SSR scenarios.
     if (typeof window === "undefined") return;
     const el = document.getElementById(targetId);
-    if (!el) return;
+    // The analyzer lives at /analyze now; a marketing page without a form
+    // on it sends the visitor there instead of scrolling to nothing.
+    if (!el) {
+      router.push("/analyze");
+      return;
+    }
     window.scrollTo({ top: el.offsetTop - offsetPx, behavior: scrollBehavior() });
   };
 

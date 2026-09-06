@@ -171,27 +171,26 @@ export function CookieConsentBanner() {
         event.stopPropagation();
         handleReject();
       }}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] outline-none backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+      data-cookie-consent-banner=""
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] outline-none backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
-      <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:items-center">
-          <Cookie className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0" />
-          {/* One line on phones (the full 3-line copy + button row ate
-              ~20% of a 667px first viewport — mobile density audit
-              LAND-5); full copy from sm:. Reject/Accept keep equal
-              prominence either way. */}
-          <p className="text-xs leading-relaxed text-foreground sm:text-sm">
+      {/* Compact single row on phones: text + buttons side by side (~60px
+          tall), so the bar never reaches the hero's primary action in a
+          375×667 first viewport. Full copy from sm:. */}
+      <div className="mx-auto flex max-w-5xl flex-row items-center gap-2 sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
+          <Cookie className="hidden size-4 shrink-0 text-primary sm:block" />
+          <p className="text-xs leading-snug text-foreground sm:text-sm sm:leading-relaxed">
             <strong>We use cookies</strong>
             <span className="sm:hidden">
-              {" for analytics & ads — "}
+              {" for analytics & ads. "}
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
                 className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                privacy policy
+                Privacy
               </Link>
-              .
             </span>
             <span className="hidden sm:inline">
               {
@@ -208,20 +207,21 @@ export function CookieConsentBanner() {
             </span>
           </p>
         </div>
-        <div className="flex shrink-0 gap-2 sm:gap-3">
+        <div className="flex shrink-0 gap-1.5 sm:gap-3">
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm"
           >
-            Accept all
+            <span className="sm:hidden">Accept</span>
+            <span className="hidden sm:inline">Accept all</span>
           </button>
           {/* Explicit dismiss on EVERY breakpoint (counts as reject). The bar
               is fixed to the bottom of the viewport, so on a phone it sits on

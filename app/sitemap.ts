@@ -24,6 +24,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 const CORE_PATHS = [
   "/",
+  "/analyze",
   "/pricing",
   "/sample-decision-memo",
   "/tools",

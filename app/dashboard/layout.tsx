@@ -16,6 +16,7 @@
  * so per-page authorization must never live only here.
  */
 
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
@@ -28,6 +29,20 @@ import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { loginPathFor } from "@/lib/auth-schema";
 import { getCurrentRequestPath } from "@/lib/request-path";
+
+/**
+ * Every /dashboard/* page is private: noindex, nofollow — and NO inherited
+ * canonical. The root layout declares `alternates.canonical = siteUrl` for the
+ * marketing site, which every dashboard page without its own canonical used
+ * to inherit, telling crawlers that private app screens were copies of the
+ * homepage. `canonical: null` here replaces the root alternates block for the
+ * whole segment; pages that self-reference (e.g. /dashboard/compare) still
+ * override this with their own.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  alternates: { canonical: null },
+};
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();

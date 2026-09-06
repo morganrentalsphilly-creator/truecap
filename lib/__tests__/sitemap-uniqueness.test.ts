@@ -20,7 +20,7 @@ const PRIVATE_PREFIXES = [
 
 const OTHER_REDIRECT_SOURCES = [
   "/tools/Y2FwLXJhdG",
-  "/analyze",
+  "/guarantee",
   "/deals",
   "/dashboard/screen",
   "/compare",

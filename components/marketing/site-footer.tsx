@@ -35,7 +35,7 @@ const FOOTER_COLS: Array<{
   {
     title: "Product",
     links: [
-      { label: "Free analyzer", href: "/" },
+      { label: "Free analyzer", href: "/analyze" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
       { label: "Proof & methodology", href: "/reviews" },
@@ -72,6 +72,7 @@ const FOOTER_COLS: Array<{
       // gives the 44 term pages a sitewide crawl path, the same fix the
       // /vs link above made for the comparison library.
       { label: "Glossary", href: "/glossary" },
+      { label: "Sample decision memo", href: "/sample-decision-memo" },
     ],
   },
   {

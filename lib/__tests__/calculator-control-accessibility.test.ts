@@ -102,21 +102,20 @@ describe("calculator control accessibility guards", () => {
     const hero = read("../../components/marketing/hero-address-form.tsx");
     const autocomplete = read("../../components/investcalc/address-autocomplete.tsx");
 
-    expect(hero).toContain('ariaLabel="Property address"');
+    expect(hero).toContain('ariaLabel="Property address or listing link"');
     expect(autocomplete).toContain("aria-label={ariaLabel}");
   });
 
-  it("gives listing-link entry a labeled, error-connected, keyboard-sized control", () => {
+  it("keeps the single hero field error-connected and its listing path labeled", () => {
+    // One field accepts an address OR a listing link (no mode toggle to
+    // reach first); an unsupported link is announced through the same
+    // role="alert" the empty-submit helper uses.
     const hero = read("../../components/marketing/hero-address-form.tsx");
 
-    expect(hero).toContain('aria-label="Property entry method"');
-    expect(hero).toContain('aria-pressed={entryMode === "listing"}');
-    expect(hero).toContain('htmlFor="hero-listing-url"');
-    expect(hero).toContain('id="hero-listing-url"');
-    expect(hero).toContain('aria-invalid={Boolean(listingError)}');
-    expect(hero.replace(/\s+/g, "")).toContain(
-      'aria-describedby={listingError?"hero-listing-url-error":"hero-listing-url-help"}',
-    );
-    expect(hero).toContain("min-h-11");
+    expect(hero).toContain("looksLikeListingLink(raw)");
+    expect(hero).toContain("setAddressError(HERO_LISTING_ERROR)");
+    expect(hero).toContain('errorId="hero-address-error"');
+    expect(hero).toContain('id="hero-address-error"');
+    expect(hero).toContain('role="alert"');
   });
 });

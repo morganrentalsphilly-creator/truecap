@@ -133,40 +133,43 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
       name: "Know your walk-away price before you make the offer.",
     }),
   ).toBeVisible();
-  await expect(
-    hero.getByText(
-      "No account or card. Your first complete Offer Ceiling is included.",
-      { exact: true },
-    ),
-  ).toBeVisible();
 
   const form = hero.locator('form[data-hero-address-form=""]');
-  const address = form.getByLabel("Property address", { exact: true });
+  await expect(form).toHaveAttribute("data-hero-form-ready", "true");
+  const address = form.getByLabel("Property address or listing link", {
+    exact: true,
+  });
   await expect(address).toHaveAttribute("aria-required", "true");
-  // Two distinct no-address paths, deliberately. The BUTTON runs the sample in
-  // place (the journey the authenticated guest specs drive); the LINK is the
-  // only internal link to /sample-decision-memo, which is in the sitemap and
-  // would otherwise be orphaned.
+  // One primary action (analyze) and one secondary (the live sample). The
+  // written memo is linked from the footer, not the hero.
+  const submit = form.getByRole("button", {
+    name: "Analyze a deal free",
+    exact: true,
+  });
+  await expect(submit).toBeEnabled();
   await expect(
-    hero.getByRole("button", { name: "View a sample decision →", exact: true }),
-  ).toHaveCount(1);
+    hero.getByRole("link", { name: "See the sample deal →", exact: true }),
+  ).toHaveAttribute("href", "/analyze?sample=1");
   await expect(
     hero.getByRole("link", { name: "Read the written memo", exact: true }),
-  ).toHaveCount(1);
+  ).toHaveCount(0);
 
   const scrollBefore = await page.evaluate(() => window.scrollY);
-  await form
-    .getByRole("button", { name: "Analyze a deal free", exact: true })
-    .click();
+  await submit.click();
   await expect(
     form.getByRole("alert").filter({
-      hasText: "Enter a property address to analyze this deal.",
+      hasText: "Paste an address or a Zillow/Redfin link",
     }),
+  ).toBeVisible();
+  await expect(
+    form.getByRole("link", { name: "try the sample deal →", exact: true }),
   ).toBeVisible();
   await expect(address).toBeFocused();
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBe(scrollBefore);
+  // Still on the homepage: an empty submit never navigates.
+  expect(new URL(page.url()).pathname).toBe("/");
 
   await expectNoHorizontalOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
@@ -210,7 +213,7 @@ test("the marketing prompt yields while the investor is using the calculator", a
   page,
 }) => {
   await page.setViewportSize({ width: 643, height: 732 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   const rejectCookies = page.getByRole("button", {
     name: "Reject",
     exact: true,
@@ -232,7 +235,7 @@ test("tablet investors keep one reachable analysis action below the desktop cock
   page,
 }) => {
   await page.setViewportSize({ width: 768, height: 800 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -271,7 +274,7 @@ test("desktop investors can run from the live preview without hunting below the 
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -321,7 +324,7 @@ test("a second listing can never inherit the first property's price and rent", a
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -392,7 +395,7 @@ test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   // available. Bounding-box checks catch clipped controls even when a global
   // overflow rule keeps document.scrollWidth from reporting the clipping.
   await page.setViewportSize({ width: 195, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const address = page.getByLabel("Property Address", { exact: true });
@@ -444,7 +447,7 @@ test("a hidden expense validation error reopens both panels and focuses the fiel
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const addressInput = page.getByLabel("Property Address", { exact: true });
@@ -480,7 +483,7 @@ test("release-gated specialist strategies stay dark at 200% mobile zoom", async 
   page,
 }) => {
   await page.setViewportSize({ width: 195, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const changeType = page.getByRole("button", {
@@ -546,7 +549,7 @@ test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
     { values: SAMPLE_DEAL_FIXTURE.values },
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await expect(
@@ -609,7 +612,7 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
     },
     { values: SAMPLE_DEAL_FIXTURE.values },
   );
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await expect(
@@ -635,7 +638,7 @@ test("released operating tax and insurance modes cannot strand an invalid hidden
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await page
@@ -686,7 +689,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
 
   const acceptCookies = page.getByRole("button", { name: /accept all/i });
   await expect(acceptCookies).toBeVisible();
@@ -847,7 +850,7 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const runDeal = async (input: {
@@ -1006,7 +1009,7 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
 test("next deal confirms the reset, clears property facts, and keeps reusable assumptions", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const acceptCookies = page.getByRole("button", { name: /accept all/i });

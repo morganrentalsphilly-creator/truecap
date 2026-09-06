@@ -53,6 +53,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
@@ -352,13 +353,13 @@ export function FinalCta() {
           rule-fit context, the Offer Ceiling, downside checks, and next
           steps—no account or card required.
         </p>
-        <ScrollToFormButton
+        <AnalyzeCtaLink
           analyticsSource="final_cta"
-          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
+          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Analyze a property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </ScrollToFormButton>
+        </AnalyzeCtaLink>
       </div>
     </section>
   );

@@ -20,7 +20,13 @@ describe("public funnel and trust guards", () => {
       "No account or card. Your first complete Offer Ceiling is included.",
     );
     expect(form).toContain('"Analyze a deal free"');
-    expect(form.match(/href="\/sample-decision-memo"/g)).toHaveLength(1);
+    // The written memo moved to the footer (one primary + one secondary CTA
+    // in the hero); the secondary is the live sample in the analyzer.
+    expect(form).not.toContain('href="/sample-decision-memo"');
+    expect(form.match(/href="\/analyze\?sample=1"/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
+    expect(read("components/marketing/site-footer.tsx")).toContain(
+      'href: "/sample-decision-memo"',
+    );
     expect(form).not.toContain("See How It Works");
     expect(form).not.toContain("See Pro features");
   });
@@ -28,18 +34,27 @@ describe("public funnel and trust guards", () => {
   it("keeps an empty hero submit visible, described, focused, and local", () => {
     const form = read("components/marketing/hero-address-form.tsx");
     const emptyBranch = form.slice(
-      form.indexOf('if (!address) {'),
-      form.indexOf('setSubmitting(true)', form.indexOf('if (!address) {')),
+      form.indexOf("if (!raw) {"),
+      form.indexOf("if (looksLikeListingLink(raw))"),
     );
 
-    expect(emptyBranch).toContain(
-      'setAddressError("Enter a property address to analyze this deal.")',
-    );
+    expect(emptyBranch).toContain("setAddressError(HERO_EMPTY_HELPER)");
     expect(emptyBranch).toContain('form.setFocus("address")');
     expect(emptyBranch).not.toContain("scrollToCalculator");
+    expect(form).toContain(
+      'HERO_EMPTY_HELPER = "Paste an address or a Zillow/Redfin link"',
+    );
     expect(form).toContain('role="alert"');
     expect(form).toContain('errorId="hero-address-error"');
     expect(form).toContain("required");
+    // The primary action is NEVER disabled and never dimmed — it hands off
+    // to /analyze (a plain GET before hydration, a router push after).
+    const submit = form.slice(form.indexOf('type="submit"'), form.indexOf("</button>", form.indexOf('type="submit"')));
+    expect(submit).not.toContain("disabled");
+    expect(submit).not.toContain("opacity-70");
+    expect(form).toContain('action="/analyze"');
+    expect(form).toContain('method="get"');
+    expect(form).toContain('router.push("/analyze")');
   });
 
   it("keeps the homepage tail to the trust, offer, proof, FAQ, and final CTA blocks", () => {

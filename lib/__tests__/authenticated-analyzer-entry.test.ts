@@ -88,7 +88,9 @@ describe("authenticated analyzer consolidation", () => {
     const reflectedKeys = [
       ...redirectFlow.matchAll(/analyzerParams\.set\("([^"]+)"/g),
     ].map((match) => match[1]);
-    expect(reflectedKeys).toEqual(["savedDeal", "billing", "session_id"]);
+    // `address` is forwarded only from /analyze?address= (bounded, non-URL),
+    // so a signed-in visitor keeps the property they typed on the homepage.
+    expect(reflectedKeys).toEqual(["savedDeal", "billing", "session_id", "address"]);
     expect(redirectFlow).not.toContain("Object.entries");
     expect(redirectFlow).not.toContain("getStripe");
     expect(cookieCheckHome).not.toContain("BillingSuccessBanner");
@@ -96,7 +98,7 @@ describe("authenticated analyzer consolidation", () => {
 
   it("keeps the stale-cookie anonymous fallback intact", () => {
     expect(cookieCheckHome).toContain("{!user && <MarketingHero />}");
-    expect(cookieCheckHome).toContain("isAuthenticated={Boolean(user)}");
+    expect(cookieCheckHome).toContain("isAuthenticated: Boolean(user)");
     expect(cookieCheckHome).toContain("{!user && (");
     expect(cookieCheckHome).toContain("{!user ? <SiteFooter /> : null}");
     expect(cookieCheckHome.indexOf("redirect(`/dashboard/new")).toBeLessThan(

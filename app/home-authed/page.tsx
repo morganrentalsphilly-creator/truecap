@@ -19,7 +19,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
-import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
+import { AnalyzePageContent } from "@/components/marketing/analyze-page-content";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
@@ -57,6 +57,8 @@ export default async function AuthedHome({
   searchParams,
 }: {
   searchParams?: Promise<{ billing?: string; session_id?: string; savedDeal?: string;
+    tc_from?: string;
+    address?: string;
   }>;
 }) {
   // No JSON-LD here — this route is noindex; the schema.org graph
@@ -91,9 +93,26 @@ export default async function AuthedHome({
       analyzerParams.set("session_id", sessionId);
     }
 
+    // /analyze?address=… for a signed-in visitor: carry the address into the
+    // in-app analyzer (the root-layout bootstrap moves it into the private
+    // sessionStorage handoff before any vendor script runs). Bounded and
+    // shape-checked; a listing URL is not forwarded.
+    const address = resolvedSearchParams.address;
+    if (
+      resolvedSearchParams.tc_from === "analyze" &&
+      typeof address === "string" &&
+      address.trim().length > 0 &&
+      address.length <= 200 &&
+      !/^https?:\/\//i.test(address.trim())
+    ) {
+      analyzerParams.set("address", address.trim());
+    }
+
     const query = analyzerParams.toString();
     redirect(`/dashboard/new${query ? `?${query}` : ""}`);
   }
+
+  const mirroringAnalyze = resolvedSearchParams.tc_from === "analyze";
   // Only the stale-cookie anonymous fallback reaches this point. Resolve its
   // free capabilities through the shared helper so this uncached fallback
   // stays in lockstep with the static public analyzer.
@@ -119,41 +138,55 @@ export default async function AuthedHome({
   // everyone — the /d/[encoded] growth loop — and the prop was dead all the
   // way down to ShareLinkButton.)
 
+  if (mirroringAnalyze) {
+    // Stale-cookie visitor on /analyze: the same page app/analyze/page.tsx
+    // renders, just uncached. Capabilities come from the shared resolver so
+    // the flags cannot drift from the static route's ANON_ANALYZER_PROPS.
+    return (
+      <div className="relative overflow-x-clip">
+        <Header initialUser={user} initialEntitlements={entitlements} />
+        {/* The analyzer itself provides progressive, contextual guidance.
+            Do not place a first-run tour over its controls: the former
+            floating five-step card obscured and intercepted the primary
+            Calculate action for exactly the zero-deal users who needed the
+            clearest first run. */}
+        <AnalyzePageContent
+          analyzerProps={{
+            canSaveDeals,
+            canCompareDeals,
+            canExportPdf,
+            canUseProjections,
+            canUseTaxStrategy,
+            canUseExitScenarios,
+            canUseDealScore,
+            canUseMaxOffer,
+            canUseSensitivity,
+            canUseStrategies,
+            canUpdateSavedDeals,
+            saveDealLimitReached,
+            initialSavedDealCount: savedDealCount ?? 0,
+            savedDealLimit: entitlements?.max_saved_deals ?? null,
+            isAuthenticated: Boolean(user),
+            userAnalysisDefaults,
+            advocacyContractEligible: false,
+          }}
+        />
+        <SiteFooter />
+      </div>
+    );
+  }
+
   return (
     // relative + overflow-x-clip: mirror of app/page.tsx — `relative` contains
     // any escaped absolutely-positioned descendant, `clip` removes horizontal
     // bleed while keeping sticky/fixed working.
     <div className="relative overflow-x-clip">
       <Header initialUser={user} initialEntitlements={entitlements} />
-      {/* Full landing experience ONLY for cold visitors (anon fallback —
-          the canonical anon homepage is the static app/page.tsx, and this
-          mirrors its TOOL-FIRST flow). Authenticated users skip ALL of it
-          — the calculator is their workspace. For anon, only the hero
-          renders above the calculator; the persuasion content follows it
-          (block below) so a cold visitor reaches the working tool first. */}
+      {/* Cold-visitor homepage (stale-cookie fallback). The analyzer lives at
+          /analyze; the hero hands off there. MUST stay in lockstep with
+          app/page.tsx — lib/__tests__/homepage-lockstep.test.ts enforces the
+          section list and that neither page imports the analyzer. */}
       {!user && <MarketingHero />}
-      <InvestCalcPage
-        canSaveDeals={canSaveDeals}
-        canCompareDeals={canCompareDeals}
-        canExportPdf={canExportPdf}
-        canUseProjections={canUseProjections}
-        canUseTaxStrategy={canUseTaxStrategy}
-        canUseExitScenarios={canUseExitScenarios}
-        canUseDealScore={canUseDealScore}
-        canUseMaxOffer={canUseMaxOffer}
-        canUseSensitivity={canUseSensitivity}
-        canUseStrategies={canUseStrategies}
-        canUpdateSavedDeals={canUpdateSavedDeals}
-        saveDealLimitReached={saveDealLimitReached}
-        initialSavedDealCount={savedDealCount ?? 0}
-        savedDealLimit={entitlements?.max_saved_deals ?? null}
-        isAuthenticated={Boolean(user)}
-        userAnalysisDefaults={userAnalysisDefaults}
-        advocacyContractEligible={false}
-      />
-      {/* Anon fallback only — the SAME seven-block story as app/page.tsx.
-          The live analyzer above is interactive product proof. Lockstep is enforced
-          by lib/__tests__/homepage-lockstep.test.ts. */}
       {!user && (
         <div className="truecap-marketing-tail contents">
           <DataSourcesSection />
@@ -167,27 +200,15 @@ export default async function AuthedHome({
           <StickyConversionBar />
         </div>
       )}
-      {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
-          nothing for auth'd users. */}
-      {/* The analyzer itself now provides progressive, contextual guidance.
-          Do not place a first-run tour over its controls: the former floating
-          five-step card obscured and intercepted the primary Calculate action
-          for exactly the zero-deal users who needed the clearest first run. */}
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}
       <ScrollDepthTracker />
       {/* Fires PostHog `landing_view` once on mount — top of the
-          conversion funnel. Pairs with `analyzer_started`,
-          `analysis_completed`, `pro_checkout_started`, `pro_subscribed`
-          to build a 5-step funnel chart in the PostHog dashboard. */}
+          conversion funnel. */}
       <TrackLandingView />
-      {/* Site footer — trust + sitemap + brand, for ANON visitors only.
-          It carries a hardcoded Account column (Sign in / Create account /
-          Forgot password) with no auth awareness, so rendering it to a
-          signed-in user invited them to sign in from inside the product.
-          Gated like MarketingHero / the landing sections / StickyConversionBar
-          above. */}
+      {/* Site footer for ANON visitors only (it carries a hardcoded
+          Account column with sign-in links). */}
       {!user ? <SiteFooter /> : null}
     </div>
   );

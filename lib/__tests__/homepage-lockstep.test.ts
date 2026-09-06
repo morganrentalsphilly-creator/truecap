@@ -55,6 +55,21 @@ function sections(rel: string): string[] {
 }
 
 describe("both homepages stay in lockstep", () => {
+  it("neither homepage imports the analyzer bundle (it lives at /analyze)", () => {
+    for (const rel of ["app/page.tsx", "app/home-authed/page.tsx"]) {
+      const src = readFileSync(join(ROOT, rel), "utf8");
+      expect(src, rel).not.toContain("@/components/investcalc/investcalc-page");
+    }
+    // /analyze and the stale-cookie mirror share ONE props object.
+    expect(readFileSync(join(ROOT, "app/analyze/page.tsx"), "utf8")).toContain(
+      "ANON_ANALYZER_PROPS",
+    );
+    expect(readFileSync(join(ROOT, "app/home-authed/page.tsx"), "utf8")).toContain(
+      "AnalyzePageContent",
+    );
+  });
+
+
   it("render the same marketing sections in the same order", () => {
     const anon = sections("app/page.tsx");
     const authed = sections("app/home-authed/page.tsx");
