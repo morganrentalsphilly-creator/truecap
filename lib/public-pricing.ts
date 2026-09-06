@@ -89,3 +89,27 @@ export function formatPublicUsd(amount: number): string {
     maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
   }).format(amount);
 }
+
+/**
+ * Pricing-page copy facts (docs/site-overhaul.md Phase 9). Amounts live here,
+ * never in JSX: the outcome line is arithmetic (3% of $250,000), the
+ * DealCheck figures are the competitor's published tiers as stated on
+ * /vs/dealcheck.
+ */
+export const PRICING_OUTCOME_EXAMPLE = {
+  purchasePriceUsd: 250_000,
+  overpayPct: 3,
+  get overpayUsd(): number {
+    return Math.round((this.purchasePriceUsd * this.overpayPct) / 100);
+  },
+} as const;
+
+export const DEALCHECK_COMPARISON = {
+  plusMonthlyUsd: 10,
+  proMonthlyUsd: 20,
+  href: "/vs/dealcheck",
+} as const;
+
+export function formatUsdWhole(amount: number): string {
+  return `$${amount.toLocaleString("en-US")}`;
+}

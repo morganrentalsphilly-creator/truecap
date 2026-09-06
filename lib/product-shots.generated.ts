@@ -24,7 +24,7 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/verdict-desktop.png",
     "webp": "/product/verdict-desktop.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T17:52:31.828Z"
+    "captured_at": "2026-09-06T19:01:07.748Z"
   },
   {
     "shot": "where-the-rent-goes",
@@ -34,17 +34,17 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/where-the-rent-goes-desktop.png",
     "webp": "/product/where-the-rent-goes-desktop.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T17:52:32.405Z"
+    "captured_at": "2026-09-06T19:01:08.348Z"
   },
   {
     "shot": "memo",
     "viewport": "desktop",
     "width": 2560,
-    "height": 2706,
+    "height": 3044,
     "png": "/product/memo-desktop.png",
     "webp": "/product/memo-desktop.webp",
     "source": "http://127.0.0.1:3100/sample-decision-memo",
-    "captured_at": "2026-09-06T17:52:37.496Z"
+    "captured_at": "2026-09-06T19:01:13.508Z"
   },
   {
     "shot": "verdict",
@@ -54,7 +54,7 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/verdict-mobile.png",
     "webp": "/product/verdict-mobile.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T17:52:38.986Z"
+    "captured_at": "2026-09-06T19:01:15.428Z"
   },
   {
     "shot": "where-the-rent-goes",
@@ -64,17 +64,17 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/where-the-rent-goes-mobile.png",
     "webp": "/product/where-the-rent-goes-mobile.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T17:52:39.547Z"
+    "captured_at": "2026-09-06T19:01:16.008Z"
   },
   {
     "shot": "memo",
     "viewport": "mobile",
     "width": 780,
-    "height": 4410,
+    "height": 5022,
     "png": "/product/memo-mobile.png",
     "webp": "/product/memo-mobile.webp",
     "source": "http://127.0.0.1:3100/sample-decision-memo",
-    "captured_at": "2026-09-06T17:52:44.484Z"
+    "captured_at": "2026-09-06T19:01:21.006Z"
   }
 ];
-export const PRODUCT_SHOTS_GENERATED_AT: string | null = "2026-09-06T17:52:44.498Z";
+export const PRODUCT_SHOTS_GENERATED_AT: string | null = "2026-09-06T19:01:21.019Z";

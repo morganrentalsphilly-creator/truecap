@@ -578,3 +578,32 @@ Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl +
 - HUD FMR rows for the 12 bespoke cities (data entry from HUD's FY2026 tables; flips Philadelphia, Dallas, Atlanta, Tampa, Houston, Phoenix, Charlotte, Cleveland, Detroit, Indianapolis, Kansas City, Memphis to indexable).
 - Real content for the city + strategy template (then flip `STRATEGY_PAGES_INDEXABLE`).
 - Official assessor/permit links on market pages: the repo has no verified per-city URLs, so the verify-locally items name the office without a link.
+
+## Phase 9 — Pricing page (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| The page leads with the outcome line: "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent." It is the `<h1>`; every figure is computed from `PRICING_OUTCOME_EXAMPLE` (3% × $250,000), not typed into JSX | `app/pricing/page.tsx`, `lib/public-pricing.ts` |
+| The three plans follow the hero directly; the "Which stage are you at?" job cards moved below the trust row (same content, later position) | `app/pricing/page.tsx` |
+| Annual is the default period. The Pro and Agent Pro cards show the effective monthly figure with "billed annually (total)" under it; the savings badge is computed from the Stripe display prices. A current monthly subscriber opens on Monthly so their "Current" card is the visible one | `components/marketing/pricing-toggle-plans.tsx` |
+| One honest comparison block: "How this compares to DealCheck ($10 Plus / $20 Pro) … If you only need metrics, DealCheck or a spreadsheet is fine." linking to `/vs/dealcheck`. The DealCheck amounts live in `DEALCHECK_COMPARISON` and were checked against dealcheck.io/pricing on 2026-09-06 (Plus $10/mo, Pro $20/mo) | `app/pricing/page.tsx`, `lib/public-pricing.ts` |
+| Trust row: free to start with no card · cancel anytime from your profile · payments handled by Stripe · methodology is public (links to `/methodology`) | `app/pricing/page.tsx` |
+| Product shot per tier (Phase 4), `<Testimonials />` (Phase 5, renders nothing until a consented quote exists), `<FounderCard />` (Phase 4), the FAQ rewritten in Phase 3 (trial + "What does Pro add?") — all kept on the page | `app/pricing/page.tsx` |
+| Prices: `PUBLIC_PRO_MONTHLY_USD = 29.99`, `PUBLIC_PRO_ANNUAL_USD = 300`, `PUBLIC_AGENT_PRO_MONTHLY_USD = 59.99`, `PUBLIC_AGENT_PRO_ANNUAL_USD = 590` — unchanged; live cards still read the Stripe display prices and fall back to these constants | `lib/public-pricing.ts` |
+| Screenshot pipeline re-run against the Phase 9 build: 6 shots regenerated (`memo-*` changed with the new copy; `verdict-*` and `where-the-rent-goes-*` were byte-identical); `ten-year-cash-flow` and `comparison` still deferred (Pro-gated views need a seeded account) | `public/product/*`, `lib/product-shots.generated.ts` |
+| Visual check at 375 / 768 / 1440 in Chromium: no horizontal overflow, outcome line visible, Annual pressed by default, "billed annually" visible, DealCheck link → `/vs/dealcheck`, ≥ 2 tier shots, trust row visible | `e2e/site-overhaul-conversion.spec.ts` ("pricing page holds together…") |
+| Structural guard: no `$<amount>` literal in pricing JSX other than the Free tier's `$0` (comments stripped), outcome line before the plans, annual default, DealCheck facts and link, trust row, shots, testimonials, FAQ schema | `lib/__tests__/site-overhaul-pricing.test.ts` |
+
+### Decisions made in the founder's absence (Phase 9)
+
+1. **Annual-first for everyone except a current monthly subscriber.** The brief says annual by default; a monthly subscriber opening on Annual would hide the "Current" badge on the card they pay for, so that one case opens on Monthly. Everything else (visitors, Free accounts, trial accounts) opens on Annual.
+2. **The job cards were moved, not removed.** "Lead with the outcome, then the three plans" leaves no room for the "Which stage are you at?" section between them; it still explains Free vs Pro vs Agent Pro, so it now sits below the trust row.
+3. **DealCheck's annual prices are not stated.** Its pricing page shows the monthly tiers in dollars and the annual option only as "3 months free"; the block quotes the two monthly figures the founder gave, which matched the page on 2026-09-06, and links to `/vs/dealcheck` for the rest.
+4. **The FAQ was not rewritten a second time.** Phase 3 rewrote it (trial mechanics, what Pro adds, auto-fill accuracy, downgrade behaviour); the Phase 9 block and trust row cover the remaining objections without adding questions.
+5. **"★ Best value" ribbon stays.** It is a merchandising label on the annual card, not a rating; the no-stars rule is about social proof.
+
+### Deferred (Phase 9)
+
+- `ten-year-cash-flow` and `comparison` product shots (Pro-gated; need a seeded demo account with database credentials this environment does not have).

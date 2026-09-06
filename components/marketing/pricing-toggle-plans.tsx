@@ -160,13 +160,13 @@ export function PricingTogglePlans({
             : evaluation.status === "expired"
               ? "Free trial ended · Free screening remains"
               : "Paid access available now";
-  // Monthly-first for visitors and Free users: they arrive primed on the
-  // advertised monthly price from ads/FAQ/marketing copy (the exact amount is
-  // catalog-driven, so this comment does not restate it). A current
-  // annual subscriber instead opens on Annual so their exact card is visibly
-  // marked Current; the toggle remains under their control.
+  // Annual-first (docs/site-overhaul.md Phase 9): the card shows the
+  // effective monthly figure with "billed annually (total)" under it, so the
+  // visitor sees the lower monthly number AND the real charge. A current
+  // monthly subscriber opens on Monthly so their exact card is visibly marked
+  // Current; the toggle remains under their control.
   const [period, setPeriod] = useState<"monthly" | "annual">(
-    activePaidPlanSlug?.endsWith("_annual") ? "annual" : "monthly"
+    activePaidPlanSlug?.endsWith("_monthly") ? "monthly" : "annual"
   );
 
   // Top of the pricing-page funnel — fire once on mount so we can measure

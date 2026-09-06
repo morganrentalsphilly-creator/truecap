@@ -168,3 +168,29 @@ test("the sample flow fires analysis_started and analysis_completed through trac
   );
   expect(dataLayer.filter((e) => typeof e === "object" && e && "event" in e && (e as { event: string }).event === "analysis_started")).toHaveLength(0);
 });
+
+test("pricing page holds together at 375, 768, and 1440 with annual as the default", async ({
+  page,
+}) => {
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/pricing", { waitUntil: "domcontentloaded" });
+    const overflow = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+    }));
+    expect(overflow.documentWidth, `overflow at ${width}`).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+    await expect(page.getByText(/Overpaying by 3% on a \$250,000 rental costs \$7,500/)).toBeVisible();
+    // Annual is the default and the effective monthly figure is shown.
+    const annualToggle = page.getByRole("button", { name: /annual/i }).first();
+    await expect(annualToggle).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText(/billed annually/i).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /how this compares to DealCheck|DealCheck/i }).first()).toHaveAttribute(
+      "href",
+      "/vs/dealcheck",
+    );
+    // A product shot per tier and the trust row.
+    expect(await page.locator("figure img").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.getByText(/Free to start/i).first()).toBeVisible();
+  }
+});
