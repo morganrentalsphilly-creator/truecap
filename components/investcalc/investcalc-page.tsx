@@ -10472,10 +10472,15 @@ export function InvestCalcPage({
             cannot blank the whole post-calc surface. The fallback
             surfaces the headline metrics directly from analysisResult
             so the user's numbers are never lost. */}
+        {/* scroll-mt: the post-Run scrollIntoView lands this region under the
+            sticky header (57px on phones, 65px from sm:). On /analyze the
+            analyzer sits below an intro, so the margin decides whether the
+            decision and its primary actions fit in the first phone viewport;
+            128px pushed them 37px past an 844px fold. */}
         {!isEditingAssumptions &&
           (showResults || isCalculating || analysisResult !== null) && (
             <div
-              className="mt-8 scroll-mt-32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
+              className="mt-8 scroll-mt-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
               data-analysis-results="true"
               role="region"
               tabIndex={-1}

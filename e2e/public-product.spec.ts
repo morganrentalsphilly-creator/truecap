@@ -175,31 +175,38 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   await expectNoSeriousAccessibilityViolations(page);
 });
 
-test("homepage sample preview keeps its reading order at zoom-sensitive widths", async ({
+test("homepage hero keeps its reading order at zoom-sensitive widths", async ({
   page,
 }) => {
+  // Phase 4 replaced the illustrative sample card with the real product
+  // screenshot (`HeroProductShot`) and its "Live sample" link. The hero's
+  // headline, the address form, the shot, and the link must all stay inside
+  // the viewport and read top-to-bottom at every width, including the very
+  // narrow ones a zoomed-in phone produces.
   for (const width of [195, 640, 768, 1023]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const card = page.locator('[data-hero-sample-card=""]');
-    const property = page.locator('[data-hero-sample-property=""]');
-    const status = page.locator('[data-hero-sample-status=""]');
-    const offer = page.locator('[data-hero-sample-offer=""]');
-    for (const element of [card, property, status, offer]) {
+    const heading = page.locator("h1").first();
+    const form = page.locator('form[action="/analyze"]').first();
+    const shot = page.locator("[data-hero-product-shot='']");
+    const liveSample = shot.getByRole("link", { name: /live sample/i });
+    for (const element of [heading, form, shot]) {
       await expect(element).toBeVisible();
       await expectContainedInViewport(page, element, 100);
     }
+    // The link is a short inline phrase; it only has to stay inside the
+    // viewport and keep a tappable width.
+    await expect(liveSample).toBeVisible();
+    await expectContainedInViewport(page, liveSample, 40);
 
-    const propertyBox = await property.boundingBox();
-    const statusBox = await status.boundingBox();
-    expect(propertyBox).not.toBeNull();
-    expect(statusBox).not.toBeNull();
-    expect(propertyBox!.y + propertyBox!.height).toBeLessThanOrEqual(
-      statusBox!.y + 1,
-    );
+    const headingBox = await heading.boundingBox();
+    const formBox = await form.boundingBox();
+    expect(headingBox).not.toBeNull();
+    expect(formBox).not.toBeNull();
+    expect(headingBox!.y + headingBox!.height).toBeLessThanOrEqual(formBox!.y + 1);
 
-    const textOverflow = await property.evaluate((element) => ({
+    const textOverflow = await heading.evaluate((element) => ({
       clientWidth: element.clientWidth,
       scrollWidth: element.scrollWidth,
     }));
@@ -212,8 +219,12 @@ test("homepage sample preview keeps its reading order at zoom-sensitive widths",
 test("the marketing prompt yields while the investor is using the calculator", async ({
   page,
 }) => {
+  // Since Phase 2 the analyzer lives on /analyze and the sticky funnel bar
+  // is mounted on the marketing homepage only, so the two can never overlap:
+  // the bar shows once a cold visitor has scrolled past the homepage hero,
+  // and following it lands on the calculator with no bar over the form.
   await page.setViewportSize({ width: 643, height: 732 });
-  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   const rejectCookies = page.getByRole("button", {
     name: "Reject",
     exact: true,
@@ -225,10 +236,12 @@ test("the marketing prompt yields while the investor is using the calculator", a
   await page.evaluate(() => window.scrollTo(0, 900));
   await expect(conversionBar).toBeVisible();
 
+  await conversionBar.getByRole("link").first().click();
+  await page.waitForURL(/\/analyze/);
   const calculator = page.locator('form[data-calc-form="true"]');
   await calculator.scrollIntoViewIfNeeded();
   await expect(calculator).toBeVisible();
-  await expect(conversionBar).toBeHidden();
+  await expect(page.locator("[data-conversion-bar-root]")).toHaveCount(0);
 });
 
 test("tablet investors keep one reachable analysis action below the desktop cockpit", async ({
@@ -691,7 +704,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/analyze", { waitUntil: "domcontentloaded" });
 
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
+  const acceptCookies = page.getByRole("button", { name: /^accept( all)?$/i });
   await expect(acceptCookies).toBeVisible();
   await acceptCookies.click();
   const sampleButton = page.getByRole("button", {

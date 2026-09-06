@@ -607,3 +607,29 @@ Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl +
 ### Deferred (Phase 9)
 
 - `ten-year-cash-flow` and `comparison` product shots (Pro-gated; need a seeded demo account with database credentials this environment does not have).
+
+## Phase 10 (part 2) — Verification of Phases 2–9 (branch `site-overhaul`)
+
+### Gate results on the final branch build (local production server, `next start` on 127.0.0.1:3100)
+
+| Gate | Result |
+| --- | --- |
+| `npx tsc --noEmit` | exit 0 |
+| `npm run lint` | exit 0 (0 errors; the 14 pre-existing warnings are unchanged) |
+| `npx vitest run` | 386 files, 4,817 tests, all passing |
+| Playwright `public-chromium` project (desktop + phone viewports inside the specs) | 34 passed, 0 failed |
+| Playwright `authenticated-chromium` | Not run locally: it needs the disposable local Supabase stack CI builds (Docker); CI's `browser-regressions` job runs it on the PR |
+| Lighthouse, mobile, simulated (`lighthouse@12`) | `/` performance 91 · accessibility 100 · best-practices 96 · SEO 100 · LCP 3.2 s · TBT 110 ms · CLS 0.003; `/analyze` 94 / 100 / 96 / 100 · LCP 1.6 s · TBT 250 ms; `/pricing` 98 / 99 / 96 / 100 · LCP 1.7 s · TBT 110 ms |
+| Lighthouse CI budgets (`lighthouserc.json`) | accessibility ≥ 95 and CLS ≤ 0.05 (errors) met on both URLs; JS ≤ 250 KB and LCP ≤ 2.5 s remain warnings (Phase 7 decision 2) |
+| axe-core (WCAG 2.0/2.1 A + AA) on `/`, `/analyze`, `/pricing` at 375 and 1440 | 0 violations on all six renders |
+| `scripts/seo-audit.ts` | 0 thin indexable pages, 0 duplicate titles, 0 missing `lastmod`, 0 non-self canonicals, 0 broken links, 0 titles over 60, 0 descriptions over 155 |
+
+### Found and fixed during verification
+
+1. **Post-Run scroll on `/analyze` left the decision's primary actions 37 px below an 844 px phone fold.** On `main` the analyzer sat at the top of the homepage, so the sample click never scrolled; on `/analyze` it sits under a short intro, and the results region's 128 px mobile scroll margin (`scroll-mt-32`) landed it too low. Measured against a `main` worktree build: every element height was identical, only the landing offset differed. The mobile margin is now 80 px (`scroll-mt-20`; `sm:` keeps 96 px), which puts the region just under the 57 px sticky header. `lib/__tests__/mobile-results-handoff.test.ts` re-pinned.
+2. **Three `e2e/public-product.spec.ts` pins predated Phases 2–4:** the hero test looked for the retired sample card (now the real product shot + "Live sample" link); the conversion-bar test looked for the bar on `/analyze` (it is mounted on the marketing homepage only, so the test now follows the bar to `/analyze` and asserts no bar over the calculator); the sample test looked for "Accept all" (the phone label is "Accept"). Rewritten to the current markup with the same intent.
+3. **Local Playwright runs need `SHARE_LINK_SECRET`.** The anonymous first-decision grant is an HMAC cookie signed with that secret; `playwright.config.ts` injects a value when it starts the server itself, but a hand-started `next start` without it renders the coarse range preview and fails the two "exact decision" specs. Not a product change; recorded here so the next person does not chase a phantom regression. Whether production defines the variable is in the founder list below.
+
+### Billing reconcile (Phase 1) — production cron result, counts only
+
+`/api/cron/billing-reconcile` ran at 17:30 UTC on 2026-09-06 on deployment `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` in `dry` mode: 35 Stripe subscriptions scanned (listing not truncated), 2 skipped as not paid, 31 skipped as the other app's (`philly_rental_compliance`), 2 already bound, 0 resolvable, 0 unresolved, 0 applied, 0 errors. The `billing_unresolved_events` table was not available (migration still founder-owed), so nothing was recorded there; nothing needed recording.
