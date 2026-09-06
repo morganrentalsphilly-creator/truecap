@@ -104,6 +104,7 @@ export function StickyConversionBar() {
         </div>
         <Link
           href="/analyze"
+          prefetch={false}
           onClick={() => trackEvent("homepage_primary_cta", { source: "sticky_bar" })}
           className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:px-4 sm:text-sm"
         >

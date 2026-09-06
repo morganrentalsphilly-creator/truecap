@@ -20,6 +20,7 @@ export function AnalyzeCtaLink({ className, analyticsSource, href = "/analyze", 
   return (
     <Link
       href={href}
+      prefetch={false}
       className={className}
       onClick={() => trackEvent("homepage_primary_cta", { source: analyticsSource })}
     >

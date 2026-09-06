@@ -192,6 +192,7 @@ function HeroProductShot({ decisionPositioning }: { decisionPositioning: boolean
         <span>Real output from the free sample deal.</span>
         <Link
           href="/analyze?sample=1"
+          prefetch={false}
           className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Live sample →

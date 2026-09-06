@@ -482,3 +482,46 @@ Pending the first scheduled production run (see Phase 10).
 2. **GTM receives events only after consent.** `track()` checks the banner's stored decision before pushing to `dataLayer`; Phase 7 makes the GTM/Ads scripts themselves load only after consent. Vercel Analytics is cookieless and always on, so the funnel stays measurable for visitors who reject cookies.
 3. **`trial_started` fires with `signup_completed`** because every new account starts the no-card free trial; a separate server flag would have added a query to the sign-up path for no extra information.
 4. **The "mocked transport" for the browser test is the in-page buffer**, not a network interception: Vercel's client SDK does not send from local builds, and intercepting GTM would have required accepting cookies in the test — which is exactly what the test asserts does not happen by default.
+
+## Phase 7 — Performance (branch `site-overhaul`)
+
+### Before / after (homepage unless noted)
+
+Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl + brotli), "after" is the local production build of this branch served with `next start` (gzip; production brotli is ~10–15 % smaller). Lighthouse 12, mobile emulation, simulated throttling, Playwright's Chromium.
+
+| Metric | Before | After | Note |
+| --- | --- | --- | --- |
+| HTML bytes | 326,414 | 152,673 | analyzer moved to `/analyze` |
+| `<script src>` tags | 42 | 28 | one of them (`polyfills-*.js`, 112 KB raw) is `noModule` and is never fetched by a modern browser |
+| Own JS, raw | 2,034,957 | 952,103 | script tags only, no prefetch |
+| Own JS, compressed | 636,923 (br) | 306,567 (gzip) | budget 250 KB not met — see decision 2 |
+| Largest chunk | `2217-*.js` 526 KB raw (Sentry SDK + Next runtime) | `3794-*.js` 250 KB raw (Next app-router runtime) | Sentry SDK (~166 KB gz) now loads after interaction/idle |
+| JS fetched through hydration (transfer script) | 766,720 B / 45 requests (Phase 2 build, incl. `/analyze` prefetch) | 503,838 B / 34 requests (incl. the deferred Sentry chunk) | `/analyze` links prefetch on hover only |
+| Lighthouse performance | 73 | 88 | |
+| LCP (mobile, simulated) | 4.6 s | 3.8 s | budget 2.5 s not met — warning |
+| TBT | 430 ms | 120 ms | budget 200 ms met |
+| CLS | 0.003 | 0.003 | budget 0.05 met |
+| Accessibility | 99 | 100 | |
+| `/analyze` Lighthouse performance / LCP / TBT | — / 5.0 s / 330 ms (Phase 2 build) | 83 / 4.4 s / 160 ms | LCP budget 3 s not met — warning |
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| `@next/bundle-analyzer` (dev dependency), `npm run analyze` (`ANALYZE=true`) | `next.config.mjs`, `package.json` |
+| Homepage does not import the analyzer (Phase 2); every `/analyze` link is `prefetch={false}` (hover prefetch only), so the analyzer bundle is not pulled onto marketing pages | `analyze-cta-link.tsx`, `sticky-conversion-bar.tsx`, `marketing-nav.tsx`, `hero-address-form.tsx`, `header.tsx`, `marketing-hero.tsx`, `/vs/*`, persona pages, blog index |
+| The 526 KB `2217-*.js` chunk identified as the Sentry browser SDK + Next runtime. Sentry now loads LAZILY — on first interaction, browser idle, or 4 s, whichever first — from `lib/sentry/client-init.ts` (the full previous configuration: PII scrubbing, Replay off, tracing on, triaged `ignoreErrors`). Errors before the SDK is up are buffered and reported after; router transitions are forwarded once loaded. Sentry's `bundleSizeOptimizations` drop Replay shadow-DOM/iframe/worker code and debug statements. | `instrumentation-client.ts`, `lib/sentry/client-init.ts`, `next.config.mjs` |
+| `browserslist: ["last 2 versions", "not dead", "> 0.5%"]` | `package.json` |
+| GTM and the Google Ads tag load only after the visitor accepts cookies (they listen to the banner's consent event) and with `lazyOnload`; Vercel Analytics stays cookieless and always on | `components/analytics/google-measurement.tsx`, `lib/use-cookie-banner.ts` |
+| Fonts already used `next/font` with `display: swap` (Plus Jakarta Sans preloaded, DM Mono on demand for tabular numbers) — unchanged | `app/layout.tsx` |
+| Images: `next/image` with explicit dimensions everywhere a product shot renders; `priority` only on the hero shot | `components/marketing/product-shot.tsx` |
+| Budgets + Lighthouse CI: `lighthouserc.json` (mobile, simulated) asserts accessibility ≥ 95 and CLS ≤ 0.05 as ERRORS and homepage JS ≤ 250 KB, LCP ≤ 2.5 s, TBT ≤ 200 ms, `/analyze` LCP ≤ 3 s as WARNINGS; a `lighthouse` CI job builds, serves, and runs `@lhci/cli autorun` | `lighthouserc.json`, `.github/workflows/ci.yml`, `package.json` (`perf:lighthouse`) |
+| Guard test for the structural rules (no analyzer import on the homepage, hover-only prefetch, consent-gated GTM, browserslist, lazy Sentry with the full config, budgets as configured) | `lib/__tests__/site-overhaul-performance.test.ts` |
+
+### Decisions made in the founder's absence (Phase 7)
+
+1. **Sentry is deferred, not trimmed.** Dropping client tracing (`excludeTracing`) would have cut the SDK further but removes performance monitoring the founder configured; loading it after interaction keeps every feature and takes it off the critical path (TBT 430 → 120 ms, LCP 4.6 → 3.8 s). Early errors are buffered so nothing is lost.
+2. **The JS and LCP budgets stay warnings, not failures.** The brief allows it when meeting them would risk the analyzer. What remains on the homepage is the Next app-router runtime + React (~135 KB gz) and the marketing page's own code; the next lever is the Radix Sheet/Dropdown behind the header menu, left for a follow-up.
+3. **The `polyfills` chunk is not a real cost.** It is `noModule` and modern browsers never download it (Chromium confirmed); `browserslist` is set anyway so the build targets modern engines.
+4. **Two fonts stay.** DM Mono renders tabular numbers in 70 components; replacing it would be a visual change outside the brief.
+5. **No `next/dynamic` sweep of the analyzer's own imports** beyond what already existed (charts, PDF, dialogs are already dynamic): the analyzer file is 11,000 lines and a partial split risked the free first decision.

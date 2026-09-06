@@ -1,4 +1,9 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+// `npm run analyze` (ANALYZE=true) writes an interactive treemap of every
+// client/server bundle to .next/analyze/. Off by default; zero runtime cost.
+const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 import { fileURLToPath } from "node:url";
 
 const projectRoot = fileURLToPath(new URL(".", import.meta.url));
@@ -322,9 +327,21 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  // Client bundle size (docs/site-overhaul.md Phase 7). The Sentry SDK was
+  // the single largest chunk on the homepage (~526 KB raw). Replay is
+  // disabled (sample rates 0 in instrumentation-client.ts), so its shadow-
+  // DOM / iframe / worker code is dead weight; debug statements are dead in
+  // production. Tracing is kept on purpose (tracesSampleRate stays 1).
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayShadowDom: true,
+    excludeReplayIframe: true,
+    excludeReplayWorker: true,
+  },
 
   org: "truecap",
 

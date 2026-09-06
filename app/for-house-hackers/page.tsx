@@ -129,7 +129,7 @@ export default function ForHouseHackersPage() {
           <ProductShot
             shot="where-the-rent-goes"
             alt="TrueCap's cash-flow breakdown for the sample deal: where each month's rent goes, from operating expenses and reserves to debt service and cash flow"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
           />
         </section>
         <section id="use-cases" className="mb-12 sm:mb-16">

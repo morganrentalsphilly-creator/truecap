@@ -205,6 +205,7 @@ export function HeroAddressForm() {
                 or{" "}
                 <Link
                   href="/analyze?sample=1"
+                  prefetch={false}
                   className="font-semibold text-primary underline underline-offset-4"
                 >
                   try the sample deal →
@@ -237,6 +238,7 @@ export function HeroAddressForm() {
       <p className="mt-2.5 text-sm">
         <Link
           href="/analyze?sample=1"
+          prefetch={false}
           data-hero-sample-link=""
           onClick={() => {
             trackEvent("hero_sample_clicked");

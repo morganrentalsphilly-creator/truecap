@@ -1,0 +1,42 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm run start -- --hostname 127.0.0.1 --port 3100",
+      "startServerReadyPattern": "Ready in|started server|Local:",
+      "startServerReadyTimeout": 120000,
+      "url": ["http://127.0.0.1:3100/", "http://127.0.0.1:3100/analyze"],
+      "numberOfRuns": 1,
+      "settings": {
+        "preset": "perf",
+        "formFactor": "mobile",
+        "screenEmulation": { "mobile": true, "width": 390, "height": 844, "deviceScaleFactor": 2, "disabled": false },
+        "throttlingMethod": "simulate",
+        "onlyCategories": ["performance", "accessibility"]
+      }
+    },
+    "assert": {
+      "assertMatrix": [
+        {
+          "matchingUrlPattern": "http://127\\.0\\.0\\.1:3100/$",
+          "assertions": {
+            "categories:accessibility": ["error", { "minScore": 0.95 }],
+            "total-byte-weight": ["warn", { "maxNumericValue": 900000 }],
+            "resource-summary:script:size": ["warn", { "maxNumericValue": 256000 }],
+            "largest-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
+            "total-blocking-time": ["warn", { "maxNumericValue": 200 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }]
+          }
+        },
+        {
+          "matchingUrlPattern": "http://127\\.0\\.0\\.1:3100/analyze$",
+          "assertions": {
+            "categories:accessibility": ["error", { "minScore": 0.95 }],
+            "largest-contentful-paint": ["warn", { "maxNumericValue": 3000 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }]
+          }
+        }
+      ]
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}

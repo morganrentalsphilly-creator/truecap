@@ -19,7 +19,8 @@ const generatorAction = read("app/actions/generate-report-pdf.ts");
 const currentAccessGuard = read("lib/stripe/decision-pack-access.ts");
 const client = read("components/investcalc/investcalc-page.tsx");
 const layout = read("app/layout.tsx");
-const sentryClient = read("instrumentation-client.ts");
+// The client init moved to a lazily loaded module (docs/site-overhaul.md Phase 7).
+const sentryClient = read("lib/sentry/client-init.ts");
 const sentryServer = read("sentry.server.config.ts");
 const sentryEdge = read("sentry.edge.config.ts");
 const googleMeasurement = read(

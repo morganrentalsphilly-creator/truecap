@@ -857,3 +857,32 @@ jobs:
       - name: Stop disposable Supabase
         if: always()
         run: npx --no-install supabase stop --no-backup --project-id truecap-ci
+
+  lighthouse:
+    # Performance budgets (docs/site-overhaul.md Phase 7; lighthouserc.json).
+    # Accessibility >= 95 and CLS <= 0.05 FAIL the job; the JS / LCP / TBT
+    # budgets WARN until the analyzer-free homepage is under them (the brief
+    # allows the assertion to stay a warning rather than block the build).
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: lighthouse-placeholder-anon-key
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
+      STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Production build
+        run: npm run build
+      - name: Lighthouse CI (budgets in lighthouserc.json)
+        run: npx -y @lhci/cli@0.15 autorun

@@ -1,133 +1,76 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+// Client instrumentation entry (Next.js loads this on every page).
+//
+// LAZY SENTRY (docs/site-overhaul.md Phase 7): the Sentry browser SDK is the
+// single largest chunk the site ships (~166 KB gzipped, in the shared 2217-*
+// chunk on every page). It is now loaded AFTER the page is interactive —
+// on the first user interaction, on browser idle, or after 4 seconds,
+// whichever comes first — from lib/sentry/client-init.ts, which holds the
+// full previous configuration (PII scrubbing, Replay off, tracing on, the
+// triaged ignoreErrors list). Errors that happen before the SDK is up are
+// buffered here and reported once it loads, so nothing is lost.
+//
+// Router transitions are forwarded to Sentry's App Router instrumentation
+// once loaded (Next reads the `onRouterTransitionStart` export).
 
-import * as Sentry from "@sentry/nextjs";
-import {
-  scrubSentryBreadcrumbUrl,
-  scrubSentryEventSensitiveData,
-  scrubSentryRequestCookies,
-  scrubSentryRequestHeaders,
-  scrubSentrySpanUrl,
-} from "@/lib/sentry-url-scrubber";
+type Buffered = { kind: "error" | "unhandledrejection"; error: unknown };
 
-Sentry.init({
-  dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
+const buffered: Buffered[] = [];
+let loading: Promise<typeof import("@/lib/sentry/client-init")> | null = null;
+let sentry: typeof import("@/lib/sentry/client-init") | null = null;
+const pendingTransitions: Array<[string, string]> = [];
 
-  // Keep optional integrations explicit. Replay is deliberately absent; see
-  // the zero sampling policy below.
-  integrations: [],
+function loadSentry(): Promise<typeof import("@/lib/sentry/client-init")> {
+  if (!loading) {
+    loading = import("@/lib/sentry/client-init").then((mod) => {
+      mod.initSentryClient();
+      sentry = mod;
+      for (const item of buffered.splice(0)) mod.captureBufferedError(item.error, item.kind);
+      for (const [href, navigationType] of pendingTransitions.splice(0)) {
+        mod.routerTransitionStart(href, navigationType);
+      }
+      return mod;
+    });
+  }
+  return loading;
+}
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable Sentry log forwarding only in development. In production
-  // every console.warn / console.info would otherwise ship as a Sentry
-  // event, burning quota and burying real errors. Dev-only keeps the
-  // signal high while preserving the local-debugging value.
-  enableLogs: process.env.NODE_ENV !== "production",
+if (typeof window !== "undefined") {
+  const onError = (event: ErrorEvent) => {
+    if (!sentry) buffered.push({ kind: "error", error: event.error ?? event.message });
+  };
+  const onRejection = (event: PromiseRejectionEvent) => {
+    if (!sentry) buffered.push({ kind: "unhandledrejection", error: event.reason });
+  };
+  window.addEventListener("error", onError);
+  window.addEventListener("unhandledrejection", onRejection);
 
-  // Replay records rrweb metadata and DOM snapshots outside the normal
-  // beforeSend event boundary. Public share routes carry encoded analyses or
-  // bearer tokens in the path, so Replay remains fully disabled until Sentry
-  // provides a verified route-aware transport scrub.
-  replaysSessionSampleRate: 0,
-  replaysOnErrorSampleRate: 0,
-
-  // Default request/user PII is disabled. The final scrub remains in place
-  // for integrations or explicit contexts that attach data independently.
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: false,
-
-  // Navigation/fetch/xhr breadcrumbs can carry the raw pre-cleanup URL even
-  // when event.request has already been scrubbed. Sanitize at breadcrumb
-  // creation and again in beforeSend below for defense in depth.
-  beforeBreadcrumb(breadcrumb) {
-    return scrubSentryBreadcrumbUrl(
-      breadcrumb,
-      typeof window === "undefined" ? undefined : window.location.pathname
-    );
-  },
-
-  beforeSendSpan(span) {
-    return scrubSentrySpanUrl(span);
-  },
-
-  beforeSendTransaction(event) {
-    return scrubSentryEventSensitiveData(event);
-  },
-
-  // Final privacy boundary for anything an integration or explicit capture
-  // attaches despite default PII collection being disabled.
-  beforeSend(event) {
-    // Checkout/OAuth capabilities must not survive in an error event's URL or
-    // parsed query string. This runs before transport even if React never
-    // mounted (for example, an early hydration exception).
-    scrubSentryEventSensitiveData(event);
-    // Scrub parsed cookies, the raw Cookie header, secrets, and referrers.
-    scrubSentryRequestCookies(
-      event.request?.cookies as Record<string, string> | undefined
-    );
-    scrubSentryRequestHeaders(
-      event.request?.headers as Record<string, string> | undefined
-    );
-    // Keep an explicitly attached opaque user id, but strip direct IDs.
-    if (event.user) {
-      delete event.user.email;
-      delete event.user.username;
-      delete event.user.ip_address;
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    for (const type of ["pointerdown", "keydown", "touchstart", "scroll"] as const) {
+      window.removeEventListener(type, start);
     }
-    // Error triage never needs request bodies containing deal inputs.
-    if (event.request && "data" in event.request) {
-      event.request.data = "[scrubbed]";
-    }
-    return event;
-  },
+    void loadSentry().finally(() => {
+      // The SDK installs its own global handlers; ours only bridged the gap.
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    });
+  };
+  for (const type of ["pointerdown", "keydown", "touchstart", "scroll"] as const) {
+    window.addEventListener(type, start, { passive: true, once: true });
+  }
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+    .requestIdleCallback;
+  if (typeof idle === "function") idle.call(window, start, { timeout: 4000 });
+  else window.setTimeout(start, 4000);
+}
 
-  // Filter out benign noise errors that don't represent real bugs.
-  // These get captured because Supabase/libraries throw them as
-  // unhandled rejections, but they're expected behavior.
-  ignoreErrors: [
-    // Supabase Auth uses Web Locks API to coordinate token refreshes
-    // across browser tabs. When a user has the site open in multiple
-    // tabs, the second tab's lock acquisition "immediately fails" by
-    // design — the first tab holds the lock. The failing tab retries
-    // on the next tick. No real bug, just multi-tab coordination.
-    /Acquiring an exclusive Navigator LockManager lock/,
-    /lock:sb-.*-auth-token/,
-    // Catches the whole class of Supabase Auth instrumentation errors
-    // in Safari. GoTrueClient attaches diagnostic properties to caught
-    // errors — `isAcquireTimeout` on lock timeouts, `__isAuthError` on
-    // AuthError subclass discrimination. Safari sometimes returns these
-    // error objects frozen, so the property assignment throws
-    // "Cannot add property X, object is not extensible". This is an
-    // instrumentation pattern, never a real logic bug — the underlying
-    // operation already failed; only the failure-reporting fails. One
-    // broad pattern catches all current + future variants without
-    // playing whack-a-mole on each new property name.
-    /Cannot add property .+, object is not extensible/,
-    // Network errors that aren't actionable (user is offline, etc.).
-    // Each browser uses different language for the same underlying
-    // condition — Chrome says "Failed to fetch", Firefox says
-    // "NetworkError when attempting to fetch resource", and Safari
-    // (desktop + iOS) says "Load failed". All three mean the request
-    // didn't complete due to network, abort, or content blocker —
-    // never a code bug. Filter all three.
-    /NetworkError when attempting to fetch resource/,
-    /Failed to fetch/,
-    /Load failed/,
-    // Aborted requests — fires when the user navigates away or
-    // backgrounds the app mid-fetch. Mobile Safari does this aggressively.
-    /AbortError/,
-    /The user aborted a request/,
-    /The operation was aborted/,
-    /signal is aborted without reason/,
-    // ResizeObserver loop noise — fired by browsers when ResizeObserver
-    // can't deliver all observations in a single frame. Benign and
-    // common, especially on iOS Safari.
-    /ResizeObserver loop/,
-    // Browser extension noise — not our code, can't fix it.
-    /Non-Error promise rejection captured with value:/,
-  ],
-});
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export function onRouterTransitionStart(href: string, navigationType: string): void {
+  if (sentry) {
+    sentry.routerTransitionStart(href, navigationType);
+    return;
+  }
+  pendingTransitions.push([href, navigationType]);
+  void loadSentry();
+}

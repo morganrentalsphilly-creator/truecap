@@ -229,7 +229,7 @@ export default async function ForAgentsPage() {
           <ProductShot
             shot="memo"
             alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
-            caption={<>The memo you can hand a client, from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
+            caption={<>The memo you can hand a client, from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
           />
         </section>
         <section id="use-cases" className="mb-12 sm:mb-16">

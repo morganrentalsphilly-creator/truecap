@@ -843,7 +843,7 @@ export default function BlogIndexPage() {
         <ProductShot
           shot="verdict"
           alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-          caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run your own numbers →</Link></>}
+          caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run your own numbers →</Link></>}
           className="mb-8"
         />
 

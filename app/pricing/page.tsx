@@ -446,7 +446,7 @@ export default async function PricingPage() {
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
             Real output from the free sample deal, not mockups.{" "}
-            <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">
+            <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">
               Run it yourself →
             </Link>
           </p>

@@ -508,7 +508,7 @@ export function Header({
                   "transition-all duration-200 active:scale-[0.98]",
                 )}
               >
-                <Link href="/analyze">Analyze</Link>
+                <Link href="/analyze" prefetch={false}>Analyze</Link>
               </Button>
               <MarketingMobileMenu />
             </>

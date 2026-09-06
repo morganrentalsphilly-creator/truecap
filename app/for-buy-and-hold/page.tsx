@@ -139,7 +139,7 @@ export default function ForBuyAndHoldPage() {
           <ProductShot
             shot="verdict"
             alt="TrueCap's decision view for the sample buy-and-hold deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
           />
         </section>
         <section id="use-cases" className="mb-12 sm:mb-16">

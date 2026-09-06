@@ -53,7 +53,7 @@ export function MarketingNav() {
   return (
     <nav aria-label="Main" className="hidden items-center gap-5 lg:flex">
       {/* "Analyze" is the product itself — the public analyzer at /analyze. */}
-      <Link href="/analyze" className={linkClass}>
+      <Link href="/analyze" prefetch={false} className={linkClass}>
         Analyze
       </Link>
       <Link href="/pricing" className={linkClass}>
@@ -104,7 +104,7 @@ export function MarketingMobileMenu() {
           Site navigation and account links
         </SheetDescription>
         <nav aria-label="Main" data-marketing-mobile-nav="" className="mt-4 flex flex-col gap-1">
-          <Link href="/analyze" className={itemClass} onClick={() => setOpen(false)}>
+          <Link href="/analyze" prefetch={false} className={itemClass} onClick={() => setOpen(false)}>
             Analyze a deal
           </Link>
           <Link href="/pricing" className={itemClass} onClick={() => setOpen(false)}>
