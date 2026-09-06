@@ -12,6 +12,7 @@
  */
 
 import { Suspense } from "react";
+import { Testimonials } from "@/components/marketing/testimonials";
 import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
 import { FounderCard } from "@/components/marketing/founder-card";
 import type { Metadata } from "next";
@@ -398,6 +399,9 @@ export default async function PricingPage() {
           <div className="mx-auto mt-8 max-w-4xl">
             <TestimonialStrip limit={2} />
           </div>
+          {/* Consented quotes from the in-product prompt (Phase 5); renders
+              nothing until real published rows exist. */}
+          <Testimonials limit={3} heading="From people who pay for it" className="mx-auto max-w-5xl" />
 
           {/* Trust strip */}
           <div className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">

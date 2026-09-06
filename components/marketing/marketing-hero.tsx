@@ -17,7 +17,8 @@
  * tree ships zero JS.
  */
 
-import { Check, Database, Target, TrendingUp } from "lucide-react";
+import { Check, Target, TrendingUp } from "lucide-react";
+import { ProofStrip } from "@/components/marketing/proof-strip";
 import Link from "next/link";
 import { ProductShot, findProductShot } from "@/components/marketing/product-shot";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
@@ -90,30 +91,10 @@ export function MarketingHero() {
           </div>
         </div>
 
-        {/* Trust band — data-source disclosure grouped beneath the split with divider rules
-            instead of card boxes (Rule 4: logic-grouping over card overuse). */}
-        {/* Keep the disclosure adjacent to the product proof on mobile and desktop. */}
+        {/* Proof strip — three facts a visitor can verify by clicking
+            (docs/site-overhaul.md Phase 5.5). Always renders. */}
         <div className="tc-reveal mt-7 border-t border-border pt-5 sm:mt-14 sm:pt-8">
-          <div className="mx-auto max-w-3xl">
-            {/* Proof that cannot drift or be overstated: the product labels
-                each starting assumption as sourced, user-entered, or a smart
-                default, and exposes the date/year when the source provides it.
-                Customer quotes render only from the verified proof registry
-                further down the page. */}
-            <div className="flex items-start gap-2.5">
-              <Database
-                className="mt-0.5 size-4 shrink-0 text-primary/50"
-                aria-hidden
-              />
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                <strong className="text-foreground">
-                  No black-box inputs.
-                </strong>{" "}
-                Every assumption is labeled with its source — HUD FMR, FRED
-                rate, TrueCap default, or your input — and stays editable.
-              </p>
-            </div>
-          </div>
+          <ProofStrip className="mx-auto max-w-4xl" />
         </div>
       </div>
     </section>

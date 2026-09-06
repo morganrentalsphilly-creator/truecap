@@ -17,6 +17,7 @@
  */
 
 import type { Metadata } from "next";
+import { Testimonials } from "@/components/marketing/testimonials";
 import { FounderCard } from "@/components/marketing/founder-card";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
@@ -200,6 +201,7 @@ export default async function AuthedHome({
           <PdfProUpsell />
           <div data-homepage-block="real-proof" className="contents">
             <SocialProof />
+            <Testimonials limit={3} />
             <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           </div>
           <HomepageFaq />

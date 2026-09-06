@@ -23,6 +23,7 @@
  */
 
 import type { Metadata } from "next";
+import { Testimonials } from "@/components/marketing/testimonials";
 import { FounderCard } from "@/components/marketing/founder-card";
 import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
@@ -196,6 +197,9 @@ export default function Home() {
         <PdfProUpsell />
         <div data-homepage-block="real-proof" className="contents">
           <SocialProof />
+          {/* Consented quotes from the in-product prompt (Phase 5): the three
+              most recent published rows; renders nothing until real ones exist. */}
+          <Testimonials limit={3} />
           <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
         </div>
         <HomepageFaq />
