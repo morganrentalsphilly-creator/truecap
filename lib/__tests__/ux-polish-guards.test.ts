@@ -206,9 +206,9 @@ describe("browser capability recovery and crawl path", () => {
     expect(source).toContain("window.__googleMapsPlacesLoading = undefined");
   });
 
-  it("links the sitemap sample memo from the homepage sample context", () => {
-    expect(read("components/marketing/hero-address-form.tsx")).toContain(
-      'href="/sample-decision-memo"',
+  it("links the sitemap sample memo from every page's footer", () => {
+    expect(read("components/marketing/site-footer.tsx")).toContain(
+      'href: "/sample-decision-memo"',
     );
   });
 });

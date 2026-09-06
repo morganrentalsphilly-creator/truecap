@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -29,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Baselane vs TrueCap (2026): Banking vs Analysis",
   description:
-    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",
+    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
   keywords: [
     "baselane alternative",
     "baselane vs stessa",
@@ -84,8 +86,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     baselane: "Not applicable",
     winner: "truecap",
   },
@@ -159,7 +161,7 @@ export default function VsBaselanePage() {
     name: "Baselane vs TrueCap (2026): Banking vs Analysis",
     url: `${siteUrl}/vs/baselane`,
     description:
-      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how they fit together.",
+      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -222,6 +224,15 @@ export default function VsBaselanePage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -241,7 +252,7 @@ export default function VsBaselanePage() {
                   equity.
                 </li>
                 <li>
-                  You want standardized economics and rule-fit context to
+                  You want standardized economics and Buy Box fit to
                   compare 2-3 deals side-by-side.
                 </li>
                 <li>
@@ -429,6 +440,8 @@ export default function VsBaselanePage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="baselane" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

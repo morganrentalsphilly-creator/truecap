@@ -1,4 +1,9 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+// `npm run analyze` (ANALYZE=true) writes an interactive treemap of every
+// client/server bundle to .next/analyze/. Off by default; zero runtime cost.
+const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 import { fileURLToPath } from "node:url";
 
 const projectRoot = fileURLToPath(new URL(".", import.meta.url));
@@ -106,12 +111,14 @@ const nextConfig = {
       // label/slug divergence is what makes /dashboard/screen guessable:
       // the nav says "Screen a shortlist", the route is /dashboard/triage.
       //
-      // /analyze intentionally lands on "/" rather than a specific
-      // analyzer: proxy.ts already rewrites "/" to the authed home for
-      // signed-in users, so one target serves both audiences. (next.config
-      // redirects cannot read cookies, so an auth-dependent destination
-      // would have to be a page-level redirect instead.)
-      { source: "/analyze", destination: "/", permanent: false },
+      // /analyze is a real page now (app/analyze/page.tsx — the public
+      // analyzer moved off the homepage in the 2026-09 site overhaul);
+      // proxy.ts routes signed-in visitors from it the same way it does "/".
+      //
+      // /guarantee received traffic while serving a 404 (no public
+      // guarantee is configured — the page fails closed). Send that traffic
+      // to the pricing page, which carries the actual terms of the offer.
+      { source: "/guarantee", destination: "/pricing", permanent: true },
       {
         source: "/deals",
         destination: "/dashboard/saved-analyses",
@@ -320,9 +327,21 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  // Client bundle size (docs/site-overhaul.md Phase 7). The Sentry SDK was
+  // the single largest chunk on the homepage (~526 KB raw). Replay is
+  // disabled (sample rates 0 in instrumentation-client.ts), so its shadow-
+  // DOM / iframe / worker code is dead weight; debug statements are dead in
+  // production. Tracing is kept on purpose (tracesSampleRate stays 1).
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayShadowDom: true,
+    excludeReplayIframe: true,
+    excludeReplayWorker: true,
+  },
 
   org: "truecap",
 

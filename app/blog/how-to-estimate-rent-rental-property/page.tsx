@@ -15,6 +15,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -87,7 +88,7 @@ export default function HowToEstimateRentPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -434,7 +435,7 @@ export default function HowToEstimateRentPost() {
               monthly cash flow by roughly $128 — from a small loss to a real
               profit — and lifts{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -506,7 +507,7 @@ export default function HowToEstimateRentPost() {
               </Link>{" "}
               does the first pass for you: enter the address and it pulls a market
               rent estimate, layers in vacancy and reserves, and returns cap rate,
-              cash flow, DSCR, and a selected-rule fit in one pass — so the comp
+              cash flow, DSCR, and a Buy Box fit in one pass — so the comp
               work becomes a confirmation step instead of a blank box you have to
               guess at.
             </p>
@@ -540,6 +541,7 @@ export default function HowToEstimateRentPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

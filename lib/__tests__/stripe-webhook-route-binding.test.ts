@@ -29,6 +29,7 @@ vi.mock("@/lib/stripe/client", () => ({
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminSupabaseClient: () => mocks.admin }));
 vi.mock("@/lib/posthog-server", () => ({ captureServerEvent: vi.fn(async () => true) }));
+vi.mock("@/lib/analytics/site-events-server", () => ({ trackServer: vi.fn(async () => undefined) }));
 vi.mock("@/lib/email/trial-emails", () => ({ scheduleTrialOnboardingEmails: vi.fn() }));
 vi.mock("@/lib/stripe/subscription-checkout-intent", () => ({
   completeSubscriptionCheckoutIntentFromWebhook: vi.fn(async () => null),
@@ -42,6 +43,7 @@ vi.mock("@/lib/analytics/canonical-event-claim", () => ({
 }));
 
 import * as Sentry from "@sentry/nextjs";
+import { trackServer } from "@/lib/analytics/site-events-server";
 import { createFakeAdmin } from "./helpers/fake-supabase-admin";
 import { POST } from "@/app/api/stripe/webhooks/route";
 
@@ -210,5 +212,33 @@ describe("POST /api/stripe/webhooks — claim, duplicate, retry", () => {
     expect(fake.rows("subscriptions")).toHaveLength(0);
     const alarm = vi.mocked(Sentry.captureMessage).mock.calls.find((call) => String(call[0]).includes("could not be bound"));
     expect(alarm?.[1]).toMatchObject({ level: "error", extra: { stripe_event_id: "evt_unres_1" } });
+  });
+});
+
+describe("POST /api/stripe/webhooks — funnel analytics", () => {
+  it("fires checkout_completed (server-side) exactly once for a synced paid checkout, never for a skipped one", async () => {
+    vi.mocked(trackServer).mockClear();
+    const fake = makeFake();
+    mocks.subscriptionsRetrieve.mockResolvedValue(subscriptionObject({ metadata: { user_id: U1, plan_slug: "pro_monthly" } }));
+    const event = checkoutEvent("evt_paid_1", {
+      client_reference_id: U1,
+      metadata: { user_id: U1, supabase_user_id: U1, plan_slug: "pro_monthly" },
+    });
+
+    const first = await deliver(event);
+    expect(first.status).toBe(200);
+    expect(fake.rows("subscriptions")).toHaveLength(1);
+    expect(trackServer).toHaveBeenCalledTimes(1);
+    expect(trackServer).toHaveBeenCalledWith("checkout_completed", { plan: "pro_monthly", interval: "monthly" });
+
+    // A redelivery is a duplicate: no second funnel event.
+    const second = await deliver(event);
+    expect(second.body).toMatchObject({ duplicate: true });
+    expect(trackServer).toHaveBeenCalledTimes(1);
+
+    // A skipped (foreign) checkout never counts as a conversion.
+    vi.mocked(trackServer).mockClear();
+    await deliver(checkoutEvent("evt_foreign_1", { metadata: { app: "philly_rental_compliance" } }));
+    expect(trackServer).not.toHaveBeenCalled();
   });
 });

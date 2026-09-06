@@ -147,7 +147,7 @@ describe("moment-of-value Max Offer copy", () => {
   it("does not claim the free result already contains a fixed ceiling", () => {
     expect(upsell).not.toContain("Your result includes a fixed price ceiling");
     expect(upsell).toContain("Pro unlocks an interactive solver");
-    expect(upsell).toMatch(/a criterion-based\s+ceiling, not/);
-    expect(upsell).toContain("a recommended offer");
+    expect(upsell).toMatch(/calculates the\s+highest price that clears all of them/);
+    expect(upsell).not.toContain("a recommended offer");
   });
 });

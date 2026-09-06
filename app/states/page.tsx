@@ -71,10 +71,10 @@ export default function StatesIndexPage() {
           Rental-property verification by state
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground max-w-2xl">
-          {STATE_COUNT} crawlable guides for collecting property-specific tax,
+          {STATE_COUNT} state guides for collecting property-specific tax,
           insurance, legal, condition, expense, rent, and financing evidence.
-          Exact hand-curated state claims stay hidden until official
-          dependencies and as-of dates are attached.
+          These guides don&apos;t publish statewide tax rates, eviction
+          timelines, or landlord rankings.
         </p>
 
         <div className="tc-reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

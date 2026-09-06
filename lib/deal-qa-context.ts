@@ -271,7 +271,7 @@ function rangeText(low: number | null | undefined, high: number | null | undefin
 function buyBoxSection(b: DealQaBuyBoxContext): string {
   const lines = [
     "YOUR BUY BOX (the user's saved acquisition criteria, evaluated against this deal):",
-    `Rule fit: ${b.headline}${b.boxName ? ` (box: "${b.boxName}")` : ""}`,
+    `Buy Box fit: ${b.headline}${b.boxName ? ` (box: "${b.boxName}")` : ""}`,
   ];
   if (b.summary) lines.push(b.summary);
   if (b.personalLine) lines.push(b.personalLine);
@@ -285,11 +285,11 @@ function buyBoxSection(b: DealQaBuyBoxContext): string {
 function maoSection(m: DealQaMaoContext): string {
   const targetProfile = m.fromBuyBox ? "the user's Buy Box targets" : "the selected screening targets";
   return [
-    "OFFER CEILING (a target-dependent modeled boundary):",
-    `Offer Ceiling: ${money(m.maxOffer)} — the highest modeled price that still meets: ${m.basis}${
+    "OFFER CEILING (the highest price that still meets the targets):",
+    `Offer Ceiling: ${money(m.maxOffer)} — the highest price that still meets: ${m.basis}${
       m.fromBuyBox ? " (targets from the user's buy box)" : " (selected screening targets)"
     }.`,
-    `Highest modeled price that still meets ${targetProfile} under the assumptions shown. This is not a recommended offer.`,
+    `The highest price that still meets ${targetProfile} under the assumptions shown. This is not a recommended offer.`,
     "Compare it with the purchase price in THE DEAL to state whether asking is above, below, or equal to the Offer Ceiling. Do not tell the user to make, submit, or avoid an offer.",
   ].join("\n");
 }
@@ -373,7 +373,7 @@ export function buildGroundedDealContext(
     }
     const missing: string[] = [];
     if (!buyBox) missing.push("buy box fit (the user has no active buy box evaluated on this deal — they can set one up in Settings)");
-    if (!mao) missing.push('Offer Ceiling (a target-dependent modeled boundary available in the Stress Test tab)');
+    if (!mao) missing.push('Offer Ceiling (the highest price that still meets the targets — available in the Stress Test tab)');
     if (!projection) missing.push("long-term projection / exit returns");
     if (!compsIncluded) missing.push('sale & rent comps (the user has not run comps — the "Run comps" button on the analysis pulls them)');
     if (missing.length > 0) {

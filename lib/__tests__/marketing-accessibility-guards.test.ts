@@ -120,8 +120,13 @@ describe("marketing landmarks and mobile targets", () => {
     expect(button).toContain("lg: 'h-11 rounded-md px-6 has-[>svg]:px-4 md:h-10'");
 
     const header = read("components/investcalc/header.tsx");
-    expect(header).toContain('className="h-11 px-3 sm:h-9 sm:px-4');
-    expect(header).toContain('"h-11 px-4 sm:h-9 sm:px-5 rounded-full');
+    // Desktop auth buttons are lg+ only; phones get ONE header row with a
+    // 44px primary Analyze button and a 44px hamburger.
+    expect(header).toContain('className="hidden lg:inline-flex h-9 px-4');
+    expect(header).toContain('"lg:hidden h-11 px-4 rounded-full');
+    expect(read("components/marketing/marketing-nav.tsx")).toContain(
+      "inline-flex size-11 shrink-0 items-center justify-center rounded-full",
+    );
   });
 });
 

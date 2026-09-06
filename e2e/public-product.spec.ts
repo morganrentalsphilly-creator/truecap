@@ -133,70 +133,80 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
       name: "Know your walk-away price before you make the offer.",
     }),
   ).toBeVisible();
-  await expect(
-    hero.getByText(
-      "No account or card. Your first complete Offer Ceiling is included.",
-      { exact: true },
-    ),
-  ).toBeVisible();
 
   const form = hero.locator('form[data-hero-address-form=""]');
-  const address = form.getByLabel("Property address", { exact: true });
+  await expect(form).toHaveAttribute("data-hero-form-ready", "true");
+  const address = form.getByLabel("Property address or listing link", {
+    exact: true,
+  });
   await expect(address).toHaveAttribute("aria-required", "true");
-  // Two distinct no-address paths, deliberately. The BUTTON runs the sample in
-  // place (the journey the authenticated guest specs drive); the LINK is the
-  // only internal link to /sample-decision-memo, which is in the sitemap and
-  // would otherwise be orphaned.
+  // One primary action (analyze) and one secondary (the live sample). The
+  // written memo is linked from the footer, not the hero.
+  const submit = form.getByRole("button", {
+    name: "Analyze a deal free",
+    exact: true,
+  });
+  await expect(submit).toBeEnabled();
   await expect(
-    hero.getByRole("button", { name: "View a sample decision →", exact: true }),
-  ).toHaveCount(1);
+    hero.getByRole("link", { name: "See the sample deal →", exact: true }),
+  ).toHaveAttribute("href", "/analyze?sample=1");
   await expect(
     hero.getByRole("link", { name: "Read the written memo", exact: true }),
-  ).toHaveCount(1);
+  ).toHaveCount(0);
 
   const scrollBefore = await page.evaluate(() => window.scrollY);
-  await form
-    .getByRole("button", { name: "Analyze a deal free", exact: true })
-    .click();
+  await submit.click();
   await expect(
     form.getByRole("alert").filter({
-      hasText: "Enter a property address to analyze this deal.",
+      hasText: "Paste an address or a Zillow/Redfin link",
     }),
+  ).toBeVisible();
+  await expect(
+    form.getByRole("link", { name: "try the sample deal →", exact: true }),
   ).toBeVisible();
   await expect(address).toBeFocused();
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBe(scrollBefore);
+  // Still on the homepage: an empty submit never navigates.
+  expect(new URL(page.url()).pathname).toBe("/");
 
   await expectNoHorizontalOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
 });
 
-test("homepage sample preview keeps its reading order at zoom-sensitive widths", async ({
+test("homepage hero keeps its reading order at zoom-sensitive widths", async ({
   page,
 }) => {
+  // Phase 4 replaced the illustrative sample card with the real product
+  // screenshot (`HeroProductShot`) and its "Live sample" link. The hero's
+  // headline, the address form, the shot, and the link must all stay inside
+  // the viewport and read top-to-bottom at every width, including the very
+  // narrow ones a zoomed-in phone produces.
   for (const width of [195, 640, 768, 1023]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const card = page.locator('[data-hero-sample-card=""]');
-    const property = page.locator('[data-hero-sample-property=""]');
-    const status = page.locator('[data-hero-sample-status=""]');
-    const offer = page.locator('[data-hero-sample-offer=""]');
-    for (const element of [card, property, status, offer]) {
+    const heading = page.locator("h1").first();
+    const form = page.locator('form[action="/analyze"]').first();
+    const shot = page.locator("[data-hero-product-shot='']");
+    const liveSample = shot.getByRole("link", { name: /live sample/i });
+    for (const element of [heading, form, shot]) {
       await expect(element).toBeVisible();
       await expectContainedInViewport(page, element, 100);
     }
+    // The link is a short inline phrase; it only has to stay inside the
+    // viewport and keep a tappable width.
+    await expect(liveSample).toBeVisible();
+    await expectContainedInViewport(page, liveSample, 40);
 
-    const propertyBox = await property.boundingBox();
-    const statusBox = await status.boundingBox();
-    expect(propertyBox).not.toBeNull();
-    expect(statusBox).not.toBeNull();
-    expect(propertyBox!.y + propertyBox!.height).toBeLessThanOrEqual(
-      statusBox!.y + 1,
-    );
+    const headingBox = await heading.boundingBox();
+    const formBox = await form.boundingBox();
+    expect(headingBox).not.toBeNull();
+    expect(formBox).not.toBeNull();
+    expect(headingBox!.y + headingBox!.height).toBeLessThanOrEqual(formBox!.y + 1);
 
-    const textOverflow = await property.evaluate((element) => ({
+    const textOverflow = await heading.evaluate((element) => ({
       clientWidth: element.clientWidth,
       scrollWidth: element.scrollWidth,
     }));
@@ -209,6 +219,10 @@ test("homepage sample preview keeps its reading order at zoom-sensitive widths",
 test("the marketing prompt yields while the investor is using the calculator", async ({
   page,
 }) => {
+  // Since Phase 2 the analyzer lives on /analyze and the sticky funnel bar
+  // is mounted on the marketing homepage only, so the two can never overlap:
+  // the bar shows once a cold visitor has scrolled past the homepage hero,
+  // and following it lands on the calculator with no bar over the form.
   await page.setViewportSize({ width: 643, height: 732 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const rejectCookies = page.getByRole("button", {
@@ -222,17 +236,19 @@ test("the marketing prompt yields while the investor is using the calculator", a
   await page.evaluate(() => window.scrollTo(0, 900));
   await expect(conversionBar).toBeVisible();
 
+  await conversionBar.getByRole("link").first().click();
+  await page.waitForURL(/\/analyze/);
   const calculator = page.locator('form[data-calc-form="true"]');
   await calculator.scrollIntoViewIfNeeded();
   await expect(calculator).toBeVisible();
-  await expect(conversionBar).toBeHidden();
+  await expect(page.locator("[data-conversion-bar-root]")).toHaveCount(0);
 });
 
 test("tablet investors keep one reachable analysis action below the desktop cockpit", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 768, height: 800 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -271,7 +287,7 @@ test("desktop investors can run from the live preview without hunting below the 
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -321,7 +337,7 @@ test("a second listing can never inherit the first property's price and rent", a
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
@@ -392,7 +408,7 @@ test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   // available. Bounding-box checks catch clipped controls even when a global
   // overflow rule keeps document.scrollWidth from reporting the clipping.
   await page.setViewportSize({ width: 195, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const address = page.getByLabel("Property Address", { exact: true });
@@ -444,7 +460,7 @@ test("a hidden expense validation error reopens both panels and focuses the fiel
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const addressInput = page.getByLabel("Property Address", { exact: true });
@@ -480,7 +496,7 @@ test("release-gated specialist strategies stay dark at 200% mobile zoom", async 
   page,
 }) => {
   await page.setViewportSize({ width: 195, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const changeType = page.getByRole("button", {
@@ -546,7 +562,7 @@ test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
     { values: SAMPLE_DEAL_FIXTURE.values },
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await expect(
@@ -609,7 +625,7 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
     },
     { values: SAMPLE_DEAL_FIXTURE.values },
   );
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await expect(
@@ -625,7 +641,7 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   );
   await expect(
     page.getByRole("button", {
-      name: "Try a synthetic sample rental and preview a sample Pro report",
+      name: "Try a sample rental and preview a sample Pro report",
       exact: true,
     }),
   ).toBeVisible();
@@ -635,14 +651,14 @@ test("released operating tax and insurance modes cannot strand an invalid hidden
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   await page
     .getByRole("button", {
-      // Property tax is labeled a PRELIMINARY FALLBACK with a "verify locally"
-      // badge — released underwriting never auto-fills a parcel bill.
-      name: /Taxes 1\.1% preliminary fallback verify locally/i,
+      // Property tax is labeled a TrueCap default with a "replace with your
+      // local number" badge — TrueCap never auto-fills a parcel bill.
+      name: /Taxes 1\.1% default replace with your local number/i,
     })
     .click();
 
@@ -686,13 +702,13 @@ test("anonymous sample reaches the decision-first result with one click", async 
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
 
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
+  const acceptCookies = page.getByRole("button", { name: /^accept( all)?$/i });
   await expect(acceptCookies).toBeVisible();
   await acceptCookies.click();
   const sampleButton = page.getByRole("button", {
-    name: "Try a synthetic sample rental and preview a sample Pro report",
+    name: "Try a sample rental and preview a sample Pro report",
     exact: true,
   });
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
@@ -847,7 +863,7 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const runDeal = async (input: {
@@ -1006,7 +1022,7 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
 test("next deal confirms the reset, clears property facts, and keeps reusable assumptions", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
   const acceptCookies = page.getByRole("button", { name: /accept all/i });
@@ -1014,7 +1030,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
 
   await page
     .getByRole("button", {
-      name: "Try a synthetic sample rental and preview a sample Pro report",
+      name: "Try a sample rental and preview a sample Pro report",
       exact: true,
     })
     .click();

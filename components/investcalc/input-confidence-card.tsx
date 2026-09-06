@@ -475,7 +475,7 @@ export function InputConfidenceCard({
               <SummaryMetric
                 label="Input Confidence"
                 value={`${confidence.score}%`}
-                help="Readiness, not probability"
+                help="Input readiness"
               />
             </>
           )}
@@ -483,7 +483,7 @@ export function InputConfidenceCard({
             <SummaryMetric
               label="Readiness state"
               value={ledger.readinessLabel}
-              help="Not investment advice"
+              help="Based on verified inputs"
             />
           ) : (
             <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">

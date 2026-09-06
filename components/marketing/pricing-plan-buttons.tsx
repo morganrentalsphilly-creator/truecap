@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
@@ -35,6 +36,10 @@ export function PricingPlanButtons({
   const [pending, setPending] = useState(false);
 
   const startCheckout = (planSlug: CheckoutPlanSlug) => {
+    track("checkout_started", {
+      plan: planSlug,
+      interval: planSlug.includes("annual") ? "annual" : "monthly",
+    });
     setPending(true);
     startTransition(async () => {
       try {
@@ -63,7 +68,7 @@ export function PricingPlanButtons({
   if (slot === "free") {
     return (
       <Link
-        href="/#main"
+        href="/analyze"
         className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
         {isAuthenticated ? "Open the calculator" : "Analyze a property free"}

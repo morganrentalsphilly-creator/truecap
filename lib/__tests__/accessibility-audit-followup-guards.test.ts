@@ -31,15 +31,14 @@ describe("accessibility audit follow-up guards", () => {
     );
     for (const [id, name] of [
       ["testimonial-quote", "quote"],
-      ["testimonial-display-format", "preferredDisplayNameFormat"],
-      ["testimonial-display-name", "displayName"],
-      ["testimonial-role", "roleSegment"],
+      ["testimonial-role", "role"],
+      ["testimonial-market", "market"],
     ] as const) {
       expect(testimonial).toContain(`htmlFor="${id}"`);
       expect(testimonial).toContain(`id="${id}"`);
       expect(testimonial).toContain(`name="${name}"`);
     }
-    expect(testimonial).toContain('name="consentToPublish"');
+    expect(testimonial).toContain('name="consent"');
   });
 
   it("connects the listing-link input to its live error", () => {

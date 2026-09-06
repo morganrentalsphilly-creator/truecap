@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -84,8 +86,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     dealmachine: "Not applicable",
     winner: "truecap",
   },
@@ -219,6 +221,15 @@ export default function VsDealmachinePage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* TL;DR */}
@@ -359,12 +370,11 @@ export default function VsDealmachinePage() {
               <strong>Underwrite in TrueCap.</strong> Paste the address. HUD
               area rent and the FRED owner-occupied rate can pre-fill as
               editable benchmarks; property tax remains a manual local input.
-              Review the Offer Ceiling under your selected targets.
+              Review the Offer Ceiling under your targets.
             </li>
             <li>
               <strong>Verify, then record your decision.</strong> TrueCap&apos;s
-              Offer Ceiling solver (Pro) works backward from your target return.
-              It is not a recommended offer.
+              Offer Ceiling (Pro) works backward from your target return.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -424,6 +434,8 @@ export default function VsDealmachinePage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="dealmachine" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
@@ -516,12 +528,12 @@ const DEALMACHINE_FAQ: FaqItem[] = [
       <>
         One possible workflow is to source a property in DealMachine, then
         underwrite the entered assumptions in TrueCap. Pro calculates an Offer
-        Ceiling under the selected targets. Verify the material inputs and
+        Ceiling under your targets. Verify the material inputs and
         record your own decision before any transaction step.
       </>
     ),
     plainTextAnswer:
-      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under selected targets; verify the material inputs and record your own decision.",
+      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under your targets; verify the material inputs and record your own decision.",
   },
 ];
 

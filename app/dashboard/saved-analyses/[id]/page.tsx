@@ -12,6 +12,7 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Disclaimer } from "@/components/marketing/disclaimer";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Target } from "lucide-react";
 import { Topbar } from "@/components/dashboard/Topbar";
@@ -857,7 +858,7 @@ export default async function DealWorkspacePage({
               ) : null}
               {dscrDisplay ? <Metric label="DSCR" value={dscrDisplay} /> : null}
               {dealScore != null ? (
-                <Metric label="Screening Index" value={`${Math.round(dealScore)}/100`} />
+                <Metric label="Deal score" value={`${Math.round(dealScore)}/100`} />
               ) : null}
             </div>
             {/* Cross-deal compare, at the "is this one better than my
@@ -932,7 +933,7 @@ export default async function DealWorkspacePage({
                       </div>
                       {maoLine.maxPrice != null ? (
                         <div className="text-xs text-muted-foreground">
-                          Highest modeled price that meets the captured targets:{" "}
+                          The highest price that still meets your targets:{" "}
                           <span className="font-semibold tabular-nums text-foreground">
                             {fmtMoney(maoLine.maxPrice)}
                           </span>{" "}
@@ -962,8 +963,8 @@ export default async function DealWorkspacePage({
                         Targets: {maoBasisLabel}
                       </div>
                       <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                        Highest modeled price that still meets {maoBasisLabel}{" "}
-                        under the assumptions shown. This is not a recommended offer or appraisal.
+                        The highest price that still clears {maoBasisLabel}{" "}
+                        under the assumptions shown.
                       </div>
                     </>
                   ) : null}
@@ -1026,6 +1027,9 @@ export default async function DealWorkspacePage({
           <div id="deal-comments" className="scroll-mt-36">
             <DealCommentsPanel savedDealId={dealRow.id} />
           </div>
+          {/* THE disclaimer (docs/voice.md rule 3): once, at the bottom of
+              this results view. The dashboard has no site footer. */}
+          <Disclaimer tone="card" />
         </main>
       </div>
     </div>

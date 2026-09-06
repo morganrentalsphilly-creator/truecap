@@ -11,7 +11,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -74,16 +76,16 @@ const MATRIX: Row[] = [
       "Custom purchase criteria screen properties against saved thresholds.",
   },
   {
-    workflow: "Modeled boundary",
+    workflow: "Offer Ceiling",
     truecap:
-      "Offer Ceiling is connected to Buy Box targets and Deal Doctor thresholds; it is not a recommended offer.",
+      "Offer Ceiling is connected to your Buy Box targets: the highest price that still meets them.",
     dealcheck:
       "Its Offer Calculator calculates offers from configurable buying criteria.",
   },
   {
     workflow: "Downside",
     truecap:
-      "Sensitivity and downside scenarios sit directly after selected-rule fit and the Offer Ceiling.",
+      "Sensitivity and downside scenarios sit directly after Buy Box fit and the Offer Ceiling.",
     dealcheck:
       "Long-range analysis and editable assumptions support scenario evaluation.",
   },
@@ -148,7 +150,7 @@ export default function VsDealCheckPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             DealCheck has served investors for years. TrueCap uses a different
             sequence: start with an address, inspect the assumptions, see a
-            selected-rule fit, then connect Buy Box, Offer Ceiling, downside,
+            Buy Box fit, then connect the Offer Ceiling, downside,
             and presentation. Here is the comparison so you can pick the
             workflow that fits.
           </p>
@@ -170,6 +172,15 @@ export default function VsDealCheckPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -187,12 +198,12 @@ export default function VsDealCheckPage() {
                   manual local property-tax input.
                 </li>
                 <li>
-                  You want core economics and selected-rule fit with the
+                  You want core economics and Buy Box fit with the
                   supporting math visible.
                 </li>
                 <li>You want Buy Box evaluation inside the analysis flow.</li>
                 <li>
-                  You want a target-dependent Offer Ceiling, downside, and
+                  You want an Offer Ceiling, downside, and
                   decision packaging connected.
                 </li>
               </ul>
@@ -322,7 +333,7 @@ export default function VsDealCheckPage() {
               sourced starting points and keeps them editable.
             </li>
             <li>
-              <strong>Move from result to review.</strong> Selected-rule fit
+              <strong>Move from result to review.</strong> Buy Box fit
               leads to the Offer Ceiling, downside, and verification tools
               instead of stopping at a metric summary.
             </li>
@@ -402,6 +413,8 @@ export default function VsDealCheckPage() {
           </div>
         </section>
 
+        <RelatedContent kind="vs" slug="dealcheck" className="mt-10" />
+
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
           <Link
@@ -431,7 +444,7 @@ const DEALCHECK_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap offers a no-signup first-pass screen with cap rate, cash-on-cash
-        return, DSCR, monthly cash flow, and selected-rule fit. DealCheck also
+        return, DSCR, monthly cash flow, and Buy Box fit. DealCheck also
         publishes a free plan; check its official{" "}
         <a
           href="https://dealcheck.io/pricing/"
@@ -478,13 +491,13 @@ const DEALCHECK_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap can fit a newer investor who values an address-first screen,
-        labeled starting assumptions, and selected-rule fit. DealCheck can fit
+        labeled starting assumptions, and Buy Box fit. DealCheck can fit
         someone who wants its established property-import and native mobile
         workflow. Neither tool replaces verification or due diligence.
       </>
     ),
     plainTextAnswer:
-      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and selected-rule fit; DealCheck can fit users who prefer its established guided tools and ecosystem.",
+      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and Buy Box fit; DealCheck can fit users who prefer its established guided tools and ecosystem.",
   },
   {
     question: "Does TrueCap have a mobile app like DealCheck?",
@@ -524,11 +537,11 @@ const DEALCHECK_FAQ: FaqItem[] = [
         Pick DealCheck if you&apos;re primarily mobile-first walking many
         properties a day, you want a native app, and listing-site property
         import is your top workflow. Pick TrueCap if you want an address-first
-        screen connected to selected-rule fit, Buy Box, Offer Ceiling, downside
+        screen connected to Buy Box fit, Offer Ceiling, downside
         analysis, and presentation tools.
       </>
     ),
     plainTextAnswer:
-      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to selected-rule fit, Buy Box, a target-dependent Offer Ceiling, downside, and presentation.",
+      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to Buy Box fit, an Offer Ceiling, downside, and presentation.",
   },
 ];

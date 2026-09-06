@@ -2,13 +2,14 @@ import {
   buildSourceFirstArticleMetadata,
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 const ARTICLE = {
   slug: "what-is-a-good-cap-rate",
   title: "What is a good cap rate? A property-specific framework",
   seoTitle: "Good cap rate: a property-specific framework",
   description:
-    "There is no universal good cap rate. Learn what the ratio measures, how to compare consistent inputs, and which property-specific evidence to verify before relying on it.",
+    "There is no universal good cap rate. Learn what the ratio measures, how to compare consistent inputs, and which property-specific evidence to check first.",
   publishedAt: "2026-05-24",
   modifiedAt: "2026-08-29",
   faqs: [
@@ -91,6 +92,8 @@ export default function GoodCapRatePost() {
         a manual local input. Replace each value with reviewed property-specific
         evidence before relying on the result.
       </p>
+
+      <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />
     </SourceFirstArticle>
   );
 }

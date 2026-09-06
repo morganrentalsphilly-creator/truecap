@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -29,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
   description:
-    "TurboTenant runs rentals after closing. TrueCap shows selected-rule fit, an Offer Ceiling, and verification work before you record your own decision.",
+    "TurboTenant runs rentals after closing. TrueCap shows Buy Box fit, an Offer Ceiling, and what to verify before you record your decision.",
   keywords: [
     "turbotenant alternative",
     "turbotenant vs",
@@ -84,8 +86,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     turbotenant: "Not applicable",
     winner: "truecap",
   },
@@ -165,7 +167,7 @@ export default function VsTurbotenantPage() {
     name: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
     url: `${siteUrl}/vs/turbotenant`,
     description:
-      "TurboTenant runs rentals after closing. TrueCap shows selected-rule fit, an Offer Ceiling, and verification work before you record your own decision.",
+      "TurboTenant runs rentals after closing. TrueCap shows Buy Box fit, an Offer Ceiling, and what to verify before you record your decision.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -227,6 +229,15 @@ export default function VsTurbotenantPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -243,8 +254,7 @@ export default function VsTurbotenantPage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, 10-year projection.</li>
                 <li>
-                  You want modeled economics, selected-rule fit, and a secondary
-                  Screening Index.
+                  You want modeled economics, Buy Box fit, and a Deal score.
                 </li>
                 <li>
                   You&apos;re comparing 2-3 deals side-by-side before deciding.
@@ -438,6 +448,8 @@ export default function VsTurbotenantPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="turbotenant" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

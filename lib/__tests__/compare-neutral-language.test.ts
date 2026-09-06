@@ -30,7 +30,7 @@ describe("comparison neutrality guards", () => {
     );
     expect(comparison).toContain("Tied values share the same shading");
     expect(comparison).toContain(
-      "no hidden tie-breaker uses Screening Index, ROI, save date, or source order",
+      "no hidden tie-breaker uses Deal score, ROI, save date, or source order",
     );
 
     expect(comparison).not.toMatch(

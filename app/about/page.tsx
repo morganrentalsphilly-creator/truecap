@@ -117,6 +117,23 @@ export default function AboutPage() {
             still how he runs the deals he considers.
           </p>
 
+          <h2 className="text-2xl sm:text-3xl">How the numbers are built</h2>
+          <p>
+            Every analysis starts from labeled inputs. Rent can start from
+            HUD&apos;s Fair Market Rent benchmark for the area and the
+            mortgage rate from FRED&apos;s national 30-year series; property
+            tax is always your local number, because no benchmark stands in
+            for an assessor&apos;s bill. Each starting value carries its
+            source label, and you can replace any of them before you rely on
+            the result. The output is a decision, not a score: cash flow after
+            reserves, DSCR, cap rate, cash-on-cash return, Buy Box fit, and the
+            Offer Ceiling &mdash; the highest price that still meets your
+            targets &mdash; with the best next step and the assumptions most
+            likely to move the answer. The formulas behind all of it are
+            published and versioned on the methodology page, so a partner or
+            lender can check the math instead of taking the label on faith.
+          </p>
+
           <h2 className="text-2xl sm:text-3xl">Why the math is opinionated</h2>
           <p>
             Most rental calculators will produce whatever number you want to
@@ -146,7 +163,7 @@ export default function AboutPage() {
           <p>
             Type an address and get a full underwrite in about 60 seconds:
             monthly cash flow, cap rate, cash-on-cash return, DSCR, 10-year
-            projections, a selected-rule fit, and a secondary Screening Index.
+            projections, Buy Box fit, and a Deal score.
             The{" "}
             <Link
               href="/"

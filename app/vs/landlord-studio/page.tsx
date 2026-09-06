@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -83,8 +85,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     landlordstudio: "Not applicable",
     winner: "truecap",
   },
@@ -208,6 +210,15 @@ export default function VsLandlordStudioPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -224,7 +235,7 @@ export default function VsLandlordStudioPage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>
-                  You want standardized economics and rule-fit context to
+                  You want standardized economics and Buy Box fit to
                   compare 2-3 deals.
                 </li>
                 <li>You&apos;re not yet generating receipts to track.</li>
@@ -404,6 +415,8 @@ export default function VsLandlordStudioPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="landlord-studio" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

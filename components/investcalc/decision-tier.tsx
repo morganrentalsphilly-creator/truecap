@@ -248,13 +248,13 @@ export function DecisionTier({
                 </p>
               ) : null}
               <p className="mt-1 text-xs text-muted-foreground">
-                Highest modeled price that still meets the selected targets under the assumptions shown.
-                Criteria: {describeMaoTarget(target)}. Not a recommended offer or appraisal.
+                The highest price that still meets your targets under the assumptions shown.
+                Criteria: {describeMaoTarget(target)}.
               </p>
               {/* Tuning a target silently rewrote the page's headline number.
                   Announce it — this is the one value the product exists for. */}
               <span aria-live="polite" className="sr-only">
-                Offer Ceiling {money(maxOffer)}, the highest modeled price that meets{" "}
+                Offer Ceiling {money(maxOffer)}, the highest price that meets{" "}
                 {describeMaoTarget(target)}.
               </span>
             </>
@@ -278,10 +278,10 @@ export function DecisionTier({
             <Verdict recommendation={recommendation} variant="compact" />
             {score != null ? (
               <span
-                title="Secondary screening heuristic; not investment advice"
+                title="A heuristic summary of the modeled numbers, 0–100."
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-semibold text-muted-foreground"
               >
-                <span>Screening Index · secondary</span>
+                <span>Deal score</span>
                 <span className="tabular-nums text-foreground">{score}</span>
                 <span>/100</span>
               </span>

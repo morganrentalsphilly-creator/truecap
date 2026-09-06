@@ -16,6 +16,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -29,7 +30,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cash-on-cash return (2026)";
 const DESCRIPTION =
-  "Cash-on-cash return = annual cash flow ÷ total cash invested. It's the only metric that tells you the return on the dollars you actually put in. Here's the formula, what counts as “total cash invested,” three worked examples, and the trap most calculators fall into.";
+  "Cash-on-cash return = annual cash flow ÷ total cash invested. The formula, three worked examples, and the trap most calculators fall into.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 7;
@@ -104,7 +105,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -440,6 +441,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

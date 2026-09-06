@@ -14,6 +14,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -25,7 +26,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How much down payment for an investment property?";
 const DESCRIPTION =
-  "Conventional investment loans need 15% down on a single-family, 25% on 2–4 units. The full 2026 breakdown, worked cash-on-cash and DSCR math, and the house-hack shortcut.";
+  "Conventional investment loans need 15% down on a single-family, 25% on 2–4 units. Full 2026 breakdown, cash-on-cash and DSCR math, house-hack shortcut.";
 const PUBLISHED_AT = "2026-06-18";
 const MODIFIED_AT = "2026-06-18";
 const READING_TIME = 11;
@@ -90,7 +91,7 @@ export default function DownPaymentPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -235,7 +236,7 @@ export default function DownPaymentPost() {
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
               7.25% (a realistic <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">investment rate</Link> in
               June 2026), renting for $2,500/month — right at the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">
                 1% rule
               </Link>{" "}
               line. After honest operating expenses (5% vacancy, 8% management, 5%
@@ -254,7 +255,7 @@ export default function DownPaymentPost() {
                 mortgage payment calculator
               </Link>{" "}
               for the P&amp;I, then let the free{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               turn it into cash-on-cash and DSCR. The pattern is the surprising
@@ -360,7 +361,7 @@ export default function DownPaymentPost() {
             <ul>
               <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t (the common case at 2026 rates), more down does. Check it deal by deal.</li>
               <li><strong>DSCR headroom.</strong> Lenders and your own safety both want{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">
                 DSCR
               </Link>{" "}
               comfortably above 1.0 — 1.20+ is a healthy buffer. More down raises DSCR; if a deal only clears 1.0 at 25% down, that&apos;s the market telling you it&apos;s thin.</li>
@@ -400,6 +401,7 @@ export default function DownPaymentPost() {
             ))}
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

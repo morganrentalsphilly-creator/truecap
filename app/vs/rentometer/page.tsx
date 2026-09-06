@@ -11,7 +11,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
@@ -53,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR",            truecap: "All three computed live",                                                rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "10-year projection",               truecap: "Pro — rent + expense + appreciation compounding",                        rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "Free use limit",                   truecap: "Unlimited core analyses; comp-lookup limits apply",                       rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
-  { feature: "Underwriting context",             truecap: "Free — core economics + selected-rule fit",                                 rentometer: "Rent comp only",                                                   winner: "truecap" },
+  { feature: "Underwriting context",             truecap: "Free — core economics + Buy Box fit",                                 rentometer: "Rent comp only",                                                   winner: "truecap" },
   { feature: "PDF report",                       truecap: "Included with Pro",                                                     rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
   { feature: "Pricing — paid tier",               truecap: "See TrueCap's live pricing page",                                        rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
@@ -104,6 +106,15 @@ export default function VsRentometerPage() {
           <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">TL;DR</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -113,7 +124,7 @@ export default function VsRentometerPage() {
                 <li>You want a FULL deal underwrite — cap rate, CoC, DSCR, NCF, 10-yr projection.</li>
                 <li>You want to decide whether to buy, not just what rent to charge.</li>
                 <li>You want operating expenses, mortgage debt service, and an editable property-tax input included.</li>
-                <li>You want cash flow, returns, and selected-rule fit for each property.</li>
+                <li>You want cash flow, returns, and Buy Box fit for each property.</li>
                 <li>You want unlimited free analyses.</li>
               </ul>
             </div>
@@ -160,7 +171,7 @@ export default function VsRentometerPage() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            <Link href="/analyze" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
             {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
             {" "}lays out every line.
@@ -183,6 +194,8 @@ export default function VsRentometerPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="rentometer" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

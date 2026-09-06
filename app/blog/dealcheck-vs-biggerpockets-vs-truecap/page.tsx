@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -94,7 +95,7 @@ export default function ThreeWayComparisonPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -225,7 +226,7 @@ export default function ThreeWayComparisonPost() {
                 __html: `<ul>
               <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
               <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator whose results are currently presented as a BiggerPockets Pro membership feature alongside broader community and educational resources.</li>
-              <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, selected-rule fit, and a secondary Screening Index. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
+              <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
             </ul>`,
               }}
             />
@@ -235,7 +236,7 @@ export default function ThreeWayComparisonPost() {
               dangerouslySetInnerHTML={{
                 __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
             <ul>
-              <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, selected-rule fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
+              <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
               <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
               <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
             </ul>
@@ -267,7 +268,7 @@ export default function ThreeWayComparisonPost() {
             <div
               dangerouslySetInnerHTML={{
                 __html: `<ul>
-              <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, selected-rule fit, portfolio rollup, a secondary Screening Index, target-dependent Offer Ceiling, and sensitivity.</li>
+              <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
               <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, and a longer product history.</li>
               <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
             </ul>`,
@@ -282,7 +283,7 @@ export default function ThreeWayComparisonPost() {
               <li><strong>&quot;I want projections, sensitivity, Offer Ceiling, and saved-deal comparison.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
               <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
               <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
-              <li><strong>&quot;I want selected-rule context, not just metrics.&quot;</strong> TrueCap — selected-rule fit with a secondary Screening Index breakdown.</li>
+              <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
               <li><strong>&quot;I want full property detail imported from a Zillow / Redfin listing.&quot;</strong> DealCheck. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
               <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
             </ul>`,
@@ -325,6 +326,8 @@ export default function ThreeWayComparisonPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

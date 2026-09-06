@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { trackServer } from "@/lib/analytics/site-events-server";
 import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 import { NextResponse, after, type NextRequest } from "next/server";
 import type { EmailOtpType, User } from "@supabase/supabase-js";
@@ -74,6 +75,11 @@ function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
           claimState = "unavailable";
         }
         if (claimState === "duplicate") continue;
+        if (analyticsEvent.event === "account_created") {
+          // Site funnel (docs/analytics.md) — once per new Google account.
+          await trackServer("signup_completed", { method: "google" });
+          await trackServer("trial_started", { method: "google" });
+        }
         const captured = await captureServerEvent({
           distinctId: user.id,
           event: analyticsEvent.event,

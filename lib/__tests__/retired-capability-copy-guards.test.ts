@@ -130,7 +130,7 @@ describe("retired capability copy and control boundaries", () => {
   it("labels archived methodology and metadata without advertising retired tools", () => {
     const methodology = source("app/methodology/page.tsx");
     expect(methodology).toContain(
-      "Unreleased BRRRR and fix-and-flip models (reference only)",
+      "Archived BRRRR and fix-and-flip models (reference only)",
     );
     expect(methodology).toMatch(/not currently exposed in the\s+analyzer/);
 

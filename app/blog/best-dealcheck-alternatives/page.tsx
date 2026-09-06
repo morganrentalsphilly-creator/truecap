@@ -22,6 +22,7 @@ import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -33,7 +34,7 @@ const TITLE_PLAIN = "7 Best DealCheck Alternatives for Rental Analysis (2026)";
 // the on-page H1 keeps the longer TITLE_PLAIN.
 const SERP_TITLE = "7 Best DealCheck Alternatives (2026)";
 const DESCRIPTION =
-  "Seven real DealCheck alternatives for 2026 — TrueCap, BiggerPockets, Stessa, Mashvisor, RentCast, Rentometer, spreadsheets — plus when to stick with DealCheck.";
+  "Seven DealCheck alternatives for 2026 — TrueCap, BiggerPockets, Stessa, Mashvisor, RentCast, Rentometer, spreadsheets — plus when to stick with DealCheck.";
 const PUBLISHED_AT = "2026-07-14";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 11;
@@ -92,7 +93,7 @@ const TOOLS: Tool[] = [
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
       "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
-      "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
+      "Buy Box fit with each metric benchmarked inline, plus a Deal score",
       "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
     ],
     tradeoffs: [
@@ -134,7 +135,7 @@ const TOOLS: Tool[] = [
       "Accounting and landlord operations after acquisition",
     ],
     tradeoffs: [
-      "Broader operations suite rather than a narrowly target-backed decision workflow",
+      "Broader operations suite rather than a narrow decision workflow built around your targets",
       "The official sources reviewed do not describe a target-derived Offer Ceiling",
       "Schedule E and other reporting features are plan-dependent",
     ],
@@ -570,6 +571,8 @@ export default function BestDealCheckAlternativesPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
+
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />
           </div>

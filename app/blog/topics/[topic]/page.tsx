@@ -164,7 +164,7 @@ export default async function BlogTopicHubPage({
           <h2 className="mb-2 text-xl font-extrabold sm:text-2xl">Run a real deal</h2>
           <p className="mb-4 text-sm opacity-90 sm:text-base">
             Reading is step one. Paste an address into TrueCap and get cap rate, cash-on-cash,
-            DSCR, cash flow, and a selected-rule fit in 60 seconds — free.
+            DSCR, cash flow, and a Buy Box fit in 60 seconds — free.
           </p>
           <Link
             href="/"

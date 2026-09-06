@@ -22,7 +22,43 @@ const UNIQUE_COLUMNS: Record<string, string[]> = {
   profiles: ["id", "stripe_customer_id"],
   subscriptions: ["id", "stripe_subscription_id"],
   plans: ["id", "slug", "stripe_price_id"],
+  testimonials: ["id", "user_id", "unpublish_token"],
+  testimonial_prompt_events: ["user_id"],
+  demo_accounts: ["user_id"],
+  feedback_email_sends: ["id", "user_id", "form_token"],
 };
+
+/** Column defaults the real schema generates (mirrors the migrations). */
+const hex48 = () => Array.from({ length: 48 }, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+const COLUMN_DEFAULTS: Record<string, Record<string, () => unknown>> = {
+  testimonials: {
+    unpublish_token: hex48,
+    publish_after: () => new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+    created_at: () => new Date().toISOString(),
+    status: () => "pending",
+    consent: () => false,
+  },
+  feedback_email_sends: {
+    form_token: hex48,
+    sent_at: () => new Date().toISOString(),
+  },
+  testimonial_prompt_events: {
+    shown_at: () => new Date().toISOString(),
+  },
+  billing_unresolved_events: {
+    created_at: () => new Date().toISOString(),
+  },
+};
+
+function withDefaults(table: string, row: Row): Row {
+  const defaults = COLUMN_DEFAULTS[table];
+  if (!defaults) return row;
+  const out = { ...row };
+  for (const [column, make] of Object.entries(defaults)) {
+    if (out[column] === undefined) out[column] = make();
+  }
+  return out;
+}
 
 type Filter = (row: Row) => boolean;
 
@@ -33,6 +69,8 @@ type QueryState = {
   upsertOptions: { onConflict?: string; ignoreDuplicates?: boolean };
   filters: Filter[];
   returnRows: boolean;
+  wantCount: boolean;
+  headOnly: boolean;
   order: { column: string; ascending: boolean } | null;
   limit: number | null;
   range: { from: number; to: number } | null;
@@ -88,7 +126,7 @@ export function createFakeAdmin(options: {
     return false;
   }
 
-  function execute(state: QueryState): { data: unknown; error: { code: string; message: string } | null } {
+  function execute(state: QueryState): { data: unknown; error: { code: string; message: string } | null; count?: number } {
     if (missing.has(state.table)) {
       return {
         data: null,
@@ -108,9 +146,14 @@ export function createFakeAdmin(options: {
           return ascending ? av.localeCompare(bv) : bv.localeCompare(av);
         });
       }
+      const total = out.length;
       if (state.range) out = out.slice(state.range.from, state.range.to + 1);
       if (state.limit != null) out = out.slice(0, state.limit);
-      return { data: out.map((row) => ({ ...row })), error: null };
+      return {
+        data: state.headOnly ? null : out.map((row) => ({ ...row })),
+        error: null,
+        ...(state.wantCount ? { count: total } : {}),
+      };
     }
 
     if (state.op === "insert") {
@@ -120,7 +163,7 @@ export function createFakeAdmin(options: {
           return { data: null, error: { code: "23505", message: "duplicate key value violates unique constraint" } };
         }
       }
-      const inserted = incoming.map((row) => ({ id: `${state.table}-${++idCounter}`, ...row }));
+      const inserted = incoming.map((row) => withDefaults(state.table, { id: `${state.table}-${++idCounter}`, ...row }));
       rows.push(...inserted);
       return { data: state.returnRows ? inserted.map((row) => ({ ...row })) : null, error: null };
     }
@@ -151,7 +194,7 @@ export function createFakeAdmin(options: {
           if (violatesUnique(state.table, row)) {
             return { data: null, error: { code: "23505", message: "duplicate key value violates unique constraint" } };
           }
-          const created = { id: `${state.table}-${++idCounter}`, ...row };
+          const created = withDefaults(state.table, { id: `${state.table}-${++idCounter}`, ...row });
           rows.push(created);
           written.push({ ...created });
         }
@@ -169,12 +212,16 @@ export function createFakeAdmin(options: {
       upsertOptions: {},
       filters: [],
       returnRows: false,
+      wantCount: false,
+      headOnly: false,
       order: null,
       limit: null,
       range: null,
     };
     const api = {
-      select() {
+      select(_columns?: string, options?: { count?: "exact" | "planned" | "estimated"; head?: boolean }) {
+        if (options?.count) state.wantCount = true;
+        if (options?.head) state.headOnly = true;
         if (state.op === "select") return api;
         state.returnRows = true;
         return api;
@@ -213,6 +260,20 @@ export function createFakeAdmin(options: {
       },
       lt(column: string, value: unknown) {
         state.filters.push((row) => row[column] != null && String(row[column]) < String(value));
+        return api;
+      },
+      lte(column: string, value: unknown) {
+        state.filters.push((row) => row[column] != null && String(row[column]) <= String(value));
+        return api;
+      },
+      gte(column: string, value: unknown) {
+        state.filters.push((row) => row[column] != null && String(row[column]) >= String(value));
+        return api;
+      },
+      not(column: string, operator: string, value: unknown) {
+        if (operator !== "in") throw new Error(`fake admin: unsupported not() operator ${operator}`);
+        const list = String(value).replace(/^\(|\)$/g, "").split(",").map((v) => v.trim()).filter(Boolean);
+        state.filters.push((row) => !list.includes(String(row[column])));
         return api;
       },
       gt(column: string, value: unknown) {

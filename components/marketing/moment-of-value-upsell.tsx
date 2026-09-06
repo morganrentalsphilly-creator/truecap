@@ -121,8 +121,8 @@ export function MomentOfValueUpsell({
         Set your own return targets, then calculate a modeled Offer Ceiling.
       </h3>
       <p className="mt-2 text-sm text-muted-foreground">
-        The free screen shows the operating math. Pro lets you adopt explicit
-        criteria and test the highest modeled price that still meets them.
+        The free screen shows the operating math. Pro lets you set your own
+        targets and see the highest price that still meets them.
       </p>
 
       {/* Everything here is a value already visible in the free analysis.
@@ -164,9 +164,8 @@ export function MomentOfValueUpsell({
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Pro unlocks an interactive solver: choose your cash-flow,
-          cash-on-cash, cap-rate, or DSCR criteria, and TrueCap calculates the
-          highest price that clears all of them. The result is a criterion-based
-          ceiling, not a recommended offer.
+          cash-on-cash, cap-rate, or DSCR targets, and TrueCap calculates the
+          highest price that clears all of them.
         </p>
       </div>
 

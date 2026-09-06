@@ -8,7 +8,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
@@ -165,6 +167,15 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </div>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             TL;DR for Short-term rentals investors
@@ -257,7 +268,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
             {" "}breaks down seasonal revenue into a defensible analysis, and our roundup of the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best short-term rental analysis tools for 2026</Link>
             {" "}covers where the ADR and occupancy data should come from. For a quick first-pass check, our{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            <Link href="/analyze" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
             {" "}returns cap rate, cash flow, and DSCR from a single address.
           </p>
         </section>
@@ -291,6 +302,8 @@ export default function VsDealcheckForShortTermRentalsPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="dealcheck-for-short-term-rentals" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

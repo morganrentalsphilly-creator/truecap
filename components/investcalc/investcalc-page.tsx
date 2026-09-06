@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/refs, react-hooks/immutability, react-hooks/preserve-manual-memoization -- This legacy, hook-dense calculator intentionally uses refs as async workflow guards. React Compiler is not enabled for the app; keep rules-of-hooks and exhaustive-deps active while the component is incrementally decomposed. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -841,8 +842,8 @@ const INPUT_TABS: {
   },
   {
     id: "deal-score",
-    label: "Screening Index",
-    mobileLabel: "Index",
+    label: "Deal score",
+    mobileLabel: "Score",
     isPro: true,
   },
 ];
@@ -6096,6 +6097,10 @@ export function InvestCalcPage({
       route_category: "analyzer",
       calculator_slug: "rental-property",
     });
+    track("analysis_started", {
+      source: isSampleRun ? "sample" : isAuthenticated ? "dashboard" : "analyze_page",
+      input_type: inputMethod,
+    });
     const dirty = form.formState.dirtyFields as Record<string, unknown>;
     const assumptionsChanged =
       computeExpensesEdited(dirty) ||
@@ -6167,7 +6172,7 @@ export function InvestCalcPage({
       if (isAuthenticated && canUseMaxOffer && !isSampleRun) {
         if (!computedFingerprint) {
           toast({
-            title: "Could not verify evaluation usage",
+            title: "Could not verify free-trial usage",
             description:
               "Your inputs are still here. Review them and try again.",
             variant: "destructive",
@@ -6182,8 +6187,8 @@ export function InvestCalcPage({
           toast({
             title:
               usage.code === "LIMIT_REACHED" || usage.code === "EXPIRED"
-                ? "Product evaluation complete"
-                : "Could not verify evaluation access",
+                ? "Free trial complete"
+                : "Could not verify free-trial access",
             description: usage.message,
             variant: usage.code === "SERVER_ERROR" ? "destructive" : "warning",
           });
@@ -6258,6 +6263,10 @@ export function InvestCalcPage({
       trackEvent("analysis_completed", {
         route_category: "analyzer",
         calculator_slug: "rental-property",
+      });
+      track("analysis_completed", {
+        verdict: getDealTier(result),
+        has_ceiling: Boolean(canUseMaxOffer),
       });
       try {
         const firstAnalysisKey = "truecap_first_analysis_completed_v1";
@@ -6789,6 +6798,7 @@ export function InvestCalcPage({
           trackEvent("deal_saved", {
             property_type: currentValues.propertyType,
           });
+          track("deal_saved", { property_type: currentValues.propertyType });
         }
         // The persisted baseline is the payload the server actually stored
         // (currentValues) — never a fresh form.getValues(): recording
@@ -7569,6 +7579,7 @@ export function InvestCalcPage({
       // A completed export is the other high-signal testimonial moment
       // (the prompt component self-caps to once per browser, ever).
       dispatchProofMoment("pdf_export");
+      track("report_exported", { report_type: String(mode) });
       trackEvent("report_generated", { report_type: mode });
       trackEvent("decision_memo_generated", {
         surface: "analyzer",
@@ -8308,6 +8319,7 @@ export function InvestCalcPage({
       });
       trackEvent("deal_compared", { source: "analysis_result" });
       trackEvent("comparison_completed", { count_bucket: "2" });
+      track("compare_used", { count_bucket: "2" });
       router.push("/dashboard/compare");
     } catch {
       toast({
@@ -9468,7 +9480,7 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a synthetic sample rental and preview a sample Pro report"
+              aria-label="Try a sample rental and preview a sample Pro report"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -10460,10 +10472,15 @@ export function InvestCalcPage({
             cannot blank the whole post-calc surface. The fallback
             surfaces the headline metrics directly from analysisResult
             so the user's numbers are never lost. */}
+        {/* scroll-mt: the post-Run scrollIntoView lands this region under the
+            sticky header (57px on phones, 65px from sm:). On /analyze the
+            analyzer sits below an intro, so the margin decides whether the
+            decision and its primary actions fit in the first phone viewport;
+            128px pushed them 37px past an 844px fold. */}
         {!isEditingAssumptions &&
           (showResults || isCalculating || analysisResult !== null) && (
             <div
-              className="mt-8 scroll-mt-32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
+              className="mt-8 scroll-mt-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
               data-analysis-results="true"
               role="region"
               tabIndex={-1}

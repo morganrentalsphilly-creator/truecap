@@ -14,7 +14,7 @@
 
 export const HOMEPAGE_HEADLINES = {
   decision_system: "Know your walk-away price before you make the offer.",
-  a: "Screen a rental and compare asking with its target-dependent Offer Ceiling.",
+  a: "Screen a rental and compare asking with its Offer Ceiling.",
   b: "See how a rental models under the assumptions shown.",
   walkaway: "Review the Offer Ceiling and the targets that produced it.",
   // Retain the legacy key so an old environment value cannot break the build,

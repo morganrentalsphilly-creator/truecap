@@ -6,15 +6,19 @@ const ROOT = process.cwd();
 const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 describe("listing-to-analyzer handoff", () => {
-  it("uses real calculator acknowledgement instead of a cosmetic timeout", () => {
+  it("hands a listing off to /analyze through the deduped handoff, never a cosmetic timeout", () => {
+    // The hero no longer shares a page with the analyzer: it stashes the
+    // parsed listing in the sessionStorage handoff (the analyzer drains it
+    // on mount and acknowledges through HERO_ANALYZE_STATUS_EVENT there)
+    // and navigates. No timer pretends to know when the lookup finished.
     const hero = read("components/marketing/hero-address-form.tsx");
-    expect(hero).toContain("HERO_ANALYZE_STATUS_EVENT");
-    expect(hero).toContain('"Looking up starting assumptions…"');
-    expect(hero).toContain('"Use this address instead"');
-    expect(hero).toContain('"Analyze listing free"');
-    expect(hero).not.toContain(
-      "window.setTimeout(() => setSubmitting(false), 1200)",
-    );
+    expect(hero).toContain("dispatchHeroAnalyzeWithFallback");
+    expect(hero).toContain("token: `listing:${newToken()}`");
+    expect(hero).toContain('router.push("/analyze")');
+    expect(hero).not.toContain("setTimeout(() => setSubmitting(false)");
+    const calculator = read("components/investcalc/investcalc-page.tsx");
+    expect(calculator).toContain("HERO_ANALYZE_STATUS_EVENT");
+    expect(calculator).toContain("window.sessionStorage.getItem(HERO_ANALYZE_STORAGE_KEY)");
   });
 
   it("preserves listing ZIP and merges address-derived location fields", () => {

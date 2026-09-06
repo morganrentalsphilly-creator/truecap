@@ -114,7 +114,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "The Verdict Ledger — the analysis reads top-down like an answer",
     description:
-      "Full results redesign: one answer card up top (verdict, Screening Index, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, Illustrative Tax Impact, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
+      "Full results redesign: one answer card up top (verdict, Deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, Illustrative Tax Impact, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
   },
   {
     date: "2026-07-05",
@@ -128,7 +128,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Screen Listings — paste a week of listings, get a shortlist",
     description:
-      "New Pro power tool at Dashboard → Screen Listings: paste up to 10 listings (free text works — AI extracts the numbers), and every row gets a verdict, Screening Index, and buy-box fit so you drill into winners instead of underwriting everything.",
+      "New Pro power tool at Dashboard → Screen Listings: paste up to 10 listings (free text works — AI extracts the numbers), and every row gets a verdict, Deal score, and Buy Box fit so you drill into winners instead of underwriting everything.",
   },
   {
     date: "2026-07-02",
@@ -519,7 +519,7 @@ const ENTRIES: Entry[] = [
     category: "Content",
     title: "/methodology page — every formula and data source",
     description:
-      "Comprehensive transparency page explaining cap rate, CoC, DSCR, released projections, labeled HUD/FRED screening benchmarks, manual property-tax behavior, and the conventions used by the current model.",
+      "Comprehensive transparency page explaining cap rate, CoC, DSCR, the 10-year projections, labeled HUD/FRED benchmarks, manual property-tax behavior, and the conventions used by the current model.",
   },
   {
     date: "2026-05-24",
@@ -631,7 +631,7 @@ const ENTRIES: Entry[] = [
     category: "Content",
     title: "Historical calculator-page launch (partly retired)",
     description:
-      "This release originally included cap rate, cash-on-cash, BRRRR, 1% rule, and rehab pages. BRRRR and other unreleased specialist calculators were later removed from the public registry and now redirect to released educational or analyzer destinations.",
+      "This release originally included cap rate, cash-on-cash, BRRRR, 1% rule, and rehab pages. BRRRR and other specialist calculators aren't offered right now; their old URLs redirect to the matching guide or the analyzer.",
   },
   {
     date: "2026-05-21",
@@ -652,21 +652,21 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Historical tax-impact projection (retired)",
     description:
-      "This entry records an earlier tax-impact presentation that is no longer released. Current Pro projections cover pre-tax cash flow and equity under editable assumptions; depreciation deductions and after-tax cash flow are not exposed.",
+      "This entry records an earlier tax-impact view that is no longer offered. Current Pro projections cover pre-tax cash flow and equity under editable assumptions; depreciation deductions and after-tax cash flow are not shown.",
   },
   {
     date: "2026-05-18",
     category: "Feature",
-    title: "Screening Index explanation (wording corrected)",
+    title: "Deal score explanation (wording corrected)",
     description:
-      "Released analysis includes a secondary 0-100 Screening Index for consistent triage plus an explanation of its modeled inputs. It is not evidence readiness, an appraisal, lender approval, an offer recommendation, or investment advice.",
+      "Every analysis includes a 0-100 Deal score for consistent triage, plus an explanation of the modeled inputs behind it. Read it after your Buy Box fit and the underlying numbers.",
   },
   {
     date: "2026-05-17",
     category: "Feature",
-    title: "PDF decision report (current released scope)",
+    title: "PDF decision report (current scope)",
     description:
-      "Entitled reports cover released underwriting metrics and pre-tax projections for review. Tax-impact and exit-scenario modules are not released; recipients must independently verify inputs and any lender or adviser requirements.",
+      "Pro reports cover the underwriting metrics and pre-tax projections for review. Tax-impact and exit-scenario sections aren't included right now; recipients should verify inputs and any lender or adviser requirements themselves.",
   },
 ];
 
@@ -690,7 +690,7 @@ export default function ChangelogPage() {
           </p>
           <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-foreground">
             This archive preserves historical release notes. Some older entries
-            describe modules that are now disabled or not currently released,
+            describe modules that aren&apos;t offered right now,
             including tax-specific, modeled-exit, BRRRR, and fix-and-flip views.
             Check the current pricing and product screens for present
             availability.

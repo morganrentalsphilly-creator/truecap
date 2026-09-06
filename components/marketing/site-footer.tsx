@@ -15,6 +15,7 @@
  */
 
 import Link from "next/link";
+import { Disclaimer } from "@/components/marketing/disclaimer";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 
@@ -35,7 +36,7 @@ const FOOTER_COLS: Array<{
   {
     title: "Product",
     links: [
-      { label: "Free analyzer", href: "/" },
+      { label: "Free analyzer", href: "/analyze" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
       { label: "Proof & methodology", href: "/reviews" },
@@ -72,6 +73,7 @@ const FOOTER_COLS: Array<{
       // gives the 44 term pages a sitewide crawl path, the same fix the
       // /vs link above made for the comparison library.
       { label: "Glossary", href: "/glossary" },
+      { label: "Sample decision memo", href: "/sample-decision-memo" },
     ],
   },
   {
@@ -115,7 +117,8 @@ const FOOTER_COLS: Array<{
 
 export function SiteFooter({
   hideAccountLinks = false,
-}: { hideAccountLinks?: boolean } = {}) {
+  disclaimer = true,
+}: { hideAccountLinks?: boolean; disclaimer?: boolean } = {}) {
   // The "Account" column offers Sign in / Create account / Forgot password.
   // Rendering it to a signed-in user invites them to sign in from inside the
   // product. Callers that know the session pass hideAccountLinks.
@@ -187,17 +190,12 @@ export function SiteFooter({
           ))}
         </div>
 
-        {/* Honest sub-promise — quiet footnote, doesn't compete with
-            the sitemap above or the bottom strip below. */}
-        <p className="mt-10 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-          <strong className="text-foreground/90">
-            TrueCap is not a financial advisor.
-          </strong>{" "}
-          The analyzer surfaces the math you&apos;d compute yourself in a
-          spreadsheet, with documented formulas and labeled market-data
-          benchmarks, but every assumption is editable and the underwriting
-          decision is yours.
-        </p>
+        {/* THE disclaimer — once per marketing page, here near the bottom.
+            Pages whose results view carries its own copy pass
+            disclaimer={false} (docs/voice.md rule 3). */}
+        {disclaimer ? (
+          <Disclaimer className="mx-auto mt-10 max-w-3xl text-center sm:text-xs" />
+        ) : null}
 
         {/* Bottom strip — copyright, trust badges, legal links + email,
             all on the same horizontal band so the footer ends with a

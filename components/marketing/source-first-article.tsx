@@ -66,7 +66,12 @@ export function SourceFirstArticle({
     description: article.description,
     datePublished: article.publishedAt,
     dateModified: article.modifiedAt,
-    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan` },
+    author: {
+      "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
+      name: "Morgan Page",
+      url: `${siteUrl}/about`,
+    },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],

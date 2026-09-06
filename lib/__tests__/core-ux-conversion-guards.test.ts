@@ -72,7 +72,7 @@ describe("free users are never instructed to perform a Pro-only action", () => {
       '? canTunePriceCeiling\n                ? "Choose at least one criterion to calculate',
     );
     expect(summary).toContain(
-      "TrueCap Pro calculates the highest modeled price that still meets rules you choose",
+      "TrueCap Pro calculates the highest price that still clears the targets you choose",
     );
   });
 
@@ -227,12 +227,12 @@ describe("sold features are reachable from the decision-first results", () => {
     );
   });
 
-  it("the free Screening Index renders as a secondary strip outside the decision card", () => {
+  it("the free Deal score renders as a secondary strip outside the decision card", () => {
     // Outside on purpose: advocacy-accessibility-guards pins that the
     // decision module itself carries no numerical-confidence claim.
     expect(dashboard).toContain('id="screening-index"');
     expect(dashboard).toContain(
-      "Secondary screening heuristic — not investment advice.",
+      "A heuristic summary of the modeled numbers, 0–100.",
     );
     expect(summary).not.toContain("screening-index");
   });

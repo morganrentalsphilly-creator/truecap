@@ -20,7 +20,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -32,7 +34,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "BiggerPockets vs TrueCap for House Hacking (2026)",
   description:
-    "Both calculators run house-hack deals. Which one models owner-occupant unit usage, FHA financing, and 'effective rent saved' more cleanly? Honest house-hack-specific comparison.",
+    "Both calculators run house-hack deals. See which one models owner-occupant unit usage, FHA financing, and effective rent saved more cleanly.",
   keywords: [
     "biggerpockets house hacking",
     "house hacking calculator",
@@ -308,6 +310,15 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -413,7 +424,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             walks through counting only the rental units&apos; income. To
             pressure-test the numbers on your own deal, our{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -458,6 +469,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="biggerpockets-for-house-hacking" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

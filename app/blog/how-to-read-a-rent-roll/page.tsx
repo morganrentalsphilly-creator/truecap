@@ -13,6 +13,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -92,7 +93,7 @@ export default function HowToReadARentRollPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -432,7 +433,7 @@ export default function HowToReadARentRollPost() {
             into the $520,000 ask. Buy on the stabilized number and you have paid
             today for work you have not done yet. Send the EGI into the free{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -558,7 +559,7 @@ export default function HowToReadARentRollPost() {
             deposits, and estoppels before you trust a total. Then take the income
             you can actually prove into the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -571,7 +572,7 @@ export default function HowToReadARentRollPost() {
               GRM calculator
             </Link>
             , and run the whole deal — cash flow, cap rate, DSCR, projections, and a
-            selected-rule fit — through the{" "}
+            Buy Box fit — through the{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>
@@ -600,6 +601,7 @@ export default function HowToReadARentRollPost() {
           </p>
         </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

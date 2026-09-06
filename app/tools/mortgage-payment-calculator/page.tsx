@@ -12,6 +12,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 export const metadata: Metadata = {
   title: "Free Mortgage Payment Calculator — Full PITI",
@@ -274,6 +275,8 @@ export default function MortgagePaymentPage() {
             calculatorName="Mortgage payment calculator"
             hook="The free core analyzer plugs your mortgage assumptions into editable DSCR and cash-flow modeling. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
+
+          <RelatedContent kind="tool" slug="mortgage-payment-calculator" title="Mortgage Payment Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

@@ -56,7 +56,7 @@ export async function consumeProductEvaluationUsageAction(
 ): Promise<ConsumeProductEvaluationResult> {
   const parsed = usageSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "SERVER_ERROR", message: "Could not verify this evaluation result." };
+    return { ok: false, code: "SERVER_ERROR", message: "Could not verify this free-trial run." };
   }
 
   const supabase = await createServerSupabaseClient();
@@ -117,7 +117,7 @@ export async function consumeProductEvaluationUsageAction(
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: "Could not verify this evaluation result.",
+      message: "Could not verify this free-trial run.",
     };
   }
 
@@ -139,8 +139,8 @@ export async function consumeProductEvaluationUsageAction(
       ok: false,
       code: "SERVER_ERROR",
       message: deterministic
-        ? "Evaluation access is temporarily unavailable while we finish an update — no action needed on your end."
-        : "Could not verify evaluation access. Try again.",
+        ? "Free-trial access is temporarily unavailable while we finish an update — no action needed on your end."
+        : "Could not verify free-trial access. Try again.",
     };
   }
 
@@ -185,10 +185,10 @@ export async function consumeProductEvaluationUsageAction(
 
   const reason = typeof row?.reason === "string" ? row.reason : "not_eligible";
   if (reason === "expired") {
-    return { ok: false, code: "EXPIRED", message: "Your 21-day evaluation has ended." };
+    return { ok: false, code: "EXPIRED", message: "Your 21-day free trial has ended." };
   }
   if (reason.endsWith("limit_reached")) {
-    return { ok: false, code: "LIMIT_REACHED", message: "This evaluation allowance has been used." };
+    return { ok: false, code: "LIMIT_REACHED", message: "This free-trial allowance has been used." };
   }
-  return { ok: false, code: "NOT_ELIGIBLE", message: "No active product evaluation was found." };
+  return { ok: false, code: "NOT_ELIGIBLE", message: "No active free trial was found." };
 }

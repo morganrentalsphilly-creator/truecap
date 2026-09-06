@@ -73,7 +73,7 @@ describe("dashboard workflow guards", () => {
   });
 
   it("makes decision-center highlights operable and clears failed reopen URLs", () => {
-    expect(dashboard).toContain("Open highest-screening deal");
+    expect(dashboard).toContain("Open highest-scoring deal");
     expect(dashboard).toContain("Review deal →");
     expect(dashboard).toContain("Open highest modeled-upside deal");
 

@@ -51,13 +51,13 @@ export function CheckoutCancelledBanner({
               SSR comment separators between segments ate the space after the
               expression in prod ("trialis"). */}
           {evaluation.status === "active"
-            ? "Your active no-card product evaluation is unaffected; subscribe only when you choose to."
+            ? "Your active no-card free trial is unaffected; subscribe only when you choose to."
             : hadPriorSubscription
               ? "Your plan is here whenever you're ready to pick it back up."
               : evaluation.status === "exhausted"
-                ? "Your included evaluation runs are already complete; no subscription was started."
+                ? "Your free-trial runs are already used up; no subscription was started."
                 : evaluation.status === "expired"
-                  ? "Your evaluation has already ended; no subscription was started."
+                  ? "Your free trial has already ended; no subscription was started."
                   : "Free screening remains available; subscribe only when you choose to."}
         </span>
       </p>

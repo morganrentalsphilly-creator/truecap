@@ -14,7 +14,7 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "Blog Topics",
   description:
-    "Browse TrueCap's rental investing guides by topic — underwriting, financing, tax, strategy, and markets — each paired with the calculators that run the math.",
+    "TrueCap's rental investing guides by topic: underwriting, financing, tax, strategy, and markets, each paired with the calculators that run the math.",
   alternates: { canonical: "/blog/topics" },
   openGraph: {
     title: "TrueCap Blog — browse by topic",

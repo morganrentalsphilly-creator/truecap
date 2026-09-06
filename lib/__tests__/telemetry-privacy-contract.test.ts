@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 describe("telemetry privacy contract", () => {
   it("keeps Sentry Replay and default PII disabled in every runtime", () => {
-    const client = read("instrumentation-client.ts");
+    const client = read("lib/sentry/client-init.ts");
     const server = read("sentry.server.config.ts");
     const edge = read("sentry.edge.config.ts");
 

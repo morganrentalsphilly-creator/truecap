@@ -301,7 +301,7 @@ export const REPORT_MODES: ReadonlyArray<{
     id: "personal",
     label: "Personal",
     description:
-      "Full released report — property, financing, cash flow, projection, and assumptions.",
+      "Full report — property, financing, cash flow, projection, and assumptions.",
   },
   {
     id: "lender",

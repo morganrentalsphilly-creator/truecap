@@ -440,10 +440,10 @@ export function FocusedDecisionSummary({
     : !clearsTargets || buyBoxFit === false
       ? targetSource === "starter-criteria"
         ? "Does not meet TrueCap starter criteria at asking"
-        : "Does not meet selected rules at asking"
+        : "Doesn't meet your targets at asking"
       : targetSource === "starter-criteria"
         ? "Meets TrueCap starter criteria at asking"
-        : "Meets selected rules at asking";
+        : "Meets your targets at asking";
   const targetContext = useMemo(
     () =>
       buildDecisionTargetContext({
@@ -493,10 +493,10 @@ export function FocusedDecisionSummary({
       : "Negative operating screen at entered assumptions"
     : advocacyContractEnabled
       ? isSampleCriteria
-        ? ruleFitLabel(ruleFit).replace("selected rules", "sample criteria")
+        ? ruleFitLabel(ruleFit).replace(/selected rules|your targets/, "sample criteria")
         : targetSource === "starter-criteria"
           ? ruleFitLabel(ruleFit).replace(
-              "selected rules",
+              /selected rules|your targets/,
               "TrueCap starter criteria",
             )
           : ruleFitLabel(ruleFit)
@@ -505,7 +505,7 @@ export function FocusedDecisionSummary({
   // pinned elsewhere): an estimated price can't be judged "at asking" in the
   // same card whose subtitle says "Est. price".
   const sourceAwareDecisionLabel = isSampleCriteria
-    ? rawDecisionLabel.replace("selected rules", "sample criteria")
+    ? rawDecisionLabel.replace(/selected rules|your targets/, "sample criteria")
     : rawDecisionLabel;
   const decisionLabel = priceIsEstimated
     ? sourceAwareDecisionLabel.replace(
@@ -539,7 +539,7 @@ export function FocusedDecisionSummary({
       ? {
           label: "Choose the criteria for your Offer Ceiling",
           reason:
-            "The operating screen is complete. Apply at least one return criterion only if you want TrueCap to calculate a modeled price threshold.",
+            "The operating screen is complete. Apply at least one return criterion if you want TrueCap to calculate an Offer Ceiling.",
         }
       : advocacyContractEnabled
         ? {
@@ -563,8 +563,8 @@ export function FocusedDecisionSummary({
               : "Review the binding target rule",
             reason:
               offerCeiling.listPriceGap > 0
-                ? `${bindingCriterionLabel ? `${bindingCriterionLabel} is what caps the price. ` : ""}The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under the selected rules. Record the investment decision yourself.`
-                : `${bindingCriterionLabel ? `${bindingCriterionLabel} is the rule being missed. ` : ""}The current price misses at least one selected rule. Record the investment decision yourself.`,
+                ? `${bindingCriterionLabel ? `${bindingCriterionLabel} is what caps the price. ` : ""}The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under your targets. Record the investment decision yourself.`
+                : `${bindingCriterionLabel ? `${bindingCriterionLabel} is the rule being missed. ` : ""}The current price misses at least one of your targets. Record the investment decision yourself.`,
           }
         : // Mirror the headline's own logic. This branch used to test only
           // `offerCeiling` — the EXACT solve — and declare "No qualifying Offer
@@ -577,7 +577,7 @@ export function FocusedDecisionSummary({
           rangePreview?.downsideFeasible && rangePreview.lower != null
           ? {
               label: "Review the active target rules",
-              reason: `A modeled range of ${money(rangePreview.lower)}–${money(rangePreview.upper)} still meets the selected rules; the exact Offer Ceiling is not part of this preview. Record the investment decision yourself.`,
+              reason: `A modeled range of ${money(rangePreview.lower)}–${money(rangePreview.upper)} still meets your targets; the exact Offer Ceiling is not part of this preview. Record the investment decision yourself.`,
             }
           : rangePreview
             ? {
@@ -893,9 +893,9 @@ export function FocusedDecisionSummary({
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
             {!targetAdopted
               ? canTunePriceCeiling
-                ? "Choose at least one criterion to calculate a modeled price threshold."
-                : "TrueCap Pro calculates the highest modeled price that still meets rules you choose — like the examples above — plus the binding constraint and a screening range."
-              : "Highest modeled price that still meets the criteria shown. This is not a recommended offer."}
+                ? "Choose at least one criterion to calculate an Offer Ceiling."
+                : "TrueCap Pro calculates the highest price that still clears the targets you choose — like the examples above — plus the binding constraint and a screening range."
+              : "The highest price that still meets the criteria shown."}
           </p>
           <details className="group mt-2 border-t border-primary/15 pt-1">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
@@ -926,8 +926,8 @@ export function FocusedDecisionSummary({
               {advocacyContractEnabled && targetAdopted ? (
                 <p>
                   User decision: {userDecisionLabel(userDecision)}. TrueCap
-                  reports rule fit; it does not record Pursue or Pass from the
-                  metrics.
+                  reports whether the deal meets your targets; it does not
+                  record Pursue or Pass from the metrics.
                 </p>
               ) : null}
               {offerCeiling ? (
@@ -984,12 +984,6 @@ export function FocusedDecisionSummary({
                     </Link>
                   )}
                   .
-                </p>
-              ) : null}
-              {advocacyContractEnabled ? (
-                <p>
-                  Model output—not an appraisal, market value, acceptance
-                  prediction, or recommended offer.
                 </p>
               ) : null}
             </div>
@@ -1395,7 +1389,7 @@ export function FocusedDecisionSummary({
                   {userDecisionLabel(userDecision)}
                 </p>
                 <p className="mt-1 text-[10px] text-muted-foreground">
-                  Never inferred from model outputs
+                  Recorded by you, never inferred
                 </p>
               </div>
             ) : null}

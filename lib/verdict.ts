@@ -128,7 +128,7 @@ function classifyDeal(result: AnalysisResult): {
       : headline === "Mixed"
       ? "The screening metrics are mixed. Stress-test and verify rent and vacancy before recording a decision."
       : headline === "Marginal"
-      ? "Modeled margins are thin. Verify rent and written financing terms, then compare them with the selected rules."
+      ? "Modeled margins are thin. Verify rent and written financing terms, then compare them with your targets."
       : "The modeled economics are weak as entered. Review price, rent, financing, and strategy assumptions before recording a decision.";
 
   return { headline, cashFlowSentence, capRateSentence, dscrSentence, cocSentence, closer };

@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -29,7 +31,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "QuickBooks vs TrueCap for Rentals (2026)",
   description:
-    "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
+    "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. See what to use for accounting instead.",
   keywords: [
     "quickbooks for rentals",
     "quickbooks alternative landlord",
@@ -203,6 +205,15 @@ export default function VsQuickbooksRentalPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* TL;DR */}
@@ -404,6 +415,8 @@ export default function VsQuickbooksRentalPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="quickbooks-rental" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

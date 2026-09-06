@@ -762,7 +762,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     const coc = applicableCashOnCashValue(d.cocReturnPct, d.cashToClose);
     return [
       d.score != null
-        ? `Secondary Screening Index ${Math.round(d.score)}`
+        ? `Deal score ${Math.round(d.score)}`
         : null,
       d.recommendation ? recommendationLabel(d.recommendation) : null,
       d.cashFlowMonthly != null
@@ -1155,10 +1155,9 @@ export function DashboardHome({
                   Decision center
                 </h2>
                 <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-                  These highlights compare modeled outputs only. The Screening
-                  Index is a secondary heuristic, not an investment directive;
-                  verify every material assumption before relying on a
-                  comparison.
+                  These highlights compare modeled outputs only. Deal score is
+                  a heuristic summary of the modeled numbers; verify every
+                  material assumption before relying on a comparison.
                 </p>
               </div>
               <Link
@@ -1189,18 +1188,18 @@ export function DashboardHome({
                     : "/dashboard/saved-analyses"
                 }
                 prefetch={false}
-                aria-label={`Open highest-screening deal: ${decisionCenter.best?.address ?? "My Deals"}`}
+                aria-label={`Open highest-scoring deal: ${decisionCenter.best?.address ?? "My Deals"}`}
                 className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
-                  <Award className="h-3.5 w-3.5" /> Highest screening index
+                  <Award className="h-3.5 w-3.5" /> Highest Deal score
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">
                   {decisionCenter.best?.address ?? "—"}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
                   {decisionCenter.best?.score != null
-                    ? `Screening Index ${Math.round(decisionCenter.best.score)}`
+                    ? `Deal score ${Math.round(decisionCenter.best.score)}`
                     : "—"}
                   {decisionCenter.best?.recommendation
                     ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}`
@@ -1643,8 +1642,7 @@ export function DashboardHome({
                   <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                     <div className="rounded-xl border border-border bg-card p-3">
                       <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        <Award className="h-3.5 w-3.5" /> Avg Screening Index ·
-                        secondary
+                        <Award className="h-3.5 w-3.5" /> Avg Deal score
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
                         {kpis.avgScore == null
@@ -1804,7 +1802,7 @@ export function DashboardHome({
                     [
                       {
                         icon: Award,
-                        label: "Highest Screening Index",
+                        label: "Highest Deal score",
                         value:
                           highlights.byScore?.score == null
                             ? "—"
@@ -1956,7 +1954,7 @@ export function DashboardHome({
               >
                 your buy box
               </Link>{" "}
-              and every deal shows which selected rules it meets or misses.
+              and every deal shows which of your targets it meets or misses.
             </p>
             <Button
               asChild

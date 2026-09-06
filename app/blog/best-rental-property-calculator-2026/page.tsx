@@ -13,6 +13,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -25,7 +26,7 @@ const TITLE = "Best rental property calculator 2026: 7 tools compared";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
-  "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.";
+  "2026 ranking of the 7 most popular rental property calculators (TrueCap, DealCheck, BiggerPockets and more) on free tier depth, pricing, mobile, and fit.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 12;
@@ -69,7 +70,7 @@ const RANKED_CALCULATORS = [
     pros: [
       "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
       "Editable HUD area-rent + FRED owner-occupied rate benchmarks, with manual local property tax",
-      "Selected-rule fit, with a secondary Screening Index",
+      "Buy Box fit, with a Deal score",
       "Paid Pro plans add 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and reports; see live pricing for current terms",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
     ],
@@ -205,7 +206,7 @@ const RANKED_CALCULATORS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD rent and FRED rate benchmarks, manual local property tax, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
+    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD rent and FRED rate benchmarks, manual local property tax, Buy Box fit, and a Deal score. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
   },
   {
     q: "What's the best free rental property calculator?",
@@ -241,7 +242,7 @@ export default function BestRentalPropertyCalculator2026Post() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -477,7 +478,7 @@ export default function BestRentalPropertyCalculator2026Post() {
             <ul>
               <li>
                 <strong>
-                  &quot;I want address-first screening and a target-backed Offer
+                  &quot;I want address-first screening and an Offer
                   Ceiling.&quot;
                 </strong>{" "}
                 Evaluate TrueCap&apos;s current free and Investor Pro terms on
@@ -570,6 +571,8 @@ export default function BestRentalPropertyCalculator2026Post() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

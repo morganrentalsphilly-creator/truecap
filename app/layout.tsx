@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     template: "%s | TrueCap",
   },
   description:
-    "Screen rental properties, test them against selected rules, stress the downside, and calculate a target-dependent Offer Ceiling.",
+    "Screen a rental: cash flow, DSCR, Buy Box fit, downside stress test, and the Offer Ceiling — the highest price that still meets your targets.",
   keywords: [
     "real estate investment calculator",
     "rental property calculator",
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Review whether a rental fits selected rules and the modeled Offer Ceiling under the assumptions shown.",
+      "See whether a rental fits your Buy Box and the highest price that still meets your targets — every assumption labeled and editable.",
     siteName: "TrueCap",
     locale: "en_US",
     url: siteUrl,
@@ -113,7 +113,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Review whether a rental fits selected rules and the modeled Offer Ceiling under the assumptions shown.",
+      "See whether a rental fits your Buy Box and the highest price that still meets your targets — every assumption labeled and editable.",
     images: ["/home.jpg"],
   },
   robots: {

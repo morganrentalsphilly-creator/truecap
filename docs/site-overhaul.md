@@ -355,3 +355,283 @@ Add `--apply` to bind and backfill; `--cap=N` limits the Stripe listing. Needs t
 ### Reconcile results
 
 Pending the first scheduled production run (see Phase 10).
+
+## Phase 10 (part 1) — Phase 1 deploy record
+
+| Step | Result |
+| --- | --- |
+| PR | [#89](https://github.com/morganrentalsphilly-creator/truecap/pull/89), squash-merged to `main` as `6dac625` after all six checks passed (build-chain-guard, check, browser-regressions, Vercel, Vercel Preview Comments, CodeRabbit) |
+| Preview smoke (`truecap-git-billing-fix-…vercel.app`, behind Vercel SSO; accessed through a share link) | 8/8: `/` 200, `/pricing` 200, `/auth/login` 200, webhook without signature 400, `/api/cron/billing-reconcile` without bearer 401, `/api/cron/reconcile-stripe` without bearer 401, sitemap 200, robots 200; hero + sample card render |
+| Production deploy | `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` (`truecap-9oll3rbnm`), READY |
+| Production smoke (`https://usetruecap.com`) | 8/8 identical checks OK; `/api/cron/billing-reconcile` live (401 without bearer) |
+| Migration `20260906170000_billing_unresolved_events.sql` | **Not applied by this run** (no database credential is exportable here — see Phase 1 decision 3). The webhook tolerates the missing table and stamps `unresolved: <reason>` on the ledger row meanwhile. Founder: run the file in the Supabase SQL editor. |
+| Reconcile run | Cannot run locally (no keys). The daily cron `/api/cron/billing-reconcile` (17:30 UTC, `BILLING_RECONCILE_MODE` default `dry`) produces the counts inside production; results are recorded below when the first run has logged. |
+
+## Phase 2 — Conversion mechanics (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Hero CTA always actionable.** One field accepts an address or a Zillow/Redfin/Realtor/Homes/Trulia link; the submit button is never disabled or dimmed. Empty submit → focus + inline helper "Paste an address or a Zillow/Redfin link" + "or try the sample deal →". Enter submits. Before hydration the form is a plain `GET /analyze?address=…`. | `components/marketing/hero-address-form.tsx` |
+| **One primary CTA per screen.** Hero: primary "Analyze a deal free", secondary "See the sample deal →" (`/analyze?sample=1`). Removed from the hero: "View a sample decision" button, "Read the written memo" link (now in the footer's Learn column), the Street address / Listing link mode toggle. With the analyzer gone from `/`, "Try a sample rental / Preview a sample Pro report", both "Analyze deal & calculate ceiling" buttons and "Analyze cash flow without an Offer Ceiling" no longer appear on the homepage. Final section keeps "Analyze a property free" (now a real link to `/analyze`); the sticky bar (only visible after scrolling past the hero) links to `/analyze`. | `hero-address-form.tsx`, `landing-sections.tsx` (`FinalCta`), `sticky-conversion-bar.tsx`, `analyze-cta-link.tsx`, `site-footer.tsx` |
+| **`/analyze` route.** Static ISR page with the full analyzer (`ANON_ANALYZER_PROPS`, one object). The homepage no longer imports the analyzer bundle (guarded by `homepage-lockstep.test.ts`). Handoff: sessionStorage (JS), `?address=` (consumed by the existing pre-analytics bootstrap), `?url=` and `?sample=1` (new `AnalyzeEntryFromQuery` island, params scrubbed from the URL). Signed-in visitors: `proxy.ts` rewrites `/analyze` → `/home-authed?tc_from=analyze`, which redirects a verified user to `/dashboard/new` (forwarding a bounded `address`) and renders the anonymous analyzer for a stale cookie. | `app/analyze/page.tsx`, `components/marketing/analyze-page-content.tsx`, `analyze-entry-from-query.tsx`, `proxy.ts`, `app/home-authed/page.tsx`, `app/sitemap.ts` |
+| **Mobile header: one row.** Below `lg`: logo · primary "Analyze" button · hamburger (Sheet with Analyze, Pricing, the five Learn pages, Log in, Sign up). The second nav row is gone. Desktop unchanged. | `components/investcalc/header.tsx`, `components/marketing/marketing-nav.tsx` |
+| **Redirects.** `/guarantee` → `/pricing` (308) in `next.config.mjs`; the old `/analyze → /` redirect removed (it would have shadowed the new page). A repo-wide audit of 197 internal `href` targets found no other dead paths. | `next.config.mjs` |
+| **Cookie banner.** Compact single row on phones (~60 px: text + Reject/Accept + dismiss), full copy from `sm`. GTM/Ads gating stays in Phase 7. | `components/marketing/cookie-consent-banner.tsx` |
+| **Dashboard metadata.** `app/dashboard/layout.tsx` now declares `robots: noindex, nofollow` and `alternates: { canonical: null }`, so `/dashboard/*` pages without their own self-canonical no longer inherit the root layout's `https://usetruecap.com` canonical. | `app/dashboard/layout.tsx` |
+| **Tests.** Unit guards updated to the new contract (hero, footer memo link, header classes, homepage without analyzer, redirect sources, description length). Playwright: the 13 calculator-driven public specs now run on `/analyze`; new `e2e/site-overhaul-conversion.spec.ts` covers the four done-when checks (empty submit, typed address → `/analyze` prefill, sample → full result, `/guarantee` 308, 375 px one-row header with CTA in the first viewport and above the cookie bar). | `lib/__tests__/*`, `e2e/*` |
+
+### Decisions made in the founder's absence (Phase 2)
+
+1. **The written memo link moved to the footer.** The brief allows one secondary hero CTA and names the sample; three guard tests required `/sample-decision-memo` to stay linked (it is in the sitemap). The footer's Learn column keeps it crawlable without competing in the hero.
+2. **Single hero field instead of the address/listing toggle.** The brief's helper text ("Paste an address or a Zillow/Redfin link") implies one field; dropping the toggle also saved ~60 px of the first mobile viewport, which the 375 px CTA rule needed.
+3. **`/guarantee` redirects permanently even though the page was a deliberate fail-closed 404.** The brief is explicit (permanent redirect in `next.config`). The page file stays (no route deletions); the redirect wins because Next evaluates redirects before routes.
+4. **`/analyze` is static (ISR) and signed-in routing reuses the `/home-authed` cookie hint** rather than making `/analyze` dynamic. That keeps the second hop edge-cached, which Phase 7's `/analyze` LCP budget needs, and adds no auth logic to `proxy.ts` (it remains a cache hint; `/home-authed` verifies the session).
+5. **A signed-in `/analyze?address=…` carries the address to `/dashboard/new`** (bounded to 200 chars, never a URL); everything else in the query is dropped, matching the existing allow-list posture.
+6. **Homepage FAQ/JSON-LD untouched in this phase** — it is Phase 3's item 3.
+
+## Phase 3 — Voice: from anxious to confident (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| One `<Disclaimer />` ("TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. The math is published in our Methodology."). Mounted once per marketing page through the site footer, once at the bottom of the results view, once on the shared read-only view, once on the saved-deal workspace. `/analyze` turns the footer copy off so a page with results shows exactly one. | `components/marketing/disclaimer.tsx`, `site-footer.tsx` (`disclaimer` prop), `components/investcalc/analysis-dashboard.tsx`, `read-only-analysis-view.tsx`, `app/dashboard/saved-analyses/[id]/page.tsx` |
+| `docs/voice.md` — the rules and the term map. | `docs/voice.md` |
+| Vocabulary pass over 166 customer-facing files plus the active email content (30-day drip, lifecycle) and the retired newsletter JSON (still scanned by a guard): product evaluation → free trial; selected-rule fit / selected rules → Buy Box fit / your targets; Synthetic sample targets → sample targets; target-dependent / target-backed → Offer Ceiling (defined once per page); Deal Doctor → Buy Box; Screening Index → Deal score (0–100) with a one-line "heuristic summary of the modeled numbers" tooltip where a help string already existed; "Does not meet selected rules at asking" → "Doesn't meet your targets at asking"; hero sample card states the dollar gap; "preliminary fallback" → "default — replace with your local number"; released / unreleased / registry / hand-curated / checked-in / as-of removed from copy; per-element hedges deleted. | `app/**`, `components/**`, `lib/**` (rendered strings only), `emails/**` |
+| Homepage FAQ: removed "Why are some advanced strategy modules unavailable?" and "Why does Pro cost more than other rental calculators?"; the remaining eight answers rewritten in the voice; FAQPage JSON-LD is generated from the same array so it stays in sync. `/pricing` gains "What does Pro add?" and "How does the free trial work?". | `components/marketing/landing-sections.tsx`, `app/pricing/page.tsx` |
+| Hero copy: headline kept; subhead "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable."; under the CTA "Free. No account. Your first full decision is included." Sample card: "Asking price is $X above the ceiling" / "The highest price that still clears these targets." | `components/marketing/marketing-hero.tsx` |
+| Sample memo and results view carry the same rules; "Best next step" and "Fastest paths to meet your criteria" kept verbatim. | `components/investcalc/*`, `app/sample-decision-memo/page.tsx` |
+| `llms.txt`, `llms-full.txt`, default title/description and OG descriptions regenerated in the new voice (they are generated from `lib/product-facts.ts`, which was rewritten). | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts`, `app/layout.tsx`, `lib/product-facts.ts` |
+
+### Decisions made in the founder's absence (Phase 3)
+
+1. **The vocabulary pass touched rendered strings only.** Identifiers, keys, analytics event names, DOM ids (`screening-index`), fixture addresses (`TrueCap Synthetic Sample, …` is matched programmatically) and comments were left alone. Renaming them would have changed behaviour or analytics continuity for no customer benefit.
+2. **`metadata.user_id`-style facts stay; only tone changed.** Every number, threshold, price and claim is unchanged; several answers are shorter.
+3. **Emails keep one disclaimer sentence** (the day-0 lead-magnet email) rewritten in the voice, because emails have no page-level `<Disclaimer />`.
+4. **The retired newsletter JSON (`emails/content/`) was term-mapped too**, only because a repo guard scans all of `emails/`; nothing is sent from it.
+5. **Guard tests that pinned the old copy were re-pinned to the new copy** in the same files; `customer-facing-decision-vocabulary.test.ts` now forbids "Screening Index" instead of "deal score". No behavioural test was weakened.
+6. **"Screening only" / "Evidence readiness" feature names and HUD-FMR source-fact sentences on the rent-estimate comparison pages stayed**: they are feature names or factual statements about the data, not model hedges.
+7. **`app/terms/page.tsx` keeps "Product evaluation" as a heading and one "preliminary fallback" sentence** — legal language describing the offer as it was written; the terms page is not marketing copy and the brief exempts legal pages from tone edits. Everything else on the site says "free trial".
+8. **The `/walk[- ]away price/` guard stays.** `customer-facing-decision-vocabulary.test.ts` forbids that phrase inside `app/`, `components/` and `emails/`; the hero headline lives in `lib/marketing-offer-config.ts` (config, not a customer surface) so the mandated headline and the guard coexist.
+9. **Vocabulary check result**: `rg -i "synthetic sample|selected-rule|product evaluation|preliminary fallback|unreleased|hand-curated"` over `app/`, `components/`, `lib/`, `emails/` leaves only the two legal-page hits above, one JSX comment, and code identifiers (`unreleasedUnderwritingCalculatorSet`).
+
+## Phase 4 — Show the product (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Screenshot pipeline.** Playwright + Chromium, 2× scale, light theme, reduced motion, 1280×800 and 390×844. Everything is captured from the NO-ACCOUNT sample flow (`/analyze?sample=1`) and the public sample memo — no seeded user, no customer data, no credentials. Writes optimized PNG + WebP pairs to `public/product/`, a `manifest.json`, and a typed `lib/product-shots.generated.ts` that the `<ProductShot />` component imports (so builds never read the filesystem at runtime and an empty list renders nothing). Captured: `verdict` (Offer Ceiling card), `where-the-rent-goes` (cash-flow breakdown), `memo` (the written decision memo), each desktop + mobile. | `scripts/capture-screenshots.ts`, `public/product/*`, `lib/product-shots.generated.ts` |
+| **Hero product shot.** The static computed card is replaced by the real verdict screenshot in a browser-chrome frame, `next/image` with explicit dimensions and `priority` (it is the LCP element), alt text derived from the sample's actual numbers, and a "Live sample →" link to `/analyze?sample=1`. The computed card remains only as a fallback when no shot exists. | `components/marketing/marketing-hero.tsx`, `components/marketing/product-shot.tsx` |
+| **Product shots on** `/pricing` (one per tier: Free → verdict, Investor Pro → cash-flow breakdown, Agent Pro → memo, the third only when Agent Pro is sold), `/for-buy-and-hold`, `/for-house-hackers`, `/for-agents`, all 38 rendered `/vs/*` pages plus `/vs`, and the blog index. | `app/pricing/page.tsx`, `app/for-*/page.tsx`, `app/vs/**`, `app/blog/page.tsx` |
+| **Dynamic OG.** `/og/home` renders the wordmark, the headline, and the real verdict PNG with `next/og`; the homepage's `openGraph.images` points at it. Blog posts already carried per-post `opengraph-image.tsx` title cards with the wordmark (75 of 76 posts; the 76th directory is the topics hub). `/home.jpg` stays the fallback for Twitter and every other page. | `app/og/home/route.tsx`, `app/page.tsx` |
+| **Founder presence, facts only.** `<FounderCard />`: "Morgan Page", "Rental investor in Philadelphia. Built TrueCap for my own underwriting.", link to `/about`. No photo. Mounted below the hero on both homepages and on `/pricing`. `/about` already carried the `Person` node at `@id: https://usetruecap.com/about#morgan`; its copy was tightened in the Phase 3 voice pass using only facts already on the page. | `components/marketing/founder-card.tsx`, `app/page.tsx`, `app/home-authed/page.tsx`, `app/pricing/page.tsx`, `app/about/page.tsx` |
+| **Accessibility.** Alt text on every image; decorative frames `aria-hidden`; both homepages gained a `<main id="main" tabIndex={-1}>` landmark (the analyzer used to carry it), which also fixes Lighthouse's skip-link audit. Local Lighthouse on the Phase 3 build: accessibility 99, SEO 100. | `app/page.tsx`, `app/home-authed/page.tsx`, `components/marketing/product-shot.tsx` |
+| **Tests.** Unit guard: the six shots exist on disk and in the module, unknown shots render nothing, no placeholder image paths, the hero uses the preloaded verdict shot, every listed surface mounts a shot, the founder card has no image and only published facts. Browser check: the hero `<img>` has `fetchpriority="high"`, points at the verdict WebP, carries an Offer Ceiling alt, and the founder card renders without an image. | `lib/__tests__/site-overhaul-product-shots.test.ts`, `e2e/site-overhaul-conversion.spec.ts` |
+
+### Decisions made in the founder's absence (Phase 4)
+
+1. **No founder photo.** The brief allows the owner account's avatar only if it is a real photograph; nothing here can read Supabase storage to check, so the card renders with initials only. No generated, downloaded, or substituted face.
+2. **No demo account.** Creating one needs the Supabase service key, which is not exportable from this machine; the public sample flow provides everything the pipeline needs without touching customer data.
+3. **Two shots deferred, recorded in the manifest:** the 10-year cash-flow view (the projections tab is Pro-gated and not rendered for the anonymous sample) and the side-by-side comparison (authenticated dashboard). Both need a seeded Pro account.
+4. **OG card as a route handler, not `app/opengraph-image.tsx`.** A root-level file-convention image is inherited by child segments and would have overridden the per-page OG images on tools, blog, and `/vs` pages.
+5. **The computed hero card stays as a fallback only.** If the pipeline has not run (empty generated module) the hero still renders the calculated sample card rather than a broken image.
+6. **Pipeline re-run is scheduled for the end of Phase 9**, as the brief asks, so the shots reflect the final copy.
+
+## Phase 5 — Real social proof, automated end to end (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Storage** (additive, idempotent): `testimonials` (quote 40–280, first_name, role, market, consent, publish_after = now + 24 h, status pending/published/unpublished, unpublish_token, skip_reason), `testimonial_prompt_events` (one row per user: the prompt fires once, ever), `demo_accounts` (excluded from every count and every email), `feedback_email_sends` (one row per user: the guarded email can never go twice), `profiles.marketing_opt_out`. Public RLS policy reads `status = 'published'` only; every write is service-role. | `supabase/migrations/20260906180000_testimonials_pipeline.sql` |
+| **In-product request.** After a report export or the third saved deal, a signed-in user is asked once: "One sentence — what did TrueCap change about how you evaluate deals?" with optional role (investor / house hacker / agent / other), market, and the consent checkbox "TrueCap may publish this with my first name, role, and market." Once-per-user is decided by the server (primary key), not the browser; "Don't ask again" is permanent. | `components/marketing/testimonial-prompt.tsx`, `app/actions/testimonials-publish.ts`, `lib/testimonials/store.ts` |
+| **Auto-publish rules** (all must hold): consent; not a demo account; ≥ 3 saved deals or ≥ 1 exported report; 40–280 chars; no URL / email / phone; passes a small profanity list; not a near-duplicate (word-set Jaccard ≥ 0.8) of a published quote; 24-hour hold elapsed. A daily cron publishes eligible rows and records the failing rule on the rest so a later run can publish them once it clears. The founder's veto is `/api/testimonials/unpublish?token=…` (the row's own 48-hex capability token). | `lib/testimonials/rules.ts`, `app/api/cron/publish-testimonials/route.ts`, `app/api/testimonials/unpublish/route.ts`, `vercel.json` |
+| **Rendering.** `<Testimonials />` renders published rows only — first name, role, market, quote, month/year — and renders nothing at zero rows. Three most recent on `/` and `/pricing`, all on `/reviews`. | `components/marketing/testimonials.tsx`, `app/page.tsx`, `app/home-authed/page.tsx`, `app/pricing/page.tsx`, `app/reviews/page.tsx` |
+| **Proof strip** under the hero, always renders: "Methodology is public and versioned" → `/methodology`; "Assumptions labeled with sources: HUD, FRED, yours" → `/methodology`; "Built and used by a Philadelphia rental investor" → `/about`. | `components/marketing/proof-strip.tsx`, `marketing-hero.tsx` |
+| **Computed usage counter**: saved deals by non-demo accounts (not deleted), cached one hour; hidden below 100, exact 100–999, rounded down to the hundred above 1,000. | `components/marketing/usage-counter.tsx`, `lib/testimonials/store.ts` |
+| **Guarded feedback email** — built and tested, shipped DORMANT (`FEEDBACK_EMAIL_MODE=off`). Audience: ≥ 1 saved deal in the last 90 days, not demo, never prompted in-product, not opted out, never emailed, confirmed address. Plain text from the existing sender, subject "One question about TrueCap", signed form link (`/feedback/testimonial?token=…` opens the same consent form for the signed-in owner), signed one-click unsubscribe (`/email/unsubscribe`, RFC 8058 headers) that sets `marketing_opt_out`, postal address only when `EMAIL_POSTAL_ADDRESS` is set; every user is claimed in `feedback_email_sends` before the provider call. | `lib/testimonials/feedback-email.ts`, `app/api/cron/feedback-request/route.ts`, `app/feedback/testimonial/page.tsx`, `app/email/unsubscribe/route.ts` |
+| **`/reviews` rewrite**: how quotes get here (stated plainly), the proof strip, published quotes (nothing when empty), methodology proof, the computed counter, the founder card, the analyzer CTA. | `app/reviews/page.tsx` |
+| **Tests**: rules (every validation and eligibility branch, the counter's display rule); store on the in-memory admin fake (prompt fires once, consent stored, publish job publishes the eligible row and records each skip reason, no-consent never publishes, missing table tolerated, unpublish idempotent, real counts, email audience exclusions); the email path with a mocked transport (off/dry send nothing, live sends once with a signed unsubscribe link and never twice, no secret → no send); a guard that `/`, `/pricing`, `/reviews` sources carry no placeholder proof and `<Testimonials />` renders null on an empty table. | `lib/__tests__/testimonials-*.test.ts`, `site-overhaul-social-proof.test.ts` |
+
+### Decisions made in the founder's absence (Phase 5)
+
+1. **The feedback email ships dormant.** The brief says to send it if a provider is configured (Resend is). An unattended first send to real customers, from a template nobody has previewed, is the kind of outward-facing action the operating rules say to take conservatively. Everything is built and covered by tests; flipping `FEEDBACK_EMAIL_MODE=live` in Vercel sends it once (daily cron, claim-before-send). Recorded as deferred.
+2. **No publish-notification email to hello@usetruecap.com.** The hard limits allow exactly one outbound send in this run. The veto still exists: the publish cron logs counts and each row carries its unpublish token; the founder can pull any quote with one click.
+3. **The usage counter uses real rows only.** `app_counters.analysis_runs` is an owner-entered cumulative figure (seeded to 51,900 on 2026-08-23) and cannot exclude demo accounts, so it is not shown. "Deals saved" is computed from `saved_analyses`; a "deals analyzed" figure is deferred until a per-run row source exists.
+4. **Prompt availability is decided by the tables, not a feature flag.** The old `testimonial_collection` flag (default off) gated a review-by-hand workflow; the new prompt shows only when the server can claim the once-per-user row, and hides itself if the migration is not applied yet.
+5. **Migration apply remains founder-owed** (no database credential is exportable here); every read and write tolerates the missing tables.
+6. **Ratings / `aggregateRating` stay out** (none exist).
+
+## Phase 6 — Funnel analytics (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| `@vercel/analytics` was already installed and mounted (`TrueCapVercelAnalytics`, with sensitive-URL stripping). A typed `track()` fans each funnel event out to Vercel Web Analytics (cookieless, always), to GTM/GA4 via `window.dataLayer` (only after the visitor accepted cookies), and to an in-page buffer (`window.__tcEvents`) browser tests read. `trackServer()` covers server-only events through `@vercel/analytics/server`. | `lib/analytics/site-events.ts`, `lib/analytics/site-events-server.ts` |
+| Thirteen events with minimal, non-PII properties: `analysis_started` (source, input_type), `analysis_completed` (verdict, has_ceiling), `sample_viewed`, `signup_started` (method), `signup_completed` (method), `trial_started`, `checkout_started` (plan, interval), `checkout_completed` (server-side, from the webhook, once per synced checkout — never on duplicates or foreign events), `report_exported`, `deal_saved`, `compare_used`, `testimonial_prompt_shown`, `testimonial_submitted`. | analyzer, sign-up form, Google button, OAuth callback, pricing buttons, webhook route, saved-deal page, hero/sample entry, testimonial prompt |
+| `docs/analytics.md`: the events, where they fire, the five weekly ratios (visit → analysis_started → analysis_completed → signup_completed → trial_started → checkout_completed), the consent rule, how to verify locally. | `docs/analytics.md` |
+| Tests: `track()` unit test (buffer, Vercel call, dataLayer only with consent, no-op on the server), webhook test asserting `checkout_completed` fires once and never for a duplicate or foreign event, Playwright test asserting `sample_viewed`, `analysis_started`, `analysis_completed` on the sample flow with no GTM push before consent. | `lib/__tests__/site-events.test.ts`, `stripe-webhook-route-binding.test.ts`, `e2e/site-overhaul-conversion.spec.ts` |
+
+### Decisions made in the founder's absence (Phase 6)
+
+1. **PostHog stays as the rich event stream; the thirteen funnel events are a separate, stable, typed set.** Merging them into the existing 90-name PostHog union would have made the weekly ratios depend on an event dictionary that changes often.
+2. **GTM receives events only after consent.** `track()` checks the banner's stored decision before pushing to `dataLayer`; Phase 7 makes the GTM/Ads scripts themselves load only after consent. Vercel Analytics is cookieless and always on, so the funnel stays measurable for visitors who reject cookies.
+3. **`trial_started` fires with `signup_completed`** because every new account starts the no-card free trial; a separate server flag would have added a query to the sign-up path for no extra information.
+4. **The "mocked transport" for the browser test is the in-page buffer**, not a network interception: Vercel's client SDK does not send from local builds, and intercepting GTM would have required accepting cookies in the test — which is exactly what the test asserts does not happen by default.
+
+## Phase 7 — Performance (branch `site-overhaul`)
+
+### Before / after (homepage unless noted)
+
+Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl + brotli), "after" is the local production build of this branch served with `next start` (gzip; production brotli is ~10–15 % smaller). Lighthouse 12, mobile emulation, simulated throttling, Playwright's Chromium.
+
+| Metric | Before | After | Note |
+| --- | --- | --- | --- |
+| HTML bytes | 326,414 | 152,673 | analyzer moved to `/analyze` |
+| `<script src>` tags | 42 | 28 | one of them (`polyfills-*.js`, 112 KB raw) is `noModule` and is never fetched by a modern browser |
+| Own JS, raw | 2,034,957 | 952,103 | script tags only, no prefetch |
+| Own JS, compressed | 636,923 (br) | 306,567 (gzip) | budget 250 KB not met — see decision 2 |
+| Largest chunk | `2217-*.js` 526 KB raw (Sentry SDK + Next runtime) | `3794-*.js` 250 KB raw (Next app-router runtime) | Sentry SDK (~166 KB gz) now loads after interaction/idle |
+| JS fetched through hydration (transfer script) | 766,720 B / 45 requests (Phase 2 build, incl. `/analyze` prefetch) | 503,838 B / 34 requests (incl. the deferred Sentry chunk) | `/analyze` links prefetch on hover only |
+| Lighthouse performance | 73 | 88 | |
+| LCP (mobile, simulated) | 4.6 s | 3.8 s | budget 2.5 s not met — warning |
+| TBT | 430 ms | 120 ms | budget 200 ms met |
+| CLS | 0.003 | 0.003 | budget 0.05 met |
+| Accessibility | 99 | 100 | |
+| `/analyze` Lighthouse performance / LCP / TBT | — / 5.0 s / 330 ms (Phase 2 build) | 83 / 4.4 s / 160 ms | LCP budget 3 s not met — warning |
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| `@next/bundle-analyzer` (dev dependency), `npm run analyze` (`ANALYZE=true`) | `next.config.mjs`, `package.json` |
+| Homepage does not import the analyzer (Phase 2); every `/analyze` link is `prefetch={false}` (hover prefetch only), so the analyzer bundle is not pulled onto marketing pages | `analyze-cta-link.tsx`, `sticky-conversion-bar.tsx`, `marketing-nav.tsx`, `hero-address-form.tsx`, `header.tsx`, `marketing-hero.tsx`, `/vs/*`, persona pages, blog index |
+| The 526 KB `2217-*.js` chunk identified as the Sentry browser SDK + Next runtime. Sentry now loads LAZILY — on first interaction, browser idle, or 4 s, whichever first — from `lib/sentry/client-init.ts` (the full previous configuration: PII scrubbing, Replay off, tracing on, triaged `ignoreErrors`). Errors before the SDK is up are buffered and reported after; router transitions are forwarded once loaded. Sentry's `bundleSizeOptimizations` drop Replay shadow-DOM/iframe/worker code and debug statements. | `instrumentation-client.ts`, `lib/sentry/client-init.ts`, `next.config.mjs` |
+| `browserslist: ["last 2 versions", "not dead", "> 0.5%"]` | `package.json` |
+| GTM and the Google Ads tag load only after the visitor accepts cookies (they listen to the banner's consent event) and with `lazyOnload`; Vercel Analytics stays cookieless and always on | `components/analytics/google-measurement.tsx`, `lib/use-cookie-banner.ts` |
+| Fonts already used `next/font` with `display: swap` (Plus Jakarta Sans preloaded, DM Mono on demand for tabular numbers) — unchanged | `app/layout.tsx` |
+| Images: `next/image` with explicit dimensions everywhere a product shot renders; `priority` only on the hero shot | `components/marketing/product-shot.tsx` |
+| Budgets + Lighthouse CI: `lighthouserc.json` (mobile, simulated) asserts accessibility ≥ 95 and CLS ≤ 0.05 as ERRORS and homepage JS ≤ 250 KB, LCP ≤ 2.5 s, TBT ≤ 200 ms, `/analyze` LCP ≤ 3 s as WARNINGS; a `lighthouse` CI job builds, serves, and runs `@lhci/cli autorun` | `lighthouserc.json`, `.github/workflows/ci.yml`, `package.json` (`perf:lighthouse`) |
+| Guard test for the structural rules (no analyzer import on the homepage, hover-only prefetch, consent-gated GTM, browserslist, lazy Sentry with the full config, budgets as configured) | `lib/__tests__/site-overhaul-performance.test.ts` |
+
+### Decisions made in the founder's absence (Phase 7)
+
+1. **Sentry is deferred, not trimmed.** Dropping client tracing (`excludeTracing`) would have cut the SDK further but removes performance monitoring the founder configured; loading it after interaction keeps every feature and takes it off the critical path (TBT 430 → 120 ms, LCP 4.6 → 3.8 s). Early errors are buffered so nothing is lost.
+2. **The JS and LCP budgets stay warnings, not failures.** The brief allows it when meeting them would risk the analyzer. What remains on the homepage is the Next app-router runtime + React (~135 KB gz) and the marketing page's own code; the next lever is the Radix Sheet/Dropdown behind the header menu, left for a follow-up.
+3. **The `polyfills` chunk is not a real cost.** It is `noModule` and modern browsers never download it (Chromium confirmed); `browserslist` is set anyway so the build targets modern engines.
+4. **Two fonts stay.** DM Mono renders tabular numbers in 70 components; replacing it would be a visual change outside the brief.
+5. **No `next/dynamic` sweep of the analyzer's own imports** beyond what already existed (charts, PDF, dialogs are already dynamic): the analyzer file is 11,000 lines and a partial split risked the free first decision.
+
+## Phase 8 — SEO: thin pages fixed, good pages protected (branch `site-overhaul`)
+
+### Audit before / after (`scripts/seo-audit.ts` against the local production build)
+
+| Check | Before (Phase 7 build) | After (Phase 8 build) |
+| --- | --- | --- |
+| Sitemap URLs | 411 | 380 (12 bespoke market pages, 19 city + strategy pages, and nothing else left the sitemap; `/analyze` joined it in Phase 2) |
+| Non-200 sitemap URLs | 0 | 0 |
+| Indexable pages under 300 words | 81 (44 glossary, market/state/strategy templates, `/tools`, `/about`, `/reviews`, `/sample-decision-memo`) | 0 (9 list hubs under `/blog/topics` are exempt from the word rule and reported separately) |
+| Duplicate titles | 0 | 0 |
+| Sitemap entries without `lastmod` | 305 | 0 |
+| Pages without a self-canonical | 0 (the first run's mismatches were a localhost-origin artifact; the audit now compares paths) | 0 |
+| Broken internal links | 0 | 0 |
+| Titles over 60 characters (advisory) | 11 (all glossary) | 0 |
+| Descriptions over 155 characters (advisory) | 90 | 0 |
+| `feed.xml` | parses, 75 items | parses, 75 items |
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| **Markets: enrich where HUD data exists, noindex the rest.** Every `/markets/<city>` page with a HUD Fair Market Rent row (150 of 162) now renders FMR by bedroom count with the HUD fiscal year (plus small-area ZIP rows where SAFMR exists), a sample underwrite at a stated $265,000 sample price run through the real `calculateAnalysis` engine with the HUD 3-bedroom rent (cash flow, cap rate, DSCR; labeled "not a listing", assumptions printed from the sample fixture), three things to verify locally, glossary links, and related blog posts. The 12 bespoke city pages (Philadelphia, Dallas, Atlanta, Tampa, …) have no HUD row and carry `robots: noindex, follow`; they flip to indexable the day a row is added (`isMarketIndexable`) | `lib/markets/indexability.ts`, `components/marketing/safe-market-page.tsx`, `app/markets/[city]/page.tsx` |
+| **States: real content from the state record.** Each `/states/<slug>` page renders the pitch, market tier, landlord-tenant lean, and typical property-tax rate (each with a source label), a linked HUD-rent table of the state's market cities, bespoke city links, and verify-locally guidance; medians, eviction, income-tax, pros/cons and insurance figures stay withheld. All 33 states clear the 300-word bar from real content (estimate 368–500+ words; the guard measures the rendered `<main>` of every state) | `app/states/[slug]/page.tsx`, `lib/markets/indexability.ts` |
+| **Strategy pages noindexed.** `/markets/<city>/<strategy>` renders a ~240-word template; every one is `noindex, follow` and out of the sitemap behind a single flag (`STRATEGY_PAGES_INDEXABLE = false`) | `app/markets/[city]/[strategy]/page.tsx`, `app/sitemap.ts` |
+| Every "source-first boundary" paragraph on the four templates replaced by one line: "Data as of {year}; verify locally before you offer." (exactly once per page, tested) | `lib/markets/indexability.ts` (`buildDataAsOfLine`) |
+| **Sitemap lists only indexable pages** and carries `lastmod` on every entry (`SITE_OVERHAUL_LAST_MODIFIED` for pages touched by the overhaul, post dates for the blog) | `app/sitemap.ts` |
+| **Glossary: "How to check it before you rely on it."** 35 entries that were under 300 words gained a `howToCheck` field — which document, quote, or record to pull and what to look for — rendered as its own section and as a FAQ item; every glossary page also carries a category-level "Where this shows up in TrueCap" section (from earlier in the phase) and related content. Glossary titles are length-aware so `title + " | TrueCap"` stays ≤ 60 | `lib/glossary.ts`, `app/glossary/[slug]/page.tsx` |
+| `/about` ("How the numbers are built"), `/tools` ("How these fit the full analysis"), `/sample-decision-memo` ("What a decision memo is"), `/reviews` ("What you will not find here") each gained a real section instead of padding | the respective `page.tsx` files |
+| **Schema.** `Article.author` → the Morgan `Person` node (`@id: /about#morgan`, name, url) on all 75 posts (60 edited; 11 had an `Organization` author; the 3 source-first posts get it from the shared layout). `BreadcrumbList` on blog (already present), tools (20), vs (38), glossary, markets, states. `aggregateRating` stays out: `buildAggregateRating()` returns `null` below 5 published testimonials with numeric ratings and is wired nowhere | `components/marketing/breadcrumb-schema.tsx`, `lib/schema/aggregate-rating.ts`, `components/marketing/source-first-article.tsx`, `app/blog/*/page.tsx` |
+| **Related content engine.** Token-overlap matcher over tools, glossary, and posts: tools → glossary + two posts; glossary → tools + posts; blog → one tool + the analyzer; vs → pricing + the sample deal. Rendered on 11 tools, 38 vs pages, every glossary entry, all 75 posts | `lib/related-content.ts`, `components/marketing/related-content.tsx` |
+| Every remaining `href="/#main"` (the analyzer's old home) now points to `/analyze`: 33 posts, 11 tools, 38 vs, pricing, the memo page, the three persona pages, states. The link-honesty guard checks `/analyze` links the way it checked `/#main` | `lib/__tests__/calculator-link-honesty.test.ts` |
+| Meta descriptions: the truncation helper now caps at 155 (it produced 156–158 before); the state template is ≤ 135 for every state; hand-written blog and vs descriptions over 155 rewritten in the new voice without adding claims | `lib/utils.ts`, `app/states/[slug]/page.tsx`, `app/blog/*/page.tsx`, `app/vs/*/page.tsx` |
+| `robots.txt` unchanged (AI crawlers allowed, `llms.txt` allowed); `llms.txt` is generated from the live data at request time and now names the free analyzer at `/analyze`; `feed.xml` validates | `app/llms.txt/route.ts` |
+| Dashboard pages carry no canonical and are `noindex` (Phase 2) | `app/dashboard/layout.tsx` |
+| `scripts/seo-audit.ts` (`--base`, `--json`): crawls the sitemap of a local build; fails on non-200 URLs, thin indexable pages, duplicate titles, missing `lastmod`, non-self canonicals (path compare), broken internal links; reports title/description length and list-hub exemptions as advisories | `scripts/seo-audit.ts` |
+| Guards: indexability rules and rendered word counts for all 33 states and the engine parity of the sample underwrite (37 tests); sitemap filtered by the same helpers; related-content shapes; breadcrumb component; aggregate-rating guard | `lib/__tests__/markets-indexability.test.ts`, `lib/__tests__/site-overhaul-seo.test.ts` |
+
+### Decisions made in the founder's absence (Phase 8)
+
+1. **The 12 bespoke city pages, Philadelphia included, are `noindex, follow`.** They are 39-line wrappers around the same template as the programmatic cities and have no HUD row, so they are exactly the thin pages the brief describes. Fabricating rent figures was not an option; adding the HUD FY2026 rows for those 12 slugs to `lib/markets/hud-rents.ts` flips them to full, indexable pages automatically. This is the first item on the founder list.
+2. **Strategy pages are noindexed as a family, not per city.** Their template renders ~240 words regardless of city; indexing the six whose city has HUD data would have shipped thin pages. One constant flips them back when the template carries real content.
+3. **Glossary entries were enriched, not noindexed.** Each thin entry gained verification guidance (which bill, quote, schedule, or record to pull). The guidance is general practice and adds no new numeric claims; the existing definitions, benchmarks, and examples were not changed.
+4. **List hubs are exempt from the 300-word rule.** `/blog/topics` and its nine topic pages exist to link; their word count is the size of the list. The audit reports them separately instead of failing on them.
+5. **`Article.author` was normalized to the Morgan `Person` node on 11 roundup posts that had an `Organization` author.** The brief says every post; the byline is the same person on every post. If the Organization author was intentional for the roundups, revert those 11.
+6. **Titles and descriptions were fixed by template where a template caused them.** The 11 long titles and the 156-character descriptions came from two helpers; hand-written descriptions were rewritten one by one under a no-new-claims rule. Titles on other page families were already ≤ 60.
+7. **`llms.txt` still lists the 19 city + strategy guides.** It is a resource list for AI crawlers, not an index directive, and the pages remain crawlable (`follow`).
+
+### Deferred (Phase 8)
+
+- HUD FMR rows for the 12 bespoke cities (data entry from HUD's FY2026 tables; flips Philadelphia, Dallas, Atlanta, Tampa, Houston, Phoenix, Charlotte, Cleveland, Detroit, Indianapolis, Kansas City, Memphis to indexable).
+- Real content for the city + strategy template (then flip `STRATEGY_PAGES_INDEXABLE`).
+- Official assessor/permit links on market pages: the repo has no verified per-city URLs, so the verify-locally items name the office without a link.
+
+## Phase 9 — Pricing page (branch `site-overhaul`)
+
+### What shipped
+
+| Item | Where |
+| --- | --- |
+| The page leads with the outcome line: "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent." It is the `<h1>`; every figure is computed from `PRICING_OUTCOME_EXAMPLE` (3% × $250,000), not typed into JSX | `app/pricing/page.tsx`, `lib/public-pricing.ts` |
+| The three plans follow the hero directly; the "Which stage are you at?" job cards moved below the trust row (same content, later position) | `app/pricing/page.tsx` |
+| Annual is the default period. The Pro and Agent Pro cards show the effective monthly figure with "billed annually (total)" under it; the savings badge is computed from the Stripe display prices. A current monthly subscriber opens on Monthly so their "Current" card is the visible one | `components/marketing/pricing-toggle-plans.tsx` |
+| One honest comparison block: "How this compares to DealCheck ($10 Plus / $20 Pro) … If you only need metrics, DealCheck or a spreadsheet is fine." linking to `/vs/dealcheck`. The DealCheck amounts live in `DEALCHECK_COMPARISON` and were checked against dealcheck.io/pricing on 2026-09-06 (Plus $10/mo, Pro $20/mo) | `app/pricing/page.tsx`, `lib/public-pricing.ts` |
+| Trust row: free to start with no card · cancel anytime from your profile · payments handled by Stripe · methodology is public (links to `/methodology`) | `app/pricing/page.tsx` |
+| Product shot per tier (Phase 4), `<Testimonials />` (Phase 5, renders nothing until a consented quote exists), `<FounderCard />` (Phase 4), the FAQ rewritten in Phase 3 (trial + "What does Pro add?") — all kept on the page | `app/pricing/page.tsx` |
+| Prices: `PUBLIC_PRO_MONTHLY_USD = 29.99`, `PUBLIC_PRO_ANNUAL_USD = 300`, `PUBLIC_AGENT_PRO_MONTHLY_USD = 59.99`, `PUBLIC_AGENT_PRO_ANNUAL_USD = 590` — unchanged; live cards still read the Stripe display prices and fall back to these constants | `lib/public-pricing.ts` |
+| Screenshot pipeline re-run against the Phase 9 build: 6 shots regenerated (`memo-*` changed with the new copy; `verdict-*` and `where-the-rent-goes-*` were byte-identical); `ten-year-cash-flow` and `comparison` still deferred (Pro-gated views need a seeded account) | `public/product/*`, `lib/product-shots.generated.ts` |
+| Visual check at 375 / 768 / 1440 in Chromium: no horizontal overflow, outcome line visible, Annual pressed by default, "billed annually" visible, DealCheck link → `/vs/dealcheck`, ≥ 2 tier shots, trust row visible | `e2e/site-overhaul-conversion.spec.ts` ("pricing page holds together…") |
+| Structural guard: no `$<amount>` literal in pricing JSX other than the Free tier's `$0` (comments stripped), outcome line before the plans, annual default, DealCheck facts and link, trust row, shots, testimonials, FAQ schema | `lib/__tests__/site-overhaul-pricing.test.ts` |
+
+### Decisions made in the founder's absence (Phase 9)
+
+1. **Annual-first for everyone except a current monthly subscriber.** The brief says annual by default; a monthly subscriber opening on Annual would hide the "Current" badge on the card they pay for, so that one case opens on Monthly. Everything else (visitors, Free accounts, trial accounts) opens on Annual.
+2. **The job cards were moved, not removed.** "Lead with the outcome, then the three plans" leaves no room for the "Which stage are you at?" section between them; it still explains Free vs Pro vs Agent Pro, so it now sits below the trust row.
+3. **DealCheck's annual prices are not stated.** Its pricing page shows the monthly tiers in dollars and the annual option only as "3 months free"; the block quotes the two monthly figures the founder gave, which matched the page on 2026-09-06, and links to `/vs/dealcheck` for the rest.
+4. **The FAQ was not rewritten a second time.** Phase 3 rewrote it (trial mechanics, what Pro adds, auto-fill accuracy, downgrade behaviour); the Phase 9 block and trust row cover the remaining objections without adding questions.
+5. **"★ Best value" ribbon stays.** It is a merchandising label on the annual card, not a rating; the no-stars rule is about social proof.
+
+### Deferred (Phase 9)
+
+- `ten-year-cash-flow` and `comparison` product shots (Pro-gated; need a seeded demo account with database credentials this environment does not have).
+
+## Phase 10 (part 2) — Verification of Phases 2–9 (branch `site-overhaul`)
+
+### Gate results on the final branch build (local production server, `next start` on 127.0.0.1:3100)
+
+| Gate | Result |
+| --- | --- |
+| `npx tsc --noEmit` | exit 0 |
+| `npm run lint` | exit 0 (0 errors; the 14 pre-existing warnings are unchanged) |
+| `npx vitest run` | 386 files, 4,817 tests, all passing |
+| Playwright `public-chromium` project (desktop + phone viewports inside the specs) | 34 passed, 0 failed |
+| Playwright `authenticated-chromium` | Not run locally: it needs the disposable local Supabase stack CI builds (Docker); CI's `browser-regressions` job runs it on the PR |
+| Lighthouse, mobile, simulated (`lighthouse@12`) | `/` performance 91 · accessibility 100 · best-practices 96 · SEO 100 · LCP 3.2 s · TBT 110 ms · CLS 0.003; `/analyze` 94 / 100 / 96 / 100 · LCP 1.6 s · TBT 250 ms; `/pricing` 98 / 99 / 96 / 100 · LCP 1.7 s · TBT 110 ms |
+| Lighthouse CI budgets (`lighthouserc.json`) | accessibility ≥ 95 and CLS ≤ 0.05 (errors) met on both URLs; JS ≤ 250 KB and LCP ≤ 2.5 s remain warnings (Phase 7 decision 2) |
+| axe-core (WCAG 2.0/2.1 A + AA) on `/`, `/analyze`, `/pricing` at 375 and 1440 | 0 violations on all six renders |
+| `scripts/seo-audit.ts` | 0 thin indexable pages, 0 duplicate titles, 0 missing `lastmod`, 0 non-self canonicals, 0 broken links, 0 titles over 60, 0 descriptions over 155 |
+
+### Found and fixed during verification
+
+1. **Post-Run scroll on `/analyze` left the decision's primary actions 37 px below an 844 px phone fold.** On `main` the analyzer sat at the top of the homepage, so the sample click never scrolled; on `/analyze` it sits under a short intro, and the results region's 128 px mobile scroll margin (`scroll-mt-32`) landed it too low. Measured against a `main` worktree build: every element height was identical, only the landing offset differed. The mobile margin is now 80 px (`scroll-mt-20`; `sm:` keeps 96 px), which puts the region just under the 57 px sticky header. `lib/__tests__/mobile-results-handoff.test.ts` re-pinned.
+2. **Three `e2e/public-product.spec.ts` pins predated Phases 2–4:** the hero test looked for the retired sample card (now the real product shot + "Live sample" link); the conversion-bar test looked for the bar on `/analyze` (it is mounted on the marketing homepage only, so the test now follows the bar to `/analyze` and asserts no bar over the calculator); the sample test looked for "Accept all" (the phone label is "Accept"). Rewritten to the current markup with the same intent.
+3. **Local Playwright runs need `SHARE_LINK_SECRET`.** The anonymous first-decision grant is an HMAC cookie signed with that secret; `playwright.config.ts` injects a value when it starts the server itself, but a hand-started `next start` without it renders the coarse range preview and fails the two "exact decision" specs. Not a product change; recorded here so the next person does not chase a phantom regression. Whether production defines the variable is in the founder list below.
+4. **Two pins only CI could catch.** The unit job pinned the exact (pre-trim) description of `/tools/rental-property-spreadsheet` in `public-metadata-contract.test.ts`, and the authenticated project's guest-journey helper (`openSampleDecision`) still opened the sample from `/`, where Phase 2 left only a link. Both re-pinned to the shipped markup (`4d6e542`, `cf9de18`); the authenticated project needs CI's disposable Supabase stack, which this machine cannot run (no Docker).
+5. **Real Phase 2 gap, caught by CI's authenticated project: guest Share on `/analyze` did not resume after sign-in.** `resolveShareAuthReturnPath` canonicalized `/` and `/home-authed` to `/dashboard/new` (where a signed-in visitor actually lands) but not `/analyze`, so the stored intent named `/analyze`, the landing route check discarded it, and the sample analysis was pruned as stale residue instead of re-running with Share reopened. `/analyze` is now mapped the same way (`lib/share-auth-intent.ts`, unit test extended). Guest Save was unaffected (its intent is route-agnostic).
+
+### Billing reconcile (Phase 1) — production cron result, counts only
+
+`/api/cron/billing-reconcile` ran at 17:30 UTC on 2026-09-06 on deployment `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` in `dry` mode: 35 Stripe subscriptions scanned (listing not truncated), 2 skipped as not paid, 31 skipped as the other app's (`philly_rental_compliance`), 2 already bound, 0 resolvable, 0 unresolved, 0 applied, 0 errors. The `billing_unresolved_events` table was not available (migration still founder-owed), so nothing was recorded there; nothing needed recording.

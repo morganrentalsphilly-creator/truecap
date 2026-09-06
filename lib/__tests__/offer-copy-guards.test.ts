@@ -140,8 +140,13 @@ describe("offer trust language", () => {
   });
 
   it("routes the secondary hero CTA to a genuine sample decision", () => {
+    // The hero's secondary action runs the real sample in the analyzer; the
+    // written memo stays one click away in the footer.
     expect(read("components/marketing/hero-address-form.tsx")).toContain(
-      'href="/sample-decision-memo"'
+      'href="/analyze?sample=1"'
+    );
+    expect(read("components/marketing/site-footer.tsx")).toContain(
+      'href: "/sample-decision-memo"'
     );
     expect(read("app/sample-decision-memo/page.tsx")).toContain(
       "calculateSampleDealOutcome"

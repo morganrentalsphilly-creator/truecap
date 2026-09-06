@@ -15,6 +15,7 @@
  */
 
 import type { Metadata } from "next";
+import { ProductShot } from "@/components/marketing/product-shot";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -468,9 +469,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-truecap-verdict-engine-works",
-    title: "How TrueCap classifies selected-rule fit",
+    title: "How TrueCap classifies Buy Box fit",
     excerpt:
-      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's secondary screening bands, plus how to interpret them without treating a label as advice.",
+      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's Buy Box fit bands, plus how to read them.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -837,6 +838,15 @@ export default function BlogIndexPage() {
           </p>
         </header>
 
+        {/* Real product screenshot (Phase 4): the writing is about
+            underwriting; this is what the underwriting looks like. */}
+        <ProductShot
+          shot="verdict"
+          alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+          caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run your own numbers →</Link></>}
+          className="mb-8"
+        />
+
         {/* Browse by topic — hubs that group the posts by investor journey
             (P2-4) and pair each with the relevant calculators. */}
         <nav aria-label="Browse by topic" className="mb-8">
@@ -948,10 +958,10 @@ export default function BlogIndexPage() {
             Want the calculator that powers these guides?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            TrueCap turns released underwriting concepts into an editable
-            preliminary screen — cap rate, cash flow, DSCR, selected-rule fit,
+            TrueCap turns these underwriting concepts into an editable
+            preliminary screen — cap rate, cash flow, DSCR, Buy Box fit,
             and Pro pre-tax cash-flow/equity projections. Tax and exit modules
-            are not released. Free to start.
+            aren&apos;t offered right now. Free to start.
           </p>
           <Link
             href="/"

@@ -29,10 +29,10 @@ describe("decision workspace UX guards", () => {
   it("keeps Decision Center comparisons factual instead of issuing investment directives", () => {
     const source = read("components/dashboard/DashboardHome.tsx");
 
-    expect(source).toContain("Highest screening index");
+    expect(source).toContain("Highest Deal score");
     expect(source).toContain("Highest modeled upside");
     expect(source.replace(/\s+/g, " ")).toContain(
-      "The Screening Index is a secondary heuristic, not an",
+      "Deal score is a heuristic summary of the modeled numbers",
     );
     expect(source.replace(/\s+/g, " ")).toContain(
       "verify every material assumption before relying on a comparison",

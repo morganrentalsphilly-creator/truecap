@@ -17,7 +17,10 @@
  * tree ships zero JS.
  */
 
-import { Check, Database, Target, TrendingUp } from "lucide-react";
+import { Check, Target, TrendingUp } from "lucide-react";
+import { ProofStrip } from "@/components/marketing/proof-strip";
+import Link from "next/link";
+import { ProductShot, findProductShot } from "@/components/marketing/product-shot";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
@@ -59,8 +62,8 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a listing or enter an address. TrueCap shows cash flow, DSCR and the highest price that meets your buy box—plus which assumptions still need verification."
-                : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds a target-dependent Offer Ceiling. Starting benchmarks are not property-specific facts or quotes."}
+                ? "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable."
+                : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
 
             {/* Primary action — the address input. Hands off to the
@@ -75,43 +78,23 @@ export function MarketingHero() {
                 aria-hidden
                 className="size-3.5 shrink-0 text-[var(--metric-positive)]"
               />
-              <span>No account or card. Your first complete Offer Ceiling is included.</span>
+              <span>Free. No account. Your first full decision is included.</span>
             </p>
           </div>
 
           {/* This is an acquisition answer, not a duplicate calculator, so it
               remains useful proof on mobile as well as desktop. */}
           <div className="tc-rise-in tc-delay-2 min-w-0 w-full lg:justify-self-end">
-            <HeroProductMock
+            <HeroProductShot
               decisionPositioning={newHomepagePositioningEnabled}
             />
           </div>
         </div>
 
-        {/* Trust band — data-source disclosure grouped beneath the split with divider rules
-            instead of card boxes (Rule 4: logic-grouping over card overuse). */}
-        {/* Keep the disclosure adjacent to the product proof on mobile and desktop. */}
+        {/* Proof strip — three facts a visitor can verify by clicking
+            (docs/site-overhaul.md Phase 5.5). Always renders. */}
         <div className="tc-reveal mt-7 border-t border-border pt-5 sm:mt-14 sm:pt-8">
-          <div className="mx-auto max-w-3xl">
-            {/* Proof that cannot drift or be overstated: the product labels
-                each starting assumption as sourced, user-entered, or a smart
-                default, and exposes the date/year when the source provides it.
-                Customer quotes render only from the verified proof registry
-                further down the page. */}
-            <div className="flex items-start gap-2.5">
-              <Database
-                className="mt-0.5 size-4 shrink-0 text-primary/50"
-                aria-hidden
-              />
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                <strong className="text-foreground">
-                  No black-box inputs.
-                </strong>{" "}
-                Every starting assumption is labeled with its source or as your
-                input, stays editable, and carries a clear verification step.
-              </p>
-            </div>
-          </div>
+          <ProofStrip className="mx-auto max-w-4xl" />
         </div>
       </div>
     </section>
@@ -180,6 +163,44 @@ const HERO_ANIM_CSS = `
   }
 }
 `;
+
+/**
+ * The hero visual: the REAL verdict screenshot from the no-account sample
+ * flow (scripts/capture-screenshots.ts), preloaded because it is the LCP
+ * element. Falls back to the computed card only when the pipeline has not
+ * produced the shot yet — never a placeholder image.
+ */
+function HeroProductShot({ decisionPositioning }: { decisionPositioning: boolean }) {
+  const shot = findProductShot("verdict", "desktop");
+  if (!shot) return <HeroProductMock decisionPositioning={decisionPositioning} />;
+  const { maxOffer } = calculateSampleDealOutcome();
+  const listPrice = SAMPLE_DEAL_FIXTURE.values.purchasePrice;
+  const gap = maxOffer ? Math.max(0, listPrice - maxOffer.maxPrice) : null;
+  const alt = maxOffer
+    ? `TrueCap's decision view for the sample deal: an Offer Ceiling of $${maxOffer.maxPrice.toLocaleString("en-US")} against a $${listPrice.toLocaleString("en-US")} asking price${gap ? ` ($${gap.toLocaleString("en-US")} above the ceiling)` : ""}, with cash flow after reserves, DSCR, the best next step, and the fastest paths to meet the targets`
+    : "TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR";
+  return (
+    <div data-hero-product-shot="">
+      <ProductShot
+        shot="verdict"
+        viewport="desktop"
+        alt={alt}
+        priority
+        sizes="(min-width: 1024px) 480px, 100vw"
+      />
+      <p className="mt-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span>Real output from the free sample deal.</span>
+        <Link
+          href="/analyze?sample=1"
+          prefetch={false}
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Live sample →
+        </Link>
+      </p>
+    </div>
+  );
+}
 
 function HeroProductMock({
   decisionPositioning,
@@ -292,8 +313,10 @@ function HeroProductMock({
               }`}
             >
                {askingClears
-                 ? "Asking meets the sample targets"
-                 : "Asking misses the sample targets"}
+                 ? "Asking price clears the sample targets"
+                 : gap != null && gap > 0
+                   ? `Asking price is $${gap.toLocaleString("en-US")} above the ceiling`
+                   : "Asking price is above the ceiling"}
              </span>
            </div>
         </div>
@@ -316,11 +339,10 @@ function HeroProductMock({
             </div>
           ) : null}
            <p className="mt-1 text-xs text-foreground/80">
-             Example criteria · {targetLabel}.
+             Sample targets · {targetLabel}.
            </p>
            <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
-             Highest modeled price meeting these example criteria. This is not
-             a recommended offer.
+             The highest price that still clears these targets.
            </p>
         </div>
 
@@ -369,10 +391,10 @@ function HeroProductMock({
               className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]"
             />
             <span>
-              <strong>Selected-rule fit:</strong>{" "}
+              <strong>Buy Box fit:</strong>{" "}
               {maxOffer && gap != null && gap > 0
-                ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling and misses the example $${targetCashFlow}/mo cash-flow target.`
-                : "The asking price meets the example targets under the illustrative assumptions. Verify the material inputs before recording a decision."}
+                ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling, so it misses the sample targets.`
+                : "The asking price meets the sample targets under the assumptions shown."}
             </span>
           </div>
         ) : null}

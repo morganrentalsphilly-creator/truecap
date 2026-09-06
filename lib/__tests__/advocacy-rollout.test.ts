@@ -35,8 +35,10 @@ describe("advocacy internal cohort", () => {
       new URL("../../components/investcalc/analysis-dashboard.tsx", import.meta.url),
       "utf8"
     );
+    // The anonymous analyzer props live in ONE object shared by /analyze and
+    // the stale-cookie mirror (the homepage no longer mounts the analyzer).
     const anonymousPage = await readFile(
-      new URL("../../app/page.tsx", import.meta.url),
+      new URL("../../components/marketing/analyze-page-content.tsx", import.meta.url),
       "utf8"
     );
 
@@ -44,6 +46,6 @@ describe("advocacy internal cohort", () => {
       'advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract")'
     );
     expect(dashboard).not.toContain("TRUECAP_ADVOCACY_INTERNAL_EMAILS");
-    expect(anonymousPage).toContain("advocacyContractEligible={false}");
+    expect(anonymousPage).toContain("advocacyContractEligible: false");
   });
 });

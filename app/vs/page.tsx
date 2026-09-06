@@ -20,6 +20,7 @@ import Link from "next/link";
 import { ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -427,6 +428,15 @@ export default function VsHubPage() {
               See pricing
             </Link>
           </div>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* Comparison cards grouped by category */}

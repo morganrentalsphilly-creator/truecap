@@ -28,7 +28,7 @@ describe("versioned synthetic shared sample", () => {
     );
     expect(SAMPLE_DEAL_FIXTURE.targetProfile).toEqual({
       id: "truecap-synthetic-sample-target",
-      name: "Synthetic sample targets",
+      name: "Sample targets",
       version: "1.0",
       source: "selected-targets",
     });
@@ -114,7 +114,11 @@ describe("versioned synthetic shared sample", () => {
       "utf8"
     );
 
-    expect(hero).toContain('"Asking misses the sample targets"');
+    // The sample card states the gap in dollars when the asking price is
+    // above the ceiling (docs/voice.md), never a vague "misses".
+    expect(hero).toContain('"Asking price clears the sample targets"');
+    expect(hero).toContain("above the ceiling");
+    expect(hero).not.toContain("Asking misses the sample targets");
     expect(hero).not.toContain("Screening Index {Math.round(score.score)}/100");
     expect(hero).not.toContain("recommendationLabel(score.recommendation)");
   });

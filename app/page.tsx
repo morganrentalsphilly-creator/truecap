@@ -23,9 +23,10 @@
  */
 
 import type { Metadata } from "next";
+import { Testimonials } from "@/components/marketing/testimonials";
+import { FounderCard } from "@/components/marketing/founder-card";
 import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
-import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
@@ -80,7 +81,7 @@ export const metadata: Metadata = {
     // social share of the homepage would render without a preview card.
     images: [
       {
-        url: "/home.jpg",
+        url: "/og/home",
         width: 1200,
         height: 630,
         alt: "TrueCap rental property calculator and Offer Ceiling workflow",
@@ -172,45 +173,33 @@ export default function Home() {
           comparison table stays on the dedicated /why-truecap page
           (linked in the footer) so it keeps its SEO + persuasion value
           without crowding this page. */}
+      {/* The homepage's main landmark — also the skip link's target now
+          that the analyzer (which carried <main id="main">) lives at /analyze. */}
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       <MarketingHero />
-      {/* Anonymous-visitor entitlement props — keep in lockstep with
-          the user == null branch in app/home-authed/page.tsx.
-          NOTE: canUseDealScore is intentionally TRUE for everyone — the
-          headline 0-100 Screening Index is given away free (it converts better
-          unlocked than as a blurred teaser). The one exact no-signup decision
-          may export its personal report; repeat projections, tax/exit, saving,
-          comparison, and reusable workflows stay gated. */}
-      <InvestCalcPage
-        canSaveDeals={false}
-        canCompareDeals={false}
-        canExportPdf={false}
-        canUseProjections={false}
-        canUseTaxStrategy={false}
-        canUseExitScenarios={false}
-        canUseDealScore={true}
-        canUseMaxOffer={true}
-        canUseSensitivity={true}
-        canUseStrategies={false}
-        canUpdateSavedDeals={false}
-        saveDealLimitReached={false}
-        initialSavedDealCount={0}
-        savedDealLimit={null}
-        isAuthenticated={false}
-        userAnalysisDefaults={null}
-        advocacyContractEligible={false}
-        // Presence-only env check — safe on a static page (baked at
-        // build; the key VALUE never reaches the client).
-      />
+      {/* Founder presence, facts only (Phase 4): name, one published
+          sentence, link to /about. No photo — see components/marketing/founder-card.tsx. */}
+      <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <FounderCard className="max-w-xl" />
+      </div>
+      {/* The analyzer itself lives at /analyze (2026-09 overhaul): the hero
+          captures an address or listing link and hands off there, so this
+          page ships NO calculator JS. Keep it that way — Phase 7's homepage
+          budget depends on it, and lib/__tests__/homepage-lockstep.test.ts
+          pins that neither homepage imports the analyzer. */}
       {/* Seven-block acquisition story:
-          1 outcome (hero), 2 interactive product proof (live analyzer),
-          3 trustworthy numbers, 4 Free vs Pro, 5 verified proof when records
-          exist, 6 objections/FAQ, 7 final CTA.
+          1 outcome (hero), 2 trustworthy numbers, 3 Free vs Pro, 4 verified
+          proof when records exist, 5 objections/FAQ, 6 final CTA. (The live
+          analyzer is one click away at /analyze.)
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
         <DataSourcesSection />
         <PdfProUpsell />
         <div data-homepage-block="real-proof" className="contents">
           <SocialProof />
+          {/* Consented quotes from the in-product prompt (Phase 5): the three
+              most recent published rows; renders nothing until real ones exist. */}
+          <Testimonials limit={3} />
           <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
         </div>
         <HomepageFaq />
@@ -219,6 +208,7 @@ export default function Home() {
             page only serves cold visitors. */}
         <StickyConversionBar />
       </div>
+      </main>
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}

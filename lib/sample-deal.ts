@@ -44,7 +44,7 @@ export const SAMPLE_DEAL_MAO_TARGET: MaoTarget = {
 };
 export const SAMPLE_DEAL_TARGET_PROFILE = {
   id: "truecap-synthetic-sample-target",
-  name: "Synthetic sample targets",
+  name: "Sample targets",
   version: "1.0",
   source: "selected-targets",
 } as const;

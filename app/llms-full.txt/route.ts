@@ -71,13 +71,13 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> =
     "70-percent-rule-calculator": {
       formula: "70%-rule price screen = (0.70 × ARV) - Repair costs",
       description:
-        "An educational flip and BRRRR screen. It applies a selected percentage to entered after-repair value and subtracts the entered rehab budget. It is not an underwrite, appraisal, or recommended offer.",
+        "An educational flip and BRRRR screen. It applies a selected percentage to entered after-repair value and subtracts the entered rehab budget.",
     },
     "arv-calculator": {
       formula:
         "ARV = Average entered comp price per sq ft × Subject sq ft; 70%-rule price screen = (0.70 × ARV) - Repairs",
       description:
-        "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen. Neither output is an appraisal, underwrite, or recommended offer.",
+        "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen.",
     },
     "rehab-cost-estimator": {
       formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
@@ -147,9 +147,9 @@ export async function GET() {
     `Single Deal: ${planFacts.singleDeal}`,
     `Investor Pro: ${planFacts.pro}`,
     `Agent Pro: ${planFacts.agentPro}`,
-    `New accounts receive a ${planFacts.evaluationDays}-day no-card product evaluation covering ${planFacts.evaluationDealLimit} Pro deals and ${planFacts.evaluationComparisonLimit} comparison. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
+    `New accounts get a ${planFacts.evaluationDays}-day free trial covering ${planFacts.evaluationDealLimit} Pro deals and ${planFacts.evaluationComparisonLimit} comparison. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
     "",
-    'TrueCap content documents its product methods and provides educational material, not investment, appraisal, lending, tax, or legal advice. Verify time-sensitive claims, linked sources, as-of dates, and property-specific inputs before citing or relying on a page. Preferred citation format: "[Title](URL) — TrueCap".',
+    'TrueCap content documents its product methods and provides educational material, not investment, appraisal, lending, tax, or legal advice. Verify time-sensitive claims, linked sources, publication dates, and property-specific inputs before citing or relying on a page. Preferred citation format: "[Title](URL) — TrueCap".',
   ].join("\n");
 
   // ── Methodology ──

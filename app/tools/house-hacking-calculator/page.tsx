@@ -446,7 +446,7 @@ export default function HouseHackingCalculatorPage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               This page answers &ldquo;what would I pay to live there?&rdquo;
               TrueCap&apos;s House Hack mode adds per-unit rents, projected cash
-              flow, DSCR, selected-rule fit, and a secondary Screening Index for
+              flow, DSCR, Buy Box fit, and a Deal score for
               the live-in case. Save the later full-rental state as a separate
               scenario instead of mixing the two.
             </p>
@@ -456,7 +456,7 @@ export default function HouseHackingCalculatorPage() {
                 "Per-unit rents for the duplex / triplex / fourplex math",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "Separate saved full-rental scenario and comparison (Pro)",
-                "Tax treatment stays outside the released analyzer",
+                "Tax treatment stays outside the analyzer",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

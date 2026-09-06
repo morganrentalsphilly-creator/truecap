@@ -368,7 +368,7 @@ export default function CoCCalculatorPage() {
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate, DSCR, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index—all
+              sensitivity, Offer Ceiling, and a Deal score—all
               from the same property inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
@@ -376,7 +376,7 @@ export default function CoCCalculatorPage() {
                 "Full cash-flow model with rent + expense growth",
                 "Downside sensitivity grid (Pro)",
                 "DSCR readout sized to lender thresholds",
-                "Target-dependent Offer Ceiling (Pro)",
+                "Offer Ceiling (Pro)",
                 "Saved-deal comparison and review reports (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -403,7 +403,7 @@ export default function CoCCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="Cash-on-cash calculator"
-            hook="The TrueCap analyzer adds a 10-year cash-flow and equity projection, downside sensitivity, and a target-dependent Offer Ceiling on top of cash-on-cash, so you can test the assumptions behind the first-year screen."
+            hook="The TrueCap analyzer adds a 10-year cash-flow and equity projection, downside sensitivity, and an Offer Ceiling on top of cash-on-cash, so you can test the assumptions behind the first-year screen."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

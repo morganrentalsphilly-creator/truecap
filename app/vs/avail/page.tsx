@@ -22,7 +22,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -86,8 +88,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     avail: "Not applicable",
     winner: "truecap",
   },
@@ -224,6 +226,15 @@ export default function VsAvailPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* TL;DR */}
@@ -447,6 +458,8 @@ export default function VsAvailPage() {
           </div>
         </section>
 
+        <RelatedContent kind="vs" slug="avail" className="mt-10" />
+
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
           <Link
@@ -485,11 +498,11 @@ const AVAIL_FAQ: FaqItem[] = [
         No — they cover different stages. Avail is post-purchase landlord
         operations: listing, screening, leases, rent collection, maintenance.
         TrueCap is pre-purchase underwriting: cap rate, CoC, DSCR, projection,
-        Screening Index. Most independent landlords end up using both.
+        Deal score. Most independent landlords end up using both.
       </>
     ),
     plainTextAnswer:
-      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Screening Index). Most independent landlords use both.",
+      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Deal score). Most independent landlords use both.",
   },
   {
     question: "Can TrueCap do what Avail's listing or screening does?",
@@ -533,7 +546,7 @@ const AVAIL_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Screening Index. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
+      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Deal score. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
   },
   {
     question: "Avail is owned by Realtor.com — does that matter?",

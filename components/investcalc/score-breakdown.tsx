@@ -75,7 +75,7 @@ export function ScoreBreakdown({
   return (
     <div className="w-[min(20rem,78vw)] text-sm">
       <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        Screening Index factors
+        Deal score factors
       </p>
       <ul className="space-y-2">
         {rows.map((r) => {
@@ -121,7 +121,7 @@ export function ScoreBreakdown({
         ) : null}
       </ul>
       <div className="mt-3 flex items-center justify-between border-t border-border pt-2 font-bold">
-        <span>Screening Index</span>
+        <span>Deal score</span>
         <span className="tabular-nums">{Math.round(score)} / 100</span>
       </div>
       <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
@@ -146,7 +146,7 @@ export function ScoreBreakdown({
         </p>
       ) : null}
       <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-        Secondary model summary only—not evidence readiness, Buy Box fit, advice, or a recorded decision.
+        A heuristic summary of the modeled numbers, 0–100.
       </p>
     </div>
   );

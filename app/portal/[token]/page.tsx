@@ -122,7 +122,7 @@ export default async function ClientPortalPage({
                         {/* Was the raw internal enum ("Strong Buy"/"Avoid").
                             This page is what an agent's BUYER sees, so it
                             must use the advice-safe display wording. */}
-                        {verdictLabel(deal.recommendation)} · Screening Index {Math.round(deal.score)}
+                        {verdictLabel(deal.recommendation)} · Deal score {Math.round(deal.score)}
                       </span>
                       {deal.meetsCriteria === true ? (
                         <span className="inline-flex items-center rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-green)]">

@@ -69,7 +69,7 @@ export async function GET() {
       ? planFacts.singleDeal
       : "New one-time report purchases are temporarily unavailable.",
   ].join(" ");
-  const summary = `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. ${planFacts.pro} ${availabilitySummary} The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
+  const summary = `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. ${planFacts.pro} ${availabilitySummary} The Deal score (0–100) is a heuristic summary of the modeled numbers; read it after Buy Box fit.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
@@ -87,6 +87,7 @@ export async function GET() {
       .join(", ")}, etc)`,
     `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
+    `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
     "  - Methodology page documenting the exact math the analyzer uses",
     `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
   ].join("\n");

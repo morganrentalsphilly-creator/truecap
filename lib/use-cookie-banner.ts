@@ -21,6 +21,8 @@ const STORAGE_KEY = "truecap_cookie_consent_v1";
 // it can never be "open" and must not gate the bars.
 const HIDE_ON_PATHS = ["/embed"];
 const CONSENT_EVENT = "truecap:cookie-consent";
+/** Exported so consent-gated loaders (GTM) can subscribe. */
+export const COOKIE_CONSENT_EVENT = CONSENT_EVENT;
 
 /** The banner calls this on accept/reject so same-tab hooks re-read storage. */
 export function notifyCookieConsentChanged(): void {

@@ -13,6 +13,7 @@ import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta"
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 export const metadata: Metadata = {
   title: "Free Break-Even Calculator — Months to Recoup Cash",
@@ -185,6 +186,7 @@ export default function BreakEvenCalculatorPage() {
 
 
         <ToolsConversionCta calculatorName="Break-even calculator" />
+        <RelatedContent kind="tool" slug="break-even-calculator" title="Break-Even Calculator" className="mt-10" />
       </main>
       <SiteFooter />
     </div>

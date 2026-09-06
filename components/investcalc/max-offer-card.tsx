@@ -492,8 +492,7 @@ export function MaxOfferCard({
           <div className="mt-3 border-t border-border pt-3">
             <p className="text-xs font-semibold text-foreground">Criteria: {describeMaoTarget(target)}</p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-              Highest modeled price that still meets {targetProfileLabel} under the assumptions shown.
-              This is not a recommended offer or an appraisal.
+              The highest price that still meets {targetProfileLabel} under the assumptions shown.
             </p>
           </div>
         ) : null}

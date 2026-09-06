@@ -420,7 +420,7 @@ export default function CapRateCalculatorPage() {
             <p>
               When you&apos;re ready to go deeper — cash-on-cash, DSCR, monthly
               cash flow, 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, and a secondary Screening Index — you can run the
+              Offer Ceiling, and a Deal score — you can run the
               full analysis free at TrueCap.
             </p>
 
@@ -453,7 +453,7 @@ export default function CapRateCalculatorPage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate is a great filter, but real underwriting needs cash flow,
               cash-on-cash, DSCR, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index.
+              sensitivity, Offer Ceiling, and a Deal score.
               TrueCap does all of it from the same property inputs you used
               here.
             </p>
@@ -462,8 +462,8 @@ export default function CapRateCalculatorPage() {
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
                 "Downside sensitivity grid (Pro)",
-                "Target-dependent Offer Ceiling (Pro)",
-                "Screening Index with a factor breakdown for triage",
+                "Offer Ceiling (Pro)",
+                "Deal score (0–100) with a factor breakdown",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

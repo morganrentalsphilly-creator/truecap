@@ -18,6 +18,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -91,7 +92,7 @@ export default function BuyingRentalWithTenantsPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -224,7 +225,7 @@ export default function BuyingRentalWithTenantsPost() {
               The second case should not replace the first until lawful,
               achievable rent is supported. Run both through the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -243,7 +244,7 @@ export default function BuyingRentalWithTenantsPost() {
               program-specific method. Obtain the accepted rent and coverage
               worksheet in writing; a lower accepted rent can move the{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -419,6 +420,7 @@ export default function BuyingRentalWithTenantsPost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

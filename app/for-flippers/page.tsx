@@ -7,13 +7,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "Fix-and-flip planning resources",
   description:
-    "Use TrueCap's released rehab, ARV, and 70% rule tools for early research. The integrated fix-and-flip profit model is not currently released.",
+    "Use TrueCap's rehab, ARV, and 70% rule tools for early research. An integrated fix-and-flip profit model isn't offered right now.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/for-flippers" },
   openGraph: {
     title: "Fix-and-flip planning resources — TrueCap",
     description:
-      "Released rehab, ARV, and acquisition-screening tools with a clear boundary around the unreleased project-profit model.",
+      "Rehab, ARV, and acquisition-screening tools, with a clear line around what TrueCap doesn't model.",
     url: "/for-flippers",
     type: "website",
     images: [
@@ -39,7 +39,7 @@ const RESOURCES = [
   {
     icon: Home,
     title: "Organize ARV assumptions",
-    body: "Use comparable sales to support an after-repair value range. Treat the result as a worksheet, not an appraisal or guaranteed sale price.",
+    body: "Use comparable sales to support an after-repair value range. Treat the result as a working range, not a sale price.",
     href: "/tools/arv-calculator",
     cta: "Open ARV calculator",
   },
@@ -80,8 +80,8 @@ export default function ForFlippersPage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             TrueCap currently offers separate rehab, ARV, and 70% rule tools.
             Its integrated fix-and-flip analysis—including a dated project ledger,
-            financing draws, holding costs, sale proceeds, and profit—is not currently
-            released.
+            financing draws, holding costs, sale proceeds, and profit—isn&apos;t offered
+            right now.
           </p>
           <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground">
             <strong>Steady-state rental analysis — use after renovation is complete.</strong>{" "}
@@ -92,7 +92,7 @@ export default function ForFlippersPage() {
 
         <section aria-labelledby="released-flip-resources" className="mb-12 sm:mb-16">
           <h2 id="released-flip-resources" className="text-2xl font-extrabold text-foreground sm:text-3xl">
-            Released resources you can use now
+            Resources you can use now
           </h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {RESOURCES.map(({ icon: Icon, title, body, href, cta }) => (

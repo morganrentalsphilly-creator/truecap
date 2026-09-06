@@ -71,7 +71,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is good monthly cash flow for a rental property?",
-    a: "It depends on deal size and how conservative the expense assumptions are. TrueCap's selected-rule classifier uses explicit cash-flow, DSCR, and cash-on-cash thresholds as screening references. Those bands do not establish evidence readiness or decide whether a property is a good investment; the result only means something when the expense reserves and other inputs are verified.",
+    a: "It depends on deal size and how conservative the expense assumptions are. TrueCap's Buy Box classifier uses explicit cash-flow, DSCR, and cash-on-cash thresholds as screening references. The result only means something when the expense reserves and other inputs are verified.",
   },
   {
     q: "Does cash flow include the mortgage payment?",
@@ -359,7 +359,7 @@ export default function RentalCashFlowCalculatorPage() {
             <p>
               There&apos;s no universal magic number — $300/mo means something
               different on a $120k door in Cleveland than on a $600k door in
-              Phoenix. But the bands TrueCap&apos;s own selected-rule classifier
+              Phoenix. But the bands TrueCap&apos;s own Buy Box classifier
               uses are a screening reference:
             </p>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -549,8 +549,8 @@ export default function RentalCashFlowCalculatorPage() {
               When a deal survives this screen, run the full analysis at TrueCap
               — the analyzer starts from the same inputs, adds PMI and closing
               costs, and layers on cap rate, cash-on-cash, model DSCR, and a
-              secondary Screening Index. Released projections and sensitivity
-              appear only when your evaluation or plan access includes them.
+              Deal score. Projections and sensitivity
+              appear when your free trial or plan includes them.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -583,7 +583,7 @@ export default function RentalCashFlowCalculatorPage() {
               Monthly cash flow is the screen, not the underwrite. TrueCap takes
               the same inputs and adds PMI, closing costs, cap rate,
               cash-on-cash, DSCR, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index.
+              sensitivity, Offer Ceiling, and a Deal score.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -591,7 +591,7 @@ export default function RentalCashFlowCalculatorPage() {
                 "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "10-year projection with rent + expense growth (Pro)",
                 "Downside sensitivity and Offer Ceiling (Pro)",
-                "Screening Index with a factor breakdown for triage",
+                "Deal score (0–100) with a factor breakdown",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

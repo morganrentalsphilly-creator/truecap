@@ -32,7 +32,7 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 export const metadata: Metadata = {
   title: "Methodology",
   description:
-    "How TrueCap computes released cap rate, CoC, DSCR, Offer Ceiling, Screening Index, and 10-year cash-flow and equity projections, plus archived model notes.",
+    "How TrueCap computes cap rate, CoC, DSCR, Offer Ceiling, Deal score, and 10-year cash-flow and equity projections, plus archived model notes.",
   keywords: [
     "truecap methodology",
     "how is cap rate calculated",
@@ -71,7 +71,7 @@ export default function MethodologyPage() {
     "@id": `${siteUrl}/methodology#article`,
     headline: "TrueCap Methodology",
     description:
-      "How TrueCap computes released cap rate, cash-on-cash, DSCR, Offer Ceiling, Screening Index, and 10-year cash-flow and equity projections, plus archived model notes.",
+      "How TrueCap computes cap rate, cash-on-cash, DSCR, Offer Ceiling, Deal score, and 10-year cash-flow and equity projections, plus archived model notes.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
     dateModified: "2026-08-27",
@@ -99,7 +99,7 @@ export default function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-            The released formulas, upstream public sources, product defaults,
+            The formulas, upstream public sources, product defaults,
             and known limitations behind a TrueCap rental screen. Read this
             before relying on an output.
           </p>
@@ -139,9 +139,9 @@ export default function MethodologyPage() {
             </li>
             <li>
               <strong>Editable assumptions stay visible.</strong> Auto-filled
-              values are starting benchmarks. Edit an available assumption and
-              the released analysis recomputes; formula conventions and
-              unreleased modules are not user controls.
+              values are starting benchmarks. Edit an assumption and the
+              analysis recomputes; formula conventions and the archived
+              modules below are not user controls.
             </li>
           </ul>
         </div>
@@ -221,10 +221,10 @@ export default function MethodologyPage() {
           <h2 className="text-2xl sm:text-3xl">
             Decision thresholds and Offer Ceiling
           </h2>
-          <h3>Screening Index (Balanced)</h3>
+          <h3>Deal score (Balanced)</h3>
           <p>
-            Current Screening Index method: v
-            {TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}. This secondary score is
+            Current Deal score method: v
+            {TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}. The score is
             versioned independently from the TrueCap Underwriting Standard v
             {TRUECAP_UNDERWRITING_STANDARD_VERSION}
             financial formulas; changing the score method does not change the
@@ -271,24 +271,22 @@ export default function MethodologyPage() {
             cash-flow rule. A Balanced or Appreciation score may be held at 40
             when a non-owner-occupant deal has more than 8% modeled annualized
             10-year return and non-negative before-tax cash flow; that floor is
-            never used by the Cash Flow lens. The score is a deterministic
-            screening model, not a probability of profit, appraisal, or lending
-            decision, evidence-readiness measure, Buy Box result, or investment
-            advice.
+            never used by the Cash Flow lens. The score is a heuristic
+            summary of the modeled numbers; it is not your Buy Box fit.
           </p>
           <p>
             Saved financial outputs retain their top-level Underwriting Standard
-            version, while new saved results also record the Screening Index
+            version, while new saved results also record the Deal score
             method version. Historical scores without that submodel field remain
             frozen and are labeled as recorded rather than silently
             recalculated.
           </p>
 
           <p>
-            Offer Ceiling is not a recommended offer, price prediction, or
-            appraisal. TrueCap runs the complete underwriting engine repeatedly
+            The Offer Ceiling is the highest price that still meets your
+            targets. TrueCap runs the complete underwriting engine repeatedly
             and finds the highest tested purchase price that still clears every
-            selected return or Buy Box threshold. The displayed Offer Ceiling is
+            target you selected. The displayed Offer Ceiling is
             rounded
             <strong> down</strong> to a $500 step and rechecked at that exact
             displayed value, so rounding cannot move the answer onto the failing
@@ -304,7 +302,7 @@ export default function MethodologyPage() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Unreleased BRRRR and fix-and-flip models (reference only)
+            Archived BRRRR and fix-and-flip models (reference only)
           </h2>
           <p>
             The integrated lifecycle models described below are archived
@@ -329,7 +327,7 @@ export default function MethodologyPage() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Where released benchmark data comes from
+            Where the benchmark data comes from
           </h2>
 
           <h3>Rent benchmark — HUD Fair Market Rent</h3>
@@ -344,7 +342,7 @@ export default function MethodologyPage() {
             forecast. Verify achievable rent with current comparable evidence.
           </p>
           <p>
-            The released lookup follows HUD&apos;s latest API response; the UI
+            The lookup follows HUD&apos;s latest API response; the UI
             records the returned year and whether the value came from an FMR
             area or a ZIP-level SAFMR. The FY 2026 source page notes revised
             FMRs effective May 21, 2026. Provider availability and geographic
@@ -368,21 +366,21 @@ export default function MethodologyPage() {
           <h3>Property tax — manual local input</h3>
           <p>
             <strong>
-              Released underwriting does not auto-fill property tax from the
+              TrueCap does not auto-fill property tax from the
               former Tax Foundation 2023 state table.
             </strong>{" "}
             That secondary, state-level aggregate was too stale and coarse to
             stand in for a parcel bill. Enter an annual local bill or a reviewed
-            local rate. If both are blank, the current formula contract uses a
-            generic 1.1% of purchase price preliminary fallback and labels it
-            for local verification. The fallback is a TrueCap continuity
-            convention, not a sourced estimate for the property. Replace it
+            local rate. If both are blank, the formula uses a TrueCap default
+            of 1.1% of purchase price and labels it for you to replace with
+            your local number. The default is a TrueCap convention, not a
+            sourced estimate for the property. Replace it
             before relying on NOI, cap rate, cash flow, DSCR, or Offer Ceiling.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Primary source register</h2>
           <p>
-            These are the direct official pages used for the released source
+            These are the direct official pages used for the source
             claims above and the archived tax/insurance conventions below.
             Source review date: August 27, 2026.
           </p>
@@ -487,12 +485,12 @@ export default function MethodologyPage() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Unreleased illustrative tax model (reference only)
+            Archived illustrative tax model (reference only)
           </h2>
           <p>
             TrueCap does not currently expose this tax-specific module. The
             archived formulas below remain documented for model review; they are
-            not a released product output or a taxpayer-specific analysis.
+            not a current product output or a taxpayer-specific analysis.
           </p>
           <h3>Depreciation</h3>
           <p>
@@ -527,7 +525,7 @@ export default function MethodologyPage() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Unreleased sale-and-exit model (reference only)
+            Archived sale-and-exit model (reference only)
           </h2>
           <p>
             TrueCap does not currently expose modeled exit comparisons. The

@@ -317,7 +317,7 @@ describe("Input Confidence v1.1", () => {
       earnedPoints: 0,
     });
     expect(byKey(missing, "yearBuilt").reason).toContain(
-      "conservative Screening Index uncertainty modifier",
+      "conservative Deal score uncertainty modifier",
     );
     expect(byKey(provided, "yearBuilt").sourceClass).toBe("property-specific");
     expect(missing.score).toBeLessThan(provided.score);

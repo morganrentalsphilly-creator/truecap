@@ -17,7 +17,13 @@ describe("permissioned testimonial workflow", () => {
 
   it("stays dark in production until the typed flag is explicitly enabled", () => {
     expect(DEFAULT_FEATURE_FLAGS.testimonial_collection).toBe(false);
-    expect(prompt).toContain('isFeatureEnabled("testimonial_collection")');
+    // The review-by-hand action stays behind the flag. The in-product prompt
+    // moved to the consented pipeline (docs/site-overhaul.md Phase 5): it
+    // renders only after the SERVER grants the once-per-user claim, so it is
+    // dark until the pipeline's tables exist — no flag needed.
+    expect(prompt).not.toContain('isFeatureEnabled("testimonial_collection")');
+    expect(prompt).toContain("claimTestimonialPromptAction");
+    expect(prompt).toContain("submitPublishableTestimonialAction");
     expect(action).toContain('isFeatureEnabled("testimonial_collection")');
     expect(action).toContain('code: "FEATURE_DISABLED"');
   });
@@ -75,13 +81,16 @@ describe("permissioned testimonial workflow", () => {
     expect(migration).toContain(") to service_role;");
   });
 
-  it("allows an omitted quote and collects an explicit display format", () => {
-    expect(action).toContain("value.length === 0 || value.length >= 10");
+  it("requires a real sentence plus explicit publish consent in the in-product prompt", () => {
+    // The old action still accepts an omitted quote + display format; the
+    // consented prompt asks one question and one permission.
     expect(action).toContain("preferredDisplayNameFormat");
-    expect(prompt).not.toContain("required\n            minLength={10}");
-    expect(prompt).toContain('name="preferredDisplayNameFormat"');
-    expect(prompt).toContain('name="consentToPublish"');
-    expect(prompt).toContain("A quote is optional");
+    expect(prompt).toContain('name="quote"');
+    expect(prompt).toContain('name="consent"');
+    expect(prompt).toContain(
+      "TrueCap may publish this with my first name, role, and market.",
+    );
+    expect(prompt).not.toContain('name="preferredDisplayNameFormat"');
   });
 
   it("requires admin review and exposes promotion only after every gate", () => {

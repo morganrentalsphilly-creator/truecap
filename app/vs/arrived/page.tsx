@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
@@ -26,7 +28,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Arrived vs TrueCap (2026): Shares vs Ownership",
   description:
-    "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",
+    "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two different investing models — honest comparison.",
   keywords: [
     "arrived alternative",
     "arrived homes review",
@@ -53,7 +55,7 @@ const MATRIX: Row[] = [
   { feature: "Ownership model", truecap: "Direct ownership of whole property", arrived: "Fractional shares of a property", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", arrived: "Not applicable (you don't own debt)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", arrived: "Forward dividend + appreciation forecast", winner: "tie" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", arrived: "Not applicable", winner: "truecap" },
+  { feature: "Deal score (0–100)", truecap: "Free — 0–100 score with factor breakdown", arrived: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k typical)", arrived: "$100 per share", winner: "arrived" },
   { feature: "Time commitment", truecap: "Active — you find, underwrite, close, manage (or hire PM)", arrived: "Passive — Arrived handles everything", winner: "arrived" },
   { feature: "Liquidity", truecap: "Low — property sale takes months", arrived: "Limited secondary market (Arrived's platform)", winner: "arrived" },
@@ -71,7 +73,7 @@ export default function VsArrivedPage() {
     name: "Arrived vs TrueCap (2026): Shares vs Ownership",
     url: `${siteUrl}/vs/arrived`,
     description:
-      "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models — honest comparison.",
+      "Arrived sells shares in rental properties. TrueCap underwrites whole properties you'd buy yourself. Two different investing models — honest comparison.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -124,6 +126,15 @@ export default function VsArrivedPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* TL;DR */}
@@ -284,6 +295,8 @@ export default function VsArrivedPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="arrived" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

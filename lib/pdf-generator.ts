@@ -142,8 +142,8 @@ export interface ReportData {
    * include it; optional only so frozen legacy payloads remain renderable. */
   decision?: {
     label:
-      | "Meets selected rules at asking"
-      | "Does not meet selected rules at asking"
+      | "Meets your targets at asking"
+      | "Doesn't meet your targets at asking"
       | "Meets TrueCap starter criteria at asking"
       | "Does not meet TrueCap starter criteria at asking"
       | "Preliminary underwriting"
@@ -346,7 +346,7 @@ export function resolvePdfInputReviewStatus(
 }
 
 export const PDF_INPUT_REVIEW_DISCLOSURE =
-  "The Screening Index summarizes modeled economics for triage. It is secondary to selected rules and is not a probability of success, an appraisal, or investment advice. Input Review records browser-based user confirmation only; it is not documentary evidence or third-party verification.";
+  "The Deal score is a heuristic summary of the modeled numbers, 0–100; read it after your Buy Box fit. Input Review records your own in-browser confirmation of each value; it is not documentary evidence or third-party verification.";
 
 export const PDF_INPUT_REVIEW_FOOTNOTE =
   "User confirmations are self-reported, are not documentary evidence or third-party verification, and must be re-checked after a value changes.";
@@ -910,13 +910,13 @@ function reportDecision(d: ReportData): NonNullable<ReportData["decision"]> {
 
 function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
   if (
-    decision.label === "Meets selected rules at asking" ||
+    decision.label === "Meets your targets at asking" ||
     decision.label === "Meets TrueCap starter criteria at asking" ||
     decision.label === "Pursue"
   )
     return COLOR.successText;
   if (
-    decision.label === "Does not meet selected rules at asking" ||
+    decision.label === "Doesn't meet your targets at asking" ||
     decision.label === "Does not meet TrueCap starter criteria at asking" ||
     decision.label === "Pass at this price"
   )
@@ -1183,7 +1183,7 @@ function pageCover(
       py + 42,
     );
     doc.text(
-      `Highest modeled price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer.`,
+      `The highest price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown.`,
       panelX + 20,
       py + 52,
     );
@@ -1863,7 +1863,7 @@ function pageInputs(
       criteriaY + 11,
     );
     doc.text(
-      `Highest modeled price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer.`,
+      `The highest price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown.`,
       M.left,
       criteriaY + 22,
     );
@@ -2061,7 +2061,7 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  doc.text("RULE FIT", M.left + 16, y + 16);
+  doc.text("BUY BOX FIT", M.left + 16, y + 16);
   doc.setCharSpace(0);
   // Headline — slightly tighter (14pt vs 13pt) for confident statement.
   setText(doc, tierColor);
@@ -2898,7 +2898,7 @@ function pageDownside(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setCharSpace(0.7);
-    doc.text("DEAL DOCTOR", M.left + 16, y + 20);
+    doc.text("BUY BOX", M.left + 16, y + 20);
     doc.setCharSpace(0);
     setText(doc, COLOR.ink);
     doc.setFontSize(14);
@@ -2924,7 +2924,7 @@ function pageDownside(
       alternatives.length
         ? `, the same target could also be reached with ${alternatives.join(" or ")}.`
         : ", review the verified inputs before negotiating."
-    } Highest modeled price that still meets the targets shown under the assumptions shown. This is not a recommended offer.`;
+    } The highest price that still meets the targets shown under the assumptions shown.`;
     doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);
     y += 132;
   }
@@ -2944,7 +2944,7 @@ function pageDownside(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   const verdictText = doc.splitTextToSize(
-    `Stressed rule fit: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
+    `Buy Box fit under stress: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
     SAFE.w - 32,
   );
   doc.text(verdictText, M.left + 16, y + 47);

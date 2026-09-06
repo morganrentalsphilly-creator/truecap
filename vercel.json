@@ -27,6 +27,14 @@
     {
       "path": "/api/cron/billing-reconcile",
       "schedule": "30 17 * * *"
+    },
+    {
+      "path": "/api/cron/publish-testimonials",
+      "schedule": "15 16 * * *"
+    },
+    {
+      "path": "/api/cron/feedback-request",
+      "schedule": "45 16 * * *"
     }
   ]
 }

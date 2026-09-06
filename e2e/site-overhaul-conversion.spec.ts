@@ -1,0 +1,196 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * Phase 2 (conversion mechanics) contract — docs/site-overhaul.md.
+ *
+ *  1. An empty hero submit focuses the field and shows the helper (no nav).
+ *  2. An address routes to /analyze, prefills, and produces a result with no
+ *     sign-in (the sample path proves the full result; the typed address
+ *     proves the handoff + prefill).
+ *  3. /guarantee is a permanent redirect to /pricing.
+ *  4. At 375px the header is one row and the hero CTA sits in the first
+ *     viewport, above the cookie bar.
+ */
+
+test("empty hero submit focuses the field, shows the helper, and stays put", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const form = page.locator('form[data-hero-address-form=""]');
+  await expect(form).toHaveAttribute("data-hero-form-ready", "true");
+  const submit = form.getByRole("button", { name: "Analyze a deal free", exact: true });
+  await expect(submit).toBeEnabled();
+  await expect(submit).toHaveCSS("opacity", "1");
+  await submit.click();
+  await expect(
+    form.getByRole("alert").filter({ hasText: "Paste an address or a Zillow/Redfin link" }),
+  ).toBeVisible();
+  await expect(form.getByRole("link", { name: "try the sample deal →" })).toBeVisible();
+  await expect(
+    form.getByLabel("Property address or listing link", { exact: true }),
+  ).toBeFocused();
+  expect(new URL(page.url()).pathname).toBe("/");
+});
+
+test("a typed address routes to /analyze and prefills the analyzer with no sign-in", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const form = page.locator('form[data-hero-address-form=""]');
+  // Before hydration the form is a plain GET (covered by the ?address= test
+  // below); this test pins the JS path, so wait for the hydration marker.
+  await expect(form).toHaveAttribute("data-hero-form-ready", "true");
+  const address = form.getByLabel("Property address or listing link", { exact: true });
+  await address.fill("1500 Market St, Philadelphia, PA 19102");
+  await address.press("Enter");
+  await page.waitForURL(/\/analyze(\?|$)/);
+  await expect(
+    page.locator('form[data-calc-form="true"][data-calculator-ready="true"]'),
+  ).toBeAttached({ timeout: 20_000 });
+  await expect(page.getByLabel("Property Address", { exact: true })).toHaveValue(
+    /1500 Market St/,
+    { timeout: 15_000 },
+  );
+  // The URL never carried the address (sessionStorage handoff).
+  expect(new URL(page.url()).searchParams.get("address")).toBeNull();
+});
+
+test("the sample link produces a full decision on /analyze with no sign-in", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByRole("link", { name: "See the sample deal →", exact: true }).click();
+  await page.waitForURL(/\/analyze/);
+  await expect(page.locator('[data-result-next-action=""]')).toBeVisible({
+    timeout: 45_000,
+  });
+  expect(new URL(page.url()).pathname).toBe("/analyze");
+});
+
+test("the plain GET fallback prefills /analyze from ?address=", async ({ page }) => {
+  await page.goto("/analyze?address=1500%20Market%20St%2C%20Philadelphia%2C%20PA%2019102", {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(
+    page.locator('form[data-calc-form="true"][data-calculator-ready="true"]'),
+  ).toBeAttached({ timeout: 20_000 });
+  await expect(page.getByLabel("Property Address", { exact: true })).toHaveValue(
+    /1500 Market St/,
+    { timeout: 15_000 },
+  );
+});
+
+test("/guarantee is a permanent redirect to /pricing", async ({ request }) => {
+  const response = await request.get("/guarantee", { maxRedirects: 0 });
+  expect(response.status()).toBe(308);
+  expect(response.headers()["location"]).toMatch(/\/pricing$/);
+});
+
+test("at 375px the header is one row and the hero CTA is in the first viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const header = page.locator("header").first();
+  const headerBox = await header.boundingBox();
+  expect(headerBox).not.toBeNull();
+  expect(headerBox!.height).toBeLessThanOrEqual(64);
+  // No second navigation row under the header.
+  await expect(page.locator("[data-marketing-mobile-nav]")).toHaveCount(0);
+  const headerAnalyze = header.getByRole("link", { name: "Analyze", exact: true });
+  await expect(headerAnalyze).toBeVisible();
+  await expect(headerAnalyze).toHaveAttribute("href", "/analyze");
+  await expect(header.getByRole("button", { name: "Open menu" })).toBeVisible();
+
+  const cta = page
+    .locator('form[data-hero-address-form=""]')
+    .getByRole("button", { name: "Analyze a deal free", exact: true });
+  const ctaBox = await cta.boundingBox();
+  expect(ctaBox).not.toBeNull();
+  expect(ctaBox!.y + ctaBox!.height).toBeLessThanOrEqual(667);
+
+  // The cookie bar must not cover the CTA.
+  const cookieBar = page.locator('[data-cookie-consent-banner=""]');
+  if (await cookieBar.isVisible()) {
+    const barBox = await cookieBar.boundingBox();
+    expect(barBox).not.toBeNull();
+    expect(ctaBox!.y + ctaBox!.height).toBeLessThanOrEqual(barBox!.y);
+  }
+
+  // The hamburger opens the rest of the navigation.
+  await header.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("link", { name: "Pricing", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
+});
+
+test("the hero's LCP element is the real product screenshot, preloaded", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const shot = page.locator('[data-hero-product-shot=""] img').first();
+  await expect(shot).toBeVisible();
+  // next/image `priority`: the optimized WebP is preloaded from <head>.
+  await expect(shot).toHaveAttribute("src", /verdict-desktop\.webp/);
+  await expect(
+    page.locator('link[rel="preload"][as="image"][imagesrcset*="verdict-desktop.webp"]'),
+  ).toHaveCount(1);
+  const alt = await shot.getAttribute("alt");
+  expect(alt ?? "").toMatch(/Offer Ceiling/);
+  await expect(page.getByRole("link", { name: "Live sample →", exact: true })).toHaveAttribute(
+    "href",
+    "/analyze?sample=1",
+  );
+  // Founder card: facts only, no image.
+  const founder = page.getByRole("complementary", { name: "About the founder" });
+  await expect(founder).toBeVisible();
+  await expect(founder.locator("img")).toHaveCount(0);
+});
+
+test("the sample flow fires analysis_started and analysis_completed through track()", async ({
+  page,
+}) => {
+  await page.goto("/analyze?sample=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-result-next-action=""]')).toBeVisible({ timeout: 45_000 });
+  const events = await page.evaluate(
+    () => (window as unknown as { __tcEvents?: Array<{ event: string; props: Record<string, unknown> }> }).__tcEvents ?? [],
+  );
+  const names = events.map((e) => e.event);
+  expect(names).toContain("sample_viewed");
+  expect(names).toContain("analysis_started");
+  expect(names).toContain("analysis_completed");
+  const started = events.find((e) => e.event === "analysis_started");
+  expect(started?.props).toMatchObject({ source: "sample", input_type: "sample" });
+  const completed = events.find((e) => e.event === "analysis_completed");
+  expect(typeof completed?.props.has_ceiling).toBe("boolean");
+  // No GTM push without consent (the banner was not accepted in this test).
+  const dataLayer = await page.evaluate(
+    () => (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? [],
+  );
+  expect(dataLayer.filter((e) => typeof e === "object" && e && "event" in e && (e as { event: string }).event === "analysis_started")).toHaveLength(0);
+});
+
+test("pricing page holds together at 375, 768, and 1440 with annual as the default", async ({
+  page,
+}) => {
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/pricing", { waitUntil: "domcontentloaded" });
+    const overflow = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+    }));
+    expect(overflow.documentWidth, `overflow at ${width}`).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+    await expect(page.getByText(/Overpaying by 3% on a \$250,000 rental costs \$7,500/)).toBeVisible();
+    // Annual is the default and the effective monthly figure is shown.
+    const annualToggle = page.getByRole("button", { name: /annual/i }).first();
+    await expect(annualToggle).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText(/billed annually/i).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /how this compares to DealCheck|DealCheck/i }).first()).toHaveAttribute(
+      "href",
+      "/vs/dealcheck",
+    );
+    // A product shot per tier and the trust row.
+    expect(await page.locator("figure img").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.getByText(/Free to start/i).first()).toBeVisible();
+  }
+});

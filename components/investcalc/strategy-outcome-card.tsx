@@ -160,7 +160,7 @@ export function StrategyOutcomeCard({
         >
           <p className="text-sm text-muted-foreground">
             Your Pro access is active. Choose at least one return criterion in
-            the analysis before TrueCap calculates a modeled price threshold.
+            the analysis and TrueCap calculates your Offer Ceiling.
           </p>
           <ReviewTargetCriteriaButton
             onOpened={onTuneTargetsOpened}
@@ -373,9 +373,8 @@ function WholesaleOutcome({
         Criteria: {targetsLabel}.
       </p>
       <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-        Highest modeled price that still meets the selected wholesale rules
-        under the assumptions shown. This is not a recommended offer or an
-        appraisal.
+        The highest price that still meets your wholesale targets under the
+        assumptions shown.
       </p>
       {asking != null ? (
         <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">

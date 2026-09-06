@@ -259,11 +259,11 @@ function DealScoreCard({
     return (
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-          Screening Index
+          Deal score
         </p>
         <div className="flex items-center justify-center min-h-40 rounded-xl border border-dashed border-border bg-muted/20 text-center px-4">
           <p className="text-sm text-muted-foreground">
-            Run the analysis to view the Screening Index and its modeled factors.
+            Run the analysis to see the Deal score and the factors behind it.
           </p>
         </div>
       </div>
@@ -279,7 +279,7 @@ function DealScoreCard({
   return (
     <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-        Screening Index
+        Deal score
       </p>
       {/* The investor-lens toggle previously lived here; it moved into the
           metrics band header (Phase 2) so the lens sits beside the metric
@@ -846,7 +846,7 @@ export function AnswerHeroCard({
                 {hasScoreBreakdown ? (
                   <div className="mt-3 space-y-2">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                      Screening Index breakdown
+                      Deal score breakdown
                     </p>
                     <ScoreBreakdownReceipts
                       dealScoreResult={dealScoreResult}

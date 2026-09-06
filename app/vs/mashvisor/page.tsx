@@ -19,7 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -69,14 +71,14 @@ const MATRIX: Row[] = [
   {
     feature: "Primary job",
     truecap:
-      "Per-deal underwriting — how does this property fit my selected rules?",
+      "Per-deal underwriting — does this property fit my Buy Box?",
     mashvisor: "Market research — WHERE should I invest?",
     winner: "tie",
   },
   {
     feature: "Free tier depth",
     truecap:
-      "Core cap rate, CoC, DSCR, cash flow, Screening Index, and selected-rule fit",
+      "Core cap rate, CoC, DSCR, cash flow, Deal score, and Buy Box fit",
     mashvisor: "Limited free preview; most data requires paid plan",
     winner: "truecap",
   },
@@ -129,12 +131,12 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Offer Ceiling solver",
-    truecap: "Pro — works backward from selected targets",
+    truecap: "Pro — works backward from your targets",
     mashvisor: "Not a primary feature",
     winner: "truecap",
   },
   {
-    feature: "Screening Index + breakdown",
+    feature: "Deal score + breakdown",
     truecap: "Free — 0–100 score with per-subscore explanation",
     mashvisor: "Their own metric",
     winner: "tie",
@@ -229,6 +231,15 @@ export default function VsMashvisorPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -369,7 +380,7 @@ export default function VsMashvisorPage() {
             Once the heatmap points you somewhere, the per-deal math is one
             address away: our{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -415,6 +426,8 @@ export default function VsMashvisorPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="mashvisor" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

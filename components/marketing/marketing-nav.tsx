@@ -22,13 +22,21 @@
  */
 
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const LEARN_LINKS: { label: string; href: string; hint: string }[] = [
   { label: "How we calculate", href: "/methodology", hint: "Every formula, shown" },
@@ -44,8 +52,8 @@ const linkClass =
 export function MarketingNav() {
   return (
     <nav aria-label="Main" className="hidden items-center gap-5 lg:flex">
-      {/* "Analyze" is the product itself — the homepage analyzer. */}
-      <Link href="/" className={linkClass}>
+      {/* "Analyze" is the product itself — the public analyzer at /analyze. */}
+      <Link href="/analyze" prefetch={false} className={linkClass}>
         Analyze
       </Link>
       <Link href="/pricing" className={linkClass}>
@@ -72,27 +80,63 @@ export function MarketingNav() {
 }
 
 /**
- * Mobile counterpart — a flat row of the same destinations under the header.
- * A dropdown on a phone hides the SEO pages behind two taps, so Learn resolves
- * to the methodology page and the rest stay in the footer, which mobile users
- * reach by scrolling anyway.
+ * Mobile counterpart — ONE header row. The header shows logo + a primary
+ * "Analyze" button; everything else (Pricing, the Learn pages, sign in /
+ * sign up) lives behind this hamburger. The old flat second row pushed the
+ * hero below the fold on phones.
  */
-export function MarketingNavMobile() {
+export function MarketingMobileMenu() {
+  const [open, setOpen] = useState(false);
+  const itemClass =
+    "flex min-h-12 items-center justify-between rounded-lg px-3 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
-    <nav
-      aria-label="Main"
-      data-marketing-mobile-nav=""
-      className="flex items-center gap-4 overflow-x-auto border-b border-border bg-card/60 px-4 py-2 lg:hidden"
-    >
-      <Link href="/" className={`${linkClass} whitespace-nowrap`}>
-        Analyze
-      </Link>
-      <Link href="/pricing" className={`${linkClass} whitespace-nowrap`}>
-        Pricing
-      </Link>
-      <Link href="/methodology" className={`${linkClass} whitespace-nowrap`}>
-        Learn
-      </Link>
-    </nav>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        aria-label="Open menu"
+        data-marketing-mobile-menu-trigger=""
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+      >
+        <Menu className="size-5" aria-hidden />
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[min(20rem,88vw)] overflow-y-auto">
+        <SheetTitle>Menu</SheetTitle>
+        <SheetDescription className="sr-only">
+          Site navigation and account links
+        </SheetDescription>
+        <nav aria-label="Main" data-marketing-mobile-nav="" className="mt-4 flex flex-col gap-1">
+          <Link href="/analyze" prefetch={false} className={itemClass} onClick={() => setOpen(false)}>
+            Analyze a deal
+          </Link>
+          <Link href="/pricing" className={itemClass} onClick={() => setOpen(false)}>
+            Pricing
+          </Link>
+          <p className="mt-3 px-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Learn
+          </p>
+          {LEARN_LINKS.map((l) => (
+            <Link key={l.href} href={l.href} className={itemClass} onClick={() => setOpen(false)}>
+              <span>{l.label}</span>
+              <span className="text-xs font-normal text-muted-foreground">{l.hint}</span>
+            </Link>
+          ))}
+          <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+            <Link
+              href="/auth/login"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => setOpen(false)}
+            >
+              Log in
+            </Link>
+            <Link
+              href="/auth/sign-up"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => setOpen(false)}
+            >
+              Sign up free
+            </Link>
+          </div>
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }

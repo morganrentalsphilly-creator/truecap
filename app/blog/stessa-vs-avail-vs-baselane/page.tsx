@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -73,7 +74,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `Does TrueCap replace any of these?`,
-    a: `Not entirely. TrueCap is a narrower, target-backed acquisition decision workflow. Stessa now overlaps in acquisition through its marketplace, buy boxes, comps, and editable underwriting, then continues into accounting and operations. Avail and Baselane remain more operations-led.`,
+    a: `Not entirely. TrueCap is a narrower acquisition decision workflow built around your targets. Stessa now overlaps in acquisition through its marketplace, buy boxes, comps, and editable underwriting, then continues into accounting and operations. Avail and Baselane remain more operations-led.`,
   },
   {
     q: `Avail vs Stessa — which one if I can only pick one?`,
@@ -93,7 +94,7 @@ export default function ThreeWayComparisonPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -172,7 +173,7 @@ export default function ThreeWayComparisonPost() {
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
               dangerouslySetInnerHTML={{
-                __html: `<strong>Stessa</strong> now spans acquisition and operations: its official marketplace materials describe investor filters, map layers, watchlists, buy-box alerts, comps, and editable underwriting before its accounting workflows. <strong>Avail</strong> emphasizes leasing and rent collection. <strong>Baselane</strong> bundles banking, bookkeeping, and rent collection. TrueCap overlaps with Stessa during acquisition but stays narrower and target-backed. Facts reviewed against official sources on 2026-08-27.`,
+                __html: `<strong>Stessa</strong> now spans acquisition and operations: its official marketplace materials describe investor filters, map layers, watchlists, buy-box alerts, comps, and editable underwriting before its accounting workflows. <strong>Avail</strong> emphasizes leasing and rent collection. <strong>Baselane</strong> bundles banking, bookkeeping, and rent collection. TrueCap overlaps with Stessa during acquisition but stays narrower and built around your targets. Facts reviewed against official sources on 2026-08-27.`,
               }}
             />
           </section>
@@ -241,7 +242,7 @@ export default function ThreeWayComparisonPost() {
             <h2>Where TrueCap fits</h2>
             <div
               dangerouslySetInnerHTML={{
-                __html: `<p>TrueCap is a narrower acquisition decision workflow—cap rate, DSCR, cash flow, target fit, Offer Ceiling, and a secondary Screening Index. Stessa overlaps during acquisition and then continues into accounting and operations; Avail and Baselane are more operations-led. Choose by workflow and verify current plan terms rather than assuming a strict before/after split.</p>`,
+                __html: `<p>TrueCap is a narrower acquisition decision workflow—cap rate, DSCR, cash flow, Buy Box fit, Offer Ceiling, and a Deal score. Stessa overlaps during acquisition and then continues into accounting and operations; Avail and Baselane are more operations-led. Choose by workflow and verify current plan terms rather than assuming a strict before/after split.</p>`,
               }}
             />
 
@@ -316,6 +317,8 @@ export default function ThreeWayComparisonPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

@@ -139,7 +139,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
           <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0" />
           <p>
-            At {money(values.purchasePrice)}, the modeled economics clear the selected criteria. The Offer Ceiling above remains the target-dependent boundary under these assumptions.
+            At {money(values.purchasePrice)}, the modeled economics clear your targets. The Offer Ceiling above is still the highest price that meets them under these assumptions.
           </p>
         </div>
       ) : actionable.length > 0 ? (

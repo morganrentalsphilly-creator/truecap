@@ -117,14 +117,14 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   },
   deal_score: {
     key: "deal_score",
-    label: "Screening Index 0–100 with factor breakdown",
+    label: "Deal score 0–100 with factor breakdown",
     tiers: ["free", "one_time_pdf", "pro", "agent_pro"],
     category: "core",
     gate: "flag",
   },
   verdict: {
     key: "verdict",
-    label: "Plain-English selected-rule fit summary",
+    label: "Plain-English Buy Box fit summary",
     tiers: ["free", "one_time_pdf", "pro", "agent_pro"],
     category: "core",
     gate: "always",

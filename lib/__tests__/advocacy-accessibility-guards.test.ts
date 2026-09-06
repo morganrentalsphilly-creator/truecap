@@ -143,6 +143,7 @@ describe("advocacy decision accessibility and reflow guards", () => {
       normalizeSource("dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL"),
     );
     expect(summary).not.toContain("Screening Index");
+    expect(summary).not.toContain("Deal score");
     expect(summary).not.toContain("dealScoreResult");
     expect(summary).toContain(
       "!advocacyContractEnabled && sensitivityLabels.length > 0",

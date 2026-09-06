@@ -1,11 +1,11 @@
 {
   "subject": "Underwrite any rental in 60 seconds — without the spreadsheet",
-  "preheader": "Paste an address. Review cap rate, cash flow, DSCR, selected-rule fit, and a secondary Screening Index.",
+  "preheader": "Paste an address. Review cap rate, cash flow, DSCR, Buy Box fit, and a Deal score.",
   "publishedAt": "2026-05-25",
   "weekLabel": "Launch",
   "marketSnapshot": {
     "headline": "Underwrite any rental in 60 seconds — without the spreadsheet.",
-    "body": "TrueCap was built for a fast first-pass screen with editable assumptions. Paste an address to review cap rate, cash-on-cash, DSCR, cash flow, selected-rule fit, and a secondary Screening Index. Investor Pro adds the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, and reports. The examples below are illustrations, not verified properties or investment recommendations.",
+    "body": "TrueCap was built for a fast first-pass screen with editable assumptions. Paste an address to review cap rate, cash-on-cash, DSCR, cash flow, Buy Box fit, and a Deal score. Investor Pro adds the Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, and reports. The examples below are illustrations, not verified properties or investment recommendations.",
     "stats": [
       {
         "label": "Avg time to underwrite",
@@ -48,7 +48,7 @@
   },
   "qa": {
     "question": "Why should I use TrueCap instead of my spreadsheet (or BiggerPockets, or DealCheck, or Mashvisor)?",
-    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD rent and FRED rate benchmarks, subject to coverage; property tax stays manual. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
+    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD rent and FRED rate benchmarks, subject to coverage; property tax stays manual. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
   },
   "shipNote": {
     "title": "Start with the free TrueCap analyzer",

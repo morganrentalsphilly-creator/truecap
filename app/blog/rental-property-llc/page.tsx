@@ -14,6 +14,7 @@ import Link from "next/link";
 import { Scale } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -26,7 +27,7 @@ const TITLE = "Should you put your rental property in an LLC? (2026)";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Rental property LLC: worth it in 2026?";
 const DESCRIPTION =
-  "The most-asked entity question in real estate — answered honestly. What an LLC actually does (and doesn't) for asset protection and taxes, the due-on-sale trap when you transfer a mortgaged rental, how financing changes, the 2026 Corporate Transparency Act reversal, and when an LLC is worth the cost.";
+  "What an LLC does (and doesn't) for asset protection and taxes, the due-on-sale trap when you transfer a mortgaged rental, and when it's worth the cost.";
 const PUBLISHED_AT = "2026-06-23";
 const MODIFIED_AT = "2026-06-23";
 const READING_TIME_MIN = 12;
@@ -96,7 +97,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -397,6 +398,7 @@ export default function BlogPost() {
             situation.
           </p>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

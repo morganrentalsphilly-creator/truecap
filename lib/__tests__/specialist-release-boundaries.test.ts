@@ -49,7 +49,9 @@ describe("specialist release boundaries", () => {
     const route = source("app/markets/[city]/[strategy]/page.tsx");
     expect(route).toContain("export const dynamicParams = false");
     expect(route).toContain("robots: { index: false, follow: false }");
-    expect(source("app/sitemap.ts")).toContain("CITY_STRATEGY_COMBOS.map");
+    // Released combos only; Phase 8 filters them by city indexability first.
+    expect(source("app/sitemap.ts")).toMatch(/CITY_STRATEGY_COMBOS\.(filter|map)\(/);
+    expect(source("app/sitemap.ts")).not.toContain("ALL_CITY_STRATEGY_COMBOS");
     expect(source("app/llms.txt/route.ts")).toContain(
       "CITY_STRATEGY_COMBOS.map",
     );

@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -26,7 +27,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Roofstock vs Mashvisor vs PropStream (2026)";
 const DESCRIPTION =
-  "Roofstock sells turnkey rentals. Mashvisor scores neighborhoods. PropStream finds motivated sellers. Honest 3-way comparison plus where TrueCap fits after they each find you a property.";
+  "Roofstock sells turnkey rentals, Mashvisor scores neighborhoods, PropStream finds motivated sellers. Compare all three and see where TrueCap fits after.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
@@ -94,7 +95,7 @@ export default function ThreeWayComparisonPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -282,6 +283,8 @@ export default function ThreeWayComparisonPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

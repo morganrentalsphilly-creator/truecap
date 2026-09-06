@@ -63,10 +63,10 @@ export async function schedulePackCreditEmails(input: {
         <p><strong>Upgrade to TrueCap Pro by ${deadlineHtml}</strong> and this
         purchase is credited to your first Pro invoice automatically at
         checkout. No code to remember.</p>
-        <p>Pro is the repeat version of the report you just bought: a target-dependent Offer Ceiling,
-        Buy Box rule fit, downside stress test, and adviser/lender review exports on
-        every deal. New accounts receive a ${escapeHtml(String(PRODUCT_EVALUATION_DAYS))}-day
-        no-card product evaluation; subscribing later is a separate, explicit checkout.
+        <p>Pro is the repeat version of the report you just bought: the Offer Ceiling,
+        Buy Box fit, downside stress test, and adviser/lender review exports on
+        every deal. New accounts get a ${escapeHtml(String(PRODUCT_EVALUATION_DAYS))}-day
+        free trial with no card; subscribing later is a separate, explicit checkout.
         Review current billing and cancellation terms before checkout.</p>
         <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day0"><strong>See Pro plans</strong></a></p>
       `,

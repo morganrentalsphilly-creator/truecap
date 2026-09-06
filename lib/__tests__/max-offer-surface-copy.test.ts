@@ -24,29 +24,38 @@ describe("rental Offer Ceiling surface copy", () => {
       '`Offer Ceiling — ${d.maxOffer.sourceLabel ?? "captured targets"}: ${d.maxOffer.basis}`'
     );
     expect(pdf).toContain('`Offer Ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`');
-    expect(pdf.match(/Highest modeled price that still meets/g)?.length)
+    expect(pdf.match(/The highest price that still meets/g)?.length)
       .toBeGreaterThanOrEqual(3);
-    expect(pdf.match(/This is not a recommended offer\./g)?.length)
-      .toBeGreaterThanOrEqual(3);
+    // The non-advice statement lives once, in the report's Disclaimer
+    // section (docs/voice.md: one disclaimer per surface, no per-element
+    // hedges).
+    expect(pdf).not.toContain("This is not a recommended offer.");
+    expect(pdf).toContain('sectionTitle(doc, "Disclaimer"');
   });
 
   it("keeps saved-deal ceilings labeled, criterion-bound, and non-advisory", () => {
     const workspace = read("../../app/dashboard/saved-analyses/[id]/page.tsx");
     expect(workspace).toContain("Offer Ceiling");
     expect(workspace).toContain("Targets: {maoBasisLabel}");
-    expect(workspace).toContain(NON_ADVICE);
+    // One page-level <Disclaimer /> carries the non-advice statement
+    // (docs/voice.md rule 3); the ceiling line no longer repeats it.
+    expect(workspace).not.toContain(NON_ADVICE);
+    expect(workspace).toContain("<Disclaimer");
 
     const list = read("../../components/investcalc/saved-analyses-page-v2.tsx");
     expect(list).toContain("Offer Ceiling:");
     expect(list).toContain("basisLabel={item.offerBasisLabel}");
-    // The criteria text + non-advice sentence moved into the shared ⓘ
-    // popover every offer line renders (OfferCriteriaNote) — still
-    // criterion-bound and non-advisory, no longer repeated per resting row.
+    // The criteria text moved into the shared ⓘ popover every offer line
+    // renders (OfferCriteriaNote) — still criterion-bound, no longer repeated
+    // per resting row. The page-level <Disclaimer /> carries the non-advice
+    // statement once; the popover no longer repeats it.
     const criteriaNote = read(
       "../../components/investcalc/offer-criteria-note.tsx",
     );
     expect(criteriaNote).toContain("Criteria: {basisLabel");
-    expect(criteriaNote).toContain(NON_ADVICE);
+    expect(criteriaNote).toContain(
+      "The highest price that still meets these criteria",
+    );
     expect(list).toContain("<OfferCriteriaNote");
 
     const server = read("../../app/dashboard/saved-analyses/page.tsx");
@@ -61,19 +70,21 @@ describe("rental Offer Ceiling surface copy", () => {
     // describeMaoTarget includes maxPurchasePrice exactly once; a prior manual
     // append duplicated that criterion beside the ceiling.
     expect(verdict).not.toContain('criteria.push(`purchase price');
-    expect(verdict).toContain(NON_ADVICE);
+    expect(verdict).toContain("the highest price that still meets");
   });
 
   it("labels shortlist thresholds as Offer Ceilings with adjacent criteria", () => {
     const shortlist = read("../../components/investcalc/batch-triage-client.tsx");
     expect(shortlist).toContain("Offer Ceiling");
     expect(shortlist).toContain("row.targetLabel");
-    expect(shortlist).toContain("not a recommended offer");
+    expect(shortlist).toContain(
+      "the highest price that still meets the Buy Box criteria shown on that row",
+    );
   });
 
   it("grounds Deal Q&A in a criterion-bound ceiling, not an offer recommendation", () => {
     const context = read("../deal-qa-context.ts");
-    expect(context).toContain("OFFER CEILING (a target-dependent modeled boundary)");
+    expect(context).toContain("OFFER CEILING (the highest price that still meets the targets)");
     expect(context).toContain("Offer Ceiling: ${money(m.maxOffer)}");
     expect(context).toContain("${m.basis}");
     expect(context).toContain(NON_ADVICE);

@@ -53,6 +53,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
@@ -95,7 +96,7 @@ const SPINE_STEPS = [
     label: "Decide",
     icon: Gauge,
     title: "See the real economics",
-    body: "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0-100 Screening Index and plain-English context for the modeled economics.",
+    body: "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0–100 Deal score and plain-English context for the numbers.",
   },
   {
     key: "offer",
@@ -194,7 +195,7 @@ export function ProblemBlock() {
           Overpaying by even 3% on a $250,000 rental is $7,500 gone before you
           collect a dollar of rent — and negative cash flow compounds it every
           month after. The protection isn&apos;t more metrics; it&apos;s knowing
-          the target-dependent Offer Ceiling before you negotiate. That&apos;s
+          the Offer Ceiling before you negotiate. That&apos;s
           the number TrueCap computes from the assumptions shown.
         </p>
       </div>
@@ -349,16 +350,16 @@ export function FinalCta() {
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
-          rule-fit context, the Offer Ceiling, downside checks, and next
-          steps—no account or card required.
+          Buy Box fit, the Offer Ceiling, downside checks, and next
+          steps. No account or card required.
         </p>
-        <ScrollToFormButton
+        <AnalyzeCtaLink
           analyticsSource="final_cta"
-          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
+          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Analyze a property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </ScrollToFormButton>
+        </AnalyzeCtaLink>
       </div>
     </section>
   );
@@ -594,7 +595,7 @@ export function VsCompetitors() {
                   A no-signup, address-first screen with editable sourced
                   assumptions.
                 </li>
-                <li>Rule-fit context tied to your Buy Box.</li>
+                <li>Buy Box fit on every deal.</li>
                 <li>
                   Offer Ceiling, downside, and a decision-review package in one
                   sequence.
@@ -634,45 +635,35 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Why not just use a free calculator?",
-    a: "Most free calculators stop at metrics. TrueCap's first complete decision also shows selected-rule fit, a target-backed Offer Ceiling, downside checks, and next steps. The Offer Ceiling is the highest modeled price that still meets the selected targets under the assumptions shown; it is not advice or an appraisal.",
+    a: "Most free calculators stop at metrics. Your first TrueCap decision also shows Buy Box fit, the Offer Ceiling (the highest price that still meets your targets), downside checks, and next steps.",
   },
   {
     q: "What does the auto-fill provide?",
-    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax is not auto-filled from the retired static state table: enter a local annual bill or reviewed rate. Until then, the model labels its generic 1.1% tax assumption as a preliminary fallback. Replace every screening assumption with property-specific evidence before recording or acting on an investment decision.",
-  },
-  {
-    // The guarantee sentence is appended dynamically in HomepageFaq so the
-    // kill switch silences it together with every other refund promise.
-    q: "Why does Pro cost more than other rental calculators?",
-    a: "Pro adds a repeatable decision-review layer: a target-backed Offer Ceiling, Buy Box rule-fit checks, downside stress tests, comparisons, and reports. The outputs remain estimates based on the assumptions shown and require independent verification.",
+    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate starts from FRED's national 30-year benchmark, not an investor lender quote. Property tax is a local number: enter the annual bill or a reviewed rate. Until you do, the model labels its 1.1% tax assumption as a default to replace. Swap every starting assumption for property-specific evidence before you act on a decision.",
   },
   {
     q: "Is TrueCap really free?",
-    a: `Yes. Your first complete decision needs no account or card. Create an account to start a ${PRODUCT_EVALUATION_DAYS}-day, no-card evaluation covering up to ${PRODUCT_EVALUATION_DEAL_LIMIT} deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Investor Pro is for repeating the verified workflow, saving and revisiting deals, comparisons, reports, and reusable Buy Box assumptions.`,
+    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Investor Pro is for repeating the workflow: saving and revisiting deals, comparisons, reports, and a reusable Buy Box.`,
   },
   {
     q: "Do I need a credit card?",
-    a: `No. The first complete decision needs no signup or card. Creating an account starts a ${PRODUCT_EVALUATION_DAYS}-day product evaluation with no payment method and no automatic subscription.`,
+    a: `No. The first complete decision needs no signup or card. Creating an account starts a ${PRODUCT_EVALUATION_DAYS}-day free trial with no payment method and no automatic subscription.`,
   },
   {
     q: "Can I edit the assumptions?",
-    a: "Yes—every number is editable. TrueCap can start rent and rate from labeled HUD/FRED benchmarks, keeps property tax as a manual local input, and discloses generic preliminary fallbacks. Change financing, expenses, and growth assumptions under “Improve accuracy,” then rerun.",
+    a: "Yes. Every number is editable. TrueCap starts rent and rate from labeled HUD and FRED benchmarks, keeps property tax as your local input, and marks every default so you can replace it. Change financing, expenses, and growth under “Improve accuracy,” then rerun.",
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Upgrade when you want to repeat the decision workflow after the product evaluation: revisit saved deals, compare opportunities, reuse Buy Box assumptions, and produce reports. Monthly Pro can be cancelled anytime.",
+    a: "Upgrade when you want to repeat the decision after the free trial: revisit saved deals, compare opportunities, reuse your Buy Box, and produce reports. Monthly Pro can be cancelled anytime.",
   },
   {
-    q: "How does the product evaluation work?",
-    a: `Create an account to evaluate the product for ${PRODUCT_EVALUATION_DAYS} days, up to ${PRODUCT_EVALUATION_DEAL_LIMIT} completed deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card is collected, nothing auto-renews, and checkout clearly shows the amount due before a paid subscription begins.`,
-  },
-  {
-    q: "Why are some advanced strategy modules unavailable?",
-    a: "TrueCap keeps specialist strategy, tax, and modeled-sale outputs behind release gates until their formulas, disclosures, regression tests, and presentation meet the same standard as the core buy-and-hold workflow. Standalone tools remain educational first-pass calculators, not acquisition decisions.",
+    q: "How does the free trial work?",
+    a: `Create an account and you get ${PRODUCT_EVALUATION_DAYS} days, up to ${PRODUCT_EVALUATION_DEAL_LIMIT} completed Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card is collected, nothing auto-renews, and checkout shows the amount before a paid subscription begins.`,
   },
   {
     q: "Is this financial advice?",
-    a: "No. TrueCap applies documented, deterministic formulas to your inputs and labeled screening benchmarks. Every assumption is editable, every output is an estimate, and the decision is yours. It is a calculator, not a financial advisor.",
+    a: "No. TrueCap applies documented formulas to your inputs and labeled benchmarks. Every assumption is editable, every output is an estimate, and the decision is yours.",
   },
 ];
 
@@ -871,15 +862,15 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
       cells: ["1 decision", true, true],
     },
     { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
-    { label: "0-100 Screening Index + modeled context", key: "deal_score" },
+    { label: "0–100 Deal score + context", key: "deal_score" },
     {
       label: "Decision memo/report",
       key: "pdf_export",
     },
-    { label: "Offer Ceiling + Deal Doctor thresholds", key: "mao" },
+    { label: "Offer Ceiling + Buy Box targets", key: "mao" },
     { label: "Save & revisit deals", key: "save_deal" },
     { label: "Compare deals side-by-side", key: "compare_deals" },
-    { label: "Buy Box: selected-rule fit on every deal", key: "buy_box" },
+    { label: "Buy Box fit on every deal", key: "buy_box" },
     { label: "10-year cash-flow projection", key: "projections" },
     { label: "Downside sensitivity checks", key: "sensitivity" },
   ] as { label: string; key: FeatureKey | null; cells?: (boolean | string)[] }[]
@@ -905,7 +896,7 @@ export function PdfProUpsell() {
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
             Start with a 60-second screen, then use Pro to review four things:
-            selected-rule fit, Offer Ceiling, what could break, and how to
+            Buy Box fit, Offer Ceiling, what could break, and how to
             document the decision.
           </p>
         </div>
@@ -1015,7 +1006,7 @@ export function PdfProUpsell() {
               One address. Four acquisition answers.
             </h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Get your Buy Box rule-fit result, Offer Ceiling, downside stress
+              Get your Buy Box fit, Offer Ceiling, downside stress
               test, and a decision-review report—then compare, save, and move
               selected deals through your acquisition workflow.
             </p>
@@ -1031,8 +1022,8 @@ export function PdfProUpsell() {
                 />
               </Link>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Create an account for a {PRODUCT_EVALUATION_DAYS}-day evaluation
-                covering up to {PRODUCT_EVALUATION_DEAL_LIMIT} deals and{" "}
+                Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:
+                up to {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
                 {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card and no
                 automatic subscription.
               </p>
@@ -1066,7 +1057,7 @@ const PERSONAS: {
   {
     icon: TrendingUp,
     title: "For investors",
-    body: "Screen buy-and-hold assumptions with cash flow, cap rate, CoC, DSCR, a 10-year view, and selected-rule fit against your Buy Box.",
+    body: "Screen buy-and-hold assumptions with cash flow, cap rate, CoC, DSCR, a 10-year view, and Buy Box fit against your Buy Box.",
     // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
     // ?strategy=) so long-term-rental defaults are already applied.
     seed: {
@@ -1079,7 +1070,7 @@ const PERSONAS: {
   {
     icon: Users,
     title: "For agents",
-    body: "Share a labeled screening analysis or Pro report for review with investor clients and lenders; it is not an appraisal or approval.",
+    body: "Share a labeled analysis or Pro report with investor clients and lenders, every assumption visible.",
     // Agent Pro is unreleased. Keep this persona limited to the released
     // analyzer/share workflow and do not link to the gated sales page.
   },

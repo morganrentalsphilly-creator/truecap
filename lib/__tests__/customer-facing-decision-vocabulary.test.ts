@@ -47,15 +47,25 @@ describe("customer-facing decision vocabulary", () => {
     // Phase-4 search metadata intentionally targets the established
     // "max offer" query. Product UI and explanations still use the canonical
     // Offer Ceiling name.
-    expect(violations).toEqual(["app/page.tsx: Max Offer"]);
+    // The homepage OG card (app/og/home/route.tsx) carries the hero headline
+    // verbatim — "Know your walk-away price before you make the offer." —
+    // which the founder keeps; it is the same exception the config file
+    // (lib/marketing-offer-config.ts) already enjoys by living outside the
+    // customer-surface roots.
+    expect(violations).toEqual([
+      "app/og/home/route.tsx: walk-away price",
+      "app/page.tsx: Max Offer",
+    ]);
   });
 
-  it("uses Screening Index as the one public name for the secondary score", () => {
+  it("uses Deal score as the one public name for the secondary score", () => {
+    // docs/voice.md term map: "Screening Index" is retired customer-facing
+    // vocabulary; the one public name is "Deal score" (0–100).
     const violations: string[] = [];
     for (const root of CUSTOMER_SURFACE_ROOTS) {
       for (const file of sourceFiles(join(ROOT, root))) {
         const visibleSource = withoutComments(readFileSync(file, "utf8"));
-        const match = visibleSource.match(/\bdeal scores?\b/i);
+        const match = visibleSource.match(/\bScreening Index\b/i);
         if (match) violations.push(`${relative(ROOT, file)}: ${match[0]}`);
       }
     }

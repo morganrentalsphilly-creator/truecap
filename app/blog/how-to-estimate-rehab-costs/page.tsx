@@ -2,13 +2,14 @@ import {
   buildSourceFirstArticleMetadata,
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
+import { RelatedContent } from "@/components/marketing/related-content";
 
 const ARTICLE = {
   slug: "how-to-estimate-rehab-costs",
   title: "How to estimate rehab costs without relying on generic price bands",
   seoTitle: "How to estimate rehab costs without generic bands",
   description:
-    "A source-first rehab-budget framework: document scope and condition, obtain local written bids, include permits and carrying costs, and choose a disclosed uncertainty reserve.",
+    "A rehab-budget framework: document scope and condition, get local written bids, add permits and carrying costs, and set a disclosed uncertainty reserve.",
   publishedAt: "2026-05-27",
   modifiedAt: "2026-08-29",
   faqs: [
@@ -90,6 +91,8 @@ export default function RehabEstimatePost() {
         specialist construction model. Use it only for the released preliminary
         rental metrics under the assumptions actually shown.
       </p>
+
+      <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />
     </SourceFirstArticle>
   );
 }

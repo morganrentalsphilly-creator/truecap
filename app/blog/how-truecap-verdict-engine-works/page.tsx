@@ -16,19 +16,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-truecap-verdict-engine-works";
-const TITLE = "How TrueCap classifies selected-rule fit";
+const TITLE = "How TrueCap classifies Buy Box fit";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "How TrueCap classifies selected-rule fit";
+const SERP_TITLE = "How TrueCap classifies Buy Box fit";
 const DESCRIPTION =
-  "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for selected-rule fit. This screening classification is not a buy/pass decision or advice.";
+  "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for Buy Box fit, with the rationale behind each band.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   keywords: [
     "rental property verdict engine",
     "is this rental a good deal",
-    "rental property Screening Index",
+    "rental property deal score",
     "rental underwriting thresholds",
     "rental property classification",
     "good cap rate rental",
@@ -65,24 +66,24 @@ export const metadata: Metadata = {
 
 const FAQ_ITEMS = [
   {
-    q: "How does TrueCap classify selected-rule fit?",
-    a: "TrueCap compares modeled cash flow, DSCR, cap rate, and cash-on-cash return with explicit screening thresholds, producing Strong, Solid, Mixed, Marginal, or Negative rule-fit bands. These labels describe the entered assumptions against those rules; they do not decide whether a property is a good investment.",
+    q: "How does TrueCap classify Buy Box fit?",
+    a: "TrueCap compares modeled cash flow, DSCR, cap rate, and cash-on-cash return with explicit thresholds, producing Strong, Solid, Mixed, Marginal, or Negative bands. The label describes how your entered assumptions stack up against those thresholds.",
   },
   {
     q: "What cash flow does TrueCap consider 'good'?",
     a: "$400/month or more net monthly cash flow (after all operating expenses and debt service) clears the Strong threshold. $100-400/month is Solid territory. Below $100/month but still positive is Mixed. Negative cash flow drops you into Marginal (down to -$200) or Negative (worse than -$200).",
   },
   {
-    q: "What DSCR contributes to TrueCap's Strong rule-fit band?",
+    q: "What DSCR contributes to TrueCap's Strong band?",
     a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed/Marginal, and below 1.0 means the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
   },
   {
     q: "How does TrueCap handle all-cash purchases for DSCR?",
-    a: "DSCR doesn't apply to cash purchases because there is no debt service. The selected-rule classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash. These are screening thresholds, not recommendations or evidence that the assumptions are verified.",
+    a: "DSCR doesn't apply to cash purchases because there is no debt service. The Buy Box classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash.",
   },
   {
-    q: "What's the difference between selected-rule fit and the Screening Index?",
-    a: "Selected-rule fit checks the entered assumptions against the named Buy Box or target profile. The Screening Index is a secondary 0-100 weighted triage score with a factor breakdown. It is not evidence readiness, a Buy Box result, an appraisal, lender approval, or investment advice.",
+    q: "What's the difference between Buy Box fit and the Deal score?",
+    a: "Buy Box fit checks your entered assumptions against your Buy Box targets. The Deal score is a 0-100 heuristic summary of the modeled numbers, with a factor breakdown.",
   },
 ];
 
@@ -98,7 +99,7 @@ export default function HowVerdictEngineWorksPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -176,7 +177,7 @@ export default function HowVerdictEngineWorksPost() {
               TL;DR
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              TrueCap&apos;s selected-rule classifier is a small set of explicit
+              TrueCap&apos;s Buy Box classifier is a small set of explicit
               thresholds that groups modeled results into five bands:{" "}
               <strong>Strong, Solid, Mixed, Marginal, Negative</strong>. Strong
               needs{" "}
@@ -190,7 +191,7 @@ export default function HowVerdictEngineWorksPost() {
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
-            <h2>Why we show selected-rule fit</h2>
+            <h2>Why we show Buy Box fit</h2>
             <p>
               A rental analysis spits out numbers — cap rate, cash flow, DSCR,
               cash-on-cash, IRR — and a new investor stares at them wondering if
@@ -199,11 +200,9 @@ export default function HowVerdictEngineWorksPost() {
               needs the assumptions and target basis stated explicitly.
             </p>
             <p>
-              The selected-rule fit groups the modeled outputs into one of five
-              bands and explains which thresholds were met or missed. It does
-              not answer whether someone should buy, pass, or offer. The
-              Screening Index is a secondary triage aid, not evidence readiness
-              or advice.
+              Buy Box fit groups the modeled outputs into one of five
+              bands and explains which thresholds were met or missed. The
+              Deal score (0–100) is a heuristic summary of the modeled numbers.
             </p>
             <p>
               The whole engine is open — the source code is at{" "}
@@ -335,7 +334,7 @@ export default function HowVerdictEngineWorksPost() {
             <p>
               When the analysis says <code>monthlyPayment &lt;= 0</code> — i.e.,
               there&apos;s no financing — DSCR doesn&apos;t mean anything.
-              There&apos;s no debt service to cover. The selected-rule
+              There&apos;s no debt service to cover. The Buy Box
               classifier detects this and switches to a simpler classifier:
             </p>
             <ul>
@@ -452,7 +451,7 @@ export default function HowVerdictEngineWorksPost() {
                 <strong>No partial credit.</strong> Strong requires
                 <em>all three</em> thresholds. Two-out-of-three knocks you to
                 Solid. We thought about a weighted score (that&apos;s what the
-                Screening Index does), while this classifier uses explicit
+                Deal score does), while this classifier uses explicit
                 cutoffs.
               </li>
             </ul>
@@ -461,7 +460,7 @@ export default function HowVerdictEngineWorksPost() {
             <p>
               When you run a property through{" "}
               <Link href="/">the TrueCap analyzer</Link>, start with the core
-              economics and any selected-rule fit. Treat a legacy band as
+              economics and any Buy Box fit. Treat a legacy band as
               secondary context:
             </p>
             <ol>
@@ -495,7 +494,7 @@ export default function HowVerdictEngineWorksPost() {
               entire site. Same engine drives the free analyzer, the saved-deal
               PDF, the share link, the dashboard, and the OG image. If
               you&apos;ve seen the number 6.4% as the cap rate in your TrueCap
-              analysis, that&apos;s the same 6.4% the selected-rule classifier
+              analysis, that&apos;s the same 6.4% the Buy Box classifier
               reads.
             </p>
             <p>
@@ -539,7 +538,7 @@ export default function HowVerdictEngineWorksPost() {
               TrueCap is free to try: paste an address, review every imported
               fact and starting assumption, then enter or confirm the property
               values. You&apos;ll see the core economics first, with
-              selected-rule fit only after targets are explicit.
+              Buy Box fit once your targets are set.
             </p>
             <p className="not-prose"></p>
           </div>
@@ -547,6 +546,8 @@ export default function HowVerdictEngineWorksPost() {
           <div className="mt-10">
             <NewsletterSignup />
           </div>
+
+          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
           <div className="mt-10">
             <RelatedBlogPosts currentSlug={SLUG} limit={3} />

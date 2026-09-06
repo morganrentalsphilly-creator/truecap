@@ -27,6 +27,7 @@ import Link from "next/link";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -458,7 +459,7 @@ export default function BlogPost() {
             not qualify at 75% LTV at all — you would be pushed to 30-35% down
             before the coverage worked. Check yours in the free{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -851,7 +852,7 @@ export default function BlogPost() {
           <p>
             Run your own pair — the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -1080,6 +1081,7 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

@@ -7,7 +7,7 @@
   "body": [
     "Reading about cap rate and DSCR is different from checking how the calculations respond to the assumptions for a specific property.",
     "Choose a supported address, enter the asking price, and review the starting assumptions at usetruecap.com. The preliminary screen is free and does not require a card.",
-    "The screen shows cap rate, cash-on-cash return, DSCR, NOI, an operating-expense breakdown, selected-rule fit, and a secondary Screening Index band — Strong, Solid, Mixed, Marginal, or Negative. The band is triage context, not a probability, appraisal, lender approval, or buy/pass instruction. You can edit assumptions and see the modeled numbers update.",
+    "The screen shows cap rate, cash-on-cash return, DSCR, NOI, an operating-expense breakdown, Buy Box fit, and a Deal score band — Strong, Solid, Mixed, Marginal, or Negative. The band is triage context, not a probability, appraisal, lender approval, or buy/pass instruction. You can edit assumptions and see the modeled numbers update.",
     "Rent comps, public records, and generic defaults can be incomplete or wrong. The editable breakdown helps you identify which inputs still need current evidence before anyone relies on the result.",
     "Use the free screen to practice reviewing assumptions across more properties; verify every material input independently."
   ],

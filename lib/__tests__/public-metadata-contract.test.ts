@@ -35,7 +35,7 @@ const SURFACES = [
     pageTitle: "Free Rental Property Analysis Spreadsheet",
     socialTitle: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
-      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
+      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
   },
   {
     file: "app/vs/page.tsx",

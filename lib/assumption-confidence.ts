@@ -60,7 +60,7 @@ export const ASSUMPTION_META: Record<string, AssumptionMeta> = {
     verify: "Reserve for roof, HVAC, and big systems.",
   },
   propertyTaxPct: {
-    source: "Generic preliminary fallback",
+    source: "TrueCap default",
     confidence: "low",
     verify: "Enter a local annual bill or reviewed effective rate.",
   },

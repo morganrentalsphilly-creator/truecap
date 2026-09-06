@@ -16,7 +16,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -95,8 +97,8 @@ const MATRIX: Row[] = [
     winner: "tie",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     mashvisor: "Investibility score per property",
     winner: "tie",
   },
@@ -258,6 +260,15 @@ export default function VsMashvisorForShortTermRentalsPage() {
           </div>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             TL;DR for Short-term rentals investors
@@ -389,7 +400,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
             rounds up where the data comes from. To put those projections
             through the deal math yourself, our{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -431,6 +442,8 @@ export default function VsMashvisorForShortTermRentalsPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="mashvisor-for-short-term-rentals" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

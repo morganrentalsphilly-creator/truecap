@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -83,8 +85,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Secondary Screening Index",
-    truecap: "Free — 0-100 triage score + factor breakdown",
+    feature: "Deal score (0–100)",
+    truecap: "Free — 0–100 score with factor breakdown",
     batchleads: "Not applicable",
     winner: "truecap",
   },
@@ -206,6 +208,15 @@ export default function VsBatchleadsPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         {/* TL;DR */}
@@ -341,9 +352,8 @@ export default function VsBatchleadsPage() {
             </li>
             <li>
               <strong>Verify, then record your decision.</strong> Use
-              TrueCap&apos;s Offer Ceiling solver (Pro) to calculate the modeled
-              boundary under your selected targets; it is not a recommended
-              offer.
+              TrueCap&apos;s Offer Ceiling (Pro) to find the highest price that
+              still meets your targets.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -403,6 +413,8 @@ export default function VsBatchleadsPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="batchleads" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
@@ -491,14 +503,14 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "Can I use BatchLeads + TrueCap together?",
     answer: (
       <>
-        Yes — BatchLeads can surface off-market leads, and TrueCap can screen
-        user-entered assumptions. The secondary Screening Index supports triage,
-        while the target-dependent Offer Ceiling shows a modeled boundary for
-        review. Neither is a recommended offer.
+        Yes — BatchLeads surfaces off-market leads, and TrueCap screens the
+        assumptions you enter. The Deal score helps you triage the list, and
+        the Offer Ceiling shows the highest price that still meets your
+        targets.
       </>
     ),
     plainTextAnswer:
-      "BatchLeads can surface off-market leads; TrueCap can screen user-entered assumptions. Its secondary Screening Index supports triage, and its target-dependent Offer Ceiling is a modeled boundary—not a recommended offer.",
+      "BatchLeads surfaces off-market leads; TrueCap screens the assumptions you enter. The Deal score helps you triage the list, and the Offer Ceiling shows the highest price that still meets your targets.",
   },
 ];
 

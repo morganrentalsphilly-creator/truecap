@@ -1,6 +1,8 @@
 /**
- * Public /pricing page. Two plans + free, FAQ, trust strip,
- * conversion-focused. For unauthenticated visitors the CTA routes to
+ * Public /pricing page. Outcome line, plans (annual-first), DealCheck
+ * comparison, trust row, product shots, FAQ. Amounts come only from
+ * lib/public-pricing.ts and the Stripe display prices. For
+ * unauthenticated visitors the CTA routes to
  * /auth/sign-up?next=/pricing?checkout=<plan>#plans, so they come back
  * here and PricingPlanButtons auto-resumes the exact checkout they
  * started (the param is read client-side via window.location — no
@@ -12,6 +14,9 @@
  */
 
 import { Suspense } from "react";
+import { Testimonials } from "@/components/marketing/testimonials";
+import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
+import { FounderCard } from "@/components/marketing/founder-card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
@@ -36,7 +41,11 @@ import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
-import { formatPublicUsd, PUBLIC_PRO_MONTHLY_USD } from "@/lib/public-pricing";
+import {
+  DEALCHECK_COMPARISON,
+  formatUsdWhole,
+  PRICING_OUTCOME_EXAMPLE,
+} from "@/lib/public-pricing";
 import {
   formatPricingEvaluationAllowance,
   summarizePricingEvaluation,
@@ -46,7 +55,7 @@ import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Repeat with Pro",
-  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day no-card evaluation with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
+  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
@@ -74,15 +83,19 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. Offer Ceiling, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. Your first personalized decision includes asking-price cash flow, selected-rule fit, a target-backed Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and begin the no-card evaluation.",
+    a: "Yes. Your first decision includes asking-price cash flow, Buy Box fit, the Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and start the free trial.",
   },
   {
     q: "Can I cancel anytime?",
     a: "Yes. Cancel from your profile in one click. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
   },
   {
-    q: "How does the product evaluation work?",
-    a: `A new account receives ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+    q: "How does the free trial work?",
+    a: `A new account gets ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+  },
+  {
+    q: "What does Pro add?",
+    a: "A repeatable decision layer: the Offer Ceiling (the highest price that still meets your targets), Buy Box fit on every deal, downside stress tests, side-by-side comparisons, and a report you can hand to a partner or lender. If you only need metrics, the free analyzer already gives you those.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -109,7 +122,7 @@ const FEATURE_COMPARISON: Array<
   ["Unlimited preliminary core screens", true, true],
   ["Cap rate · CoC · DSCR · cash flow", true, true],
   ["Labeled HUD rent · FRED rate benchmarks", true, true],
-  ["Screening Index (0–100) with factor breakdown", true, true],
+  ["Deal score (0–100) with factor breakdown", true, true],
   ["Sale + rent comps from the address", "1 free", "50 / mo"],
   ["Offer Ceiling · downside sensitivity", "First complete decision", true],
   ["Shareable read-only deal links", true, true],
@@ -244,9 +257,17 @@ export default async function PricingPage() {
               <Sparkles className="size-3" />
               Analyze free · No card required
             </div>
-            <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              From first screen to shareable underwrite.{" "}
-              <span className="text-primary">One review workflow.</span>
+            {/* Lead with the outcome (docs/site-overhaul.md Phase 9). The
+                arithmetic is deliberately simple and checkable and every
+                figure comes from PRICING_OUTCOME_EXAMPLE, not this file. */}
+            <h1
+              data-pricing-outcome
+              className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl"
+            >
+              Overpaying by {PRICING_OUTCOME_EXAMPLE.overpayPct}% on a{" "}
+              {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.purchasePriceUsd)} rental costs{" "}
+              {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.overpayUsd)}{" "}
+              <span className="text-primary">— before you collect a dollar of rent.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {!user
@@ -254,16 +275,16 @@ export default async function PricingPage() {
                 : activePaidPlanSlug || billingRecoveryRequired
                   ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
                   : pricingEvaluation.status === "active" && evaluationAllowance
-                    ? `Your no-card evaluation has ${evaluationAllowance}.`
+                    ? `Your free trial has ${evaluationAllowance}.`
                     : pricingEvaluation.status === "exhausted"
-                      ? "Your included evaluation runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                      ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
                       : pricingEvaluation.status === "expired"
-                        ? "Your no-card evaluation has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                        ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
                         : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
-                href="/#main"
+                href="/analyze"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Analyze a property free
@@ -276,6 +297,104 @@ export default async function PricingPage() {
               </Link>
             </div>
           </div>
+        </section>
+
+        {/* Plans — 2-card layout with Monthly ↔ Annual toggle on Pro
+            (replaced the previous 3-card side-by-side). The toggle
+            consistently outperforms separate cards because users
+            directly compare per-month cost. ~10-15% lift on annual. */}
+        {/* id="plans" — scroll target for exit-intent CTAs and any other
+            deep link that needs to land directly on the plan toggle. */}
+        <section
+          id="plans"
+          className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6"
+        >
+          {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
+              points back here with ?billing=checkout_cancelled. Suspense keeps
+              the page's rendering unaffected by the banner's useSearchParams. */}
+          <Suspense fallback={null}>
+            <CheckoutCancelledBanner
+              hadPriorSubscription={hadPriorSubscription}
+              evaluation={pricingEvaluation}
+            />
+          </Suspense>
+          <PricingTogglePlans
+            monthly={monthly}
+            annual={annual}
+            agentMonthly={agentMonthly}
+            agentAnnual={agentAnnual}
+            isAuthenticated={Boolean(user)}
+            activePaidPlanSlug={activePaidPlanSlug}
+            evaluation={pricingEvaluation}
+            billingRecoveryRequired={billingRecoveryRequired}
+            agentProConfigured={agentProConfigured}
+            proOfferName={proOfferName}
+          />
+
+          {/* One honest comparison (docs/site-overhaul.md Phase 9). The
+              DealCheck figures are its published monthly tiers, checked
+              against dealcheck.io/pricing on 2026-09-06; they live in
+              DEALCHECK_COMPARISON so this file holds no amounts. */}
+          <div
+            data-pricing-comparison
+            className="mx-auto mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5 text-center sm:p-6"
+          >
+            <h2 className="text-base font-extrabold tracking-tight text-foreground sm:text-lg">
+              How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
+              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro)
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
+              Box fit, downside stress test, and a memo. If you only need metrics,
+              DealCheck or a spreadsheet is fine.
+            </p>
+            <Link
+              href={DEALCHECK_COMPARISON.href}
+              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Read the full DealCheck comparison
+            </Link>
+          </div>
+
+          {/* Verified customer quotes near the CTAs (2026-08 offer rollout,
+              superseding the earlier ticker-only stance). Renders null until
+              records pass the lib/proof-records.ts verification + approval
+              gate, so the ticker below stays the sole proof until real
+              quotes exist — nothing fake can render here. */}
+          <div className="mx-auto mt-8 max-w-4xl">
+            <TestimonialStrip limit={2} />
+          </div>
+          {/* Consented quotes from the in-product prompt (Phase 5); renders
+              nothing until real published rows exist. */}
+          <Testimonials limit={3} heading="From people who pay for it" className="mx-auto max-w-5xl" />
+
+          {/* Trust row (Phase 9): the four facts a buyer checks before the
+              card form. Each is true today: no card to start (evaluation
+              flow), cancel from the profile, Stripe Checkout, and the
+              public methodology page. */}
+          <ul
+            data-pricing-trust-row
+            className="mx-auto mt-6 flex max-w-3xl list-none flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground"
+          >
+            <li className="inline-flex items-center gap-1.5">
+              <ShieldCheck aria-hidden className="size-4 text-[var(--metric-positive)]" />
+              <strong className="text-foreground">Free to start — no card</strong>
+            </li>
+            <li>
+              <strong className="text-foreground">Cancel anytime from your profile</strong>
+            </li>
+            <li>
+              <strong className="text-foreground">Payments handled by Stripe</strong>
+            </li>
+            <li>
+              <Link
+                href="/methodology"
+                className="font-bold text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Methodology is public
+              </Link>
+            </li>
+          </ul>
         </section>
 
         <section
@@ -335,90 +454,45 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* Plans — 2-card layout with Monthly ↔ Annual toggle on Pro
-            (replaced the previous 3-card side-by-side). The toggle
-            consistently outperforms separate cards because users
-            directly compare per-month cost. ~10-15% lift on annual. */}
-        {/* id="plans" — scroll target for exit-intent CTAs and any other
-            deep link that needs to land directly on the plan toggle. */}
+        {/* What each tier produces — REAL screenshots from the sample flow
+            (Phase 4). One per tier; Agent Pro only when it is sold. */}
         <section
-          id="plans"
-          className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6"
+          aria-labelledby="pricing-shots-title"
+          className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16"
         >
-          {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
-              points back here with ?billing=checkout_cancelled. Suspense keeps
-              the page's rendering unaffected by the banner's useSearchParams. */}
-          <Suspense fallback={null}>
-            <CheckoutCancelledBanner
-              hadPriorSubscription={hadPriorSubscription}
-              evaluation={pricingEvaluation}
+          <h2
+            id="pricing-shots-title"
+            className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+          >
+            What you get at each tier
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
+            Real output from the free sample deal, not mockups.{" "}
+            <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">
+              Run it yourself →
+            </Link>
+          </p>
+          <div className={`mt-8 grid gap-8 md:grid-cols-2 ${agentProConfigured ? "lg:grid-cols-3" : ""}`}>
+            <ProductShot
+              shot={DECISION_SHOT}
+              alt="Free tier: the decision view for the sample deal — the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+              caption={<><strong className="text-foreground">Free.</strong> Your first full decision.</>}
             />
-          </Suspense>
-          <PricingTogglePlans
-            monthly={monthly}
-            annual={annual}
-            agentMonthly={agentMonthly}
-            agentAnnual={agentAnnual}
-            isAuthenticated={Boolean(user)}
-            activePaidPlanSlug={activePaidPlanSlug}
-            evaluation={pricingEvaluation}
-            billingRecoveryRequired={billingRecoveryRequired}
-            agentProConfigured={agentProConfigured}
-            proOfferName={proOfferName}
-          />
-
-          {/* Avoided-mistake frame (2026-08 offer rollout): the price
-              objection is answered against the cost of overpaying on the
-              asset — not against hourly time savings (the previous $/hr
-              ROI widget framing was retired with the repositioning). The
-              arithmetic is deliberately simple and checkable: 3% × $250,000
-              = $7,500. */}
-          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5 text-center sm:p-6">
-            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-              <strong className="text-foreground">
-                Overpaying by even 3% on a $250,000 rental costs $7,500
-              </strong>{" "}
-              — before you collect a dollar of rent. {proOfferName} is{" "}
-              {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month and computes an
-              Offer Ceiling under the selected targets on every deal you review.
-            </p>
+            <ProductShot
+              shot={RENT_BREAKDOWN_SHOT}
+              alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
+              caption={<><strong className="text-foreground">{proOfferName}.</strong> Every deal, saved, compared, and re-run.</>}
+            />
+            {agentProConfigured ? (
+              <ProductShot
+                shot={MEMO_SHOT}
+                alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+                caption={<><strong className="text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
+              />
+            ) : null}
           </div>
-
-          {/* Verified customer quotes near the CTAs (2026-08 offer rollout,
-              superseding the earlier ticker-only stance). Renders null until
-              records pass the lib/proof-records.ts verification + approval
-              gate, so the ticker below stays the sole proof until real
-              quotes exist — nothing fake can render here. */}
-          <div className="mx-auto mt-8 max-w-4xl">
-            <TestimonialStrip limit={2} />
-          </div>
-
-          {/* Trust strip */}
-          <div className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">
-                Free to start — no card
-              </strong>
-            </span>
-            <span aria-hidden className="text-muted-foreground/40">
-              ·
-            </span>
-            <span>
-              <strong className="text-foreground">
-                {EVALUATION_FACTS.durationDays}-day evaluation ·{" "}
-                {EVALUATION_FACTS.dealLimit} Pro deals ·{" "}
-                {EVALUATION_FACTS.comparisonLimit} comparison
-              </strong>
-            </span>
-            <span aria-hidden className="text-muted-foreground/40">
-              ·
-            </span>
-            <span>
-              <strong className="text-foreground">
-                No card, no auto-renewal
-              </strong>
-            </span>
+          <div className="mx-auto mt-10 max-w-xl">
+            <FounderCard />
           </div>
         </section>
 
@@ -433,7 +507,7 @@ export default async function PricingPage() {
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
             Free answers whether the deal deserves attention. Pro shows the
-            target-dependent ceiling, what could break, and what to verify next.
+            Offer Ceiling, what could break, and what to verify next.
           </p>
           {/* Phones use stacked comparison cards; tablet and desktop keep the
               denser semantic table. No narrow viewport has to pan sideways. */}

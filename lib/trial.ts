@@ -6,7 +6,7 @@ import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
  * charge is scheduled when it begins.
  */
 export const TRIAL_DAYS = PRODUCT_EVALUATION_DAYS;
-export const TRIAL_LABEL = `${TRIAL_DAYS}-day no-card product evaluation`;
+export const TRIAL_LABEL = `${TRIAL_DAYS}-day free trial, no card`;
 
 /**
  * Mirror of the checkout repeat-trial guard (app/actions/billing.ts:

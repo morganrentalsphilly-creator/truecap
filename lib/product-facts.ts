@@ -40,11 +40,11 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 const pct = (value: unknown) => `${Number(value)}%`;
 
 export const PRODUCT_POSITIONING =
-  "TrueCap turns an address or supported listing into a preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.";
+  "TrueCap turns an address or supported listing into a rental screen with editable assumptions and an Offer Ceiling — the highest price that still meets your targets.";
 
 export const FOUR_ACQUISITION_ANSWERS = [
-  "Selected-rule fit at asking",
-  "Offer Ceiling under your rules",
+  "Buy Box fit at asking",
+  "Offer Ceiling for your targets",
   "What could break",
   "What to verify",
 ] as const;
@@ -69,14 +69,14 @@ export const PROPERTY_TAX_FACTS = {
     "reviewed local effective rate",
   ] as const,
   blankFieldBehavior:
-    "A blank property-tax field uses a disclosed generic 1.1% of purchase price preliminary fallback.",
+    "A blank property-tax field uses a TrueCap default of 1.1% of purchase price — replace it with your local number.",
   notAutoFilled:
-    "Released underwriting does not auto-fill property tax from a state average or parcel source.",
+    "TrueCap does not auto-fill property tax from a state average or parcel source.",
 } as const;
 
 export const FINANCIAL_PRODUCT_DISCLAIMERS = [
   "TrueCap is a preliminary underwriting model, not an appraisal, inspection, lender approval, tax opinion, legal opinion, offer recommendation, or investment advice.",
-  "The Offer Ceiling is the highest modeled purchase price that meets the selected released targets under the assumptions shown; it is not a recommended offer.",
+  "The Offer Ceiling is the highest price that still meets your targets under the assumptions shown; it is not a recommended offer.",
   "HUD rent and FRED mortgage-rate values are editable screening benchmarks, not property-specific rent comps or investor loan quotes.",
   "Replace every material assumption with property-specific evidence before relying on a result.",
 ] as const;
@@ -158,7 +158,7 @@ export const PRODUCT_PLAN_FACTS = {
     autoRenews: false,
   },
   evaluation: {
-    name: "No-card product evaluation",
+    name: "Free trial (no card)",
     durationDays: PRODUCT_EVALUATION_DAYS,
     dealLimit: PRODUCT_EVALUATION_DEAL_LIMIT,
     comparisonLimit: PRODUCT_EVALUATION_COMPARISON_LIMIT,
@@ -206,7 +206,7 @@ export function getPlanFacts() {
   const availability = getProductAvailabilityFacts();
   const oneTimePurchase = getOneTimePurchaseFacts();
   return {
-    free: `No-signup preliminary screen with editable assumptions, core modeled metrics, selected-rule context, and ${PRODUCT_PLAN_FACTS.free.savedDealLimit} saved deals after account creation.`,
+    free: `No-signup screen with editable assumptions, core modeled metrics, Buy Box context, and ${PRODUCT_PLAN_FACTS.free.savedDealLimit} saved deals after account creation.`,
     singleDeal: availability.oneTimePurchase
       ? `${oneTimePurchase.name} is available as a non-renewing ${oneTimePurchase.displayPrice} one-time purchase.`
       : "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
@@ -214,7 +214,7 @@ export function getPlanFacts() {
       ? "Investor Pro is available on this deployment with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports."
       : "Investor Pro checkout is not configured on this deployment.",
     agentPro: availability.agentPro
-      ? "Agent Pro is available on this deployment and adds released client-roster and client-buy-box workflows to Investor Pro."
+      ? "Agent Pro is available on this deployment and adds client-roster and client Buy Box workflows to Investor Pro."
       : "Agent Pro checkout is not configured on this deployment.",
     evaluationDays: PRODUCT_PLAN_FACTS.evaluation.durationDays,
     evaluationDealLimit: PRODUCT_PLAN_FACTS.evaluation.dealLimit,
@@ -227,7 +227,7 @@ export function getPlanFacts() {
 
 /** Retained for imports that do not need deployment-specific availability. */
 export const PLAN_FACTS = {
-  free: "No-signup preliminary screen with editable assumptions, core modeled metrics, and selected-rule context.",
+  free: "No-signup screen with editable assumptions, core modeled metrics, and Buy Box context.",
   singleDeal:
     "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
   pro: "Repeat underwriting workflow with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports.",

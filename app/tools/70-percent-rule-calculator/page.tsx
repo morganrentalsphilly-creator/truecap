@@ -23,6 +23,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -52,11 +53,11 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is the 70% rule in real estate?",
-    a: "It's a rule of thumb that calculates a screening boundary at 70% of a property's projected after-repair value (ARV) minus repairs. On a property modeled at $300,000 renovated with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; buying, holding, and selling costs come first. This boundary is not a recommended offer or appraisal.",
+    a: "It's a rule of thumb that calculates a screening boundary at 70% of a property's projected after-repair value (ARV) minus repairs. On a property modeled at $300,000 renovated with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; buying, holding, and selling costs come first.",
   },
   {
     q: "Is the 70%-rule price screen the same as TrueCap's Offer Ceiling?",
-    a: "No — they are different calculations and should not be compared. The 70%-rule price screen on this page is a rule of thumb: entered ARV × your selected multiplier, minus entered repairs. TrueCap's Offer Ceiling is a separate, target-backed result from the full underwriting model: the highest modeled price that still satisfies the return targets you explicitly adopt, under your financing and operating assumptions. This page does not compute an Offer Ceiling. Both are screening boundaries, not recommended offers or appraisals.",
+    a: "No — they are different calculations and should not be compared. The 70%-rule price screen on this page is a rule of thumb: entered ARV × your selected multiplier, minus entered repairs. TrueCap's Offer Ceiling is a separate result from the full underwriting model: the highest price that still meets your targets, under your financing and operating assumptions. This page does not compute an Offer Ceiling.",
   },
   {
     q: "Where does the ARV number come from?",
@@ -72,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why is the 70%-rule price screen rounded down to $500?",
-    a: "Rounding down keeps the displayed amount at or below the rule's own modeled boundary. The same convention is used for TrueCap's target-dependent Offer Ceiling. It does not make the result a recommended offer.",
+    a: "Rounding down keeps the displayed amount at or below the rule's own modeled boundary. TrueCap's Offer Ceiling uses the same convention.",
   },
 ];
 
@@ -314,7 +315,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               full cycle with the{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>, and
               check the rental math in the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
+              <Link href="/analyze" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
               — cap rate and DSCR together — before you commit.
             </p>
 
@@ -349,10 +350,10 @@ export default function SeventyPercentRuleCalculatorPage() {
             <p>
               When a deal passes the screen, back into the offer using a
               separate, reviewed project ledger for acquisition, renovation,
-              holding, financing, and disposition costs. TrueCap&apos;s released
-              analyzer can screen only the stabilized rental case, including
-              cash flow, cap rate, cash-on-cash return, DSCR, selected-rule fit,
-              and a secondary Screening Index.
+              holding, financing, and disposition costs. TrueCap&apos;s
+              analyzer screens only the stabilized rental case, including
+              cash flow, cap rate, cash-on-cash return, DSCR, Buy Box fit,
+              and a Deal score.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -383,17 +384,17 @@ export default function SeventyPercentRuleCalculatorPage() {
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               The 70% rule is an early acquisition screen, not a defensible
-              offer by itself. TrueCap&apos;s released rental analyzer calculates a
-              target-dependent Offer Ceiling for a stabilized hold from the
-              selected targets and assumptions shown.
+              offer by itself. For a stabilized hold, TrueCap&apos;s Offer Ceiling
+              is the highest price that still meets your targets, calculated
+              from the assumptions shown.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Entered-ARV × selected-multiplier screen on this page",
                 "Editable rehab and acquisition-cost assumptions",
-                "Target-dependent rental 70%-rule price screen (Pro)",
+                "TrueCap's Offer Ceiling for the rental case (Pro)",
                 "Cash flow, cap rate, CoC, DSCR on the keep scenario",
-                "Selected-rule fit, with a secondary Screening Index",
+                "Buy Box fit, with a Deal score",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -406,7 +407,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               href="/"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Open the released rental analyzer
+              Open the rental analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
@@ -416,7 +417,9 @@ export default function SeventyPercentRuleCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="70-percent-rule-calculator" />
 
-          <ToolsConversionCta calculatorName="70% rule calculator" hook="The 70% rule is an initial screen. TrueCap's released rental analyzer adds itemized costs, stabilized cash flow, and a target-dependent Offer Ceiling under the selected rules. The result is not a recommended offer." />
+          <ToolsConversionCta calculatorName="70% rule calculator" hook="The 70% rule is an initial screen. TrueCap's rental analyzer adds itemized costs, stabilized cash flow, and TrueCap's Offer Ceiling under your Buy Box." />
+
+          <RelatedContent kind="tool" slug="70-percent-rule-calculator" title="70% Rule Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

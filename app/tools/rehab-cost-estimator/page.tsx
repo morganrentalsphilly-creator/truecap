@@ -8,6 +8,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
@@ -299,6 +300,8 @@ export default function RehabEstimatorPage() {
 
 
           <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the released rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
+
+          <RelatedContent kind="tool" slug="rehab-cost-estimator" title="Rehab Cost Estimator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

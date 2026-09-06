@@ -64,10 +64,10 @@ export function buildVerdictSentence(input: VerdictSentenceInput): VerdictSenten
   // Price only (Free tier, or the solver found no supported ceiling).
   if (price) {
     return {
-      text: `Review the selected rules and assumptions at the ${money(price)} asking price.`,
+      text: `Review your targets and assumptions at the ${money(price)} asking price.`,
       hasOffer: false,
     };
   }
 
-  return { text: "Review the selected rules and assumptions.", hasOffer: false };
+  return { text: "Review your targets and assumptions.", hasOffer: false };
 }

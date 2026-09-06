@@ -124,13 +124,20 @@ describe("content hub touch targets", () => {
 
 describe("homepage loading boundaries", () => {
   it("keeps hero and analyzer SSR while deferring post-analysis dialogs", () => {
-    const homepage = read("app/page.tsx");
-    expect(homepage).toContain(
+    // The analyzer lives at /analyze (the homepage ships no calculator JS);
+    // it is a STATIC import there so the form server-renders.
+    const analyzePage = read("app/analyze/page.tsx");
+    expect(analyzePage).toContain(
+      'from "@/components/marketing/analyze-page-content"',
+    );
+    const analyzeContent = read("components/marketing/analyze-page-content.tsx");
+    expect(analyzeContent).toContain(
       'import { InvestCalcPage } from "@/components/investcalc/investcalc-page"',
     );
-    expect(homepage.indexOf("<MarketingHero />")).toBeLessThan(
-      homepage.indexOf("<InvestCalcPage"),
-    );
+    expect(analyzeContent).not.toContain("dynamic(");
+    const homepage = read("app/page.tsx");
+    expect(homepage).toContain("<MarketingHero />");
+    expect(homepage).not.toContain("<InvestCalcPage");
 
     const calculator = read("components/investcalc/investcalc-page.tsx");
     expect(calculator).not.toContain(

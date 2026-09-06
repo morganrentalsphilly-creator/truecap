@@ -20,7 +20,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -113,8 +115,8 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "Screening Index with breakdown",
-    truecap: "Free — 0-100 screening score with subscore drill-down",
+    feature: "Deal score with breakdown",
+    truecap: "Free — 0–100 score with subscore drill-down",
     roofstock: "Confirm any rating methodology in the current offering",
     winner: "truecap",
   },
@@ -240,6 +242,15 @@ export default function VsRoofstockPage() {
           </p>
         </section>
 
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
+        </section>
+
         {/* TL;DR */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
@@ -267,7 +278,7 @@ export default function VsRoofstockPage() {
                   year-one snapshot.
                 </li>
                 <li>
-                  You want a Screening Index with a transparent breakdown.
+                  You want a Deal score with a transparent breakdown.
                 </li>
               </ul>
             </div>
@@ -406,10 +417,9 @@ export default function VsRoofstockPage() {
               scenarios. The grid is decision support, not a forecast.
             </li>
             <li>
-              <strong>Review the Screening Index and its inputs.</strong> The
-              secondary index is a screening aid, not a buy, decline, appraisal,
-              or investment recommendation. Apply your own criteria and complete
-              diligence.
+              <strong>Review the Deal score and its inputs.</strong> It is a
+              heuristic summary of the modeled numbers, 0–100. Apply your own
+              criteria and complete diligence.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -483,6 +493,8 @@ export default function VsRoofstockPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="roofstock" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

@@ -108,9 +108,9 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     for (const path of HEURISTIC_SURFACES) {
       for (const line of read(path).split("\n")) {
         if (!/Offer Ceiling/.test(line)) continue;
-        // Permitted: naming TrueCap's target-backed solver as a DIFFERENT thing.
+        // Permitted: naming TrueCap's own solver as a DIFFERENT thing.
         expect(
-          /target-dependent Offer Ceiling|TrueCap's Offer Ceiling|does not compute an Offer Ceiling/.test(
+          /TrueCap(?:'s|&apos;s) Offer Ceiling|does not compute an Offer Ceiling/.test(
             line,
           ),
           `${path} uses "Offer Ceiling" for the heuristic: ${line.trim().slice(0, 120)}`,

@@ -1,11 +1,11 @@
 /**
  * Dynamic city + strategy verification page.
  *
- * Combo records contain hand-curated price, rent, cap-rate, neighborhood,
- * timing, legal, and strategy narratives. Those fields are stale-review and
- * must not render until authoritative dependencies and as-of dates are
- * attached. The route preserves canonical long-tail URLs and uses only combo
- * identity fields plus a generic, honest analyzer handoff.
+ * Combo records carry hand-authored price, rent, cap-rate, neighborhood,
+ * timing, legal, and strategy narratives; the route renders only the combo's
+ * identity fields plus the city's HUD rent (when it exists) and a generic,
+ * honest analyzer handoff. A combo whose city has no HUD rent is
+ * `noindex, follow` (lib/markets/indexability.ts).
  */
 
 import type { Metadata } from "next";
@@ -14,6 +14,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { Header } from "@/components/investcalc/header";
+import { MarketDataAsOf } from "@/components/marketing/safe-market-page";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -21,9 +22,17 @@ import {
   CITY_STRATEGY_COMBOS,
   getCityStrategyCombo,
 } from "@/lib/city-strategy-combos";
+import {
+  NOINDEX_FOLLOW,
+  getMarketDataYear,
+  getMarketHudRent,
+  isStrategyIndexable,
+} from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamicParams = false;
+
+const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
 export async function generateStaticParams() {
   return CITY_STRATEGY_COMBOS.map((combo) => ({
@@ -47,7 +56,7 @@ export async function generateMetadata({
   }
 
   const title = `${combo.strategyLabel} screening in ${combo.cityName}`;
-  const description = `A source-first checklist for reviewing a specific ${combo.cityName} property under a ${combo.strategyLabel} scenario—without unsourced market ranges or investment verdicts.`;
+  const description = `What to verify before a ${combo.strategyLabel} offer on a ${combo.cityName} property, with the HUD rent benchmark when one exists and an analyzer handoff.`;
 
   return {
     title,
@@ -58,6 +67,9 @@ export async function generateMetadata({
       `${combo.strategyLabel.toLowerCase()} verification checklist`,
     ],
     alternates: { canonical: `/markets/${combo.citySlug}/${combo.strategy}` },
+    // Thin template: noindex,follow until STRATEGY_PAGES_INDEXABLE flips
+    // (lib/markets/indexability.ts); the city rule still applies after that.
+    robots: isStrategyIndexable(combo.citySlug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
       title,
       description,
@@ -80,7 +92,9 @@ export default async function CityStrategyPage({
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${combo.citySlug}/${combo.strategy}`;
-  const description = `Review property-specific evidence for a ${combo.strategyLabel} scenario in ${combo.cityName}. No hand-curated market range or neighborhood recommendation is published from the stale-review registry.`;
+  const hud = getMarketHudRent(combo.citySlug);
+  const year = getMarketDataYear(combo.citySlug);
+  const description = `Review property-specific evidence for a ${combo.strategyLabel} scenario in ${combo.cityName}. TrueCap doesn't publish a market range or neighborhood recommendation for this city.`;
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
@@ -114,7 +128,7 @@ export default async function CityStrategyPage({
     name: `${combo.strategyLabel} screening in ${combo.cityName}`,
     description,
     url: canonicalUrl,
-    dateModified: "2026-08-29",
+    dateModified: "2026-09-06",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -127,7 +141,7 @@ export default async function CityStrategyPage({
         name: `Does this page recommend ${combo.strategyLabel} in ${combo.cityName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `No. The page preserves a strategy-specific verification workflow but does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
+          text: `No. This page gives you a strategy-specific verification checklist. It does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
         },
       },
       {
@@ -187,7 +201,7 @@ export default async function CityStrategyPage({
         </nav>
 
         <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          {combo.cityName}, {combo.state} · Source-first strategy guide
+          {combo.cityName}, {combo.state} · {combo.strategyLabel}
         </p>
         <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           {combo.strategyLabel} screening in {combo.cityName}
@@ -195,9 +209,24 @@ export default async function CityStrategyPage({
         <p className="mt-5 text-lg leading-relaxed text-foreground">
           A city-and-strategy label does not establish a property&apos;s price,
           rent, cap rate, neighborhood fit, legal eligibility, financing, or
-          outcome. This page keeps the review path public while hand-curated
-          registry claims remain hidden pending authoritative dependencies.
+          outcome. This page shows you what to verify.{" "}
+          TrueCap does not publish a market range or neighborhood pick for this city.
         </p>
+        {hud ? (
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            HUD Fair Market Rent, FY{hud.year}, for the area that contains{" "}
+            {combo.cityName}: {usd(hud.rent2br)}/mo for 2 bedrooms,{" "}
+            {usd(hud.rent3br)}/mo for 3 bedrooms. The{" "}
+            <Link
+              href={`/markets/${combo.citySlug}`}
+              className="font-semibold text-primary hover:underline"
+            >
+              {combo.cityName} market page
+            </Link>{" "}
+            shows what that rent pencils to on a sample deal.
+          </p>
+        ) : null}
+        <MarketDataAsOf year={year} />
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
           <h2 className="text-xl font-extrabold text-foreground">
@@ -228,28 +257,16 @@ export default async function CityStrategyPage({
           </ul>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
-          <h2 className="text-base font-extrabold text-foreground">
-            Stale-review boundary
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-foreground">
-            The page intentionally omits hand-authored purchase-price, rent,
-            cap-rate, neighborhood, timing, legal, and strategy-fit statements.
-            Calling a range illustrative does not make an unsourced current
-            market claim publication-ready.
-          </p>
-        </section>
-
         <section className="mt-12 rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
           <h2 className="text-xl font-extrabold sm:text-2xl">
             Start a {combo.cityName} {combo.strategyLabel} screen
           </h2>
           <p className="mb-5 mt-2 text-sm opacity-90 sm:text-base">
-            The handoff carries {combo.cityName}, {combo.state} and the closest
-            released analyzer strategy. Enter a supported property address and
-            asking price, then review labeled rent and rate benchmarks plus
-            editable assumptions. A 10-year planning view requires entitled
-            access; this link does not preload market ranges.
+            This link opens the analyzer with {combo.cityName}, {combo.state}{" "}
+            and the closest matching strategy. Enter a supported property
+            address and asking price, then review the labeled rent and rate
+            benchmarks and edit any assumption. The 10-year projection is a Pro
+            feature; this link does not preload market ranges.
           </p>
           <AnalyzerHandoffLink
             handoffHref={`${buildAnalyzerHandoffUrl(

@@ -341,7 +341,7 @@ export function OperatingExpensesSection({
                 {hasPrice ? `$${propertyTaxEst.toLocaleString()}/mo` : "—"}
                 {!hasExplicitPropertyTax ? (
                   <span className="ml-1 font-normal text-amber-700">
-                    (generic 1.1% preliminary fallback)
+                    (1.1% default — replace with your local number)
                   </span>
                 ) : null}
               </span>

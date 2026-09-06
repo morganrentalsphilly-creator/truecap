@@ -49,7 +49,7 @@ describe("focused decision safety", () => {
       "Negotiate to ${money(offerCeiling.ceiling)} or less — or pass",
     );
     expect(summary).toContain(
-      "above the Offer Ceiling under the selected rules",
+      "above the Offer Ceiling under your targets",
     );
     expect(summary).toContain("Record the investment decision yourself");
     expect(dashboard).toContain(

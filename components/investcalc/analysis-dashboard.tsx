@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import { Disclaimer } from "@/components/marketing/disclaimer";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -1443,7 +1444,7 @@ export function AnalysisDashboard({
         : returnSummary?.irrPct != null
           ? `IRR ${returnSummary.irrPct.toFixed(1)}% over ${returnSummary.years} yrs`
           : "When should you sell? Model the exit",
-    strategies: "Run released specialist strategy scenarios",
+    strategies: "Run specialist strategy scenarios",
     "stress-test": deferredWhatIfState?.isAdjusted
       ? `${deferredWhatIfState.result.netCashFlow >= 0 ? "Survives" : "Goes negative under"} ${formatAdjustmentLabel(
           deferredWhatIfState.rentPct,
@@ -1583,7 +1584,7 @@ export function AnalysisDashboard({
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
             Checking the saved Buy Box rules for this strategy before showing
-            any target-backed fit or Offer Ceiling.
+            a fit or Offer Ceiling.
           </p>
         </section>
       ) : decisionFirst &&
@@ -1702,13 +1703,13 @@ export function AnalysisDashboard({
               className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-border bg-muted/20 px-4 py-2.5"
             >
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Screening Index
+                Deal score
               </p>
               <p className="font-mono text-sm font-extrabold tabular-nums text-foreground">
                 {Math.round(dealScoreResult.data.score)}/100
               </p>
               <p className="text-[11px] text-muted-foreground">
-                Secondary screening heuristic — not investment advice. Method v
+                A heuristic summary of the modeled numbers, 0–100. Method v
                 {dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
               </p>
             </div>
@@ -2325,8 +2326,8 @@ export function AnalysisDashboard({
                 ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Highest modeled price that still meets {maoQaContext.basis}{" "}
-                under the assumptions shown. This is not a recommended offer.
+                The highest price that still meets {maoQaContext.basis}{" "}
+                under the assumptions shown.
               </p>
             </div>
             <div className="text-sm sm:text-right">
@@ -3635,6 +3636,10 @@ function CashFlowTab({
       {/* Compare financing scenarios - Pro feature. Self-hides on
           cash purchases. Click-to-open keeps default surface clean. */}
       <MortgageScenarioCompare result={result} values={values} isPro={isPro} />
+      {/* THE disclaimer (docs/voice.md rule 3): once, at the bottom of the
+          results view. The footer's copy is switched off on /analyze so a
+          page with results shows exactly one. */}
+      <Disclaimer tone="card" className="mt-6" />
     </div>
   );
 }

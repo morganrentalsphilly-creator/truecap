@@ -29,7 +29,9 @@
     "build-market-safmr:dry": "npx -y tsx scripts/build-market-safmr.ts --dry-run",
     "build-intelligence-pack": "npx -y tsx scripts/build-market-intelligence-pack.ts",
     "snapshot": "npx -y tsx scripts/numeric-snapshot.ts",
-    "pdf:check": "npx -y tsx scripts/pdf-visual-check.ts"
+    "pdf:check": "npx -y tsx scripts/pdf-visual-check.ts",
+    "perf:lighthouse": "npx -y @lhci/cli@0.15 autorun",
+    "analyze": "ANALYZE=true next build --webpack"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -77,6 +79,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@next/bundle-analyzer": "^16.3.4",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
@@ -93,5 +96,10 @@
   },
   "overrides": {
     "form-data": "^4.0.6"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "> 0.5%"
+  ]
 }

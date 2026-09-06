@@ -2,45 +2,59 @@
  * Dynamic city market page at /markets/[city].
  *
  * Data-driven local-SEO landing page generated from MARKET_CITIES
- * (lib/markets/cities.ts). Mirrors the bespoke market pages (e.g.
- * app/markets/philadelphia) but scales from a dataset so we can add
- * cities without hand-writing a page each time.
+ * (lib/markets/cities.ts). Bespoke static routes under
+ * app/markets/<city>/page.tsx take precedence; both render paths share the
+ * sections in components/marketing/safe-market-page.tsx.
  *
- * Only checked-in HUD rent data is rendered as a numeric market fact. The
- * hand-curated city, cap-rate, price, tax, neighborhood, and strategy records
- * remain internal stale-review inputs until authoritative dependencies are
- * attached; they must not leak into visible copy or structured data. Bespoke
- * static routes under app/markets/<city>/page.tsx take precedence.
+ * What the page publishes (docs/site-overhaul.md Phase 8.1): HUD Fair Market
+ * Rent for the slug (hud-rents.ts, plus ZIP-level SAFMR rows when HUD has
+ * them), a sample underwrite run through the real engine with the HUD
+ * 3-bedroom rent, and plain local-verification guidance. A city without HUD
+ * rent stays short, honest, and `noindex, follow`
+ * (lib/markets/indexability.ts). The hand-authored blurb, ranges, angle, and
+ * neighborhood fields in cities.ts are not rendered.
  */
 
 import type { Metadata } from "next";
-import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calculator, MapPin } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
+import {
+  MarketDataAsOf,
+  MarketFmrSection,
+  MarketRelatedReading,
+  MarketSampleUnderwrite,
+  MarketVerifyLocally,
+} from "@/components/marketing/safe-market-page";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 import {
   MARKET_CITIES,
   getMarketCity,
   getMarketCityParams,
 } from "@/lib/markets/cities";
-import { HUD_RENTS } from "@/lib/markets/hud-rents";
-import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
+import {
+  NOINDEX_FOLLOW,
+  getMarketDataYear,
+  getMarketHudRent,
+  isMarketIndexable,
+} from "@/lib/markets/indexability";
 import {
   buildMarketCityDescription,
   buildMarketCityTitle,
 } from "@/lib/markets/market-city-seo";
-import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
-import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
-import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
+import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 
 // Candidates only. Anything not currently released is filtered out below, so
-// a market page can never link a reader to a gated tool. The previous list
-// pointed four of its five links at calculators that now fail closed.
+// a market page can never link a reader to a gated tool.
 const RELATED_TOOL_CANDIDATES: { slug: string; label: string }[] = [
   { slug: "mortgage-payment-calculator", label: "Mortgage payment calculator" },
   { slug: "break-even-calculator", label: "Break-even calculator" },
@@ -52,6 +66,8 @@ const RELATED_TOOL_CANDIDATES: { slug: string; label: string }[] = [
 const RELATED_TOOLS = RELATED_TOOL_CANDIDATES.filter((tool) =>
   isCalculatorReleased(tool.slug),
 );
+
+const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
 export async function generateStaticParams() {
   return getMarketCityParams();
@@ -67,13 +83,9 @@ export async function generateMetadata({
   if (!data) return { title: "Market not found" };
 
   // Question-first title targeting "Is [City] a good place to buy rental
-  // property in 2026?" (the SERP moving companies currently win). The
-  // helper guarantees ≤50 chars pre-template — unit-tested in
-  // lib/__tests__/markets-data-bar.test.ts. Detail lives in the description.
+  // property in 2026?" The helper guarantees ≤50 chars pre-template —
+  // unit-tested in lib/__tests__/markets-data-bar.test.ts.
   const title = buildMarketCityTitle(data.name);
-  // Built from fixed-width parts so it always lands under ~160 chars —
-  // the old `.slice(0, 300)` shipped over-length, mid-word-truncated
-  // descriptions. The blurb still leads og:description below.
   const description = buildMarketCityDescription(data.name, null);
 
   return {
@@ -89,6 +101,8 @@ export async function generateMetadata({
       `is ${data.name.toLowerCase()} good for rental property`,
     ],
     alternates: { canonical: `/markets/${data.slug}` },
+    // A city page without HUD rent is a template, not a page worth ranking.
+    robots: isMarketIndexable(data.slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
       title,
       description,
@@ -112,29 +126,34 @@ export default async function MarketCityPage({
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${data.slug}`;
 
-  // State investing guide for this city's state (if one exists) — used for
-  // the breadcrumb crumb + a contextual link so city pages feed link equity
-  // up to the previously-orphaned /states cluster.
+  // State guide for this city's state (if one exists) — breadcrumb crumb plus
+  // a contextual link so city pages feed link equity up to /states.
   const stateSlug = Object.values(STATES).find(
     (s) => s.name === data.stateName,
   )?.slug;
 
-  // Checked-in HUD Fair Market Rent is the only numeric market context this
-  // template may publish. Never fall back to the hand-authored city range.
-  const hud = HUD_RENTS[data.slug];
-  const rentDisplay = hud
-    ? `$${hud.rent2br.toLocaleString("en-US")}–$${hud.rent3br.toLocaleString("en-US")}/mo`
-    : "No checked-in HUD value";
-
-  // ZIP-level Small Area FMR table (build-market-safmr) — only ~1/3 of
-  // market cities sit in a HUD SAFMR entity; the section renders nothing
-  // for the rest (invisible until useful).
+  const hud = getMarketHudRent(data.slug);
+  const year = getMarketDataYear(data.slug);
   const safmr = SAFMR_RENTS[data.slug];
 
-  const verdictLead = `A citywide label cannot determine whether a ${data.name} property fits your criteria.`;
-  const verdictDetail = hud
-    ? `HUD's FY${hud.year} area benchmark for 2–3 bedroom units is ${rentDisplay}. It is not a property rent comp, collected-rent claim, or investment conclusion.`
-    : "This page does not substitute an unsourced cap-rate, price, tax, or rent estimate for property-specific evidence.";
+  // The same sample the page renders, so the FAQ answers quote the page.
+  const sample = hud
+    ? calculateAnalysis({
+        ...SAMPLE_DEAL_FIXTURE.values,
+        address: `${data.name} sample`,
+        monthlyRent: hud.rent3br,
+      })
+    : null;
+  const samplePrice = SAMPLE_DEAL_FIXTURE.values.purchasePrice;
+  const sampleCashFlow = sample ? Math.round(sample.netCashFlow) : null;
+
+  const lead = hud
+    ? `HUD Fair Market Rent, FY${hud.year}, puts a ${data.name} 2-bedroom at ${usd(hud.rent2br)}/mo and a 3-bedroom at ${usd(hud.rent3br)}/mo.`
+    : `TrueCap has no published rent benchmark for ${data.name}.`;
+  const detail =
+    hud && sample && sampleCashFlow !== null
+      ? `At a stated ${usd(samplePrice)} price with the 3-bedroom rent, the sample underwrite below comes to ${sampleCashFlow < 0 ? "−" : "+"}${usd(Math.abs(sampleCashFlow))}/mo cash flow, a ${sample.capRate.toFixed(1)}% cap rate, and a ${sample.dscr.toFixed(2)} DSCR. Whether a specific ${data.name} property works depends on its own price, rent, tax bill, and insurance.`
+      : `Bring the property's own rent, tax bill, and insurance evidence, then run the address with every assumption labeled and editable.`;
 
   // Cross-link to other programmatic markets + a few bespoke flagship markets.
   const otherMarkets = MARKET_CITIES.filter((c) => c.slug !== data.slug).slice(
@@ -192,8 +211,8 @@ export default async function MarketCityPage({
     name: `${data.name} rental property analysis`,
     description: buildMarketCityDescription(data.name, null),
     url: canonicalUrl,
-    // Real last-substantive-change date (2026 retarget + SAFMR tables).
-    dateModified: "2026-07-14",
+    // Real last-substantive-change date (HUD table + sample underwrite).
+    dateModified: "2026-09-06",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -207,15 +226,17 @@ export default async function MarketCityPage({
         name: `Is ${data.name} a good place to buy rental property in 2026?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${verdictLead} ${verdictDetail} For a supported address and asking price, TrueCap can calculate a preliminary cap rate, cash flow, and DSCR from labeled, editable assumptions. A 10-year planning view requires entitled access. No result is an appraisal, lender approval, or investment recommendation.`,
+          text: `${lead} ${detail} Enter an address and asking price and TrueCap shows cash flow, cap rate, DSCR, and the highest price that still meets your targets.`,
         },
       },
       {
         "@type": "Question",
-        name: `How should I evaluate a cap rate in ${data.name}?`,
+        name: `What cap rate does a ${data.name} rental pencil to?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `There is no authoritative cap-rate figure in this page's checked-in sources. Calculate the property from verified income, operating expenses, and asking price, then compare it with dated local evidence using the same NOI convention.`,
+          text: sample
+            ? `TrueCap's sample underwrite at a stated ${usd(samplePrice)} price with the HUD FY${hud!.year} 3-bedroom rent of ${usd(hud!.rent3br)}/mo comes to a ${sample.capRate.toFixed(1)}% cap rate. That is a sample, not a listing. A specific property's cap rate comes from its own rent, operating expenses, and price.`
+            : `TrueCap doesn't publish a ${data.name} cap rate. A property's cap rate comes from its own rent, operating expenses, and price; run the address to see it.`,
         },
       },
       {
@@ -224,16 +245,16 @@ export default async function MarketCityPage({
         acceptedAnswer: {
           "@type": "Answer",
           text: hud
-            ? `HUD's FY${hud.year} Fair Market Rent area benchmark for 2–3 bedroom units is ${rentDisplay}. It is not an address-level comp, asking-rent forecast, payment standard, or collection promise. Verify it against current comparable leases and the specific property.`
-            : `This page does not publish an unsourced city rent estimate. Use current comparable leases and property-specific evidence. TrueCap may start with a labeled HUD area benchmark when available.`,
+            ? `HUD Fair Market Rent, FY${hud.year}, for the area that contains ${data.name} is ${usd(hud.rent2br)}/mo for 2 bedrooms and ${usd(hud.rent3br)}/mo for 3 bedrooms. It is a housing-program benchmark for the county or metro, not a comp for one property. Check it against current leases for the address.`
+            : `TrueCap has no published rent benchmark for ${data.name}. Use current comparable leases for the property.`,
         },
       },
       {
         "@type": "Question",
-        name: `What is the property tax rate in ${data.stateName}?`,
+        name: `What property tax should I use for a ${data.name} rental?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `This page does not publish a statewide rate as the property's tax. Enter a current parcel bill or reviewed local effective rate and investigate the applicable assessment, exemption, transfer, and appeal rules with authoritative local sources.`,
+          text: `Use the parcel's current bill from the county assessor, and check how the assessment resets after a sale. TrueCap's sample uses ${SAMPLE_DEAL_FIXTURE.values.propertyTaxPct}% of price as a default; replace it with the local number.`,
         },
       },
     ],
@@ -296,195 +317,46 @@ export default async function MarketCityPage({
           Is {data.name} a good place to buy rental property in 2026?
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-foreground">
-          <strong>{verdictLead}</strong> {verdictDetail}
+          <strong>{lead}</strong> {detail}
         </p>
-        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-          Review the specific address, asking price, rent evidence, parcel tax,
-          insurance, condition, operating costs, financing, and local rules.
-          Hand-curated city estimates remain hidden until their source and as-of
-          dependencies are attached.
-        </p>
+        <MarketDataAsOf year={year} />
 
-        {/* Checked-in public context */}
-        <section className="mt-10 rounded-2xl border border-border bg-card p-6">
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-            {data.name} checked-in public context
-          </p>
-          {hud ? (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  HUD 2BR area benchmark
-                </p>
-                <p className="mt-1 text-lg font-extrabold text-foreground">
-                  ${hud.rent2br.toLocaleString("en-US")}/mo
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  HUD 3BR area benchmark
-                </p>
-                <p className="mt-1 text-lg font-extrabold text-foreground">
-                  ${hud.rent3br.toLocaleString("en-US")}/mo
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              No checked-in HUD rent value is available for this page. No
-              hand-authored market estimate is substituted.
-            </p>
-          )}
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            HUD FMR is an area housing-program benchmark, not a property rent
-            comp, asking-rent forecast, or collection promise. This template
-            intentionally omits unsourced cap-rate, price, property-tax,
-            appreciation, vacancy, and strategy-fit values.
-          </p>
-          {hud ? (
-            <SourceMethodologyBox
-              className="mt-4"
-              sources={["HUD Fair Market Rent"]}
-              updated={`HUD FY${hud.year}`}
-              note="Only the displayed HUD area benchmark is attributed to this source. No cap-rate, price, tax, legal, or investment conclusion is inferred from it."
-              confidence="Area-level housing-program benchmark; verify current property-specific comparable leases and program figures."
-            />
-          ) : null}
-        </section>
-
-        {/* Rent-by-ZIP (HUD Small Area FMR) — only for cities in a SAFMR entity */}
-        {safmr ? (
-          <section className="mt-12">
-            <h2 className="text-2xl font-extrabold text-foreground mb-3">
-              HUD Small Area Fair Market Rents for {data.name}
-            </h2>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              HUD publishes ZIP-level Small Area Fair Market Rents for the{" "}
-              {safmr.areaName}, the FMR region that includes {data.name}. These
-              housing-program benchmarks vary by ZIP and bedroom count; they are
-              not property rent comps or investment conclusions.
-            </p>
-            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[24rem] text-sm">
-                <caption className="sr-only">
-                  HUD Small Area Fair Market Rent by ZIP code, {safmr.areaName},
-                  FY{safmr.year}
-                </caption>
-                <thead>
-                  <tr className="border-b border-border bg-muted/50 text-left">
-                    <th
-                      scope="col"
-                      className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
-                    >
-                      ZIP code
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
-                    >
-                      2BR rent
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
-                    >
-                      3BR rent
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {safmr.rows.map((r) => (
-                    <tr
-                      key={r.zip}
-                      className="border-b border-border last:border-b-0"
-                    >
-                      <td className="px-4 py-2.5 font-semibold text-foreground">
-                        {r.zip}
-                      </td>
-                      <td className="px-4 py-2.5 text-right text-foreground">
-                        ${r.rent2br.toLocaleString("en-US")}/mo
-                      </td>
-                      <td className="px-4 py-2.5 text-right text-foreground">
-                        ${r.rent3br.toLocaleString("en-US")}/mo
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              {safmr.rows.length < safmr.zipCount
-                ? `Showing ${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName} — the HUD FMR region that includes ${data.name} — sampled highest to lowest across the rent range. `
-                : `All ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, highest rent first. `}
-              Source:{" "}
-              <a
-                href="https://www.huduser.gov/portal/datasets/fmr/smallarea/index.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-primary hover:underline"
-              >
-                HUD FY{safmr.year} Small Area Fair Market Rents
-              </a>
-              . For a supported {data.name} address, TrueCap starts with a HUD
-              rent benchmark at the ZIP level when available and otherwise uses
-              the broader FMR area; verify property-specific rent independently.
-            </p>
-          </section>
+        {hud ? (
+          <>
+            <MarketFmrSection city={data.name} hud={hud} safmr={safmr} />
+            <MarketSampleUnderwrite city={data.name} hud={hud} />
+          </>
         ) : null}
 
-        {/* Property-specific review boundary. Hand-authored city narratives and
-            neighborhood recommendations stay hidden while stale-review. */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-3">
-            What to verify for a {data.name} property
-          </h2>
-          <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-foreground">
-            <li>
-              Current comparable leases and the subject property&apos;s lease or
-              collection history.
-            </li>
-            <li>
-              The parcel&apos;s current tax bill and applicable assessment,
-              exemption, and transfer rules.
-            </li>
-            <li>
-              Property-specific insurance availability, coverage, exclusions,
-              deductibles, and premium.
-            </li>
-            <li>
-              Condition, inspection findings, operating responsibilities,
-              utilities, HOA terms, and planned work.
-            </li>
-            <li>
-              Written financing terms and the lender&apos;s own
-              qualifying-income, expense, DSCR, and reserve method.
-            </li>
-          </ul>
-          {stateSlug ? (
-            <p className="mt-4 text-sm">
-              <Link
-                href={`/states/${stateSlug}`}
-                className="font-semibold text-primary hover:underline"
-              >
-                Review the {data.stateName} source-and-verification guide →
-              </Link>
-            </p>
-          ) : null}
-        </section>
+        <MarketVerifyLocally city={data.name} />
 
-        <div className="mt-12">
+        {stateSlug ? (
+          <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+            For the state&apos;s starting numbers, see the{" "}
+            <Link
+              href={`/states/${stateSlug}`}
+              className="font-semibold text-primary hover:underline"
+            >
+              {data.stateName} guide
+            </Link>
+            .
+          </p>
+        ) : null}
+
+        <div className="mt-10">
           <SeoAnalyzerCta
             context={`a ${data.name} property`}
             handoff={{ address: `${data.name}, ${data.stateCode}` }}
             utmSource="market-page"
-            supportingText={`Start with safe ${data.name} market context, then verify the address, rent, property tax, insurance, and every other assumption before relying on the screen.`}
+            supportingText={`Start with ${data.name} context, then verify the address, rent, property tax, insurance, and every other assumption. Every assumption is labeled and editable.`}
           />
         </div>
 
-        {/* Source-first long-tail pages must be reachable from their city
-            parent. The shared registry filters unreleased specialist models,
-            so this creates crawl paths only for released strategy guides. */}
+        {/* Long-tail strategy guides must be reachable from their city parent.
+            The helper filters unreleased specialist models. */}
         <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
+
+        {hud ? <MarketRelatedReading postSlugs={data.relatedPosts} /> : null}
 
         {/* Related calculators — released only; hidden if the gate empties it. */}
         {RELATED_TOOLS.length > 0 ? (
@@ -503,27 +375,6 @@ export default async function MarketCityPage({
                 </Link>
               ))}
             </div>
-          </section>
-        ) : null}
-
-        {/* Related reading */}
-        {data.relatedPosts.length > 0 ? (
-          <section className="mt-12 border-t border-border pt-6">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
-              Related reading
-            </p>
-            <ul className="space-y-1.5 text-sm">
-              {data.relatedPosts.map((slug) => (
-                <li key={slug}>
-                  <Link
-                    href={`/blog/${slug}`}
-                    className="text-primary font-semibold hover:underline"
-                  >
-                    /blog/{slug.replaceAll("-", " ")} →
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </section>
         ) : null}
 

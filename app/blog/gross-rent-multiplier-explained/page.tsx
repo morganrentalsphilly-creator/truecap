@@ -13,6 +13,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -90,7 +91,7 @@ export default function GrossRentMultiplierPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -288,7 +289,7 @@ export default function GrossRentMultiplierPost() {
           </h2>
           <p>
             Because GRM is just price over rent, you can rearrange it into a
-            target-dependent Offer Ceiling once you select a target multiple:
+            an Offer Ceiling once you select a target multiple:
           </p>
           <p>
             <strong>Max price = target GRM × annual gross rent.</strong>
@@ -571,7 +572,7 @@ export default function GrossRentMultiplierPost() {
               implied cap rate
             </Link>
             , and when a listing survives the screen, run the whole thing — NOI,
-            cash flow, DSCR, projections, and selected-rule fit — through
+            cash flow, DSCR, projections, and Buy Box fit — through
             the{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
@@ -601,6 +602,7 @@ export default function GrossRentMultiplierPost() {
           </p>
         </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

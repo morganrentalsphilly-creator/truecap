@@ -41,6 +41,11 @@ export type GlossaryEntry = {
   formula?: string;
   /** Optional worked example showing the formula in action. */
   example?: string;
+  /**
+   * How to verify the number before relying on it: which document, quote,
+   * or record to pull, and what to look for. Rendered as its own section.
+   */
+  howToCheck?: string;
   /** 1-2 sentences on why this metric matters for investing decisions. */
   whyItMatters?: string;
   /** Related terms — array of GLOSSARY keys. Powers internal linking. */
@@ -98,6 +103,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "$2,000 rent − $400 expenses − $1,200 mortgage = $400/mo cash flow = $4,800/yr.",
     whyItMatters:
       "Monthly cash flow is what funds your life. Wealth-building investors weight IRR; income investors weight monthly cash flow.",
+    howToCheck:
+      "Rebuild it from documents, not the listing. Use the current lease or a signed rent roll for income, the last twelve months of bills for expenses, and a written loan quote for the payment. Then subtract the reserves the listing leaves out: vacancy, maintenance, capital items, and management. If the number only stays positive without those reserves, treat it as break-even.",
     related: ["coc", "noi", "afterTaxCF"],
   },
   dscr: {
@@ -171,31 +178,35 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "There is no universal long-run target. The result is highly sensitive to rent, expense, financing, value, and sale assumptions, so treat it as a scenario rather than a forecast.",
     whyItMatters:
       "Cash flow alone undersells a rental: a deal that's near break-even today can still build real wealth through equity paydown and appreciation. This number is the closest single figure to 'what will this actually earn me long-term.'",
+    howToCheck:
+      "Read the assumptions before the result. Change rent growth, expense growth, appreciation, and the sale cost one at a time and watch how far the ten-year figure moves. A return that survives flat rent and zero appreciation is a return you can plan around; one that depends on the growth inputs is a scenario, and you should say so when you share it.",
     related: ["irr", "coc", "appreciation"],
   },
   mao: {
     term: "Offer Ceiling",
     slug: "max-allowable-offer",
-    also: ["Target-dependent modeled price boundary"],
+    also: ["Highest price that meets your targets"],
     category: "metric",
     definition:
-      "The highest modeled purchase price that still meets your selected targets under the assumptions shown. It is not a recommended offer.",
+      "The highest purchase price that still meets your targets under the assumptions shown.",
     formula:
       "Offer Ceiling = work backward from your selected target metrics using the property's modeled NOI and your financing assumptions.",
     example:
       "With $32,000 of modeled NOI and a selected 7.5% cap-rate floor, the cap-rate-only Offer Ceiling is $32,000 ÷ 0.075 = $426,666; other selected targets may produce a lower boundary.",
     whyItMatters:
-      "The Offer Ceiling shows where the model stops meeting the selected targets. Verify rent, financing, taxes, insurance, property condition, and material costs before using it in a negotiation or purchase decision.",
+      "The Offer Ceiling shows where the model stops meeting your targets. Verify rent, financing, taxes, insurance, property condition, and material costs before using it in a negotiation or purchase decision.",
     related: ["capRate", "coc", "dealScore"],
   },
   dealScore: {
-    term: "Screening Index",
+    term: "Deal score",
     slug: "deal-score",
     category: "metric",
     definition:
-      "A secondary 0–100 composite of modeled cap rate, cash-on-cash, monthly cash flow, DSCR, and projected return for consistent triage.",
+      "A 0–100 heuristic summary of the modeled cap rate, cash-on-cash, monthly cash flow, DSCR, and projected return, for consistent triage.",
     whyItMatters:
-      "The Screening Index can help sort analyses for deeper review, but it is not selected-rule fit, evidence readiness, a probability of success, an appraisal, or investment advice. Read it after the selected rules and underlying metrics.",
+      "The Deal score helps you sort analyses for deeper review. It is not your Buy Box fit; read it after your targets and the underlying metrics.",
+    howToCheck:
+      "Open the metrics behind it. The score blends cap rate, cash-on-cash return, monthly cash flow, DSCR, and the projected return, so a strong score with a weak DSCR is a deal that scored well on the wrong things for a cash-flow buyer. Sort with the score, decide with your Buy Box targets and the Offer Ceiling, and never quote the score to a lender or partner as if it were an underwriting result.",
     related: ["capRate", "coc", "dscr", "cashFlow"],
   },
   taxSavings: {
@@ -206,6 +217,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "An educational scenario that applies an assumed marginal rate to modeled taxable rental income or loss. It is not a determination of liability, eligibility, or whether a loss is currently usable.",
     whyItMatters:
       "Tax treatment can materially affect an investor's outcome, but it depends on the taxpayer, ownership, property use, basis, activity rules, and jurisdiction. TrueCap does not currently expose a tax-specific analysis module; use a qualified professional and taxpayer-specific model.",
+    howToCheck:
+      "Treat the figure as a placeholder until a tax professional has your facts. Confirm the marginal rate that applies to you, whether the rental loss is currently usable under passive-activity rules, and how the building-value allocation was set. Then compare the scenario against a case with no tax effect at all; if the deal only works with the tax line, it does not work yet.",
     related: ["afterTaxCF", "depreciationYears", "buildingValue"],
   },
   afterTaxCF: {
@@ -216,6 +229,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Pre-tax cash flow adjusted by a taxpayer-specific estimate of income taxes attributable to the rental. TrueCap does not currently expose an after-tax cash-flow module.",
     whyItMatters:
       "Tax treatment can shift an investor's realized result in either direction, but eligibility and timing depend on facts that a general rental screen cannot determine. Use a qualified professional and taxpayer-specific model.",
+    howToCheck:
+      "Start from the pre-tax cash flow you have already verified, then have a tax professional model the income tax attributable to the property using your return, not a generic rate. Ask specifically whether depreciation and any loss are usable this year. Keep the pre-tax number as the decision number until that answer is in writing.",
     related: ["cashFlow", "taxSavings", "depreciationYears"],
   },
 
@@ -263,7 +278,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     example:
       "Map acquisition uses, renovation funding and downtime, stabilized operations, the original-loan payoff, refinance fees and proceeds, and the new loan schedule before estimating capital remaining in the deal.",
     whyItMatters:
-      "A simple ARV-times-LTV shortcut can overstate refinance proceeds and understate capital at risk. TrueCap keeps its BRRRR model unreleased until the full lifecycle reconciles across every result and report surface.",
+      "A simple ARV-times-LTV shortcut can overstate refinance proceeds and understate capital at risk. TrueCap doesn't offer an integrated BRRRR model right now.",
+    howToCheck:
+      "Test the plan against the numbers a lender will actually use. Get a written refinance term sheet that states the maximum loan-to-value, the seasoning period, and the appraisal basis. Build the after-repair value from closed comparable sales you have seen yourself, and price the rehab from contractor bids rather than a per-square-foot guess. Then run the case where the appraisal comes in ten percent low and the refinance closes three months late; the capital you cannot pull back out is the real cost of the deal.",
     related: ["arv", "ltv", "capRate"],
     postUrl: "/blog/brrrr-method-explained",
   },
@@ -278,6 +295,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A $200,000 property should rent for at least $2,000/mo to clear the 1% rule.",
     whyItMatters:
       "The 1% rule is a back-of-napkin filter for triage. It's gotten harder to hit in most markets since 2020 — many strong cash-flow markets are 0.6–0.8% now. Use it to sort listings, not to make decisions.",
+    howToCheck:
+      "Use it only to sort, and check the two inputs behind it. Confirm the rent with current comparable leases for the same bedroom count and condition, not the listing's pro-forma figure, and use the price you would actually offer rather than the asking price. A property that passes the rule can still lose money once taxes, insurance, and reserves are real, so move every candidate that clears the screen into a full cash-flow analysis before you write an offer.",
     related: ["capRate", "cashFlow"],
     toolUrl: "/tools/1-percent-rule-calculator",
   },
@@ -290,6 +309,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Buying a 2–4 unit property, living in one unit, and renting out the others.",
     whyItMatters:
       "Eligible owner-occupants may have lower-down-payment financing options than investors. Down payment, occupancy certification, unit-count eligibility, reserves, mortgage insurance, and any later change in use depend on the specific loan documents and program; a 12-month scenario does not itself authorize conversion to a rental.",
+    howToCheck:
+      "Confirm the financing before the property. Ask the lender in writing which occupancy requirements, unit counts, reserve levels, and mortgage-insurance terms apply to the program you plan to use, and how long you must live in the unit. Then underwrite the building twice: once with you occupying a unit and paying part of the mortgage from your own income, and once fully rented after you move out. The second case is the one that tells you whether it is an investment.",
     related: ["downPayment", "cashFlow", "brrrr"],
     postUrl: "/blog/house-hacking-explained",
   },
@@ -301,6 +322,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A qualifying exchange of eligible real property that may postpone recognition of gain by carrying basis into like-kind replacement real property.",
     whyItMatters:
       "A qualifying 1031 exchange may postpone recognition of gain by carrying basis into eligible replacement real property. It does not erase tax. Identification is generally due within 45 days, and receipt is generally due by the earlier of day 180 or the applicable return due date, subject to detailed rules and limited relief.",
+    howToCheck:
+      "Line up the qualified intermediary before you close the sale; once you receive the proceeds, the exchange is off. Confirm the identification deadline and the closing deadline on a calendar with your tax professional and the intermediary, and get the replacement-property rules in writing for your situation. Underwrite the replacement property on its own merits first; deferring a tax bill is not a reason to buy a weak deal, and the deferred gain follows you into the next property.",
     related: ["taxSavings", "sellingCost", "appreciation"],
     postUrl: "/blog/1031-exchange-basics",
   },
@@ -316,6 +339,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     example: "A $300,000 loan on a $400,000 property = 75% LTV.",
     whyItMatters:
       "LTV is one lender risk input. Lower leverage generally creates more equity buffer, but rate, approval, eligible value, and maximum LTV remain program- and borrower-specific.",
+    howToCheck:
+      "Ask the lender which value it will use, because that is what the ratio is measured against. On a purchase it is usually the lower of price and appraisal; on a refinance it is the appraisal, sometimes after a seasoning period. Get the program's maximum loan-to-value for an investment property in writing, then model the loan at that cap rather than at the round number you assumed. A five-point difference changes the cash you need to close.",
     related: ["downPayment", "dscr", "brrrr"],
   },
   downPayment: {
@@ -328,6 +353,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "On a $400,000 property at 25% down, you bring $100,000 to closing (before closing costs).",
     whyItMatters:
       "Down payment is the inverse of LTV and a major driver of leverage and liquidity. Compare written loan quotes and stress-test reserves instead of treating a percentage range as a universal sweet spot.",
+    howToCheck:
+      "Get the required percentage from a written loan quote for the specific program and property type, not from a rule of thumb, and confirm how much of it must be your own funds rather than a gift or a second loan. Add closing costs and the lender's reserve requirement to the cash you need at closing. Then check that the cash-on-cash return still meets your target at the real down payment; a larger down payment lowers the loan but also lowers the return on every dollar you put in.",
     related: ["ltv", "coc", "closingCosts"],
   },
   interestRate: {
@@ -338,6 +365,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Annual mortgage rate. Pricing varies by occupancy, program, borrower, property, leverage, points, lender, and lock date.",
     whyItMatters:
       "Rate materially changes payment and modeled cash flow. Compare current written quotes on the same terms and stress a higher-rate case; a generic market spread is not a quote or approval.",
+    howToCheck:
+      "Compare written quotes on identical terms: same loan amount, same points, same lock period, same occupancy. Ask whether the quote is for an investment property, because owner-occupied rates are lower and often quoted by default. Then rerun the analysis at a rate one point higher than the quote; if the deal only works at today's rate, it depends on the market rather than on the property.",
     related: ["loanTerm", "dscr", "cashFlow"],
     toolUrl: "/tools/mortgage-payment-calculator",
   },
@@ -351,6 +380,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "On a $300k loan at 7%, 30-year = ~$2,000/mo payment ($718k total paid). 15-year = ~$2,700/mo ($486k total). 30-year keeps cash flow strong; 15-year builds equity faster.",
     whyItMatters:
       "30-year vs 15-year is the classic trade. 30-year wins on cash-on-cash return; 15-year wins on total wealth accumulated. Most investors pick 30-year for flexibility, then make extra principal payments when cash flow is strong.",
+    howToCheck:
+      "Confirm the amortization period and any balloon or rate-reset date on the term sheet, because a thirty-year amortization with a five-year balloon is not a thirty-year loan. Model the payment at the term you will actually receive, and check the prepayment terms if you plan to pay principal early. Compare the monthly cash flow and the total interest side by side so the trade you are making is explicit.",
     related: ["interestRate", "cashFlow"],
   },
   closingCosts: {
@@ -363,6 +394,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "On a $400,000 purchase, expect $8,000-$16,000 in closing costs. Larger of: origination fee + title insurance + recording + property tax escrow + insurance prepay.",
     whyItMatters:
       "Closing costs eat into your cash-on-cash return immediately. They're often forgotten in the initial back-of-napkin underwrite. Always include them in your total cash invested when calculating CoC.",
+    howToCheck:
+      "Ask the lender for a written loan estimate and the title company for a fee sheet before you rely on a percentage. Include lender fees, title and settlement charges, recording and transfer taxes, prepaid interest, the insurance premium, and the escrow deposits for taxes and insurance. Add every line to the total cash you invest before you calculate the cash-on-cash return; leaving them out flatters the return on every deal.",
     related: ["coc", "downPayment"],
   },
 
@@ -377,6 +410,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Conventional residential lenders cap DTI around 43–50% to approve a loan.",
     whyItMatters:
       "DTI can constrain conventional financing as a portfolio grows. Some DSCR programs use property coverage instead of personal DTI as the primary ratio, but they still apply borrower, credit, reserve, property, and program-specific requirements.",
+    howToCheck:
+      "Total your monthly debt obligations the way a lender would, including the new mortgage, and divide by your gross monthly income. Ask the lender how much of the property's rent it will count toward income and what documentation that requires. If the ratio is near the program's limit, find out before you offer whether a DSCR loan or a different program fits, because the answer changes the rate and the down payment.",
     related: ["dscr", "ltv", "interestRate"],
   },
   negativeLeverage: {
@@ -387,6 +422,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "When your borrowing rate exceeds the property's cap rate, so every borrowed dollar costs more than the property earns.",
     whyItMatters:
       "This is 2026's dominant trap: a 6% cap rate financed at 7% loses 1% on every borrowed dollar, which is why adding leverage can push cash-on-cash BELOW cap rate. Deals can still pencil on appreciation, tax savings, and principal paydown — but you should know that's what you're signing up for.",
+    howToCheck:
+      "Compare the property's cap rate to the interest rate on the loan quote in front of you. When the rate is higher, every borrowed dollar reduces the return, so check the cash-on-cash return with and without the loan. If the deal still makes sense, write down what you are relying on instead: loan paydown, appreciation, or a later refinance, and test the case where those do not arrive on schedule.",
     related: ["capRate", "interestRate", "coc", "ltv"],
     postUrl: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
@@ -396,9 +433,11 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "property-tax",
     category: "expense",
     definition:
-      "Annual property tax as a percent of value. Released underwriting accepts a local annual bill or reviewed local effective rate entered by the user; a blank field uses a disclosed generic 1.1% preliminary fallback.",
+      "Annual property tax as a percent of value. Enter a local annual bill or a reviewed local effective rate; a blank field uses a TrueCap default of 1.1% — replace it with your local number.",
     whyItMatters:
       "Property tax is the second-largest expense after mortgage on most deals. State rates vary wildly: 0.3% in Hawaii vs 2.5%+ in some Texas MUD zones. Always pull the ACTUAL current tax bill from the county appraisal district — don't trust Zillow's estimate.",
+    howToCheck:
+      "Pull the current bill from the county assessor or treasurer for the parcel itself, then ask how the assessment changes after a sale, because many jurisdictions reset it to the purchase price. Check for exemptions the seller receives that you will not, and for any special district or municipal charges outside the base rate. Enter the annual amount you will pay in your first full year of ownership, not the seller's figure.",
     related: ["noi", "capRate"],
   },
   insurance: {
@@ -409,6 +448,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Annual landlord insurance. Typically 0.3-0.7% of property value for SFR; higher in coastal/storm zones.",
     whyItMatters:
       "Insurance has been the most-moved-against expense in rental investing since 2020. FL/LA/coastal TX up 25-40% in 5 years. Always quote insurance YOURSELF before signing a contract — don't trust the seller's last-year number.",
+    howToCheck:
+      "Get a written landlord-policy quote for the specific address before you go under contract, and make sure it is quoted as a rental rather than a primary residence. Ask what the policy excludes: wind, hail, flood, sewer backup, and vacancy are the common gaps, and each is a separate premium or a separate policy. Check the roof age and any prior claims on the property, because both move the premium and some carriers decline older roofs outright. Enter the quoted annual premium, then rerun the analysis with the premium twenty percent higher to see whether the cash flow survives a renewal increase.",
     related: ["noi", "capRate"],
   },
   maintenance: {
@@ -419,6 +460,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A planning reserve for routine repairs; the appropriate amount depends on the property's systems, condition, service history, and operating plan.",
     whyItMatters:
       "Building age is only a screening signal, not a reserve multiplier. Size maintenance and capital reserves from the inspection, remaining useful life of major systems, service history, quotes, warranties, and an explicit contingency for unknowns.",
+    howToCheck:
+      "Size the reserve from the inspection report, not from a percentage. List every major system with its age and expected remaining life, note what the report flags for repair now, and price the near-term items with contractor quotes. Ask the seller for the maintenance and service history and compare it to the condition you observed. Then set the monthly reserve so the near-term repairs and the routine items are both covered, and keep it separate from the capital reserve for full replacements.",
     related: ["capex", "noi"],
   },
   management: {
@@ -429,6 +472,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Property management cost as % of collected rent. Typical PM fees: 8-10%. Set to 0 if you self-manage.",
     whyItMatters:
       "Always include 8-10% management in your underwrite even if you plan to self-manage. Why? Your time has cost. AND if you ever sell or hand off the property, the next owner will need PM in the model. A deal that only works at 0% management is a fragile deal.",
+    howToCheck:
+      "Get a written fee schedule from at least one local property manager, and read past the headline percentage. Ask about the leasing fee for a new tenant, the renewal fee, maintenance markups, the vacancy fee, and any minimum monthly charge, because those often add more than the base rate. Underwrite the deal with the full cost even if you plan to manage it yourself; if you later hire it out, sell, or move away, the property has to carry that expense.",
     related: ["noi", "capRate"],
   },
   capex: {
@@ -440,6 +485,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Reserves for large infrequent repairs — roof, HVAC, water heater. Typically 5–10% of rent set aside each month.",
     whyItMatters:
       "Capex differs from maintenance — these are the BIG fixes (roof = $10-20k, HVAC = $5-10k). Even at 5% of rent, you're only saving $100/mo on a $2k rental, which doesn't cover a roof replacement in 10 years. Adjust upward for older buildings.",
+    howToCheck:
+      "Walk the property with the inspection report and write down the replacement cost and expected timing of the roof, the heating and cooling system, the water heater, the electrical panel, the plumbing, and the windows. Price the items due within five years from contractor quotes and spread them across the months until they are due. Compare that monthly figure to a flat percentage of rent; on an older building the quoted figure is usually higher, and that is the number to use.",
     related: ["maintenance", "noi"],
   },
   vacancy: {
@@ -451,6 +498,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Reserve for months without a paying tenant. Typically 5–8% of gross rent, depending on the market.",
     whyItMatters:
       "Vacancy is the most-under-budgeted line item in new-investor underwrites. Real vacancy is 6-10% in most markets, NOT the 3% the listing pro-forma shows. Even a single 30-day turnover = 8.3% vacancy for that year.",
+    howToCheck:
+      "Look for evidence instead of a default percentage. Ask the seller for the rent roll and the lease history for the last two years, count the months without a paying tenant, and ask a local property manager how long a unit at this rent takes to lease. Then include turnover costs in your estimate: cleaning, repairs, and the leasing fee arrive with every vacancy. Rerun the analysis with one extra month of vacancy each year to see whether the deal still clears.",
     related: ["noi", "maintenance"],
     postUrl: "/blog/vacancy-rate-rental-property",
   },
@@ -462,6 +511,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Monthly homeowners association dues, if applicable. Often covers exterior maintenance, common-area landscaping, and shared amenities.",
     whyItMatters:
       "HOAs are an expense killer in many condo/townhome deals. They go UP, never down, and special assessments can hit $5-20k. Always pull the HOA's last 2 years of financials + reserve study before buying a condo as an investment.",
+    howToCheck:
+      "Get the current dues in writing from the association, then request the last two years of financial statements, the most recent reserve study, and the meeting minutes. Look for a reserve balance that is well below what the study calls for, discussion of a special assessment, and pending litigation. Confirm the rental rules: some associations cap the number of rented units or require a waiting period before an owner can lease. Enter the dues plus any assessment you can see coming, and treat a rental cap as a reason to walk away.",
     related: ["noi", "capRate"],
   },
   utilities: {
@@ -472,6 +523,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Monthly utilities the owner covers — water/sewer, trash, sometimes gas. Most SFRs put utilities on the tenant; multi-family deals often split them.",
     whyItMatters:
       "On multi-family without separate meters, utilities can be $200-500/mo of NOI killer. Sub-metering or RUBS (Ratio Utility Billing) is one of the highest-ROI improvements you can make to a small multi-family.",
+    howToCheck:
+      "Ask the seller for twelve months of actual utility bills for each account the owner pays, and confirm which meters serve which units. In a multi-unit building without separate meters, water, sewer, trash, and common-area electricity usually stay with the owner, and heating may too. Check the lease terms to see which utilities the tenant is required to pay and whether a ratio billing program is allowed by local rules. Enter the owner-paid total from the bills, not the listing, and note that a single leaking fixture or a cold winter can move it by hundreds of dollars a month.",
     related: ["noi"],
   },
 
@@ -487,6 +540,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A $80,000 distressed property with $30,000 of rehab and an ARV of $150,000 has equity creation of $40,000 ($150k − $80k − $30k).",
     whyItMatters:
       "ARV is a high-sensitivity assumption in BRRRR and flip plans. Build it from relevant closed comps and test multiple downside values; there is no reliable market-wide appraisal haircut that substitutes for property-specific evidence.",
+    howToCheck:
+      "Build it from closed sales, not active listings. Use renovated properties of similar size, age, and layout within the same neighborhood that sold in the last six months, and adjust for differences you can point to. Ask an agent or appraiser who works that market to check your comparables. Then underwrite the case where the value comes in ten percent lower; if the plan fails there, the margin is the problem, not the estimate.",
     related: ["brrrr", "ltv"],
   },
   buildingValue: {
@@ -497,6 +552,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Portion of purchase price allocated to depreciable building (not land). Defaults to 80% for SFR; land value varies by market.",
     whyItMatters:
       "A supported allocation to depreciable building affects the modeled depreciation deduction. The allocation must be grounded in the property's facts; a default percentage is only an input assumption, and passive-loss and other limits determine the actual tax effect.",
+    howToCheck:
+      "Start with the county assessor's split between land and improvements for the parcel, and ask your tax professional whether that allocation is supportable for your return or whether an appraisal or cost segregation is warranted. Do not use the default percentage in a filing. The allocation changes only the modeled depreciation, and whether that deduction reduces your tax this year depends on your own facts.",
     related: ["depreciationYears", "taxSavings"],
   },
   depreciationYears: {
@@ -507,6 +564,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "27.5 years for residential rentals (IRS standard); 39 years for commercial. Determines annual non-cash depreciation deduction.",
     whyItMatters:
       "Depreciation is a non-cash deduction, not a promised current tax saving. Basis allocation, placed-in-service conventions, personal use, passive-activity, basis, at-risk, and sale rules can change when or whether the modeled deduction reduces tax.",
+    howToCheck:
+      "Confirm with your tax professional that the property is residential rental property for tax purposes and the date it is placed in service, because the period and the first-year convention follow from those facts. Separate the land from the building, since land is not depreciated. Then treat the annual deduction as a modeling input: it lowers taxable income on paper, and whether it lowers your tax this year depends on passive-activity, basis, and at-risk rules.",
     related: ["taxSavings", "buildingValue"],
   },
 
@@ -518,6 +577,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A projection of a property's future operating performance, as opposed to the seller's trailing actuals.",
     whyItMatters:
       "Brokers always pitch pro-forma cap rates built on optimistic rent bumps and thin expense assumptions. Use pro forma for triage; for the actual offer, recompute with trailing actuals plus your own conservative growth assumptions.",
+    howToCheck:
+      "Put the seller's pro forma next to the trailing twelve months of actual income and expenses, and mark every line that differs. Rent above the current lease, vacancy below the actual history, and missing lines for management, maintenance, or capital reserves are the usual gaps. Underwrite the offer on the actuals plus your own conservative assumptions, and use the pro forma only to understand what the seller is hoping for.",
     related: ["noi", "capRate", "rentGrowth", "expenseGrowth"],
     postUrl: "/blog/rental-property-pro-forma-explained",
   },
@@ -530,6 +591,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Repairs and updates to a property — cosmetic (paint, flooring, fixtures), systems (HVAC, electrical, plumbing), or structural.",
     whyItMatters:
       "BRRRR investors deliberately buy properties that need rehab so the post-renovation appraisal supports pulling most of their cash back out. Underestimating rehab is the single most common way a BRRRR deal fails.",
+    howToCheck:
+      "Get a written scope and bid from a contractor who has walked the property, and include permits, materials, disposal, and a contingency for what the walls hide. Confirm the timeline in weeks, because every month of rehab is a month of carrying costs without rent. Then compare the bid to the value it creates using closed comparable sales; a renovation that costs more than the value it adds is an expense, not an investment.",
     related: ["brrrr", "arv", "capex", "mao"],
     toolUrl: "/tools/rehab-cost-estimator",
     postUrl: "/blog/how-to-estimate-rehab-costs",
@@ -543,6 +606,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMRs are used in several housing programs, including as an input to Housing Choice Voucher payment standards.",
     whyItMatters:
       "FMR is an area benchmark, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can prefill it from HUD, but you should replace it with current comparable leases and property-specific program figures where applicable.",
+    howToCheck:
+      "Confirm the figure on HUD's own site for the fiscal year, the area, and the bedroom count, and note whether a small-area rent applies to the ZIP code. Then replace it: pull current listings and, better, signed leases for comparable units within a mile, and ask a local property manager what the unit would actually lease for in its current condition. Use the comparable rent in the analysis and keep the HUD figure only as a reference point.",
     related: ["vacancy", "rentGrowth"],
   },
   principalPaydown: {
@@ -553,6 +618,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "The portion of each mortgage payment that reduces the loan balance rather than paying interest.",
     whyItMatters:
       "Principal paydown is real wealth building — your tenant retires your loan — but it never shows up in cash flow. On a typical 30-year mortgage, year 1 is ~80% interest / 20% principal; year 25 is the inverse.",
+    howToCheck:
+      "Read it from the amortization schedule for the actual loan terms, because the split between interest and principal depends on the rate, the term, and the year. Check how much of the first year's payments reduce the balance, and note that it is small early in the loan. Count the paydown in the total return, but never in the cash flow: the tenant's rent retires the loan, and that equity is only available when you sell or refinance.",
     related: ["loanTerm", "interestRate", "ltv", "equityMultiple"],
   },
   // ─── PROJECTION ASSUMPTIONS ───
@@ -564,6 +631,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Editable annual rent-change assumption used in the 10-year projection; it is not a forecast or permitted increase.",
     whyItMatters:
       "Different assumptions compound into materially different year-10 results. Use current property and submarket evidence, verify applicable rent rules, and run flat and downside cases.",
+    howToCheck:
+      "Look at what rents for comparable units in the submarket actually did over the last several years, using listing history or a local property manager's records rather than a national average. Check whether any rent-stabilization or notice rules apply to the property, because they limit the increases you can take. Then run the projection with flat rent and with a decline; if the deal only works with growth, the growth is doing the underwriting.",
     related: ["irr", "appreciation"],
   },
   expenseGrowth: {
@@ -574,6 +643,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Editable annual operating-expense change assumption used in the projection.",
     whyItMatters:
       "Taxes, insurance, utilities, labor, repairs, and other expenses can move differently from rent and from one another. Use current evidence and model expense growth that equals or exceeds rent growth as a downside case.",
+    howToCheck:
+      "Check the history of the largest lines separately: pull several years of property-tax bills, ask the insurance agent what renewals have done in the area, and look at utility and labor trends locally. Expenses have often risen faster than rent, so model a case where expense growth exceeds rent growth and see what the tenth year looks like. If the property cannot absorb that case, it is thinner than the base case suggests.",
     related: ["rentGrowth", "noi"],
   },
   appreciation: {
@@ -581,9 +652,11 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "appreciation-rate",
     category: "projection",
     definition:
-      "Editable annual property-value change assumption; it is not an appraisal or forecast.",
+      "Your editable assumption for annual property-value change.",
     whyItMatters:
       "Small assumed rates compound into large modeled exit differences. Build the base case from current local evidence and include flat and declining-value scenarios; no market tier guarantees appreciation.",
+    howToCheck:
+      "Look at the closed-sale history for similar properties in the same neighborhood over the last decade, including the years values fell, and ask what drove the changes: jobs, supply, and lending conditions, not the national headline. Then build the base case from that evidence and run flat and declining cases beside it. The projection should tell you what you are betting on, not confirm it.",
     related: ["irr", "rentGrowth"],
   },
   sellingCost: {
@@ -594,6 +667,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "An editable sale-cost assumption that can include brokerage compensation, transfer taxes, title or legal fees, concessions, and other transaction-specific costs.",
     whyItMatters:
       "Selling costs reduce modeled net sale proceeds and can materially change IRR. For illustration, an entered 8% cost on a $500,000 modeled sale is $40,000; obtain transaction- and jurisdiction-specific estimates rather than treating that example as typical or as a reason to choose a holding strategy.",
+    howToCheck:
+      "Ask a local agent what a sale of this property type would actually cost: the commission you would pay, transfer taxes and recording fees in that jurisdiction, title and legal charges, and the concessions and repairs buyers there typically negotiate. Add the payoff of any prepayment penalty on the loan. Enter that total as a percentage of the modeled sale price, and check how far the projected return falls when you raise it two points.",
     related: ["irr"],
   },
 };

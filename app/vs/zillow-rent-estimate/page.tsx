@@ -19,7 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import {
   ComparisonFaq,
@@ -150,7 +152,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Underwriting context",
-    truecap: "Free — core economics + selected-rule fit",
+    truecap: "Free — core economics + Buy Box fit",
     zillow: "Rent estimate only",
     winner: "truecap",
   },
@@ -222,6 +224,15 @@ export default function VsZillowRentPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Free analyzer: no card or signup
           </p>
+        </section>
+
+        {/* Real product screenshot from the free sample deal. */}
+        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+          />
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-amber-500/30 bg-amber-50/30 p-6 sm:p-8">
@@ -378,7 +389,7 @@ export default function VsZillowRentPage() {
             A rent estimate is just the first input — the decision lives
             downstream. Push your number through our{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -426,6 +437,8 @@ export default function VsZillowRentPage() {
             </Link>
           </div>
         </section>
+
+        <RelatedContent kind="vs" slug="zillow-rent-estimate" className="mt-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
@@ -521,14 +534,14 @@ const ZILLOW_FAQ: FaqItem[] = [
       <>
         TrueCap takes rent, expenses, financing, and tax assumptions and runs
         cap rate, cash-on-cash, DSCR, and monthly cash flow, then shows
-        selected-rule fit based on transparent targets. The free analyzer also
-        includes a secondary Screening Index (0–100) with factor breakdown.
+        Buy Box fit against your targets. The free analyzer also
+        includes a Deal score (0–100) with factor breakdown.
         Zillow stops at the rent number — you have to do everything downstream
         by hand.
       </>
     ),
     plainTextAnswer:
-      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows selected-rule fit plus a free secondary 0–100 Screening Index. Zillow stops at the rent number. The index is for triage, not evidence readiness, an appraisal, or investment advice.",
+      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows Buy Box fit plus a free 0–100 Deal score. Zillow stops at the rent number.",
   },
 ];
 

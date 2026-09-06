@@ -18,6 +18,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -94,7 +95,7 @@ export default function OnePercentRulePost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
@@ -193,8 +194,7 @@ export default function OnePercentRulePost() {
             </p>
             <p>
               Flip it around and it becomes a rule-of-thumb Offer Ceiling:
-              <strong>100 × the monthly rent</strong>. This is a screening
-              boundary, not a recommended offer. A house that rents for
+              <strong>100 × the monthly rent</strong>. A house that rents for
               $1,800/month &quot;passes&quot; at any price up to $180,000; one
               that rents for $2,500 passes up to $250,000. That is the whole
               mechanic — no financing, no expenses, no condition. Which is the
@@ -378,7 +378,7 @@ export default function OnePercentRulePost() {
               property-tax line the 1% rule never reads. That is why you finish
               the job with the metric that actually accounts for your cash:{" "}
               <Link
-                href="/#main"
+                href="/analyze"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash
@@ -492,7 +492,7 @@ export default function OnePercentRulePost() {
               starts from a published rate benchmark and editable assumptions,
               asks you to enter a local tax bill or reviewed rate, layers in
               vacancy and reserves, and hands back cash flow, cap rate,
-              cash-on-cash, DSCR, and selected-rule fit — the entire underwrite
+              cash-on-cash, DSCR, and Buy Box fit — the entire underwrite
               the 1% rule was only ever pretending to be a stand-in for. The
               rule is the napkin; this is the spreadsheet.
             </p>
@@ -533,6 +533,7 @@ export default function OnePercentRulePost() {
             </p>
           </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

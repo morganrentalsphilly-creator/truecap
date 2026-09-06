@@ -25,8 +25,10 @@ describe("PDF input-review trust copy", () => {
   });
 
   it("states that browser confirmation is not evidence or third-party verification", () => {
+    // Voice pass (docs/voice.md): same fact, plainer words — Input Review is
+    // the user's own in-browser confirmation, never evidence.
     expect(PDF_INPUT_REVIEW_DISCLOSURE).toContain(
-      "browser-based user confirmation only",
+      "your own in-browser confirmation of each value",
     );
     expect(PDF_INPUT_REVIEW_DISCLOSURE).toContain(
       "not documentary evidence or third-party verification",

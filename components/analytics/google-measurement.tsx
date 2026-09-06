@@ -4,6 +4,8 @@ import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
+import { readStoredAnalyticsConsent } from "@/lib/analytics/site-events";
+import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
 
 const GOOGLE_ADS_ID = "AW-8236119484";
 const GTM_ID = "GTM-TCBNRMBG";
@@ -27,17 +29,32 @@ function GoogleMeasurementInner() {
       setSensitiveRouteSeen(true);
     }
   }, [disabledForDocument, sensitiveRouteSeen]);
+
+  // CONSENT GATE (docs/site-overhaul.md Phase 7): GTM and the Ads tag are
+  // not loaded at all until the visitor accepts cookies in the banner —
+  // rejecting keeps them off entirely, and the funnel stays measurable
+  // through cookieless Vercel Analytics. Consent Mode defaults still ship
+  // with the loader so the tags boot denied if consent is later withdrawn.
+  const [consentGranted, setConsentGranted] = useState(false);
+  useEffect(() => {
+    const sync = () => setConsentGranted(readStoredAnalyticsConsent() === "granted");
+    sync();
+    window.addEventListener(COOKIE_CONSENT_EVENT, sync);
+    return () => window.removeEventListener(COOKIE_CONSENT_EVENT, sync);
+  }, []);
+
   if (
     process.env.NODE_ENV !== "production" ||
     !pathname ||
-    disabledForDocument
+    disabledForDocument ||
+    !consentGranted
   ) {
     return null;
   }
 
   return (
     <>
-      <Script id="gtm-loader" strategy="afterInteractive">
+      <Script id="gtm-loader" strategy="lazyOnload">
         {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('consent', 'default', {
@@ -55,11 +72,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.referrerPolicy=
       </Script>
       <Script
         id="google-ads-loader"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
         referrerPolicy="no-referrer"
       />
-      <Script id="google-ads-config" strategy="afterInteractive">
+      <Script id="google-ads-config" strategy="lazyOnload">
         {`gtag('js', new Date());
 gtag('config', '${GOOGLE_ADS_ID}');`}
       </Script>

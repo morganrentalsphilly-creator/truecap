@@ -12,6 +12,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -22,7 +23,7 @@ const TITLE = "1031 exchange basics for individual rental investors";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "1031 exchange basics for rental investors";
 const DESCRIPTION =
-  "How a 1031 exchange works in 2026 — the identification and exchange periods, qualified-intermediary safe harbor, like-kind rules, boot, reverse exchanges, and trade-offs.";
+  "How a 1031 exchange works in 2026: identification and exchange periods, qualified-intermediary safe harbor, like-kind rules, boot, and reverse exchanges.";
 const PUBLISHED_AT = "2026-05-25";
 const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 11;
@@ -52,7 +53,7 @@ export default function ExchangePost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
@@ -280,6 +281,7 @@ export default function ExchangePost() {
           </p>
         </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>

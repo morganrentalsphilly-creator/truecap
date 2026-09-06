@@ -12,6 +12,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -22,7 +23,7 @@ const TITLE = "How to find off-market rental properties — 8 sources that actua
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to find off-market rental properties (2026)";
 const DESCRIPTION =
-  "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.";
+  "The 8 sources investors use to find off-market rental deals: driving for dollars, direct mail, wholesalers, networking, public records, and more.";
 const PUBLISHED_AT = "2026-05-26";
 const MODIFIED_AT = "2026-06-01";
 const READING_TIME = 10;
@@ -88,7 +89,7 @@ export default function OffMarketPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    author: { "@type": "Person", name: "Morgan Page", url: siteUrl },
+    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
     publisher: { "@id": `${siteUrl}/#organization` },
     isPartOf: { "@id": `${siteUrl}/blog#blog` },
     mainEntityOfPage: canonicalUrl,
@@ -251,6 +252,7 @@ export default function OffMarketPost() {
           </p>
         </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>

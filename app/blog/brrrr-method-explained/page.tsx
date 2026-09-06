@@ -13,6 +13,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
+import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -23,7 +24,7 @@ const TITLE = "The BRRRR method in 2026: the complete numbers walkthrough";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "The BRRRR method in 2026: numbers walkthrough";
 const DESCRIPTION =
-  "An illustrative BRRRR walkthrough using stated financing assumptions. LTV, seasoning, DSCR, credit, reserves, appraisal, and approval vary by program and lender.";
+  "A BRRRR numbers walkthrough on stated financing assumptions. LTV, seasoning, DSCR, credit, reserves, appraisal, and approval vary by program and lender.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-08-15";
 const READING_TIME = 11;
@@ -335,7 +336,7 @@ export default function BrrrrMethodPost() {
             roughly $162,000 — about 66% LTV. The DSCR floor, not the LTV
             ceiling, would decide your cash-out. Run your own deal through the{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -364,7 +365,7 @@ export default function BrrrrMethodPost() {
             $23,500 in the deal — and on the self-managed numbers that&apos;s
             roughly an 11%{" "}
             <Link
-              href="/#main"
+              href="/analyze"
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash return
@@ -464,7 +465,7 @@ export default function BrrrrMethodPost() {
             liquid for cycle four. The same $60,000 deployed as a single 25%
             down payment buys exactly one turnkey property and then stops.
             That is the entire argument for BRRRR — and it only holds if every
-            deal in the chain clears its target-dependent Offer Ceiling. One
+            deal in the chain clears its Offer Ceiling. One
             overpriced deal doesn&apos;t just underperform; it traps the
             capital that was supposed to fund the next cycle. Actual timing,
             appraisal, approval, proceeds, and portfolio outcome may differ.
@@ -545,8 +546,8 @@ export default function BrrrrMethodPost() {
             >
               rehab cost estimator
             </Link>{" "}
-            helps anchor one early-stage input. TrueCap&apos;s integrated BRRRR
-            lifecycle model is not currently released; the core{" "}
+            helps anchor one early-stage input. TrueCap doesn&apos;t offer an
+            integrated BRRRR lifecycle model right now; the core{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
@@ -575,6 +576,7 @@ export default function BrrrrMethodPost() {
           </p>
         </div>
         </article>
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
       </main>
       <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

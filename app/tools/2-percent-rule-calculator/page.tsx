@@ -22,10 +22,11 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { RelatedContent } from "@/components/marketing/related-content";
 export const metadata: Metadata = {
   title: "2% Rule Calculator | Free Cash-Flow Screener",
   description:
-    "Free 2% rule calculator. Check any rental's rent-to-price ratio against the 2% and 1% bars — plus why a 2% deal in 2026 deserves suspicion, not celebration.",
+    "Free 2% rule calculator. Check any rental's rent-to-price ratio against the 2% and 1% bars — plus why a 2% deal in 2026 deserves scrutiny, not celebration.",
   keywords: [
     "2 percent rule calculator",
     "2% rule real estate",
@@ -367,7 +368,7 @@ export default function TwoPercentRuleCalculatorPage() {
                 "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "Stress-test rent and vacancy assumptions",
                 "10-year projection with rent + expense growth (Pro)",
-                "Selected-rule fit with a secondary Screening Index",
+                "Buy Box fit with a Deal score",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -392,8 +393,10 @@ export default function TwoPercentRuleCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="2% rule calculator"
-            hook="A 2% ratio is a reason to look harder, not a decision. TrueCap's full analyzer adds expenses, financing, selected-rule fit, and a secondary Screening Index. You still verify the assumptions and make the decision."
+            hook="A 2% ratio is a reason to look harder, not a decision. TrueCap's full analyzer adds expenses, financing, Buy Box fit, and a Deal score. You still verify the assumptions and make the decision."
           />
+
+          <RelatedContent kind="tool" slug="2-percent-rule-calculator" title="2% Rule Calculator" className="mt-10" />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

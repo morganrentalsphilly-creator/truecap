@@ -142,7 +142,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "brrrr",
     tag: "Capital recycler",
     cardDescription:
-      "Stabilized-rental assumption preset only; it does not model acquisition, rehab timing, or refinance proceeds. The integrated BRRRR lifecycle model is not currently released.",
+      "Stabilized-rental assumption preset only; it does not model acquisition, rehab timing, or refinance proceeds. An integrated BRRRR lifecycle model isn't offered right now.",
     template: {
       templateName: "Starter — BRRRR",
       templateDescription: "Value-add buy/rehab/rent/refi",
@@ -346,7 +346,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "hard-money-flip",
     tag: "Fix & flip",
     cardDescription:
-      "Rental-screening assumption preset only; it does not calculate flip profit, sale proceeds, or project timing. The integrated fix-and-flip model is not currently released.",
+      "Rental-screening assumption preset only; it does not calculate flip profit, sale proceeds, or project timing. An integrated fix-and-flip model isn't offered right now.",
     template: {
       templateName: "Starter — Hard-money flip",
       templateDescription: "Fix-and-flip / hard-money defaults",
@@ -374,7 +374,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "wholesaler-mao",
     tag: "Wholesale",
     cardDescription:
-      "Wholesaling — screen contracts against a target-dependent Offer Ceiling before assigning to an end buyer. Verify buyer demand, costs, condition, and every material assumption before acting.",
+      "Wholesaling — screen contracts against the Offer Ceiling before assigning to an end buyer. Verify buyer demand, costs, condition, and every material assumption before acting.",
     template: {
       templateName: "Starter — Wholesale Offer Ceiling",
       templateDescription: "Wholesale / assignment screening",
@@ -402,7 +402,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "portfolio-refi",
     tag: "Refinance",
     cardDescription:
-      "Saved stabilized-rental assumptions only; it does not calculate cash-out proceeds or compare refinance exits. Integrated exit scenarios are not currently released.",
+      "Saved stabilized-rental assumptions only; it does not calculate cash-out proceeds or compare refinance exits. Integrated exit scenarios aren't offered right now.",
     template: {
       templateName: "Starter — Portfolio refinance",
       templateDescription: "Refi / cash-out scenario defaults",
