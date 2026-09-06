@@ -635,3 +635,148 @@ Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl +
 ### Billing reconcile (Phase 1) — production cron result, counts only
 
 `/api/cron/billing-reconcile` ran at 17:30 UTC on 2026-09-06 on deployment `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` in `dry` mode: 35 Stripe subscriptions scanned (listing not truncated), 2 skipped as not paid, 31 skipped as the other app's (`philly_rental_compliance`), 2 already bound, 0 resolvable, 0 unresolved, 0 applied, 0 errors. The `billing_unresolved_events` table was not available (migration still founder-owed), so nothing was recorded there; nothing needed recording.
+
+## Phase 10 (part 3) — Phases 2–9 deploy record
+
+| Step | Result |
+| --- | --- |
+| PR | [#90](https://github.com/morganrentalsphilly-creator/truecap/pull/90), squash-merged to `main` as `6b4ddb2` at 22:06 UTC on 2026-09-06 after every check passed on head `3686d4e` (build-chain-guard, check, browser-regressions, lighthouse, Vercel; CodeRabbit skipped by policy) |
+| CI iterations | Three pushes after the first: the metadata guard re-pin (`4d6e542`), the guest-journey helper → `/analyze` (`cf9de18`), and the share-intent return path fix (`3686d4e`, a real Phase 2 gap — verification item 5) |
+| Preview (`dpl_6Kk3eGq3gvNxSUNgXrjyN6UwqHjf`, behind Vercel SSO, reached through a share link) | HTTP smoke 11/11; Playwright `public-chromium` 34/34 through a `storageState` cookie; Lighthouse mobile performance 88 / 93 / 94 and accessibility 100 / 100 / 99 on `/`, `/analyze`, `/pricing` (SEO 61 only because non-canonical hosts serve `X-Robots-Tag: noindex`) |
+| Production deploy | `dpl_ENoGDbR242DKFfwdRugUaxNg16oY` READY at 22:09:56 UTC, aliases `usetruecap.com` and `www.usetruecap.com` |
+| Production smoke (`https://usetruecap.com`) | 8/8 Phase 1 smoke checks + 15/15 overhaul checks OK: `/analyze` 200, `/analyze?sample=1` 200, `/guarantee` 308 → `/pricing`, `/dashboard` anonymous 307 → `/auth/login`, `/markets/philadelphia` `noindex, follow`, `/markets/columbus` and `/states/texas` indexable, `/markets/cincinnati/cash-flow` `noindex, follow`, sitemap 381 URLs with 381 `lastmod` (Philadelphia absent, `/analyze` present), `llms.txt` names `/analyze`, `feed.xml` parses with 75 items, hero shot preloaded, outcome line and DealCheck block rendered with Annual pressed, no `X-Robots-Tag` on the canonical host, testimonial and feedback crons answer 401 without the bearer |
+| Runtime errors on the new deployment | none in the first 30 minutes (Vercel runtime logs, error + fatal) |
+| Lighthouse, production, mobile | First run, seconds after the alias flipped: `/` 74 (LCP 4.8 s, of which 1.6 s was the TTFB phase of a cold edge miss). Warm runs: `/` 89 (LCP 3.4 s, TBT 150 ms, CLS 0.003), `/analyze` 93 (LCP 1.7 s), `/pricing` 96 (LCP 1.7 s); accessibility 100 / 100 / 99; SEO 100 on all three. The preview scored the same warm (88 / 93 / 94), so the remaining gap to the local 91 is HTTPS + CDN round-trips under Lighthouse's simulated slow 4G, not the build |
+| SEO audit against production | Not run by design: `scripts/seo-audit.ts` accepts only a loopback base; it ran against the identical build locally (0 findings, 0 advisories) |
+| Dashboard canonical | An anonymous request redirects to `/auth/login`; `canonical: null` + `noindex` on the dashboard layout is pinned by the guard test. No signed-in browser session exists in this run, so the rendered `<head>` was not inspected live |
+| Vercel crons (`vercel.json`) | `publish-testimonials` 16:15 UTC, `feedback-request` 16:45 UTC, `billing-reconcile` 17:30 UTC all registered; `FEEDBACK_EMAIL_MODE` is unset in production, so no feedback email was sent and `feedback_email_sends` stays empty |
+| Screenshots | `docs/site-overhaul/screenshots/` — `/`, `/analyze`, `/pricing`, `/about`, `/reviews`, `/markets/columbus`, `/blog/how-to-calculate-cap-rate` at 375 and 1440 |
+| Revert | Not needed |
+
+
+## Final report — Site overhaul (Phases 0–10)
+
+Everything below is also filed as the GitHub issue "Site overhaul — report" so it is visible without opening the repo. Per-phase detail, with every number's provenance, is in the sections above.
+
+### What shipped, per phase
+
+| Phase | Shipped | Where it lives |
+| --- | --- | --- |
+| 1 — Revenue leak | Stripe events bind to the right user through an ordered resolver (supabase_user_id → client_reference_id → customer mapping → exactly-one confirmed email → subscription metadata); foreign-app events are skipped, contradictions are never auto-bound, unresolved events are durable; daily dry-mode reconcile cron; dead-session cookies cleared | `main` via [#89](https://github.com/morganrentalsphilly-creator/truecap/pull/89), production `dpl_APoUiUy9DeFbMzjaYUeUoB2gGCgQ` |
+| 2 — Conversion | Analyzer at `/analyze` (static); one-field hero handoff; signed-in routing; mobile nav + primary Analyze CTA; compact cookie banner; `/guarantee` → `/pricing`; dashboard `noindex`, no canonical | [#90](https://github.com/morganrentalsphilly-creator/truecap/pull/90) |
+| 3 — Voice | One disclaimer per page; term map ("Deal score", "Buy Box fit", "Offer Ceiling"); FAQs rewritten; `docs/voice.md` | #90 |
+| 4 — Product | Screenshot pipeline → `public/product`; hero LCP is the real decision shot; shots on pricing/persona/vs/blog; dynamic OG; `FounderCard` (facts only) | #90 |
+| 5 — Social proof | Consented testimonial pipeline (prompt → submit → daily publish, unpublish link), real usage counter, dormant feedback-request cron, honest `/reviews` | #90 (+ migration, founder-owed) |
+| 6 — Analytics | Typed `track()` / `trackServer()` with 13 funnel events; `docs/analytics.md` | #90 |
+| 7 — Performance | Lazy Sentry, hover-only analyzer prefetch, consent-gated GTM/Ads, browserslist, bundle analyzer, Lighthouse CI budgets | #90 |
+| 8 — SEO | Enrich-or-noindex markets/states/strategy pages; glossary "How to check it"; related content; Article author node; sitemap with `lastmod`; audit script at zero | #90 |
+| 9 — Pricing | Outcome line first; annual-first toggle with effective monthly; DealCheck comparison; trust row; tier shots; amounts from one config, unchanged | #90 |
+| 10 — Verify/deploy | Gates above; preview + production smoke; screenshots in `docs/site-overhaul/screenshots/`; this report | #90 |
+
+### Before / after
+
+| Metric | Before (live site, 2026-09-06 morning) | After (final branch build) |
+| --- | --- | --- |
+| Homepage Lighthouse performance (mobile, simulated) | 73 | 91 local build · 89 on production, warm (74 on the first cold hit after the deploy) |
+| Homepage LCP / TBT / CLS | 4.6 s / 430 ms / 0.003 | 3.2 s / 110 ms / 0.003 local · 3.4 s / 150 ms / 0.003 on production, warm |
+| Homepage accessibility | 99 | 100 |
+| Homepage own JS, compressed | 636,923 B (br) | 306,567 B (gzip) |
+| Homepage HTML bytes | 326,414 | 152,673 |
+| `/analyze` Lighthouse performance / LCP | — (analyzer lived on `/`) | 94 / 1.6 s local · 93 / 1.7 s production |
+| `/pricing` Lighthouse performance / accessibility | — | 98 / 99 local · 96 / 99 production |
+| Sitemap URLs (all indexable) | 411 | 380 |
+| Indexable pages under 300 words | 81 | 0 |
+| Sitemap entries without `lastmod` | 305 | 0 |
+| Titles > 60 / descriptions > 155 | 11 / 90 | 0 / 0 |
+| Broken internal links / duplicate titles | 0 / 0 | 0 / 0 |
+| axe violations on `/`, `/analyze`, `/pricing` | — | 0 |
+
+### Reconcile results (counts only)
+
+Production cron `/api/cron/billing-reconcile`, 2026-09-06 17:30 UTC, `dry` mode: 35 subscriptions scanned, 2 not paid, 31 foreign app, 2 already bound, 0 resolvable by any signal, 0 unresolved, 0 applied, 0 errors. Unresolved-events table not yet created (migration founder-owed), nothing to record.
+
+### Every decision made in the founder's absence
+
+1. Phase 1: Foreign-app guard added.
+2. Phase 1: `metadata.user_id` accepted at the same rank as `metadata.supabase_user_id`.
+3. Phase 1: Migration apply is founder-owed.
+4. Phase 1: The reconcile runs inside production as a cron, dry by default.
+5. Phase 1: No summary email.
+6. Phase 1: No `package.json` script alias for the CLI.
+7. Phase 1: Middleware cookie clearing is scoped to dead-session codes only.
+8. Phase 1: `vercel.json` edit.
+9. Phase 2: The written memo link moved to the footer.
+10. Phase 2: Single hero field instead of the address/listing toggle.
+11. Phase 2: `/guarantee` redirects permanently even though the page was a deliberate fail-closed 404.
+12. Phase 2: `/analyze` is static (ISR) and signed-in routing reuses the `/home-authed` cookie hint.
+13. Phase 2: A signed-in `/analyze?address=…` carries the address to `/dashboard/new`.
+14. Phase 2: Homepage FAQ/JSON-LD untouched in this phase.
+15. Phase 3: The vocabulary pass touched rendered strings only.
+16. Phase 3: `metadata.user_id`-style facts stay; only tone changed.
+17. Phase 3: Emails keep one disclaimer sentence.
+18. Phase 3: The retired newsletter JSON (`emails/content/`) was term-mapped too.
+19. Phase 3: Guard tests that pinned the old copy were re-pinned to the new copy.
+20. Phase 3: "Screening only" / "Evidence readiness" feature names and HUD-FMR source-fact sentences on the rent-estimate comparison pages stayed.
+21. Phase 3: `app/terms/page.tsx` keeps "Product evaluation" as a heading and one "preliminary fallback" sentence.
+22. Phase 3: The `/walk[- ]away price/` guard stays.
+23. Phase 3: Vocabulary check result.
+24. Phase 4: No founder photo.
+25. Phase 4: No demo account.
+26. Phase 4: Two shots deferred, recorded in the manifest:.
+27. Phase 4: OG card as a route handler, not `app/opengraph-image.tsx`.
+28. Phase 4: The computed hero card stays as a fallback only.
+29. Phase 4: Pipeline re-run is scheduled for the end of Phase 9.
+30. Phase 5: The feedback email ships dormant.
+31. Phase 5: No publish-notification email to hello@usetruecap.com.
+32. Phase 5: The usage counter uses real rows only.
+33. Phase 5: Prompt availability is decided by the tables, not a feature flag.
+34. Phase 5: Migration apply remains founder-owed.
+35. Phase 5: Ratings / `aggregateRating` stay out.
+36. Phase 6: PostHog stays as the rich event stream; the thirteen funnel events are a separate, stable, typed set.
+37. Phase 6: GTM receives events only after consent.
+38. Phase 6: `trial_started` fires with `signup_completed`.
+39. Phase 6: The "mocked transport" for the browser test is the in-page buffer.
+40. Phase 7: Sentry is deferred, not trimmed.
+41. Phase 7: The JS and LCP budgets stay warnings, not failures.
+42. Phase 7: The `polyfills` chunk is not a real cost.
+43. Phase 7: Two fonts stay.
+44. Phase 7: No `next/dynamic` sweep of the analyzer's own imports.
+45. Phase 8: The 12 bespoke city pages, Philadelphia included, are `noindex, follow`.
+46. Phase 8: Strategy pages are noindexed as a family, not per city.
+47. Phase 8: Glossary entries were enriched, not noindexed.
+48. Phase 8: List hubs are exempt from the 300-word rule.
+49. Phase 8: `Article.author` was normalized to the Morgan `Person` node on 11 roundup posts that had an `Organization` author.
+50. Phase 8: Titles and descriptions were fixed by template where a template caused them.
+51. Phase 8: `llms.txt` still lists the 19 city + strategy guides.
+52. Phase 9: Annual-first for everyone except a current monthly subscriber.
+53. Phase 9: The job cards were moved, not removed.
+54. Phase 9: DealCheck's annual prices are not stated.
+55. Phase 9: The FAQ was not rewritten a second time.
+56. Phase 9: "★ Best value" ribbon stays.
+
+### Deferred, with reasons
+
+- **Migrations** `20260906170000_billing_unresolved_events.sql` (Phase 1) and `20260906180000_testimonials_pipeline.sql` (Phase 5): no database credential is exportable from this environment; both are additive and idempotent; the code tolerates their absence (Phase 1 falls back to the webhook ledger, Phase 5 renders nothing).
+- **Reconcile `apply` mode** (`BILLING_RECONCILE_MODE=apply`): left in `dry` so nothing rebinds a customer unattended; the dry run found nothing to rebind.
+- **Feedback-request email** (`FEEDBACK_EMAIL_MODE=off`, `EMAIL_POSTAL_ADDRESS` unset): an unattended first send to real customers was the wrong call without the founder's postal address and a look at the copy.
+- **Founder photo**: no real photograph exists in the owner account's storage; the card renders without one rather than with a generated or downloaded face.
+- **Product shots** `ten-year-cash-flow` and `comparison`: Pro-gated views need a seeded account this environment cannot create.
+- **Demo account**: not created (needs database credentials); the sample flow covered every capture the pipeline could make.
+- **Performance budgets** JS ≤ 250 KB and LCP ≤ 2.5 s: warnings, not failures; the remainder is the Next runtime + React and the hero image on a simulated slow 4G.
+- **Sentry**: deferred, not trimmed (client tracing kept).
+- **HUD rows for the 12 bespoke cities**: data entry from HUD's FY2026 tables (Philadelphia, Dallas, Atlanta, Tampa, Houston, Phoenix, Charlotte, Cleveland, Detroit, Indianapolis, Kansas City, Memphis); those pages stay `noindex, follow` until then.
+- **City + strategy template**: needs real content before `STRATEGY_PAGES_INDEXABLE` flips.
+- **Assessor/permit links on market pages**: the repo has no verified per-city URLs.
+- **PostHog in production**: pre-existing (no production key); the new `track()` path uses Vercel Analytics and the consented `dataLayer`, so the funnel is measured without it.
+- **Authenticated Playwright project**: runs in CI (disposable Supabase); not runnable locally without Docker.
+
+### Founder-owed (nothing here ships itself)
+
+1. Apply the two migrations above in the Supabase SQL editor (each is `IF NOT EXISTS` throughout; safe to re-run).
+2. Decide `BILLING_RECONCILE_MODE=apply` after reading a few days of the dry-run JSON in Vercel logs (`[cron/billing-reconcile]`).
+3. Decide whether to enable the feedback email: `FEEDBACK_EMAIL_MODE=live` + `EMAIL_POSTAL_ADDRESS`; the cron is registered and idempotent.
+4. Add the 12 HUD rows (Phase 8 decision 1) to flip the flagship city pages to indexable.
+5. Review the 11 roundup posts whose `Article.author` moved from `Organization` to the founder `Person` node; revert if intentional.
+6. Everything on the earlier founder checklist still stands (secret rotation, the four older migrations, PostHog production key, dormant cron modes).
+
+{DEPLOY_RECORD}
