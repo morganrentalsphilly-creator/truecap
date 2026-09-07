@@ -18,7 +18,6 @@
 
 import type { Metadata } from "next";
 import { Testimonials } from "@/components/marketing/testimonials";
-import { FounderCard } from "@/components/marketing/founder-card";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzePageContent } from "@/components/marketing/analyze-page-content";
@@ -190,11 +189,6 @@ export default async function AuthedHome({
           section list and that neither page imports the analyzer. */}
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       {!user && <MarketingHero />}
-      {!user && (
-        <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-          <FounderCard className="max-w-xl" />
-        </div>
-      )}
       {!user && (
         <div className="truecap-marketing-tail contents">
           <DataSourcesSection />

@@ -18,7 +18,6 @@ import Link from "next/link";
 import { Database, FileCheck2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
-import { FounderCard } from "@/components/marketing/founder-card";
 import { ProofStrip } from "@/components/marketing/proof-strip";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Testimonials } from "@/components/marketing/testimonials";
@@ -267,16 +266,6 @@ export default async function ReviewsPage() {
               <li>Case studies without the customer&apos;s written approval of every number.</li>
               <li>Stock photos of &ldquo;customers.&rdquo; If there is a face on this site, it is a real person who agreed to it.</li>
             </ul>
-          </div>
-        </section>
-
-        {/* (g) Founder */}
-        <section
-          aria-label="Who built this"
-          className="border-t border-border"
-        >
-          <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-            <FounderCard />
           </div>
         </section>
 

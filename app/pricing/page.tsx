@@ -16,7 +16,6 @@
 import { Suspense } from "react";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
-import { FounderCard } from "@/components/marketing/founder-card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
@@ -490,9 +489,6 @@ export default async function PricingPage() {
                 caption={<><strong className="text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
               />
             ) : null}
-          </div>
-          <div className="mx-auto mt-10 max-w-xl">
-            <FounderCard />
           </div>
         </section>
 
