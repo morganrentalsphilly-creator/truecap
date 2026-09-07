@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cropper from "react-easy-crop";
 import type { MediaSize, Size } from "react-easy-crop";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Camera, Check, KeyRound, Loader2, Mail, Upload, X } from "lucide-react";
 import "react-easy-crop/react-easy-crop.css";
@@ -199,10 +199,13 @@ export function ProfileForm({
     mode: "onTouched",
   });
 
-  const initials = useMemo(
-    () => getInitials(form.watch("firstName"), form.watch("lastName") ?? "", initialEmail),
-    [form, initialEmail]
-  );
+  // Subscribe to the name fields directly. A useMemo keyed on the stable
+  // `form` object computed the initials exactly once, so the avatar fallback
+  // never tracked typing (react-hooks/incompatible-library was pointing at a
+  // real bug). getInitials is trivial; no memo is needed.
+  const watchedFirstName = useWatch({ control: form.control, name: "firstName" });
+  const watchedLastName = useWatch({ control: form.control, name: "lastName" }) ?? "";
+  const initials = getInitials(watchedFirstName, watchedLastName, initialEmail);
 
   // Revoke the current crop object URL (if any) and forget it. Safe to call
   // repeatedly — the leak guard for cancel / replace / unmount / save.
@@ -440,7 +443,16 @@ export function ProfileForm({
         </div>
 
         <Form {...form}>
-          <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <form
+            className="space-y-6"
+            // Build the RHF handler inside the event rather than during
+            // render: onSubmit reads refs (avatar cleanup), and calling
+            // form.handleSubmit(onSubmit) in render is flagged by
+            // react-hooks/refs now that the component compiles (the old
+            // form.watch memo had made the compiler skip this file).
+            onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+            noValidate
+          >
             <div
               className={`rounded-3xl border bg-card/80 p-4 shadow-sm transition-colors sm:p-5 ${
                 isDraggingOver ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border"
@@ -480,7 +492,7 @@ export function ProfileForm({
 
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                    {`${form.watch("firstName")} ${form.watch("lastName") ?? ""}`.trim() || initialEmail}
+                    {`${watchedFirstName} ${watchedLastName}`.trim() || initialEmail}
                   </p>
                   <p className="truncate text-sm text-muted-foreground sm:text-base">{initialEmail}</p>
                   <p className="max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">

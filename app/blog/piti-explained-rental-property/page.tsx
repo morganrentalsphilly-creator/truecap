@@ -103,7 +103,7 @@ export default function PitiExplainedPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -380,7 +380,7 @@ export default function PitiExplainedPost() {
               </Link>
               , or run a property through the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -491,7 +491,7 @@ export default function PitiExplainedPost() {
               For our $250k example: 1.875 × $665 = $1,247, plus $250 taxes,
               plus $150 insurance = $1,647. The full{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -527,7 +527,7 @@ export default function PitiExplainedPost() {
               all-in cost: vacancy, maintenance, reserves, and management still
               sit on top. Get PITI right and the rest of the underwrite —{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

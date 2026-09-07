@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "August 23, 2026";
+const LAST_UPDATED = "September 7, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -202,6 +202,14 @@ export default function PrivacyPage() {
               rent-comparable lookups. The full property address is sent for a requested
               lookup; your TrueCap account identity is not.{" "}
               <a href="https://www.rentcast.io/privacy" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>Anthropic</strong> — AI-assisted listing extraction on the Pro batch-triage
+              screen. When you click Auto-extract, the listing text you pasted (which may
+              include property addresses and prices) is sent to Anthropic&apos;s API to be turned
+              into structured rows; your TrueCap account identity is not sent. Anthropic does not
+              train on API inputs.{" "}
+              <a href="https://www.anthropic.com/privacy" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
               <strong>HUD &amp; FRED</strong> — public government data sources queried for area

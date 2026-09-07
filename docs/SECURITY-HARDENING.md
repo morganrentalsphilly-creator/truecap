@@ -3,14 +3,14 @@
 Everything in this file is a GitHub, Vercel or Supabase *settings* change.
 Code cannot do them.
 
-**Status as of 2026-08-03:**
+**Status reviewed 2026-09-07** (older evidence is dated explicitly):
 
 | # | Step | Status |
 |---|------|--------|
-| 1 | Branch protection on `main` requiring `build-chain-guard` + `check` | ✅ **DONE 2026-08-03.** Classic protection, `enforce_admins: false` (owner direct pushes to `main` still work, which is how this repo deploys), force-push and deletion blocked. Verified: `contexts` = `["build-chain-guard","check"]`. It is demonstrably binding — Dependabot PRs #10 and #18 sit unmergeable with `build-chain-guard` red. |
+| 1 | Required checks and branch protection on `main` | ✅ **VERIFIED 2026-09-07:** `build-chain-guard`, `check`, and `browser-regressions` are required; strict/up-to-date checks and admin enforcement are enabled, and required review count is zero. The production-readiness branch uses a PR and squash auto-merge. **OWED:** add `lighthouse` without removing the existing checks or weakening enforcement. |
 | 2 | `SEO_AUTOMERGE` | ⛔️ **DECLINED — automerge stays ON by founder decision.** See §2, rewritten. |
 | 3 | Review the `esaleci` account | ⏳ **OWED.** |
-| 4 | Narrow the agent's tool scope | ⏳ **OWED** (4a/4c); 4b shipped. |
+| 4 | Narrow the agent's tool scope | ⏳ **OWED** (4a/4b/4c). The `.gitignore` re-include that makes 4b committable has shipped; the deny list itself is not yet created or tracked (`git ls-files .claude/` is empty — verified 2026-09-07). |
 | 5 | Vercel | ⏳ **OWED**, and the important part changed — see §5. The control that matters is **scoping secret env vars to Production only**, not the Ignored Build Step. |
 | 6 | Pin `claude-code-action` to a SHA | ⏳ **OWED.** |
 | — | **Rotate every secret** | 🚨 **OWED, still the top item.** Verified 2026-08-03: the old `SUPABASE_SERVICE_ROLE_KEY` still authenticates. |
@@ -19,7 +19,7 @@ Code cannot do them.
 Step 1 being done is what makes the code half mean anything: an unrequired
 status check blocks nothing, and until 2026-08-03 that is what these were.
 
-Owner: `morganrentalsphilly-creator` · Repo: `morganrentalsphilly-creator/truecap` (public)
+Owner: the repository owner · Repository: TrueCap (public). Run commands from its checkout; `gh api` resolves `{owner}` and `{repo}` from the Git remote.
 
 ---
 
@@ -70,14 +70,12 @@ This is the load-bearing step. Do it first.
 
 ### Option A — UI (recommended: repository ruleset)
 
-1. Go to **https://github.com/morganrentalsphilly-creator/truecap/settings/rules**
+1. Go to the repository’s **Settings → Rules** page
 2. **New ruleset → New branch ruleset**
 3. **Ruleset Name:** `main protection`
 4. **Enforcement status:** `Active`
-5. **Bypass list:** click **+ Add bypass** → **Repository admin** → set the mode
-   to **Allow for pull requests only**.
-   (Keeping yourself on the bypass list means a solo founder never gets locked
-   out. `app/claude` and `github-actions` are *not* admins and get no bypass.)
+5. Keep required checks binding for administrators. Do not add a bypass while
+   completing the remaining Lighthouse requirement.
 6. **Target branches:** **+ Add target** → **Include default branch**
 7. Tick these rules, and only these:
    - ☑ **Restrict deletions**
@@ -94,9 +92,11 @@ This is the load-bearing step. Do it first.
      - **+ Add checks** → type each of these exactly and select it:
        - `build-chain-guard`
        - `check`
-8. **Create**
+       - `browser-regressions`
+       - `lighthouse`
+8. **Create** (or save the existing ruleset). Preserve the current protection.
 
-Both names must match exactly — they are the *job ids* in
+All check names must match exactly — they are the *job ids* in
 `.github/workflows/ci.yml`. If the search box shows nothing, open any PR first
 so GitHub has seen the check names once, then come back.
 
@@ -106,16 +106,19 @@ Equivalent, if you would rather not use the UI. `restrictions` must be `null`
 because the repo is owned by a user account, not an org.
 
 ```bash
-gh api -X PUT repos/morganrentalsphilly-creator/truecap/branches/main/protection \
+gh api -X PUT repos/{owner}/{repo}/branches/main/protection \
   -H "Accept: application/vnd.github+json" \
   --input - <<'JSON'
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["build-chain-guard", "check"]
+    "contexts": ["build-chain-guard", "check", "browser-regressions", "lighthouse"]
   },
-  "enforce_admins": false,
-  "required_pull_request_reviews": null,
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 0,
+    "dismiss_stale_reviews": true
+  },
   "restrictions": null,
   "allow_force_pushes": false,
   "allow_deletions": false,
@@ -129,21 +132,20 @@ JSON
 ### Verify it took
 
 ```bash
-# should print the two contexts, not a 404
-gh api repos/morganrentalsphilly-creator/truecap/branches/main/protection \
+# should include all four contexts after the remaining setting is completed
+gh api repos/{owner}/{repo}/branches/main/protection \
   --jq '.required_status_checks.contexts'
 
 # effective rules from every source (classic + rulesets + org)
-gh api repos/morganrentalsphilly-creator/truecap/rules/branches/main
+gh api repos/{owner}/{repo}/rules/branches/main
 ```
 
-If the first command prints `["build-chain-guard","check"]`, the guard can
-finally *block*: a PR that changes `postcss.config.mjs`, `next.config.mjs`,
+If the first command includes all four contexts, each check can *block*: a PR that changes `postcss.config.mjs`, `next.config.mjs`,
 `package.json`, `.github/**`, `.claude/**`, `scripts/**`,
 `supabase/**`, `app/api/**` or the other guarded paths, and was not
-authored by you, cannot be merged — short of your own admin bypass, which the
-ruleset in step 1 keeps deliberately. If it 404s, nothing has changed and you
-should not move on.
+authored by the trusted repository owner cannot be merged. Admin enforcement
+must remain enabled. If it 404s, protection is missing; do not assume the checks
+are binding.
 
 Say that precisely, because the imprecise version of this sentence has been
 wrong twice. **Required checks do not close the build-config route on their
@@ -260,7 +262,7 @@ With automerge on, no human reads an SEO PR before it is in production.
 
 If you ever want the stricter posture, this is the switch:
 
-1. **https://github.com/morganrentalsphilly-creator/truecap/settings/variables/actions**
+1. the repository’s **Settings → Secrets and variables → Actions → Variables** page
 2. **Variables** tab → find `SEO_AUTOMERGE` → **Edit** (pencil icon)
 3. Set the value to `false` → **Save**
    (Or **Remove** it outright — `seo-content.yml:161` is
@@ -268,7 +270,7 @@ If you ever want the stricter posture, this is the switch:
 
 ```bash
 gh variable set SEO_AUTOMERGE --body false \
-  --repo morganrentalsphilly-creator/truecap
+  --repo "$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
 ```
 
 ### The preconditions this decision assumes
@@ -336,7 +338,7 @@ If any of the four does not behave as written, do not re-enable auto-merge.
 ## 3. Review the second write-access account (`esaleci`)
 
 ```bash
-gh api repos/morganrentalsphilly-creator/truecap/collaborators \
+gh api repos/{owner}/{repo}/collaborators \
   --jq '.[] | {login, role: .role_name, push: .permissions.push, admin: .permissions.admin}'
 ```
 
@@ -358,16 +360,16 @@ unrotated. That makes this an open persistence path, not a tidiness issue.
 
 **Do this:**
 
-1. **https://github.com/morganrentalsphilly-creator/truecap/settings/access**
+1. the repository’s **Settings → Collaborators** page
 2. Next to `esaleci` → **Remove**.
    If you still need them occasionally, re-add on demand, or downgrade to
    **Read** (the dropdown next to their name → **Read**).
 
    ```bash
    # remove
-   gh api -X DELETE repos/morganrentalsphilly-creator/truecap/collaborators/esaleci
+   gh api -X DELETE repos/{owner}/{repo}/collaborators/esaleci
    # or downgrade to read-only
-   gh api -X PUT repos/morganrentalsphilly-creator/truecap/collaborators/esaleci -f permission=pull
+   gh api -X PUT repos/{owner}/{repo}/collaborators/esaleci -f permission=pull
    ```
 
 3. Check they hold nothing else: **Settings → Deploy keys**, **Settings →
@@ -676,7 +678,7 @@ Shipped in this change, no settings required:
   `eslint.config.*`, `tsconfig*.json`, `.github/**`, `.claude/**`,
   `.gitmodules`, `.gitattributes`, `supabase/**`, `lib/supabase/**`,
   `app/api/**`, and all of `scripts/**` (which contains the three files of this
-  control itself) — unless the actor is `morganrentalsphilly-creator`. On
+  control itself) — unless the actor is the repository owner. On
   a PR, *both* the pusher and the PR author must be you, so an agent-opened PR
   cannot be laundered by a later push from your account. If the diff cannot be
   computed at all and the actor is not you, it fails closed. A change touching
@@ -812,8 +814,9 @@ production build". Bots do not belong on it.
 
 ## Checklist
 
-- [x] 1. Ruleset (or classic protection) on `main`, requiring `build-chain-guard` + `check` — **done 2026-08-03**
-- [x] 1b. Verified with `gh api .../branches/main/protection --jq '.required_status_checks.contexts'` → `["build-chain-guard","check"]`
+- [x] 1. Classic protection on `main` requires `build-chain-guard`, `check`, and `browser-regressions` — **verified 2026-09-07**; strict checks and admin enforcement are enabled.
+- [ ] 1a. Add `lighthouse` to the required checks, preserving all existing protection.
+- [x] 1b. Re-read live branch protection during the production-readiness pass; settings were not changed by that pass.
 - [ ] 0. **Vercel: scope the secret env vars to Production only** (§5 step 0) — the
       one that stops an untrusted PR's preview build from running with production
       secrets. Not optional, and not covered by anything in the repo.

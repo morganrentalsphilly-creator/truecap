@@ -44,6 +44,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { isValidCronBearer } from "@/lib/cron-auth";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
@@ -88,7 +89,7 @@ export async function GET(request: Request) {
     reportFailure("CRON_SECRET env var not set");
     return NextResponse.json({ ok: false, message: "CRON_SECRET not configured." }, { status: 500 });
   }
-  if (request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+  if (!isValidCronBearer(request, cronSecret)) {
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
 

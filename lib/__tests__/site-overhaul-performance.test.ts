@@ -32,6 +32,18 @@ describe("performance contract", () => {
     expect(google).not.toContain('strategy="afterInteractive"');
     expect((google.match(/strategy="lazyOnload"/g) ?? []).length).toBe(3);
     expect(google).toContain("COOKIE_CONSENT_EVENT");
+    // The loader only renders after an explicit "granted" decision, so it must
+    // push the granted update itself — the banner's click-time update fires
+    // before window.gtag exists. Default (denied) must still come first.
+    const consentDefault = google.indexOf("gtag('consent', 'default'");
+    const consentUpdate = google.indexOf("gtag('consent', 'update'");
+    expect(consentDefault).toBeGreaterThanOrEqual(0);
+    expect(consentUpdate).toBeGreaterThan(consentDefault);
+    const update = google.slice(consentUpdate, google.indexOf("});", consentUpdate));
+    expect(update).toContain("analytics_storage: 'granted'");
+    expect(update).toContain("ad_storage: 'granted'");
+    expect(update).toContain("ad_user_data: 'granted'");
+    expect(update).toContain("ad_personalization: 'granted'");
   });
 
   it("targets modern browsers so the legacy polyfills chunk is not shipped", () => {
@@ -59,6 +71,33 @@ describe("performance contract", () => {
     expect(init).toContain("replaysSessionSampleRate: 0");
     expect(init).toContain("scrubSentryEventSensitiveData(event)");
     expect(init).toContain("captureRouterTransitionStart");
+    // Client modules Next.js bundles into EVERY route (the root error
+    // boundaries, the 404 tracker) must not import the SDK statically either,
+    // or ~15 KB gzip of Sentry core lands back on every marketing page. They
+    // go through lib/sentry/lazy.ts, which inits (idempotent) then captures.
+    for (const path of [
+      "app/error.tsx",
+      "app/global-error.tsx",
+      "components/marketing/not-found-tracker.tsx",
+    ]) {
+      const source = read(path);
+      expect(source, path).not.toContain('from "@sentry/nextjs"');
+      expect(source, path).toMatch(/from "@\/lib\/sentry\/lazy"/);
+    }
+    const lazy = read("lib/sentry/lazy.ts");
+    expect(lazy).not.toContain('from "@sentry/nextjs"');
+    expect(lazy).toContain('import("@/lib/sentry/client-init")');
+    expect(lazy).toContain("m.initSentryClient()");
+  });
+
+  it("keeps the Supabase browser client out of the anonymous /analyze first load", () => {
+    // cacheSavedAnalysisPdfExport is only reachable for signed-in Pro PDF
+    // exports, yet a static import of it pulled supabase-js + auth-js (~64 KB
+    // gzip) into the analyzer bundle for every anonymous visitor.
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    expect(analyzer).not.toMatch(/^import .* from "@\/lib\/supabase\/client";/m);
+    expect(analyzer).not.toMatch(/^import .* from "@\/lib\/pdf\/saved-analysis-cache";/m);
+    expect(analyzer).toContain('await import("@/lib/pdf/saved-analysis-cache")');
   });
 
   it("enforces the budgets in CI with the accessibility and CLS gates as errors", () => {

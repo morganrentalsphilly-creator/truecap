@@ -281,7 +281,7 @@ export function TemplateSelectorSection({
   if (isTemplateLocked) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="mt-4 space-y-2 border-t border-border pt-4">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
         Template
       </p>

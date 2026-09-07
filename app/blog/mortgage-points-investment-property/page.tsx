@@ -105,7 +105,7 @@ export default function MortgagePointsPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -365,7 +365,7 @@ export default function MortgagePointsPost() {
             <p>
               A lower modeled rate reduces the payment and can increase a{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
@@ -434,7 +434,7 @@ export default function MortgagePointsPost() {
               In a model, points can lower the payment while raising the cash in
               the deal. Run both effects through{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash
@@ -574,7 +574,7 @@ export default function MortgagePointsPost() {
               , confirm the lender&apos;s own inputs and threshold rather than
               relying on the model. The{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

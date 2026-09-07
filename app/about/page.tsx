@@ -149,7 +149,8 @@ export default function AboutPage() {
             projections, Buy Box fit, and a Deal score.
             The{" "}
             <Link
-              href="/"
+              href="/analyze"
+              prefetch={false}
               className="font-bold text-foreground hover:underline"
             >
               core analyzer
@@ -161,8 +162,9 @@ export default function AboutPage() {
             >
               paid plan
             </Link>{" "}
-            adds saved deals, a portfolio dashboard, deal comparison, and
-            lender-facing Pro report exports.
+            adds unlimited saved deals you can edit, a portfolio dashboard,
+            deal comparison, and lender-facing Pro report exports. Free keeps
+            up to 5 saved deals.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Get in touch</h2>

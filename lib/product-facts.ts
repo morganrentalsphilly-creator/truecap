@@ -211,10 +211,10 @@ export function getPlanFacts() {
       ? `${oneTimePurchase.name} is available as a non-renewing ${oneTimePurchase.displayPrice} one-time purchase.`
       : "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
     pro: availability.investorPro
-      ? "Investor Pro is available on this deployment with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports."
-      : "Investor Pro checkout is not configured on this deployment.",
+      ? "Pro is available on this deployment with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports."
+      : "Pro checkout is not configured on this deployment.",
     agentPro: availability.agentPro
-      ? "Agent Pro is available on this deployment and adds client-roster and client Buy Box workflows to Investor Pro."
+      ? "Agent Pro is available on this deployment and adds client-roster and client Buy Box workflows to Pro."
       : "Agent Pro checkout is not configured on this deployment.",
     evaluationDays: PRODUCT_PLAN_FACTS.evaluation.durationDays,
     evaluationDealLimit: PRODUCT_PLAN_FACTS.evaluation.dealLimit,

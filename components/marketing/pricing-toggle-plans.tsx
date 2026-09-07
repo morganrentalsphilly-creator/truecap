@@ -143,7 +143,7 @@ export function PricingTogglePlans({
   evaluation,
   billingRecoveryRequired = false,
   agentProConfigured = false,
-  proOfferName = "TrueCap Pro",
+  proOfferName = "Pro",
 }: PricingTogglePlansProps) {
   const isPaid = activePaidPlanSlug != null || billingRecoveryRequired;
   const evaluationAllowance = formatPricingEvaluationAllowance(evaluation);
@@ -290,7 +290,7 @@ export function PricingTogglePlans({
                 Showing it to an anonymous visitor told them they already
                 hold a plan — a status-quo anchor toward staying on Free. */}
             {isAuthenticated && !isPaid && (
-              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
+              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
                 Current
               </span>
             )}
@@ -349,7 +349,7 @@ export function PricingTogglePlans({
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">{proOfferName}</h3>
             {proCardDecision.kind === "current" ? (
-              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
+              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
                 Current
               </span>
             ) : (
@@ -475,7 +475,7 @@ export function PricingTogglePlans({
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <div className="flex flex-wrap justify-end gap-1.5">
                 {agentCardDecision.kind === "current" ? (
-                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
+                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
                     Current
                   </span>
                 ) : null}

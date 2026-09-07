@@ -38,13 +38,22 @@ test("capture public product evidence without entering checkout", async ({
       animations: "disabled",
     });
 
-    const sampleCard = page.locator('[data-hero-sample-card=""]');
+    // The hero renders the real product shot when one exists and falls back
+    // to the illustrative sample card only until the shot is produced
+    // (components/marketing/marketing-hero.tsx); capture whichever mounted.
+    const sampleCard = page
+      .locator('[data-hero-product-shot=""], [data-hero-sample-card=""]')
+      .first();
     await expect(sampleCard).toBeVisible();
     await sampleCard.screenshot({
       path: `${evidenceDirectory}/homepage-sample-${width}.png`,
       animations: "disabled",
     });
 
+    // Since Phase 2 (docs/site-overhaul.md) the homepage no longer mounts
+    // the analyzer; the initial calculator lives on /analyze.
+    await page.goto("/analyze", { waitUntil: "domcontentloaded" });
+    await acceptCookiesIfShown(page);
     const calculator = page.locator('form[data-calc-form="true"]');
     await expect(calculator).toBeVisible();
     await calculator.screenshot({

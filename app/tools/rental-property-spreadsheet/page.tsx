@@ -219,7 +219,7 @@ export default function RentalPropertySpreadsheetPage() {
               just have the tool. If the spreadsheet is genuinely useful, some
               of you will eventually want the faster version (
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 type an address, get the same analysis in 60 seconds
@@ -297,7 +297,7 @@ export default function RentalPropertySpreadsheetPage() {
               The spreadsheet ships pre-filled with the same example deal we
               underwrite in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -383,7 +383,7 @@ export default function RentalPropertySpreadsheetPage() {
             <p>
               The{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -465,7 +465,7 @@ export default function RentalPropertySpreadsheetPage() {
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "10-year projection with rent + expense growth (Pro)",
-                "Downside sensitivity and Offer Ceiling (Pro)",
+                "Downside sensitivity and Offer Ceiling (included in your first decision, Pro after)",
                 "Deal score (0–100) with a factor breakdown",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -476,7 +476,7 @@ export default function RentalPropertySpreadsheetPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the full TrueCap analyzer

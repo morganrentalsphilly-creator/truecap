@@ -25,11 +25,30 @@ export const metadata: Metadata = {
   description:
     "Enter an address or paste a listing link. See cash flow, DSCR, and the highest price that still meets your targets, every assumption editable. No account.",
   alternates: { canonical: "/analyze" },
+  // A page-level openGraph REPLACES the root's wholesale (see app/page.tsx),
+  // so images/type and a matching twitter block must be declared here or the
+  // share card renders with no image and the root's twitter:title.
   openGraph: {
     title: "Analyze a Rental Property Free | TrueCap",
     description:
       "Cash flow, DSCR, and the highest price that still meets your targets, from an address. No account.",
     url: "/analyze",
+    type: "website",
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap rental property analyzer",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Analyze a Rental Property Free | TrueCap",
+    description:
+      "Cash flow, DSCR, and the highest price that still meets your targets, from an address. No account.",
+    images: ["/home.jpg"],
   },
 };
 

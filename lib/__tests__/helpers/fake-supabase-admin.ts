@@ -102,6 +102,8 @@ export function createFakeAdmin(options: {
   users?: FakeAuthUser[];
   /** Tables that "do not exist" — every query returns 42P01. */
   missingTables?: string[];
+  /** Optional PostgREST response cap, applied after requested range/limit. */
+  maxRows?: number;
 } = {}) {
   const tables: Record<string, Row[]> = {};
   for (const [name, rows] of Object.entries(options.tables ?? {})) {
@@ -149,6 +151,7 @@ export function createFakeAdmin(options: {
       const total = out.length;
       if (state.range) out = out.slice(state.range.from, state.range.to + 1);
       if (state.limit != null) out = out.slice(0, state.limit);
+      if (options.maxRows != null) out = out.slice(0, options.maxRows);
       return {
         data: state.headOnly ? null : out.map((row) => ({ ...row })),
         error: null,

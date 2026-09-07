@@ -31,7 +31,7 @@ export function VsBreadcrumbSchema({ vsPath, pageName }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",

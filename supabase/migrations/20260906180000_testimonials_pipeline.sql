@@ -4,8 +4,12 @@
 --
 --   testimonials              consented quotes from the in-product prompt;
 --                             auto-published by /api/cron/publish-testimonials
---                             once every rule holds; public reads ONLY of
---                             status = 'published'.
+--                             once every rule holds. Service-role only: the
+--                             site reads published rows through the server
+--                             (lib/testimonials/store.ts); there is NO client
+--                             read path, because the row carries the
+--                             unpublish_token capability and the author's
+--                             user_id.
 --   testimonial_prompt_events one row per user: the prompt fires once, ever.
 --   demo_accounts             users excluded from every count and every email.
 --   feedback_email_sends      one row per user: the guarded feedback email can
@@ -44,18 +48,21 @@ create unique index if not exists testimonials_unpublish_token_idx
   on public.testimonials (unpublish_token);
 
 alter table public.testimonials enable row level security;
+alter table public.testimonials force row level security;
 
--- Public reads of PUBLISHED rows only (anon + signed-in). Writes go through
--- the service role (server actions + cron); there is no client insert path.
+-- Service role only — grants AND RLS as two independent controls (the house
+-- pattern from 20260829110000). Supabase's default privileges grant SELECT on
+-- every public table to anon/authenticated, so a row policy alone would have
+-- let the public anon key read unpublish_token (the founder's veto capability)
+-- and user_id off every published row. Every read and write goes through
+-- createAdminSupabaseClient (server components, server actions, cron); there
+-- is no client read or insert path. No policies exist on purpose.
 drop policy if exists testimonials_public_read on public.testimonials;
-create policy testimonials_public_read
-  on public.testimonials
-  for select
-  to anon, authenticated
-  using (status = 'published');
+revoke all on table public.testimonials from public, anon, authenticated;
+grant select, insert, update on table public.testimonials to service_role;
 
 comment on table public.testimonials is
-  'Consented customer quotes from the in-product prompt. Auto-published by the publish-testimonials cron when every eligibility rule holds; public reads only of status = published. Never deleted — unpublish sets status + unpublished_at.';
+  'Consented customer quotes from the in-product prompt. Auto-published by the publish-testimonials cron when every eligibility rule holds. Service-role only: the site reads published rows server-side; the row carries the unpublish capability token, so no client role may select it. Never deleted — unpublish sets status + unpublished_at.';
 
 create table if not exists public.testimonial_prompt_events (
   user_id uuid primary key references auth.users (id) on delete cascade,
@@ -65,7 +72,11 @@ create table if not exists public.testimonial_prompt_events (
   submitted_at timestamptz
 );
 alter table public.testimonial_prompt_events enable row level security;
--- No policies: service role only.
+alter table public.testimonial_prompt_events force row level security;
+-- No policies: service role only. The explicit revoke closes the default
+-- anon/authenticated SELECT grant independently of RLS.
+revoke all on table public.testimonial_prompt_events from public, anon, authenticated;
+grant select, insert, update on table public.testimonial_prompt_events to service_role;
 
 create table if not exists public.demo_accounts (
   user_id uuid primary key references auth.users (id) on delete cascade,
@@ -73,7 +84,11 @@ create table if not exists public.demo_accounts (
   created_at timestamptz not null default now()
 );
 alter table public.demo_accounts enable row level security;
--- No policies: service role only.
+alter table public.demo_accounts force row level security;
+-- No policies: service role only. The explicit revoke closes the default
+-- anon/authenticated SELECT grant independently of RLS.
+revoke all on table public.demo_accounts from public, anon, authenticated;
+grant select, insert, update on table public.demo_accounts to service_role;
 comment on table public.demo_accounts is
   'Accounts excluded from every public count, every testimonial, and every email (screenshot/demo users).';
 
@@ -85,7 +100,11 @@ create table if not exists public.feedback_email_sends (
   form_token text not null default encode(gen_random_bytes(24), 'hex')
 );
 alter table public.feedback_email_sends enable row level security;
--- No policies: service role only.
+alter table public.feedback_email_sends force row level security;
+-- No policies: service role only. The explicit revoke closes the default
+-- anon/authenticated SELECT grant independently of RLS.
+revoke all on table public.feedback_email_sends from public, anon, authenticated;
+grant select, insert, update on table public.feedback_email_sends to service_role;
 
 alter table public.profiles
   add column if not exists marketing_opt_out boolean not null default false;

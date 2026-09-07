@@ -36,7 +36,6 @@ import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
@@ -79,9 +78,11 @@ const FAQS: { q: string; a: string }[] = [
     // Keep this answer in lockstep with the homepage FAQ
     // (components/marketing/landing-sections.tsx), the plan cards
     // (pricing-toggle-plans.tsx), and the actual gating in
-    // app/page.tsx. Offer Ceiling, sensitivity, BRRRR/fix-and-flip, and share
-    // links are PRO features — a previous version of this answer
-    // claimed they were free, contradicting every other surface.
+    // app/page.tsx. The Offer Ceiling and downside sensitivity are included
+    // in the anonymous first decision (FEATURE_CATALOG anonymousLimit) and
+    // are Pro after that; 10-year projection, comparison, PDF and templates
+    // are Pro-only. Tool, /vs and blog copy is guarded against re-labelling
+    // the first-decision features "(Pro)" in pricing-copy-guards.test.ts.
     a: "Yes. Your first decision includes asking-price cash flow, Buy Box fit, the Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and start the free trial.",
   },
   {
@@ -194,10 +195,10 @@ export default async function PricingPage() {
     : null;
   const siteUrl = getSiteUrl();
   const recurringOffers = [
-    ["TrueCap Pro Monthly", monthly],
-    ["TrueCap Pro Annual", annual],
-    ["TrueCap Agent Pro Monthly", agentMonthly],
-    ["TrueCap Agent Pro Annual", agentAnnual],
+    [`${proOfferName} Monthly`, monthly],
+    [`${proOfferName} Annual`, annual],
+    ["Agent Pro Monthly", agentMonthly],
+    ["Agent Pro Annual", agentAnnual],
   ] as const;
   const pricingSchema = {
     "@context": "https://schema.org",
@@ -272,18 +273,18 @@ export default async function PricingPage() {
               {!user
                 ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} deals, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
                 : activePaidPlanSlug || billingRecoveryRequired
-                  ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+                  ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
                   : pricingEvaluation.status === "active" && evaluationAllowance
                     ? `Your free trial has ${evaluationAllowance}.`
                     : pricingEvaluation.status === "exhausted"
                       ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
                       : pricingEvaluation.status === "expired"
                         ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                        : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
+                        : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Analyze a property free
@@ -306,8 +307,10 @@ export default async function PricingPage() {
             deep link that needs to land directly on the plan toggle. */}
         <section
           id="plans"
+          aria-labelledby="pricing-plans-title"
           className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6"
         >
+          <h2 id="pricing-plans-title" className="sr-only">Plans</h2>
           {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
               points back here with ?billing=checkout_cancelled. Suspense keeps
               the page's rendering unaffected by the banner's useSearchParams. */}
@@ -355,17 +358,13 @@ export default async function PricingPage() {
             </Link>
           </div>
 
-          {/* Verified customer quotes near the CTAs (2026-08 offer rollout,
-              superseding the earlier ticker-only stance). Renders null until
-              records pass the lib/proof-records.ts verification + approval
-              gate, so the ticker below stays the sole proof until real
-              quotes exist — nothing fake can render here. */}
-          <div className="mx-auto mt-8 max-w-4xl">
-            <TestimonialStrip limit={2} />
-          </div>
           {/* Consented quotes from the in-product prompt (Phase 5); renders
               nothing until real published rows exist. */}
-          <Testimonials limit={3} heading="From people who pay for it" className="mx-auto max-w-5xl" />
+          {/* No paid-customer heading override: publication is gated on activity
+              (lib/testimonials/rules.ts), not on plan, so a free account's
+              quote can publish here — the component default is the truthful
+              label. */}
+          <Testimonials limit={3} className="mx-auto max-w-5xl" />
 
           {/* Trust row (Phase 9): the four facts a buyer checks before the
               card form. Each is true today: no card to start (evaluation
@@ -527,7 +526,7 @@ export default async function PricingPage() {
                     </div>
                     <div className="rounded-xl bg-primary/5 p-3">
                       <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        Pro
+                        {proOfferName}
                       </dt>
                       <dd className="mt-1">
                         <MobileFeatureValue value={pro} pro />
@@ -541,7 +540,7 @@ export default async function PricingPage() {
           <div className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full text-sm">
               <caption className="sr-only">
-                Features included with TrueCap Free and TrueCap Pro
+                Features included with Free and {proOfferName}
               </caption>
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -552,7 +551,7 @@ export default async function PricingPage() {
                     Free
                   </th>
                   <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
-                    Pro
+                    {proOfferName}
                   </th>
                 </tr>
               </thead>
@@ -603,13 +602,16 @@ export default async function PricingPage() {
 
           <div className="mt-10 flex flex-col items-center gap-3 text-center">
             <p className="text-sm text-muted-foreground">
-              Still have questions?
+              Still have a question?{" "}
+              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Email hello@usetruecap.com
+              </a>
             </p>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Try the calculator first — it&apos;s free →
+              Analyze a deal free →
             </Link>
           </div>
         </section>
@@ -652,7 +654,7 @@ function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
         </>
       ) : value === false ? (
         <>
-          <X aria-hidden className="mx-auto size-4 text-muted-foreground/30" />
+          <X aria-hidden className="mx-auto size-4 text-muted-foreground" />
           <span className="sr-only">Not included</span>
         </>
       ) : (

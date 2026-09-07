@@ -4,6 +4,7 @@ import {
   formatUsageCount,
   isNearDuplicate,
   quoteSimilarity,
+  validateAttribution,
   validateQuote,
 } from "@/lib/testimonials/rules";
 
@@ -25,8 +26,36 @@ describe("validateQuote", () => {
     expect(validateQuote(`${GOOD} Email me at bob@example.com`)).toEqual({ ok: false, reason: "contains_email" });
     expect(validateQuote(`${GOOD} Call 215-555-0134 anytime`)).toEqual({ ok: false, reason: "contains_phone" });
   });
+  it.each(["2024-2025", "2024–2026", "2019 - 2024"])("allows an ordinary year range: %s", (years) => {
+    const quote = `I used TrueCap in ${years} and saved several deals before deciding what to offer.`;
+    expect(validateQuote(quote)).toEqual({ ok: true, quote });
+    expect(validateAttribution(years)).toEqual({ ok: true, value: years });
+  });
+  it.each(["2155550134", "+1 (215) 555-0134", "44-2024-2025", "2024-2025 and then 215-555-0134"])(
+    "still rejects phone numbers when year-shaped groups are present: %s", (phone) => {
+      expect(validateQuote(`${GOOD} Call ${phone}`)).toEqual({ ok: false, reason: "contains_phone" });
+      expect(validateAttribution(phone)).toEqual({ ok: false, reason: "contains_phone" });
+    },
+  );
   it("rejects obvious profanity", () => {
     expect(validateQuote(`${GOOD} It is fucking great.`)).toEqual({ ok: false, reason: "profanity" });
+  });
+});
+
+describe("validateAttribution (market and first name render verbatim on the public card)", () => {
+  it("accepts an ordinary market or name, normalizes whitespace, and treats empty as absent", () => {
+    expect(validateAttribution("  Philadelphia,  PA ")).toEqual({ ok: true, value: "Philadelphia, PA" });
+    expect(validateAttribution("Alice")).toEqual({ ok: true, value: "Alice" });
+    expect(validateAttribution("")).toEqual({ ok: true, value: null });
+    expect(validateAttribution(null)).toEqual({ ok: true, value: null });
+  });
+  it("rejects URLs, emails, phone numbers, and profanity", () => {
+    expect(validateAttribution("see cheapdeals.xyz")).toEqual({ ok: false, reason: "contains_url" });
+    expect(validateAttribution("cheapdeals.com")).toEqual({ ok: false, reason: "contains_url" });
+    expect(validateAttribution("https://cheapdeals.xyz")).toEqual({ ok: false, reason: "contains_url" });
+    expect(validateAttribution("bob@example.com")).toEqual({ ok: false, reason: "contains_email" });
+    expect(validateAttribution("Call 215-555-0134")).toEqual({ ok: false, reason: "contains_phone" });
+    expect(validateAttribution("Shithole, PA")).toEqual({ ok: false, reason: "profanity" });
   });
 });
 
@@ -51,6 +80,7 @@ describe("evaluatePublishEligibility (all rules must hold)", () => {
   };
   it("publishes when every rule holds", () => {
     expect(evaluatePublishEligibility(base, now)).toEqual({ publish: true });
+    expect(evaluatePublishEligibility({ ...base, firstName: "Alice", market: "Philadelphia, PA" }, now)).toEqual({ publish: true });
   });
   it("accepts one exported report in place of three saved deals", () => {
     expect(evaluatePublishEligibility({ ...base, savedDealCount: 0, exportedReportCount: 1 }, now)).toEqual({ publish: true });
@@ -61,6 +91,10 @@ describe("evaluatePublishEligibility (all rules must hold)", () => {
     [{ savedDealCount: 2, exportedReportCount: 0 }, "not_enough_activity"],
     [{ quote: "Too short." }, "too_short"],
     [{ quote: `${GOOD} https://x.co` }, "contains_url"],
+    [{ market: "cheapdeals.com" }, "contains_url"],
+    [{ firstName: "www.cheapdeals.xyz" }, "contains_url"],
+    [{ market: "Call 215-555-0134" }, "contains_phone"],
+    [{ firstName: "Asshole" }, "profanity"],
     [{ existingPublishedQuotes: [GOOD] }, "near_duplicate"],
     [{ publishAfter: "2026-09-09T00:00:00Z" }, "delay_not_elapsed"],
   ] as const)("skips %j with %s", (override, reason) => {

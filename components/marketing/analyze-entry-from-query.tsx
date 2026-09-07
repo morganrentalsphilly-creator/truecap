@@ -9,9 +9,12 @@
  *                                 to the analyzer exactly like the hero does
  *
  * `?address=` is consumed earlier by the pre-analytics bootstrap in the root
- * layout (lib/analyzer-handoff.ts) and prefills the address field — nothing
- * to do here. Sensitive params are scrubbed from the URL after reading so
- * vendor scripts and history never see a listing link.
+ * layout (lib/analyzer-handoff.ts — it runs on every route in
+ * ANALYZER_HANDOFF_BOOTSTRAP_PATHS, /analyze and /dashboard/new included)
+ * and prefills the address field — nothing to do here. Sensitive params are
+ * scrubbed from the URL after reading so vendor scripts and history never
+ * see a listing link. Mounted on /analyze and on /dashboard/new (where
+ * /home-authed sends a signed-in visitor), so `?sample=1` works for both.
  */
 
 import { useEffect } from "react";

@@ -105,7 +105,7 @@ export default function HowToCalculateArvPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: canonicalUrl },
     ],
@@ -549,7 +549,7 @@ export default function HowToCalculateArvPost() {
               survives an appraisal 5–10% below your estimate before you wire
               a deposit. When the property&apos;s endgame is a rental, run the
               stabilized numbers through the{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               so the ARV, the refinance, and the cash flow all come from one

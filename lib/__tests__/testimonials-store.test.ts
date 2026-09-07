@@ -20,8 +20,9 @@ const GOOD = "TrueCap made me stop guessing at rent and start checking the numbe
 const NOW = new Date("2026-09-08T12:00:00Z");
 const TOKEN = "a".repeat(48);
 
-function setup() {
+function setup(maxRows?: number) {
   return createFakeAdmin({
+    maxRows,
     tables: {
       profiles: [
         { id: U1, first_name: "Alice", display_name: null, marketing_opt_out: false },
@@ -89,6 +90,28 @@ describe("prompt fires once per user and stores consent", () => {
     expect(result).toEqual({ ok: false, reason: "contains_url" });
     expect(fake.rows("testimonials")).toHaveLength(0);
   });
+
+  it("refuses a market that carries a URL, email, phone, or profanity (it renders verbatim on the public card)", async () => {
+    const fake = setup();
+    for (const [market, reason] of [
+      ["cheapdeals.com", "contains_url"],
+      ["bob@example.com", "contains_email"],
+      ["215-555-0134", "contains_phone"],
+      ["Shithole, PA", "profanity"],
+    ] as const) {
+      const result = await submitTestimonial(fake.admin, { userId: U1, quote: GOOD, market, consent: true, trigger: "pdf_export" });
+      expect(result, market).toEqual({ ok: false, reason });
+    }
+    expect(fake.rows("testimonials")).toHaveLength(0);
+  });
+
+  it("drops a profile-derived first name that fails the public-string gate instead of storing it", async () => {
+    const fake = setup();
+    fake.rows("profiles").push({ id: "44444444-4444-4444-8444-444444444444", first_name: "www.cheapdeals.xyz", display_name: null, marketing_opt_out: false });
+    const result = await submitTestimonial(fake.admin, { userId: "44444444-4444-4444-8444-444444444444", quote: GOOD, consent: true, trigger: "pdf_export" });
+    expect(result.ok).toBe(true);
+    expect(fake.rows("testimonials")[0]).toMatchObject({ first_name: null, quote: GOOD });
+  });
 });
 
 describe("publish job", () => {
@@ -113,6 +136,18 @@ describe("publish job", () => {
     expect(byId.t3).toMatchObject({ status: "pending", skip_reason: "demo_account" });
     expect(byId.t4).toMatchObject({ status: "pending" });
     expect(await listPublishedTestimonials(fake.admin, 10)).toMatchObject([{ id: "t1", firstName: "Alice", role: "investor", market: "Philadelphia, PA" }]);
+  });
+
+  it("re-checks market and first name at publish time and records the failing rule", async () => {
+    const fake = setup();
+    fake.rows("testimonials").push(
+      { id: "t1", user_id: U1, quote: GOOD, first_name: "Alice", role: null, market: "see cheapdeals.com", consent: true, publish_after: "2026-09-07T00:00:00Z", status: "pending", published_at: null, created_at: "2026-09-06T00:00:00Z", unpublish_token: TOKEN },
+      { id: "t2", user_id: U1, quote: `${GOOD} Truly.`, first_name: "https://cheapdeals.xyz", role: null, market: null, consent: true, publish_after: "2026-09-07T00:00:00Z", status: "pending", published_at: null, created_at: "2026-09-06T00:00:00Z", unpublish_token: "b".repeat(48) },
+    );
+    const summary = await runPublishJob(fake.admin, NOW);
+    expect(summary).toMatchObject({ scanned: 2, published: 0, skipped: { contains_url: 2 } });
+    for (const row of fake.rows("testimonials")) expect(row).toMatchObject({ status: "pending", skip_reason: "contains_url" });
+    expect(await listPublishedTestimonials(fake.admin, 10)).toEqual([]);
   });
 
   it("does not publish without consent even when everything else holds", async () => {
@@ -153,4 +188,50 @@ describe("real counts and the email audience", () => {
     fake.rows("feedback_email_sends").push({ user_id: U1, form_token: TOKEN });
     expect(await selectFeedbackEmailAudience(fake.admin, NOW)).toEqual([]);
   });
+});
+
+
+describe("feedback audience pagination", () => {
+  it("includes candidates beyond the first 1,000 matching deals", async () => {
+    const fake = setup(1000);
+    fake.rows("saved_analyses").unshift(...Array.from({ length: 1001 }, (_, i) => ({
+      id: `a${String(i).padStart(4, "0")}`, user_id: "unconfirmed-user", deleted_at: null,
+      created_at: "2026-09-01T00:00:00Z",
+    })));
+    expect(await selectFeedbackEmailAudience(fake.admin, NOW)).toEqual([
+      { userId: U1, email: "alice@example.com" }, { userId: U2, email: "bob@example.com" },
+    ]);
+  });
+
+  it.each(["demo_accounts", "testimonial_prompt_events", "feedback_email_sends", "profiles"])(
+    "honors an exclusion after the first 1,000 matching %s rows", async (table) => {
+      const fake = setup(1000);
+      const column = table === "profiles" ? "id" : "user_id";
+      const noise = Array.from({ length: 1001 }, (_, i) => ({
+        [column]: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
+        marketing_opt_out: true,
+      }));
+      fake.rows(table).unshift(...noise);
+      if (table === "profiles") {
+        fake.rows(table).find((row) => row.id === U2)!.marketing_opt_out = true;
+      } else {
+        fake.rows(table).push({ user_id: U2 });
+      }
+      expect(await selectFeedbackEmailAudience(fake.admin, NOW)).toEqual([{ userId: U1, email: "alice@example.com" }]);
+    },
+  );
+
+  it("uses exact counts to continue when the API returns less than the requested page size", async () => {
+    const fake = setup(1);
+    fake.rows("testimonial_prompt_events").push({ user_id: "00000000-0000-4000-8000-000000000001" }, { user_id: U2 });
+    expect(await selectFeedbackEmailAudience(fake.admin, NOW)).toEqual([{ userId: U1, email: "alice@example.com" }]);
+  });
+
+  it.each(["demo_accounts", "testimonial_prompt_events", "feedback_email_sends", "profiles"])(
+    "fails closed instead of emailing when the %s exclusion cannot be read", async (table) => {
+      const seed = setup();
+      const fake = createFakeAdmin({ tables: seed.tables, users: seed.users, missingTables: [table] });
+      await expect(selectFeedbackEmailAudience(fake.admin, NOW)).rejects.toMatchObject({ code: "42P01" });
+    },
+  );
 });

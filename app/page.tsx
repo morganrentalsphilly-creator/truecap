@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     title: "Rental Property Calculator & Max Offer | TrueCap",
     description:
       "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
-    images: ["/home.jpg"],
+    images: ["/og/home"],
   },
 };
 

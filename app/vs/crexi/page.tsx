@@ -20,7 +20,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import {
   ComparisonFaq,
   type FaqItem,
@@ -177,11 +177,11 @@ export default function VsCrexiPage() {
             TrueCap for residential.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
+            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </ScrollToFormButton>
+            </AnalyzeCtaLink>
             <Link
               href="/pricing"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
@@ -352,7 +352,7 @@ export default function VsCrexiPage() {
             </Link>{" "}
             sizes the cash you actually need at the table, and the full{" "}
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="font-semibold text-primary hover:underline"
             >
               TrueCap analyzer
@@ -398,7 +398,7 @@ export default function VsCrexiPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
               <Calculator className="w-4 h-4" />

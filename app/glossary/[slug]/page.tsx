@@ -190,7 +190,7 @@ export default async function GlossaryTermPage({
       {
         "@type": "ListItem",
         position: 1,
-        name: "Home",
+        name: "TrueCap",
         item: siteUrl,
       },
       {

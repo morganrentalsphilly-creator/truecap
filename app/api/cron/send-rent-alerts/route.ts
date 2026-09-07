@@ -28,6 +28,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { isValidCronBearer } from "@/lib/cron-auth";
 import * as Sentry from "@sentry/nextjs";
 import { render } from "@react-email/render";
 import RentAlertEmail from "@/emails/rent-alert";
@@ -83,7 +84,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json({ error: "Not configured" }, { status: 500 });
   }
-  if (request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+  if (!isValidCronBearer(request, cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

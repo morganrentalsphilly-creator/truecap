@@ -26,9 +26,16 @@ export const ROLE_LABELS: Record<TestimonialRole, string> = {
   other: "Investor",
 };
 
-const URL_RE = /(?:https?:\/\/|www\.)\S+|\b[a-z0-9-]+\.(?:com|net|org|io|co|us|app|dev)\b/i;
+const URL_RE = /(?:https?:\/\/|www\.)\S+|\b[a-z0-9-]+\.(?:com|net|org|io|co|us|app|dev|xyz|info|biz|ai|site|online|store)\b/i;
 const EMAIL_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-const PHONE_RE = /(?:\+?\d[\d\s().-]{7,}\d)/;
+const PHONE_RE = /(?:\+?\d[\d\s().-]{7,}\d)/g;
+const YEAR_RANGE_RE = /^(?:19|20)\d{2}\s*[-–]\s*(?:19|20)\d{2}$/;
+
+function containsPhone(value: string): boolean {
+  // Exempt only an entire year-range match. A longer phone number that
+  // happens to contain two year-shaped groups must still be rejected.
+  return [...value.matchAll(PHONE_RE)].some(([match]) => !YEAR_RANGE_RE.test(match));
+}
 
 /** Deliberately small: the goal is "never publish an obvious slur or expletive", not moderation. */
 const PROFANITY = [
@@ -47,9 +54,29 @@ export function validateQuote(raw: string): QuoteValidation {
   if (quote.length > QUOTE_MAX) return { ok: false, reason: "too_long" };
   if (EMAIL_RE.test(quote)) return { ok: false, reason: "contains_email" };
   if (URL_RE.test(quote)) return { ok: false, reason: "contains_url" };
-  if (PHONE_RE.test(quote)) return { ok: false, reason: "contains_phone" };
+  if (containsPhone(quote)) return { ok: false, reason: "contains_phone" };
   if (PROFANITY_RE.test(quote)) return { ok: false, reason: "profanity" };
   return { ok: true, quote };
+}
+
+export type AttributionValidation =
+  | { ok: true; value: string | null }
+  | { ok: false; reason: "contains_url" | "contains_email" | "contains_phone" | "profanity" };
+
+/**
+ * The public card renders market and first name verbatim next to the quote,
+ * so they pass the same URL / email / phone / profanity gate (no length rule;
+ * the column checks cap length). Empty input is fine: the attribution is
+ * optional.
+ */
+export function validateAttribution(raw: string | null | undefined): AttributionValidation {
+  const value = (raw ?? "").replace(/\s+/g, " ").trim();
+  if (!value) return { ok: true, value: null };
+  if (EMAIL_RE.test(value)) return { ok: false, reason: "contains_email" };
+  if (URL_RE.test(value)) return { ok: false, reason: "contains_url" };
+  if (containsPhone(value)) return { ok: false, reason: "contains_phone" };
+  if (PROFANITY_RE.test(value)) return { ok: false, reason: "profanity" };
+  return { ok: true, value };
 }
 
 function tokens(text: string): Set<string> {
@@ -80,6 +107,9 @@ export function isNearDuplicate(quote: string, existing: readonly string[]): boo
 
 export type PublishCandidate = {
   quote: string;
+  /** Public attribution strings; both are re-checked at publish time. */
+  firstName?: string | null;
+  market?: string | null;
   consent: boolean;
   publishAfter: string; // ISO
   isDemoAccount: boolean;
@@ -115,6 +145,10 @@ export function evaluatePublishEligibility(c: PublishCandidate, now: Date): Publ
   }
   const validation = validateQuote(c.quote);
   if (!validation.ok) return { publish: false, reason: validation.reason };
+  for (const attribution of [c.market, c.firstName]) {
+    const check = validateAttribution(attribution);
+    if (!check.ok) return { publish: false, reason: check.reason };
+  }
   if (isNearDuplicate(validation.quote, c.existingPublishedQuotes)) {
     return { publish: false, reason: "near_duplicate" };
   }

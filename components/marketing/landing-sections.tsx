@@ -103,7 +103,7 @@ const SPINE_STEPS = [
     label: "Ceiling",
     icon: Target,
     title: "Review the Offer Ceiling",
-    body: "TrueCap calculates the highest modeled price that still meets the selected targets under the assumptions shown. Compare that Offer Ceiling with asking, then verify the inputs before recording your decision.",
+    body: "TrueCap calculates the highest modeled price that still meets your targets under the assumptions shown. Compare that Offer Ceiling with asking, then verify the inputs before recording your decision.",
     proNote: "Included in your first complete decision",
   },
 ] as const;
@@ -643,7 +643,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is TrueCap really free?",
-    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Investor Pro is for repeating the workflow: saving and revisiting deals, comparisons, reports, and a reusable Buy Box.`,
+    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Pro is for repeating the workflow: saving and revisiting deals, comparisons, reports, and a reusable Buy Box.`,
   },
   {
     q: "Do I need a credit card?",
@@ -971,7 +971,7 @@ export function PdfProUpsell() {
                         <>
                           <X
                             aria-hidden
-                            className="mx-auto size-4 text-muted-foreground/40"
+                            className="mx-auto size-4 text-muted-foreground"
                           />
                           <span className="sr-only">Not included</span>
                         </>
@@ -1061,7 +1061,7 @@ const PERSONAS: {
     // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
     // ?strategy=) so long-term-rental defaults are already applied.
     seed: {
-      href: "/?strategy=buy-hold#main",
+      href: "/analyze?strategy=buy-hold",
       label: "Start a buy-and-hold analysis",
       strategy: "buy-hold",
     },
@@ -1082,7 +1082,7 @@ const PERSONAS: {
     // ?strategy=, upgraded from ?type=) — same owner-occupant form, now with
     // FHA-style starter assumptions applied too.
     seed: {
-      href: "/?strategy=house-hack#main",
+      href: "/analyze?strategy=house-hack",
       label: "Start a house-hack analysis",
       strategy: "house-hack",
     },

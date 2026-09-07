@@ -102,7 +102,7 @@ export default function ScheduleEPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -376,7 +376,7 @@ export default function ScheduleEPost() {
               equals the $3,703 modeled loss. Sanity-check the pre-tax operating
               side in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -493,7 +493,7 @@ export default function ScheduleEPost() {
               cash-on-cash return diverge, and why two investors in different
               tax brackets can correctly disagree about the same deal. The{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

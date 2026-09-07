@@ -100,7 +100,7 @@ export default async function CityStrategyPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -269,13 +269,13 @@ export default async function CityStrategyPage({
             feature; this link does not preload market ranges.
           </p>
           <AnalyzerHandoffLink
-            handoffHref={`${buildAnalyzerHandoffUrl(
+            handoffHref={buildAnalyzerHandoffUrl(
               {
                 address: `${combo.cityName}, ${combo.state}`,
                 strategy: analyzerStrategy,
               },
               { utmSource: "combo-page" },
-            )}#main`}
+            )}
             className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-4 py-2.5 font-bold text-primary transition-opacity hover:opacity-90"
           >
             Analyze a property free <ArrowRight className="size-4" />

@@ -97,7 +97,7 @@ export default function HowToEstimateRentPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -435,7 +435,7 @@ export default function HowToEstimateRentPost() {
               monthly cash flow by roughly $128 — from a small loss to a real
               profit — and lifts{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -502,7 +502,7 @@ export default function HowToEstimateRentPost() {
             </p>
             <p>
               The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               does the first pass for you: enter the address and it pulls a market

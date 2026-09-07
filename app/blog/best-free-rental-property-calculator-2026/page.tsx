@@ -73,8 +73,8 @@ const TOOLS = [
     ],
     freeGates: [
       "10-year projection (Pro)",
-      "10-year cash-flow and equity projection + sensitivity (Pro)",
-      "Offer Ceiling and saved-deal comparison (Pro)",
+      "10-year cash-flow and equity projection (Pro); sensitivity is included in your first decision, then Pro",
+      "Offer Ceiling included in your first decision, then Pro; saved-deal comparison (Pro)",
       "Editing, unlimited saves, and comparison of up to 4 deals (Pro)",
       "Additional comps lookups: Pro includes 50 per month",
       "PDF export (Pro)",
@@ -164,7 +164,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the catch with TrueCap's free tier?",
-    a: "Preliminary core metrics are available without signup. Creating read-only share links, saving up to 5 deals, and using the included comps lookup require a free account; recipients can open a shared link without an account. The first complete decision and 21-day account evaluation are usage-limited; Investor Pro adds the repeatable paid workflow described on the live pricing page.",
+    a: "Preliminary core metrics are available without signup. Creating read-only share links, saving up to 5 deals, and using the included comps lookup require a free account; recipients can open a shared link without an account. The first complete decision and 21-day account evaluation are usage-limited; Pro adds the repeatable paid workflow described on the live pricing page.",
   },
   {
     q: "Can I underwrite a BRRRR or flip on a free calculator?",
@@ -211,7 +211,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,

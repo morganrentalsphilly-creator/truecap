@@ -112,7 +112,7 @@ describe("deployment-specific product availability", () => {
     expect(getPlanFacts().agentPro).toContain("Agent Pro is available");
   });
 
-  it("recognizes annual-only Investor Pro checkout and the selected one-time variant", () => {
+  it("recognizes annual-only Pro checkout and the selected one-time variant", () => {
     vi.stubEnv("STRIPE_PRICE_PRO_MONTHLY", "");
     vi.stubEnv("STRIPE_PRICE_PRO_ANNUAL", "price_pro_annual");
     vi.stubEnv("NEXT_PUBLIC_TRUECAP_DEAL_DECISION_PACK", "true");
@@ -127,7 +127,7 @@ describe("deployment-specific product availability", () => {
       autoRenews: false,
     });
     expect(getPlanFacts().singleDeal).toContain("non-renewing $15");
-    expect(getPlanFacts().pro).toContain("Investor Pro is available");
+    expect(getPlanFacts().pro).toContain("Pro is available");
   });
 
   it("fails closed when prices or either one-time release gate are missing", () => {

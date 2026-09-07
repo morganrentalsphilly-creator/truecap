@@ -100,7 +100,7 @@ export default function BrrrrMethodPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -336,7 +336,7 @@ export default function BrrrrMethodPost() {
             roughly $162,000 — about 66% LTV. The DSCR floor, not the LTV
             ceiling, would decide your cash-out. Run your own deal through the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -365,7 +365,7 @@ export default function BrrrrMethodPost() {
             $23,500 in the deal — and on the self-managed numbers that&apos;s
             roughly an 11%{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash return
@@ -548,7 +548,7 @@ export default function BrrrrMethodPost() {
             </Link>{" "}
             helps anchor one early-stage input. TrueCap doesn&apos;t offer an
             integrated BRRRR lifecycle model right now; the core{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
             stress-tests the stabilized rental afterward. Related reading:{" "}

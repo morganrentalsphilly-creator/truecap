@@ -45,7 +45,7 @@ describe("customer-facing decision vocabulary", () => {
     }
 
     // Phase-4 search metadata intentionally targets the established
-    // "max offer" query. Product UI and explanations still use the canonical
+    // "max offer" query on both versions of the homepage. Product UI and explanations still use the canonical
     // Offer Ceiling name.
     // The homepage OG card (app/og/home/route.tsx) carries the hero headline
     // verbatim — "Know your walk-away price before you make the offer." —
@@ -53,6 +53,7 @@ describe("customer-facing decision vocabulary", () => {
     // (lib/marketing-offer-config.ts) already enjoys by living outside the
     // customer-surface roots.
     expect(violations).toEqual([
+      "app/home-authed/page.tsx: Max Offer",
       "app/og/home/route.tsx: walk-away price",
       "app/page.tsx: Max Offer",
     ]);
@@ -72,4 +73,17 @@ describe("customer-facing decision vocabulary", () => {
 
     expect(violations).toEqual([]);
   });
+  it("uses plain target and Buy Box language in reusable marketing copy", () => {
+    for (const path of [
+      "components/marketing/comparison-faq.tsx",
+      "components/marketing/seo-analyzer-cta.tsx",
+      "components/marketing/landing-sections.tsx",
+      "lib/marketing-offer-config.ts",
+      "emails/lifecycle-content/pro-nudge.json",
+    ]) {
+      expect(withoutComments(readFileSync(join(ROOT, path), "utf8")), path)
+        .not.toMatch(/selected targets|rule-fit/i);
+    }
+  });
+
 });

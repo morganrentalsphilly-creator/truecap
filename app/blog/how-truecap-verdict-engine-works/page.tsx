@@ -108,7 +108,7 @@ export default function HowVerdictEngineWorksPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -459,7 +459,7 @@ export default function HowVerdictEngineWorksPost() {
             <h2>How to use the screening bands</h2>
             <p>
               When you run a property through{" "}
-              <Link href="/">the TrueCap analyzer</Link>, start with the core
+              <Link href="/analyze" prefetch={false}>the TrueCap analyzer</Link>, start with the core
               economics and any Buy Box fit. Treat a legacy band as
               secondary context:
             </p>

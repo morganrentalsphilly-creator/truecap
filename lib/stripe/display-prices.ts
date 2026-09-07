@@ -1,6 +1,7 @@
 import "server-only";
 
 import * as Sentry from "@sentry/nextjs";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { getStripe } from "@/lib/stripe/client";
 import { getPrimaryPlanPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { stripePriceMatchesCatalog } from "@/lib/public-pricing";
@@ -16,6 +17,90 @@ export type StripeDisplayPriceDetails = {
 
 export type StripeDisplayPrice = StripeDisplayPriceDetails | null;
 
+/**
+ * Cache tag for the Stripe price reads behind /pricing, /for-agents and
+ * /profile. The Stripe webhook revalidates it on price.* / plan.* events so a
+ * price change shows within seconds rather than at the end of the TTL.
+ */
+export const STRIPE_DISPLAY_PRICE_CACHE_TAG = "stripe-display-prices";
+const STRIPE_DISPLAY_PRICE_TTL_SECONDS = 600;
+/**
+ * A display read must never hold a public page render for the SDK's 80 s
+ * default (x retries) during a Stripe incident; a failed read degrades to the
+ * existing "Billing setup pending" null fallback instead.
+ */
+const STRIPE_DISPLAY_READ_TIMEOUT_MS = 5_000;
+
+/**
+ * The subset of a Stripe Price the display path reads. Kept small and plain
+ * so the cache entry is serialisable and carries no customer data.
+ */
+type CachedStripePrice = {
+  active: boolean;
+  currency: string;
+  type: string;
+  unit_amount: number | null;
+  recurring: { interval: string | null } | null;
+};
+
+/**
+ * The only Stripe round-trip on this path, memoised per price id for the TTL.
+ * It THROWS on any failure so a bad read is never cached: `unstable_cache`
+ * stores resolved values only, and the callers' try/catch + Sentry + `null`
+ * (fail-closed) stay outside the cache. The catalog check also runs outside,
+ * per call, so a cached-but-drifted price still fails closed.
+ */
+const readStripePriceCached = unstable_cache(
+  async (priceId: string): Promise<CachedStripePrice> => {
+    const price = await getStripe({
+      timeout: STRIPE_DISPLAY_READ_TIMEOUT_MS,
+      maxNetworkRetries: 1,
+    }).prices.retrieve(priceId);
+    return {
+      active: price.active,
+      currency: price.currency,
+      type: price.type,
+      unit_amount: price.unit_amount,
+      recurring: price.recurring ? { interval: price.recurring.interval ?? null } : null,
+    };
+  },
+  ["stripe-display-price"],
+  { revalidate: STRIPE_DISPLAY_PRICE_TTL_SECONDS, tags: [STRIPE_DISPLAY_PRICE_CACHE_TAG] }
+);
+
+/**
+ * Called from the Stripe webhook on price.* / plan.* events. Safe to call
+ * from any server context; a revalidation failure is not worth failing the
+ * webhook over (the TTL still bounds staleness), so it is reported and
+ * swallowed.
+ */
+export function revalidateStripeDisplayPrices(): void {
+  try {
+    revalidateTag(STRIPE_DISPLAY_PRICE_CACHE_TAG, "max");
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "billing-price-display", stage: "revalidate" },
+    });
+  }
+}
+
+function toDisplayDetails(
+  price: CachedStripePrice,
+  unitAmount: number,
+  fallbackPeriod: string
+): StripeDisplayPriceDetails {
+  return {
+    amountLabel: new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: price.currency,
+      maximumFractionDigits: unitAmount % 100 === 0 ? 0 : 2,
+    }).format(unitAmount / 100),
+    period: price.recurring?.interval ?? fallbackPeriod,
+    currency: price.currency.toUpperCase(),
+    unitAmount: unitAmount / 100,
+  };
+}
+
 export async function loadStripeDisplayPriceById(
   priceId: string | null | undefined,
   fallbackPeriod: string,
@@ -23,18 +108,9 @@ export async function loadStripeDisplayPriceById(
 ): Promise<StripeDisplayPrice> {
   if (!priceId || !process.env.STRIPE_SECRET_KEY) return null;
   try {
-    const price = await getStripe().prices.retrieve(priceId);
+    const price = await readStripePriceCached(priceId);
     if (price.unit_amount == null) return null;
-    return {
-      amountLabel: new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: price.currency,
-        maximumFractionDigits: price.unit_amount % 100 === 0 ? 0 : 2,
-      }).format(price.unit_amount / 100),
-      period: price.recurring?.interval ?? fallbackPeriod,
-      currency: price.currency.toUpperCase(),
-      unitAmount: price.unit_amount / 100,
-    };
+    return toDisplayDetails(price, price.unit_amount, fallbackPeriod);
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "billing-price-display" },
@@ -50,7 +126,7 @@ export async function loadStripeDisplayPrice(slug: PaidPlanSlug): Promise<Stripe
   const priceId = getPrimaryPlanPriceId(slug);
   if (!priceId || !process.env.STRIPE_SECRET_KEY) return null;
   try {
-    const price = await getStripe().prices.retrieve(priceId);
+    const price = await readStripePriceCached(priceId);
     if (!stripePriceMatchesCatalog(slug, price)) {
       Sentry.captureMessage(`billing: Stripe price does not match the committed catalog for ${slug}`, {
         level: "error",
@@ -59,16 +135,11 @@ export async function loadStripeDisplayPrice(slug: PaidPlanSlug): Promise<Stripe
       });
       return null;
     }
-    return {
-      amountLabel: new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: price.currency,
-        maximumFractionDigits: price.unit_amount! % 100 === 0 ? 0 : 2,
-      }).format(price.unit_amount! / 100),
-      period: price.recurring?.interval ?? (slug.endsWith("_annual") ? "year" : "month"),
-      currency: price.currency.toUpperCase(),
-      unitAmount: price.unit_amount! / 100,
-    };
+    return toDisplayDetails(
+      price,
+      price.unit_amount!,
+      slug.endsWith("_annual") ? "year" : "month"
+    );
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "billing-price-display" },

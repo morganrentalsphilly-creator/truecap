@@ -212,7 +212,7 @@ export default function BrrrrCalculatorPage() {
               The post-rehab rent matters in two ways: it has to support the new
               mortgage payment after refi ({" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -341,7 +341,7 @@ export default function BrrrrCalculatorPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the full TrueCap analyzer

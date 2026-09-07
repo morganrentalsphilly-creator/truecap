@@ -23,14 +23,16 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import * as Sentry from "@sentry/nextjs";
+import { captureMessageLazy } from "@/lib/sentry/lazy";
 
 export function NotFoundTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
     if (!pathname || pathname === "/404") return;
-    Sentry.captureMessage("404: page not found", {
+    // Lazy: keeps @sentry/nextjs out of the shared client chunk that every
+    // route loads (docs/site-overhaul.md Phase 7).
+    void captureMessageLazy("404: page not found", {
       level: "info",
       tags: { feature: "not-found" },
       extra: {

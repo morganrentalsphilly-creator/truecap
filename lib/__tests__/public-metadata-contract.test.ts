@@ -95,6 +95,22 @@ describe("priority public metadata", () => {
     },
   );
 
+  it("/analyze declares a complete share card (page-level openGraph replaces the root's)", () => {
+    // A page-level `openGraph` object REPLACES app/layout.tsx's wholesale, so
+    // a block without `images` ships og:image=<none> and, with no page-level
+    // `twitter`, the root's generic twitter:title on the primary conversion
+    // page. Both were live on 2026-09-07.
+    const source = metadataSource("app/analyze/page.tsx");
+    expect(source).toContain('canonical: "/analyze"');
+    expect(source).toContain('url: "/analyze"');
+    expect(source).toContain('type: "website"');
+    expect(source.match(/images:\s*\[/g) ?? []).toHaveLength(2);
+    expect(source).toContain('card: "summary_large_image"');
+    expect(
+      source.split('title: "Analyze a Rental Property Free | TrueCap"'),
+    ).toHaveLength(3);
+  });
+
   it("keeps the now-indexable comparison hub free of a noindex override", () => {
     expect(metadataSource("app/vs/page.tsx")).not.toMatch(
       /robots:\s*\{[^}]*index:\s*false/,

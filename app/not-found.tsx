@@ -35,7 +35,7 @@ const POPULAR_PAGES = [
   { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: "Plain-English definitions for 33 metrics." },
   { href: "/markets/philadelphia", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },
   { href: "/pricing", label: "Pricing", icon: TrendingUp, blurb: "Free + Pro plans." },
-  { href: "/", label: "Run a free analysis", icon: ArrowUpRight, blurb: "Paste any address — 60-second underwrite." },
+  { href: "/analyze", label: "Run a free analysis", icon: ArrowUpRight, blurb: "Paste any address — 60-second underwrite." },
 ];
 
 export default function NotFound() {
@@ -86,7 +86,8 @@ export default function NotFound() {
         {/* Primary CTA — the conversion action. */}
         <div className="mt-5">
           <Link
-            href="/"
+            href="/analyze"
+            prefetch={false}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
           >
             Run a free analysis
@@ -104,6 +105,7 @@ export default function NotFound() {
             <Link
               key={page.href}
               href={page.href}
+              prefetch={false}
               className="group rounded-xl border border-border bg-card p-4 text-left transition hover:border-primary hover:shadow-sm"
             >
               <div className="flex items-center gap-2">

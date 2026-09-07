@@ -120,7 +120,7 @@ export default function BlogPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -271,7 +271,7 @@ export default function BlogPost() {
               — net monthly income after all expenses + mortgage. Run any
               deal&apos;s number in 30 seconds in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

@@ -110,7 +110,7 @@ export default function DtiInvestmentPropertyPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -302,7 +302,7 @@ export default function DtiInvestmentPropertyPost() {
               nothing to your income and a small drag to your debt, despite
               renting for $446 a month more than its payment. In your own{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash math
@@ -464,7 +464,7 @@ export default function DtiInvestmentPropertyPost() {
               instead of personal DTI as the primary qualifying ratio —
               whether its rent covers its debt service, measured by the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
@@ -540,7 +540,7 @@ export default function DtiInvestmentPropertyPost() {
               lender to calculate the actual file, and compare DSCR or portfolio
               programs without assuming that property coverage guarantees a
               loan. The{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               models payment, coverage, and cash flow from user-entered

@@ -167,7 +167,7 @@ export default async function BlogTopicHubPage({
             DSCR, cash flow, and a Buy Box fit in 60 seconds — free.
           </p>
           <Link
-            href="/"
+            href="/analyze" prefetch={false}
             className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-4 py-2.5 font-bold text-primary transition-opacity hover:opacity-90"
           >
             Open TrueCap <ArrowUpRight className="size-4" />

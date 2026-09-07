@@ -64,6 +64,27 @@ describe("social proof renders nothing it cannot substantiate", () => {
     expect(reviews).toMatch(/UsageCounter|loadUsageLabel/);
   });
 
+  it("keeps /reviews statically prerenderable (declared hourly ISR must be true)", () => {
+    // Reading the request session (cookies) opts the route out of
+    // prerendering; `/reviews` was "not prerendered" in the build manifest
+    // while its header comment promised "Static + hourly ISR".
+    const reviews = read("app/reviews/page.tsx");
+    expect(reviews).toContain("export const revalidate = 3600;");
+    expect(reviews).not.toMatch(/lib\/request-auth|lib\/supabase\/server|next\/headers/);
+    expect(reviews).not.toContain("hideAccountLinks");
+    // The "(b) three facts" section is what keeps the page above the site's
+    // 300-word indexability gate (scripts/seo-audit.ts) after the founder
+    // card and proof strip were retired.
+    expect(reviews).toContain('aria-labelledby="verify-title"');
+    expect(reviews).toContain('href="/methodology"');
+    // The publisher sends no email and the veto token belongs to the
+    // founder's moderation path, so do not promise a delivered self-service
+    // removal link to the person quoted.
+    expect(reviews).not.toContain("the person named gets");
+    expect(reviews).not.toContain("one-click link");
+    expect(reviews).toContain("contact hello@usetruecap.com");
+  });
+
   it("keeps the usage counter computed, never seeded", () => {
     const counter = read("components/marketing/usage-counter.tsx");
     expect(counter).toContain("formatUsageCount");

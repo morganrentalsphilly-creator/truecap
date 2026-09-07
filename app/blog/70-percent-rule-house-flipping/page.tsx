@@ -108,7 +108,7 @@ export default function SeventyPercentRulePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -569,7 +569,7 @@ export default function SeventyPercentRulePost() {
               won&apos;t cash-flow after all that, the deal was never a BRRRR — it
               was a flip you forgot to sell. Pressure-test it as a{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 hold on cap rate and DSCR
@@ -638,7 +638,7 @@ export default function SeventyPercentRulePost() {
               ARV disciplined by real sold comps and a neighborhood ceiling, and a
               rehab number built bottom-up with a contingency. Then use the rule to
               screen and the backward solve to commit. The{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               runs a property&apos;s 70%-rule price screen, cash flow, cap rate, and DSCR from

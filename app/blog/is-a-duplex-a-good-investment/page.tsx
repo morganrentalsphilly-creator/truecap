@@ -137,7 +137,7 @@ export default function BlogPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -454,7 +454,7 @@ export default function BlogPost() {
             not qualify at 75% LTV at all — you would be pushed to 30-35% down
             before the coverage worked. Check yours in the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -611,10 +611,11 @@ export default function BlogPost() {
             than six, $6,569, for <strong>$44,990 total</strong>. Size your own
             version in the{" "}
             <Link
-              href="/?strategy=house-hack#main"
+              href="/analyze?strategy=house-hack"
+              prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
-              house hacking calculator
+              analyzer in House Hack mode
             </Link>
             .
           </p>
@@ -847,7 +848,7 @@ export default function BlogPost() {
           <p>
             Run your own pair — the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

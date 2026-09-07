@@ -146,3 +146,14 @@ export function captureBufferedError(error: unknown, kind: "error" | "unhandledr
 }
 
 export const routerTransitionStart = Sentry.captureRouterTransitionStart;
+
+/**
+ * captureMessage behind the lazy loader (lib/sentry/lazy.ts) so modules that
+ * ship on every route never import `@sentry/nextjs` statically.
+ */
+export function captureMessageLazyTarget(
+  message: string,
+  context?: Parameters<typeof Sentry.captureMessage>[1],
+): void {
+  Sentry.captureMessage(message, context);
+}

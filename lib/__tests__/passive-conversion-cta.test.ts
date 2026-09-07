@@ -12,7 +12,13 @@ describe("sitewide passive-conversion CTA", () => {
 
     expect(shared.match(/<TrackedContentCtaLink\b/g)).toHaveLength(1);
     expect(shared).toContain("Analyze a property free");
-    expect(shared).toContain('"/#main"');
+    // The analyzer lives at /analyze (site overhaul Phase 2). A "/…#main"
+    // destination lands on the marketing hero and drops the staged prefill.
+    expect(shared).toContain('base: ANALYZER_ROUTE');
+    expect(shared).toContain('`${ANALYZER_ROUTE}?utm_source=${encodeURIComponent(utmSource)}`');
+    expect(shared).toContain(": ANALYZER_ROUTE;");
+    expect(shared).not.toContain("#main");
+    expect(shared).not.toContain('"/?utm_source');
     expect(shared).not.toMatch(/property(?:_| )?(?:address|price|rent)/i);
   });
 
@@ -46,10 +52,12 @@ describe("sitewide passive-conversion CTA", () => {
       // Contextual prose links may cite the analyzer, but a second imperative
       // analyzer button/link would compete with the one shared conversion CTA.
       // Match JSX Link blocks instead of one particular class list so a visual
-      // restyle cannot silently reintroduce the duplicate.
+      // restyle cannot silently reintroduce the duplicate. "/analyze" is the
+      // analyzer's home now; "/" and "/#main" are kept so a stale link is
+      // still counted.
       const directAnalyzerLinks =
         source.match(
-          /<Link\b[^>]*href=\{?["']\/(?:#main)?["']\}?[^>]*>[\s\S]{0,800}?<\/Link>/g,
+          /<Link\b[^>]*href=\{?["']\/(?:#main|analyze(?:\?[^"']*)?)?["']\}?[^>]*>[\s\S]{0,800}?<\/Link>/g,
         ) ?? [];
       const duplicateCallsToAction = directAnalyzerLinks.filter((link) => {
         const text = link

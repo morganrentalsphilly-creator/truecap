@@ -20,6 +20,7 @@ import {
   expireSubscriptionCheckoutIntentFromWebhook,
 } from "@/lib/stripe/subscription-checkout-intent";
 import { reconcileDecisionPackRiskEvent } from "@/lib/stripe/decision-pack-risk-webhook";
+import { revalidateStripeDisplayPrices } from "@/lib/stripe/display-prices";
 import {
   canonicalAnalyticsEventId,
   claimCanonicalAnalyticsEvent,
@@ -526,6 +527,18 @@ export async function POST(req: Request) {
             properties: {},
           });
         }
+        break;
+      }
+      case "price.created":
+      case "price.updated":
+      case "price.deleted":
+      case "plan.created":
+      case "plan.updated":
+      case "plan.deleted": {
+        // The public price reads behind /pricing, /for-agents and /profile
+        // are memoised for 10 minutes (lib/stripe/display-prices.ts). Drop
+        // that cache here so a founder price change shows within seconds.
+        revalidateStripeDisplayPrices();
         break;
       }
       default:

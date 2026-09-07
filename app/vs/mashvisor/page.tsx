@@ -22,7 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import {
   ComparisonFaq,
   type FaqItem,
@@ -216,11 +216,11 @@ export default function VsMashvisorPage() {
             different price points. Here&apos;s when to pick which.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
+            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Try the TrueCap free analyzer
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </ScrollToFormButton>
+            </AnalyzeCtaLink>
             <Link
               href="/pricing"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
@@ -380,7 +380,7 @@ export default function VsMashvisorPage() {
             Once the heatmap points you somewhere, the per-deal math is one
             address away: our{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="font-semibold text-primary hover:underline"
             >
               free deal analyzer
@@ -418,7 +418,7 @@ export default function VsMashvisorPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
               <Calculator className="w-4 h-4" />

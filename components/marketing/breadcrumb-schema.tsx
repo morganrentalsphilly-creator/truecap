@@ -13,7 +13,7 @@ export function BreadcrumbSchema({ items }: { items: Array<{ name: string; path:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       ...items.map((item, index) => ({
         "@type": "ListItem",
         position: index + 2,

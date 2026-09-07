@@ -35,6 +35,13 @@ function GoogleMeasurementInner() {
   // rejecting keeps them off entirely, and the funnel stays measurable
   // through cookieless Vercel Analytics. Consent Mode defaults still ship
   // with the loader so the tags boot denied if consent is later withdrawn.
+  //
+  // The loader below MUST also push the `granted` update itself. This
+  // component only renders once the stored decision is "granted", and the
+  // banner's own gtag('consent','update') fires at click time — before this
+  // lazyOnload loader has defined window.gtag — so it is a no-op. Without the
+  // update here every accepting visitor ran GA4/Ads in denied (cookieless
+  // ping) mode for the life of the document and on every later page load.
   const [consentGranted, setConsentGranted] = useState(false);
   useEffect(() => {
     const sync = () => setConsentGranted(readStoredAnalyticsConsent() === "granted");
@@ -63,6 +70,12 @@ gtag('consent', 'default', {
   ad_user_data: 'denied',
   ad_personalization: 'denied',
   wait_for_update: 500
+});
+gtag('consent', 'update', {
+  ad_storage: 'granted',
+  analytics_storage: 'granted',
+  ad_user_data: 'granted',
+  ad_personalization: 'granted'
 });
 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

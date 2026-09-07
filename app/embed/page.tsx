@@ -120,7 +120,8 @@ export default function EmbedHubPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Want a calculator we don&apos;t have here?{" "}
             <Link
-              href="/?utm_source=embed-hub"
+              href="/analyze?utm_source=embed-hub"
+              prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               Send us a note
@@ -225,7 +226,8 @@ export default function EmbedHubPage() {
             calculator queries. We get a backlink. Everyone wins.
           </p>
           <Link
-            href="/?utm_source=embed-hub-cta"
+            href="/analyze?utm_source=embed-hub-cta"
+            prefetch={false}
             className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
           >
             Try the full TrueCap analyzer

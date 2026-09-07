@@ -63,28 +63,38 @@ declare global {
   }
 }
 
+/**
+ * Returns true once the event has actually left the page (gtag call made, or
+ * dataLayer push for an unlabeled event) and false when `window.gtag` is not
+ * defined yet. The Google loader is consent-gated AND `lazyOnload`
+ * (components/analytics/google-measurement.tsx), so a caller that must fire
+ * exactly once — BillingConversionTracker — retries on `false` instead of
+ * burning its dedup key on a transiently missing gtag.
+ */
 export function trackConversion(
   event: ConversionKey,
   options: ConversionOptions = {},
-): void {
-  if (typeof window === "undefined") return;
+): boolean {
+  if (typeof window === "undefined") return false;
   const label = LABELS[event];
   if (!label) {
     // Still log the event to dataLayer so GA4 / GTM can pick it up.
     pushDataLayerEvent(event, options);
-    return;
+    return true;
   }
   try {
     const gtag = window.gtag;
-    if (typeof gtag !== "function") return;
+    if (typeof gtag !== "function") return false;
     gtag("event", "conversion", {
       send_to: `${GOOGLE_ADS_ID}/${label}`,
       value: options.value ?? 0,
       currency: options.currency ?? "USD",
     });
     pushDataLayerEvent(event, options);
+    return true;
   } catch {
     // never let analytics break the user flow
+    return false;
   }
 }
 

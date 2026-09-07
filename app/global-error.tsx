@@ -8,13 +8,15 @@
  * Keep this minimal: no fonts, no styled-system, no global CSS imports
  * other than what's strictly required for it to be legible.
  *
- * Sentry integration: forwards the error to Sentry.captureException so
+ * Sentry integration: forwards the error to Sentry (captureException) so
  * the root-layout crashes (which are the most catastrophic class) get
- * proper stack-trace logging in production.
+ * proper stack-trace logging in production. The SDK is loaded lazily at
+ * capture time: this file is bundled into every route, and a static
+ * `@sentry/nextjs` import here would ship Sentry core on every page.
  */
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+import { captureExceptionLazy } from "@/lib/sentry/lazy";
 
 export default function GlobalError({
   error,
@@ -24,7 +26,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    void captureExceptionLazy(error);
     console.error("[app/global-error]", error);
   }, [error]);
 

@@ -7,6 +7,7 @@ import {
   sanitizeSensitiveUrl,
   shouldKeepThirdPartyTelemetryDisabled,
   hasSensitiveQueryParameter,
+  isSensitiveTelemetryLocation,
 } from "@/lib/sensitive-url";
 import {
   scrubSentryBreadcrumbUrl,
@@ -26,6 +27,19 @@ describe("sensitive URL scrubbing", () => {
     ).toBe("https://usetruecap.com/?utm_source=google#offer");
   });
 
+  it("keeps the clean post-checkout landing measurable while the id-bearing URLs stay gated", () => {
+    // Stripe returns to /api/billing/return, which parks the Session id in an
+    // httpOnly cookie and lands on this URL; the Google Ads Purchase conversion
+    // is only reachable if this location does NOT trip the telemetry gate.
+    expect(isSensitiveTelemetryLocation("/dashboard/new?billing=success")).toBe(false);
+    expect(
+      isSensitiveTelemetryLocation("/dashboard/new?billing=success&session_id=cs_test_abc123"),
+    ).toBe(true);
+    expect(
+      isSensitiveTelemetryLocation("/api/billing/return?session_id=cs_test_abc123"),
+    ).toBe(true);
+  });
+
   it("sanitizes relative and query-only values", () => {
     expect(
       sanitizeSensitiveUrl("/?session_id=cs_test_123&utm_medium=cpc"),
@@ -36,6 +50,21 @@ describe("sensitive URL scrubbing", () => {
         "https://api.stripe.com/v1/checkout/sessions/cs_live_pathBearer",
       ),
     ).toBe("https://api.stripe.com/v1/checkout/sessions/cs_[redacted]");
+  });
+
+  it("strips the bare `token` parameter used by emailed capability links", () => {
+    const formToken = "0123456789abcdef0123456789abcdef0123456789abcdef";
+    expect(
+      sanitizeSensitiveUrl(`https://usetruecap.com/feedback/testimonial?token=${formToken}&utm_source=email`),
+    ).toBe("https://usetruecap.com/feedback/testimonial?utm_source=email");
+    expect(sanitizeSensitiveUrl(`/email/unsubscribe?token=${formToken}`)).toBe("/email/unsubscribe");
+    expect(hasSensitiveQueryParameter("/feedback/testimonial?token=abc")).toBe(true);
+    expect(shouldKeepThirdPartyTelemetryDisabled("/feedback/testimonial?token=abc", false)).toBe(true);
+    expect(shouldKeepThirdPartyTelemetryDisabled("/api/testimonials/unpublish?token=abc", false)).toBe(true);
+    expect(shouldKeepThirdPartyTelemetryDisabled("/feedback/testimonial", false)).toBe(false);
+    expect(
+      redactSensitiveQueryValuesInText(`Opened /email/unsubscribe?token=${formToken} from mail`),
+    ).toBe("Opened /email/unsubscribe?token=[redacted] from mail");
   });
 
   it("removes exact analyzer handoff inputs while preserving coarse attribution", () => {

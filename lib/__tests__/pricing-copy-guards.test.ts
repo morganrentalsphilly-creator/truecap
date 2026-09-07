@@ -6,7 +6,10 @@ import {
   PRODUCT_EVALUATION_DEAL_LIMIT,
   PRODUCT_EVALUATION_DAYS,
 } from "@/lib/product-access";
-import { featureLimit, tierHas } from "@/lib/entitlements-catalog";
+import { FEATURE_CATALOG, featureLimit, tierHas } from "@/lib/entitlements-catalog";
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { unusableToolRoutes } from "./unreleased-tool-routes";
 
 /**
  * Regression guards for two promise-vs-product contradictions fixed in the
@@ -52,6 +55,15 @@ describe("saved-deal copy — surfaces stay aligned with the runtime gates", () 
     expect(source).not.toContain("Pro adds save/compare deals");
     // "plus save deals" in the upgrade FAQ implied the same falsehood.
     expect(source).not.toContain("plus save deals");
+  });
+
+  it("/about does not claim saving is a paid-plan add-on", () => {
+    // The E-E-A-T page every blog byline points to said a paid plan "adds
+    // saved deals" — Free saves up to 5; Pro adds unlimited saves + editing.
+    const source = read("../../app/about/page.tsx");
+    expect(source).not.toContain("adds saved deals");
+    expect(source).toContain("adds unlimited saved deals you can edit");
+    expect(source).toContain("up to 5 saved deals");
   });
 
   it("pricing FAQ no longer claims downgraded users lose CREATE", () => {
@@ -192,5 +204,59 @@ describe("billing recovery safety", () => {
       '["active", "trialing", "past_due", "unpaid", "paused", "canceled"]'
     );
     expect(profile).toContain("subscriptions.find");
+  });
+});
+
+/**
+ * 3. First-decision features: the Offer Ceiling and the downside sensitivity
+ *    grid are included in the anonymous first decision (FEATURE_CATALOG
+ *    anonymousLimit; ANON_ANALYZER_PROPS grants canUseMaxOffer +
+ *    canUseSensitivity) and are Pro AFTER that. The homepage, /pricing and
+ *    /analyze all say so. Tool, /vs and blog pages used to label them a flat
+ *    "(Pro)", so a visitor arriving from a tool page was told the Offer
+ *    Ceiling was paid and then saw it free in the analyzer.
+ */
+describe("first-decision features are never labelled a flat \"(Pro)\" on marketing copy", () => {
+  const ROOT = process.cwd();
+  const FLAT_PRO_RE = /(Offer Ceiling|[Ss]ensitivity)[^.()]{0,40}\(Pro\)/;
+
+  function pagesUnder(dir: string, skip: Set<string> = new Set()): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(join(ROOT, dir))) {
+      const rel = join(dir, entry);
+      if (!statSync(join(ROOT, rel)).isDirectory() || skip.has(entry)) continue;
+      const page = join(rel, "page.tsx");
+      try {
+        statSync(join(ROOT, page));
+        out.push(page);
+      } catch {
+        /* no page in this folder */
+      }
+    }
+    return out;
+  }
+
+  it("catalog policy: both features carry an anonymous first-decision allowance", () => {
+    expect(FEATURE_CATALOG.mao.anonymousLimit).toBeTruthy();
+    expect(FEATURE_CATALOG.sensitivity.anonymousLimit).toBeTruthy();
+  });
+
+  it("released tools, /vs and blog pages do not contradict the first-decision promise", () => {
+    // Redirect stubs under /tools never render their CTA lists; only the
+    // routes a visitor can actually reach are scanned.
+    const unreleased = new Set(unusableToolRoutes(ROOT).keys());
+    const pages = [
+      ...pagesUnder("app/tools", unreleased),
+      ...pagesUnder("app/vs"),
+      ...pagesUnder("app/blog"),
+    ];
+    expect(pages.length).toBeGreaterThan(20);
+    const offenders = pages.filter((page) =>
+      FLAT_PRO_RE.test(readFileSync(join(ROOT, page), "utf8")),
+    );
+    expect(
+      offenders,
+      `Offer Ceiling / sensitivity are included in the first decision (FEATURE_CATALOG.mao.anonymousLimit = "${FEATURE_CATALOG.mao.anonymousLimit}"); say "included in your first decision, Pro after" instead of "(Pro)"`,
+    ).toEqual([]);
   });
 });

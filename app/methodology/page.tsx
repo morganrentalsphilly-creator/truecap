@@ -75,7 +75,7 @@ export default function MethodologyPage() {
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
     dateModified: "2026-08-27",
-    author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
+    author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
   };
@@ -648,7 +648,7 @@ export default function MethodologyPage() {
 
           <div className="not-prose mt-6 flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
             >
               <Calculator className="w-4 h-4" />

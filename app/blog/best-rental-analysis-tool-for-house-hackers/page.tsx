@@ -56,7 +56,7 @@ const TOOLS = [
     name: "TrueCap",
     bestFor: "Best owner-occupant property type + effective-rent-saved math",
     url: "/vs/biggerpockets-for-house-hacking",
-    pricing: "Free core; paid Investor Pro — see live pricing",
+    pricing: "Free core; paid Pro — see live pricing",
     freeCovers: [
       "Explicit 'owner-occupant' property type with per-unit setup",
       "Mark which unit you live in — TrueCap excludes it from rent income",
@@ -142,7 +142,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is house hacking still a good strategy in 2026?",
-    a: "Math still works for the right property in the right market. Tight cash-flow margins make it tougher than 2018-2022, but with FHA 3.5% down and a 2-4 unit property where rental units cover most of PITI, the effective-rent-saved math can still beat renting an equivalent apartment by hundreds per month. Underwrite carefully — TrueCap's sensitivity grid (Pro) stress-tests rent + vacancy + rate so you don't bet on optimistic numbers.",
+    a: "Math still works for the right property in the right market. Tight cash-flow margins make it tougher than 2018-2022, but with FHA 3.5% down and a 2-4 unit property where rental units cover most of PITI, the effective-rent-saved math can still beat renting an equivalent apartment by hundreds per month. Underwrite carefully — TrueCap's sensitivity grid (free on your first decision, then Pro) stress-tests rent + vacancy + rate so you don't bet on optimistic numbers.",
   },
 ];
 
@@ -174,7 +174,7 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -371,7 +371,7 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               hack, check whether the rented units cover the debt and what the
               deal returns on your down payment — the free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="font-semibold text-primary hover:underline"
               >
                 TrueCap analyzer

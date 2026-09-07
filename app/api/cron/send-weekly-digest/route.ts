@@ -25,6 +25,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { isValidCronBearer } from "@/lib/cron-auth";
 import * as Sentry from "@sentry/nextjs";
 import { currentSendDate, loadContent, renderWeeklyDigest } from "@/lib/email/render-weekly";
 
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-  if (auth !== `Bearer ${cronSecret}`) {
+  if (!isValidCronBearer(request, cronSecret)) {
     // Don't alert on 401s — could be probing traffic. Only logged.
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }

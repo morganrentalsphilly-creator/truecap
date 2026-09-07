@@ -100,11 +100,12 @@ export default function ForHouseHackersPage() {
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            {/* Deep-link into the analyzer with the House Hack play pre-
-                selected (?strategy= analyzer handoff) — owner-occupant form
-                + FHA-style defaults, not a blank single-family deal. */}
+            {/* Deep-link into /analyze with the House Hack play pre-selected
+                (?strategy= analyzer handoff) — owner-occupant form + FHA-style
+                defaults, not a blank single-family deal. The analyzer no
+                longer lives on "/", so the seed must target /analyze. */}
             <Link
-              href="/?strategy=house-hack#main"
+              href="/analyze?strategy=house-hack"
               prefetch={false}
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
@@ -216,13 +217,13 @@ export default function ForHouseHackersPage() {
               single-family vs multi-family
             </Link>{" "}
             properties. Screen candidates fast with the free{" "}
-            <Link href="/?strategy=house-hack#main" className="text-primary font-semibold hover:underline">
-              house hacking calculator
+            <Link href="/analyze?strategy=house-hack" prefetch={false} className="text-primary font-semibold hover:underline">
+              analyzer in House Hack mode
             </Link>{" "}
             — your effective housing cost after tenant rent, in seconds.
             Once you&apos;ve picked a property, ground the
             numbers in the{" "}
-            <Link href="/analyze" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
             — cap rate and DSCR for the rented portion — then run the year-1 screen
@@ -250,7 +251,7 @@ export default function ForHouseHackersPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/?strategy=house-hack#main"
+              href="/analyze?strategy=house-hack"
               prefetch={false}
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >

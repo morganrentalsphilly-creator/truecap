@@ -315,7 +315,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               full cycle with the{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>, and
               check the rental math in the{" "}
-              <Link href="/analyze" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
               — cap rate and DSCR together — before you commit.
             </p>
 
@@ -392,7 +392,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               {[
                 "Entered-ARV × selected-multiplier screen on this page",
                 "Editable rehab and acquisition-cost assumptions",
-                "TrueCap's Offer Ceiling for the rental case (Pro)",
+                "TrueCap's Offer Ceiling for the rental case (included in your first decision, Pro after)",
                 "Cash flow, cap rate, CoC, DSCR on the keep scenario",
                 "Buy Box fit, with a Deal score",
                 "Free to start — no credit card",
@@ -404,7 +404,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the rental analyzer

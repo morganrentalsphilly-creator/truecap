@@ -24,6 +24,15 @@
 import { headers } from "next/headers";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import {
+  buildDripUnsubscribeHeaders,
+  buildDripUnsubscribeUrl,
+  hashDripEmail,
+  isDripEmailSuppressed,
+  readResendMessageId,
+  recordDripSchedule,
+} from "@/lib/email-drip-unsubscribe";
 import {
   claimEmailCaptureSlot,
   releaseEmailCaptureSlot,
@@ -98,12 +107,12 @@ const SEQUENCE: Array<{
   },
 ];
 
-function wrapHtml(inner: string, unsubscribeMailbox: string): string {
+function wrapHtml(inner: string, unsubscribeUrl: string): string {
   return `<!doctype html><html><body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 560px; margin: 0 auto; padding: 24px 16px;">
     ${inner}
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0 12px" />
     <p style="font-size: 12px; color: #6b7280;">TrueCap · labeled, editable rental screening assumptions ·
-    <a href="mailto:${unsubscribeMailbox}?subject=unsubscribe" style="color:#6b7280">unsubscribe</a></p>
+    <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6b7280">unsubscribe</a></p>
   </body></html>`;
 }
 
@@ -130,6 +139,26 @@ export async function captureLeadMagnetEmail(input: {
     return { ok: true, scheduledCount: 0, downloadUrl };
   }
   const email = parsed.data.email;
+  const emailHash = hashDripEmail(email);
+  let admin: ReturnType<typeof createAdminSupabaseClient>;
+  try {
+    admin = createAdminSupabaseClient();
+    if (await isDripEmailSuppressed(admin, emailHash)) {
+      return { ok: true, scheduledCount: 0, downloadUrl };
+    }
+  } catch {
+    Sentry.captureMessage("Drip suppression unavailable — capture blocked", {
+      level: "error", tags: { feature: "lead-magnet-capture" },
+    });
+    return { ok: false, code: "SEND_FAILED", message: "We couldn't send your email right now. Please try again in a minute." };
+  }
+  const unsubscribeUrl = buildDripUnsubscribeUrl(siteUrl, email);
+  if (!unsubscribeUrl) {
+    Sentry.captureMessage("Signed HTTPS drip unsubscribe unavailable — capture blocked", {
+      level: "error", tags: { feature: "lead-magnet-capture" },
+    });
+    return { ok: false, code: "CONFIG_MISSING", message: "Email sending isn't configured. Try again later." };
+  }
 
   let ip = "unknown";
   try {
@@ -205,17 +234,18 @@ export async function captureLeadMagnetEmail(input: {
 
   let scheduledCount = 0;
   let day0Sent = false;
+  let suppressedDuringCapture = false;
+  let sequenceFailed = false;
+  let deliveryUncertain = false;
   for (const item of SEQUENCE) {
     const payload: Record<string, unknown> = {
       from,
       to: [email],
       subject: item.subject,
-      html: wrapHtml(item.build(ctx), escapeHtml(unsubscribeMailbox)),
+      html: wrapHtml(item.build(ctx), unsubscribeUrl),
       reply_to: replyTo,
       tags: [{ name: "purpose", value: "lead-magnet" }],
-      headers: {
-        "List-Unsubscribe": `<mailto:${unsubscribeMailbox}?subject=unsubscribe>`,
-      },
+      headers: buildDripUnsubscribeHeaders({ unsubscribeUrl, mailbox: unsubscribeMailbox }),
     };
     if (item.delayDays > 0) {
       payload.scheduled_at = new Date(
@@ -223,6 +253,12 @@ export async function captureLeadMagnetEmail(input: {
       ).toISOString();
     }
     try {
+      if (await isDripEmailSuppressed(admin, emailHash)) {
+        suppressedDuringCapture = true;
+        break;
+      }
+      // A network timeout may still have queued mail; retain the abuse claim.
+      deliveryUncertain = true;
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -232,9 +268,27 @@ export async function captureLeadMagnetEmail(input: {
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(10_000),
       });
+      deliveryUncertain = false;
       if (res.ok) {
         scheduledCount += 1;
         if (item.delayDays === 0) day0Sent = true;
+        const resendId = await readResendMessageId(res);
+        if (!resendId) {
+          Sentry.captureMessage("Drip provider response missing message ID — sequence stopped", {
+            level: "error", tags: { feature: "lead-magnet-capture" },
+          });
+          sequenceFailed = true;
+          break;
+        }
+        const recorded = await recordDripSchedule(admin, {
+          emailHash, surface: "lead-magnet", resendId,
+          scheduledAt: typeof payload.scheduled_at === "string" ? payload.scheduled_at : null,
+          apiKey,
+        });
+        if (recorded === "suppressed") {
+          suppressedDuringCapture = true;
+          break;
+        }
       } else {
         Sentry.captureMessage("Lead magnet email send failed", {
           level: "error",
@@ -242,11 +296,22 @@ export async function captureLeadMagnetEmail(input: {
           extra: { status: res.status, delay_days: item.delayDays },
         });
       }
-    } catch (error) {
-      Sentry.captureException(error, {
-        tags: { feature: "lead-magnet-capture" },
+    } catch {
+      sequenceFailed = true;
+      Sentry.captureMessage("Lead magnet email sequence stopped", {
+        level: "error", tags: { feature: "lead-magnet-capture" },
       });
+      break;
     }
+  }
+
+  if (sequenceFailed) {
+    if (scheduledCount === 0 && !deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return { ok: false, code: "SEND_FAILED", message: "We couldn't finish sending your email. Please try again later." };
+  }
+  if (suppressedDuringCapture) {
+    if (scheduledCount === 0) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return { ok: true, scheduledCount, downloadUrl };
   }
 
   if (scheduledCount === 0) {

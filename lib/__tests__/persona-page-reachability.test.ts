@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
  * /for-agents is the ONLY page that explains Agent Pro — client rosters,
  * per-client Buy Boxes, deal assignment, co-branded delivery — and it shipped
  * with zero inbound links from anywhere in app/ or components/. Agent Pro is
- * the highest-priced plan at $59.99/mo, exactly 2x Investor Pro, and it is also
+ * the highest-priced plan at $59.99/mo, exactly 2x Pro, and it is also
  * absent from the only feature-comparison table on /pricing. So the tier we
  * most want an agent to buy was the one they could neither compare nor read
  * about, and the rational move was to buy the cheaper plan.

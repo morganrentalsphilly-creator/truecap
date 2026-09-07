@@ -415,7 +415,7 @@ export default function VsHubPage() {
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition hover:-translate-y-0.5"
             >
               <Calculator className="size-4" />
@@ -494,7 +494,7 @@ export default function VsHubPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               <Calculator className="w-4 h-4" />

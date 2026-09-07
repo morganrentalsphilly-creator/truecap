@@ -102,7 +102,7 @@ export default function HowToReadARentRollPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -433,7 +433,7 @@ export default function HowToReadARentRollPost() {
             into the $520,000 ask. Buy on the stabilized number and you have paid
             today for work you have not done yet. Send the EGI into the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -559,7 +559,7 @@ export default function HowToReadARentRollPost() {
             deposits, and estoppels before you trust a total. Then take the income
             you can actually prove into the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -573,7 +573,7 @@ export default function HowToReadARentRollPost() {
             </Link>
             , and run the whole deal — cash flow, cap rate, DSCR, projections, and a
             Buy Box fit — through the{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>
             . Related reading:{" "}
