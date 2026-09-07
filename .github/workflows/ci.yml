@@ -118,7 +118,7 @@ jobs:
           # Logins allowed to change build-executed files. Space separated.
           # Adding a login here is equivalent to handing that account the
           # production build environment. Do not add bots. Do not add agents.
-          OWNER_LOGINS: "morganrentalsphilly-creator"
+          OWNER_LOGINS: "${{ github.repository_owner }}"
         run: |
           set -uo pipefail
 
