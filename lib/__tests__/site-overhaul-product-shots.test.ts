@@ -134,13 +134,7 @@ describe("no founder identity in tracked repo text", () => {
     // A macOS/Linux home path names the local account (the founder's name).
     expect(source, `${path}: home path`).not.toMatch(/\/Users\/[A-Za-z0-9_.-]+/);
     expect(source, `${path}: home path`).not.toMatch(/\/home\/[A-Za-z0-9_.-]+\//);
-    // The existing owner allowlist is a protected CI control pending owner
-    // approval. This temporary exception is restricted to that exact file;
-    // docs, URLs and runtime code may not repeat the personal handle.
-    const handleSource = path === ".github/workflows/ci.yml"
-      ? source.replaceAll(`${privateHandle}-creator`, "repository owner")
-      : source;
-    expect(handleSource, `${path}: personal handle`).not.toMatch(forbiddenHandle);
+    expect(source, `${path}: personal handle`).not.toMatch(forbiddenHandle);
     expect(source.replaceAll(`J.P. ${privateGivenName}`, "financial institution"), `${path}: personal name`)
       .not.toMatch(forbiddenGivenName);
     // The Person JSON-LD anchor that carried the first name was retired.

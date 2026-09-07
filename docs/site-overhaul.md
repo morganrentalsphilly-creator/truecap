@@ -874,7 +874,7 @@ No new performance budget, provider configuration, or email campaign was enabled
 3. Apply the drip migration before expecting either capture form to send: missing suppression tables now fail closed. Keep `SHARE_LINK_SECRET` stable, use an HTTPS site origin, and ensure the Resend key can cancel/retrieve scheduled emails. For opt-outs involving pre-rollout messages, audit/cancel their existing Resend queue manually because historical sends have no stored IDs or new links. Investigate any failed compensating cancellation or ambiguous provider acceptance.
 4. Add `lighthouse` to the required checks on main. `browser-regressions` is already required, verified during this pass.
 5. Complete the existing security-hardening queue, including the missing repository deny-list and previously owed credential/access work. Source documentation no longer claims the deny-list has shipped. Update live Google consent-screen contact fields to an owned non-personal account/Group if needed.
-6. Preserve earlier open migration, PostHog, dormant-cron, reconciliation, feedback-email/postal-address, and HUD-data decisions in the founder checklist. The old request to review Person authors is superseded: article authors now reference TrueCap’s Organization. Account renaming or commit-history rewriting remains an explicit founder decision. The privacy guard retains one narrow exception for the existing protected CI owner-login literal; replacing that literal remains blocked pending approval. This pass does not claim zero identifying strings across the repository.
+6. Preserve earlier open migration, PostHog, dormant-cron, reconciliation, feedback-email/postal-address, and HUD-data decisions in the founder checklist. The old request to review Person authors is superseded: article authors now reference TrueCap’s Organization. Account renaming or commit-history rewriting remains an explicit founder decision. The original release retained one protected CI owner-login exception pending approval; the approved follow-up below removes it. Historic commit/account identity remains outside the source-cleanup scope.
 
 
 ### Verification and deployment
@@ -889,3 +889,10 @@ No new performance budget, provider configuration, or email campaign was enabled
 - Build integrity: all 16 pinned hashes match, all 97 shadow build-config filenames remain absent, and content/lifecycle checks pass. The reviewed ESLint change only adds `artifacts/**` to ignored local output; its manifest refresh is committed separately.
 
 This commit records the local implementation and gate results above. The protected pull request, all remote CI checks, production deployment, production smoke checks, and Vercel runtime-log review must follow. Final release evidence belongs in the founder checklist and memory; no production verification or migration application is claimed by this local-gate record.
+
+
+### 2026-09-07 — Approved CI owner-identity follow-up
+
+The founder approved replacing the final personal-login literal with GitHub’s trusted `github.repository_owner` context, passed through the existing `OWNER_LOGINS` environment field. The owner-matching function and the requirement that both the actor and PR author are the owner remain unchanged. No bot, collaborator, extra account or bypass was added.
+
+The temporary CI-file exception in the repository identity guard is removed, so the workflow receives the same personal-handle check as other text sources. The reviewed workflow hash is refreshed in a separate integrity-manifest commit. This changes CI identity configuration and its documentation/test guard; application behavior, prices, entitlements, database schemas and production settings remain unchanged.
