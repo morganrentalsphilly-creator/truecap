@@ -198,7 +198,7 @@ export function HeroAddressForm() {
             <p
               id="hero-address-error"
               role="alert"
-              className="mt-2 text-sm font-medium text-destructive"
+              className="mt-2 text-sm font-medium text-destructive-text"
             >
               {addressError}
               <span className="block font-normal text-muted-foreground">

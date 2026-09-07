@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  ANALYZER_HANDOFF_BOOTSTRAP_PATHS,
   ANALYZER_HANDOFF_SESSION_KEY,
+  ANALYZER_ROUTE,
   analyzerHandoffBootstrapScript,
   readAnalyzerHandoff,
   buildAnalyzerHandoffUrl,
@@ -103,6 +105,19 @@ describe("readAnalyzerHandoff", () => {
 });
 
 describe("buildAnalyzerHandoffUrl", () => {
+  it("targets /analyze by default — the homepage no longer mounts the analyzer", () => {
+    // Every /tools widget, the SEO CTA and batch-triage build their handoff
+    // without a base. Pre-overhaul "/" mounted the analyzer; now nothing on
+    // "/" reads the staged payload, so a "/" default silently drops inputs.
+    expect(ANALYZER_ROUTE).toBe("/analyze");
+    expect(buildAnalyzerHandoffUrl({ purchasePrice: 325000 })).toMatch(
+      /^\/analyze\?/,
+    );
+    expect(
+      buildAnalyzerHandoffUrl({ purchasePrice: 325000 }, { base: "/embed" }),
+    ).toMatch(/^\/embed\?/);
+  });
+
   it("round-trips through readAnalyzerHandoff", () => {
     const url = buildAnalyzerHandoffUrl({
       purchasePrice: 320000,
@@ -255,5 +270,61 @@ describe("private analyzer handoff transport", () => {
       purchasePrice: 325000,
       address: "123 Main St",
     });
+  });
+
+  function runBootstrap(href: string) {
+    const storage = memoryStorage();
+    let replaced: string | null = null;
+    const windowLike = {
+      location: { href },
+      sessionStorage: storage,
+      history: {
+        state: null,
+        replaceState: (_state: unknown, _title: string, next: string) => {
+          replaced = next;
+        },
+      },
+    };
+    const execute = new Function(
+      "window",
+      "URL",
+      "URLSearchParams",
+      analyzerHandoffBootstrapScript(),
+    );
+    execute(windowLike, URL, URLSearchParams);
+    return { storage, replaced: replaced as string | null };
+  }
+
+  it("scrubs ?address= on every route that mounts the analyzer", () => {
+    // The hero's no-JS path is a plain GET /analyze?address=… and
+    // /home-authed redirects a signed-in visitor to /dashboard/new?address=…;
+    // both must be scrubbed before GTM/GA4/Vercel/PostHog can read the URL.
+    expect([...ANALYZER_HANDOFF_BOOTSTRAP_PATHS]).toEqual([
+      "/",
+      "/analyze",
+      "/dashboard/new",
+    ]);
+
+    const analyze = runBootstrap(
+      "https://usetruecap.com/analyze?address=123%20Main%20St",
+    );
+    expect(analyze.replaced).toBe("/analyze");
+    expect(consumeAnalyzerHandoff("", analyze.storage)).toEqual({
+      address: "123 Main St",
+    });
+
+    const dashboard = runBootstrap(
+      "https://usetruecap.com/dashboard/new?tc_from=analyze&address=123%20Main%20St",
+    );
+    expect(dashboard.replaced).toBe("/dashboard/new?tc_from=analyze");
+    expect(consumeAnalyzerHandoff("", dashboard.storage)).toEqual({
+      address: "123 Main St",
+    });
+  });
+
+  it("leaves unrelated routes' query strings untouched", () => {
+    const pricing = runBootstrap("https://usetruecap.com/pricing?address=x");
+    expect(pricing.replaced).toBeNull();
+    expect(pricing.storage.getItem(ANALYZER_HANDOFF_SESSION_KEY)).toBeNull();
   });
 });

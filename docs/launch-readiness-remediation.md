@@ -373,9 +373,9 @@ authoritative checkout as documented in the completion report. The untracked
 `artifacts/` directory remained preserved.
 
 - Original source checkout at that checkpoint:
-  `/Users/morganpage/Desktop/truecap` — preserved with no implementation edits
+  `<repo-root>` — preserved with no implementation edits
   at that time.
-- Writable remediation clone: `/Users/morganpage/Documents/Codex/2026-08-27/files-pasted-by-the-user-you/work/truecap-remediation`.
+- Writable remediation clone: `<remediation-clone>`.
 - Source artifact bundle reference SHA-256 (previously recorded): `fee0f16a6f783704f17caf2ef541a18f508957f828c97aed678b5da133908cc4`.
 - Baseline screenshot-set reference SHA-256 (previously recorded): `b03a5dd5ecb121274e7751f99a2391f00c58352ac02a897633f720820fd48fb4`.
 - **These two prior digests could not be reproduced, because the record never stated how they were computed.** A set digest is sensitive to the working directory, the path prefix, the traversal order, and whether filenames are hashed alongside contents; four plausible reconstructions were tried and none matched. This is a defect in the earlier record, not evidence of drift — see the recomputation below, which uses a stated, repeatable method. Treat the two values above as historical only.
@@ -394,7 +394,7 @@ find <relative-dir> -type f | LC_ALL=C sort | xargs shasum -a 256 | shasum -a 25
 
 | Set                                   | Working directory                        | Files | SHA-256                                                            |
 | ------------------------------------- | ---------------------------------------- | ----- | ------------------------------------------------------------------ |
-| `artifacts/` in the original checkout | `/Users/morganpage/Desktop/truecap`      | 25    | `a839acc0955180782f2211731b5f9be1746154a365d0e60c6b6e6f51cd4d8089` |
+| `artifacts/` in the original checkout | `<repo-root>`                             | 25    | `a839acc0955180782f2211731b5f9be1746154a365d0e60c6b6e6f51cd4d8089` |
 | `truecap-launch-evidence/before`      | `…/files-pasted-by-the-user-you/outputs` | 10    | `593f19c9c7bfa14218137dfd42ce4b7cf8865f70e8c73564cbcddf193337b631` |
 | `truecap-launch-evidence/after`       | `…/files-pasted-by-the-user-you/outputs` | 27    | `9c394286a03aefcc205592d12d13f155e419464e5543355200a19ef47f974a43` |
 | `truecap-launch-evidence` (all)       | `…/files-pasted-by-the-user-you/outputs` | 42    | `fd7c2670b9b92bc7dd9ed8f903e82f9775f70a7408be9c22cb04f095f7e853ed` |
@@ -407,7 +407,7 @@ At the 2026-08-28 checkpoint, the original checkout was preserved and the proof
 did not rest on a set digest:
 
 ```
-$ git -C /Users/morganpage/Desktop/truecap status -sb
+$ git -C <repo-root> status -sb
 ## main...origin/main [ahead 1, behind 8]
 ?? artifacts/
 ```

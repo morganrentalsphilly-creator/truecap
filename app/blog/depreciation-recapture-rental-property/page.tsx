@@ -107,7 +107,7 @@ export default function DepreciationRecapturePost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -446,7 +446,7 @@ export default function DepreciationRecapturePost() {
             <p>
               Disposition tax can change an after-tax return. A modeled pre-tax{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 return on investment
@@ -493,7 +493,7 @@ export default function DepreciationRecapturePost() {
               Build alternative disposition scenarios with qualified advisers
               before listing or transferring the property. The{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

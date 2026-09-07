@@ -706,7 +706,10 @@ export function ReadOnlyAnalysisView({
     } else {
       clearPendingMaoTarget();
     }
-    router.push("/?utm_source=shared_deal&utm_medium=clone");
+    // The analyzer lives at /analyze (a signed-in visitor is routed on to
+    // /dashboard/new by proxy → /home-authed); the draft above is read from
+    // localStorage at mount on either route.
+    router.push("/analyze?utm_source=shared_deal&utm_medium=clone");
   };
 
   const copyToAccount = async () => {
@@ -1090,7 +1093,8 @@ export function ReadOnlyAnalysisView({
             advanced decision tools.
           </p>
           <Link
-            href="/?utm_source=shared_deal&utm_medium=pro_gate"
+            href="/analyze?utm_source=shared_deal&utm_medium=pro_gate"
+            prefetch={false}
             className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
           >
             Analyze this property in TrueCap →
@@ -1101,7 +1105,8 @@ export function ReadOnlyAnalysisView({
       {/* Viral loop: this public share page is seen by partners, lenders,
           and other investors. Convert them into TrueCap users. */}
       <Link
-        href="/?utm_source=shared_deal&utm_medium=share_link"
+        href="/analyze?utm_source=shared_deal&utm_medium=share_link"
+        prefetch={false}
         className="block rounded-2xl bg-primary p-6 sm:p-8 text-center text-primary-foreground no-underline transition-opacity hover:opacity-90"
       >
         <p className="text-lg sm:text-xl font-extrabold">

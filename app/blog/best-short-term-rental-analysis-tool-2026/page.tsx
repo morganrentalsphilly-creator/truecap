@@ -79,14 +79,14 @@ const TOOLS = [
     name: "TrueCap (underwriting)",
     bestFor: "Best STR underwriting with LTR/STR scenario comparison",
     url: "/vs/dealcheck-for-short-term-rentals",
-    pricing: "Free core; paid Investor Pro — see live pricing",
+    pricing: "Free core; paid Pro — see live pricing",
     freeCovers: [
       "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
       "Compare LTR vs STR scenarios on same property",
       "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment",
     ],
     freeGates: [
-      "Sensitivity grid stress-tests STR revenue ±10% (Pro)",
+      "Sensitivity grid stress-tests STR revenue ±10% (first decision free, then Pro)",
       "Seasonal months require separate saved scenarios",
     ],
     pickIf:
@@ -222,7 +222,7 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -419,7 +419,7 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
               the financing on a short-term rental and check the return on your
               cash — the free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="font-semibold text-primary hover:underline"
               >
                 TrueCap analyzer

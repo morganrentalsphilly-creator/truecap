@@ -69,7 +69,7 @@ export default function CashOnCashVsIrrPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -272,7 +272,7 @@ export default function CashOnCashVsIrrPost() {
             <p>
               The{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

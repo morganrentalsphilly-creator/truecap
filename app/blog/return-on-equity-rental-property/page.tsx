@@ -106,7 +106,7 @@ export default function ReturnOnEquityPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -259,7 +259,7 @@ export default function ReturnOnEquityPost() {
               lands at about $16,100 — a 6.4% cap rate and a 1.08 DSCR. Cash flow
               is thin: roughly $1,130 a year, about $94 a month, for a first-year{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -508,7 +508,7 @@ export default function ReturnOnEquityPost() {
               quietly becomes paper appreciation rather than spendable cash. That
               is the signal to check whether your equity is still working or just
               sitting. The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               runs cash flow, cap rate, DSCR, and multi-year projections on any

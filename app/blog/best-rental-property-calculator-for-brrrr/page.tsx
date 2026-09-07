@@ -189,7 +189,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -395,7 +395,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
               , pressure-test lender-specific debt coverage by running the
               stabilized rent and refinance terms through the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="font-semibold text-primary hover:underline"
               >
                 TrueCap analyzer

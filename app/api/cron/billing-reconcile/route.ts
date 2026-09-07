@@ -19,6 +19,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { isValidCronBearer } from "@/lib/cron-auth";
 import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
-  if (request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+  if (!isValidCronBearer(request, cronSecret)) {
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
 

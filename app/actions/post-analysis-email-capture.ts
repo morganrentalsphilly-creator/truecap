@@ -32,6 +32,15 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import {
+  buildDripUnsubscribeHeaders,
+  buildDripUnsubscribeUrl,
+  hashDripEmail,
+  isDripEmailSuppressed,
+  readResendMessageId,
+  recordDripSchedule,
+} from "@/lib/email-drip-unsubscribe";
 import { escapeHtml, sanitizeAddressText } from "@/lib/html-escape";
 import {
   claimEmailCaptureSlot,
@@ -231,6 +240,27 @@ export async function capturePostAnalysisEmail(input: {
   // the guard normalises case itself for bucketing, so "A@x.com" and "a@x.com"
   // still share one dedup slot.
   const email = parsed.data.email;
+  const emailHash = hashDripEmail(email);
+  let admin: ReturnType<typeof createAdminSupabaseClient>;
+  try {
+    admin = createAdminSupabaseClient();
+    if (await isDripEmailSuppressed(admin, emailHash)) {
+      return { ok: true, scheduledCount: 0 };
+    }
+  } catch {
+    Sentry.captureMessage("Drip suppression unavailable — capture blocked", {
+      level: "error", tags: { feature: "post-analysis-email-capture" },
+    });
+    return { ok: false, code: "SEND_FAILED", message: "We couldn't send your email right now. Please try again in a minute." };
+  }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com";
+  const unsubscribeUrl = buildDripUnsubscribeUrl(siteUrl, email);
+  if (!unsubscribeUrl) {
+    Sentry.captureMessage("Signed HTTPS drip unsubscribe unavailable — capture blocked", {
+      level: "error", tags: { feature: "post-analysis-email-capture" },
+    });
+    return { ok: false, code: "CONFIG_MISSING", message: "Email sending isn't configured. Try again later." };
+  }
   // Address is data, not markup: strip to an address character set, then
   // escape. Empty result = treat as "no address" (templates have a fallback).
   const addressHtml = escapeHtml(sanitizeAddressText(parsed.data.address));
@@ -311,7 +341,6 @@ export async function capturePostAnalysisEmail(input: {
   const unsubscribeMailbox = (
     replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo
   ).trim();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com";
   const postAnalysisOffer = getPostAnalysisOfferConfig();
   const couponCode = postAnalysisOffer.code;
   // Env values are trusted, but escape them anyway — a template author reading
@@ -327,10 +356,12 @@ export async function capturePostAnalysisEmail(input: {
   // day 0 sends immediately (we just don't pass scheduled_at).
   let scheduledCount = 0;
   let day0Sent = false;
+  let suppressedDuringCapture = false;
+  let sequenceFailed = false;
+  let deliveryUncertain = false;
   const failures: Array<{
     delayDays: number;
     status: number | "thrown";
-    body: string;
   }> = [];
 
   const enabledSequence = SEQUENCE.filter(
@@ -343,17 +374,10 @@ export async function capturePostAnalysisEmail(input: {
       from,
       to: [email],
       subject: item.subject,
-      html: item.build(buildCtx),
+      html: item.build(buildCtx).replace("</body>",
+        `<p style="text-align:center;font-size:12px;color:#6b7280"><a href="${escapeHtml(unsubscribeUrl)}">Unsubscribe from these emails</a></p></body>`),
       reply_to: replyTo,
-      // Unsolicited-mail defence for the recipient AND for our sending
-      // reputation: mailbox providers weigh a visible opt-out far more kindly
-      // than a spam complaint, and someone who receives this sequence without
-      // asking for it needs a way out. mailto: form only — RFC 8058 one-click
-      // needs an HTTPS endpoint we don't have, and EMAIL_REPLY_TO is already
-      // a monitored inbox.
-      headers: {
-        "List-Unsubscribe": `<mailto:${unsubscribeMailbox}?subject=unsubscribe>`,
-      },
+      headers: buildDripUnsubscribeHeaders({ unsubscribeUrl, mailbox: unsubscribeMailbox }),
     };
     if (item.delayDays > 0) {
       const future = new Date(
@@ -365,6 +389,12 @@ export async function capturePostAnalysisEmail(input: {
       // 10s timeout — Resend usually returns in <1s; >10s is almost
       // certainly a network issue, not a slow API response. Without
       // this the server action can hang and the user sees nothing.
+      if (await isDripEmailSuppressed(admin, emailHash)) {
+        suppressedDuringCapture = true;
+        break;
+      }
+      // A network timeout may still have queued mail; retain the abuse claim.
+      deliveryUncertain = true;
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -374,23 +404,37 @@ export async function capturePostAnalysisEmail(input: {
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(10_000),
       });
+      deliveryUncertain = false;
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
         failures.push({
           delayDays: item.delayDays,
           status: res.status,
-          body: text.slice(0, 500),
         });
         continue;
       }
       scheduledCount += 1;
       if (item.delayDays === 0) day0Sent = true;
-    } catch (err) {
-      failures.push({
-        delayDays: item.delayDays,
-        status: "thrown",
-        body: err instanceof Error ? err.message : String(err),
+      const resendId = await readResendMessageId(res);
+      if (!resendId) {
+        Sentry.captureMessage("Drip provider response missing message ID — sequence stopped", {
+          level: "error", tags: { feature: "post-analysis-email-capture" },
+        });
+        sequenceFailed = true;
+        break;
+      }
+      const recorded = await recordDripSchedule(admin, {
+        emailHash, surface: "post-analysis", resendId,
+        scheduledAt: typeof payload.scheduled_at === "string" ? payload.scheduled_at : null,
+        apiKey,
       });
+      if (recorded === "suppressed") {
+        suppressedDuringCapture = true;
+        break;
+      }
+    } catch {
+      sequenceFailed = true;
+      failures.push({ delayDays: item.delayDays, status: "thrown" });
+      break;
     }
   }
 
@@ -411,13 +455,19 @@ export async function capturePostAnalysisEmail(input: {
           failures,
           scheduledCount,
           totalAttempts: enabledSequence.length,
-          fromAddress: from,
-          // Email + address intentionally omitted to keep PII out of
-          // Sentry; the failure pattern (status code + body) is what
-          // we need to debug.
+          // Raw provider bodies can echo recipient data; keep only statuses.
         },
       },
     );
+  }
+
+  if (sequenceFailed) {
+    if (scheduledCount === 0 && !deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return { ok: false, code: "SEND_FAILED", message: "We couldn't finish sending your email. Please try again later." };
+  }
+  if (suppressedDuringCapture) {
+    if (scheduledCount === 0) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return { ok: true, scheduledCount };
   }
 
   if (scheduledCount === 0) {

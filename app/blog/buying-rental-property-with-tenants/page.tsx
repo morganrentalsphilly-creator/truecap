@@ -105,7 +105,7 @@ export default function BuyingRentalWithTenantsPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -225,7 +225,7 @@ export default function BuyingRentalWithTenantsPost() {
               The second case should not replace the first until lawful,
               achievable rent is supported. Run both through the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -244,7 +244,7 @@ export default function BuyingRentalWithTenantsPost() {
               program-specific method. Obtain the accepted rent and coverage
               worksheet in writing; a lower accepted rent can move the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -408,7 +408,7 @@ export default function BuyingRentalWithTenantsPost() {
               expire. Run the supported in-place and alternative scenarios
               through the{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

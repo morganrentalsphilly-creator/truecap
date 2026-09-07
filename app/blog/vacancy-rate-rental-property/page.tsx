@@ -99,7 +99,7 @@ export default function VacancyRatePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -298,7 +298,7 @@ export default function VacancyRatePost() {
             every month. Hold reserves accordingly. Stress-test your own
             numbers in the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -331,7 +331,7 @@ export default function VacancyRatePost() {
             number guarantees approval or future collections.
             Run both versions in the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -488,7 +488,7 @@ export default function VacancyRatePost() {
           <p>
             Vacancy is one line, but it touches everything downstream — NOI,
             cap rate, cash flow, DSCR, and Buy Box fit. The full{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
             carries your vacancy assumption through all of it in one pass,

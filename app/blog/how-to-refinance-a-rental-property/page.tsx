@@ -97,7 +97,7 @@ export default function RefinancePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],

@@ -112,7 +112,7 @@ export default function PropertyTaxReassessmentPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -375,14 +375,14 @@ export default function PropertyTaxReassessmentPost() {
               On the seller&apos;s bill the deal looks like a thin but real
               winner: a 6.3%{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
               </Link>
               , a{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -472,7 +472,7 @@ export default function PropertyTaxReassessmentPost() {
               are exactly where an optimistic number hides a bad deal. Run the
               honest figure through the free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -507,7 +507,7 @@ export default function PropertyTaxReassessmentPost() {
               against a recently sold comp — and budget the supplemental bill as
               a closing-year cost. The full{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

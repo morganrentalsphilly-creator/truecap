@@ -104,7 +104,7 @@ export default function BreakEvenOccupancyPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -360,7 +360,7 @@ export default function BreakEvenOccupancyPost() {
               is about $18,000 — essentially identical to the $17,964 debt service,
               for a{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -511,7 +511,7 @@ export default function BreakEvenOccupancyPost() {
               expenses and debt service, divide by full rent, and compare the result
               to the vacancy you actually expect. A disciplined purchase price buys
               you cushion; an aggressive one spends it. The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               runs this for you — enter a property and it returns cash flow, cap

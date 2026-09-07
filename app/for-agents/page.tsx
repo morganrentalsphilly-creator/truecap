@@ -175,7 +175,7 @@ export default async function ForAgentsPage() {
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </TrackedMarketingLink>
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
               Analyze a property free
@@ -340,7 +340,7 @@ export default async function ForAgentsPage() {
             </Link>
             , or the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -457,7 +457,7 @@ export default async function ForAgentsPage() {
               <ArrowUpRight className="w-4 h-4" />
             </TrackedMarketingLink>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex min-h-11 items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
               <Calculator className="w-4 h-4" />

@@ -2,15 +2,20 @@
  * /reviews — proof, not praise (docs/site-overhaul.md Phase 5.8).
  *
  * The page has to make sense WITH or WITHOUT quotes. Everything it renders
- * unconditionally is something a visitor can check: the proof strip, the
- * rules a quote must pass, the sourced-assumption and public-methodology
- * cards, the founder, and a real link to the analyzer. The two data-backed
+ * unconditionally is something a visitor can check: three facts with a link
+ * to verify each, the rules a quote must pass, the sourced-assumption and
+ * public-methodology cards, and a real link to the analyzer. (The founder
+ * card and the proof strip were retired on 2026-09-07.) The two data-backed
  * blocks — <Testimonials /> and the usage counter — render NOTHING at zero
  * rows: no placeholders, no placeholder text, no stars, no empty boxes.
  * Product/AggregateRating schema is deliberately ABSENT (rating markup over
  * zero records is a fabricated-claim risk and a Google penalty risk).
  *
- * Static + hourly ISR like the homepage.
+ * Static + hourly ISR like the homepage: the page must NOT read cookies or
+ * the request session (no request-user helper, no server Supabase client),
+ * or Next silently renders it dynamically on every request and the declared
+ * `revalidate` is a lie. The footer shows its account column like every
+ * other prerendered marketing page; the Header self-corrects client-side.
  */
 
 import type { Metadata } from "next";
@@ -24,7 +29,6 @@ import {
   UsageCounter,
   loadUsageLabel,
 } from "@/components/marketing/usage-counter";
-import { getRequestUser } from "@/lib/request-auth";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   MIN_SAVED_DEALS_FOR_PUBLISH,
@@ -57,10 +61,6 @@ const LINK_CLASS =
   "inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
 export default async function ReviewsPage() {
-  // Only to suppress the footer's Sign in / Create account column for a
-  // signed-in visitor — no gating, no personalization.
-  const user = await getRequestUser();
-
   // Decide whether the "Real usage" block exists at all, so an empty
   // counter never leaves an empty box behind. (Same cached read as
   // <UsageCounter />, so this costs nothing extra.)
@@ -98,7 +98,59 @@ export default async function ReviewsPage() {
           </div>
         </section>
 
-        {/* (b) Three facts a visitor can verify by clicking — always renders. */}
+        {/* (b) Three facts a visitor can verify by clicking — always renders.
+            Each card states something true today and links to where it can
+            be checked; none of them depends on a database row. */}
+        <section aria-labelledby="verify-title" className="border-b border-border">
+          <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+            <h2
+              id="verify-title"
+              className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+            >
+              Three things you can check right now
+            </h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-extrabold text-foreground">The math is public</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  Every formula behind a verdict is written down with its
+                  limits: cash flow, cap rate, DSCR, and the Offer Ceiling.
+                  Nothing is hidden inside a model you cannot read.
+                </p>
+                <Link href="/methodology" className={`${LINK_CLASS} mt-3 text-sm`}>
+                  Read the methodology
+                </Link>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-extrabold text-foreground">Every assumption is labeled</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  In the analyzer, each input says where it came from: HUD Fair
+                  Market Rent, the FRED mortgage rate, or a labeled local
+                  default you can replace with your own number.
+                </p>
+                <AnalyzeCtaLink
+                  analyticsSource="reviews-verify"
+                  className={`${LINK_CLASS} mt-3 text-sm`}
+                >
+                  Open the analyzer
+                </AnalyzeCtaLink>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-extrabold text-foreground">Any quote can come down</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  A quote is held for {PUBLISH_DELAY_HOURS} hours before it
+                  appears, publishes only after {MIN_SAVED_DEALS_FOR_PUBLISH}{" "}
+                  saved deals or an exported report. The founder can remove
+                  a quote; contact hello@usetruecap.com if you want yours
+                  taken down.
+                </p>
+                <a href="#quotes-flow-title" className={`${LINK_CLASS} mt-3 text-sm`}>
+                  See how quotes get here
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* (c) How quotes get here — the real flow, stated plainly. */}
         <section aria-labelledby="quotes-flow-title">
@@ -278,7 +330,7 @@ export default async function ReviewsPage() {
           </div>
         </section>
       </main>
-      <SiteFooter hideAccountLinks={Boolean(user)} />
+      <SiteFooter />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsLd) }}

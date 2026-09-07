@@ -99,7 +99,7 @@ export default function CapexReservesPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -365,7 +365,7 @@ export default function CapexReservesPost() {
             </Link>
             . Run your own numbers both ways in the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -505,7 +505,7 @@ export default function CapexReservesPost() {
             CapEx is one line, but it compounds through everything
             downstream — NOI, cap rate, cash flow, DSCR, and whether the
             modeled return still holds after a future roof. The full{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}
             carries your maintenance and capex assumptions through the

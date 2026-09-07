@@ -53,7 +53,7 @@ export default function ShareLinkNotFound() {
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/"
+            href="/analyze" prefetch={false}
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground transition hover:-translate-y-0.5 sm:w-auto"
           >
             Analyze a property free

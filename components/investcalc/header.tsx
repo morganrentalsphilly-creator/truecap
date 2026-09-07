@@ -445,17 +445,24 @@ export function Header({
                 {/* Insights holders → the Overview home; everyone else with
                     dashboard access (free) → straight to My Deals, since
                     /dashboard would only redirect them there anyway. */}
-                <Link href={hasDashboardInsights ? "/dashboard" : "/dashboard/saved-analyses"} prefetch={false}>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Dashboard"
-                className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Button>
-            </Link>
+                {/* asChild so ONE <a> renders with the button styling: a
+                    <button> nested inside <Link> is invalid HTML and gave
+                    keyboard users two tab stops for one action. */}
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
+                >
+                  <Link
+                    href={hasDashboardInsights ? "/dashboard" : "/dashboard/saved-analyses"}
+                    prefetch={false}
+                    aria-label="Dashboard"
+                  >
+                    <LayoutDashboard className="w-3.5 h-3.5" aria-hidden />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Link>
+                </Button>
               </div>
             )}
 
@@ -476,13 +483,13 @@ export function Header({
             />
           ) : (
             <>
-              {/* Desktop (lg+): Log in + Sign Up Free beside the marketing nav. */}
+              {/* Desktop (lg+): Sign in + Create account beside the marketing nav. */}
               <Button variant="ghost"
               className="hidden lg:inline-flex h-9 px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
              asChild>
                 <Link href="/auth/login">
                   <LogIn className="w-4 h-4 mr-1" />
-                  Log in
+                  Sign in
                 </Link>
               </Button>
               <Button
@@ -494,7 +501,7 @@ export function Header({
                   "transition-all duration-200 active:scale-[0.98]",
                 )}
               >
-                <Link href="/auth/sign-up">Sign Up Free</Link>
+                <Link href="/auth/sign-up">Create account</Link>
               </Button>
               {/* Phones + tablets (<lg): ONE row — the primary Analyze action
                   and a hamburger for everything else. */}

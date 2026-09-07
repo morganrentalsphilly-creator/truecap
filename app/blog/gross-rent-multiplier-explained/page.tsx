@@ -100,7 +100,7 @@ export default function GrossRentMultiplierPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -574,7 +574,7 @@ export default function GrossRentMultiplierPost() {
             , and when a listing survives the screen, run the whole thing — NOI,
             cash flow, DSCR, projections, and Buy Box fit — through
             the{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>
             . Related reading:{" "}

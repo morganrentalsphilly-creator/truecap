@@ -42,7 +42,7 @@ describe("marketing offer configuration", () => {
     const config = getMarketingOfferConfig();
 
     expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.decision_system);
-    expect(config.proOfferName).toBe("Investor Pro");
+    expect(config.proOfferName).toBe("Pro");
     expect(config.singleDeal).toMatchObject({ amount: 9, priceLabel: "$9" });
     expect(config.guaranteeEnabled).toBe(false);
     expect(config.guaranteeTermsUrl).toBe("/guarantee");
@@ -57,7 +57,7 @@ describe("marketing offer configuration", () => {
     const config = getMarketingOfferConfig();
 
     expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.b);
-    expect(config.proOfferName).toBe("Investor Pro");
+    expect(config.proOfferName).toBe("Pro");
     expect(config.singleDeal).toMatchObject({
       amount: 19,
       priceLabel: "$19",

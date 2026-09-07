@@ -121,7 +121,7 @@ export default function BlogPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -273,7 +273,7 @@ export default function BlogPost() {
             $15,962 ÷ $250,000 = <strong>6.4%</strong>. (Run your own line items
             through the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

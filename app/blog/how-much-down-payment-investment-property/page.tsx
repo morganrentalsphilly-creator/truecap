@@ -100,7 +100,7 @@ export default function DownPaymentPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -236,7 +236,7 @@ export default function DownPaymentPost() {
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
               7.25% (a realistic <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">investment rate</Link> in
               June 2026), renting for $2,500/month — right at the{" "}
-              <Link href="/analyze" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 1% rule
               </Link>{" "}
               line. After honest operating expenses (5% vacancy, 8% management, 5%
@@ -255,7 +255,7 @@ export default function DownPaymentPost() {
                 mortgage payment calculator
               </Link>{" "}
               for the P&amp;I, then let the free{" "}
-              <Link href="/analyze" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               turn it into cash-on-cash and DSCR. The pattern is the surprising
@@ -361,7 +361,7 @@ export default function DownPaymentPost() {
             <ul>
               <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t (the common case at 2026 rates), more down does. Check it deal by deal.</li>
               <li><strong>DSCR headroom.</strong> Lenders and your own safety both want{" "}
-              <Link href="/analyze" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 DSCR
               </Link>{" "}
               comfortably above 1.0 — 1.20+ is a healthy buffer. More down raises DSCR; if a deal only clears 1.0 at 25% down, that&apos;s the market telling you it&apos;s thin.</li>

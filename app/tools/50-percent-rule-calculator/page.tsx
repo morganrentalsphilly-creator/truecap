@@ -304,14 +304,14 @@ export default function FiftyPercentRuleCalculatorPage() {
               is the cash-flow-market variant of the income screen. From there,
               replace the guesses with line items: the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 rental cash flow calculator
               </Link>{" "}
               itemizes every expense the 50% bundle compresses, and the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 NOI calculator
@@ -384,7 +384,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the full TrueCap analyzer

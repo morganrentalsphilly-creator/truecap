@@ -20,15 +20,15 @@ export const HOMEPAGE_HEADLINES = {
   // Retain the legacy key so an old environment value cannot break the build,
   // but serve qualified decision language instead of an absolute outcome
   // claim.
-  never_overpay: "Review the highest modeled price that meets your selected targets.",
+  never_overpay: "Review the highest modeled price that meets your targets.",
 } as const;
 
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
 
 export const PRO_OFFER_NAMES = {
-  pro: "Investor Pro",
+  pro: "Pro",
   // Preserve the old environment key without permitting offer-name drift.
-  offer_engine: "Investor Pro",
+  offer_engine: "Pro",
 } as const;
 
 export type ProOfferNameVariant = keyof typeof PRO_OFFER_NAMES;

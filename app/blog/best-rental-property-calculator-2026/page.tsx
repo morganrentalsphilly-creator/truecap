@@ -66,7 +66,7 @@ const RANKED_CALCULATORS = [
     name: "TrueCap",
     bestFor: "Address-first screening plus paid decision tools",
     url: "/",
-    pricing: "Free core; paid Investor Pro — see live pricing",
+    pricing: "Free core; paid Pro — see live pricing",
     pros: [
       "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
       "Editable HUD area-rent + FRED owner-occupied rate benchmarks, with manual local property tax",
@@ -251,7 +251,7 @@ export default function BestRentalPropertyCalculator2026Post() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
@@ -481,7 +481,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                   &quot;I want address-first screening and an Offer
                   Ceiling.&quot;
                 </strong>{" "}
-                Evaluate TrueCap&apos;s current free and Investor Pro terms on
+                Evaluate TrueCap&apos;s current free and Pro terms on
                 the live pricing page.
               </li>
               <li>

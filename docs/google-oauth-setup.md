@@ -49,10 +49,14 @@ Keep this open in another tab. You'll paste it into Google in a moment.
 3. Search bar → **APIs & Services → OAuth consent screen**.
    - User type: **External** → **Create**.
    - App name: `TrueCap`
-   - User support email: `morganrentalsphilly@gmail.com`
+   - User support email: the Google account you are signed in to the Cloud
+     console with, or a Google Group you own (Google only accepts an owned
+     account or Group here; a plain mailbox alias may be rejected). Google
+     shows this address on the consent screen to every sign-in user, so
+     prefer a Group / shared address over a personal one.
    - App domain (optional but recommended): `usetruecap.com`
    - Authorized domains: add `usetruecap.com` and `supabase.co`
-   - Developer contact: `morganrentalsphilly@gmail.com`
+   - Developer contact: `hello@usetruecap.com`
    - **Save and Continue**.
 4. **Scopes** screen: click **Add or Remove Scopes**, add the three default
    ones: `.../auth/userinfo.email`, `.../auth/userinfo.profile`, `openid`.

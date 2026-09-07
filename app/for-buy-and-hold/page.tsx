@@ -109,11 +109,12 @@ export default function ForBuyAndHoldPage() {
 
           {/* CTAs */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            {/* Deep-link into the analyzer with the Buy & Hold play pre-
-                selected (?strategy= analyzer handoff) — long-term-rental
-                assumption defaults applied from the first keystroke. */}
+            {/* Deep-link into /analyze with the Buy & Hold play pre-selected
+                (?strategy= analyzer handoff) — long-term-rental assumption
+                defaults applied from the first keystroke. The analyzer no
+                longer lives on "/", so the seed must target /analyze. */}
             <Link
-              href="/?strategy=buy-hold#main"
+              href="/analyze?strategy=buy-hold"
               prefetch={false}
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
@@ -262,7 +263,7 @@ export default function ForBuyAndHoldPage() {
             </Link>
             , and the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -294,7 +295,7 @@ export default function ForBuyAndHoldPage() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/?strategy=buy-hold#main"
+              href="/analyze?strategy=buy-hold"
               prefetch={false}
               className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >

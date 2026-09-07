@@ -5,7 +5,7 @@
 The complete local repair is implemented and verified on branch
 `fix/my-deals-table-reachability-2026-08-29` at base commit
 `995cca4322a27990772b79a75472d4baa933cb36`. The verified patch was transferred
-to the authoritative checkout at `/Users/morganpage/Desktop/truecap` without a
+to the authoritative checkout at `<repo-root>` without a
 commit, push, deployment, provider mutation, email send, purchase, or production
 data change. The pre-existing untracked `artifacts/` directory was preserved.
 

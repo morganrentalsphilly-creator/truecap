@@ -36,21 +36,59 @@ import { StickyConversionBar } from "@/components/marketing/sticky-conversion-ba
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
+import { isReleasedHandoffStrategy } from "@/lib/analyzer-handoff";
+import { cookies } from "next/headers";
+import { CHECKOUT_RETURN_COOKIE, isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 
 export const metadata: Metadata = {
-  // Same title/description as the static homepage (this IS the homepage
-  // for signed-in users), but noindex + canonical "/" so search engines
-  // never treat /home-authed as a separate page.
-  title: "Rental Property Calculator — Cap Rate, Cash Flow & DSCR",
+  // Same homepage identity; the signed-in route remains excluded from indexing.
+  robots: { index: false, follow: true },
+  // `absolute` prevents the root layout from adding a second brand suffix.
+  title: {
+    absolute: "Rental Property Calculator & Max Offer | TrueCap",
+  },
   description:
-    "Use TrueCap to analyze rental properties with cap rate, cash-on-cash return, monthly cash flow, and long-term investment projections.",
+    "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+  keywords: [
+    "rental property analysis",
+    "investment property calculator",
+    "cap rate",
+    "cash on cash return",
+    "real estate cash flow",
+    "rental property ROI",
+    "real estate deal analysis",
+  ],
   alternates: {
     canonical: "/",
   },
-  robots: {
-    index: false,
-    follow: true,
+  openGraph: {
+    // Keep og:title aligned with the <title> — Google falls back to
+    // og:title when rewriting SERP titles, so a mismatched og:title
+    // resurfaces stale phrasing on brand queries.
+    title: "Rental Property Calculator & Max Offer | TrueCap",
+    description:
+      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+    url: "/",
+    type: "website",
+    // Re-declare images because page-level openGraph fully replaces the
+    // layout's (Next metadata isn't a deep merge). Without this, every
+    // social share of the homepage would render without a preview card.
+    images: [
+      {
+        url: "/og/home",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap rental property calculator and Offer Ceiling workflow",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rental Property Calculator & Max Offer | TrueCap",
+    description:
+      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+    images: ["/og/home"],
   },
 };
 
@@ -60,6 +98,8 @@ export default async function AuthedHome({
   searchParams?: Promise<{ billing?: string; session_id?: string; savedDeal?: string;
     tc_from?: string;
     address?: string;
+    strategy?: string;
+    sample?: string;
   }>;
 }) {
   // No JSON-LD here — this route is noindex; the schema.org graph
@@ -86,16 +126,20 @@ export default async function AuthedHome({
       analyzerParams.set("savedDeal", savedDeal);
     }
 
-    const sessionId = resolvedSearchParams.session_id;
-    if (
-      resolvedSearchParams.billing === "success" &&
-      typeof sessionId === "string" && /^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)) {
-      analyzerParams.set("billing", "success");
-      analyzerParams.set("session_id", sessionId);
+    // Legacy checkout URLs go through the cookie handoff before any page
+    // renders. A clean return forwards only its status, never the Session id.
+    if (resolvedSearchParams.billing === "success") {
+      const sessionId = resolvedSearchParams.session_id;
+      if (isCheckoutSessionId(sessionId)) {
+        redirect(`/api/billing/return?session_id=${encodeURIComponent(sessionId)}`);
+      }
+      const returnSession = (await cookies()).get(CHECKOUT_RETURN_COOKIE)?.value;
+      if (isCheckoutSessionId(returnSession)) analyzerParams.set("billing", "success");
     }
 
     // /analyze?address=… for a signed-in visitor: carry the address into the
-    // in-app analyzer (the root-layout bootstrap moves it into the private
+    // in-app analyzer (the root-layout bootstrap runs on /dashboard/new too —
+    // ANALYZER_HANDOFF_BOOTSTRAP_PATHS — and moves it into the private
     // sessionStorage handoff before any vendor script runs). Bounded and
     // shape-checked; a listing URL is not forwarded.
     const address = resolvedSearchParams.address;
@@ -107,6 +151,24 @@ export default async function AuthedHome({
       !/^https?:\/\//i.test(address.trim())
     ) {
       analyzerParams.set("address", address.trim());
+    }
+
+    // /analyze?strategy=… (persona pages, blog posts): the play seed is read
+    // once, at analyzer mount, so it must survive the redirect or a signed-in
+    // visitor gets a blank default analyzer instead of the promised House
+    // Hack / Buy & Hold form. Released keys only — same gate as the link.
+    if (isReleasedHandoffStrategy(resolvedSearchParams.strategy)) {
+      analyzerParams.set("strategy", resolvedSearchParams.strategy);
+    }
+
+    // /analyze?sample=1 ("See the sample deal", the /vs pages' "Run it
+    // yourself"): /dashboard/new mounts the same AnalyzeEntryFromQuery
+    // island as /analyze, which turns the flag into the sample run.
+    if (
+      resolvedSearchParams.tc_from === "analyze" &&
+      resolvedSearchParams.sample === "1"
+    ) {
+      analyzerParams.set("sample", "1");
     }
 
     const query = analyzerParams.toString();

@@ -27,6 +27,13 @@ interface Props {
   transactionId?: string;
 }
 
+/** The Google loader is consent-gated and `lazyOnload`, and the banner only
+ *  hands us "success" after a Stripe round trip — either can win the race.
+ *  Poll for window.gtag for ~60s rather than dropping the one Purchase
+ *  conversion the paid-ads account is bid against. */
+const CONVERSION_RETRY_INTERVAL_MS = 500;
+const CONVERSION_RETRY_MAX_ATTEMPTS = 120;
+
 export function BillingConversionTracker({ billingStatus, value, transactionId }: Props) {
   useEffect(() => {
     if (billingStatus !== "success") return;
@@ -38,11 +45,36 @@ export function BillingConversionTracker({ billingStatus, value, transactionId }
     const key = `tc_paid_${transactionId ?? "unknown"}`;
     try {
       if (window.sessionStorage.getItem(key) === "1") return;
-      window.sessionStorage.setItem(key, "1");
     } catch {
       // sessionStorage may be unavailable in some browsers; fall through and fire anyway.
     }
-    trackConversion("paid_subscribed", { value: value ?? 0, currency: "USD", transactionId });
+    // The dedup key is burned only AFTER the conversion actually reached
+    // gtag. Burning it first (the old order) permanently lost the event
+    // whenever gtag was not defined yet.
+    const fire = () => {
+      const fired = trackConversion("paid_subscribed", {
+        value: value ?? 0,
+        currency: "USD",
+        transactionId,
+      });
+      if (fired) {
+        try {
+          window.sessionStorage.setItem(key, "1");
+        } catch {
+          // Non-fatal: the event went out; only the refresh guard is weaker.
+        }
+      }
+      return fired;
+    };
+    if (fire()) return;
+    let attempts = 0;
+    const intervalId = window.setInterval(() => {
+      attempts += 1;
+      if (fire() || attempts >= CONVERSION_RETRY_MAX_ATTEMPTS) {
+        window.clearInterval(intervalId);
+      }
+    }, CONVERSION_RETRY_INTERVAL_MS);
+    return () => window.clearInterval(intervalId);
   }, [billingStatus, value, transactionId]);
   return null;
 }

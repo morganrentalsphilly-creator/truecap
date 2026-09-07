@@ -39,12 +39,16 @@ export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 }
 
 export async function openSampleDecision(page: Page): Promise<void> {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  // Since Phase 2 (docs/site-overhaul.md) the analyzer and its sample
+  // button live on /analyze; the homepage only links there. Signed-in
+  // callers still work: proxy.ts rewrites /analyze to /home-authed, which
+  // sends verified users to /dashboard/new where the same button mounts.
+  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await acceptCookiesIfShown(page);
 
   const sampleButton = page
     .getByRole("button", {
-      name: /view a sample decision|see a sample deal|try a sample rental/i,
+      name: /sample rental|view a sample decision|see a sample deal/i,
     })
     .first();
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });

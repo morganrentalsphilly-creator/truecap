@@ -22,6 +22,11 @@
   --accent-foreground: oklch(0.3 0.04 255);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
+  /* Text-safe red for small error copy on tinted marketing surfaces: the
+     display --destructive only reaches 3.9:1 on --brand-blue-light and 4.4:1
+     on --background, so inline messages use this darker variant (>= 5:1 on
+     both). Keep --destructive for solid fills and aria-invalid borders. */
+  --destructive-text: oklch(0.5 0.22 27);
   /* Semantic status colors must exist outside `.dashboard-shell` too: auth,
      public, and portal surfaces use the corresponding Tailwind utilities. */
   --success: oklch(0.5 0.16 158);
@@ -128,6 +133,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-text: var(--destructive-text);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-gold: var(--gold);

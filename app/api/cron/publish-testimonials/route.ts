@@ -3,9 +3,10 @@
  * Publishes every pending, consented quote whose rules all hold
  * (lib/testimonials/rules.ts) after its 24-hour hold. Counts only; no email
  * (hard limit). The founder can take any quote down with its unpublish link
- * (/api/testimonials/unpublish?token=…, token in the testimonials row).
+ * (/api/testimonials/unpublish?token=…, token in the testimonials row; GET confirms, POST acts).
  */
 import { NextResponse } from "next/server";
+import { isValidCronBearer } from "@/lib/cron-auth";
 import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { runPublishJob } from "@/lib/testimonials/store";
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json({ ok: false, message: "CRON_SECRET not configured." }, { status: 500 });
   }
-  if (request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+  if (!isValidCronBearer(request, cronSecret)) {
     return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
   }
   try {

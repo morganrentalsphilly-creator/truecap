@@ -145,7 +145,7 @@ export async function GET() {
     `One address. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
     `Free: ${planFacts.free}`,
     `Single Deal: ${planFacts.singleDeal}`,
-    `Investor Pro: ${planFacts.pro}`,
+    `Pro: ${planFacts.pro}`,
     `Agent Pro: ${planFacts.agentPro}`,
     `New accounts get a ${planFacts.evaluationDays}-day free trial covering ${planFacts.evaluationDealLimit} Pro deals and ${planFacts.evaluationComparisonLimit} comparison. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
     "",

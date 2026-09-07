@@ -2,8 +2,8 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
 import {
-  acceptCookiesIfShown,
   deleteRegressionDealsByAddress,
+  openSampleDecision,
   replaceSampleAddressForRegression,
 } from "./support/product-flows";
 
@@ -16,23 +16,6 @@ const authSkipReason = authEnvironment.enabled
 test.beforeEach(() => {
   test.skip(!authEnvironment.enabled, authSkipReason);
 });
-
-async function openSampleDecision(page: Page) {
-  // Since Phase 2 (docs/site-overhaul.md) the analyzer and its sample
-  // button live on /analyze; the homepage only links there.
-  await page.goto("/analyze", { waitUntil: "domcontentloaded" });
-  await acceptCookiesIfShown(page);
-  const sampleButton = page
-    .getByRole("button", {
-      name: /sample rental|view a sample decision|see a sample deal/i,
-    })
-    .first();
-  await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
-  await sampleButton.click();
-  await expect(page.locator("#decision-summary-title")).toBeVisible({
-    timeout: 20_000,
-  });
-}
 
 async function signInFromCurrentPage(page: Page) {
   if (!authEnvironment.enabled)

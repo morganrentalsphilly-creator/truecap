@@ -105,7 +105,7 @@ export default function ExitCapRatePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: canonicalUrl },
     ],
@@ -221,7 +221,7 @@ export default function ExitCapRatePost() {
               </Link>{" "}
               walks the going-in version step by step, and the free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -336,7 +336,7 @@ export default function ExitCapRatePost() {
               0.88x — a loss — at 7.5%. If you want to feel how the going-in side
               of this drives the exit, rebuild the NOI line in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -498,7 +498,7 @@ export default function ExitCapRatePost() {
               never let a compressing exit cap rescue a deal that doesn&apos;t work
               on its own. Do that and your projected return becomes a statement
               about the building instead of a bet on interest rates. Let the{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               carry your NOI, financing, and cap-rate assumptions straight through

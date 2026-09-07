@@ -8,6 +8,12 @@
  * hero ship as a server component (zero JS for the static markup),
  * which improves LCP on every page load. This island is the smallest
  * possible client surface.
+ *
+ * Fallback contract: the decision "is there a form to scroll to?" is made
+ * on the ADDRESS/CALCULATOR FORM, never on `#main`. Every page wraps its
+ * body in <main id="main">, so an id lookup always succeeds and the click
+ * silently scrolled 38 /vs pages to their own top instead of opening the
+ * analyzer. Prefer <AnalyzeCtaLink> (a real link) on pages without a form.
  */
 
 import type { ReactNode } from "react";
@@ -16,7 +22,7 @@ import { scrollBehavior } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
 type Props = {
-  /** Element ID to scroll to (defaults to "main"). */
+  /** Element ID to scroll to when a form is present (defaults to "main"). */
   targetId?: string;
   /** Sticky-nav offset compensation in pixels. */
   offsetPx?: number;
@@ -47,14 +53,23 @@ export function ScrollToFormButton({
     // actually fire, but the typeof check costs nothing and protects
     // future SSR scenarios.
     if (typeof window === "undefined") return;
-    const el = document.getElementById(targetId);
-    // The analyzer lives at /analyze now; a marketing page without a form
-    // on it sends the visitor there instead of scrolling to nothing.
-    if (!el) {
+    // The analyzer lives at /analyze now; a marketing page without an
+    // address or calculator form sends the visitor there instead of
+    // scrolling to nothing (or, worse, to the top of the same page).
+    const form = document.querySelector<HTMLElement>(
+      'form[data-hero-address-form], form[data-calc-form="true"]',
+    );
+    if (!form) {
       router.push("/analyze");
       return;
     }
+    const el = document.getElementById(targetId) ?? form;
     window.scrollTo({ top: el.offsetTop - offsetPx, behavior: scrollBehavior() });
+    // Move focus with the scroll so keyboard and screen-reader users land
+    // in the form the button named, not on the now off-screen button.
+    form
+      .querySelector<HTMLElement>('input:not([type="hidden"]), [tabindex="-1"]')
+      ?.focus({ preventScroll: true });
   };
 
   return (

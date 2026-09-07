@@ -20,13 +20,13 @@ export const PUBLIC_DECISION_PACK_USD = 9;
 
 export const PLAN_CATALOG = {
   pro_monthly: {
-    name: "Investor Pro",
+    name: "Pro",
     cadence: "monthly",
     unitAmountUsd: PUBLIC_PRO_MONTHLY_USD,
     stripeInterval: "month",
   },
   pro_annual: {
-    name: "Investor Pro",
+    name: "Pro",
     cadence: "annual",
     unitAmountUsd: PUBLIC_PRO_ANNUAL_USD,
     stripeInterval: "year",

@@ -87,7 +87,7 @@ export interface AnalyzerHandoff {
   propertyType?: HandoffPropertyType;
   /**
    * Maps to the "What's your play?" strategy chip — lets a persona page
-   * (/for-brrrr → /?strategy=brrrr) land the visitor with the play already
+   * (/for-brrrr → /analyze?strategy=brrrr) land the visitor with the play already
    * selected: property type, starter assumptions, and the lead result tab all
    * set, exactly as if they'd clicked the chip. Ignored when it isn't one of
    * the known keys. Wins over `type` when both are present (the play sets its
@@ -107,6 +107,19 @@ export const PRIVATE_ANALYZER_HANDOFF_QUERY_PARAMETERS = [
   "address",
 ] as const;
 const PRIVATE_ANALYZER_HANDOFF_TTL_MS = 5 * 60 * 1000;
+/**
+ * Routes that mount the analyzer and therefore consume a handoff. The
+ * pre-analytics bootstrap scrubs private params only on these paths so an
+ * unrelated route's query string is never touched. "/" stays for legacy
+ * links (its hero no longer reads the payload, but the scrub is still the
+ * privacy-correct behaviour); "/analyze" is the public analyzer and
+ * "/dashboard/new" is where /home-authed sends a signed-in visitor.
+ */
+export const ANALYZER_HANDOFF_BOOTSTRAP_PATHS = [
+  "/",
+  "/analyze",
+  "/dashboard/new",
+] as const;
 
 type HandoffStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -202,7 +215,8 @@ export function consumeAnalyzerHandoff(
 export function analyzerHandoffBootstrapScript(): string {
   const names = JSON.stringify(PRIVATE_ANALYZER_HANDOFF_QUERY_PARAMETERS);
   const key = JSON.stringify(ANALYZER_HANDOFF_SESSION_KEY);
-  return `(function(){try{var u=new URL(window.location.href);if(u.pathname!=="/")return;var n=${names},p=new URLSearchParams(),f=false;n.forEach(function(k){var v=u.searchParams.get(k);if(v!==null){p.set(k,v);u.searchParams.delete(k);f=true;}});if(!f)return;try{window.sessionStorage.setItem(${key},JSON.stringify({version:1,privateSearch:p.toString(),createdAt:Date.now()}));}catch(_){}window.history.replaceState(window.history.state,"",u.pathname+u.search+u.hash);}catch(_){}})();`;
+  const paths = JSON.stringify(ANALYZER_HANDOFF_BOOTSTRAP_PATHS);
+  return `(function(){try{var u=new URL(window.location.href);if(${paths}.indexOf(u.pathname)===-1)return;var n=${names},p=new URLSearchParams(),f=false;n.forEach(function(k){var v=u.searchParams.get(k);if(v!==null){p.set(k,v);u.searchParams.delete(k);f=true;}});if(!f)return;try{window.sessionStorage.setItem(${key},JSON.stringify({version:1,privateSearch:p.toString(),createdAt:Date.now()}));}catch(_){}window.history.replaceState(window.history.state,"",u.pathname+u.search+u.hash);}catch(_){}})();`;
 }
 
 /**
@@ -290,15 +304,20 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
   return Object.keys(out).length > 0 ? out : null;
 }
 
+/** Where the analyzer lives (site overhaul Phase 2); "/" is marketing only. */
+export const ANALYZER_ROUTE = "/analyze";
+
 /**
  * Build a handoff URL into the full analyzer from a calculator's inputs.
  * Adds utm_source for attribution (ignored by readAnalyzerHandoff).
+ * Defaults to /analyze — the homepage no longer mounts the analyzer, so a
+ * handoff aimed at "/" would stage values nothing reads.
  */
 export function buildAnalyzerHandoffUrl(
   input: AnalyzerHandoff,
   opts?: { base?: string; utmSource?: string },
 ): string {
-  const base = opts?.base ?? "/";
+  const base = opts?.base ?? ANALYZER_ROUTE;
   const params = new URLSearchParams();
 
   if (typeof input.purchasePrice === "number" && input.purchasePrice >= 10000) {

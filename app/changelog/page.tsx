@@ -166,13 +166,6 @@ const ENTRIES: Entry[] = [
       "'House hacking explained' walks first-time buyers through FHA 3.5% down, owner-occupant rules, year-2 transition math. 'Should I use a property management company?' lays out the honest break-even math on PM fees vs. self-management. Both target bottom-funnel high-intent queries. Blog catalog now at 9 posts.",
   },
   {
-    date: "2026-05-25",
-    category: "Doc",
-    title: "Solo-executable marketing playbook (docs/MARKETING-PLAYBOOK.md)",
-    description:
-      "Weekly 5-6 hour playbook the founder can run alone — three loops (community, content, newsletter), 90-day check-in metrics, what NOT to do, minimum viable weekly schedule. The content queue at the bottom is 8 blog topics ranked by search volume, ready to commission one at a time.",
-  },
-  {
     date: "2026-05-24",
     category: "Feature",
     title: "New analyses pre-fill from your saved defaults",

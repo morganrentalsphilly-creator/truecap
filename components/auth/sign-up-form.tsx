@@ -86,7 +86,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   const selectedBilling =
     searchParams.get("billing") === "annual" ? "annual" : "monthly";
   const selectedPlanName =
-    selectedPlan === "agent-pro" ? "Agent Pro" : "Investor Pro";
+    selectedPlan === "agent-pro" ? "Agent Pro" : "Pro";
   const selectedPrice =
     selectedPlan === "agent-pro"
       ? selectedBilling === "annual"

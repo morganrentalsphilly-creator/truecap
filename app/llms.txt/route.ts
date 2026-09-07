@@ -148,7 +148,7 @@ export async function GET() {
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
-    `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Investor Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
+    `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
   ].join("\n");
 
   const body = `# TrueCap

@@ -87,7 +87,7 @@ const TOOLS: Tool[] = [
     name: "TrueCap",
     bestFor: "Free preliminary rental screens with no signup or analysis cap",
     url: "/vs/dealcheck",
-    pricing: "Free core; paid Investor Pro — see live pricing",
+    pricing: "Free core; paid Pro — see live pricing",
     disclosure:
       "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
@@ -267,7 +267,7 @@ export default function BestDealCheckAlternativesPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,

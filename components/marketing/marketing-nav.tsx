@@ -125,14 +125,14 @@ export function MarketingMobileMenu() {
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setOpen(false)}
             >
-              Log in
+              Sign in
             </Link>
             <Link
               href="/auth/sign-up"
               className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setOpen(false)}
             >
-              Sign up free
+              Create account
             </Link>
           </div>
         </nav>

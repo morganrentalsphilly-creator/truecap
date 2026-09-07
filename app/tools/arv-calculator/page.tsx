@@ -520,7 +520,7 @@ export default function ArvCalculatorPage() {
                 "Separate rehab and stabilized-rental tools",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
-                "Downside sensitivity and TrueCap's Offer Ceiling (Pro)",
+                "Downside sensitivity and TrueCap's Offer Ceiling (included in your first decision, Pro after)",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -530,7 +530,7 @@ export default function ArvCalculatorPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the rental analyzer

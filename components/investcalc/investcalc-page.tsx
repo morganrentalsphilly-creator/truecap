@@ -196,7 +196,6 @@ import {
   userDecisionFromPipelineStage,
 } from "@/lib/decision-contract";
 import type { ReportMode } from "@/lib/pdf-export-constants";
-import { cacheSavedAnalysisPdfExport } from "@/lib/pdf/saved-analysis-cache";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { selectUnderwritingEnrichment } from "@/lib/property-enrichment/underwriting-adoption";
 import { addDealToCompareAction } from "@/app/actions/compare";
@@ -7536,6 +7535,9 @@ export function InvestCalcPage({
       // currently stores one PDF object, while lender/partner/agent modes have
       // deliberately different presentation and already bypass that cache.
       if (savedExport && mode === "personal" && pdfResult.cacheAttestation) {
+        // Lazy: the cache writer pulls in the Supabase browser client, which
+        // anonymous /analyze visitors must not download on first load.
+        const { cacheSavedAnalysisPdfExport } = await import("@/lib/pdf/saved-analysis-cache");
         void cacheSavedAnalysisPdfExport({
           analysisId: savedExport.id,
           renderFingerprint: savedExport.renderFingerprint,

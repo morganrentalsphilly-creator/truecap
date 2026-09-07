@@ -8,7 +8,8 @@
  * Organization node that post Article JSON-LD author nodes point at.
  *
  * Blog posts are standalone pages (no shared post layout/header), so
- * this currently ships in the highest-traffic posts rather than all 67.
+ * this currently ships in 11 standalone article headers. Other articles
+ * can receive their byline through a shared article component.
  * Add it to the header of every NEW post you write, right after the
  * date line, and point the post's Article `author` at the site
  * Organization `@id` at the same time.

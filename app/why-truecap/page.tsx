@@ -76,7 +76,7 @@ export default function WhyTrueCapPage() {
               plain-English verdict in 60 seconds. No card, no signup.
             </p>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="mt-6 inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 sm:text-base"
             >
               Analyze a property free

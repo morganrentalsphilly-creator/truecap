@@ -12,7 +12,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
+import { captureExceptionLazy } from "@/lib/sentry/lazy";
 import { ArrowUpRight, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function GlobalAppError({
@@ -28,7 +28,10 @@ export default function GlobalAppError({
     // show up in the browser console, never in our error inbox.
     // (global-error.tsx already does this for root-layout crashes; we
     // need the same coverage for route-segment crashes.)
-    Sentry.captureException(error);
+    // Lazy: this boundary is a client module on EVERY route, so a static
+    // Sentry import would put the SDK core back on the critical path of
+    // every marketing page (docs/site-overhaul.md Phase 7).
+    void captureExceptionLazy(error);
     // Also keep the console line for local dev debugging.
     console.error("[app/error]", error);
   }, [error]);

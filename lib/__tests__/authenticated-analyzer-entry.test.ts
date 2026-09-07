@@ -23,9 +23,9 @@ describe("authenticated analyzer consolidation", () => {
   const dashboardAnalyzer = read("app/dashboard/new/page.tsx");
   const cookieCheckHome = read("app/home-authed/page.tsx");
 
-  it("returns new subscription Checkouts directly to the in-shell analyzer", () => {
+  it("returns subscription Checkouts through an HttpOnly handoff to the in-shell analyzer", () => {
     expect(billingAction).toContain(
-      "success_url: `${siteUrl}/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`",
+      "success_url: `${siteUrl}/api/billing/return?session_id={CHECKOUT_SESSION_ID}`",
     );
     expect(billingAction).not.toContain(
       "success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`",
@@ -75,9 +75,10 @@ describe("authenticated analyzer consolidation", () => {
     expect(redirectFlow).toContain(
       "/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(",
     );
-    expect(redirectFlow).toContain(
-      "/^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)",
-    );
+    expect(redirectFlow).toContain("isCheckoutSessionId(sessionId)");
+    expect(redirectFlow).toContain("cookies()).get(CHECKOUT_RETURN_COOKIE)");
+    expect(redirectFlow).toContain("redirect(`/api/billing/return?session_id=");
+    expect(redirectFlow).not.toContain('analyzerParams.set("session_id"');
     expect(redirectFlow).toContain(
       'resolvedSearchParams.billing === "success"',
     );
@@ -90,7 +91,31 @@ describe("authenticated analyzer consolidation", () => {
     ].map((match) => match[1]);
     // `address` is forwarded only from /analyze?address= (bounded, non-URL),
     // so a signed-in visitor keeps the property they typed on the homepage.
-    expect(reflectedKeys).toEqual(["savedDeal", "billing", "session_id", "address"]);
+    // `strategy` (released keys only) keeps the persona-page play seed and
+    // `sample` (only "1", only from /analyze) keeps "See the sample deal"
+    // working for signed-in visitors — both are read at analyzer mount on
+    // /dashboard/new, so dropping them here made the promise silently false.
+    expect(reflectedKeys).toEqual([
+      "savedDeal",
+      "billing",
+      "address",
+      "strategy",
+      "sample",
+    ]);
+    expect(redirectFlow).toContain(
+      "isReleasedHandoffStrategy(resolvedSearchParams.strategy)",
+    );
+    expect(redirectFlow).toContain('resolvedSearchParams.sample === "1"');
+    expect(redirectFlow).toContain('analyzerParams.set("sample", "1")');
+    // /dashboard/new must turn the forwarded flag into the sample run with
+    // the same island /analyze uses (it is the only reader of ?sample=1).
+    expect(dashboardAnalyzer).toContain(
+      'from "@/components/marketing/analyze-entry-from-query"',
+    );
+    expect(dashboardAnalyzer.indexOf("<AnalyzeEntryFromQuery />")).toBeGreaterThan(0);
+    expect(dashboardAnalyzer.indexOf("<AnalyzeEntryFromQuery />")).toBeLessThan(
+      dashboardAnalyzer.indexOf("<InvestCalcPage"),
+    );
     expect(redirectFlow).not.toContain("Object.entries");
     expect(redirectFlow).not.toContain("getStripe");
     expect(cookieCheckHome).not.toContain("BillingSuccessBanner");

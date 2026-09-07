@@ -14,6 +14,7 @@
 
 import { ArrowRight, Calculator } from "lucide-react";
 import {
+  ANALYZER_ROUTE,
   buildAnalyzerHandoffUrl,
   type AnalyzerHandoff,
 } from "@/lib/analyzer-handoff";
@@ -38,14 +39,17 @@ export function SeoAnalyzerCta({
 }) {
   // Attribution must survive the no-handoff path too — most call sites
   // (glossary, vs, playbook) pass no prefill but still need utm_source.
-  // Every variant ends in #main: the handoff prefills the form, but without
-  // the fragment the visitor lands at the top of the homepage instead of on
-  // the analyzer (same convention as the persona seed links).
+  // Every variant lands on /analyze: the analyzer moved off the homepage
+  // (site overhaul Phase 2), so a homepage-fragment destination would drop the
+  // visitor on the marketing hero and discard any staged prefill.
   const href = handoff
-    ? `${buildAnalyzerHandoffUrl(handoff, utmSource ? { utmSource } : undefined)}#main`
+    ? buildAnalyzerHandoffUrl(handoff, {
+        base: ANALYZER_ROUTE,
+        ...(utmSource ? { utmSource } : {}),
+      })
     : utmSource
-      ? `/?utm_source=${encodeURIComponent(utmSource)}#main`
-      : "/#main";
+      ? `${ANALYZER_ROUTE}?utm_source=${encodeURIComponent(utmSource)}`
+      : ANALYZER_ROUTE;
   const contentType: ContentCtaType =
     utmSource === "glossary"
       ? "glossary"
@@ -66,7 +70,7 @@ export function SeoAnalyzerCta({
         </p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
           {supportingText ??
-            "Free 60-second analysis with labeled starting assumptions and no signup. Pro calculates the highest modeled Offer Ceiling that still meets your selected targets under the assumptions shown."}
+            "Free 60-second analysis with labeled starting assumptions and no signup. Pro calculates your Offer Ceiling: the highest price that still meets your targets under the assumptions shown."}
         </p>
       </div>
       <TrackedContentCtaLink

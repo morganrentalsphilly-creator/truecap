@@ -71,6 +71,10 @@ describe("Phase 9 — pricing page", () => {
     expect(page).toContain("Cancel anytime");
     expect(page).toContain("Stripe");
     expect(page).toContain("<Testimonials");
+    // Publication is gated on activity (lib/testimonials/rules.ts), never on
+    // plan, so a heading that says the quoted people pay would mislabel a
+    // free account's quote. /pricing uses the component's default heading.
+    expect(page).not.toContain("pay for it");
     expect(page).toContain("<ProductShot");
     expect(page).toContain('"@type": "FAQPage"');
   });

@@ -14,6 +14,10 @@ export const SENSITIVE_QUERY_PARAMETER_NAMES = Object.freeze([
   "id_token",
   "token_hash",
   "auth_token",
+  // Bare `token`: the emailed feedback-form token (/feedback/testimonial),
+  // the one-click unsubscribe token (/email/unsubscribe), and the founder's
+  // testimonial veto token (/api/testimonials/unpublish) all travel under it.
+  "token",
   "user_id",
   "owner_id",
   "deal_id",

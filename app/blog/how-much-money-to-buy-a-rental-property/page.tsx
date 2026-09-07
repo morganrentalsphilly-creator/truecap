@@ -128,7 +128,7 @@ export default function BlogPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -874,10 +874,11 @@ export default function BlogPost() {
             effective monthly housing expense is $1,768 instead of $3,268. Size
             your own version in the{" "}
             <Link
-              href="/?strategy=house-hack#main"
+              href="/analyze?strategy=house-hack"
+              prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
-              house hacking calculator
+              analyzer in House Hack mode
             </Link>
             , and read{" "}
             <Link
@@ -918,7 +919,7 @@ export default function BlogPost() {
             are worth reading before you assume the easier qualification is
             free, and the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -997,7 +998,7 @@ export default function BlogPost() {
             The cheap defence against both is arithmetic before offers.
             Underwriting a listing takes about a minute in the{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

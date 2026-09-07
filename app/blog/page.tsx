@@ -964,7 +964,7 @@ export default function BlogIndexPage() {
             aren&apos;t offered right now. Free to start.
           </p>
           <Link
-            href="/"
+            href="/analyze" prefetch={false}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90"
           >
             Open TrueCap

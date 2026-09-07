@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   evaluatePublishEligibility,
   TESTIMONIAL_ROLES,
+  validateAttribution,
   validateQuote,
   type PublicTestimonial,
   type TestimonialRole,
@@ -129,7 +130,11 @@ async function firstNameFor(admin: SupabaseClient, userId: string): Promise<stri
   const row = data as { first_name: string | null; display_name: string | null } | null;
   const candidate = row?.first_name?.trim() || row?.display_name?.trim().split(/\s+/)[0] || null;
   if (!candidate) return null;
-  return candidate.slice(0, 60);
+  // The profile name is user-editable and the prompt has no field to fix it,
+  // so a name that fails the public-string gate is dropped, not a reason to
+  // refuse the quote.
+  const check = validateAttribution(candidate.slice(0, 60));
+  return check.ok ? check.value : null;
 }
 
 export async function submitTestimonial(
@@ -140,7 +145,9 @@ export async function submitTestimonial(
   if (!validation.ok) return { ok: false, reason: validation.reason };
   const role = input.role ?? null;
   if (role !== null && !TESTIMONIAL_ROLES.includes(role)) return { ok: false, reason: "invalid_role" };
-  const market = input.market?.replace(/\s+/g, " ").trim().slice(0, 80) || null;
+  const marketCheck = validateAttribution(input.market);
+  if (!marketCheck.ok) return { ok: false, reason: marketCheck.reason };
+  const market = marketCheck.value?.slice(0, 80) ?? null;
   const firstName = await firstNameFor(admin, input.userId);
 
   const { data, error } = await admin
@@ -194,7 +201,7 @@ export async function runPublishJob(
 
   const { data: pendingRows, error: pendingError } = await admin
     .from("testimonials")
-    .select("id, user_id, quote, consent, publish_after, status")
+    .select("id, user_id, quote, first_name, market, consent, publish_after, status")
     .eq("status", "pending")
     .eq("consent", true)
     .lte("publish_after", now.toISOString())
@@ -207,7 +214,9 @@ export async function runPublishJob(
     }
     throw pendingError;
   }
-  const pending = (pendingRows ?? []) as Array<Pick<TestimonialRow, "id" | "user_id" | "quote" | "consent" | "publish_after">>;
+  const pending = (pendingRows ?? []) as Array<
+    Pick<TestimonialRow, "id" | "user_id" | "quote" | "first_name" | "market" | "consent" | "publish_after">
+  >;
   summary.scanned = pending.length;
   if (pending.length === 0) return summary;
 
@@ -244,6 +253,8 @@ export async function runPublishJob(
     const decision = evaluatePublishEligibility(
       {
         quote: row.quote,
+        firstName: row.first_name ?? null,
+        market: row.market ?? null,
         consent: row.consent,
         publishAfter: row.publish_after,
         isDemoAccount: userId ? demo.has(userId) : true,
@@ -326,6 +337,39 @@ export async function getUsageCounts(admin: SupabaseClient): Promise<UsageCounts
 
 export type FeedbackRecipient = { userId: string; email: string };
 
+/** Keyset pages and exact counts prevent the API row cap from truncating an audience rule. */
+async function collectFeedbackAudienceIds(
+  admin: SupabaseClient,
+  table: string,
+  idColumn: "id" | "user_id",
+  options: { orderColumn?: string; savedSince?: string; optedOutOnly?: boolean } = {},
+): Promise<Set<string>> {
+  const ids = new Set<string>();
+  const orderColumn = options.orderColumn ?? idColumn;
+  const columns = orderColumn === idColumn ? idColumn : `${idColumn}, ${orderColumn}`;
+  let cursor: string | null = null;
+  while (true) {
+    let query = admin.from(table).select(columns, { count: "exact" })
+      .order(orderColumn, { ascending: true }).range(0, 499);
+    if (cursor !== null) query = query.gt(orderColumn, cursor);
+    if (options.savedSince) query = query.is("deleted_at", null).gte("created_at", options.savedSince);
+    if (options.optedOutOnly) query = query.eq("marketing_opt_out", true);
+    const { data, count, error } = await query;
+    // Missing exclusions or incomplete reads must never become permission to email.
+    if (error) throw error;
+    if (count == null) throw new Error(`Feedback audience count unavailable for ${table}`);
+    const rows = (data ?? []) as unknown as Array<Record<string, string>>;
+    for (const row of rows) ids.add(row[idColumn]);
+    if (rows.length >= count) break;
+    const nextCursor = rows.at(-1)?.[orderColumn];
+    if (!nextCursor || nextCursor === cursor) {
+      throw new Error(`Feedback audience read incomplete for ${table}`);
+    }
+    cursor = nextCursor;
+  }
+  return ids;
+}
+
 /**
  * The guarded feedback-request audience (docs/site-overhaul.md Phase 5.7):
  * ≥ 1 saved deal in the last 90 days; not a demo account; has never seen the
@@ -336,27 +380,19 @@ export async function selectFeedbackEmailAudience(
   now = new Date(),
 ): Promise<FeedbackRecipient[]> {
   const since = new Date(now.getTime() - 90 * 24 * 3600 * 1000).toISOString();
-  const { data: dealRows, error: dealError } = await admin
-    .from("saved_analyses")
-    .select("user_id")
-    .is("deleted_at", null)
-    .gte("created_at", since);
-  if (dealError) throw dealError;
-  const candidates = new Set(((dealRows ?? []) as Array<{ user_id: string }>).map((r) => r.user_id));
+  const candidates = await collectFeedbackAudienceIds(admin, "saved_analyses", "user_id", {
+    orderColumn: "id",
+    savedSince: since,
+  });
   if (candidates.size === 0) return [];
 
   const exclude = new Set<string>();
   for (const table of ["demo_accounts", "testimonial_prompt_events", "feedback_email_sends"]) {
-    const { data, error } = await admin.from(table).select("user_id");
-    if (error && !isMissingRelation(error)) throw error;
-    for (const r of (data ?? []) as Array<{ user_id: string }>) exclude.add(r.user_id);
+    for (const userId of await collectFeedbackAudienceIds(admin, table, "user_id")) exclude.add(userId);
   }
-  const { data: optOutRows, error: optOutError } = await admin
-    .from("profiles")
-    .select("id")
-    .eq("marketing_opt_out", true);
-  if (optOutError && !isMissingRelation(optOutError)) throw optOutError;
-  for (const r of (optOutRows ?? []) as Array<{ id: string }>) exclude.add(r.id);
+  for (const userId of await collectFeedbackAudienceIds(admin, "profiles", "id", { optedOutOnly: true })) {
+    exclude.add(userId);
+  }
 
   const recipients: FeedbackRecipient[] = [];
   const perPage = 200;

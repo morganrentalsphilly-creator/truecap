@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
+import { CHECKOUT_RETURN_COOKIE, CHECKOUT_SESSION_ID_PATTERN, checkoutReturnCookieOptions, isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -63,7 +65,10 @@ const switchPlanSchema = z.object({
 
 const checkoutReturnSchema = z
   .object({
-    sessionId: z.string().regex(/^cs_[a-zA-Z0-9_]{8,240}$/),
+    // Optional: the canonical path reads the id from the httpOnly return
+    // cookie (app/api/billing/return). An explicit id is still accepted for
+    // any caller that already holds one; both paths are user-bound below.
+    sessionId: z.string().regex(CHECKOUT_SESSION_ID_PATTERN).optional(),
   })
   .strict();
 
@@ -109,7 +114,12 @@ function buildSubscriptionCheckoutSessionParams(args: {
       ? [{ coupon: intent.stripe_discount_coupon_id }]
       : undefined,
     allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
-    success_url: `${siteUrl}/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+    // The Session id goes to a Route Handler that parks it in an httpOnly
+    // cookie and 303s to a clean /dashboard/new?billing=success. It must never
+    // be in the URL the client tree mounts on: `session_id` is a sensitive
+    // parameter, so the Google tags (and the Purchase conversion) would stay
+    // off for that whole document. See lib/stripe/checkout-return-cookie.ts.
+    success_url: `${siteUrl}/api/billing/return?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
     metadata: {
       // `supabase_user_id` is the binding key the webhook resolves FIRST;
@@ -1040,6 +1050,9 @@ export type ProActiveResult =
 export type CheckoutReturnVerificationResult =
   | {
       ok: true;
+      /** The verified, user-bound Checkout Session id. Used by the browser
+       *  ONLY as a local dedup key (banner dismissal, conversion once). */
+      checkoutSessionId: string;
       purchasedPlanSlug: PaidPlanSlug;
       conversionValue?: number;
     }
@@ -1059,8 +1072,30 @@ export type CheckoutReturnVerificationResult =
 export async function verifyCheckoutReturnAction(
   input: unknown,
 ): Promise<CheckoutReturnVerificationResult> {
-  const parsed = checkoutReturnSchema.safeParse(input);
+  const parsed = checkoutReturnSchema.safeParse(input ?? {});
   if (!parsed.success) {
+    return {
+      ok: false,
+      code: "INVALID_RETURN",
+      message: "This checkout return could not be verified.",
+    };
+  }
+
+  // Canonical source is the httpOnly cookie set by app/api/billing/return —
+  // the browser never sees the id before this verification succeeds, and the
+  // document URL stays free of it so the Google tags can load.
+  let sessionId: string | null = parsed.data.sessionId ?? null;
+  let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
+  if (!sessionId) {
+    try {
+      cookieStore = await cookies();
+      const fromCookie = cookieStore.get(CHECKOUT_RETURN_COOKIE)?.value;
+      if (isCheckoutSessionId(fromCookie)) sessionId = fromCookie;
+    } catch {
+      // cookies() unavailable — treat as "no return in flight".
+    }
+  }
+  if (!sessionId) {
     return {
       ok: false,
       code: "INVALID_RETURN",
@@ -1082,12 +1117,9 @@ export async function verifyCheckoutReturnAction(
 
   try {
     const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(
-      parsed.data.sessionId,
-      {
-        expand: ["line_items"],
-      },
-    );
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items"],
+    });
     const metadataPlanSlug = session.metadata?.plan_slug ?? null;
     if (!isPaidPlanSlug(metadataPlanSlug)) {
       return {
@@ -1160,7 +1192,20 @@ export async function verifyCheckoutReturnAction(
       session,
     );
 
-    return { ok: true, ...verified };
+    // One-shot handoff: clear the return cookie once it has been verified so
+    // a stale id cannot resurface the success banner on a later visit.
+    if (cookieStore) {
+      try {
+        cookieStore.set(CHECKOUT_RETURN_COOKIE, "", {
+          ...checkoutReturnCookieOptions(),
+          maxAge: 0,
+        });
+      } catch {
+        // Cosmetic: the cookie expires on its own within minutes.
+      }
+    }
+
+    return { ok: true, checkoutSessionId: sessionId, ...verified };
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "billing-checkout-return" },

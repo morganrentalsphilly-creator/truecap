@@ -109,7 +109,7 @@ export default function RentalPropertyDepreciationPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -299,7 +299,7 @@ export default function RentalPropertyDepreciationPost() {
               and the mortgage — $2,400 a year of real cash flow (pressure-test
               your own deal&apos;s number in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -464,7 +464,7 @@ export default function RentalPropertyDepreciationPost() {
               universal tax saving. Screen the property&apos;s price, rent,
               financing, and operating expenses through the{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

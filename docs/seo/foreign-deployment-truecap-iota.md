@@ -46,14 +46,14 @@ worth keeping — it covers this project's own `*.vercel.app` aliases. It simply
 cannot reach a project we do not own.
 
 Vercel confirms the ownership: this project's domains are `usetruecap.com`,
-`truecap-pink.vercel.app`, `truecap-morganrentalsphilly-creators-projects.vercel.app`
+`truecap-pink.vercel.app`, `<account-scoped-deployment-alias>`
 and `truecap-git-main-…vercel.app`. `truecap-iota.vercel.app` is not among them,
 and no project in the account produces that hostname.
 
 ## The only fix
 
 1. Find the Vercel account that owns it. It is **not** the current one
-   (`morganrentalsphilly-creator's projects`, 7 projects, none of them iota).
+   (`the owner’s projects`, 7 projects, none of them iota).
    Vercel accounts are per sign-in identity, so check GitHub vs Google vs email
    logins, and check **v0.dev** — v0 auto-deploys to `name-<greek>.vercel.app`
    under whatever account is linked to it, which matches both the naming and the

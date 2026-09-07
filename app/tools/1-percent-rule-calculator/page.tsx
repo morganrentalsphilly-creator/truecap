@@ -276,21 +276,21 @@ export default function OnePercentRulePage() {
               <li>
                 Run the full underwrite —{" "}
                 <Link
-                  href="/analyze"
+                  href="/analyze" prefetch={false}
                   className="text-primary font-semibold hover:underline"
                 >
                   cap rate
                 </Link>
                 ,{" "}
                 <Link
-                  href="/analyze"
+                  href="/analyze" prefetch={false}
                   className="text-primary font-semibold hover:underline"
                 >
                   CoC
                 </Link>
                 ,{" "}
                 <Link
-                  href="/analyze"
+                  href="/analyze" prefetch={false}
                   className="text-primary font-semibold hover:underline"
                 >
                   DSCR
@@ -354,8 +354,7 @@ export default function OnePercentRulePage() {
               {[
                 "Cap rate + CoC + DSCR + monthly cash flow",
                 "10-year projection with rent growth (Pro)",
-                "Downside sensitivity grid (Pro)",
-                "Offer Ceiling (Pro)",
+                "Offer Ceiling and downside sensitivity (included in your first decision, Pro after)",
                 "Editable operating and financing assumptions",
                 "Free to start",
               ].map((line) => (
@@ -366,7 +365,7 @@ export default function OnePercentRulePage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the full TrueCap analyzer

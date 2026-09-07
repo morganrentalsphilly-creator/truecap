@@ -37,7 +37,7 @@ Each morning (or whenever fits your schedule):
 - Answer them. **Do not link TrueCap.** Don't even mention it. Just be the most helpful person in the thread.
 - If your answer involves a specific calculation, do that calculation by hand in the comment.
 
-**Why no link-dropping?** Because Reddit subreddits ban it within 48 hours. The play is: build comment karma + a known username (yours: `morganrentalsphilly` is recognizable + sounds like a real investor, perfect). After 3-4 months of regular helpful comments, when someone DMs you "what calculator are you using?" you mention TrueCap. The conversion rate on those DMs is 70%+; the conversion rate on link-dropped self-promo is ~0%.
+**Why no link-dropping?** Because Reddit subreddits ban it within 48 hours. The play is: build comment karma + a known username (use one that reads like a real investor, not a brand). After 3-4 months of regular helpful comments, when someone DMs you "what calculator are you using?" you mention TrueCap. The conversion rate on those DMs is 70%+; the conversion rate on link-dropped self-promo is ~0%.
 
 **Success metric for Loop 1:** comment karma growth on r/realestateinvesting + DMs asking "what tools do you use." After 90 days you should be getting 2-5 DMs/week organically.
 

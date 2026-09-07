@@ -60,6 +60,16 @@ describe("marketing small-text contrast", () => {
     expect(
       contrast(cssToken(globals, "brand-blue-text"), cssToken(globals, "brand-blue-light"))
     ).toBeGreaterThanOrEqual(4.5);
+    // Inline error copy on the hero gradient: --destructive is 3.9:1 on
+    // --brand-blue-light and 4.4:1 on --background, so small error text uses
+    // the darker --destructive-text variant, which must clear AA on both.
+    expect(
+      contrast(cssToken(globals, "destructive-text"), cssToken(globals, "brand-blue-light"))
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(
+      contrast(cssToken(globals, "destructive-text"), cssToken(globals, "background"))
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(globals).toContain("--color-destructive-text: var(--destructive-text);");
   });
 
   it("uses the accessible variants on every audited failure surface", () => {
@@ -77,6 +87,11 @@ describe("marketing small-text contrast", () => {
     expect(read("components/investcalc/live-verdict-panel.tsx")).toContain(
       "tracking-widest text-[var(--brand-blue-text)]"
     );
+
+    // The hero address error renders over the tinted hero gradient.
+    const heroForm = read("components/marketing/hero-address-form.tsx");
+    expect(heroForm).toContain("text-sm font-medium text-destructive-text");
+    expect(heroForm).not.toMatch(/text-destructive(?![-\w])/);
   });
 });
 

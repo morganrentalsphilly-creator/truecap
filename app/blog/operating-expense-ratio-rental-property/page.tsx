@@ -105,7 +105,7 @@ export default function OperatingExpenseRatioPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: canonicalUrl },
     ],
@@ -458,7 +458,7 @@ export default function OperatingExpenseRatioPost() {
               price cut, but plenty of investors wave through the OER assumption
               that causes it. The free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -534,7 +534,7 @@ export default function OperatingExpenseRatioPost() {
                 50% rule
               </Link>{" "}
               as a sanity check, and let the{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               carry the operating expenses straight through to NOI, cap rate,

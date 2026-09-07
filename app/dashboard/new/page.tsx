@@ -22,10 +22,13 @@
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { CHECKOUT_RETURN_COOKIE, isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
 import { redirect } from "next/navigation";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
+import { AnalyzeEntryFromQuery } from "@/components/marketing/analyze-entry-from-query";
 import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getDashboardNavAccess, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
@@ -69,6 +72,10 @@ export default async function NewAnalysisPage({
   searchParams?: Promise<{ savedDeal?: string;
     billing?: string;
     session_id?: string;
+    /** Forwarded by /home-authed from /analyze?sample=1; read client-side. */
+    sample?: string;
+    /** Forwarded by /home-authed from /analyze?strategy=…; read at mount. */
+    strategy?: string;
   }>;
 }) {
   const supabase = await createServerSupabaseClient();
@@ -78,6 +85,20 @@ export default async function NewAnalysisPage({
   const entitlements = await getRequestEntitlements(user.id);
   const navAccess = getDashboardNavAccess(entitlements);
   const resolvedSearchParams = (await searchParams) ?? {};
+
+  // Legacy return links (Sessions created before the cookie handoff shipped)
+  // still carry the id in the URL. Bounce them through the return route so the
+  // document the client tree mounts on never contains `session_id` — that
+  // parameter keeps GTM and the Ads tag off for the life of the document.
+  if (
+    resolvedSearchParams.billing === "success" &&
+    isCheckoutSessionId(resolvedSearchParams.session_id)
+  ) {
+    redirect(
+      `/api/billing/return?session_id=${encodeURIComponent(resolvedSearchParams.session_id)}`,
+    );
+  }
+
   const requestedSavedDealId =
     typeof resolvedSearchParams.savedDeal === "string" &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -101,7 +122,14 @@ export default async function NewAnalysisPage({
     resolvedSearchParams.billing === "success" &&
     process.env.STRIPE_SECRET_KEY
   ) {
-    const sessionId = resolvedSearchParams.session_id;
+    // The id lives in the httpOnly return cookie (app/api/billing/return),
+    // never in the URL. Read-only here; the banner's server action clears it.
+    let sessionId: string | undefined;
+    try {
+      sessionId = (await cookies()).get(CHECKOUT_RETURN_COOKIE)?.value;
+    } catch {
+      // cookies() unavailable — no conversion hint, banner still verifies.
+    }
     if (
       typeof sessionId === "string" &&
       /^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)
@@ -158,6 +186,10 @@ export default async function NewAnalysisPage({
         />
       </Suspense>
       <div className="flex-1">
+        {/* Same entry island as /analyze: a signed-in click on
+            "/analyze?sample=1" arrives here (proxy → /home-authed forwards
+            the flag) and must still run the sample deal. */}
+        <AnalyzeEntryFromQuery />
         <InvestCalcPage
           key={requestedSavedDealId ?? "new-analysis"}
           canSaveDeals={capabilities.canSaveDeals}

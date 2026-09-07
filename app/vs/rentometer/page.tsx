@@ -14,7 +14,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
+import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
@@ -94,11 +94,11 @@ export default function VsRentometerPage() {
             Rentometer is a rent estimator — it tells you what a property should rent for based on local comps. TrueCap models the broader first-year rental economics from editable assumptions. They&apos;re not the same product; here&apos;s where each one fits.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
+            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Try TrueCap free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </ScrollToFormButton>
+            </AnalyzeCtaLink>
             <Link href="/pricing" className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted">
               See pricing
             </Link>
@@ -171,7 +171,7 @@ export default function VsRentometerPage() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
-            <Link href="/analyze" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            <Link href="/analyze" prefetch={false} className="font-semibold text-primary hover:underline">free deal analyzer</Link>
             {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
             {" "}lays out every line.
@@ -186,7 +186,7 @@ export default function VsRentometerPage() {
             If you&apos;ve been using Rentometer for rent and a spreadsheet for everything else, TrueCap collapses both into one workflow. Try a deal in 60 seconds.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <Link href="/analyze" prefetch={false} className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
               <Calculator className="w-4 h-4" />Run a deal now
             </Link>
             <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">

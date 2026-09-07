@@ -85,7 +85,7 @@ const TOOLS: Tool[] = [
     name: "TrueCap",
     bestFor: "No-account preliminary rental screening",
     url: "/vs/biggerpockets-calculator",
-    pricing: "Free core; paid Investor Pro — see live pricing",
+    pricing: "Free core; paid Pro — see live pricing",
     disclosure:
       "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — with no report count to run out of. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
@@ -97,7 +97,7 @@ const TOOLS: Tool[] = [
     ],
     freeGates: [
       "Editing + unlimited saves + comparing deals (Pro)",
-      "10-year cash-flow and equity projections + sensitivity (Pro)",
+      "10-year cash-flow and equity projections (Pro); sensitivity is included in your first decision, then Pro",
       "PDF export + co-branded share links (Pro)",
     ],
     pickIf:
@@ -240,7 +240,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,

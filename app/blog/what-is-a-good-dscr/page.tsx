@@ -126,7 +126,7 @@ export default function BlogPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -443,7 +443,7 @@ export default function BlogPost() {
             that a DSCR target actually gives you: not a pass/fail grade on the
             listing, but a defensible ceiling on what you can pay. The{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer
@@ -515,7 +515,7 @@ export default function BlogPost() {
             35% is cash that now sits in the walls earning the property&apos;s
             return instead of yours: it lifts DSCR while it drags your{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash return
@@ -609,7 +609,7 @@ export default function BlogPost() {
             underwriters actually apply, and it&apos;s free to apply yourself
             with the free{" "}
             <Link
-              href="/analyze"
+              href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
             >
               TrueCap analyzer

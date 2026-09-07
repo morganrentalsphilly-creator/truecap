@@ -192,7 +192,7 @@ export default function SampleDecisionMemoPage() {
         </section>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href="/analyze" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
+          <Link href="/analyze" prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
             Analyze a Deal <ArrowRight className="ml-2 size-4" aria-hidden />
           </Link>
           <Link href="/pricing" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 font-bold">

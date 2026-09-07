@@ -175,17 +175,6 @@ export default function RootLayout({
         />
         {process.env.NODE_ENV === "production" && (
           <>
-            {/* Preconnect to the slowest third-party we load — saves
-              ~80-200ms on first paint by warming DNS + TLS to gtag's
-              CDN before the actual <script src> evaluation starts.
-              Materially improves LCP, which is a direct Google
-              Quality Score input for paid traffic. */}
-            <link
-              rel="preconnect"
-              href="https://www.googletagmanager.com"
-              crossOrigin=""
-            />
-            <link rel="dns-prefetch" href="https://www.google-analytics.com" />
             {/* Google Places address autocomplete uses maps.googleapis.com
               — preconnect saves ~50-150ms when the user reaches the
               address field, which is on the calculator's first paint. */}
@@ -224,10 +213,9 @@ export default function RootLayout({
                   description:
                     "Rental acquisition decision engine — screen a property, review the assumptions, stress-test the downside, and solve the price that meets an investor's targets.",
                   sameAs: [],
-                  // Person entity is defined on /about (AboutPage +
-                  // Person @graph) — referencing it here ties the org
-                  // to a real, findable founder for E-E-A-T.
-                            // Moved here from the homepage's (now removed)
+                  // No Person/founder node by request (2026-09-07).
+                  // The /about page references this Organization as mainEntity.
+                  // Moved here from the homepage's (now removed)
                   // duplicate Organization node so the single canonical
                   // entity keeps the support-contact signal.
                   contactPoint: {

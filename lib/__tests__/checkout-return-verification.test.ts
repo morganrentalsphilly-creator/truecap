@@ -80,7 +80,11 @@ describe("post-checkout browser integration", () => {
     expect(action).toContain('session.client_reference_id');
     expect(action).toContain('session.metadata?.user_id');
     expect(action).toContain('session.metadata?.plan_slug');
-    expect(banner).toContain("verifyCheckoutReturnAction({ sessionId })");
+    expect(banner).toContain("verifyCheckoutReturnAction({})");
+    expect(banner).toContain("checkoutSessionId: result.checkoutSessionId");
+    expect(banner).not.toContain('searchParams.get("session_id")');
+    expect(banner).not.toContain("!sessionId ||");
+    expect(action).toContain("cookieStore.get(CHECKOUT_RETURN_COOKIE)");
   });
 
   it("gates success analytics, conversion, banner, and polling on verification", () => {

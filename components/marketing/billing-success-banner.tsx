@@ -4,10 +4,14 @@
  * Post-checkout landing: Google Ads purchase conversion + "Pro unlocked"
  * acknowledgment + entitlement self-heal.
  *
- * Stripe checkout's success_url points at
- * `/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`
- * (app/actions/billing.ts) so a new subscriber lands back in the signed-in
- * analyzer with the app shell still available.
+ * Stripe checkout's success_url points at /api/billing/return, which parks
+ * the Checkout Session id in a short-lived httpOnly cookie and 303s to
+ * `/dashboard/new?billing=success` (app/actions/billing.ts,
+ * lib/stripe/checkout-return-cookie.ts) so a new subscriber lands back in the
+ * signed-in analyzer with the app shell still available — on a URL the
+ * privacy gate lets the Google tags load on. The id reaches this component
+ * only inside the verified server-action result; it is never read from the
+ * URL.
  *
  * The normal mount is app/dashboard/new/page.tsx, where the server resolves
  * `conversionValue` from the user-bound Stripe Session. app/page.tsx retains
@@ -82,16 +86,19 @@ export function BillingSuccessBanner({
   // history.replaceState), and the tracker/banner must not see them vanish
   // mid-flight. State (not a ref) so reading the captured values during
   // render is legal (react-hooks/refs).
-  const [{ billing, sessionId }] = useState(() => ({
+  const [{ billing }] = useState(() => ({
     billing: searchParams.get("billing"),
-    sessionId: searchParams.get("session_id"),
   }));
 
   const [showBanner, setShowBanner] = useState(false);
   const [verifiedReturn, setVerifiedReturn] = useState<{
+    checkoutSessionId: string;
     conversionValue?: number;
     purchasedPlanSlug: string;
   } | null>(null);
+  // The Session id exists client-side only after the server bound it to this
+  // user; every dedup key below derives from it.
+  const sessionId = verifiedReturn?.checkoutSessionId ?? null;
   const boughtAgentPro =
     verifiedReturn?.purchasedPlanSlug.startsWith("agent_pro") ?? false;
   // Flips true the moment the poll sees the subscription row — upgrades the
@@ -126,19 +133,14 @@ export function BillingSuccessBanner({
   // event until the server has retrieved this recent Session from Stripe and
   // bound it to the signed-in user and exact plan Price.
   useEffect(() => {
-    if (
-      billing !== "success" ||
-      !sessionId ||
-      !/^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)
-    ) {
-      return;
-    }
+    if (billing !== "success") return;
 
     let cancelled = false;
-    void verifyCheckoutReturnAction({ sessionId })
+    void verifyCheckoutReturnAction({})
       .then((result) => {
         if (!cancelled && result.ok) {
           setVerifiedReturn({
+            checkoutSessionId: result.checkoutSessionId,
             purchasedPlanSlug: result.purchasedPlanSlug,
             ...(result.conversionValue != null
               ? { conversionValue: result.conversionValue }
@@ -154,7 +156,7 @@ export function BillingSuccessBanner({
     return () => {
       cancelled = true;
     };
-  }, [billing, sessionId]);
+  }, [billing]);
 
   // Canonical Checkout return event. The Stripe Session id is used only in
   // local sessionStorage for deduplication; it is never sent to PostHog.

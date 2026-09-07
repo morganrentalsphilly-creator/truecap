@@ -103,7 +103,7 @@ export default function ClosingCostsPost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -404,7 +404,7 @@ export default function ClosingCostsPost() {
               closing stack equals <strong>$75,100 of modeled cash in</strong>.
               If annual pre-tax cash flow were $6,000, the modeled{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -423,7 +423,7 @@ export default function ClosingCostsPost() {
             <p>
               Acquisition charges generally do not enter a modeled{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

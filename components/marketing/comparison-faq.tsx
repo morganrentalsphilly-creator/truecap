@@ -138,8 +138,7 @@ export function ComparisonFaq({
           Tools in this space run from free to well above TrueCap — check{" "}
           {competitorName}&apos;s live pricing for their current number. What
           TrueCap&apos;s price buys is the decision layer, not more calculation:
-          an Offer Ceiling under your selected targets, rule-fit results for
-          your Buy Box with reasons, the downside stress test, and assumptions
+          an Offer Ceiling for your targets, Buy Box fit with reasons, the downside stress test, and assumptions
           that are source-labeled instead of silently defaulted. Whether that
           workflow justifies the price depends on your volume, verification
           process, and existing tools.

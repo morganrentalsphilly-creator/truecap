@@ -104,7 +104,7 @@ export default function InvestmentPropertyAppraisalPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: canonicalUrl },
     ],
@@ -284,7 +284,7 @@ export default function InvestmentPropertyAppraisalPost() {
               Nothing about the property changed — one opinion of rent moved
               your cost of capital. Check where your deal sits in the{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
@@ -448,7 +448,7 @@ export default function InvestmentPropertyAppraisalPost() {
               walk — and let the contingency do the job you kept it for. Run
               the full picture — price, rent, financing, and the DSCR your
               lender will compute — through the{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               before the appraisal is ordered, so the referee&apos;s number is

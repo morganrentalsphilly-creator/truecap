@@ -118,7 +118,7 @@ export default function MarketsIndexPage() {
             DSCR. Every assumption is editable.
           </p>
           <Link
-            href="/"
+            href="/analyze" prefetch={false}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Run a deal free →

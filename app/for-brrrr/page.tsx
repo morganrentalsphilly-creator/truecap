@@ -47,14 +47,14 @@ const RESOURCES = [
     icon: Landmark,
     title: "Check refinance debt coverage",
     body: "Test a lender-specific loan amount, rate, term, and qualifying NOI. Refinance proceeds and requirements vary by lender and borrower.",
-    href: "/#main",
+    href: "/analyze",
     cta: "Check refinance DSCR",
   },
   {
     icon: Calculator,
     title: "Screen the stabilized rental",
     body: "Run the core analyzer only with the expected post-renovation rent, expenses, value, and permanent financing assumptions clearly reviewed.",
-    href: "/",
+    href: "/analyze",
     cta: "Open rental analyzer",
   },
 ] as const;
@@ -101,7 +101,7 @@ export default function ForBrrrrPage() {
                 <Icon className="size-5 text-primary" aria-hidden="true" />
                 <h3 className="mt-3 text-lg font-extrabold text-foreground">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                <Link href={href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+                <Link href={href} prefetch={false} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">
                   {cta}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>

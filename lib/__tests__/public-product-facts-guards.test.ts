@@ -114,7 +114,7 @@ describe("generated AI-facing product facts", () => {
     ]);
 
     expect(index).toContain("Agent Pro is available on this deployment.");
-    expect(index).toContain("Investor Pro is available on this deployment");
+    expect(index).toContain("Pro is available on this deployment");
     expect(index).toContain("Decision Pack is available as a non-renewing $9");
     expect(full).toContain("Agent Pro is available on this deployment");
     expect(full).toContain("Decision Pack is available as a non-renewing $9");
@@ -140,7 +140,7 @@ describe("generated AI-facing product facts", () => {
     ]);
 
     expect(index).toContain("Agent Pro checkout is not configured");
-    expect(index).toContain("Investor Pro checkout is not configured");
+    expect(index).toContain("Pro checkout is not configured");
     expect(index).toContain(
       "New one-time report purchases are temporarily unavailable",
     );

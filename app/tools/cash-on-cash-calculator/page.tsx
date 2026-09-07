@@ -387,7 +387,7 @@ export default function CoCCalculatorPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href="/analyze" prefetch={false}
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Open the full TrueCap analyzer

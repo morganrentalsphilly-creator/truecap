@@ -150,14 +150,12 @@ export function PropertyTypeSection({
 
       {/* Template - optional. Demoted below the type (behind a divider) so it
           reads as a secondary "advanced" choice, not co-equal with the type. */}
-      <div className="mt-4 border-t border-border pt-4">
-        <TemplateSelectorSection
-          form={form}
-          savedTemplateFallback={savedTemplateFallback}
-          onTemplatesLoaded={onTemplatesLoaded}
-          onExplicitTemplateChange={onExplicitTemplateChange}
-        />
-      </div>
+      <TemplateSelectorSection
+        form={form}
+        savedTemplateFallback={savedTemplateFallback}
+        onTemplatesLoaded={onTemplatesLoaded}
+        onExplicitTemplateChange={onExplicitTemplateChange}
+      />
     </div>
   );
 }

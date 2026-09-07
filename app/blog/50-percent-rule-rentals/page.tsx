@@ -73,7 +73,7 @@ export default function FiftyPercentRulePost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -349,7 +349,7 @@ export default function FiftyPercentRulePost() {
               5 seconds to decide whether a property is worth opening the full
               underwrite (the free{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer

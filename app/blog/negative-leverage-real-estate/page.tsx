@@ -109,7 +109,7 @@ export default function NegativeLeveragePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
@@ -250,7 +250,7 @@ export default function NegativeLeveragePost() {
             <p>
               The property&apos;s unlevered yield is its{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
@@ -273,7 +273,7 @@ export default function NegativeLeveragePost() {
             <p>
               You can make this exact rather than directional. Your levered{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -382,7 +382,7 @@ export default function NegativeLeveragePost() {
               <strong>1.17 DSCR</strong>. It is profitable. It is within shouting
               distance of the 1.20 to 1.25{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
@@ -616,7 +616,7 @@ export default function NegativeLeveragePost() {
               DSCR lender. The fix is never &quot;more leverage&quot;; it is a
               wider spread, or a clear-eyed decision to accept the gap for
               paydown and appreciation. The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
               runs cap rate, loan constant, cash-on-cash, and DSCR off the same

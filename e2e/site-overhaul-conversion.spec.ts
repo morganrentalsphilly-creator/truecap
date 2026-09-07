@@ -79,6 +79,59 @@ test("the plain GET fallback prefills /analyze from ?address=", async ({ page })
     /1500 Market St/,
     { timeout: 15_000 },
   );
+  // The pre-analytics bootstrap moved the address into sessionStorage and
+  // scrubbed it from the URL before any vendor script could read it.
+  expect(new URL(page.url()).searchParams.get("address")).toBeNull();
+});
+
+test("a /vs hero CTA is a real link that opens the analyzer", async ({ page }) => {
+  // Every /vs page wraps its body in <main id="main">, so the old scroll
+  // button always found its target and never fell back to /analyze — the
+  // primary CTA on 38 competitor pages scrolled to the top of the same page.
+  await page.goto("/vs/dealcheck", { waitUntil: "domcontentloaded" });
+  const cta = page.getByRole("link", { name: /Try the TrueCap free analyzer/ });
+  await expect(cta).toHaveAttribute("href", "/analyze");
+  await cta.click();
+  await page.waitForURL(/\/analyze(\?|$)/);
+  await expect(
+    page.locator('form[data-calc-form="true"][data-calculator-ready="true"]'),
+  ).toBeAttached({ timeout: 20_000 });
+});
+
+test("a /tools calculator hands its inputs to the analyzer on /analyze", async ({ page }) => {
+  // buildAnalyzerHandoffUrl defaulted to "/" after the analyzer moved; the
+  // staged values expired unread while the visitor sat on the homepage.
+  // The released 2% widget hands off entered price + rent. The 70% widget
+  // intentionally never seeds its heuristic result as a purchase price,
+  // and the 50% widget's public route is retired.
+  await page.goto("/tools/2-percent-rule-calculator", { waitUntil: "domcontentloaded" });
+  // Inputs are editable in the server HTML before React hydrates. Retry
+  // the setup until the computed ratio proves both edits reached widget
+  // state; merely reading the DOM values can pass while the CTA still
+  // holds the default numbers. Clear first so each retry changes the input.
+  await expect(async () => {
+    await page.locator("#twopct-price").fill("");
+    await page.locator("#twopct-price").fill("287500");
+    await page.locator("#twopct-rent").fill("");
+    await page.locator("#twopct-rent").fill("2475");
+    await expect(page.getByText("0.86%", { exact: true })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
+  const handoff = page.locator('a[href="/analyze?utm_source=2-percent-rule-calculator"]');
+  await expect(handoff).toBeAttached();
+  await expect(handoff).not.toHaveAttribute("href", /price=|rent=|address=/);
+  await handoff.click();
+  await page.waitForURL(/\/analyze\?/);
+  await expect(
+    page.locator('form[data-calc-form="true"][data-calculator-ready="true"]'),
+  ).toBeAttached({ timeout: 20_000 });
+  // This is the actual handoff contract: both edited widget values survive
+  // navigation and replace the analyzer defaults, without entering its URL.
+  await expect(page.locator("#purchasePrice")).toHaveValue("287,500");
+  await expect(page.locator("#monthlyRent")).toHaveValue("2,475");
+  const url = new URL(page.url());
+  for (const key of ["price", "rent", "beds", "address"]) {
+    expect(url.searchParams.get(key)).toBeNull();
+  }
 });
 
 test("/guarantee is a permanent redirect to /pricing", async ({ request }) => {
@@ -122,7 +175,9 @@ test("at 375px the header is one row and the hero CTA is in the first viewport",
   // The hamburger opens the rest of the navigation.
   await header.getByRole("button", { name: "Open menu" }).click();
   await expect(page.getByRole("link", { name: "Pricing", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
+  const signIn = page.getByRole("link", { name: "Sign in", exact: true });
+  await expect(signIn).toBeVisible();
+  await expect(signIn).toHaveAttribute("href", "/auth/login");
 });
 
 test("the hero's LCP element is the real product screenshot, preloaded", async ({ page }) => {

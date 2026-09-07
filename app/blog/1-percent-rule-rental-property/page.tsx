@@ -109,7 +109,7 @@ export default function OnePercentRulePost() {
         "@type": "ListItem",
         position: 1,
         name: "TrueCap",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",
@@ -378,7 +378,7 @@ export default function OnePercentRulePost() {
               property-tax line the 1% rule never reads. That is why you finish
               the job with the metric that actually accounts for your cash:{" "}
               <Link
-                href="/analyze"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash
@@ -484,7 +484,7 @@ export default function OnePercentRulePost() {
               That last step is the whole reason TrueCap exists. Drop in a price
               and a rent and the{" "}
               <Link
-                href="/"
+                href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 free analyzer
