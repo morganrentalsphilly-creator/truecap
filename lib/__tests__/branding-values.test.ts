@@ -9,16 +9,16 @@ describe("brandingValuesSchema contact details", () => {
   it("accepts and trims the contact details rendered in branded PDFs", () => {
     const parsed = brandingValuesSchema.parse({
       company_name: "  Page Realty  ",
-      contact_name: "  Morgan Page  ",
-      contact_email: "  morgan@example.com  ",
+      contact_name: "  Jordan Lee  ",
+      contact_email: "  jordan@example.com  ",
       contact_phone: "  (215) 555-0100  ",
       contact_website: "  https://example.com/contact  ",
     });
 
     expect(parsed).toMatchObject({
       company_name: "Page Realty",
-      contact_name: "Morgan Page",
-      contact_email: "morgan@example.com",
+      contact_name: "Jordan Lee",
+      contact_email: "jordan@example.com",
       contact_phone: "(215) 555-0100",
       contact_website: "https://example.com/contact",
     });

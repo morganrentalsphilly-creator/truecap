@@ -43,7 +43,6 @@ describe("social proof renders nothing it cannot substantiate", () => {
       "app/pricing/page.tsx",
       "app/reviews/page.tsx",
       "components/marketing/testimonials.tsx",
-      "components/marketing/proof-strip.tsx",
       "components/marketing/usage-counter.tsx",
       "components/marketing/landing-sections.tsx",
     ]) {
@@ -54,14 +53,14 @@ describe("social proof renders nothing it cannot substantiate", () => {
     }
   });
 
-  it("mounts the proof strip, testimonials, and the reviews page pieces", () => {
-    expect(read("components/marketing/marketing-hero.tsx")).toContain("<ProofStrip");
+  it("mounts the testimonials and the reviews page pieces (the proof strip was retired on 2026-09-07)", () => {
+    expect(read("components/marketing/marketing-hero.tsx")).not.toContain("ProofStrip");
     for (const path of ["app/page.tsx", "app/home-authed/page.tsx", "app/pricing/page.tsx"]) {
       expect(read(path), path).toContain("<Testimonials limit={3}");
     }
     const reviews = read("app/reviews/page.tsx");
     expect(reviews).toContain("<Testimonials");
-    expect(reviews).toContain("<ProofStrip");
+    expect(reviews).not.toContain("ProofStrip");
     expect(reviews).toMatch(/UsageCounter|loadUsageLabel/);
   });
 

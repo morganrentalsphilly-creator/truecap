@@ -6,7 +6,7 @@
 >
 > Scope: the **analysis dashboard** (verdict → numbers → details). Implementation/
 > visual layer — complementary to `TRUECAP_UX_AUDIT.md` (product/packaging UX).
-> Every item respects Morgan's standing directive: no new required inputs, no new
+> Every item respects the founder's standing directive: no new required inputs, no new
 > top-level nav, invisible-until-useful. Polish, not redesign.
 
 ---

@@ -114,7 +114,7 @@ jobs:
             - Any `proxy.ts` change, 308 redirect, `X-Robots-Tag` or middleware
               tweak aimed at `truecap-iota.vercel.app`. That host is a DIFFERENT
               Vercel project and never executes this repo's code. The only fix
-              is Morgan deleting that project. Read
+              is the founder deleting that project. Read
               `docs/seo/foreign-deployment-truecap-iota.md` before writing Part D
               and do not re-litigate it. You may state that it is still live.
             - "Publish more blog posts." 75 posts rank for 0 of 10 panel
@@ -130,7 +130,7 @@ jobs:
             possible.
 
             Maintain `docs/seo/submissions/` — one markdown file per target,
-            each a packet Morgan can paste without thinking:
+            each a packet the founder can paste without thinking:
 
             - `alternativeto.md` — AlternativeTo, submitted against its
               **DealCheck** page (that page is already page one for "DealCheck
@@ -153,7 +153,7 @@ jobs:
 
             **You never submit anything.** No account creation, no form
             submission, no outreach email, no posting to Reddit or any forum.
-            Drafts in `docs/seo/submissions/` only. Morgan executes them under
+            Drafts in `docs/seo/submissions/` only. The founder executes them under
             his own identity. This boundary is not negotiable — automated
             submission is spam, and it would put the brand at risk for a handful
             of links.
@@ -169,7 +169,7 @@ jobs:
             titled `seo: visibility snapshot <YYYY-MM-DD>` whose body is Part C
             and Part D inline, so the whole point is readable without opening
             the file. If any submission packet is new or changed, list it in the
-            PR body under "Ready to submit" — that list is Morgan's to-do.
+            PR body under "Ready to submit" — that list is the founder's to-do.
 
             You may only write under `docs/**`. The `build-chain-guard` CI job
             enforces this for every non-owner commit and will fail the PR

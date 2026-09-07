@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "For client" control on the DEAL WORKSPACE — the screen Morgan named when he
+ * "For client" control on the DEAL WORKSPACE — the screen the founder named when he
  * said assigning a deal to a client was confusing. The deal list has the same
  * control; this puts it where an agent actually decides ("I've read the
  * underwrite, this one fits the Nguyens") instead of making them go back.

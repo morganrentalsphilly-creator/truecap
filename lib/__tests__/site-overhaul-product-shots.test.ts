@@ -57,17 +57,19 @@ describe("product screenshots are real and wired", () => {
     }
   });
 
-  it("keeps the founder card facts-only with no photo and no invented details", () => {
-    const card = read("components/marketing/founder-card.tsx");
-    expect(card).toContain("Morgan Page");
-    expect(card).toContain("Rental investor in Philadelphia. Built TrueCap for my own underwriting.");
-    expect(card).toContain('href="/about"');
-    expect(card).not.toMatch(/<Image|<img|\.jpg|\.png|placeholder-user/);
-    for (const path of ["app/page.tsx", "app/home-authed/page.tsx", "app/pricing/page.tsx"]) {
-      expect(read(path), path).toContain("<FounderCard");
+  it("renders no founder card anywhere (retired at the founder's request on 2026-09-07); /about keeps the Person node", () => {
+    for (const path of [
+      "app/page.tsx",
+      "app/home-authed/page.tsx",
+      "app/pricing/page.tsx",
+      "app/reviews/page.tsx",
+    ]) {
+      expect(read(path), path).not.toContain("FounderCard");
     }
+    // The founder is described, never named (their request, 2026-09-07).
     const about = read("app/about/page.tsx");
-    expect(about).toContain('"@type": "Person"');
-    expect(about).toContain("`${siteUrl}/about#morgan`");
+    expect(about).not.toContain('"@type": "Person"');
+    expect(about).not.toContain("#morgan");
+    expect(about).not.toMatch(/Morgan/);
   });
 });

@@ -116,12 +116,7 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: {
-      "@type": "Person",
-      "@id": `${siteUrl}/about#morgan`,
-      name: "Morgan Page",
-      url: `${siteUrl}/about`,
-    },
+    author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -204,7 +199,7 @@ export default function BlogPost() {
               rel="author"
               className="font-semibold text-foreground hover:underline"
             >
-              Morgan Page
+              TrueCap
             </Link>
             {" · "}IRS sources verified {FACT_CHECKED_AT}
           </p>

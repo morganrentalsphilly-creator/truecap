@@ -9,7 +9,7 @@
  *   service-role) for 30 days to conserve API quota — the same address
  *   never costs two API calls within the window.
  * - Dormant without RENTCAST_API_KEY: returns NOT_CONFIGURED so the UI
- *   stays hidden until Morgan provisions the key.
+ *   stays hidden until the founder provisions the key.
  */
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";

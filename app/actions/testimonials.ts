@@ -6,7 +6,7 @@
  * Receives the one-question prompt's answer after a high-signal moment
  * (PDF export, third saved deal). Submissions are STORED ONLY in the separate
  * permissioned_testimonial_submissions workflow — private, unapproved, and
- * service-role-only — and never render anywhere until Morgan reviews one and
+ * service-role-only — and never render anywhere until the founder reviews one and
  * deliberately promotes it into
  * lib/proof-records.ts with verification + customer approval.
  *

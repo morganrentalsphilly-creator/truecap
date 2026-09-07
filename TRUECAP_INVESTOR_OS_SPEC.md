@@ -153,7 +153,7 @@ This becomes the single source `lib/entitlements-catalog.ts`. Tiers: **Free**, *
 | Buy Box (`buy_box`) | ❌ | — | ✅ | feature flag |
 | Pipeline + tags (`pipeline`) | ❌ | — | ✅ | feature flag |
 
-**Two decisions you (Morgan) must confirm before P0‑1 ships** (both are reversible copy/flag flips, not architecture):
+**Two decisions you must confirm before P0‑1 ships** (both are reversible copy/flag flips, not architecture):
 - **D1 — Deal Score policy.** Code currently gives Deal Score *and its breakdown* to everyone. Intended? (Recommended: **yes, free** — it's the headline SEO/conversion hook. Then add `deal_score` to the free JSON and strip "Pro" from the 25 surfaces.) Alternative: re‑gate the breakdown to Pro and fix pricing instead.
 - **D2 — MAO/sensitivity/strategies/share** have **no entitlement key** (gated by paid status). Recommend giving them real keys (`mao`, `sensitivity`, `strategies`, `share_links`) so the catalog is complete and gating is uniform.
 

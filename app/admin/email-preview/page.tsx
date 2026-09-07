@@ -2,7 +2,7 @@
  * Admin email preview page.
  *
  * Shows the rendered HTML of any weekly digest content file in an
- * iframe, so Morgan can verify the design + content before the cron
+ * iframe, so the founder can verify the design + content before the cron
  * sends it (or before he hits the "Send test" button below).
  *
  * Access control: admin guard via lib/admin-guard.ts. Non-admins get

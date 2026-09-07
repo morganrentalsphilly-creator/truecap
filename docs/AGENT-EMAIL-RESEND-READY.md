@@ -42,7 +42,7 @@ evidence before anyone relies on the result.
 
 Try it here: https://usetruecap.com/
 
-— Morgan
+— the founder
 
 ## Draft 2 — assumption review
 
@@ -59,7 +59,7 @@ perform, appraise, qualify for financing, or suit a particular buyer.
 
 Open the analyzer: https://usetruecap.com/
 
-— Morgan
+— the founder
 
 ## Draft 3 — advanced access
 
@@ -74,7 +74,7 @@ grid varies rent by ±10%, vacancy by ±5 percentage points, and interest rate b
 
 See the live pricing and access terms: https://usetruecap.com/pricing
 
-— Morgan
+— the founder
 
 ## Preconditions before any send
 

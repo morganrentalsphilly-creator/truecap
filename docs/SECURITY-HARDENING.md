@@ -1,4 +1,4 @@
-# Security hardening — settings Morgan has to change by hand
+# Security hardening — settings the founder has to change by hand
 
 Everything in this file is a GitHub, Vercel or Supabase *settings* change.
 Code cannot do them.
@@ -220,7 +220,7 @@ blog post safe. Plan accordingly.
 ## 2. `SEO_AUTOMERGE` stays ON — accepted risk, and what carries it
 
 **Founder decision, 2026-08-03.** The autonomous SEO pipeline is the point of
-the system; a merge gate that needs Morgan every time makes it not autonomous.
+the system; a merge gate that needs the founder every time makes it not autonomous.
 This section used to say "turn it off". It now records the decision that was
 actually made, and what has to be true for that decision to be survivable.
 
@@ -350,7 +350,7 @@ rights to a branch that auto-deploys production.
 
 Why it matters right now: **no commit in this repo is signed**
 (`git log --format='%G?'` returns `N` for every commit, including `15eb1b5`).
-Git authorship is metadata, not authentication — "Author: Morgan Page" on the
+Git authorship is metadata, not authentication — "Author: the founder" on the
 June injection proves nothing about who pushed it. The set of principals that
 could have made that push is exactly {your machine/token, `esaleci`}. The June
 incident was never attributed to a principal, and the June secrets are still

@@ -5,7 +5,7 @@ import "server-only";
  * every surface that PROMISES an alert email (the Settings toggle copy,
  * the dashboard RateWatchStrip explainer, the analyzer's inline opt-in
  * nudge) all derive from here, so copy and sends can never disagree.
- * When Morgan flips the env var to "live", the promises come back with
+ * When the founder flips the env var to "live", the promises come back with
  * zero code changes.
  *
  * `import "server-only"`: reads a non-NEXT_PUBLIC env var — a client

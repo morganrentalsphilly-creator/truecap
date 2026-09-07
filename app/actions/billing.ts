@@ -1378,7 +1378,7 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
  * its product list). It NEVER silently drops to the generic portal in a way
  * that looks like a successful switch.
  *
- * Prerequisite Morgan owns: the Stripe Customer Portal Configuration must have
+ * Prerequisite the founder owns: the Stripe Customer Portal Configuration must have
  * "Customers can switch plans" enabled and list BOTH the monthly and annual
  * products/prices under features.subscription_update.products — otherwise
  * Stripe returns an invalid_request_error here and the user sees the loud

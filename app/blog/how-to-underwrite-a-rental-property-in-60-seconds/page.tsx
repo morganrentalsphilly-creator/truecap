@@ -105,12 +105,7 @@ export default function BlogPost() {
     dateModified: MODIFIED_AT,
     // Author points at the /about Person entity (E-E-A-T): same @id as
     // the AboutPage schema so Google resolves one consistent author.
-    author: {
-      "@type": "Person",
-      "@id": `${siteUrl}/about#morgan`,
-      name: "Morgan Page",
-      url: `${siteUrl}/about`,
-    },
+    author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],

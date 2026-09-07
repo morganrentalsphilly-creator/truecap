@@ -3,19 +3,19 @@ import { formatTestimonialDisplayName } from "@/lib/testimonial-display-name";
 
 describe("testimonial display-name consent", () => {
   it("returns only the attribution format the submitter selected", () => {
-    expect(formatTestimonialDisplayName("Morgan Jane Page", "full_name")).toBe(
-      "Morgan Jane Page",
+    expect(formatTestimonialDisplayName("Jordan Avery Lee", "full_name")).toBe(
+      "Jordan Avery Lee",
     );
     expect(
       formatTestimonialDisplayName(
-        "Morgan Jane Page",
+        "Jordan Avery Lee",
         "first_name_last_initial",
       ),
-    ).toBe("Morgan P.");
-    expect(formatTestimonialDisplayName("Morgan Jane Page", "initials")).toBe(
-      "M.J.P.",
+    ).toBe("Jordan L.");
+    expect(formatTestimonialDisplayName("Jordan Avery Lee", "initials")).toBe(
+      "J.A.L.",
     );
-    expect(formatTestimonialDisplayName("Morgan Jane Page", "anonymous")).toBe(
+    expect(formatTestimonialDisplayName("Jordan Avery Lee", "anonymous")).toBe(
       "Anonymous",
     );
   });

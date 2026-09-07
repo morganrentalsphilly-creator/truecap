@@ -5,24 +5,20 @@
  * don't sprinkle the email check across multiple files.
  *
  * Admins are defined by env var `ADMIN_EMAILS` — a comma-separated
- * list of emails (case-insensitive match). Falls back to the founder
- * email if the env var isn't set (defense in depth so a misconfigured
- * env doesn't accidentally expose admin endpoints to the public).
+ * list of emails (case-insensitive match). With the variable unset there
+ * are NO admins: every admin page and endpoint fails closed. (A hard-coded
+ * fallback address used to live here; it was removed on 2026-09-07 so the
+ * public repo carries no personal email. Set ADMIN_EMAILS in Vercel.)
  */
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-const FOUNDER_EMAIL_FALLBACK = "morganrentalsphilly@gmail.com";
 
 function adminEmailSet(): Set<string> {
   const fromEnv = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  if (fromEnv.length > 0) {
-    return new Set(fromEnv);
-  }
-  return new Set([FOUNDER_EMAIL_FALLBACK]);
+  return new Set(fromEnv);
 }
 
 export type AdminCheckResult =

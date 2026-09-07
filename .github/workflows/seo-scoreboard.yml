@@ -272,7 +272,7 @@ jobs:
           # seo/telemetry branch via the force-push above, and the
           # carry-forward step restores it next week regardless of what
           # happens below. The PR is only a convenience: a one-click way for
-          # Morgan to land it on main so the content pipeline can read it.
+          # the founder to land it on main so the content pipeline can read it.
           #
           # So PR creation must NEVER fail the run. `gh pr create` with the
           # default GITHUB_TOKEN needs "Allow GitHub Actions to create and

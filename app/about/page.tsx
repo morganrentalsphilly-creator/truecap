@@ -4,8 +4,8 @@
  * E-E-A-T anchor page. Google's quality guidance (and AI search engines
  * citing us) want a real, findable human behind money-adjacent content;
  * every blog post byline and Article JSON-LD author node points here.
- * The Person entity is anchored at `${siteUrl}/about#morgan` so schema
- * across the site can reference one consistent @id.
+ * The founder is described but never named (their request, 2026-09-07);
+ * schema references the site-wide Organization @id instead of a Person.
  *
  * Deliberately short and hype-free — this page earns trust by being
  * plain, not by selling. Linked from the footer bottom strip only
@@ -19,14 +19,14 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: { absolute: "About TrueCap & Founder Morgan Page" },
+  title: { absolute: "About TrueCap" },
   description:
-    "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
+    "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "About TrueCap & Founder Morgan Page",
+    title: "About TrueCap",
     description:
-      "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
+      "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
     url: "/about",
     type: "website",
     images: [
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "About TrueCap & Founder Morgan Page",
+    title: "About TrueCap",
     description:
-      "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
+      "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
     images: ["/home.jpg"],
   },
 };
@@ -45,11 +45,11 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   const siteUrl = getSiteUrl();
 
-  // AboutPage + Person. The Organization + WebSite entities are defined
+  // AboutPage only. The Organization + WebSite entities are defined
   // site-wide in app/layout.tsx (@id: `${siteUrl}/#organization` /
   // `${siteUrl}/#website`) — reference them, don't redefine them.
-  // Blog post Article JSON-LD points its author node at
-  // `${siteUrl}/about#morgan` (see components/marketing/blog-byline.tsx).
+  // Blog post Article JSON-LD points its author node at the Organization
+  // (see components/marketing/blog-byline.tsx).
   const aboutLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -60,25 +60,8 @@ export default function AboutPage() {
         name: "About TrueCap",
         isPartOf: { "@id": `${siteUrl}/#website` },
         about: { "@id": `${siteUrl}/#organization` },
-        mainEntity: { "@id": `${siteUrl}/about#morgan` },
+        mainEntity: { "@id": `${siteUrl}/#organization` },
         inLanguage: "en-US",
-      },
-      {
-        "@type": "Person",
-        "@id": `${siteUrl}/about#morgan`,
-        name: "Morgan Page",
-        url: `${siteUrl}/about`,
-        description:
-          "Philadelphia rental investor and the founder of TrueCap. Builds the analyzer he underwrites his own deals with.",
-        jobTitle: "Founder",
-        worksFor: { "@id": `${siteUrl}/#organization` },
-        email: "hello@usetruecap.com",
-        // sameAs intentionally omitted — Morgan supplies his public
-        // profile URLs (LinkedIn / X / BiggerPockets / etc.). When he
-        // does, add them here as:
-        //   sameAs: ["https://www.linkedin.com/in/…", …],
-        // Do NOT invent or guess profile links; a wrong sameAs is worse
-        // than none.
       },
     ],
   };
@@ -110,8 +93,8 @@ export default function AboutPage() {
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_strong]:text-foreground">
           <h2 className="text-2xl sm:text-3xl">Who builds this</h2>
           <p>
-            TrueCap is built by one person: <strong>Morgan Page</strong>, a
-            rental investor in Philadelphia. It started as the tool he wanted
+            TrueCap is built by one person, a rental investor in
+            Philadelphia. It started as the tool he wanted
             for his own underwriting — a way to get from an address to a
             source-labeled first-pass answer in about a minute — and it&apos;s
             still how he runs the deals he considers.

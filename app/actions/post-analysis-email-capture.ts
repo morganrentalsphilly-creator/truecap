@@ -114,7 +114,7 @@ const SEQUENCE: SequenceEmail[] = [
   <div style="text-align:center;margin:24px 0;">
       <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Review another preliminary screen</a>
   </div>
-  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan, founder · usetruecap.com</p>
+  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— TrueCap · usetruecap.com</p>
 </div></body></html>`,
   },
   {
@@ -140,7 +140,7 @@ const SEQUENCE: SequenceEmail[] = [
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Re-run your deal</a>
   </div>
-  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
+  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— TrueCap · usetruecap.com</p>
 </div></body></html>`,
   },
   {
@@ -163,7 +163,7 @@ const SEQUENCE: SequenceEmail[] = [
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}/pricing" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro features</a>
   </div>
-  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
+  <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— TrueCap · usetruecap.com</p>
 </div></body></html>`,
   },
   {
@@ -183,7 +183,7 @@ const SEQUENCE: SequenceEmail[] = [
     <a href="${siteUrlHtml}/pricing" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro plans</a>
   </div>
   <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Keep using Free for unlimited screening analyses; upgrade only when the repeat workflow is useful.</p>
-  <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
+  <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— TrueCap · usetruecap.com</p>
 </div></body></html>`,
   },
   {
@@ -204,7 +204,7 @@ const SEQUENCE: SequenceEmail[] = [
     <a href="${siteUrlHtml}/pricing?coupon=${couponCodeUrl}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:14px;">Review your offer</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">
-    Not interested? Just ignore this — no follow-up.<br>— Morgan · usetruecap.com
+    Not interested? Just ignore this — no follow-up.<br>— TrueCap · usetruecap.com
   </p>
 </div></body></html>`,
   },

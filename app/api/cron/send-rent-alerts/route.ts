@@ -12,7 +12,7 @@
  *                          and NO sends (zero cost). Set RENT_ALERTS_DRY_FETCH=1
  *                          to do a real (paid, capped) fetched preview instead.
  *       - "live"         → fetch (capped) + send via Resend.
- *     Morgan flips off → dry → live after reviewing.
+ *     the founder flips off → dry → live after reviewing.
  *  3. COST GUARD: each re-priced deal = ONE RentCast rent lookup. We share the
  *     SAME global monthly RentCast budget as live comps (app_counters key
  *     `rentcast_enrichments_${month}`, cap RENTCAST_MONTHLY_ENRICHMENT_CAP) so

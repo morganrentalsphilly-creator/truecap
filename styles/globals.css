@@ -152,7 +152,7 @@
 
 /* Hero product-mock animations were previously defined here but
  * weren't surviving the Tailwind v4 build for unclear reasons —
- * Morgan reported nothing animating at all. Moved inline to a
+ * the founder reported nothing animating at all. Moved inline to a
  * <style> tag rendered directly by the hero component
  * (components/marketing/marketing-hero.tsx) so the keyframes ship
  * verbatim to the browser regardless of CSS pipeline behavior. */

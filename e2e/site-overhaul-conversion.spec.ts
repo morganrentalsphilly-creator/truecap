@@ -140,10 +140,10 @@ test("the hero's LCP element is the real product screenshot, preloaded", async (
     "href",
     "/analyze?sample=1",
   );
-  // Founder card: facts only, no image.
-  const founder = page.getByRole("complementary", { name: "About the founder" });
-  await expect(founder).toBeVisible();
-  await expect(founder.locator("img")).toHaveCount(0);
+  // The founder card and the proof strip were retired on 2026-09-07 at the
+  // founder's request: nothing under the hero names or describes a person.
+  await expect(page.getByRole("complementary", { name: "About the founder" })).toHaveCount(0);
+  await expect(page.locator("[data-proof-strip]")).toHaveCount(0);
 });
 
 test("the sample flow fires analysis_started and analysis_completed through track()", async ({

@@ -72,7 +72,7 @@ Time-to-value is excellent: pre-filled draft, one-click run, instant verdict, no
 
 | # | Priority | Finding | Recommended change | Guardrail |
 |---|----------|---------|--------------------|-----------|
-| 1 | **P0** | Score (13/Avoid) contradicts the evidence (+167% ROI, "wealth-building hold") | Stop double-counting negative CF / sub-1 DSCR in both the component score *and* the risk penalty; make the risk penalty lens-aware so the Appreciation lens can actually reward total return; or lower/soften the appreciation-floor cliff (currently ~12%/yr — this 10%/yr deal just misses it) | Touches `lib/deal-score.ts` thresholds → propose to Morgan before shipping |
+| 1 | **P0** | Score (13/Avoid) contradicts the evidence (+167% ROI, "wealth-building hold") | Stop double-counting negative CF / sub-1 DSCR in both the component score *and* the risk penalty; make the risk penalty lens-aware so the Appreciation lens can actually reward total return; or lower/soften the appreciation-floor cliff (currently ~12%/yr — this 10%/yr deal just misses it) | Touches `lib/deal-score.ts` thresholds → propose to the founder before shipping |
 | 2 | **P0** | Verdict, colors, and recommendation tell different stories | Reconcile into one headline; when year-1 is negative but long-term strong, say so at the score, not three scrolls down | `lib/verdict.ts` + dashboard copy |
 | 3 | **P1** | ROI figures (588–992%) look implausible | Relabel "10-yr ROI," annualize, or show a multiple (5.9×) everywhere they appear (dashboard, AI Insight, decision list) | Display-only, low risk |
 | 4 | **P1** | Charts show data, not takeaways | Add a one-line "so what" under each tab's chart cluster (e.g. "Turns cash-flow positive in year 8") | Additive, low risk |

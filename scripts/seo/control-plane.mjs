@@ -371,7 +371,7 @@ try {
       search_intent: kind.primaryQuery,
       primary_query: kind.primaryQuery,
       business_relevance: kind.businessRelevance,
-      author: kind.pageType === "article" ? "Morgan Page" : null,
+      author: kind.pageType === "article" ? "TrueCap" : null,
       freshness_class: kind.freshnessClass,
       risk_class: kind.riskClass,
       indexable: true,

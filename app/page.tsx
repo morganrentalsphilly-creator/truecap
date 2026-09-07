@@ -24,7 +24,6 @@
 
 import type { Metadata } from "next";
 import { Testimonials } from "@/components/marketing/testimonials";
-import { FounderCard } from "@/components/marketing/founder-card";
 import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
@@ -177,11 +176,6 @@ export default function Home() {
           that the analyzer (which carried <main id="main">) lives at /analyze. */}
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       <MarketingHero />
-      {/* Founder presence, facts only (Phase 4): name, one published
-          sentence, link to /about. No photo — see components/marketing/founder-card.tsx. */}
-      <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-        <FounderCard className="max-w-xl" />
-      </div>
       {/* The analyzer itself lives at /analyze (2026-09 overhaul): the hero
           captures an address or listing link and hands off there, so this
           page ships NO calculator JS. Keep it that way — Phase 7's homepage

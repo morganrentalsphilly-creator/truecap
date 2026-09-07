@@ -1034,7 +1034,7 @@ export function DashboardHome({
             <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
               {/* An email local-part is not a name. page.tsx's getDisplayName
                   already falls back to it, so the old second fallback here was
-                  dead code that guaranteed "Welcome back, morganrentalsphilly".
+                  dead code that guaranteed "Welcome back, <email handle>".
                   If we don't have a real first name, greet without one. */}
               {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
             </h1>

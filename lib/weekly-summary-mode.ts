@@ -4,7 +4,7 @@ import "server-only";
  * Single source of truth for the WEEKLY_SUMMARY_MODE parse — the
  * send-weekly-summary cron and every surface that PROMISES a weekly
  * summary email (the Settings toggle copy) all derive from here, so copy
- * and sends can never disagree. When Morgan flips the env var to "live",
+ * and sends can never disagree. When the founder flips the env var to "live",
  * the promises come back with zero code changes.
  *
  * Mirrors lib/rate-alerts-mode.ts exactly:

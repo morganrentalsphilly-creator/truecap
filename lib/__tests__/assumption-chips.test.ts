@@ -233,7 +233,7 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     const chips = buildAssumptionChips(
       { ...defaultValues, templateId: "tpl-1" } as AssumptionChipValues,
       {},
-      { ...NO_OPTS, templateName: "Morgan's template", templateOwnedFields },
+      { ...NO_OPTS, templateName: "Jordan's template", templateOwnedFields },
     );
     expect(byId(chips, "financing").badge).toEqual({
       kind: "template",
@@ -245,7 +245,7 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
         text: "template",
       });
     }
-    expect(byId(chips, "template").label).toBe("Template: Morgan's template");
+    expect(byId(chips, "template").label).toBe("Template: Jordan's template");
     expect(byId(chips, "template").applied).toBe(true);
   });
 
@@ -263,7 +263,7 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
       {},
       {
         ...NO_OPTS,
-        templateName: "Morgan's template",
+        templateName: "Jordan's template",
         templateOwnedFields: new Set([
           "interestRate",
           "propertyTaxPct",

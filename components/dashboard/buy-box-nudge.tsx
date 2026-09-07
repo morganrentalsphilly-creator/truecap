@@ -11,7 +11,7 @@
  *  - "dashboard": a slim card on 1-3-deal dashboards. NOTE: this variant is a
  *    deliberate, flagged exception to the "invisible until useful" principle
  *    (CLAUDE.md §1 #3/#5) — it's kept to one sentence + link and fully
- *    self-contained here so removing it is a two-line revert if Morgan vetoes.
+ *    self-contained here so removing it is a two-line revert if the founder vetoes.
  *
  * Renders NOTHING unless the user can use buy boxes (Pro `buy_box` feature)
  * AND has zero boxes AND hasn't dismissed the nudge. When the parent already

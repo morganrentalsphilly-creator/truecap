@@ -282,7 +282,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               <TextInput
                 value={contactName}
                 onChange={setContactName}
-                placeholder="e.g. Morgan Page"
+                placeholder="Your name"
                 maxLength={120}
                 name="contact_name"
                 autoComplete="name"
@@ -294,7 +294,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 type="email"
                 value={contactEmail}
                 onChange={setContactEmail}
-                placeholder="morgan@example.com"
+                placeholder="you@example.com"
                 maxLength={180}
                 name="contact_email"
                 autoComplete="email"

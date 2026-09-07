@@ -1,5 +1,5 @@
 /**
- * Hand-built sample deals for the admin email preview, so Morgan can review
+ * Hand-built sample deals for the admin email preview, so the founder can review
  * the rate-alert and rent-alert email designs without waiting for a real
  * cron run (which needs live data + a rate/rent move + spends a RentCast call).
  *
