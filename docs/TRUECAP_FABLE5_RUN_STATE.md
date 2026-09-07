@@ -18,7 +18,7 @@
 - Captcha (Turnstile) LIVE + enforcing; coverage guard `lib/__tests__/captcha-coverage.test.ts`.
 - SHARE_LINK_SECRET set in prod (portal links + white-label embeds + /d/ attribution live).
 - Supabase project `cpfbtvblaufrnxsrvmnm` (truecap-db). MCP: read SQL fine; DDL apply BLOCKED by
-  permission classifier → migrations are WRITTEN + SURFACED for Morgan (SQL-editor paste), code
+  permission classifier → migrations are WRITTEN + SURFACED for the founder (SQL-editor paste), code
   ships tolerant of the missing table (MIGRATION_PENDING pattern).
 - Deploy convention: push to main → Vercel. No PR gate for this repo (standing rule: ship to main).
 
@@ -33,8 +33,8 @@
   default expiry); legacy `/d/[encoded]` KEPT decoding (CLAUDE.md §8.8) as time-boxed compat,
   noindexed; portal deal links move off encoded URLs to `/portal/[token]/d/[dealId]`.
 - Guarantee + founding offer + $5→Pro credit: implement flag-gated, DISABLED; Terms/Stripe steps
-  documented for Morgan. Never enable autonomously.
-- Analytics: PostHog is the provider (env still owed by Morgan — events must be PII-free
+  documented for the founder. Never enable autonomously.
+- Analytics: PostHog is the provider (env still owed by the founder — events must be PII-free
   regardless).
 
 ## RECONCILED 2026-08-17: a parallel session shipped 17 commits on origin/main
@@ -51,13 +51,13 @@ Header hardening converged on origin's per-route no-referrer family, extended
 with /s/ (+ X-Robots-Tag + no-store); origin's telemetry contract test updated
 to count 4 routes.
 
-## CLOSED — storage uploads dead sitewide (found via Morgan's report, fixed + applied 2026-08-17)
+## CLOSED — storage uploads dead sitewide (found via the founder's report, fixed + applied 2026-08-17)
 
 truecap_storage_metadata_allowed() returned false on NULL metadata, but Supabase storage
 inserts the objects row BEFORE metadata exists → EVERY upload on deal-documents (0 objects
 ever), analysis-pdfs (dead since 2026-06-22), and branding-logos was RLS-rejected since the
 2026-08-03 hardening. Fixed live via migration 20260817210000 (applied through MCP with
-Morgan's explicit request): NULL metadata passes at insert (bucket-level allowed_mime_types +
+The founder's explicit request): NULL metadata passes at insert (bucket-level allowed_mime_types +
 file_size_limit now enforce at the API layer on all three buckets — allowlists added to
 analysis-pdfs + branding-logos), full check still applies when metadata is present
 (verified: null=pass, oversized=reject, wrong-mime=reject, good=pass). profile-avatars never
@@ -69,7 +69,7 @@ objects.metadata — it is not populated yet at policy time.
 Phase 1 continues: listing-ingestion hardening, offer SSOT, claims sweep, proof/ticker removal.
 Then phases 2–4 (offer/homepage/pricing), then 5–10.
 
-## CLOSED — Phase 1.1 opaque shares (migration APPLIED by Morgan 2026-08-17; live E2E passed)
+## CLOSED — Phase 1.1 opaque shares (migration APPLIED by the founder 2026-08-17; live E2E passed)
 
 Live production E2E evidence: minted row → GET /s/<token> 200 with full analysis render,
 headers no-referrer + noindex/noarchive/nosnippet + no-store; last_viewed_at bookkeeping
@@ -78,7 +78,7 @@ sweep healthy: / , /pricing, /auth/login, /d/<valid> 200; /d/garbage graceful; /
 404; /embed/brand/garbage → standard-embed redirect; /dashboard 307; sitemap 200.
 Original implementation evidence below:
 
-- migration 20260817150658_public_shares.sql WRITTEN + SURFACED (Morgan applies; verification
+- migration 20260817150658_public_shares.sql WRITTEN + SURFACED (the founder applies; verification
   select must show policies=4, rls_enabled=true).
 - lib/share-token.ts + lib/public-share.ts + app/actions/public-shares.ts (create/list/revoke).
 - /s/[token] route; /d/ refactored onto shared SharedDealShell (still decodes v:1);
@@ -95,7 +95,7 @@ See brief. None marked complete yet — this file updates as evidence lands.
 
 ## Blockers
 
-- None currently. Morgan-owed (standing): apply future surfaced migrations; PostHog env vars.
+- None currently. The founder-owed (standing): apply future surfaced migrations; PostHog env vars.
 
 ## Next executable action
 

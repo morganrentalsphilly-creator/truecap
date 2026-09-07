@@ -20,7 +20,7 @@
 --     The weekly summary is a DIFFERENT consent surface than rate alerts
 --     (a recurring digest vs an event-triggered alert), so it gets its own
 --     column instead of reusing rate_alert_emails. Default false = nobody
---     gets an email until they opt in AND Morgan flips the mode to live.
+--     gets an email until they opt in AND the founder flips the mode to live.
 --
 --  2. weekly_summary_log — per-user per-ISO-week idempotency. The cron
 --     CLAIMS a (user_id, iso_week) row before sending (the stripe-events
@@ -149,7 +149,7 @@ comment on column public.stripe_webhook_events.claimed_at is
 -- that still hold a full public URL are parsed back to a path and re-signed,
 -- so applying this migration does not break existing cached exports.
 --
--- OPERATIONAL NOTE FOR MORGAN: every public URL minted before this
+-- OPERATIONAL NOTE FOR THE FOUNDER: every public URL minted before this
 -- migration is applied should be treated as already disclosed — those
 -- objects were anonymously readable for the whole window. Applying this
 -- migration makes them private going forward; it cannot un-disclose what
@@ -189,7 +189,7 @@ end
 $$;
 
 -- ---------------------------------------------------------------------------
--- NOT PART OF THIS MIGRATION — surfaced for Morgan's decision.
+-- NOT PART OF THIS MIGRATION — surfaced for the founder's decision.
 --
 -- `profile-avatars` and `branding-logos` are also `public = true` AND carry
 -- blanket public-read policies (20260414133000:30-37 and

@@ -133,7 +133,7 @@ $$;
 --     The weekly summary is a DIFFERENT consent surface than rate alerts
 --     (a recurring digest vs an event-triggered alert), so it gets its own
 --     column instead of reusing rate_alert_emails. Default false = nobody
---     gets an email until they opt in AND Morgan flips the mode to live.
+--     gets an email until they opt in AND the founder flips the mode to live.
 --
 --  2. weekly_summary_log — per-user per-ISO-week idempotency. The cron
 --     CLAIMS a (user_id, iso_week) row before sending (the stripe-events

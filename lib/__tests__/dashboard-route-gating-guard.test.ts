@@ -74,7 +74,7 @@ describe("/dashboard Overview — insights-gated, redirects free to My Deals (fi
 // DEFERRED, not fixed: the update path still requires a paid plan
 // (hasPaidPlanSubscription), so a free user can save up to 5 deals but not
 // edit them. Making update free like create would EXPAND the free tier — a
-// paywall/product decision that is Morgan's to make, not one to ship
+// paywall/product decision that is the founder's to make, not one to ship
 // autonomously (CLAUDE.md §8). No test is asserted on that path until the
 // intended behavior is decided; asserting either direction would bless a
 // business rule this codebase has not settled.

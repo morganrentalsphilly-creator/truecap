@@ -544,7 +544,7 @@ describe("Input Confidence v1.1", () => {
       values: original,
       startingAssumptionOrigins: {
         interestRate: { kind: "strategy-default", label: "BRRRR starter" },
-        vacancy: { kind: "template", label: "Template: Morgan's template" },
+        vacancy: { kind: "template", label: "Template: Jordan's template" },
       },
     }).sourceContext;
 
@@ -555,7 +555,7 @@ describe("Input Confidence v1.1", () => {
     expect(restored.startingAssumptionOrigins.interestRate).toBeUndefined();
     expect(restored.startingAssumptionOrigins.vacancy).toEqual({
       kind: "template",
-      label: "Template: Morgan's template",
+      label: "Template: Jordan's template",
     });
   });
 

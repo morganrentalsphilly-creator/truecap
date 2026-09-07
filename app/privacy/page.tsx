@@ -12,7 +12,7 @@
  *
  * NOT lawyer-reviewed. Substantive enough to satisfy OAuth
  * verification and look legitimate, but if TrueCap scales materially
- * Morgan should engage a privacy lawyer to review.
+ * the founder should engage a privacy lawyer to review.
  */
 
 import type { Metadata } from "next";

@@ -227,8 +227,7 @@ export default function RootLayout({
                   // Person entity is defined on /about (AboutPage +
                   // Person @graph) — referencing it here ties the org
                   // to a real, findable founder for E-E-A-T.
-                  founder: { "@id": `${siteUrl}/about#morgan` },
-                  // Moved here from the homepage's (now removed)
+                            // Moved here from the homepage's (now removed)
                   // duplicate Organization node so the single canonical
                   // entity keeps the support-contact signal.
                   contactPoint: {

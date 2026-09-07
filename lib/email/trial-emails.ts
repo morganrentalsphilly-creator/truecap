@@ -11,7 +11,7 @@ import "server-only";
  *   - trial_day10 (+10 days): plain pre-billing reminder + guarantee restated
  *
  * Same estate rules as every lifecycle send: gated on
- * LIFECYCLE_EMAILS_MODE=live (Morgan's one flip for the whole lifecycle
+ * LIFECYCLE_EMAILS_MODE=live (the founder's one flip for the whole lifecycle
  * program), idempotent via lifecycle_email_log (unique user_id+email_key —
  * webhook retries can't double-schedule), rendered through the shared
  * emails/lifecycle-email.tsx template from JSON content files, and

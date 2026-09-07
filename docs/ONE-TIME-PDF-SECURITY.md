@@ -69,7 +69,7 @@ claims retain paid-report recovery but do not consume a mismatched coupon.
 Without that server-only configuration, claims remain `not_configured` and no
 credit is promised or applied.
 
-Morgan approved the refund/dispute policy on 2026-08-24. The retained
+The founder approved the refund/dispute policy on 2026-08-24. The retained
 historical flow enforces it as follows:
 
 - every report verification, recovery, and export re-reads the current Stripe

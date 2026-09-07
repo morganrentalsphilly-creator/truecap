@@ -2,7 +2,7 @@
  * scripts/preview-daily-campaign.ts
  *
  * Renders all 30 daily campaign emails into a single static HTML file
- * so Morgan can scroll through and review every email before running
+ * so the founder can scroll through and review every email before running
  * `npm run schedule-daily-campaign` for real.
  *
  * Why one HTML file with iframes (not 30 separate files):
@@ -15,7 +15,7 @@
  *     mock would be.
  *   - One file = one double-click to open. No webserver needed.
  *
- * Output: /Users/morganpage/Downloads/final_source_code/.preview/daily-campaign-preview.html
+ * Output: <repo>/.preview/daily-campaign-preview.html
  *   (Git-ignored; this is a local artifact, not a shipped asset.)
  *
  * Usage:

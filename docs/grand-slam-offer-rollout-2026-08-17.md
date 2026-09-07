@@ -129,7 +129,7 @@ purchases (`deal_decision_pack_purchased` et al.), and the canonical billing
 steps (`upgrade_started` → `subscription_started`). NOT instrumentable: refund
 requests (claims arrive by email — track in the inbox or add a form later).
 
-## Morgan's activation queue (nothing sends/charges until these)
+## the founder's activation queue (nothing sends/charges until these)
 
 1. **Stripe coupon (superseded launch contract)**: create $9.00-off, duration
    "once", USD → set `STRIPE_PACK_CREDIT_900_COUPON_ID` in Vercel. Until then the credit system is

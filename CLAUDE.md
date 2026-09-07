@@ -40,11 +40,11 @@ shareable read-only link.
   When you add a field to `ReportData` that the report renders, DECLARE IT in
   `lib/report-payload-schema.ts`: every nested `z.object()` there strips
   undeclared keys in silence, and only the top level is `.passthrough()`.
-- **Solo founder**: Morgan (`morganrentalsphilly@gmail.com`).
+- **Solo founder**: one person; contact `hello@usetruecap.com`. The founder is never named in the repo, the site, or emails (their request, 2026-09-07).
   ~6 months of intensive work, ~320 completed tasks. Conventions are
   consistent but mostly tribal — that's what this doc is for.
 
-### Product principle: stay easy to use (Morgan's standing directive)
+### Product principle: stay easy to use (the founder's standing directive)
 
 Every new feature must preserve the core flow: type an address →
 get a verdict. Concretely:
@@ -62,7 +62,7 @@ get a verdict. Concretely:
 4. **Upsells appear at the moment of need,** not as ambient chrome
    (e.g. the PDF dialog opens on Export click; the Q&A upsell appears
    only when the free limit hits).
-5. When a feature idea can't satisfy these, propose it to Morgan with
+5. When a feature idea can't satisfy these, propose it to the founder with
    the trade-off spelled out instead of building it.
 
 ---
@@ -456,11 +456,11 @@ export type SharePayload = {
 
 > **⚠️ NEWSLETTER CANCELED — founder decision 2026-07-15.** The Resend
 > account switch deleted the audience (subscribers unrecoverable) and
-> Morgan chose to kill the newsletter rather than rebuild it. The
+> the founder chose to kill the newsletter rather than rebuild it. The
 > weekly-digest cron is REMOVED from `vercel.json`, and
 > `NewsletterSignup` renders `null` (all ~70 mounts dark). Do NOT
 > re-add signup surfaces, re-schedule broadcasts, or recreate the
-> audience without Morgan's explicit word. The machinery below is
+> audience without the founder's explicit word. The machinery below is
 > documented for potential revival only. Lifecycle onboarding emails,
 > rate/rent alerts, and the weekly summary are SEPARATE per-user sends
 > and remain active/dormant as configured.
@@ -775,7 +775,7 @@ Operational dry-runs:
 ## 8. Out-of-scope for Claude — ask first
 
 Don't autonomously do any of the following. Surface a proposal first
-and let Morgan say yes.
+and let the founder say yes.
 
 1. **Change pricing** — the `$29.99/mo` / `$300/yr` figures, the annual discount, or
    anything that changes what a user sees on the pricing page or in

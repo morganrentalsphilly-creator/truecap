@@ -6,7 +6,7 @@
  * numbers), and tells the results view which tab to LEAD with so the number
  * that matters for that play is front-and-center.
  *
- * Design constraints (Morgan's "stay easy to use" directive):
+ * Design constraints (the founder's "stay easy to use" directive):
  *  - Additive + optional: with no strategy selected the calculator behaves
  *    exactly as before. Picking a chip only sets values + a focus hint.
  *  - No new nav, no new required inputs. Strategies consume what the form

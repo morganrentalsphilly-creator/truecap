@@ -20,7 +20,7 @@ export type ReconcileMode = "off" | "dry" | "live";
 
 /**
  * RECONCILE_MODE parse — mirrors resolveRateAlertsMode's contract
- * (off by default; the feature ships dormant until Morgan flips it).
+ * (off by default; the feature ships dormant until the founder flips it).
  * Takes the raw env value as a parameter so this stays pure/testable;
  * only the cron route reads process.env.
  */

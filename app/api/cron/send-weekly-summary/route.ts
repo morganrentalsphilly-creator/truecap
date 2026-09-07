@@ -14,7 +14,7 @@
  *                          first email's HTML included). Sends NOTHING,
  *                          writes NOTHING.
  *       - "live"         → sends via Resend + records weekly_summary_log.
- *     Morgan flips off → dry → live after reviewing a dry run.
+ *     the founder flips off → dry → live after reviewing a dry run.
  *  3. DOUBLE-GATED consent: only paid users with
  *     profiles.weekly_summary_emails = true (default false) are considered
  *     — flipping the mode to "live" never emails someone who didn't opt in.

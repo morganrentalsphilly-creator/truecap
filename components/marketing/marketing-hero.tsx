@@ -18,7 +18,6 @@
  */
 
 import { Check, Target, TrendingUp } from "lucide-react";
-import { ProofStrip } from "@/components/marketing/proof-strip";
 import Link from "next/link";
 import { ProductShot, findProductShot } from "@/components/marketing/product-shot";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
@@ -91,11 +90,6 @@ export function MarketingHero() {
           </div>
         </div>
 
-        {/* Proof strip — three facts a visitor can verify by clicking
-            (docs/site-overhaul.md Phase 5.5). Always renders. */}
-        <div className="tc-reveal mt-7 border-t border-border pt-5 sm:mt-14 sm:pt-8">
-          <ProofStrip className="mx-auto max-w-4xl" />
-        </div>
       </div>
     </section>
   );
@@ -108,7 +102,7 @@ export function MarketingHero() {
  *
  * Animation styles inlined into the component because the same keyframes
  * defined in globals.css weren't reaching the browser in production
- * (Morgan reported nothing animating at all, including the LIVE dot).
+ * (the founder reported nothing animating at all, including the LIVE dot).
  * Inlining via a server-rendered <style> tag bypasses the Tailwind v4 /
  * PostCSS pipeline — the rules ship in the HTML payload verbatim.
  *

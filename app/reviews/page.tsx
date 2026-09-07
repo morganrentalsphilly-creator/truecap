@@ -18,7 +18,6 @@ import Link from "next/link";
 import { Database, FileCheck2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
-import { ProofStrip } from "@/components/marketing/proof-strip";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Testimonials } from "@/components/marketing/testimonials";
 import {
@@ -100,17 +99,6 @@ export default async function ReviewsPage() {
         </section>
 
         {/* (b) Three facts a visitor can verify by clicking — always renders. */}
-        <section
-          aria-labelledby="facts-title"
-          className="border-b border-border bg-card/40"
-        >
-          <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-            <h2 id="facts-title" className="sr-only">
-              Facts you can check
-            </h2>
-            <ProofStrip />
-          </div>
-        </section>
 
         {/* (c) How quotes get here — the real flow, stated plainly. */}
         <section aria-labelledby="quotes-flow-title">

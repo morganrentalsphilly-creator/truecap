@@ -11,7 +11,7 @@
  *   - every sitemap URL is REACHABLE by following <a href> from `/` — the
  *     orphan check (see "Orphan detection" below)
  *   - the foreign truecap-iota.vercel.app deployment is gone (see "The
- *     tripwire" below) — a nag Morgan cannot turn off from this repo
+ *     tripwire" below) — a nag the founder cannot turn off from this repo
  *   - every `/api/cron/*` route named in vercel.json answers 401, not a 3xx
  *   - <link rel=canonical> points at https://usetruecap.com, not a preview
  *     hostname (the getSiteUrl fail-open in lib/site-url.ts would silently
@@ -52,7 +52,7 @@
  * THE TRIPWIRE — truecap-iota.vercel.app
  * ---------------------------------------------------------------------------
  * This is a FOREIGN Vercel deployment: a different project, frozen, in
- * Morgan's OLD Vercel account. It is not a preview alias of this project, and
+ * the founder's OLD Vercel account. It is not a preview alias of this project, and
  * NOTHING in this repository is served by it. It is currently the #1 Google
  * result for the brand — above usetruecap.com — and its SERP snippet still
  * advertises dead "$5 one-time PDF" pricing that no longer exists.
@@ -63,7 +63,7 @@
  * the 308 as its single highest-leverage action; that recommendation is
  * WRONG and is corrected in docs/seo/foreign-deployment-truecap-iota.md.
  *
- * The only fix is Morgan deleting that project in the old Vercel account.
+ * The only fix is the founder deleting that project in the old Vercel account.
  * So this is a nag with teeth: it prints at the TOP of the weekly report,
  * at `critical` severity, and it fails the run. There is deliberately NO
  * flag and NO environment variable to silence it — a nag you can turn off
@@ -1240,7 +1240,7 @@ if (foreignDeployment.live === true) {
   );
   lines.push("> ");
   lines.push(
-    "> **ONLY MORGAN CAN FIX IT:** log in to the OLD Vercel account, find the project serving " +
+    "> **ONLY THE FOUNDER CAN FIX IT:** log in to the OLD Vercel account, find the project serving " +
       "`truecap-iota.vercel.app`, and **delete the project** (Project → Settings → Delete). " +
       "Then request removal of the host in Search Console. This banner stops when that URL " +
       "returns 404 or 410, and there is no flag in this repo that silences it.",

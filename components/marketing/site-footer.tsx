@@ -28,7 +28,7 @@ const FOOTER_COLS: Array<{
   // read as a dump rather than navigation. Split into "Product" (what you
   // buy / how it works) and "Learn" (the content library) below, so each
   // column is scannable and the crawl paths that matter are still one click
-  // from every page. Changelog was removed entirely at Morgan's request
+  // from every page. Changelog was removed entirely at the founder's request
   // (2026-08-11): it is a public "is this actively shipped?" signal that
   // mostly advertises release cadence, and he does not want it front-facing.
   // Its route still exists and is still in the sitemap — only the sitewide

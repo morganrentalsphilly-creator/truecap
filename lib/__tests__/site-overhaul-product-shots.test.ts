@@ -66,8 +66,10 @@ describe("product screenshots are real and wired", () => {
     ]) {
       expect(read(path), path).not.toContain("FounderCard");
     }
+    // The founder is described, never named (their request, 2026-09-07).
     const about = read("app/about/page.tsx");
-    expect(about).toContain('"@type": "Person"');
-    expect(about).toContain("`${siteUrl}/about#morgan`");
+    expect(about).not.toContain('"@type": "Person"');
+    expect(about).not.toContain("#morgan");
+    expect(about).not.toMatch(/Morgan/);
   });
 });

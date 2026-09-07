@@ -1,6 +1,6 @@
 # Quality / Infrastructure — Free-Tier Next Steps
 
-Three items that move real metrics (uptime, Google Ads Quality Score, accessibility / SEO trust) without ongoing cost. Each one needs a setup step from you (Morgan) — none can be done from code alone.
+Three items that move real metrics (uptime, Google Ads Quality Score, accessibility / SEO trust) without ongoing cost. Each one needs a setup step from you (the founder) — none can be done from code alone.
 
 ---
 

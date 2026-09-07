@@ -96,7 +96,7 @@ export interface FeatureSpec {
 
 /**
  * CANONICAL truth. Deal Score is FREE (score + breakdown) — confirmed by
- * Morgan 2026-06; the runtime already gives it to everyone, and migration
+ * the founder 2026-06; the runtime already gives it to everyone, and migration
  * 20260621250000 adds `deal_score` to the free plan JSON so the data matches.
  */
 export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {

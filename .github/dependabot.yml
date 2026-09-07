@@ -20,7 +20,7 @@
 #   npm install <pkg>@<version> ...       # or: git checkout <bot-branch> -- package.json package-lock.json && npm install
 #   npm run build && npm test             # capture the exit code, don't pipe it
 #   node scripts/verify-build-integrity.mjs --update
-#   git add -A && git commit && git push  # opened by Morgan → both gates pass
+#   git add -A && git commit && git push  # opened by the founder → both gates pass
 #
 # Then close the bot's PR. Do NOT admin-bypass the required checks: that
 # trains the exact reflex the guard exists to prevent.

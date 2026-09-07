@@ -60,9 +60,9 @@ describe("dashboard list clarity", () => {
         visibleCount: 0,
         scopedCount: 3,
         scope: "all",
-        clientName: "Morgan's buyers",
+        clientName: "Jordan's buyers",
       }),
-    ).toBe("0 shown · 3 deals assigned to Morgan's buyers");
+    ).toBe("0 shown · 3 deals assigned to Jordan's buyers");
   });
 
   it("does not point a zero-row client scope at nonexistent rows", () => {

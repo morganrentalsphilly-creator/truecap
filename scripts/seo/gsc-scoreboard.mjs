@@ -33,7 +33,7 @@
  *   installable in that job, so the RS256 JWT assertion is signed here with
  *   node:crypto and exchanged at Google's token endpoint by hand.
  * · FAILS LOUDLY. A missing secret, a malformed key, an auth failure or a 403
- *   exits non-zero with a message naming exactly what Morgan has to set up.
+ *   exits non-zero with a message naming exactly what the founder has to set up.
  *   The specific trap this codebase must never fall into: a service account
  *   added to the property with **Restricted** permission keeps Search
  *   Analytics working while URL Inspection returns 403 on every call. Treated
@@ -486,7 +486,7 @@ const progress = (line) => console.error(line);
 /**
  * Hard failure. Prints a boxed diagnostic to stderr AND emits the same content
  * as the markdown report, so the workflow's issue-upsert step puts the setup
- * instructions somewhere Morgan actually reads instead of leaving a red X in
+ * instructions somewhere the founder actually reads instead of leaving a red X in
  * the Actions tab with the reason buried in a log.
  *
  * Deliberately does NOT write a telemetry file. A run that could not measure

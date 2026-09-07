@@ -53,7 +53,7 @@ export default function ExchangePost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: `${siteUrl}/blog/${SLUG}`,
-    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
+    author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
     isPartOf: { "@id": `${siteUrl}/blog#blog` },

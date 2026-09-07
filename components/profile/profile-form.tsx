@@ -216,7 +216,7 @@ export function ProfileForm({
   // Recompute the fit-to-image zoom whenever the media or crop area is measured.
   // fitZoom = the zoom at which the ENTIRE image fits inside the crop box; for a
   // non-square photo it is < 1, so we expose it as the slider's floor and open
-  // the dialog already zoomed out to show the whole picture (the thing Morgan
+  // the dialog already zoomed out to show the whole picture (the thing the founder
   // could never reach before). restrictPosition is off, so panning past the
   // edges works and the crop can extend beyond the image when fully zoomed out.
   const recomputeMinZoom = () => {

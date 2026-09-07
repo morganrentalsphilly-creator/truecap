@@ -12,7 +12,7 @@
  * automatically. This page renders a copy-ready record skeleton per
  * submission to make that promotion a paste-and-fill.
  *
- * Guarded by checkAdmin() (ADMIN_EMAILS env, founder fallback), noindex.
+ * Guarded by checkAdmin() (ADMIN_EMAILS env; no admins when unset), noindex.
  */
 
 import type { Metadata } from "next";
@@ -79,7 +79,7 @@ function promotionSkeleton(row: SubmissionRow): string {
   verification: {
     status: "verified",
     verifiedAt: "YYYY-MM-DD",
-    verifiedBy: "Morgan",
+    verifiedBy: "founder",
     evidenceRef: "email thread / call note ref",
   },
   approval: {

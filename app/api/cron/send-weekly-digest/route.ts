@@ -192,7 +192,7 @@ export async function GET(request: Request) {
         subject,
         html,
         text,
-        // Friendly internal name so Morgan can find it in the dashboard.
+        // Friendly internal name so the founder can find it in the dashboard.
         name: `Weekly digest · ${today}`,
         // reply_to lets Resend route inbox replies to a human address.
         reply_to: process.env.EMAIL_REPLY_TO ?? "hello@usetruecap.com",

@@ -16,10 +16,10 @@ const SURFACES = [
   {
     file: "app/about/page.tsx",
     path: "/about",
-    pageTitle: "About TrueCap & Founder Morgan Page",
-    socialTitle: "About TrueCap & Founder Morgan Page",
+    pageTitle: "About TrueCap",
+    socialTitle: "About TrueCap",
     description:
-      "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
+      "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
   },
   {
     file: "app/why-truecap/page.tsx",

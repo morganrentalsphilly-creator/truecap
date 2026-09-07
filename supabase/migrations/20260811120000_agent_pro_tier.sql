@@ -1,5 +1,5 @@
 -- ============================================================
--- Agent Pro tier ($59/mo, Morgan-approved 2026-08) + client rosters
+-- Agent Pro tier ($59/mo, founder-approved 2026-08) + client rosters
 --
 -- SURFACED FOR REVIEW — do not let tooling auto-apply. Idempotent;
 -- safe to run over a partially-applied state.
@@ -108,7 +108,7 @@ create index if not exists saved_analyses_client_idx
   on public.saved_analyses (client_id) where client_id is not null;
 
 -- ============================================================
--- AFTER creating the Stripe Prices (Morgan): paste ids + run.
+-- AFTER creating the Stripe Prices (the founder): paste ids + run.
 -- Suggested amounts (approved: $59/mo; annual mirrors Pro's ~2-months-free
 -- pattern → $590/yr, but the Stripe Price is the source of truth):
 --

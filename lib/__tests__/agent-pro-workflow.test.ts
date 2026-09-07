@@ -123,7 +123,7 @@ describe("assignment is reachable from both surfaces an agent works in", () => {
     expect(src).toContain("setSavedDealClientAction");
   });
 
-  it("the deal WORKSPACE can assign a client (the screen Morgan named)", () => {
+  it("the deal WORKSPACE can assign a client (the screen the founder named)", () => {
     const src = read("app/dashboard/saved-analyses/[id]/page.tsx");
     expect(src).toContain("DealClientSelect");
     expect(src).toContain("client_id");

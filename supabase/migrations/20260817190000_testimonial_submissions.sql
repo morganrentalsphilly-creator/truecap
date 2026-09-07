@@ -3,7 +3,7 @@
 --
 -- WHY: the Grand Slam Offer rollout (2026-08-17) adds an in-product
 -- testimonial prompt after high-signal moments (PDF export, third saved
--- deal). Submissions land here as RAW, UNPUBLISHED input for Morgan's
+-- deal). Submissions land here as RAW, UNPUBLISHED input for the founder's
 -- review. Publication still happens ONLY by promoting a reviewed quote into
 -- lib/proof-records.ts with verification + customer approval — this table
 -- can never render on a public surface directly, so an unreviewed draft can

@@ -95,7 +95,7 @@ jobs:
             # "Reached maximum number of turns (40)" — 2026-08-04 and
             # 2026-08-07 both, on the old prompt AND the new one. A run that
             # exhausts its turns produces NOTHING, opens no PR, and still bills
-            # the full model spend, twice a week. It also emails Morgan a
+            # the full model spend, twice a week. It also emails the founder a
             # failure every time, which is how a real failure later gets
             # ignored.
             #
@@ -268,7 +268,7 @@ jobs:
             - If you could not produce something you'd defend, open the PR as a
               DRAFT and say why. Do not pad to a word count.
 
-      # A `content:` PR is the one tier that deliberately waits for Morgan.
+      # A `content:` PR is the one tier that deliberately waits for the founder.
       # Requesting a native GitHub review is stronger than relying on repository
       # watch settings: GitHub creates a direct review notification, and email
       # follows the reviewer's own notification preferences.
@@ -312,7 +312,7 @@ jobs:
       #   `seo-maintenance:` → queued. Bounded edits to pages that already
       #                        exist, ratchet-gated by the SEO guards.
       #   `content:`         → NOT queued. A net-new public URL waits for
-      #                        Morgan. One click, only for genuinely new pages.
+      #                        the founder. One click, only for genuinely new pages.
       #   anything else      → NOT queued, and says so loudly. An unrecognised
       #                        prefix means the run did something this file
       #                        does not model; failing closed is the only safe

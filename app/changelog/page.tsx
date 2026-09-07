@@ -170,7 +170,7 @@ const ENTRIES: Entry[] = [
     category: "Doc",
     title: "Solo-executable marketing playbook (docs/MARKETING-PLAYBOOK.md)",
     description:
-      "Weekly 5-6 hour playbook Morgan can run alone — three loops (community, content, newsletter), 90-day check-in metrics, what NOT to do, minimum viable weekly schedule. The content queue at the bottom is 8 blog topics ranked by search volume, ready to commission one at a time.",
+      "Weekly 5-6 hour playbook the founder can run alone — three loops (community, content, newsletter), 90-day check-in metrics, what NOT to do, minimum viable weekly schedule. The content queue at the bottom is 8 blog topics ranked by search volume, ready to commission one at a time.",
   },
   {
     date: "2026-05-24",

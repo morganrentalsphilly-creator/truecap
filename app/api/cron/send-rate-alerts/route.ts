@@ -12,7 +12,7 @@
  *                          email that WOULD send (recipients masked,
  *                          first email's HTML included). Sends nothing.
  *       - "live"         → actually sends via Resend.
- *     Morgan flips off → dry → live after reviewing a dry run.
+ *     the founder flips off → dry → live after reviewing a dry run.
  *  3. Flat weeks are silent: requires the FRED print to have moved
  *     ≥ RATE_ALERTS_MIN_WEEKLY_MOVE_PP vs the previous print.
  *  4. Per-deal + per-user gating in lib/rate-alerts.ts (pure, tested):
