@@ -29,6 +29,10 @@ const cspReportOnly = [
 ].join("; ");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Do not advertise the framework on every response (audit finding
+  // security-7, 2026-09-08). Fingerprinting is trivial anyway; the header
+  // just adds a free hint.
+  poweredByHeader: false,
   // This repository can live below a home directory that has an unrelated
   // lockfile. Pin both tracing engines to this project so Next never infers a
   // parent workspace or omits runtime files from a deployment bundle.
