@@ -25,7 +25,7 @@ const SERP_TITLE = "The 50% rule for rentals: still useful in 2026?";
 const DESCRIPTION =
   "The 50% rule says operating expenses run about half of gross rent. When it works as a triage tool, when it misleads, and what to do when it cannot.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-09-08";
 const READING_TIME = 6;
 
 export const metadata: Metadata = {
@@ -197,8 +197,16 @@ export default function FiftyPercentRulePost() {
             </p>
             <p>
               Once you have NOI, you subtract annual debt service (mortgage
-              P&amp;I × 12) to get cash flow. The whole calculation takes ~10
-              seconds.
+              P&amp;I × 12) to get cash flow. Pull that P&amp;I figure from
+              the{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                mortgage payment calculator
+              </Link>{" "}
+              instead of estimating it — the whole triage still takes under a
+              minute.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
