@@ -12,7 +12,7 @@
  *
  * Now Stripe returns to app/api/billing/return, which moves the id into a
  * short-lived httpOnly cookie and 303s to a clean `/dashboard/new?billing=success`
- * URL. The server (page hint + verifyCheckoutReturnAction) reads the cookie;
+ * URL. The server (verifyCheckoutReturnAction) reads the cookie;
  * the browser never sees the id until the Stripe-bound verification succeeds.
  * The privacy gate itself is untouched: `session_id` stays sensitive.
  */

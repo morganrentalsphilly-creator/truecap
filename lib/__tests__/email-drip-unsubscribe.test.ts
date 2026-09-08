@@ -157,19 +157,38 @@ describe.each(captureCases)("$name capture", ({ name, capture, count }) => {
   });
   it.each(["error", "throw"] as const)("fails closed before claim when suppression lookup returns %s", async mode => {
     db.errors["email_suppressions:select"] = mode;
-    expect(await capture({ email: EMAIL })).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    const result = await capture({ email: EMAIL });
+    expect(result).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    // The playbook needs no email: a blocked send never withholds the asset.
+    if (name === "lead-magnet") expect(result).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
     expect(mocks.claim).not.toHaveBeenCalled();
     expect(transport).not.toHaveBeenCalled();
     expect(JSON.stringify(mocks.captureMessage.mock.calls)).not.toContain("private database detail");
   });
   it("requires a signing secret and HTTPS before claiming or sending", async () => {
     vi.stubEnv("SHARE_LINK_SECRET", "");
-    expect(await capture({ email: EMAIL })).toMatchObject({ ok: false, code: "CONFIG_MISSING" });
+    const withoutSecret = await capture({ email: EMAIL });
+    expect(withoutSecret).toMatchObject({ ok: false, code: "CONFIG_MISSING" });
+    if (name === "lead-magnet") expect(withoutSecret).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
     vi.stubEnv("SHARE_LINK_SECRET", "mock-signing-key");
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://usetruecap.com");
     expect(await capture({ email: EMAIL })).toMatchObject({ ok: false, code: "CONFIG_MISSING" });
     expect(mocks.claim).not.toHaveBeenCalled();
     expect(transport).not.toHaveBeenCalled();
+  });
+  it("hands over the asset when the guard is unavailable or the provider key is missing", async () => {
+    mocks.claim.mockResolvedValueOnce({ allowed: false, reason: "UNAVAILABLE" });
+    const guardDown = await capture({ email: EMAIL });
+    expect(guardDown).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    vi.stubEnv("RESEND_API_KEY", "");
+    const keyMissing = await capture({ email: EMAIL });
+    expect(keyMissing).toMatchObject({ ok: false, code: "CONFIG_MISSING" });
+    expect(mocks.release).toHaveBeenCalledWith("bucket");
+    expect(transport).not.toHaveBeenCalled();
+    if (name === "lead-magnet") {
+      expect(guardDown).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
+      expect(keyMissing).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
+    }
   });
   it.each(["DUPLICATE", "IP_LIMIT", "GLOBAL_LIMIT", "UNAVAILABLE"])("preserves the abuse guard for %s", async reason => {
     mocks.claim.mockResolvedValue({ allowed: false, reason });
@@ -188,15 +207,51 @@ describe.each(captureCases)("$name capture", ({ name, capture, count }) => {
   });
   it("stops and retains the claim on an uncertain provider timeout", async () => {
     transport.mockRejectedValue(new Error("timeout"));
-    expect(await capture({ email: EMAIL })).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    const result = await capture({ email: EMAIL });
+    expect(result).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    if (name === "lead-magnet") expect(result).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
     expect(transport).toHaveBeenCalledTimes(1);
     expect(mocks.release).not.toHaveBeenCalled();
   });
-  it("stops after an accepted response with no usable provider ID", async () => {
+  it("refunds the slot when the sequence stops before anything is sent", async () => {
+    // The pre-claim check passes; the in-loop recheck (before the first send)
+    // fails. Zero sent, nothing uncertain → the 30-day claim goes back.
+    let suppressionReads = 0;
+    db.setOnQuery((table, method) => {
+      if (table === "email_suppressions" && method === "select" && ++suppressionReads === 2) {
+        db.errors["email_suppressions:select"] = "error";
+      }
+    });
+    const result = await capture({ email: EMAIL });
+    expect(result).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    if (name === "lead-magnet") expect(result).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
+    expect(transport).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledWith("bucket");
+  });
+  it("treats an accepted day-0 with no usable provider ID as a partial send", async () => {
     transport.mockResolvedValue(Response.json({}));
-    expect(await capture({ email: EMAIL })).toMatchObject({ ok: false, code: "SEND_FAILED" });
+    // The day-0 message was accepted (in flight, uncancellable) — that is a
+    // partial send, not a zero-sent failure: the claim stays and the user
+    // hears success while the truncated follow-ups go to Sentry.
+    expect(await capture({ email: EMAIL })).toMatchObject({ ok: true, scheduledCount: 1 });
     expect(transport).toHaveBeenCalledTimes(1);
     expect(mocks.release).not.toHaveBeenCalled();
+    expect(JSON.stringify(mocks.captureMessage.mock.calls)).toContain("truncated after partial send");
+  });
+  it("reports a truncated sequence but succeeds once day-0 has left", async () => {
+    transport.mockImplementationOnce(async (url, init) => {
+      sent.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return Response.json({ id: "message-1" });
+    }).mockRejectedValueOnce(new Error("timeout"));
+    const result = await capture({ email: EMAIL });
+    expect(result).toMatchObject({ ok: true, scheduledCount: 1 });
+    if (name === "lead-magnet") expect(result).toHaveProperty("downloadUrl", "https://usetruecap.com/playbook");
+    expect(sent).toHaveLength(1);
+    expect(sent[0]?.scheduled_at).toBeUndefined();
+    expect(transport).toHaveBeenCalledTimes(2);
+    expect(mocks.release).not.toHaveBeenCalled();
+    const reports = mocks.captureMessage.mock.calls.map(([message]) => String(message));
+    expect(reports.some(message => message.includes("truncated after partial send"))).toBe(true);
   });
   it("cancels a future send if unsubscribe commits while the provider request is in flight", async () => {
     transport.mockImplementation(async (url, init) => {
@@ -242,24 +297,79 @@ describe("schedule persistence", () => {
 });
 
 describe("unsubscribe endpoint", () => {
-  it.each(["GET", "POST"])("%s saves suppression and cancels only future, uncancelled sends across surfaces", async method => {
+  it("GET is a side-effect-free confirmation page whose form POSTs the token", async () => {
+    // Mail-client link scanners GET every body href; a GET that acted would
+    // unsubscribe recipients who never clicked and cancel their queued sends.
+    queued("analysis", { surface: "post-analysis" });
+    const url = buildDripUnsubscribeUrl("https://usetruecap.com", EMAIL)!;
+    const token = new URL(url).searchParams.get("token")!;
+    const response = await GET(unsubscribeRequest("GET", url));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(response.headers.get("x-robots-tag")).toBe("noindex");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    const html = await response.text();
+    expect(html).toContain('<meta name="robots" content="noindex">');
+    expect(html).toContain('<form method="post" action="/email/unsubscribe">');
+    expect(html).toContain(`<input type="hidden" name="token" value="${token}">`);
+    expect(html).toContain("checklist and playbook emails");
+    expect(db.tables.email_suppressions).toHaveLength(0);
+    expect(db.tables.email_drip_schedules![0]?.cancelled_at).toBeNull();
+    expect(mocks.admin).not.toHaveBeenCalled();
+    expect(transport).not.toHaveBeenCalled();
+    expect(mocks.setMarketingOptOut).not.toHaveBeenCalled();
+  });
+  it("GET confirms without acting on the account marketing token too", async () => {
+    const token = mintSignedToken("marketing-unsubscribe", { u: "11111111-2222-4333-8444-555555555555" })!;
+    const response = await GET(new Request(`https://usetruecap.com/email/unsubscribe?token=${token}`));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("marketing emails");
+    expect(mocks.setMarketingOptOut).not.toHaveBeenCalled();
+    expect(mocks.admin).not.toHaveBeenCalled();
+  });
+  it("POST saves suppression and cancels only future, uncancelled sends across surfaces", async () => {
     queued("analysis", { surface: "post-analysis" });
     queued("playbook", { surface: "lead-magnet" });
     queued("day-zero", { scheduled_at: null });
     queued("past", { scheduled_at: "2020-01-01T00:00:00Z" });
     queued("already-cancelled", { cancelled_at: "2026-01-01T00:00:00Z" });
     queued("other-recipient", { email_hash: "a".repeat(64) });
-    const handle = method === "GET" ? GET : POST;
-    const response = await handle(unsubscribeRequest(method));
+    const response = await POST(unsubscribeRequest());
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("referrer-policy")).toBe("no-referrer");
     expect(db.tables.email_suppressions).toHaveLength(1);
     expect(transport).toHaveBeenCalledTimes(2);
-    expect((await handle(unsubscribeRequest(method))).status).toBe(200);
+    expect((await POST(unsubscribeRequest())).status).toBe(200);
     expect(db.tables.email_suppressions).toHaveLength(1);
     expect(transport).toHaveBeenCalledTimes(2);
     expect(mocks.setMarketingOptOut).not.toHaveBeenCalled();
+  });
+  it("POST accepts the confirmation form's body token without a query string", async () => {
+    queued();
+    const token = new URL(buildDripUnsubscribeUrl("https://usetruecap.com", EMAIL)!).searchParams.get("token")!;
+    const body = new URLSearchParams({ token });
+    const response = await POST(new Request("https://usetruecap.com/email/unsubscribe", { method: "POST", body }));
+    expect(response.status).toBe(200);
+    expect(db.tables.email_suppressions).toHaveLength(1);
+    expect(db.tables.email_drip_schedules![0]?.cancelled_at).toEqual(expect.any(String));
+  });
+  it("POST keeps RFC 8058 one-click working from the header URL", async () => {
+    queued();
+    const url = buildDripUnsubscribeUrl("https://usetruecap.com", EMAIL)!;
+    const response = await POST(new Request(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "List-Unsubscribe=One-Click",
+    }));
+    expect(response.status).toBe(200);
+    expect(db.tables.email_suppressions).toHaveLength(1);
+    expect(db.tables.email_drip_schedules![0]?.cancelled_at).toEqual(expect.any(String));
+  });
+  it("POST rejects an invalid token without touching the database", async () => {
+    expect((await POST(unsubscribeRequest("POST", "https://usetruecap.com/email/unsubscribe?token=junk"))).status).toBe(400);
+    expect(mocks.admin).not.toHaveBeenCalled();
   });
   it.each([401, 403, 404, 429, 500, 503])("keeps cancellation retryable after HTTP %s", async status => {
     queued();

@@ -22,8 +22,7 @@
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { cookies } from "next/headers";
-import { CHECKOUT_RETURN_COOKIE, isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
+import { isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
 import { redirect } from "next/navigation";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { Topbar } from "@/components/dashboard/Topbar";
@@ -35,11 +34,6 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
-import { getStripe } from "@/lib/stripe/client";
-import {
-  planSlugFromPriceId,
-  type PaidPlanSlug,
-} from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -110,53 +104,6 @@ export default async function NewAnalysisPage({
     ? await getSavedDealForEditingAction(requestedSavedDealId)
     : null;
 
-  // Stripe returns subscription buyers directly to the authenticated
-  // analyzer. Resolve the paid amount from the Checkout Session (available
-  // immediately) rather than racing the webhook-written subscription row.
-  // This value is only a server-rendered conversion hint; the banner's server
-  // action independently verifies the recent Session, user, plan, and Price
-  // before it emits success UI or analytics.
-  let billingConversionValue: number | undefined;
-  let billingPurchasedPlan: PaidPlanSlug | null = null;
-  if (
-    resolvedSearchParams.billing === "success" &&
-    process.env.STRIPE_SECRET_KEY
-  ) {
-    // The id lives in the httpOnly return cookie (app/api/billing/return),
-    // never in the URL. Read-only here; the banner's server action clears it.
-    let sessionId: string | undefined;
-    try {
-      sessionId = (await cookies()).get(CHECKOUT_RETURN_COOKIE)?.value;
-    } catch {
-      // cookies() unavailable — no conversion hint, banner still verifies.
-    }
-    if (
-      typeof sessionId === "string" &&
-      /^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)
-    ) {
-      try {
-        const stripe = getStripe();
-        const session = await stripe.checkout.sessions.retrieve(sessionId, {
-          expand: ["line_items"],
-        });
-        // Never attach a conversion value or plan hint from another user's
-        // Checkout Session.
-        if (session.client_reference_id === user.id) {
-          const purchasedPrice = session.line_items?.data?.[0]?.price;
-          if (purchasedPrice?.unit_amount != null) {
-            billingConversionValue = purchasedPrice.unit_amount / 100;
-          }
-          billingPurchasedPlan = planSlugFromPriceId(purchasedPrice?.id);
-        }
-      } catch (error) {
-        console.warn(
-          "[billing] could not resolve checkout session for conversion value:",
-          error instanceof Error ? error.message : error,
-        );
-      }
-    }
-  }
-
   const [capabilities, { data: profile }, isPremium] = await Promise.all([
     getAnalyzerCapabilities(supabase, user),
     supabase
@@ -179,11 +126,14 @@ export default async function NewAnalysisPage({
         isPremium={isPremium}
         canAccessDashboard={navAccess.dashboard}
       />
+      {/* Post-checkout landing. The banner's server action
+          (verifyCheckoutReturnAction) is the sole Stripe lookup: it reads the
+          httpOnly return cookie, verifies the Session against the signed-in
+          user, plan Price, and payment status, and resolves the conversion
+          value. No server-rendered hint here — it cost a second Stripe
+          retrieve per return and the banner never read it. */}
       <Suspense fallback={null}>
-        <BillingSuccessBanner
-          conversionValue={billingConversionValue}
-          purchasedPlanSlug={billingPurchasedPlan ?? undefined}
-        />
+        <BillingSuccessBanner />
       </Suspense>
       <div className="flex-1">
         {/* Same entry island as /analyze: a signed-in click on

@@ -100,6 +100,11 @@ export default function PrivacyPage() {
             <li>
               <strong>Communications</strong> — anything you email us at hello@usetruecap.com.
             </li>
+            <li>
+              <strong>Email opt-outs</strong> — when you unsubscribe from the analysis checklist
+              or playbook emails, we keep a one-way hash of your email address (not the address
+              itself) so no further emails in that series are sent to you.
+            </li>
           </ul>
 
           <h3>Information collected automatically</h3>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { featuresForTier } from "@/lib/entitlements-catalog";
@@ -226,40 +225,16 @@ export default async function ProfilePage({
           ],
     }));
 
-  // Pull the matching plan price so the Google Ads conversion event
-  // carries a meaningful value for value-based bidding strategies.
-  const justSubscribedSlug = (subscriptionRow?.status === "active" || subscriptionRow?.status === "trialing")
-    ? (subscribedPlanSlug ?? undefined)
-    : undefined;
-  const subscriptionValue = justSubscribedSlug
-    ? (() => {
-        const display = stripePriceDisplays[justSubscribedSlug];
-        if (!display) return undefined;
-        return display.unitAmount;
-      })()
-    : undefined;
+  // No Google Ads conversion mount here on purpose. Nothing produces
+  // /profile?billing=success any more (checkout returns land on
+  // /dashboard/new via app/api/billing/return, and the only paid_subscribed
+  // emitter is components/marketing/billing-success-banner.tsx after a
+  // Stripe-verified return). A mount keyed on the subscription id would
+  // re-fire the Purchase conversion for a months-old subscriber who typed
+  // that URL by hand.
 
   return (
     <>
-      {/* Compatibility mount: fires the Google Ads paid-subscription
-          conversion when a subscriber lands here from an OLD checkout success
-          link. Stripe's real success_url is /dashboard/new (app/actions/
-          billing.ts:98), which mounts the tracker through
-          billing-success-banner.tsx.
-
-          Gated on justSubscribedSlug — i.e. an active/trialing subscription
-          actually exists. Without the gate, any signed-in visitor loading
-          /profile?billing=success reports a paid conversion to Google Ads with
-          no Stripe verification at all, and an inflated conversion count is
-          worse than a missing one: it trains bidding toward traffic that never
-          paid. */}
-      {justSubscribedSlug ? (
-        <BillingConversionTracker
-          billingStatus={resolvedSearchParams.billing}
-          value={subscriptionValue}
-          transactionId={subscriptionRow?.stripe_subscription_id ?? undefined}
-        />
-      ) : null}
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-5  space-y-10">
         <ProfileForm
           userId={user.id}

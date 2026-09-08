@@ -13,9 +13,10 @@
  * only inside the verified server-action result; it is never read from the
  * URL.
  *
- * The normal mount is app/dashboard/new/page.tsx, where the server resolves
- * `conversionValue` from the user-bound Stripe Session. app/page.tsx retains
- * a static, fail-closed compatibility mount for legacy return URLs.
+ * The normal mount is app/dashboard/new/page.tsx. app/page.tsx retains a
+ * static, fail-closed compatibility mount for legacy return URLs. Both mount
+ * it prop-less: the server action below is the only Stripe lookup and the
+ * only source of the conversion value and purchased tier.
  *
  * Behavior when billing=success:
  *  1. Verifies the Checkout Session server-side against Stripe, the signed-in
@@ -42,10 +43,14 @@
  *     someone who paid seconds ago. The signal fails OPEN: it's cleared on
  *     poll timeout and on unmount, and non-buyers never see it raised.
  *
- * The billing params are captured on first render and then stripped from
- * the address bar (history.replaceState — no navigation, so the restored
- * calculator draft is untouched). A refresh therefore neither re-fires
- * the conversion nor resurrects a dismissed banner.
+ * The billing params are captured on first render and stripped from the
+ * address bar (history.replaceState — no navigation, so the restored
+ * calculator draft is untouched) once verification SETTLES with ok or
+ * INVALID_RETURN. A refresh therefore neither re-fires the conversion nor
+ * resurrects a dismissed banner. On SERVER_ERROR (Stripe/DB blip) the param
+ * is deliberately left in place: the action keeps the return cookie for
+ * retry, and `billing=success` is not a sensitive parameter, so a reload
+ * re-runs verification instead of silently losing the purchase landing.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -63,28 +68,27 @@ import { scrollBehavior } from "@/lib/utils";
 const PRO_ACTIVATION_POLL_INTERVAL_MS = 2000;
 const PRO_ACTIVATION_POLL_MAX_ATTEMPTS = 10;
 
-export function BillingSuccessBanner({
-  /** Plan list price (dollars) resolved server-side on /dashboard/new; the
-   *  legacy static-page mount omits it and the conversion fires with value 0. */
-  conversionValue,
-  purchasedPlanSlug,
-}: {
-  conversionValue?: number;
-  /** Which tier the checkout bought (resolved server-side from the session).
-   *  Absent on the static mount or when resolution fails — copy then stays
-   *  tier-neutral rather than guessing. */
-  purchasedPlanSlug?: string;
-}) {
-  // Server-rendered values are hints only. The browser action below rechecks
-  // Stripe and is the sole authority for every post-checkout side effect.
-  void conversionValue;
-  void purchasedPlanSlug;
+/** Remove `billing` / `session_id` from the address bar without navigating.
+ *  Cosmetic cleanup only — never let it break the landing. */
+function stripBillingParamsFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("billing") && !url.searchParams.has("session_id")) return;
+    url.searchParams.delete("billing");
+    url.searchParams.delete("session_id");
+    window.history.replaceState(window.history.state, "", url.toString());
+  } catch {
+    // Cosmetic cleanup only.
+  }
+}
+
+export function BillingSuccessBanner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Capture the params ONCE via a lazy useState initializer — the cleanup
-  // effect below strips them from the URL (Next syncs useSearchParams with
-  // history.replaceState), and the tracker/banner must not see them vanish
-  // mid-flight. State (not a ref) so reading the captured values during
+  // Capture the params ONCE via a lazy useState initializer — the verify
+  // effect below strips them from the URL once verification settles (Next
+  // syncs useSearchParams with history.replaceState), and the tracker/banner
+  // must not see them vanish mid-flight. State (not a ref) so reading the captured values during
   // render is legal (react-hooks/refs).
   const [{ billing }] = useState(() => ({
     billing: searchParams.get("billing"),
@@ -132,13 +136,26 @@ export function BillingSuccessBanner({
   // Query parameters are untrusted. Do not acknowledge a purchase or emit any
   // event until the server has retrieved this recent Session from Stripe and
   // bound it to the signed-in user and exact plan Price.
+  //
+  // The params come off the URL only after the action SETTLES:
+  //  - ok / INVALID_RETURN: the return is consumed (or was never valid), so a
+  //    refresh must not re-run it.
+  //  - SERVER_ERROR / SIGN_IN_REQUIRED / rejected promise: the action kept the
+  //    return cookie for retry, so keep `?billing=success` too — otherwise a
+  //    reload lands on a clean URL, `billing !== "success"` short-circuits,
+  //    and the cookie expires unused.
   useEffect(() => {
-    if (billing !== "success") return;
+    if (billing == null) return;
+    if (billing !== "success") {
+      stripBillingParamsFromUrl();
+      return;
+    }
 
     let cancelled = false;
     void verifyCheckoutReturnAction({})
       .then((result) => {
-        if (!cancelled && result.ok) {
+        if (cancelled) return;
+        if (result.ok) {
           setVerifiedReturn({
             checkoutSessionId: result.checkoutSessionId,
             purchasedPlanSlug: result.purchasedPlanSlug,
@@ -147,10 +164,14 @@ export function BillingSuccessBanner({
               : {}),
           });
         }
+        if (result.ok || result.code === "INVALID_RETURN") {
+          stripBillingParamsFromUrl();
+        }
       })
       .catch(() => {
         // Fail closed. A transient verification failure produces no success
         // UI or analytics; the Stripe webhook remains the entitlement source.
+        // The URL keeps `billing=success` so a reload retries.
       });
 
     return () => {
@@ -260,25 +281,6 @@ export function BillingSuccessBanner({
       document.removeEventListener("visibilitychange", recheck);
     };
   }, [activationState, refreshAccess, verifiedReturn]);
-
-  // Strip the billing params from the address bar after mount. Runs in a
-  // PARENT effect, i.e. after the child tracker's effect has already
-  // fired the conversion from its captured props. replaceState (not
-  // router.replace) so there's no navigation/RSC refetch to disturb the
-  // restored draft.
-  useEffect(() => {
-    if (billing == null && sessionId == null) return;
-    try {
-      const url = new URL(window.location.href);
-      if (!url.searchParams.has("billing") && !url.searchParams.has("session_id")) return;
-      url.searchParams.delete("billing");
-      url.searchParams.delete("session_id");
-      window.history.replaceState(window.history.state, "", url.toString());
-    } catch {
-      // Cosmetic cleanup only — never let it break the landing.
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const dismiss = () => {
     setShowBanner(false);

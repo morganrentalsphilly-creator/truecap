@@ -12,8 +12,13 @@ describe("profile subscription display wiring", () => {
     expect(profilePage).not.toContain("planSlug: currentPlan?.slug ?? null");
   });
 
-  it("uses the resolved subscribed slug for conversion price lookup", () => {
-    expect(profilePage).toContain("? (subscribedPlanSlug ?? undefined)");
+  it("mounts no Google Ads conversion tracker (nothing produces /profile?billing=success)", () => {
+    // The only paid_subscribed emitter is billing-success-banner.tsx after a
+    // Stripe-verified checkout return. A subscription-id-keyed mount here
+    // re-fired the Purchase conversion for any active subscriber who opened
+    // /profile?billing=success by hand.
+    expect(profilePage).not.toContain("BillingConversionTracker");
+    expect(profilePage).not.toContain("justSubscribedSlug");
   });
 });
 

@@ -107,6 +107,17 @@ describe("no founder identity in tracked repo text", () => {
     ...readdirSync(ROOT).filter((name) => name.endsWith(".md")),
   ];
 
+  it("keeps binary office documents out of the repo root, where the sweep cannot read them", () => {
+    // 2026-09-08: a tracked cold-email .docx carried the first name three
+    // times as a signature and passed every guard because the sweep only
+    // reads text. Marketing collateral is not build input; keep it out.
+    const BINARY_DOC_EXT = new Set([".docx", ".pptx", ".xlsx", ".doc", ".ppt", ".xls"]);
+    const binaryDocs = readdirSync(ROOT, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && BINARY_DOC_EXT.has(extname(entry.name).toLowerCase()))
+      .map((entry) => entry.name);
+    expect(binaryDocs, "office documents at the repo root cannot be swept for identity").toEqual([]);
+  });
+
 
   it("keeps the private name out of customer surfaces and shared runtime code", () => {
     const runtimeFiles = ["app", "components", "emails", "lib"]

@@ -61,12 +61,17 @@ function CaptureForm({
   const [honeypot, setHoneypot] = useState("");
   const [state, setState] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  // The playbook needs no email: when the drip pipeline is down the action
+  // still returns the link, and we show it beside the error instead of
+  // holding the asset hostage to a working mail send.
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (state === "submitting") return;
     setState("submitting");
     setMessage(null);
+    setFallbackUrl(null);
     const result = await captureLeadMagnetEmail({
       email,
       source,
@@ -78,6 +83,7 @@ function CaptureForm({
     } else {
       setState("error");
       setMessage(result.message);
+      setFallbackUrl(result.downloadUrl ?? null);
     }
   };
 
@@ -114,7 +120,21 @@ function CaptureForm({
         className="absolute -left-[9999px] top-0 h-px w-px opacity-0"
       />
       {message ? (
-        <p className="mt-2 text-xs font-semibold text-destructive">{message}</p>
+        <>
+          <p className="mt-2 text-xs font-semibold text-destructive">{message}</p>
+          {fallbackUrl ? (
+            <p className="mt-1 text-sm text-foreground">
+              <a
+                href={fallbackUrl}
+                className="font-bold text-primary underline underline-offset-4"
+                target="_blank"
+                rel="noopener"
+              >
+                Read the First Offer Playbook
+              </a>
+            </p>
+          ) : null}
+        </>
       ) : (
         <p className="mt-2 text-[11px] text-muted-foreground">
           One link email plus two short follow-ups. Unsubscribe anytime.
