@@ -461,9 +461,19 @@ export async function capturePostAnalysisEmail(input: {
     );
   }
 
-  if (sequenceFailed) {
-    if (scheduledCount === 0 && !deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
-    return { ok: false, code: "SEND_FAILED", message: "We couldn't finish sending your email. Please try again later." };
+  if (sequenceFailed && scheduledCount > 0) {
+    // Mail already left (or is queued) and the 30-day claim stays spent, so
+    // the outcome for the user is the normal partial-send path below (ok when
+    // day-0 landed); the truncated follow-ups are ours to see, not theirs.
+    Sentry.captureMessage("post-analysis-email-capture: sequence truncated after partial send", {
+      level: "warning",
+      tags: { feature: "post-analysis-email-capture", day0_sent: String(day0Sent) },
+      extra: { scheduledCount, totalAttempts: enabledSequence.length },
+    });
+  } else if (sequenceFailed) {
+    // Nothing went out — refund the slot unless a timeout may have queued mail.
+    if (!deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return { ok: false, code: "SEND_FAILED", message: "We couldn't send your email right now. Please try again in a minute." };
   }
   if (suppressedDuringCapture) {
     if (scheduledCount === 0) await releaseEmailCaptureSlot(claim.emailBucketKey);

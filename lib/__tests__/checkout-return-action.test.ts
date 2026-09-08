@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  cookieGet: vi.fn(), cookieSet: vi.fn(), user: vi.fn(), retrieve: vi.fn(), complete: vi.fn(),
+  cookieGet: vi.fn(), cookieSet: vi.fn(), user: vi.fn(), retrieve: vi.fn(), complete: vi.fn(), sentry: vi.fn(),
 }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: mocks.cookieGet, set: mocks.cookieSet }) }));
-vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
+vi.mock("@sentry/nextjs", () => ({ captureException: mocks.sentry, captureMessage: vi.fn() }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminSupabaseClient: () => ({}) }));
 vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: async () => ({
   auth: { getUser: mocks.user },
@@ -23,7 +23,7 @@ beforeEach(() => {
   mocks.cookieGet.mockReturnValue({ value: "cs_test_return123" });
   mocks.user.mockResolvedValue({ data: { user: { id: "user-123" } } });
   mocks.retrieve.mockResolvedValue({
-    mode: "subscription", status: "complete", subscription: "sub_paid",
+    mode: "subscription", status: "complete", payment_status: "paid", subscription: "sub_paid",
     client_reference_id: "user-123", metadata: { user_id: "user-123", plan_slug: "pro_monthly" },
     line_items: { data: [{ price: { id: "price_current_pro", unit_amount: 2999, currency: "usd" } }] },
     created: Math.floor(Date.now() / 1000) - 60,
@@ -55,6 +55,28 @@ describe("authenticated checkout cookie verification", () => {
     expect(await verifyCheckoutReturnAction({})).toMatchObject({ ok: false, code: "INVALID_RETURN" });
     expect(mocks.complete).not.toHaveBeenCalled();
     expect(mocks.cookieSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects a completed Session whose delayed payment has not settled", async () => {
+    const session = await mocks.retrieve();
+    mocks.retrieve.mockResolvedValue({ ...session, payment_status: "unpaid" });
+    expect(await verifyCheckoutReturnAction({})).toMatchObject({ ok: false, code: "INVALID_RETURN" });
+    expect(mocks.complete).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
+  });
+
+  it("still returns ok when intent closure loses the race to the webhook (best-effort, reported)", async () => {
+    mocks.complete.mockRejectedValue(new Error("checkout-intent completion failed: no-row"));
+    expect(await verifyCheckoutReturnAction({})).toEqual({
+      ok: true, checkoutSessionId: "cs_test_return123", purchasedPlanSlug: "pro_monthly", conversionValue: 29.99,
+    });
+    expect(mocks.complete).toHaveBeenCalledTimes(1);
+    expect(mocks.sentry).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ tags: expect.objectContaining({ feature: "billing-checkout-return", stage: "intent-closure" }) }),
+    );
+    // The verified return is consumed exactly as on the happy path.
+    expect(mocks.cookieSet).toHaveBeenCalledWith("tc_checkout_return", "", expect.objectContaining({ httpOnly: true, maxAge: 0 }));
   });
 
   it("keeps the cookie for retry after Stripe fails", async () => {

@@ -13,6 +13,10 @@ export type CheckoutReturnCandidate = {
   currency: string | null;
   createdAtSeconds: number;
   hasSubscription: boolean;
+  /** Stripe `payment_status`. Delayed-notification methods (e.g. bank debit)
+   *  complete the Session before funds settle; mirror the webhook's gate so
+   *  the browser never fires the Purchase conversion early. */
+  paymentStatus: string | null;
 };
 
 export type VerifiedCheckoutReturn = {
@@ -41,6 +45,8 @@ export function verifyCheckoutReturnCandidate(input: {
   if (
     candidate.mode !== "subscription" ||
     candidate.status !== "complete" ||
+    (candidate.paymentStatus !== "paid" &&
+      candidate.paymentStatus !== "no_payment_required") ||
     !candidate.hasSubscription ||
     candidate.clientReferenceId !== input.expectedUserId ||
     candidate.metadataUserId !== input.expectedUserId ||

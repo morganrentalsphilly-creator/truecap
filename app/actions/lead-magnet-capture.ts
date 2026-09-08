@@ -59,6 +59,12 @@ export type LeadMagnetCaptureResult =
         | "SEND_FAILED"
         | "CONFIG_MISSING";
       message: string;
+      /**
+       * The playbook needs no email to read. Present on SEND_FAILED and
+       * CONFIG_MISSING so the drip pipeline can never hold the asset hostage;
+       * the client shows the link next to the "could not email it" note.
+       */
+      downloadUrl?: string;
     };
 
 type SequenceCtx = { siteUrlHtml: string };
@@ -150,14 +156,24 @@ export async function captureLeadMagnetEmail(input: {
     Sentry.captureMessage("Drip suppression unavailable — capture blocked", {
       level: "error", tags: { feature: "lead-magnet-capture" },
     });
-    return { ok: false, code: "SEND_FAILED", message: "We couldn't send your email right now. Please try again in a minute." };
+    return {
+      ok: false,
+      code: "SEND_FAILED",
+      message: "We couldn't email the playbook right now, but the direct link below still works. Try again in a minute for the email.",
+      downloadUrl,
+    };
   }
   const unsubscribeUrl = buildDripUnsubscribeUrl(siteUrl, email);
   if (!unsubscribeUrl) {
     Sentry.captureMessage("Signed HTTPS drip unsubscribe unavailable — capture blocked", {
       level: "error", tags: { feature: "lead-magnet-capture" },
     });
-    return { ok: false, code: "CONFIG_MISSING", message: "Email sending isn't configured. Try again later." };
+    return {
+      ok: false,
+      code: "CONFIG_MISSING",
+      message: "Email sending isn't configured yet, but the direct link below still works.",
+      downloadUrl,
+    };
   }
 
   let ip = "unknown";
@@ -187,7 +203,8 @@ export async function captureLeadMagnetEmail(input: {
         ok: false,
         code: "SEND_FAILED",
         message:
-          "We couldn't send the pack right now. Please try again in a minute.",
+          "We couldn't email the playbook right now, but the direct link below still works. Try again in a minute for the email.",
+        downloadUrl,
       };
     }
     if (claim.reason === "GLOBAL_LIMIT") {
@@ -219,7 +236,8 @@ export async function captureLeadMagnetEmail(input: {
     return {
       ok: false,
       code: "CONFIG_MISSING",
-      message: "Email sending isn't configured. Try again later.",
+      message: "Email sending isn't configured yet, but the direct link below still works.",
+      downloadUrl,
     };
   }
 
@@ -305,9 +323,25 @@ export async function captureLeadMagnetEmail(input: {
     }
   }
 
+  if (sequenceFailed && scheduledCount > 0) {
+    // Mail already left (or is queued) and the 30-day claim stays spent, so
+    // this is a success for the user; the truncated follow-ups are ours to see.
+    Sentry.captureMessage("Lead magnet sequence truncated after partial send", {
+      level: "warning",
+      tags: { feature: "lead-magnet-capture", day0_sent: String(day0Sent) },
+      extra: { scheduled_count: scheduledCount, total_attempts: SEQUENCE.length },
+    });
+    return { ok: true, scheduledCount, downloadUrl };
+  }
   if (sequenceFailed) {
-    if (scheduledCount === 0 && !deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
-    return { ok: false, code: "SEND_FAILED", message: "We couldn't finish sending your email. Please try again later." };
+    // Nothing went out — refund the slot unless a timeout may have queued mail.
+    if (!deliveryUncertain) await releaseEmailCaptureSlot(claim.emailBucketKey);
+    return {
+      ok: false,
+      code: "SEND_FAILED",
+      message: "We couldn't email the playbook right now, but the direct link below still works. Try again in a minute for the email.",
+      downloadUrl,
+    };
   }
   if (suppressedDuringCapture) {
     if (scheduledCount === 0) await releaseEmailCaptureSlot(claim.emailBucketKey);

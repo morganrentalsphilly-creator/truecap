@@ -1170,6 +1170,7 @@ export async function verifyCheckoutReturnAction(
         currency: purchasedPrice?.currency ?? null,
         createdAtSeconds: session.created,
         hasSubscription: Boolean(session.subscription),
+        paymentStatus: session.payment_status ?? null,
       },
       expectedUserId: user.id,
       expectedPriceId,
@@ -1187,10 +1188,23 @@ export async function verifyCheckoutReturnAction(
     // draining. The old handler activates billing but cannot close the new
     // ledger. The authenticated, fully verified success return is a second
     // idempotent closure path; the current webhook can still apply Pack credit.
-    await completeSubscriptionCheckoutIntentFromWebhook(
-      createAdminSupabaseClient(),
-      session,
-    );
+    //
+    // Best-effort only: the webhook is the authoritative closer and runs this
+    // same helper. When both read the intent as `open` and race the guarded
+    // update, the loser throws "no-row" — that must not convert a fully
+    // verified purchase into SERVER_ERROR (which would drop the banner, the
+    // Purchase conversion, and the entitlement poll for a paid customer).
+    try {
+      await completeSubscriptionCheckoutIntentFromWebhook(
+        createAdminSupabaseClient(),
+        session,
+      );
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { feature: "billing-checkout-return", stage: "intent-closure" },
+        extra: { userId: user.id },
+      });
+    }
 
     // One-shot handoff: clear the return cookie once it has been verified so
     // a stale id cannot resurface the success banner on a later visit.

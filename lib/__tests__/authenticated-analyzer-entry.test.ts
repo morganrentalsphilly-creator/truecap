@@ -32,33 +32,31 @@ describe("authenticated analyzer consolidation", () => {
     );
   });
 
-  it("resolves the same user-bound Session value on /dashboard/new and mounts the existing banner", () => {
+  it("mounts the banner prop-less on /dashboard/new and leaves the Stripe lookup to the server action", () => {
     expect(dashboardAnalyzer).toContain("billing?: string");
     expect(dashboardAnalyzer).toContain("session_id?: string");
+    // Legacy URLs that still carry the id bounce through the cookie handoff.
     expect(dashboardAnalyzer).toContain(
       'resolvedSearchParams.billing === "success"',
     );
     expect(dashboardAnalyzer).toContain(
-      "/^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)",
+      "isCheckoutSessionId(resolvedSearchParams.session_id)",
     );
-    expect(dashboardAnalyzer).toContain(
-      "stripe.checkout.sessions.retrieve(sessionId",
-    );
-    expect(dashboardAnalyzer).toContain('expand: ["line_items"]');
-    expect(dashboardAnalyzer).toContain(
-      "session.client_reference_id === user.id",
-    );
-    expect(dashboardAnalyzer).toContain("purchasedPrice.unit_amount / 100");
-    expect(dashboardAnalyzer).toContain(
-      "planSlugFromPriceId(purchasedPrice?.id)",
-    );
-    expect(dashboardAnalyzer).toContain("<BillingSuccessBanner");
-    expect(dashboardAnalyzer).toContain(
-      "conversionValue={billingConversionValue}",
-    );
-    expect(dashboardAnalyzer).toContain(
-      "purchasedPlanSlug={billingPurchasedPlan ?? undefined}",
-    );
+    expect(dashboardAnalyzer).toContain("redirect(\n      `/api/billing/return?session_id=");
+    expect(dashboardAnalyzer).toContain("<BillingSuccessBanner />");
+    // The server-side "conversion hint" was a second Stripe retrieve per
+    // return whose props the banner discarded (`void conversionValue`).
+    // verifyCheckoutReturnAction is the single Stripe lookup and the only
+    // source of conversionValue / purchasedPlanSlug.
+    expect(dashboardAnalyzer).not.toContain("stripe.checkout.sessions.retrieve");
+    expect(dashboardAnalyzer).not.toContain("getStripe");
+    expect(dashboardAnalyzer).not.toContain("billingConversionValue");
+    expect(dashboardAnalyzer).not.toContain("billingPurchasedPlan");
+    expect(dashboardAnalyzer).not.toContain("CHECKOUT_RETURN_COOKIE");
+    const banner = read("components/marketing/billing-success-banner.tsx");
+    expect(banner).toContain("export function BillingSuccessBanner() {");
+    expect(banner).not.toContain("void conversionValue");
+    expect(banner).not.toContain("void purchasedPlanSlug");
   });
 
   it("redirects a verified signed-in root request while reflecting only validated analyzer parameters", () => {

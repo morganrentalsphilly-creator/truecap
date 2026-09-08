@@ -537,7 +537,9 @@ export async function POST(req: Request) {
       case "plan.deleted": {
         // The public price reads behind /pricing, /for-agents and /profile
         // are memoised for 10 minutes (lib/stripe/display-prices.ts). Drop
-        // that cache here so a founder price change shows within seconds.
+        // that cache here so a price change shows within seconds when the
+    // endpoint subscribes to price.* / plan.* events; otherwise the
+    // 10-minute TTL applies.
         revalidateStripeDisplayPrices();
         break;
       }

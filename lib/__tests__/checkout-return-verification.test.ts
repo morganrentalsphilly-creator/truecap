@@ -23,6 +23,7 @@ function candidate(
     currency: "usd",
     createdAtSeconds: Math.floor((NOW - 5 * 60 * 1000) / 1000),
     hasSubscription: true,
+    paymentStatus: "paid",
     ...overrides,
   };
 }
@@ -44,9 +45,20 @@ describe("post-checkout return verification", () => {
     });
   });
 
+  it("accepts a completed Session that needed no payment (100% coupon / trial)", () => {
+    expect(verify({ paymentStatus: "no_payment_required" })).toEqual({
+      purchasedPlanSlug: "pro_monthly",
+      conversionValue: 29.99,
+    });
+  });
+
   it.each([
     ["wrong mode", { mode: "payment" }],
     ["not complete", { status: "open" }],
+    // Mirrors the webhook's `paymentReady` gate: a delayed-notification
+    // method completes the Session before funds settle.
+    ["unpaid (delayed payment method)", { paymentStatus: "unpaid" }],
+    ["unknown payment status", { paymentStatus: null }],
     ["missing subscription", { hasSubscription: false }],
     ["wrong client reference", { clientReferenceId: "other-user" }],
     ["wrong metadata user", { metadataUserId: "other-user" }],
@@ -85,6 +97,24 @@ describe("post-checkout browser integration", () => {
     expect(banner).not.toContain('searchParams.get("session_id")');
     expect(banner).not.toContain("!sessionId ||");
     expect(action).toContain("cookieStore.get(CHECKOUT_RETURN_COOKIE)");
+  });
+
+  it("strips the billing params only once verification settles as consumed", () => {
+    // ok / INVALID_RETURN → strip (a refresh must not re-run a consumed
+    // return). SERVER_ERROR → keep `?billing=success` so a reload retries
+    // against the return cookie the action deliberately kept.
+    const verifyStart = banner.indexOf("verifyCheckoutReturnAction({})");
+    const stripInThen = banner.indexOf(
+      'if (result.ok || result.code === "INVALID_RETURN") {\n          stripBillingParamsFromUrl();',
+      verifyStart,
+    );
+    expect(stripInThen).toBeGreaterThan(verifyStart);
+    expect(stripInThen).toBeLessThan(banner.indexOf(".catch(() => {", verifyStart));
+    // No mount-time strip effect remains.
+    expect(banner).not.toContain("// eslint-disable-next-line react-hooks/exhaustive-deps\n  }, []);");
+    // Exactly two call sites: non-success billing values at mount, and the
+    // settled verify result. (The definition has no trailing semicolon.)
+    expect(banner.match(/stripBillingParamsFromUrl\(\);/g)?.length).toBe(2);
   });
 
   it("gates success analytics, conversion, banner, and polling on verification", () => {

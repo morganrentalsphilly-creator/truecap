@@ -10,7 +10,8 @@
 --                         capture checks this before it schedules anything.
 --
 -- Both tables are service-role only (lib/email-drip-unsubscribe.ts through
--- createAdminSupabaseClient). The raw address is never stored.
+-- createAdminSupabaseClient). Only a one-way hash of the address is stored;
+-- it is still personal data for retention and deletion purposes.
 
 create extension if not exists pgcrypto;
 

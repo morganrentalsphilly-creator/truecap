@@ -23,12 +23,38 @@
  *   - Each threshold fires at most once per page load.
  *   - Throttled via requestAnimationFrame — won't thrash the main thread.
  *   - Catches all errors so analytics never break the UI.
+ *   - Consent-gated: nothing reaches window.dataLayer until the cookie
+ *     banner's stored decision is "granted" (same rule as track() in
+ *     lib/analytics/site-events.ts). GTM replays every queued dataLayer
+ *     entry once it loads, so an unconditional pre-consent push would
+ *     forward behaviour recorded before the decision to Google.
  */
 
 import { useEffect } from "react";
+import { readStoredAnalyticsConsent } from "@/lib/analytics/site-events";
 
 type Threshold = 25 | 50 | 75 | 100;
 const THRESHOLDS: Threshold[] = [25, 50, 75, 100];
+
+/**
+ * Push one scroll-depth threshold to GTM. Returns true only when the event
+ * was actually queued; without a stored "granted" consent it is a no-op so
+ * the pre-decision queue never exists. Never throws.
+ */
+export function pushScrollDepthEvent(threshold: Threshold, page: string): boolean {
+  if (readStoredAnalyticsConsent() !== "granted") return false;
+  try {
+    (window.dataLayer ??= []).push({
+      event: `scroll_depth_${threshold}`,
+      scrollDepthPct: threshold,
+      page,
+    });
+    return true;
+  } catch {
+    /* never let analytics break the UI */
+    return false;
+  }
+}
 
 export function ScrollDepthTracker() {
   useEffect(() => {
@@ -56,16 +82,7 @@ export function ScrollDepthTracker() {
           for (const t of THRESHOLDS) {
             if (pct >= t && !fired.has(t)) {
               fired.add(t);
-              try {
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({
-                  event: `scroll_depth_${t}`,
-                  scrollDepthPct: t,
-                  page: window.location.pathname,
-                });
-              } catch {
-                /* never let analytics break the UI */
-              }
+              pushScrollDepthEvent(t, window.location.pathname);
             }
           }
 

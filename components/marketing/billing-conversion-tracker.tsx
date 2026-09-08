@@ -7,7 +7,9 @@
  * PRIMARY mount: the post-checkout /dashboard/new analyzer landing — Stripe's
  * success_url includes `?billing=success&session_id=…` and this tracker is
  * mounted through components/marketing/billing-success-banner.tsx. The static
- * homepage and /profile retain compatibility mounts for old links.
+ * /profile no longer mounts this tracker (2026-09-08): nothing produced
+ * /profile?billing=success, and a subscription-id keyed mount could fire a
+ * second purchase event for the same Checkout Session.
  *
  * Renders nothing; mounting is the side effect. The `value` should be
  * the dollar amount of the plan they just bought so Google can use
