@@ -34,7 +34,7 @@ const SERP_TITLE = "Cash flow vs appreciation: which wins in 2026?";
 const DESCRIPTION =
   "A 10-year side-by-side of cash flow vs. appreciation that shows when each strategy wins, and the 2026 conditions that have flipped the historical math.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = "2026-09-11";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -320,6 +320,14 @@ export default function BlogPost() {
           <p>
             Same investor, same $400k purchase, 25% down, 7% rate, 10-year hold.
             Different cap rates and appreciation assumptions for each market.
+            Run your own rate and down payment through the{" "}
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="text-primary font-semibold hover:underline"
+            >
+              mortgage payment calculator
+            </Link>{" "}
+            before assuming this 7% scenario matches your loan.
           </p>
           <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[640px] text-sm">
