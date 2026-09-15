@@ -29,7 +29,7 @@ const TITLE = "How to screen a rental property in 60 seconds";
 const DESCRIPTION =
   "A fast rental screen: organize five inputs, review four modeled metrics, and see what still needs checking before a full underwrite.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-08-24";
+const MODIFIED_AT = "2026-09-15";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -405,7 +405,16 @@ export default function BlogPost() {
             Comparing cap rate with current alternatives can add context, but it
             is not an apples-to-apples suitability rule: liquidity, leverage,
             workload, transaction costs, taxes, condition risk, and uncertain
-            future price changes differ materially.
+            future price changes differ materially. For the full walkthrough,
+            including how to source the NOI inputs and what a market cap-rate
+            table actually tells you,{" "}
+            <Link
+              href="/blog/how-to-calculate-cap-rate"
+              className="text-primary font-semibold hover:underline"
+            >
+              see the cap-rate deep dive
+            </Link>
+            .
           </p>
           <h2 className="text-2xl sm:text-3xl">
             Metric 3: Cash-on-cash return (15 seconds)
@@ -476,6 +485,17 @@ export default function BlogPost() {
             a total-return forecast and the risks are different. Record which
             cash flows, fees, taxes, liquidity limits, leverage, work, and
             future value assumptions are included before comparing alternatives.
+            Comparing against a metro average is also weaker than comparing
+            against that metro specifically —{" "}
+            <Link
+              href="/markets/philadelphia"
+              className="text-primary font-semibold hover:underline"
+            >
+              TrueCap&apos;s Philadelphia market page
+            </Link>{" "}
+            is one example of the labeled HUD Fair Market Rent and price
+            context that should replace a national figure once you know the
+            submarket.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Putting it together</h2>
