@@ -78,14 +78,24 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
   const loading = new Promise<void>((resolve, reject) => {
-    const awaitPlaces = () => {
+    // Under `loading=async` the script's load event can fire BEFORE the
+    // bootstrap defines google.maps.importLibrary (measured on prod
+    // 2026-09-18: undefined at onload on a fresh visit). Treating that as an
+    // "old bootstrap" resolved early and the first focus latched "Address
+    // suggestions are unavailable". Poll for either readiness signal instead.
+    const awaitPlaces = (deadline = Date.now() + 10_000): void => {
+      if (window.google?.maps?.places?.AutocompleteSuggestion) return resolve();
       const importLibrary = window.google?.maps?.importLibrary;
-      if (typeof importLibrary !== "function") return resolve();
-      return importLibrary("places").then(
-        () => resolve(),
-        (error: unknown) =>
-          reject(error instanceof Error ? error : new Error("Places library failed to load")),
-      );
+      if (typeof importLibrary === "function") {
+        importLibrary("places").then(
+          () => resolve(),
+          (error: unknown) =>
+            reject(error instanceof Error ? error : new Error("Places library failed to load")),
+        );
+        return;
+      }
+      if (Date.now() > deadline) return reject(new Error("Places library never became ready"));
+      window.setTimeout(() => awaitPlaces(deadline), 50);
     };
 
     const existing = document.getElementById("google-maps-places-script") as HTMLScriptElement | null;
@@ -117,19 +127,7 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     // Places API itself was always fine — calling it by hand on the same
     // "failed" page returned suggestions — which is why the old console
     // message pointed the fix at Google Cloud Console and wasted the trail.
-    script.onload = () => {
-      const importLibrary = window.google?.maps?.importLibrary;
-      if (typeof importLibrary !== "function") {
-        // Older bootstrap without importLibrary: symbols are already attached.
-        resolve();
-        return;
-      }
-      importLibrary("places").then(
-        () => resolve(),
-        (error: unknown) =>
-          reject(error instanceof Error ? error : new Error("Places library failed to load")),
-      );
-    };
+    script.onload = () => awaitPlaces();
     script.onerror = () => reject(new Error("Failed to load Google Maps script"));
     document.head.appendChild(script);
   });
