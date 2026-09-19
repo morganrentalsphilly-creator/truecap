@@ -336,27 +336,26 @@ export function PricingTogglePlans({
                   : `Save ${annualSavingsPct}%`}
             </span>
           ) : null}
-          {/* "BEST VALUE" — secondary ribbon on annual to make the
-              recommended option visually obvious. The default-selected
-              annual + this ribbon together do the work of telling the
-              user which to pick. */}
-          {period === "annual" ? (
-            <span className="absolute right-4 top-4 rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
-              ★ Best value
-            </span>
-          ) : null}
-
-          <div className="flex items-baseline justify-between">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-lg font-extrabold text-foreground">{proOfferName}</h3>
-            {proCardDecision.kind === "current" ? (
-              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
-                Current
-              </span>
-            ) : (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-                Recommended
-              </span>
-            )}
+            {/* Badges share the header row. "Best value" (annual only) used
+                to be pinned absolute top-right, landing on "Recommended". */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {period === "annual" ? (
+                <span className="rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
+                  ★ Best value
+                </span>
+              ) : null}
+              {proCardDecision.kind === "current" ? (
+                <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
+                  Current
+                </span>
+              ) : (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+                  Recommended
+                </span>
+              )}
+            </div>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Turn every address into a reviewable acquisition decision.

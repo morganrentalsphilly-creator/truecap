@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Article pages (blog, methodology, about, calculators) use `prose`; without
+   the plugin those classes were no-ops and posts rendered with 0px paragraph
+   margins and bullet-less lists. */
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
