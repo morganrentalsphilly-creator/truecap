@@ -3771,7 +3771,7 @@ export function SavedAnalysesPage({
                                 ? "Download saved PDF"
                                 : "Export PDF"}
                               {!canExportPdf && !item.hasSavedPdf ? (
-                                <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[10px] font-bold text-primary">
                                   PRO
                                 </span>
                               ) : null}
@@ -4399,7 +4399,7 @@ export function SavedAnalysesPage({
                                     ? "Download saved PDF"
                                     : "Export PDF"}
                                   {!canExportPdf && !item.hasSavedPdf ? (
-                                    <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                    <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[10px] font-bold text-primary">
                                       PRO
                                     </span>
                                   ) : null}

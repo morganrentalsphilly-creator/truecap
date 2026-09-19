@@ -907,7 +907,7 @@ export function BatchTriageClient({
                         >
                           <span>{money(row.maxOffer)}</span>
                           {row.targetLabel ? (
-                            <span className="mt-0.5 block max-w-40 text-[9px] font-sans font-normal leading-tight text-muted-foreground">
+                            <span className="mt-0.5 block max-w-40 text-[10px] font-sans font-normal leading-tight text-muted-foreground">
                               {row.targetLabel}
                             </span>
                           ) : null}

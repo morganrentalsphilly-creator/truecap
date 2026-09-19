@@ -111,7 +111,7 @@ export function DealQaPanel({
           {/* Pill hidden below sm - the AI summary card renders directly
               above with the identical Beta pill; one flag covers the pair
               on phones. */}
-          <span className="hidden rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-muted-foreground sm:inline">
+          <span className="hidden rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground sm:inline">
             Beta
           </span>
         </p>

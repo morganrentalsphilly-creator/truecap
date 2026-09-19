@@ -395,7 +395,7 @@ export function PricingTogglePlans({
             >
               Annual
               {annualSavingsPct && annualSavingsPct > 0 ? (
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-primary-foreground">
+                <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground">
                   −{annualSavingsPct}%
                 </span>
               ) : null}
