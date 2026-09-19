@@ -398,7 +398,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               </p>
             </div>
             <div className="border-t border-border pt-3">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Prepared by
               </p>
               <p className="mt-1 text-xs font-bold text-foreground">

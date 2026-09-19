@@ -308,7 +308,7 @@ export default async function PricingPage() {
         <section
           id="plans"
           aria-labelledby="pricing-plans-title"
-          className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6"
+          className="mx-auto mt-4 max-w-5xl px-4 pb-6 sm:px-6"
         >
           <h2 id="pricing-plans-title" className="sr-only">Plans</h2>
           {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)

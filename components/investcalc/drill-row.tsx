@@ -102,7 +102,7 @@ export function DrillRow({
             <span className="flex items-center gap-2">
               <span className="text-sm font-bold text-foreground">{title}</span>
               {locked ? (
-                <span className="inline-flex shrink-0 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white sm:text-[10px]">
+                <span className="inline-flex shrink-0 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white sm:text-[10px]">
                   PRO
                 </span>
               ) : null}

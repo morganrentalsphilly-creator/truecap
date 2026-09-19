@@ -487,7 +487,7 @@ export function InputConfidenceCard({
             />
           ) : (
             <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
                 Sensitivity risk
               </p>
               <span
@@ -498,7 +498,7 @@ export function InputConfidenceCard({
               >
                 {confidence.sensitivityRisk}
               </span>
-              <p className="mt-1 text-[9px] text-muted-foreground">
+              <p className="mt-1 text-[10px] text-muted-foreground">
                 Unverified-input risk
               </p>
             </div>
@@ -995,7 +995,7 @@ function SummaryMetric({
 }) {
   return (
     <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
         {label}
       </p>
       <p className="mt-1 break-words font-mono text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
@@ -1004,7 +1004,7 @@ function SummaryMetric({
           <span className="text-xs text-muted-foreground">{suffix}</span>
         ) : null}
       </p>
-      <p className="mt-0.5 text-[9px] text-muted-foreground">{help}</p>
+      <p className="mt-0.5 text-[10px] text-muted-foreground">{help}</p>
     </div>
   );
 }

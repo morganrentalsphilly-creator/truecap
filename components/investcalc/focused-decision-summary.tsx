@@ -1123,7 +1123,7 @@ export function FocusedDecisionSummary({
           )}
           {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
           {isSaveLocked ? (
-            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
               PRO
             </span>
           ) : null}

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Article pages (blog, methodology, about, calculators) use `prose`; without
+   the plugin those classes were no-ops and posts rendered with 0px paragraph
+   margins and bullet-less lists. */
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -611,4 +615,13 @@ summary:has([class*="rotate-"])::-webkit-details-marker {
 summary:has(svg)::marker,
 summary:has([class*="rotate-"])::marker {
   content: "";
+}
+
+/* FAQ / disclosure rows rendered 24px tall on phones: below a comfortable
+   tap target. Summaries that already set their own min-h-* are left alone.
+   Layered so a utility (py-*, p-*) on a specific summary still wins. */
+@layer base {
+  summary:not([class*="min-h-"]) {
+    padding-block: 0.625rem;
+  }
 }

@@ -1174,7 +1174,7 @@ function CompareMobileDealStrip({
               {getDealLabel(deal, { short: true })}
             </p>
             {deal.methodologyLabel ? (
-              <p className="mt-0.5 text-[9px] leading-tight text-muted-foreground">
+              <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
                 {deal.methodologyLabel}
               </p>
             ) : null}
