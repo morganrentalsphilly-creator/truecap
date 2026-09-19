@@ -854,7 +854,7 @@ export function TemplatesManagementPage({
                               {template.templateName}
                             </p>
                             {template.isDefault ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                                 <Star className="size-2.5" /> Default
                               </span>
                             ) : null}

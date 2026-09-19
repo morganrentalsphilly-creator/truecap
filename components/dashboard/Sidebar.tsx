@@ -150,7 +150,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                   </span>
                 )}
                 {!item.enabled ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-[9px] font-bold text-sidebar-foreground/80">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-[10px] font-bold text-sidebar-foreground/80">
                     <LockKeyhole className="size-2.5" aria-hidden />
                     PRO
                   </span>

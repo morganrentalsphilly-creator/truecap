@@ -269,7 +269,7 @@ function HeroProductMock({
           </span>
           <span
             aria-label="Example analysis"
-            className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
+            className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
           >
             <span
               aria-hidden
