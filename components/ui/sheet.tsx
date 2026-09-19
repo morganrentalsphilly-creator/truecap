@@ -77,8 +77,10 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
-          <XIcon className="size-4" />
+        {/* focus-visible, not focus: Radix auto-focuses this button on open, and
+            a plain :focus ring drew a boxed outline on every tap-to-open. */}
+        <SheetPrimitive.Close className="ring-offset-background focus-visible:ring-ring hover:bg-muted absolute top-4 right-4 inline-flex size-11 items-center justify-center rounded-full opacity-70 transition hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
+          <XIcon className="size-5" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>

@@ -88,7 +88,7 @@ export function MarketingNav() {
 export function MarketingMobileMenu() {
   const [open, setOpen] = useState(false);
   const itemClass =
-    "flex min-h-12 items-center justify-between rounded-lg px-3 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "flex min-h-12 flex-col justify-center rounded-lg px-3 py-2 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
@@ -98,8 +98,10 @@ export function MarketingMobileMenu() {
       >
         <Menu className="size-5" aria-hidden />
       </SheetTrigger>
-      <SheetContent side="right" className="w-[min(20rem,88vw)] overflow-y-auto">
-        <SheetTitle>Menu</SheetTitle>
+      <SheetContent side="right" className="w-[min(20rem,88vw)] gap-0 overflow-y-auto px-4 pb-6 pt-4">
+        {/* Title row is padded to the close button's 44px hit box so the two
+            sit on one line instead of the title hugging the drawer corner. */}
+        <SheetTitle className="flex min-h-11 items-center px-3 pr-12 text-lg">Menu</SheetTitle>
         <SheetDescription className="sr-only">
           Site navigation and account links
         </SheetDescription>
@@ -116,7 +118,7 @@ export function MarketingMobileMenu() {
           {LEARN_LINKS.map((l) => (
             <Link key={l.href} href={l.href} className={itemClass} onClick={() => setOpen(false)}>
               <span>{l.label}</span>
-              <span className="text-xs font-normal text-muted-foreground">{l.hint}</span>
+              <span className="mt-0.5 text-xs font-normal text-muted-foreground">{l.hint}</span>
             </Link>
           ))}
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
