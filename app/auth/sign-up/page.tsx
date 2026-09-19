@@ -8,7 +8,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 export const metadata: Metadata = {
   title: "Create account",
   description:
-    "Create a TrueCap account and start your 21-day free trial. No card.",
+    "Create a TrueCap account to unlock your Offer Ceiling and start your 21-day free Pro evaluation. No card.",
   alternates: { canonical: "/auth/sign-up" },
   robots: { index: false, follow: false },
 };
@@ -29,8 +29,10 @@ export default function SignUpPage() {
 
   return (
     <AuthShell
-      title="Create account"
-      description="Keep this decision and evaluate three Pro deals plus one comparison. No card, no scheduled charge."
+      title="You're one step away from your full deal decision."
+      description="Create your account to unlock your Offer Ceiling, downside analysis, saved deals, and Pro evaluation. $0 today. No card required. Nothing automatically renews."
+      panelTitle="Know your walk-away price before you make the offer."
+      panelDescription="Offer Ceiling. Downside analysis. Saved deals. Your work stays private."
     >
       {/* Suspense boundary is required because SignUpForm (via the
           embedded GoogleAuthButton) calls useSearchParams. Next 16

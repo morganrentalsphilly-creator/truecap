@@ -125,6 +125,9 @@ export const ANALYTICS_EVENT_DICTIONARY = {
     "decision_readiness",
     "has_feasible",
   ]),
+  offer_ceiling_reveal_cta_clicked: define("growth", "anonymous-aggregate", [
+    "placement",
+  ]),
   binding_constraint_viewed: define("product", "anonymous-aggregate", [
     "constraint",
     "target_source",

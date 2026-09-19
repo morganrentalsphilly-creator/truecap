@@ -23,10 +23,13 @@ import { Header } from "@/components/investcalc/header";
 import { AnalyzePageContent } from "@/components/marketing/analyze-page-content";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  BuiltByInvestor,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
+  HowTrueCapWorks,
   PdfProUpsell,
+  ProblemBlock,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -253,8 +256,11 @@ export default async function AuthedHome({
       {!user && <MarketingHero />}
       {!user && (
         <div className="truecap-marketing-tail contents">
-          <DataSourcesSection />
+          <ProblemBlock />
+          <HowTrueCapWorks />
           <PdfProUpsell />
+          <DataSourcesSection />
+          <BuiltByInvestor />
           <div data-homepage-block="real-proof" className="contents">
             <SocialProof />
             <Testimonials limit={3} />

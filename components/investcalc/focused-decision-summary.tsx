@@ -897,6 +897,51 @@ export function FocusedDecisionSummary({
                 : "TrueCap Pro calculates the highest price that still clears the targets you choose — like the examples above — plus the binding constraint and a screening range."
               : "The highest price that still meets the criteria shown."}
           </p>
+          {/* Anonymous range-preview reveal (2026-09 positioning pass).
+              Presentation only: the server already decided this request gets
+              the coarse range, and the exact value never reaches the browser.
+              The button reuses the anonymous Save hand-off (draft + pending
+              save → sign-up → /dashboard/new), where a new account's
+              evaluation serves the exact Offer Ceiling. */}
+          {!isAuthenticated &&
+          targetAdopted &&
+          !targetBlocked &&
+          !canShowPriceCeiling &&
+          rangePreview &&
+          !isOfferCeilingLoading &&
+          !offerCeilingError ? (
+            <div
+              data-offer-ceiling-reveal=""
+              className="mt-3 rounded-lg border border-primary/30 bg-background p-3"
+            >
+              <p className="text-sm font-bold text-foreground">
+                {rangePreview.downsideFeasible &&
+                rangePreview.lower != null &&
+                Number(values.purchasePrice) > rangePreview.upper
+                  ? "This deal misses your targets at asking. TrueCap found the price where it works."
+                  : "See the exact Offer Ceiling for this deal."}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                The preview above is a range. Create a free account to reveal
+                the exact Offer Ceiling for this deal. No card required.
+              </p>
+              <Button
+                type="button"
+                onClick={() => {
+                  trackEvent("offer_ceiling_reveal_cta_clicked", {
+                    placement: "decision_summary",
+                  });
+                  onSave();
+                }}
+                disabled={resultActionsBlocked}
+                title={resultActionsBlockedReason}
+                className="mt-2 h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:w-auto"
+              >
+                <LockKeyhole className="size-4" aria-hidden />
+                Create a free account to reveal it
+              </Button>
+            </div>
+          ) : null}
           <details className="group mt-2 border-t border-primary/15 pt-1">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
               How this ceiling was calculated

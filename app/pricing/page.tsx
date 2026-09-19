@@ -52,11 +52,11 @@ import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
-  title: "Pricing — Screen Free, Repeat with Pro",
+  title: "Pricing — Screen Free, Know Your Offer with Pro",
   description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
+    title: "TrueCap pricing — Screen free, know your offer with Pro",
     description:
       "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
     url: "/pricing",
@@ -95,7 +95,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What does Pro add?",
-    a: "A repeatable decision layer: the Offer Ceiling (the highest price that still meets your targets), Buy Box fit on every deal, downside stress tests, side-by-side comparisons, and a report you can hand to a partner or lender. If you only need metrics, the free analyzer already gives you those.",
+    a: "Pro tells you what to offer on every deal: whether it meets your Buy Box, your Offer Ceiling (your walk-away price based on your targets), what could make it fail under downside stress tests, and a report you can hand to a partner or lender, plus side-by-side comparisons. If you only need metrics, the free analyzer already gives you those.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -415,21 +415,21 @@ export default async function PricingPage() {
           >
             {[
               {
-                job: "Screen",
+                job: "Screen the deal",
                 product: "Free",
-                answer: "Is this worth investigating?",
+                answer: "Understand the economics before spending more time on the property.",
               },
               {
-                job: "Repeat",
+                job: "Know what to offer",
                 product: proOfferName,
-                answer: "Reuse the underwriting workflow across every deal.",
+                answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
               },
               ...(agentProConfigured
                 ? [
                     {
                       job: "Win investor clients",
                       product: "Agent Pro",
-                      answer: "Match, present, and follow up professionally.",
+                      answer: "Send clients a property with the investment analysis already done.",
                     },
                   ]
                 : []),
@@ -479,7 +479,7 @@ export default async function PricingPage() {
             <ProductShot
               shot={RENT_BREAKDOWN_SHOT}
               alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
-              caption={<><strong className="text-foreground">{proOfferName}.</strong> Every deal, saved, compared, and re-run.</>}
+              caption={<><strong className="text-foreground">{proOfferName}.</strong> Know what to offer on every deal.</>}
             />
             {agentProConfigured ? (
               <ProductShot
