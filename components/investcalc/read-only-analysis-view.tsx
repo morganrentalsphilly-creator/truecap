@@ -105,7 +105,7 @@ function MetricTile({
 }) {
   return (
     <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
-      <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+      <span className="text-[10px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
         {label}
       </span>
       <span

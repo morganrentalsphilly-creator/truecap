@@ -612,3 +612,12 @@ summary:has(svg)::marker,
 summary:has([class*="rotate-"])::marker {
   content: "";
 }
+
+/* FAQ / disclosure rows rendered 24px tall on phones: below a comfortable
+   tap target. Summaries that already set their own min-h-* are left alone.
+   Layered so a utility (py-*, p-*) on a specific summary still wins. */
+@layer base {
+  summary:not([class*="min-h-"]) {
+    padding-block: 0.625rem;
+  }
+}

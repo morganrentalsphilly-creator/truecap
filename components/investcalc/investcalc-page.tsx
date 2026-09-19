@@ -9627,7 +9627,7 @@ export function InvestCalcPage({
                   </span>
                 </div>
                 {tab.isFree && !canUseProjections && (
-                  <span className="inline-flex text-[9px] sm:text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
+                  <span className="inline-flex text-[10px] sm:text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
                     FREE
                   </span>
                 )}

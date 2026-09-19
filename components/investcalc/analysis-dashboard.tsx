@@ -1476,10 +1476,12 @@ export function AnalysisDashboard({
           the demo and converts the "wow" into a pricing visit; gradient +
           border language still matches ProInlineGate. */}
       {isSampleProPreview && !sampleBannerDismissed && (
-        <div className="flex items-center gap-2 rounded-full border border-primary/25 bg-gradient-to-r from-[var(--brand-blue-light)] via-card to-card py-1 pl-3 pr-1">
+        <div className="flex items-center gap-2 rounded-2xl border border-primary/25 bg-gradient-to-r from-[var(--brand-blue-light)] via-card to-card py-1 pl-3 pr-1">
           <Sparkles className="size-3.5 shrink-0 text-primary" aria-hidden />
-          <p className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
-            Sample deal — the full Pro report is unlocked for this demo.
+          {/* Wraps instead of truncating: at 390px the sentence was cut off
+              mid-word ("the full Pro repor…"). */}
+          <p className="min-w-0 flex-1 text-xs font-semibold leading-snug text-foreground">
+            Sample deal: the full Pro report is unlocked.
           </p>
           <Button
             size="sm"
@@ -1930,7 +1932,7 @@ export function AnalysisDashboard({
               )}
               <span>Save</span>
               {isSaveLockedByPlan && (
-                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[9px] sm:text-[9px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
+                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[10px] sm:text-[10px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
                   PRO
                 </span>
               )}
