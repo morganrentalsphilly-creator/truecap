@@ -61,9 +61,19 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable."
+                ? "Paste any rental listing. In about 60 seconds, see whether it works at the asking price, what price makes it work, and what could break the deal."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
+            {/* The math supports the decision; it is not the headline. */}
+            {newHomepagePositioningEnabled ? (
+              <p
+                data-hero-supporting-metrics=""
+                className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground"
+              >
+                Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable
+                assumptions
+              </p>
+            ) : null}
 
             {/* Primary action — the address input. Hands off to the
                 calculator below via a window event (hero-address-form.tsx). */}

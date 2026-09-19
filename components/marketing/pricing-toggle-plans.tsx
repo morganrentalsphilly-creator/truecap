@@ -102,20 +102,20 @@ const AGENT_PRO_FEATURES: string[] = [
  */
 const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   {
-    outcome: "Find the right price",
-    detail: "Calculate your Offer Ceiling — the highest price that still meets your targets — then check the deal against your Buy Box and market comps.",
+    outcome: "Does the deal meet my criteria?",
+    detail: "Check every deal against your Buy Box — cash flow, CoC, DSCR, cap rate, and price targets — and against market comps.",
   },
   {
-    outcome: "See what could break",
+    outcome: "What is my Offer Ceiling?",
+    detail: "Your walk-away price based on your targets: the highest price that still meets them under the assumptions shown.",
+  },
+  {
+    outcome: "What could make the deal fail?",
     detail: "Stress rent, vacancy, rate, and price against the assumptions that drive the decision.",
   },
   {
-    outcome: "Run a repeatable workflow",
-    detail: "Save unlimited deals, compare the best four, and carry each one through due diligence.",
-  },
-  {
-    outcome: "Present the decision",
-    detail: "Send a lender-facing review report or co-branded share page with the assumptions and risks intact.",
+    outcome: "Can I defend the analysis?",
+    detail: "Save unlimited deals, compare up to four, and send a lender-facing report or co-branded share page with the assumptions and risks intact.",
   },
 ];
 
@@ -269,16 +269,16 @@ export function PricingTogglePlans({
       <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
         <p className="text-sm">
           <span className="font-bold text-foreground">{proOfferName}</span>{" "}
-          <span className="text-muted-foreground">— underwrite and document decisions</span>
+          <span className="text-muted-foreground">— know what to offer</span>
         </p>
         <p className="text-sm">
           <span className="font-bold text-foreground">Free</span>{" "}
-          <span className="text-muted-foreground">— complete your first decision</span>
+          <span className="text-muted-foreground">— screen the deal</span>
         </p>
         {showAgentPro ? (
           <p className="text-sm">
             <span className="font-bold text-foreground">Agent Pro</span>{" "}
-            <span className="text-muted-foreground">— underwrite for your clients</span>
+            <span className="text-muted-foreground">— win investor clients</span>
           </p>
         ) : null}
       </div>
@@ -296,7 +296,9 @@ export function PricingTogglePlans({
             )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Get a clear first-pass answer in 60 seconds. No card required.
+            <strong className="font-semibold text-foreground">Screen the deal.</strong>{" "}
+            Understand the economics before spending more time on the
+            property. No card required.
           </p>
           <div className="mt-5 flex items-baseline gap-1.5">
             <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">$0</span>
@@ -359,7 +361,9 @@ export function PricingTogglePlans({
             )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Turn every address into a reviewable acquisition decision.
+            <strong className="font-semibold text-foreground">Know what to offer.</strong>{" "}
+            See whether the deal meets your targets, find your Offer Ceiling,
+            stress-test the assumptions, and document the decision.
           </p>
 
           {/* Monthly ↔ Annual toggle */}
@@ -452,7 +456,7 @@ export function PricingTogglePlans({
               evaluation={evaluation}
             />
           ) : null}
-          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus four outcomes —</p>
+          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus answers to four questions —</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {PRO_OUTCOMES.map((group) => (
               <div key={group.outcome} className="rounded-xl border border-border bg-muted/25 p-3">
@@ -485,7 +489,9 @@ export function PricingTogglePlans({
               </div>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Give every buyer their own criteria, screen the right deals for them, and keep each client&rsquo;s shortlist organized.
+              <strong className="font-semibold text-foreground">Win investor clients.</strong>{" "}
+              Analyze investment properties quickly and give each client
+              branded, investor-focused underwriting against their own Buy Box.
             </p>
             <div className="mt-5 flex items-baseline gap-1.5">
               <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">

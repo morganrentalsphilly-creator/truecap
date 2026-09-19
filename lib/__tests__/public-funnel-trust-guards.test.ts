@@ -13,10 +13,11 @@ describe("public funnel and trust guards", () => {
     expect(config).toContain(
       'decision_system: "Know your walk-away price before you make the offer."',
     );
-    // Phase 3 voice (docs/voice.md): the mandated subhead + risk line.
+    // 2026-09 positioning pass: decision → price → risk, math underneath.
     expect(hero).toContain(
-      "Paste a listing. TrueCap shows the cash flow, DSCR, and the highest price that still hits your targets — with every assumption labeled and editable.",
+      "Paste any rental listing. In about 60 seconds, see whether it works at the asking price, what price makes it work, and what could break the deal.",
     );
+    expect(hero).toContain("Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable");
     expect(hero).toContain(
       "Free. No account. Your first full decision is included.",
     );
@@ -58,12 +59,15 @@ describe("public funnel and trust guards", () => {
     expect(form).toContain('router.push("/analyze")');
   });
 
-  it("keeps the homepage tail to the trust, offer, proof, FAQ, and final CTA blocks", () => {
+  it("keeps the homepage tail to problem, how-it-works, offer, trust, founder, proof, FAQ, and final CTA blocks", () => {
     for (const path of ["app/page.tsx", "app/home-authed/page.tsx"]) {
       const page = read(path);
       for (const component of [
-        "DataSourcesSection",
+        "ProblemBlock",
+        "HowTrueCapWorks",
         "PdfProUpsell",
+        "DataSourcesSection",
+        "BuiltByInvestor",
         "SocialProof",
         "CaseStudiesSection",
         "HomepageFaq",
@@ -72,8 +76,6 @@ describe("public funnel and trust guards", () => {
         expect(page, path).toContain(`<${component}`);
       }
       for (const redundant of [
-        "ProblemBlock",
-        "HowTrueCapWorks",
         "OfferEngineSection",
         "Personas",
       ]) {

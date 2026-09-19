@@ -88,22 +88,22 @@ const SPINE_STEPS = [
     key: "analyze",
     label: "Analyze",
     icon: Search,
-    title: "Start with an address",
+    title: "Paste the listing",
     body: "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Every assumption stays yours to review and change.",
   },
   {
     key: "decide",
-    label: "Decide",
+    label: "Screen",
     icon: Gauge,
-    title: "See the real economics",
-    body: "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0–100 Deal score and plain-English context for the numbers.",
+    title: "See if it works at asking",
+    body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, plus a 0–100 Deal score and plain-English context for the numbers.",
   },
   {
     key: "offer",
     label: "Ceiling",
     icon: Target,
-    title: "Review the Offer Ceiling",
-    body: "TrueCap calculates the highest modeled price that still meets your targets under the assumptions shown. Compare that Offer Ceiling with asking, then verify the inputs before recording your decision.",
+    title: "Know your Offer Ceiling",
+    body: "Your walk-away price based on your targets: the highest price that still meets them under the assumptions shown, plus the assumptions most likely to break the deal. Verify the inputs before you make the offer.",
     proNote: "Included in your first complete decision",
   },
 ] as const;
@@ -117,17 +117,12 @@ export function HowTrueCapWorks() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            The decision gap
+            How TrueCap works
           </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            The problem isn&apos;t calculating the deal. It&apos;s deciding{" "}
-            <span className="text-primary">what to do next.</span>
+            From listing to offer{" "}
+            <span className="text-primary">in three steps.</span>
           </h2>
-          <p className="mx-auto mt-3 max-w-[60ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Should you pursue it? What price makes it work? What happens if the
-            assumptions change? TrueCap connects those questions in one
-            workflow.
-          </p>
         </div>
         <ol className="tc-reveal relative grid gap-10 sm:grid-cols-3 sm:gap-8">
           <span
@@ -159,7 +154,7 @@ export function HowTrueCapWorks() {
           ))}
         </ol>
         <div className="mt-10 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
+          <ScrollToFormButton analyticsSource="how_it_works" className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
             Analyze a property free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
@@ -172,32 +167,47 @@ export function HowTrueCapWorks() {
   );
 }
 
-// ───────────────────────────────────────── The expensive mistake
+// ───────────────────────────────────────── The real problem
 /**
- * Problem block (2026-08 offer rollout): dollar-denominates the stake the
- * whole product exists to protect — overpaying on the asset — before the
- * page starts explaining features. The arithmetic is deliberately simple
- * and checkable (3% × $250,000 = $7,500), mirroring the /pricing
- * avoided-mistake block so the two surfaces can't drift apart in spirit.
+ * Problem block (2026-09 positioning pass): TrueCap is sold as the offer
+ * decision, not as a calculator. Three questions, stated once — the /pricing
+ * hero still carries the checkable overpay arithmetic.
  */
+const PROBLEM_QUESTIONS = [
+  "Does this deal fit my criteria?",
+  "What's my walk-away price?",
+  "What assumptions could kill the deal?",
+] as const;
+
 export function ProblemBlock() {
   return (
-    <section className="border-t border-border bg-card/40">
+    <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
         <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          The expensive mistake
+          The real problem
         </p>
         <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          Nobody loses money on the spreadsheet.{" "}
-          <span className="text-primary">They lose it at the offer.</span>
+          The calculator isn&apos;t the hard part.{" "}
+          <span className="text-primary">The offer is.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-[58ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Overpaying by even 3% on a $250,000 rental is $7,500 gone before you
-          collect a dollar of rent — and negative cash flow compounds it every
-          month after. The protection isn&apos;t more metrics; it&apos;s knowing
-          the Offer Ceiling before you negotiate. That&apos;s
-          the number TrueCap computes from the assumptions shown.
+          Traditional calculators tell you what a property&apos;s returns look
+          like. Before you make an offer, you need three other answers:
         </p>
+        <ul className="mx-auto mt-6 grid max-w-2xl gap-3 text-left sm:grid-cols-3">
+          {PROBLEM_QUESTIONS.map((question) => (
+            <li
+              key={question}
+              className="flex items-start gap-2 rounded-xl border border-border bg-card p-4 text-sm font-semibold text-foreground"
+            >
+              <Check
+                aria-hidden
+                className="mt-0.5 size-4 shrink-0 text-primary"
+              />
+              <span>{question}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -337,6 +347,51 @@ export function OfferEngineSection() {
 }
 
 /**
+ * Founder/trust block (2026-09 positioning pass). Facts come from /about only:
+ * one rental investor in Philadelphia, built for their own underwriting. The
+ * founder is described, never named (their request, 2026-09-07) — no name,
+ * photo, portfolio size, returns, or customer counts belong here.
+ */
+export function BuiltByInvestor() {
+  return (
+    <section
+      data-homepage-block="built-by-investor"
+      className="border-t border-border bg-card/40"
+    >
+      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-16">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          Who builds TrueCap
+        </p>
+        <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+          Built by a rental investor, for rental investors.
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          TrueCap is built by one person, a rental investor in Philadelphia. It
+          started as a way to answer one practical question before every
+          offer: what price actually makes this property work? The defaults
+          lean conservative, every assumption is editable, and every formula is
+          published.
+        </p>
+        <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+          <Link
+            href="/about"
+            className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+          >
+            About TrueCap
+          </Link>
+          <Link
+            href="/methodology"
+            className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+          >
+            Read the methodology
+          </Link>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/**
  * Closing ask. The page has made its case by here; this is the one job left —
  * send them back to the address field they scrolled past.
  */
@@ -345,8 +400,8 @@ export function FinalCta() {
     <section className="border-t border-border">
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
         <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Put in an address. Understand the deal.{" "}
-          <span className="text-primary">Review the Offer Ceiling.</span>
+          Paste a listing.{" "}
+          <span className="text-primary">Know your walk-away price.</span>
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
@@ -643,7 +698,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is TrueCap really free?",
-    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Pro is for repeating the workflow: saving and revisiting deals, comparisons, reports, and a reusable Buy Box.`,
+    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Pro is for knowing what to offer on every deal: Buy Box fit, the Offer Ceiling, downside checks, comparisons, and reports.`,
   },
   {
     q: "Do I need a credit card?",
@@ -655,7 +710,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Upgrade when you want to repeat the decision after the free trial: revisit saved deals, compare opportunities, reuse your Buy Box, and produce reports. Monthly Pro can be cancelled anytime.",
+    a: "Upgrade when you want the Offer Ceiling and downside checks on every deal after the free trial, plus saved deals you can edit, comparisons, your Buy Box, and reports. Monthly Pro can be cancelled anytime.",
   },
   {
     q: "How does the free trial work?",
@@ -890,14 +945,15 @@ export function PdfProUpsell() {
             What you get
           </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Analyze free. Use{" "}
-            <span className="text-primary">{proOfferName}</span> to solve the
-            Offer Ceiling that fits your targets—deal after deal.
+            Free screens the deal.{" "}
+            <span className="text-primary">{proOfferName}</span> tells you what
+            to offer.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Start with a 60-second screen, then use Pro to review four things:
-            Buy Box fit, Offer Ceiling, what could break, and how to
-            document the decision.
+            Free shows the economics before you spend more time on a property.{" "}
+            {proOfferName} answers four questions on every deal: does it meet
+            my criteria, what is my Offer Ceiling, what could make it fail, and
+            can I defend the analysis?
           </p>
         </div>
 
@@ -1003,12 +1059,12 @@ export function PdfProUpsell() {
               {proOfferName}
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">
-              One address. Four acquisition answers.
+              Know what to offer.
             </h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Get your Buy Box fit, Offer Ceiling, downside stress
-              test, and a decision-review report—then compare, save, and move
-              selected deals through your acquisition workflow.
+              See whether each deal meets your Buy Box, find your Offer
+              Ceiling, stress-test the assumptions, and document the decision
+              in a report you can hand to a partner or lender.
             </p>
             <div className="mt-5">
               <Link

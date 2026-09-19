@@ -36,9 +36,9 @@ import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-track
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 
 export const metadata: Metadata = {
-  title: "Agent Pro — Become the Agent Investors Call First",
+  title: "Agent Pro — Win the Investor. Keep the Investor.",
   description:
-    "Send a branded, data-sourced deal analysis before you leave the showing. Client rosters, per-client Buy Boxes, and deal assignment with TrueCap Agent Pro.",
+    "Send investor clients a property with the analysis already done: branded, data-sourced underwriting against each client's own Buy Box, with TrueCap Agent Pro.",
   keywords: [
     "real estate agent calculator",
     "rental analysis for agents",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/for-agents" },
   openGraph: {
-    title: "TrueCap Agent Pro — Become the Agent Investors Call First",
+    title: "TrueCap Agent Pro — Win the Investor. Keep the Investor.",
     description:
-      "Send a branded, data-sourced analysis before you leave the showing. Client rosters, per-client Buy Boxes, deal assignment.",
+      "Send investor clients a property with the analysis already done. Client rosters, per-client Buy Boxes, branded analysis.",
     url: "/for-agents",
     type: "website",
     images: [
@@ -124,13 +124,14 @@ export default async function ForAgentsPage() {
             For real estate agents
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            Become the agent{" "}
-            <span className="text-primary">every investor calls first.</span>
+            Win the investor.{" "}
+            <span className="text-primary">Keep the investor.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Send a branded, data-sourced deal analysis before you leave the
-            showing — checked against that client&apos;s own Buy Box, with every
-            assumption labeled.
+            Instead of sending a listing and asking an investor what they
+            think, send the property with the investment analysis already
+            done — checked against that client&apos;s own Buy Box, branded to
+            you, with every assumption labeled.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:w-fit">
             {agentProConfigured ? (
@@ -190,33 +191,46 @@ export default async function ForAgentsPage() {
               sit in the pricing band far below the fold. */}
         </section>
 
-        {/* Commission math — the buying logic stated plainly, first
-            (2026-08 rollout). Price stays live-loaded; no hard-coded tier
-            price while Agent Pro's Stripe config is pending. */}
+        {/* Why it wins the conversation (2026-09 positioning pass). Replaced
+            the commission-math block: agent copy describes the workflow and
+            never promises closings, commissions, or returns. */}
         <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            The commission math
+            A listing vs. an analysis
           </p>
           <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            One closed investor deal pays for this many times over.
+            Investors answer the agent who already did the math.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground sm:text-base">
-            A typical buy-side commission on a $250,000 investor purchase runs
-            in the thousands of dollars — and investors, unlike most buyers,
-            purchase again and again.{" "}
-            {agentMonthly
-              ? `Agent Pro is ${agentMonthly.amountLabel}/${agentMonthly.period}.`
-              : agentProConfigured
-                ? "Agent Pro is a monthly plan."
-                : "Agent Pro pricing will be shown before subscriptions open."}{" "}
-            If being the agent with the underwrite in hand wins you a single
-            additional investor deal a year, this is not a close call.
-          </p>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Commission figures depend on your market, brokerage split, and
-            representation agreement — run your own numbers; that habit is
-            rather the point.
-          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              [
+                "Client-specific Buy Boxes",
+                "Each investor's own cash-flow, return, DSCR, and price targets, applied to every property you send them.",
+              ],
+              [
+                "Branded analysis",
+                "A co-branded link or PDF with the assumptions, Offer Ceiling, and risks intact, under your name.",
+              ],
+              [
+                "Faster investor responses",
+                "Give clients the numbers they would otherwise ask for, so the reply can be a decision instead of a question.",
+              ],
+              [
+                "More credible conversations",
+                "Labeled data sources and editable assumptions, so the discussion is about the deal, not whose spreadsheet is right.",
+              ],
+            ].map(([title, body]) => (
+              <li
+                key={title}
+                className="rounded-2xl border border-border bg-card p-4"
+              >
+                <p className="text-sm font-extrabold text-foreground">{title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {body}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* Verified agent proof — self-hides until records pass the

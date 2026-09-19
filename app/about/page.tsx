@@ -144,10 +144,11 @@ export default function AboutPage() {
 
           <h2 className="text-2xl sm:text-3xl">What TrueCap does</h2>
           <p>
-            Type an address and get a full underwrite in about 60 seconds:
-            monthly cash flow, cap rate, cash-on-cash return, DSCR, 10-year
-            projections, Buy Box fit, and a Deal score.
-            The{" "}
+            Paste a listing and, in about 60 seconds, see whether it works at
+            the asking price, what price makes it work, and what could break
+            the deal: monthly cash flow, cap rate, cash-on-cash return, DSCR, a
+            Deal score, and the Offer Ceiling &mdash; your walk-away price
+            based on your targets. The{" "}
             <Link
               href="/analyze"
               prefetch={false}
@@ -155,16 +156,18 @@ export default function AboutPage() {
             >
               core analyzer
             </Link>{" "}
-            is free with no signup. A{" "}
+            is free with no signup, and your first complete decision is
+            included. A{" "}
             <Link
               href="/pricing"
               className="font-bold text-foreground hover:underline"
             >
               paid plan
             </Link>{" "}
-            adds unlimited saved deals you can edit, a portfolio dashboard,
-            deal comparison, and lender-facing Pro report exports. Free keeps
-            up to 5 saved deals.
+            adds unlimited saved deals you can edit, the Offer Ceiling and
+            downside checks on every deal, 10-year projections, a portfolio
+            dashboard, deal comparison, and lender-facing Pro report exports.
+            Free keeps up to 5 saved deals.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Get in touch</h2>

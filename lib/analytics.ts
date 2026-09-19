@@ -55,6 +55,7 @@ export type FunnelEvent =
   | "evidence_readiness_changed"
   | "activation_completed"
   | "offer_ceiling_viewed"
+  | "offer_ceiling_reveal_cta_clicked"
   | "binding_constraint_viewed"
   | "verification_task_created"
   | "verification_task_completed"

@@ -29,10 +29,13 @@ import { Header } from "@/components/investcalc/header";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
+  BuiltByInvestor,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
+  HowTrueCapWorks,
   PdfProUpsell,
+  ProblemBlock,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -181,14 +184,18 @@ export default function Home() {
           page ships NO calculator JS. Keep it that way — Phase 7's homepage
           budget depends on it, and lib/__tests__/homepage-lockstep.test.ts
           pins that neither homepage imports the analyzer. */}
-      {/* Seven-block acquisition story:
-          1 outcome (hero), 2 trustworthy numbers, 3 Free vs Pro, 4 verified
-          proof when records exist, 5 objections/FAQ, 6 final CTA. (The live
-          analyzer is one click away at /analyze.)
+      {/* Decision-first story (2026-09 positioning pass):
+          1 hero + real sample output, 2 the problem (the offer, not the
+          calculator), 3 how it works, 4 Free vs Pro, 5 methodology/data,
+          6 who builds it + verified proof when records exist, 7 FAQ,
+          8 final CTA. (The live analyzer is one click away at /analyze.)
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
-        <DataSourcesSection />
+        <ProblemBlock />
+        <HowTrueCapWorks />
         <PdfProUpsell />
+        <DataSourcesSection />
+        <BuiltByInvestor />
         <div data-homepage-block="real-proof" className="contents">
           <SocialProof />
           {/* Consented quotes from the in-product prompt (Phase 5): the three
