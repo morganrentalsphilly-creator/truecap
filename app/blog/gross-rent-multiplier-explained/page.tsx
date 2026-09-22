@@ -27,7 +27,7 @@ const SERP_TITLE = "Gross rent multiplier (GRM) explained (2026)";
 const DESCRIPTION =
   "GRM = price ÷ annual gross rent — the fastest rental screen. The formula, 2026 worked examples, GRM vs cap rate, a good GRM range, and where it lies.";
 const PUBLISHED_AT = "2026-06-17";
-const MODIFIED_AT = "2026-06-17";
+const MODIFIED_AT = "2026-09-22";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -168,7 +168,16 @@ export default function GrossRentMultiplierPost() {
             The formula
           </h2>
           <p>
-            <strong>GRM = property price ÷ annual gross rent.</strong> That is
+            <strong>
+              <Link
+                href="/glossary/grm"
+                className="text-primary font-semibold hover:underline"
+              >
+                GRM
+              </Link>{" "}
+              = property price ÷ annual gross rent.
+            </strong>{" "}
+            That is
             the whole thing. Gross rent means the rent before a single dollar of
             expense comes out — no taxes, no insurance, no vacancy, no
             management. A $250,000 duplex where each side rents for $1,300/month
@@ -258,7 +267,14 @@ export default function GrossRentMultiplierPost() {
             </li>
             <li>
               <strong>6 to 10</strong> — healthy cash-flow territory. The
-              Midwest, much of the Sun Belt, and older small multifamily live
+              Midwest (see{" "}
+              <Link
+                href="/markets/cleveland"
+                className="text-primary font-semibold hover:underline"
+              >
+                Cleveland
+              </Link>
+              ), much of the Sun Belt, and older small multifamily live
               here.
             </li>
             <li>
@@ -333,7 +349,16 @@ export default function GrossRentMultiplierPost() {
             difference is operating expenses, which gives a clean conversion:
           </p>
           <p>
-            <strong>Cap rate = (1 − operating expense ratio) ÷ GRM.</strong>
+            <strong>
+              Cap rate = (1 −{" "}
+              <Link
+                href="/glossary/operating-expense-ratio"
+                className="text-primary font-semibold hover:underline"
+              >
+                operating expense ratio
+              </Link>
+              ) ÷ GRM.
+            </strong>
           </p>
           <p>
             If expenses eat 50% of gross rent — the classic{" "}
