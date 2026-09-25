@@ -99,8 +99,11 @@ describe("every first-year surface routes through the shared rules", () => {
     }
   });
 
-  it("the decision card shows all four numbers at one decimal with definitions", () => {
-    expect(card).toContain('sm:grid-cols-4"\n      aria-label="First-year investment snapshot"');
+  it("the decision card formats all four numbers at one decimal with definitions", () => {
+    // Cash flow + DSCR stay on the card (the action row must end inside the
+    // first phone screen); cap rate + CoC sit one disclosure down but share
+    // the band's one-decimal formats and glossary tips.
+    expect(card).toContain('aria-label="Secondary first-year metrics"');
     for (const term of ['term="cashFlow"', 'term="dscr"', 'term="capRate"', 'term="coc"']) {
       expect(card, term).toContain(term);
     }
