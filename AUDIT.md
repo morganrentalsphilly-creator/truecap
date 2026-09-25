@@ -7,7 +7,7 @@ by automated checks and end-to-end tests. Financial math is never changed
 without a failing test and a founder decision.
 
 Status legend: ✅ done · 🔧 fixed on this branch · ⏳ in progress · ⛔ blocked ·
-🧭 needs Morgan's decision.
+🧭 needs the founder's decision.
 
 ## 0. Summary
 
@@ -38,7 +38,7 @@ _(filled in Phase 4)_
   therefore runs through `scripts/dev-isolated.sh`, which overrides Supabase
   to a loopback origin with fake keys, blanks every paid/outbound provider,
   keeps the test-mode Stripe keys, and refuses to start on a live Stripe key.
-  No production data was read or written. 🧭 Morgan: consider replacing
+  No production data was read or written. 🧭 Founder: consider replacing
   `.env` with a development project's keys.
 - **Docker is not installed on this machine**, so the disposable Supabase
   stack the authenticated Playwright gate relies on cannot run locally.
@@ -169,7 +169,7 @@ _(pending)_
 | L-8 | Low | `components/investcalc/template-form-dialog.tsx` | `form.watch()` inside JSX skips React-Compiler compilation for the component | `useWatch` at the top of the component | ad43606 |
 | M-1 | Low | `/methodology` | the page never states that monthly expense lines are rounded to whole dollars before summing, so a reader reproducing the formula gets a slightly different NOI | one sentence added under "Cap rate" (Phase 3 clarify) | _pending_ |
 
-## 7. Needs Morgan's decision
+## 7. Needs the founder's decision
 
 | ID | Decision | Context | Recommendation |
 | --- | --- | --- | --- |
