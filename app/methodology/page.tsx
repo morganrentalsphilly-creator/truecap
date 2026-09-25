@@ -160,6 +160,11 @@ export default function MethodologyPage() {
             include property tax, insurance, maintenance, management, HOA, and
             owner-paid utilities. The vacancy allowance is shown above NOI as a
             reduction to scheduled income. The CapEx reserve is shown below NOI.
+            TrueCap works in monthly line items and rounds each expense line
+            (tax, insurance, HOA, utilities, maintenance, vacancy, management,
+            CapEx reserve) to the nearest dollar before summing, so a hand
+            calculation from the annual formula can differ by a few dollars a
+            month.
           </p>
           <p>
             <strong>Other income:</strong> Standard v
