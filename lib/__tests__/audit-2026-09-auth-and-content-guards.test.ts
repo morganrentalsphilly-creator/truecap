@@ -29,7 +29,10 @@ describe("sign-up with email confirmation holds a sent state", () => {
 
   it("states the password rule where the field is and pins policy errors to it", () => {
     expect(form).toContain('id="password-policy"');
-    expect(form).toContain("At least 8 characters.");
+    expect(form).toContain("{PASSWORD_POLICY_TEXT}");
+    const schema = read("lib/auth-schema.ts");
+    expect(schema).toContain('.min(12, "Password must be at least 12 characters")');
+    expect(schema.match(/password: passwordSchema/g)).toHaveLength(2);
     expect(form).toContain('form.setError("password", { message: result.message })');
   });
 

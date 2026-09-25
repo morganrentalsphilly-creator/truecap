@@ -13,6 +13,7 @@ import { trackEvent } from "@/lib/analytics";
 import {
   internalNextPathOrNull,
   safeInternalNextPath,
+  PASSWORD_POLICY_TEXT,
   signUpSchema,
   type SignUpInput,
 } from "@/lib/auth-schema";
@@ -425,7 +426,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   </button>
                 </div>
                 <FormDescription id="password-policy" className="text-xs">
-                  At least 8 characters.
+                  {PASSWORD_POLICY_TEXT}
                 </FormDescription>
                 <FormMessage />
               </FormItem>

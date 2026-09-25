@@ -8,12 +8,17 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { updatePasswordAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { updatePasswordSchema, type UpdatePasswordInput } from "@/lib/auth-schema";
+import {
+  PASSWORD_POLICY_TEXT,
+  type UpdatePasswordInput,
+  updatePasswordSchema,
+} from "@/lib/auth-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -133,6 +138,9 @@ export function UpdatePasswordForm() {
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              <FormDescription id="new-password-policy" className="text-xs">
+                {PASSWORD_POLICY_TEXT}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
