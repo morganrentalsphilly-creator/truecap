@@ -795,10 +795,10 @@ jobs:
       # Browser runs must not report to the production Sentry project.
       SENTRY_DISABLED: "1"
       NEXT_PUBLIC_SENTRY_DISABLED: "1"
-      # One runner IP makes hundreds of anonymous Offer Ceiling solves per
-      # hour across the suite; the production brake (120/h) is not the thing
+      # One runner IP makes hundreds of anonymous calls per hour across the
+      # suite; the per-IP brakes (lib/ip-rate-limit.ts) are not the thing
       # under test here (2026-09 audit).
-      OFFER_CEILING_IP_RATE_LIMIT_MAX: "100000"
+      IP_RATE_LIMIT_MAX_OVERRIDE: "100000"
     steps:
       - uses: actions/checkout@v7
 

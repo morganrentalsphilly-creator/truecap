@@ -187,10 +187,6 @@ describe("Offer Ceiling server entitlement boundary", () => {
     expect(limiter).toBeGreaterThan(-1);
     expect(limiter).toBeLessThan(solve);
     expect(action).toContain('code: "RATE_LIMITED"');
-    // The production ceiling stays 120/hour; the env override exists only so a
-    // whole browser suite from one IP is not rate limited (2026-09 audit).
-    expect(action).toContain("maxPerWindow: anonymousOfferCeilingMaxPerWindow()");
-    expect(action).toMatch(/Number\.isInteger\(raw\) && raw > 0 \? raw : 120/);
-    expect(action).toContain("process.env.OFFER_CEILING_IP_RATE_LIMIT_MAX");
+    expect(action).toContain("maxPerWindow: 120");
   });
 });

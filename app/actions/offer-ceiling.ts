@@ -35,16 +35,9 @@ const requestSchema = z.object({
 // endpoint from becoming an unbounded CPU oracle while staying far above a
 // human investor's target-tuning pace. Authorization remains the signed grant;
 // this limiter is only defense in depth.
-// OFFER_CEILING_IP_RATE_LIMIT_MAX exists for test runs only: a full Playwright
-// suite is one IP making hundreds of solves in an hour, which is exactly the
-// pattern this brake exists to stop in production. Unset → 120.
-function anonymousOfferCeilingMaxPerWindow(): number {
-  const raw = Number(process.env.OFFER_CEILING_IP_RATE_LIMIT_MAX);
-  return Number.isInteger(raw) && raw > 0 ? raw : 120;
-}
 const anonymousOfferCeilingRateLimit = createIpRateLimit({
   windowMs: 60 * 60 * 1000,
-  maxPerWindow: anonymousOfferCeilingMaxPerWindow(),
+  maxPerWindow: 120,
 });
 
 /**
