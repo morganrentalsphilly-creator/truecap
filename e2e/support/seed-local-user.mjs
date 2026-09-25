@@ -124,7 +124,50 @@ export async function seedLocalAuthenticatedUser(environment = process.env) {
     );
   }
 
-  return { userId: created.user.id };
+  // 2026-09 audit: a second, FREE account (no subscription row) so the
+  // authenticated browser gate can prove free-tier gating as well as Pro
+  // access. Same disposable password; email derived from the Pro one.
+  const freeEmail = freeEmailFor(resolved.email);
+  const { data: createdFree, error: createFreeError } =
+    await admin.auth.admin.createUser({
+      email: freeEmail,
+      password: resolved.password,
+      email_confirm: true,
+    });
+  if (createFreeError || !createdFree.user) {
+    throw new Error(
+      `Could not create the isolated FREE auth user: ${createFreeError?.message ?? "no user returned"}`,
+    );
+  }
+
+  // The DB trigger from migration 20260827090000 opens a 21-day no-card
+  // evaluation for every new account. The FREE fixture must represent life
+  // AFTER that evaluation, so expire it; the Pro fixture keeps its row (a paid
+  // subscription outranks it). A missing row means the migration did not
+  // apply — fail loudly rather than test the wrong tier.
+  const expiredAt = new Date(periodStart.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  const { data: expired, error: expireError } = await admin
+    .from("product_evaluations")
+    .update({ expires_at: expiredAt })
+    .eq("user_id", createdFree.user.id)
+    .select("user_id");
+  if (expireError) {
+    throw new Error(`Could not expire the FREE fixture's evaluation: ${expireError.message}`);
+  }
+  if (!expired || expired.length !== 1) {
+    throw new Error(
+      "The FREE fixture has no product_evaluations row: the no-card evaluation trigger (20260827090000) is not applied.",
+    );
+  }
+
+  return { userId: created.user.id, freeUserId: createdFree.user.id };
+}
+
+/** internal-e2e@x.invalid → internal-e2e-free@x.invalid */
+export function freeEmailFor(email) {
+  const at = email.indexOf("@");
+  if (at <= 0) throw new Error("Cannot derive the free account email.");
+  return `${email.slice(0, at)}-free${email.slice(at)}`;
 }
 
 const executedPath = process.argv[1]

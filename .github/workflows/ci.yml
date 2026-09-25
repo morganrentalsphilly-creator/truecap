@@ -784,6 +784,14 @@ jobs:
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
       STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
       STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+      # Address-enrichment providers are served by the loopback mock that
+      # e2e/audit-analyzer-autofill.spec.ts starts on :3199 (2026-09 audit).
+      # The action only honours loopback overrides; the keys are placeholders.
+      AUDIT_ENRICHMENT_MOCK: "1"
+      HUD_API_BASE_URL: http://127.0.0.1:3199
+      FRED_API_BASE_URL: http://127.0.0.1:3199
+      HUD_API_KEY: audit-hud-key
+      FRED_API_KEY: audit-fred-key
     steps:
       - uses: actions/checkout@v7
 

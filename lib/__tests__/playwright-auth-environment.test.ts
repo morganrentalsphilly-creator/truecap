@@ -36,6 +36,7 @@ describe("authenticated Playwright environment", () => {
     expect(resolveAuthenticatedE2EEnvironment(isolatedLocalEnvironment)).toEqual({
       enabled: true,
       email: "internal@example.test",
+      freeEmail: "internal-free@example.test",
       password: "test-only-password",
       baseUrl: "http://127.0.0.1:3100",
     });

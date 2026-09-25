@@ -24,3 +24,20 @@ setup("authenticate the isolated internal test account", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "My Deals" })).toBeVisible();
   await page.context().storageState({ path: authStatePath });
 });
+
+const freeAuthStatePath = "playwright/.auth/internal-free-user.json";
+
+setup("authenticate the isolated FREE test account", async ({ page }) => {
+  setup.skip(!authEnvironment.enabled, authSkipReason);
+  if (!authEnvironment.enabled) return;
+
+  await page.goto("/auth/login?next=/dashboard/new", {
+    waitUntil: "domcontentloaded",
+  });
+  await page.getByLabel("Email", { exact: true }).fill(authEnvironment.freeEmail);
+  await page.getByLabel("Password", { exact: true }).fill(authEnvironment.password);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
+  await page.context().storageState({ path: freeAuthStatePath });
+});

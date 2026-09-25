@@ -17,13 +17,29 @@ const publicProject = {
   use: { ...devices["Desktop Chrome"] },
 };
 
+const freeAuthStatePath = "playwright/.auth/internal-free-user.json";
+const authenticatedFreeSpecPattern = /authenticated-free-.*\.spec\.ts/;
+
 const authenticatedProject = {
   name: "authenticated-chromium",
   testMatch: authenticatedSpecPattern,
+  testIgnore: [authenticatedFreeSpecPattern],
   dependencies: authEnvironment.enabled ? ["auth-setup"] : [],
   use: {
     ...devices["Desktop Chrome"],
     ...(authEnvironment.enabled ? { storageState: authStatePath } : {}),
+  },
+};
+
+// Same disposable stack, signed in as the seeded FREE account (2026-09 audit):
+// proves free-tier gating alongside the Pro workflows above.
+const authenticatedFreeProject = {
+  name: "authenticated-free-chromium",
+  testMatch: authenticatedFreeSpecPattern,
+  dependencies: authEnvironment.enabled ? ["auth-setup"] : [],
+  use: {
+    ...devices["Desktop Chrome"],
+    ...(authEnvironment.enabled ? { storageState: freeAuthStatePath } : {}),
   },
 };
 
@@ -63,6 +79,7 @@ export default defineConfig({
         ]
       : []),
     authenticatedProject,
+    authenticatedFreeProject,
     ...(captureVisuals
       ? [
           {
