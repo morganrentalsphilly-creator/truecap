@@ -282,7 +282,7 @@ export function PricingTogglePlans({
           </p>
         ) : null}
       </div>
-      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
+      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5"}>
         <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
@@ -343,11 +343,6 @@ export function PricingTogglePlans({
             {/* Badges share the header row. "Best value" (annual only) used
                 to be pinned absolute top-right, landing on "Recommended". */}
             <div className="flex flex-wrap items-center gap-1.5">
-              {period === "annual" ? (
-                <span className="rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-3xs font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
-                  ★ Best value
-                </span>
-              ) : null}
               {proCardDecision.kind === "current" ? (
                 <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
                   Current
@@ -398,9 +393,7 @@ export function PricingTogglePlans({
             >
               Annual
               {annualSavingsPct && annualSavingsPct > 0 ? (
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-3xs font-extrabold uppercase tracking-wider text-primary-foreground">
-                  −{annualSavingsPct}%
-                </span>
+                <span className="text-xs font-semibold">−{annualSavingsPct}%</span>
               ) : null}
             </button>
           </div>
@@ -411,7 +404,7 @@ export function PricingTogglePlans({
             </span>
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
+          <div className="mt-1 text-sm text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-foreground">
                <Sparkles className="size-3" />{evaluationBadge}
@@ -498,7 +491,7 @@ export function PricingTogglePlans({
               </span>
               <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{agentCard.subline}</div>
             <div className="mt-3 flex justify-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
                  <Sparkles className="size-3" />{evaluationBadge}
