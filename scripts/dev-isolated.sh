@@ -23,6 +23,8 @@ export NEXT_PUBLIC_SUPABASE_URL="${E2E_SUPABASE_URL:-http://127.0.0.1:54321}"
 export NEXT_PUBLIC_SUPABASE_ANON_KEY="${E2E_SUPABASE_ANON_KEY:-truecap-e2e-anon-key}"
 export SUPABASE_SERVICE_ROLE_KEY="${E2E_SUPABASE_SERVICE_ROLE_KEY:-truecap-e2e-service-role-key}"
 export SHARE_LINK_SECRET="${SHARE_LINK_SECRET:-truecap-e2e-anonymous-decision-signing-secret}"
+# Local spec runs hammer the anonymous Offer Ceiling solve from one IP.
+export OFFER_CEILING_IP_RATE_LIMIT_MAX="${OFFER_CEILING_IP_RATE_LIMIT_MAX:-100000}"
 export CRON_SECRET="${CRON_SECRET:-truecap-local-audit-cron-secret}"
 
 # Paid / external providers and outbound channels: off.
