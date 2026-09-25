@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   SavedAnalysesPage,
@@ -518,6 +519,15 @@ export default async function DashboardSavedAnalysesPage({
     .filter((row): row is SavedAnalysisListItem => Boolean(row));
   const hasMixedMetricMethodologies =
     new Set(mappedItems.map((item) => item.methodologyComparisonKey)).size > 1;
+  // Failing closed on the aggregate is right — blending formula-dependent
+  // metrics across standards would imply precision these rows do not share.
+  // But the notice used to stop at "totals are withheld", naming no remedy,
+  // no count, and no way to find the deals responsible. The dashboard's
+  // headline number simply vanished and the reader was left to work out why
+  // on their own, by scanning every row for a "Recorded v1.0" badge.
+  const staleMethodologyCount = mappedItems.filter(
+    (item) => item.methodologyIsCurrent === false,
+  ).length;
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 
@@ -581,6 +591,40 @@ export default async function DashboardSavedAnalysesPage({
                   available below, grouped within each version when you sort by
                   a calculated result.
                 </p>
+                <p className="mt-2 text-muted-foreground">
+                  {staleMethodologyCount > 0 ? (
+                    <>
+                      <span className="font-semibold text-foreground">
+                        {staleMethodologyCount === 1
+                          ? "1 deal was recorded"
+                          : `${staleMethodologyCount} deals were recorded`}{" "}
+                        under an earlier standard.
+                      </span>{" "}
+                      Re-underwrite{" "}
+                      {staleMethodologyCount === 1 ? "it" : "them"} to
+                      today&apos;s standard and totals come back automatically.
+                      Recorded results stay frozen; re-underwriting saves a new
+                      scenario beside them.
+                    </>
+                  ) : (
+                    <>
+                      Re-underwrite the older deals to today&apos;s standard and
+                      totals come back automatically.
+                    </>
+                  )}
+                </p>
+                {/* The banner already said the list "groups within each version
+                    when you sort by a calculated result" — but left the reader
+                    to discover that control themselves. Make the sentence
+                    clickable using the grouping that already exists, rather
+                    than inventing a version filter. */}
+                <Link
+                  href="/dashboard/saved-analyses?sort=cash-flow&dir=desc"
+                  prefetch={false}
+                  className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
+                >
+                  Group deals by underwriting version
+                </Link>
               </div>
             </section>
           ) : null}
