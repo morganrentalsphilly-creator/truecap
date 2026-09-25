@@ -63,7 +63,9 @@ test("a free run shows Pro badges on gated rows, gates the PDF, and still saves"
     await expect(save).toBeEnabled({ timeout: 20_000 });
     await save.click();
     await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, { timeout: 30_000 });
-    await expect(summary.getByRole("button", { name: "Saved", exact: true })).toBeVisible({ timeout: 30_000 });
+    // A free account's button carries the "PRO" pill for re-saves, so its
+    // accessible name is "Saved PRO".
+    await expect(summary.getByRole("button", { name: /^Saved\b/ })).toBeVisible({ timeout: 30_000 });
   } finally {
     await deleteRegressionDealsByAddress(page, address).catch(() => 0);
   }

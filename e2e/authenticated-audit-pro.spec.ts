@@ -87,7 +87,9 @@ test("Pro is never gated: projections and stress test open, then save → edit �
     await page.goto(`/dashboard/new?savedDeal=${dealId}`, { waitUntil: "domcontentloaded" });
     await expect(page.locator("#decision-summary-title")).toBeVisible({ timeout: 30_000 });
     await expect(page.locator("section[aria-labelledby='decision-summary-title']").getByText(addressA, { exact: true })).toBeVisible();
-    await expect(page.getByText(/\$2,700/).first()).toBeVisible();
+    // The reopened deal carries the edited rent in its assumption ledger (the
+    // ledger row is collapsed by default, so assert the value, not visibility).
+    await expect(page.locator('[data-assumption-ledger-value="rent"]').first()).toContainText("2,700");
 
     // Duplicate from the deal workspace → the analyzer carries the assumptions
     // but asks for the new property.
