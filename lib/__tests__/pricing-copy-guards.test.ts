@@ -106,7 +106,10 @@ describe("no-card product evaluation", () => {
     expect(buttons).toContain("Start {tierName} evaluation — no card");
     expect(buttons).toContain("plan=${plan}&billing=${billing}");
     expect(buttons).not.toContain("resolveCheckoutResumeForSlot");
-    expect(plans).toContain("3 Pro deals + 1 comparison · no card");
+    // The allowance is stated once, under the CTA, in every trial state
+    // (2026-09 audit removed the duplicate pill beside the price).
+    expect(plans).toContain("New account: $0 today, no card.");
+    expect(plans).toContain("three complete Pro deals and one");
     expect(signup).toContain("Nothing auto-renews");
     expect(signup).toContain("No card is requested and no subscription starts today");
   });

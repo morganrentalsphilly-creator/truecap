@@ -146,20 +146,6 @@ export function PricingTogglePlans({
   proOfferName = "Pro",
 }: PricingTogglePlansProps) {
   const isPaid = activePaidPlanSlug != null || billingRecoveryRequired;
-  const evaluationAllowance = formatPricingEvaluationAllowance(evaluation);
-  const evaluationBadge = billingRecoveryRequired
-    ? "Billing attention needed"
-    : isPaid
-      ? "Paid access active"
-      : !isAuthenticated
-        ? `${PRODUCT_EVALUATION_DAYS} days · 3 Pro deals + 1 comparison · no card`
-        : evaluation.status === "active" && evaluationAllowance
-          ? `${evaluationAllowance} · no card`
-          : evaluation.status === "exhausted"
-            ? "Free-trial runs complete"
-            : evaluation.status === "expired"
-              ? "Free trial ended · Free screening remains"
-              : "Paid access available now";
   // Annual-first (docs/site-overhaul.md Phase 9): the card shows the
   // effective monthly figure with "billed annually (total)" under it, so the
   // visitor sees the lower monthly number AND the real charge. A current
@@ -405,11 +391,6 @@ export function PricingTogglePlans({
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
           </div>
           <div className="mt-1 text-sm text-muted-foreground">{proCard.subline}</div>
-          <div className="mt-3 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-foreground">
-               <Sparkles className="size-3" />{evaluationBadge}
-            </span>
-          </div>
 
           <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.045] p-4">
             <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
@@ -492,11 +473,6 @@ export function PricingTogglePlans({
               <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
             </div>
             <div className="mt-1 text-sm text-muted-foreground">{agentCard.subline}</div>
-            <div className="mt-3 flex justify-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
-                 <Sparkles className="size-3" />{evaluationBadge}
-              </span>
-             </div>
              <div className="mt-5">
                {billingRecoveryRequired ? (
                  <Link
