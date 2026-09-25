@@ -281,6 +281,10 @@ test("tablet investors keep one reachable analysis action below the desktop cock
       await expect(stickyAction).toBeVisible();
       await expectMinimumTouchTarget(stickyAction.getByRole("button"));
     } else {
+      // The in-form action sits within a screen of the arming point; it is
+      // the reachable action, and the block below proves the fixed bar
+      // retires once it is in view.
+      await inFormAction.scrollIntoViewIfNeeded();
       await expect(inFormAction).toBeInViewport();
       await expect(stickyAction).toBeHidden();
     }

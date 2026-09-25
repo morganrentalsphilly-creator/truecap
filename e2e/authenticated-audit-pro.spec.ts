@@ -67,8 +67,17 @@ test("Pro is never gated: projections and stress test open, then save â†’ edit â
     await expect(summary.getByRole("button", { name: "Saved", exact: true })).toBeVisible({ timeout: 30_000 });
 
     await summary.getByRole("button", { name: "Edit assumptions", exact: true }).click();
-    await form.getByLabel("Expected gross monthly rent", { exact: true }).fill("2700");
+    // The saved deal's edit field re-renders while the value is being
+    // replaced (CI captured "26,002,700": the new digits appended to the old
+    // "2,600"), so replace and verify until the field holds the new rent.
+    const rentField = form.getByLabel("Expected gross monthly rent", { exact: true });
+    await expect(async () => {
+      await rentField.fill("");
+      await rentField.fill("2700");
+      await expect(rentField).toHaveValue(/^2,?700$/);
+    }).toPass({ timeout: 20_000 });
     await page.getByRole("button", { name: "Done editing", exact: true }).click();
+    await expect(page.getByText(/last complete entry/)).toHaveCount(0);
     const saveAgain = summary.getByRole("button", { name: "Save", exact: true });
     await expect(saveAgain).toBeEnabled({ timeout: 20_000 });
     await saveAgain.click();

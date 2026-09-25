@@ -30,8 +30,8 @@ test("sign-up creates an account, lands in the app, and opens the 21-day no-card
   await page.getByLabel("Email", { exact: true }).fill(NEW_EMAIL);
   await page.getByLabel("Password", { exact: true }).fill(NEW_PASSWORD);
   await page.getByLabel("Confirm password", { exact: true }).fill(NEW_PASSWORD);
-  await page.getByRole("button", { name: /create account/i }).click();
-  await expect(page).toHaveURL(/\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
+  await page.getByRole("button", { name: /^create account — \$0 today$/i }).click();
+  await expect(page).toHaveURL(/^https?:\/\/[^/]+\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
   await expect(page.locator('form[data-calc-form="true"]')).toBeVisible({ timeout: 30_000 });
 
   // Trial start: the DB trigger opens 3 Pro deals + 1 comparison for 21 days.
@@ -45,7 +45,7 @@ test("sign out from the account menu ends the session", async ({ page }) => {
   await page.getByLabel("Email", { exact: true }).fill(NEW_EMAIL);
   await page.getByLabel("Password", { exact: true }).fill(NEW_PASSWORD);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page).toHaveURL(/\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/^https?:\/\/[^/]+\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
 
   await page.getByRole("button", { name: /audit-/ }).first().click();
   await page.getByRole("menuitem", { name: "Sign out", exact: true }).click();
