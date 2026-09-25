@@ -31,6 +31,10 @@ import {
   X,
 } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import {
+  isTrueCapSyntheticSampleAddress,
+  SAMPLE_DEAL_DISPLAY,
+} from "@/lib/sample-deal";
 import { setPendingSaveIntent } from "@/lib/save-intent";
 import { trackEvent } from "@/lib/analytics";
 
@@ -64,11 +68,15 @@ export function SignupPromptCard({
   };
 
   const cleanAddress = (address ?? "").trim();
-  const dealLabel = cleanAddress
-    ? cleanAddress.length > 36
-      ? `${cleanAddress.slice(0, 36)}…`
-      : cleanAddress
-    : "this analysis";
+  // The sample deal carries an internal placeholder address; show the same
+  // "Philadelphia rental example" label the decision card derives, never the
+  // raw fixture string. Real addresses keep their street line only so the
+  // headline never truncates mid-word.
+  const dealLabel = isTrueCapSyntheticSampleAddress(cleanAddress)
+    ? `this ${SAMPLE_DEAL_DISPLAY.shortAddress}`
+    : cleanAddress
+      ? cleanAddress.split(",")[0].trim().slice(0, 48) || "this analysis"
+      : "this analysis";
 
   return (
     <div className="rounded-2xl border border-[var(--brand-green)]/25 bg-gradient-to-br from-[var(--brand-green-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(22,163,74,0.10)] sm:p-6">
