@@ -11,7 +11,7 @@ Status legend: ✅ done · 🔧 fixed on this branch · ⏳ in progress · ⛔ b
 
 ## 0. Summary
 
-**Verdict: ship-ready after the founder answers §7.** No financial formula,
+**Verdict: shipped.** PR #110 merged to `main` as `b9ebd44` on 2026-09-25 with the CI browser job green (72/72); production verified afterwards (§3.2a). No financial formula,
 default assumption, or data source changed (the engine passes an independent
 re-derivation to the cent). Every checklist item in the brief ran; the two
 that could not run on this machine (browser-level billing, the authenticated
@@ -32,9 +32,9 @@ plus the dark-scheme probe; production build served by `scripts/dev-isolated.sh`
 | Broken internal links (real) | 2 (embed brand-token fallback, plus a stale slug) | **0** (the 11 reported are the crawler's own `not-a-real-*` probes and the unreleased `/embed/brrrr-calculator`) |
 | Console errors that are not local-build artifacts | 0 | 0 (5,024 raw = Sentry tunnel aborted by the crawler + Vercel insights script absent off-Vercel + the 404 probes) |
 | SEO (380 indexable): dup titles / dup descriptions / missing description / missing canonical / missing og:image / h1≠1 / title>65 / desc>165 | 0 / 0 / 0 / 0 / 0 / 0 / 0 / 0 | same |
-| Lighthouse mobile (production, before) `/` `/analyze` `/pricing` | perf 93 / 97 / 96 · a11y 100 · bp 100 · seo 100 | local build after: perf 88 / 86 / 93 · a11y 100 · bp 96 · seo 100 (same machine's local baseline was 79 / 85 / 93; local always trails production — no CDN or image optimisation) |
+| Lighthouse mobile, production `/` `/analyze` `/pricing` | perf 93 / 97 / 96 · a11y 100 · bp 100 · seo 100 · CLS 0.003 / 0.003 / 0.065 | **after deploy: perf 92 / 98 / 98 · a11y 100 · bp 100 · seo 100 · CLS 0.003 on all three** (local build after: 88 / 86 / 93, a11y 100) |
 | Unit tests | 5,136 | 5,168 (400 files, 12.8 s) |
-| Playwright public + audit specs (local, production build) | — | public project 43/43 on the rebuilt build (the 5 that had failed on a long-lived server — per-IP Offer Ceiling limiter — pass on a fresh server); audit specs 21/21 on the mock-wired dev server; authenticated specs in CI |
+| Playwright, all projects | — | CI browser job green on the merged head: 72/72 (public + audit + authenticated Pro + authenticated FREE); locally 43/43 public and 21/21 audit specs on the rebuilt build |
 
 Scores the brief asked for, as I would give them (10 = nothing left that a
 paying customer could hit): functional **9** (billing E2E unproven in a
@@ -43,14 +43,14 @@ artifact), UI bugs **9** (residuals in §8 are cosmetic), consistency **8**
 (one type ramp, one focus ring, one colour vocabulary, one metric rule set;
 widget label case and the tool-page CTA stack are still two-voiced).
 
-What changed: 55 one-theme commits on `audit/full-site` (PR #110, **not
+What changed: 68 one-theme commits (squashed on merge; the per-theme history is on PR #110) on `audit/full-site` (PR #110, **not
 merged, not deployed**). Highlights — a11y 121 serious → 0; the shared
 viewer, decision card, band and memo now share one metric colour/format rule
 set pinned by tests; sign-up with email confirmation no longer bounces to
 login; the sample fixture address never reaches the save prompt; article
 tables keep their numbers on phones; embed snippets are canonical-origin
 only; the analyzer opens on the form. Full ledger in §5–§6; the decisions and their outcomes are in §7 — three
-(D-2, D-3, D-4) still need the founder's accounts.
+(D-2, D-3, D-4) were declined by the founder on 2026-09-25 and are closed.
 
 ## 1. Codebase map (Phase 0)
 
@@ -166,6 +166,19 @@ every public page (body stays `oklch(0.97 …)`), by design — the OS override
 was removed from `app/globals.css` (line ≈523) and the ThemeProvider forces
 light; the dashboard carries its own dark tokens. Recorded as an
 observation, not a bug (D-10 if the founder wants system dark back).
+
+### 3.2a Production after the merge (2026-09-25)
+
+Against https://usetruecap.com after Vercel deployed `b9ebd44`: the ten key
+routes answer 200 (private routes 307 to login, unknown share token 404); the
+analyzer's form heading is the page H1 with the free-decision promise in its
+signpost and no duplicate intro; the memo opens on the decision with no
+version suffix; the pricing card shows one savings badge; embed snippets are
+issued on `usetruecap.com`; the sign-up form states the 12-character rule
+(browser-verified, zero console errors); the security headers are as in 3.7;
+axe (serious, critical, moderate) is 0 on eleven pages at 375 and 1280;
+Lighthouse mobile is `/` 92, `/analyze` 98, `/pricing` 98 with
+accessibility, best-practices and SEO at 100 and CLS 0.003 on each.
 
 ### 3.3 Links and images
 
@@ -396,10 +409,10 @@ and business"). Outcome, per item:
 | ID | Outcome |
 | --- | --- |
 | D-1 | **Done, separate PR #111** (`chore/og-images-node-runtime`): all 134 OG routes on the Node runtime; verified 135/135 routes return `image/png` on a local production build, zero build warnings. Merge after or independently of #110. |
-| D-2 | **Still yours** — needs a dev Supabase project (or deleting the live keys from the laptop) and a service-role key rotation. |
-| D-3 | **Still yours** — install OrbStack or Docker Desktop; CI remains the only place the authenticated gate runs until then. |
-| D-4 | **Still yours** — add test-mode Stripe secrets to a protected GitHub environment; then a `billing-e2e` job can be written. |
-| D-5 | **Done in this PR** (`3bdc30f`): the form mirrors `supabase/config.toml` (12+ characters with lower/upper/digits) for sign-up and password reset, stated under both fields from one constant. **One follow-up for you:** set the production project to the same policy (Supabase dashboard → Authentication → Password requirements), otherwise the form is merely stricter than the server. |
+| D-2 | **Declined by the founder (2026-09-25)** — the current service-role key stays; no dev project. |
+| D-3 | **Declined by the founder (2026-09-25)** — no local Docker; CI is the authenticated gate. |
+| D-4 | **Declined by the founder (2026-09-25)** — billing stays covered by the route and unit tests. |
+| D-5 | **Done in this PR** (`3bdc30f`): the form mirrors `supabase/config.toml` (12+ characters with lower/upper/digits) for sign-up and password reset, stated under both fields from one constant. The production Supabase policy was set to the same rule by the founder on 2026-09-25. |
 | D-6 | **Kept as is** — the filled sample button stays; revisit only if the sample click-through on `/analyze` is low in analytics. |
 | D-7 | **Done in this PR** (`4ef741f`): the pre-run editor legend, the context tile and the save/next-deal dialogs say "targets"; guards re-anchored. |
 | D-8 | **Kept as is** — "$0" is the modelled value. |

@@ -24,7 +24,10 @@ for (const width of [375, 1280]) {
   const page = await ctx.newPage();
   if (share) await page.goto(share, { waitUntil: "networkidle" });
   for (const p of paths) {
-    await page.goto(base + p, { waitUntil: "networkidle" });
+    // "load" + a short settle: pages with a captcha or analytics keep-alive
+    // never reach networkidle on production.
+    await page.goto(base + p, { waitUntil: "load" });
+    await page.waitForTimeout(1500);
     const r = await new AxeBuilder({ page }).analyze();
     const bad = r.violations.filter((v) => ["serious", "critical", "moderate"].includes(v.impact ?? ""));
     total += bad.length;
