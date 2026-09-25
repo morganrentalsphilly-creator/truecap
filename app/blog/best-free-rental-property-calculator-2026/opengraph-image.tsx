@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Best free rental property calculator 2026: 5 tools that actually work for free — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

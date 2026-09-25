@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Stessa vs Avail vs Baselane: 3-way landlord ops comparison — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "House hack underwriting: how to know if a duplex, triplex, or fourplex actually beats renting — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

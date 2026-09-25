@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Bonus depreciation on rental property in 2026: what changed, what's left, and how to use it — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

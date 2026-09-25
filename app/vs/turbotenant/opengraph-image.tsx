@@ -9,7 +9,6 @@
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const runtime = "edge";
 export const alt = "TrueCap vs TurboTenant — honest comparison";
 export const size = OG_SIZE;
 export const contentType = "image/png";
