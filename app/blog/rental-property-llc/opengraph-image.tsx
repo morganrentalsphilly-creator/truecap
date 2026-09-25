@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Should you put your rental property in an LLC? (2026) — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

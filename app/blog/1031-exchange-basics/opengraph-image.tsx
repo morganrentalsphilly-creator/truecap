@@ -5,7 +5,6 @@
 
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "1031 exchange basics for individual rental investors — TrueCap";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

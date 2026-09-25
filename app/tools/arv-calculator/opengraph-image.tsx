@@ -10,7 +10,6 @@
 
 import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
 
-export const runtime = "edge";
 export const alt = "ARV calculator — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

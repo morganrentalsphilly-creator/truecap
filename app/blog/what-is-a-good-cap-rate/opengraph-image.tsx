@@ -4,7 +4,6 @@
 
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "What's a good cap rate for rental property in 2026 — TrueCap";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

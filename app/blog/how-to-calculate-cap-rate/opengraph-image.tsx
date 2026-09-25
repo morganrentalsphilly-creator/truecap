@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "How to calculate cap rate (with worked examples) — 2026 guide — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

@@ -5,7 +5,6 @@
 
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt =
   "How much money do you need to buy a rental property? — TrueCap";
 export const size = { width: 1200, height: 630 };

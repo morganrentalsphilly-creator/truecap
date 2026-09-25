@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Cash-out refinance vs HELOC on a rental: which pulls equity better in 2026? — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

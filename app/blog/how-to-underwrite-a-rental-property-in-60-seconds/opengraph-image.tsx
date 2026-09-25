@@ -9,7 +9,7 @@
  * images: [] declared in generateMetadata for THIS route only.
  *
  * Constraints (next/og):
- *  - Edge runtime
+ *  - Node runtime (Next 16 deprecates the Edge runtime; next/og renders the same under Node)
  *  - JSX subset only (basic divs + inline styles + text)
  *  - No Tailwind classes
  *  - No custom fonts unless we fetch them in the handler
@@ -17,7 +17,6 @@
 
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "How to underwrite a rental property in 60 seconds — TrueCap";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

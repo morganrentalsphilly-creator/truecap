@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Hard money vs DSCR: which loan product is right for your next deal in 2026 — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";
