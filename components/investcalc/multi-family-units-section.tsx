@@ -186,7 +186,7 @@ export function MultiFamilyUnitsSection({
             <span
               role="status"
               aria-live="polite"
-              className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 [overflow-wrap:anywhere]"
+              className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border border-caution/30 bg-caution-light px-2 py-0.5 text-3xs font-semibold text-caution-text [overflow-wrap:anywhere]"
             >
               <span aria-hidden="true">●</span>
               {validationMessage}
@@ -266,7 +266,7 @@ export function MultiFamilyUnitsSection({
                     <p className="text-sm font-medium text-foreground">
                       Owner occupied unit
                     </p>
-                    <p className="text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
+                    <p className="text-2xs text-muted-foreground [overflow-wrap:anywhere]">
                       Turn this on for the unit you live in.
                     </p>
                   </div>
@@ -449,7 +449,7 @@ export function MultiFamilyUnitsSection({
                   {isOwner ? (
                     <p
                       id={`unit-${index}-owner-rent-help`}
-                      className="mt-1 text-[11px] leading-relaxed text-muted-foreground"
+                      className="mt-1 text-2xs leading-relaxed text-muted-foreground"
                     >
                       Fixed at $0 and not counted as rental income.
                     </p>
@@ -464,9 +464,9 @@ export function MultiFamilyUnitsSection({
               {rentHint ? (
                 <p
                   className={cn(
-                    "mt-2 text-[11px] leading-relaxed",
+                    "mt-2 text-2xs leading-relaxed",
                     unitVerdict?.verdict === "above"
-                      ? "text-amber-700"
+                      ? "text-caution-text"
                       : "text-muted-foreground",
                   )}
                 >

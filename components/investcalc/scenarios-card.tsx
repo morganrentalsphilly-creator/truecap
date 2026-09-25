@@ -215,7 +215,7 @@ export function ScenariosCard({
         <div className="flex items-center gap-2">
           <Layers className="size-4 text-primary" />
           <h2 className="text-base font-bold text-foreground">Scenarios</h2>
-          <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+          <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
             {hasBase ? "1 base · " : ""}
             {alternateCount} {alternateCount === 1 ? "scenario" : "scenarios"}
           </span>
@@ -250,22 +250,22 @@ export function ScenariosCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-foreground">{s.scenarioName}</span>
-                  <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                     {kindLabel}
                   </span>
                   {s.strategyKind &&
                   isScenarioStrategyEnabled(s.strategyKind) ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
                       {strategyLabel(s.strategyKind)}
                     </span>
                   ) : null}
                   {s.isSource ? (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
                       Viewing
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
                   {s.isBase
                     ? "Original saved assumptions for this property."
                     : "Independent copy — edits here do not change Base."}
@@ -281,7 +281,7 @@ export function ScenariosCard({
                 <a
                   href={`/dashboard/saved-analyses/${s.id}`}
                   aria-label={`Open ${s.scenarioName} workspace`}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/5 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                 >
                   <FolderOpen aria-hidden className="size-3.5" /> Open workspace
                 </a>
@@ -295,7 +295,7 @@ export function ScenariosCard({
         <div className="mt-4 rounded-xl border border-border bg-background p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="scenario-name" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="scenario-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 Scenario name
               </Label>
               <Input
@@ -307,7 +307,7 @@ export function ScenariosCard({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="scenario-strategy" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="scenario-strategy" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 Strategy (optional)
               </Label>
               <select
@@ -333,7 +333,7 @@ export function ScenariosCard({
               </select>
             </div>
           </div>
-          <div className="mt-2 rounded-lg bg-muted/50 p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+          <div className="mt-2 rounded-lg bg-muted/50 p-2.5 text-2xs leading-relaxed text-muted-foreground">
             <p>
               Starts as a separate copy of <span className="font-semibold text-foreground">{sourceName}</span>.
               Later edits stay isolated from every other saved analysis.

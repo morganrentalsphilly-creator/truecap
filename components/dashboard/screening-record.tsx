@@ -51,7 +51,7 @@ export function ScreeningRecord({
       </h2>
       <dl className="mt-3 grid grid-cols-2 gap-4">
         <div>
-          <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          <dt className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
             Deals saved
           </dt>
           <dd className="mt-0.5 font-mono text-2xl font-extrabold tabular-nums text-foreground">
@@ -59,7 +59,7 @@ export function ScreeningRecord({
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          <dt className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
             Work at asking
           </dt>
           <dd className="mt-0.5 font-mono text-2xl font-extrabold tabular-nums text-foreground">
@@ -67,13 +67,13 @@ export function ScreeningRecord({
           </dd>
         </div>
       </dl>
-      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-2xs leading-relaxed text-muted-foreground">
         {judged.length === 0
           ? "Once your deals have an Offer Ceiling, this shows how many meet the modeled targets at the asking price."
           : `${clearing.length} of ${judged.length} deals shown here have an Offer Ceiling at or above their asking price. Verify the material inputs, then record your own decision.`}
       </p>
       {recordedDealCount > 0 ? (
-        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
           {recordedDealCount} recorded-version {recordedDealCount === 1 ? "deal is" : "deals are"}{" "}
           excluded until explicitly re-underwritten with the current model.
         </p>

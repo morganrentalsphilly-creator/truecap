@@ -149,7 +149,7 @@ export function NoiCalculatorWidget() {
                 value={capexInput}
                 setValue={setCapexInput}
               />
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
                 Kept below lender-style NOI, but subtracted from cash after
                 reserves.
               </p>

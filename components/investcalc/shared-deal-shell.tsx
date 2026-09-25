@@ -168,7 +168,7 @@ export function SharedDealShell({
           {outputsRecomputed ? (
             <p
               role="status"
-              className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground"
+              className="mt-2 rounded-lg border border-caution/40 bg-caution-light p-3 text-xs leading-relaxed text-foreground"
             >
               {inputsSource === "live-saved"
                 ? `This view uses the agent’s current saved inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"}. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`

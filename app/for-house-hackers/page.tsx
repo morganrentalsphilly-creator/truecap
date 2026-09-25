@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "For House Hackers",
@@ -74,24 +75,25 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
 export default function ForHouseHackersPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
         </div>
 
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             For house hackers
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             Live in one, rent the others.{" "}
-            <span className="text-primary">Do the math first.</span>
+            Do the math first.
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             TrueCap handles the math that makes house hacks unique:

@@ -57,7 +57,7 @@ export function TestimonialCard({ record }: { record: VerifiedTestimonial }) {
           {record.portfolioSize ? ` · ${record.portfolioSize}` : ""}
         </p>
         {metrics ? (
-          <p className="mt-1 text-[11px] font-semibold text-primary">{metrics}</p>
+          <p className="mt-1 text-2xs font-semibold text-primary">{metrics}</p>
         ) : null}
       </figcaption>
     </figure>

@@ -335,7 +335,7 @@ export function UserDefaultsCard() {
       </p>
       {DEFAULTS_GROUPS.map((group) => (
         <fieldset key={group} className="mb-5 last:mb-0">
-          <legend className="mb-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+          <legend className="mb-2 text-2xs font-bold uppercase tracking-widest text-primary">
             {group}
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -343,7 +343,7 @@ export function UserDefaultsCard() {
               <div key={field.key} className="space-y-1">
                 <Label
                   htmlFor={`user-default-${field.key}`}
-                  className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
+                  className="text-2xs font-bold uppercase tracking-widest text-muted-foreground"
                 >
                   {field.label}
                 </Label>
@@ -368,7 +368,7 @@ export function UserDefaultsCard() {
                   </span>
                 </div>
                 {field.note ? (
-                  <p className="text-[10px] leading-tight text-muted-foreground">
+                  <p className="text-3xs leading-tight text-muted-foreground">
                     {field.note}
                   </p>
                 ) : null}

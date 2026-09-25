@@ -80,7 +80,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-display text-lg font-semibold">Deal Comparison</h3>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-2xs font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
               <TrendingUp className="h-3 w-3" /> Decision View
             </span>
           </div>

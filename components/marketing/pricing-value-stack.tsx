@@ -37,7 +37,7 @@ export function PricingValueStack({
   return (
     <div className="mx-auto mb-10 max-w-3xl">
       <div className="rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 shadow-[0_12px_36px_rgba(0,112,196,0.10)] sm:p-8">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-2xs font-bold uppercase tracking-widest text-primary">
           What {proOfferName} actually buys
         </p>
         <h3 className="mt-1 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
@@ -58,7 +58,7 @@ export function PricingValueStack({
         </ul>
         {agentProConfigured ? (
           <>
-            <p className="mt-6 text-[11px] font-bold uppercase tracking-widest text-primary">
+            <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-primary">
               Agent Pro adds
             </p>
             <ul className="mt-3 space-y-4">
@@ -81,7 +81,7 @@ export function PricingValueStack({
                 it is where the fuller argument has to be reachable. */}
             <Link
               href="/for-agents"
-              className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               See how agents use it →
             </Link>

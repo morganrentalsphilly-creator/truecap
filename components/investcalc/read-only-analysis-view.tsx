@@ -105,7 +105,7 @@ function MetricTile({
 }) {
   return (
     <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
-      <span className="text-[10px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+      <span className="text-3xs sm:text-3xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
         {label}
       </span>
       <span
@@ -144,7 +144,7 @@ function FrozenStrategyMetric({
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </p>
       <p
@@ -158,7 +158,7 @@ function FrozenStrategyMetric({
         {value}
       </p>
       {note ? (
-        <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="mt-0.5 text-2xs leading-relaxed text-muted-foreground">
           {note}
         </p>
       ) : null}
@@ -179,7 +179,7 @@ function FrozenAssumption({
     <div className="flex items-start justify-between gap-3 border-b border-border/70 py-2 last:border-b-0">
       <div className="min-w-0">
         <p className="text-xs font-semibold text-foreground">{label}</p>
-        <p className="text-[10px] leading-relaxed text-muted-foreground">
+        <p className="text-3xs leading-relaxed text-muted-foreground">
           {SPECIALIST_SOURCE_LABEL[source]}
         </p>
       </div>
@@ -210,7 +210,7 @@ function FrozenSpecialistAnalysis({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-primary">
+          <p className="text-3xs font-extrabold uppercase tracking-widest text-primary">
             Frozen strategy analysis
           </p>
           <h2
@@ -221,7 +221,7 @@ function FrozenSpecialistAnalysis({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <p className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+        <p className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-3xs font-bold uppercase tracking-wide text-primary">
           Model v{snapshot.modelVersion} · core v
           {snapshot.coreMethodologyVersion}
         </p>
@@ -458,7 +458,7 @@ function FrozenSpecialistUnavailable({
   return (
     <section
       role="status"
-      className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 sm:p-6"
+      className="rounded-2xl border border-caution/40 bg-caution-light p-5 sm:p-6"
       aria-labelledby="recorded-specialist-unavailable-title"
     >
       <h2
@@ -499,7 +499,7 @@ function CompRow({ c }: { c: ReportComp }) {
           {c.address || "Nearby comp"}
         </p>
         {facts ? (
-          <p className="truncate text-[11px] text-muted-foreground">{facts}</p>
+          <p className="truncate text-2xs text-muted-foreground">{facts}</p>
         ) : null}
       </div>
       <span className="shrink-0 text-xs font-semibold tabular-nums text-foreground">
@@ -535,25 +535,25 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
         <h2 className="text-sm font-semibold text-foreground">
           Backed by market comps
         </h2>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-2xs text-muted-foreground">
           Nearby sales &amp; rentals via RentCast — reference only.
         </p>
       </div>
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Est. value
             </p>
             <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
               {money0(comps.valueEstimate)}
             </p>
             {valueRange ? (
-              <p className="text-[11px] text-muted-foreground">{valueRange}</p>
+              <p className="text-2xs text-muted-foreground">{valueRange}</p>
             ) : null}
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Est. rent
             </p>
             <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
@@ -562,13 +562,13 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
                 : `${money0(comps.rentEstimate)}/mo`}
             </p>
             {rentRange ? (
-              <p className="text-[11px] text-muted-foreground">{rentRange}</p>
+              <p className="text-2xs text-muted-foreground">{rentRange}</p>
             ) : null}
           </div>
         </div>
         {sale.length > 0 ? (
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
               Comparable sales
             </p>
             <ul className="divide-y divide-border/70">
@@ -580,7 +580,7 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
         ) : null}
         {rent.length > 0 ? (
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
               Comparable rentals
             </p>
             <ul className="divide-y divide-border/70">
@@ -746,7 +746,7 @@ export function ReadOnlyAnalysisView({
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
+            <p className="text-2xs font-extrabold uppercase tracking-widest text-muted-foreground">
               Decision
             </p>
             <h2
@@ -768,7 +768,7 @@ export function ReadOnlyAnalysisView({
           </div>
 
           <div className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4">
-            <p className="text-[11px] font-extrabold uppercase tracking-widest text-primary">
+            <p className="text-2xs font-extrabold uppercase tracking-widest text-primary">
               Offer Ceiling
             </p>
             <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
@@ -784,11 +784,11 @@ export function ReadOnlyAnalysisView({
                       ? " · coarse range preview"
                       : ""}
                 </p>
-                <p className="mt-1 text-[11px] leading-relaxed text-foreground">
+                <p className="mt-1 text-2xs leading-relaxed text-foreground">
                   Targets: {describeMaoTarget(adoptedMaoTarget)}
                 </p>
                 {offerCeiling ? (
-                  <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
+                  <div className="mt-2 space-y-1 text-2xs leading-relaxed text-muted-foreground">
                     <p>
                       Binding:{" "}
                       {offerCeiling.bindingConstraints
@@ -821,7 +821,7 @@ export function ReadOnlyAnalysisView({
                 adopt your own rules without rewriting this historical result.
               </p>
             )}
-            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-2 text-2xs leading-relaxed text-muted-foreground">
               {adoptedMaoTarget
                 ? "The highest price that still meets the targets captured with this share under the assumptions shown."
                 : "A supported Offer Ceiling requires captured target criteria."}
@@ -831,7 +831,7 @@ export function ReadOnlyAnalysisView({
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Criteria fit
             </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -843,7 +843,7 @@ export function ReadOnlyAnalysisView({
             </p>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Decision readiness
             </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -851,7 +851,7 @@ export function ReadOnlyAnalysisView({
             </p>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Margin of safety
             </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -859,7 +859,7 @@ export function ReadOnlyAnalysisView({
             </p>
           </div>
           <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Next action
             </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -870,8 +870,8 @@ export function ReadOnlyAnalysisView({
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3">
+          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             What could break the deal
           </p>
           {assumptionBreakpoints.length > 0 ? (
@@ -1045,7 +1045,7 @@ export function ReadOnlyAnalysisView({
 
           {specialistModelsEnabled ? (
             <details className="bg-card rounded-2xl border border-border shadow-sm">
-              <summary className="flex min-h-11 cursor-pointer items-center px-5 py-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <summary className="flex min-h-11 cursor-pointer items-center px-5 py-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ">
                 Advanced/Beta strategy modeling
               </summary>
               <p className="border-t border-border px-5 pt-4 text-xs leading-relaxed text-muted-foreground">

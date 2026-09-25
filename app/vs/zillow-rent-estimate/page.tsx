@@ -30,6 +30,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
@@ -174,6 +175,7 @@ export default function VsZillowRentPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -186,14 +188,14 @@ export default function VsZillowRentPage() {
         <div className="mb-2">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
         </div>
 
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             Honest comparison
           </div>
@@ -236,7 +238,7 @@ export default function VsZillowRentPage() {
           />
         </section>
 
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-amber-500/30 bg-amber-50/30 p-6 sm:p-8">
+        <section className="mb-12 sm:mb-16 rounded-2xl border border-caution/40 bg-caution-light p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
             Where a Rent Zestimate stops short of an underwrite
           </h2>
@@ -277,7 +279,7 @@ export default function VsZillowRentPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
                 Use TrueCap if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -300,7 +302,7 @@ export default function VsZillowRentPage() {
               </ul>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                 Use Zillow if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -326,13 +328,13 @@ export default function VsZillowRentPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Feature
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
                     TrueCap
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Zillow Rent Estimate
                   </th>
                 </tr>
@@ -363,7 +365,7 @@ export default function VsZillowRentPage() {
               </tbody>
             </table>
           </ScrollX>
-          <p className="mt-3 text-[11px] text-muted-foreground">
+          <p className="mt-3 text-2xs text-muted-foreground">
             Source definitions: Zillow describes Rent Zestimate as a starting
             point based on public data and similar local listings; HUD defines
             FMR as an area-level gross-rent benchmark. Review{" "}

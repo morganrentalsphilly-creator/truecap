@@ -484,7 +484,7 @@ export function FinancingProfilesCard() {
                 id="financing-profile-loan-type"
                 value={editor.loanType}
                 onChange={(event) => setEditor((current) => current ? { ...current, loanType: event.target.value } : current)}
-                className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {FINANCING_PROFILE_LOAN_TYPES.map((loanType) => (
                   <option key={loanType} value={loanType}>{financingProfileLoanTypeLabel(loanType)}</option>
@@ -522,7 +522,7 @@ export function FinancingProfilesCard() {
                   />
                   {field.suffix ? <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{field.suffix}</span> : null}
                 </div>
-                {field.hint ? <p id={`financing-profile-${field.key}-hint`} className="text-[10px] text-muted-foreground">{field.hint}</p> : null}
+                {field.hint ? <p id={`financing-profile-${field.key}-hint`} className="text-3xs text-muted-foreground">{field.hint}</p> : null}
               </div>
             ))}
           </div>
@@ -560,7 +560,7 @@ export function FinancingProfilesCard() {
                   <ShieldCheck aria-hidden /> Today
                 </Button>
               </div>
-              <p id="financing-profile-verified-hint" className="text-[10px] leading-relaxed text-muted-foreground">
+              <p id="financing-profile-verified-hint" className="text-3xs leading-relaxed text-muted-foreground">
                 Set this only after confirming the current lender quote or term sheet. A date
                 within 30 days can raise Input Confidence; older terms remain visible but do not.
               </p>
@@ -575,7 +575,7 @@ export function FinancingProfilesCard() {
               rows={3}
               value={editor.notes}
               onChange={(event) => setEditor((current) => current ? { ...current, notes: event.target.value } : current)}
-              className="min-h-24 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="min-h-24 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               placeholder="Quote source, prepayment penalty, recourse, or other lender notes"
             />
           </div>

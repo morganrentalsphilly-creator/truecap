@@ -200,7 +200,7 @@ export default async function CityStrategyPage({
           </ol>
         </nav>
 
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-2xs font-bold uppercase tracking-widest text-primary">
           {combo.cityName}, {combo.state} · {combo.strategyLabel}
         </p>
         <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">

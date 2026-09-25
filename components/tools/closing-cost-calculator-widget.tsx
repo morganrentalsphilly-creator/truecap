@@ -174,7 +174,7 @@ export function ClosingCostCalculatorWidget() {
   const verdictColor = !result
     ? "text-muted-foreground"
     : result.pctOfPrice >= 6
-      ? "text-amber-700"
+      ? "text-caution-text"
       : "text-foreground";
 
   // Carry the user's purchase price into the full analyzer (P2-2 handoff).
@@ -198,7 +198,7 @@ export function ClosingCostCalculatorWidget() {
         error={validated.purchasePrice.error}
       />
 
-      <p className="mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Loan + title fees
       </p>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -263,7 +263,7 @@ export function ClosingCostCalculatorWidget() {
         />
       </div>
 
-      <p className="mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Prepaid items + due diligence
       </p>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -324,7 +324,7 @@ export function ClosingCostCalculatorWidget() {
             ? `${verdict}. Total modeled closing costs ${fmtMoney(result.total)}, or ${fmtPct(result.pctOfPrice)} of purchase price.`
             : "Fix the highlighted inputs to calculate modeled closing costs."}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Total closing costs
         </p>
         <p

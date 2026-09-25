@@ -58,7 +58,7 @@ type FieldHelpTooltipProps = {
 };
 
 const inputClassName =
-  "min-h-11 rounded-lg border-input bg-background shadow-sm focus-visible:border-ring focus-visible:ring-ring";
+  "min-h-11 rounded-lg border-input bg-background shadow-sm focus-visible:border-ring focus-visible:ring-ring/50";
 const OPERATING_EXPENSES_DETAILS_ID = "operating-expenses-details";
 
 function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
@@ -87,7 +87,7 @@ function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
       <TooltipTrigger asChild>
         <button
           type="button"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
           aria-label={`${label} guidance`}
         >
           <Info aria-hidden="true" className="size-3.5" />
@@ -129,7 +129,7 @@ function FieldLabel({
       ) : null}
       <Label
         htmlFor={htmlFor}
-        className="min-w-0 flex-1 py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
+        className="min-w-0 flex-1 py-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
       >
         {label}
       </Label>
@@ -140,7 +140,7 @@ function FieldLabel({
 
 function FieldHint({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-2 min-h-[32px] text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+    <p className="mt-2 min-h-[32px] text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
       {children}
     </p>
   );
@@ -340,7 +340,7 @@ export function OperatingExpensesSection({
               <span className="text-sm font-semibold text-foreground">
                 {hasPrice ? `$${propertyTaxEst.toLocaleString()}/mo` : "—"}
                 {!hasExplicitPropertyTax ? (
-                  <span className="ml-1 font-normal text-amber-700">
+                  <span className="ml-1 font-normal text-caution-text">
                     (1.1% default — replace with your local number)
                   </span>
                 ) : null}
@@ -409,9 +409,9 @@ export function OperatingExpensesSection({
       )}
 
       {!hasExplicitPropertyTax ? (
-        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2.5">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-700" />
-          <p className="text-xs leading-relaxed text-amber-950">
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
+          <p className="text-xs leading-relaxed text-caution-text">
             <span className="font-semibold">Property tax is not verified.</span>{" "}
             The preliminary result uses a generic 1.1% of purchase price
             fallback. Enter the local annual bill or a reviewed local rate
@@ -428,9 +428,9 @@ export function OperatingExpensesSection({
           (visible even while Advanced is collapsed, which is exactly when
           the $0 slips through). */}
       {propertyType === "multi-family" && !((utilitiesMonthly ?? 0) > 0) ? (
-        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2.5">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
-          <div className="min-w-0 text-xs leading-relaxed text-amber-900">
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
+          <div className="min-w-0 text-xs leading-relaxed text-caution-text">
             <span className="font-semibold">Owner-paid utilities are $0.</span>{" "}
             Most multi-family owners cover water, sewer, trash, or common-area
             electric — a $0 assumption usually overstates cash flow.{" "}
@@ -445,7 +445,7 @@ export function OperatingExpensesSection({
                   60,
                 );
               }}
-              className="inline-flex min-h-11 items-center font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700"
+              className="inline-flex min-h-11 items-center font-semibold text-caution-text underline underline-offset-2 hover:text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-caution"
             >
               Add utilities
             </button>
@@ -506,7 +506,7 @@ export function OperatingExpensesSection({
                         }}
                         aria-pressed={field.value === option.value}
                         className={cn(
-                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
                           field.value === option.value
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground",
@@ -636,7 +636,7 @@ export function OperatingExpensesSection({
                         }}
                         aria-pressed={field.value === option.value}
                         className={cn(
-                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
                           field.value === option.value
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground",
@@ -775,7 +775,7 @@ export function OperatingExpensesSection({
         >
           <p
             className={cn(
-              "px-2 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]",
+              "px-2 pb-2 pt-1 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)]",
               !showAdvanced && "hidden",
             )}
           >
@@ -1013,7 +1013,7 @@ export function OperatingExpensesSection({
             !showAdvanced && "hidden",
           )}
         >
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)]">
+          <p className="mb-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)]">
             Advanced Options (Optional)
           </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1080,7 +1080,7 @@ export function OperatingExpensesSection({
                       // text-base below md: iOS Safari zooms the whole page in on
                       // any form control under 16px and never zooms back out.
                       // Same rule the Input primitive already encodes.
-                      "min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
+                      "min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm",
                       errors.depreciationYears && "border-destructive",
                     )}
                   >
@@ -1301,7 +1301,7 @@ export function OperatingExpensesSection({
                     <div className="mb-2 flex min-h-11 min-w-0 items-start gap-1.5">
                       <Label
                         htmlFor="include-interest-deduction"
-                        className="min-w-0 flex-1 cursor-pointer py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
+                        className="min-w-0 flex-1 cursor-pointer py-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
                       >
                         Include Interest Deduction
                       </Label>
@@ -1309,7 +1309,7 @@ export function OperatingExpensesSection({
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                             aria-label="Include interest deduction guidance"
                           >
                             <Info aria-hidden="true" className="size-3.5" />
@@ -1325,7 +1325,7 @@ export function OperatingExpensesSection({
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+                    <p className="text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                       Include mortgage interest deduction in cash flow and
                       taxes.
                     </p>

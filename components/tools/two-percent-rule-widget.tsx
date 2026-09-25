@@ -131,7 +131,7 @@ export function TwoPercentRuleWidget() {
             )}
           >
             {meetsTwo ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-bold text-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-caution-light text-caution-text font-bold text-sm">
                 <AlertTriangle className="w-4 h-4" /> Meets the 2% rule — verify
                 why
               </span>
@@ -140,7 +140,7 @@ export function TwoPercentRuleWidget() {
                 <Check className="w-4 h-4" /> Passes 1%, below 2%
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[var(--metric-negative)] font-bold text-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-negative/10 text-[var(--metric-negative)] font-bold text-sm">
                 <X className="w-4 h-4" /> Below the 1% rule
               </span>
             )}

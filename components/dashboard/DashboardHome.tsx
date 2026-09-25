@@ -1031,7 +1031,7 @@ export function DashboardHome({
             collapses to a hamburger, so these stay essential. */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
               {/* An email local-part is not a name. page.tsx's getDisplayName
                   already falls back to it, so the old second fallback here was
                   dead code that guaranteed "Welcome back, <email handle>".
@@ -1078,7 +1078,7 @@ export function DashboardHome({
                 <Link href="/pricing" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
                   Compare
-                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold text-primary">
                     PRO
                   </span>
                 </Link>
@@ -1151,7 +1151,7 @@ export function DashboardHome({
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                   Decision center
                 </h2>
                 <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
@@ -1189,9 +1189,9 @@ export function DashboardHome({
                 }
                 prefetch={false}
                 aria-label={`Open highest-scoring deal: ${decisionCenter.best?.address ?? "My Deals"}`}
-                className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
+                <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-success">
                   <Award className="h-3.5 w-3.5" /> Highest Deal score
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1224,7 +1224,7 @@ export function DashboardHome({
                       : "Review deals missing cash-flow data"
                 }
                 className={cn(
-                  "rounded-xl border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "rounded-xl border p-3 transition focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   decisionCenter.needsReview
                     ? "border-destructive/30 bg-destructive/5"
                     : decisionCenter.cashFlowCoverageComplete
@@ -1234,7 +1234,7 @@ export function DashboardHome({
               >
                 <div
                   className={cn(
-                    "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
+                    "flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest",
                     decisionCenter.needsReview
                       ? "text-destructive"
                       : decisionCenter.cashFlowCoverageComplete
@@ -1286,9 +1286,9 @@ export function DashboardHome({
                 }
                 prefetch={false}
                 aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
-                className="rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-primary">
                   <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1331,7 +1331,7 @@ export function DashboardHome({
                   prefetch={false}
                   className="rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 transition hover:bg-[var(--brand-green-light)]"
                 >
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
+                  <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)]">
                     <Target className="h-3.5 w-3.5" /> Meets your buy box
                   </div>
                   <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1380,7 +1380,7 @@ export function DashboardHome({
             {/* Truthfulness: the table shows a bounded recent sample. Without
                 this line a 40-deal user reads 20 rows as their whole book. */}
             {sampledNote ? (
-              <p className="px-1 text-[11px] text-muted-foreground">
+              <p className="px-1 text-2xs text-muted-foreground">
                 {sampledNote}
               </p>
             ) : null}
@@ -1409,7 +1409,7 @@ export function DashboardHome({
           <section aria-label="Owned portfolio" className="space-y-4">
             <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                   Owned portfolio · {owned.count}{" "}
                   {owned.count === 1 ? "property" : "properties"}
                 </h2>
@@ -1423,7 +1423,7 @@ export function DashboardHome({
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-5">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Owned Equity
                   </div>
                   <div className="mt-1 text-lg font-extrabold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
@@ -1431,7 +1431,7 @@ export function DashboardHome({
                       ? `~${formatCurrency(owned.totalEquity)}`
                       : "—"}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  <div className="mt-0.5 text-2xs text-muted-foreground">
                     {owned.totalEquity == null ? (
                       owned.equityEnabled ? (
                         <Link
@@ -1454,7 +1454,7 @@ export function DashboardHome({
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Built Since Close
                   </div>
                   <div
@@ -1471,12 +1471,12 @@ export function DashboardHome({
                       ? formatSignedCurrency(owned.equityGain)
                       : "—"}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  <div className="mt-0.5 text-2xs text-muted-foreground">
                     appreciation + principal paydown
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Monthly Cash Flow
                   </div>
                   <div
@@ -1494,7 +1494,7 @@ export function DashboardHome({
                       ? "—"
                       : formatSignedCurrency(owned.monthlyCashFlow)}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  <div className="mt-0.5 text-2xs text-muted-foreground">
                     {owned.monthlyCashFlow == null
                       ? "Different calculation records; re-underwrite to combine."
                       : `~${formatCurrency(owned.monthlyCashFlow * 12)} / yr, projected`}
@@ -1641,7 +1641,7 @@ export function DashboardHome({
                 {kpis ? (
                   <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                     <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                         <Award className="h-3.5 w-3.5" /> Avg Deal score
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
@@ -1657,7 +1657,7 @@ export function DashboardHome({
                       </div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                         <Layers className="h-3.5 w-3.5" />{" "}
                         <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
                       </div>
@@ -1668,7 +1668,7 @@ export function DashboardHome({
                             : "—"
                           : `${kpis.weightedDscr.toFixed(2)}×`}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-3xs text-muted-foreground">
                         {kpis.weightedDscr == null
                           ? kpis.allCashOnly
                             ? "all active deals are cash purchases"
@@ -1679,7 +1679,7 @@ export function DashboardHome({
                       </div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                         <DollarSign className="h-3.5 w-3.5" /> Cash to Close
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
@@ -1687,7 +1687,7 @@ export function DashboardHome({
                           ? "—"
                           : formatCurrency(kpis.cashToClose, true)}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-3xs text-muted-foreground">
                         down + closing, active deals
                       </div>
                     </div>
@@ -1703,7 +1703,7 @@ export function DashboardHome({
                     >
                       <div
                         className={cn(
-                          "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
+                          "flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest",
                           kpis.needsReviewCount > 0
                             ? "text-destructive"
                             : kpis.cashFlowCoverageComplete
@@ -1719,7 +1719,7 @@ export function DashboardHome({
                           ? "—"
                           : kpis.needsReviewCount}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-3xs text-muted-foreground">
                         {!kpis.cashFlowCoverageComplete
                           ? `${kpis.cashFlowKnownCount} of ${kpis.cashFlowTotalCount} with cash-flow data`
                           : kpis.needsReviewCount === 0
@@ -1757,13 +1757,13 @@ export function DashboardHome({
                       key={seg.id}
                       className="rounded-xl border border-border bg-card p-3"
                     >
-                      <div className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      <div className="truncate text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                         {seg.label}
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
                         {seg.count}
                       </div>
-                      <div className="truncate text-[11px] text-muted-foreground">
+                      <div className="truncate text-2xs text-muted-foreground">
                         {formatCurrency(seg.value, true)}
                       </div>
                     </div>
@@ -1855,7 +1855,7 @@ export function DashboardHome({
                           <Icon className="size-4" />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                          <span className="block text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                             {row.label}
                           </span>
                           <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
@@ -2006,7 +2006,7 @@ export function DashboardHome({
             {/* NT-4: honest sample label — only renders when deals were
                 actually left out of the charts above. */}
             {sampledNote ? (
-              <p className="mt-2 px-1 text-[11px] text-muted-foreground">
+              <p className="mt-2 px-1 text-2xs text-muted-foreground">
                 {sampledNote}
               </p>
             ) : null}
@@ -2024,7 +2024,7 @@ export function DashboardHome({
           <div>
             <TopDeals data={topDeals} />
             {sampledNote ? (
-              <p className="mt-2 px-1 text-[11px] text-muted-foreground">
+              <p className="mt-2 px-1 text-2xs text-muted-foreground">
                 {sampledNote}
               </p>
             ) : null}

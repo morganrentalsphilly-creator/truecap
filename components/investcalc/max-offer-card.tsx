@@ -224,7 +224,7 @@ export function MaxOfferCard({
           Offer Ceiling
         </span>
         {showBuyBoxSeedLabel ? (
-          <span className="rounded-full border border-primary/30 bg-[var(--brand-blue-light)] px-2 py-0.5 text-[10px] font-semibold text-primary">
+          <span className="rounded-full border border-primary/30 bg-[var(--brand-blue-light)] px-2 py-0.5 text-3xs font-semibold text-primary">
             From your buy box
           </span>
         ) : null}
@@ -236,7 +236,7 @@ export function MaxOfferCard({
 
       <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
         <div>
-          <Label htmlFor={capRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={capRateId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cap Rate <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
@@ -263,7 +263,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={cocId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={cocId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cash-on-Cash <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
@@ -290,7 +290,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={cashFlowId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={cashFlowId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min Cash Flow <span className="sr-only">dollars per month</span>
           </Label>
           <div className="relative">
@@ -317,7 +317,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={dscrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={dscrId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min DSCR{" "}
             <span className="font-normal lowercase tracking-normal">
               {isCashDeal ? NO_DEBT_SERVICE_DSCR_LABEL : "(opt)"}
@@ -345,7 +345,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={irrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={irrId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min 10-Year Pre-Tax IRR <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
@@ -372,7 +372,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={maxCashRequiredId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={maxCashRequiredId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Max Cash Required <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
@@ -399,7 +399,7 @@ export function MaxOfferCard({
           ) : null}
         </div>
         <div>
-          <Label htmlFor={maxPurchasePriceId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={maxPurchasePriceId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Max Purchase Price <span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
@@ -433,7 +433,7 @@ export function MaxOfferCard({
       <div className="mt-5 rounded-xl border border-border bg-[var(--background)] p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Offer Ceiling</div>
+            <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">Offer Ceiling</div>
             <div className={cn("mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight sm:text-4xl", mao ? "text-primary" : "text-muted-foreground")}>
               {!values ? "—" : noneSet ? "Set a target" : mao ? money(mao.maxPrice) : "No price hits these targets"}
             </div>
@@ -491,7 +491,7 @@ export function MaxOfferCard({
         {!noneSet ? (
           <div className="mt-3 border-t border-border pt-3">
             <p className="text-xs font-semibold text-foreground">Criteria: {describeMaoTarget(target)}</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
               The highest price that still meets {targetProfileLabel} under the assumptions shown.
             </p>
           </div>
@@ -501,7 +501,7 @@ export function MaxOfferCard({
       {/* Inverse: make the current price work */}
       {!showDecisionThresholds && active && currentPrice ? (
         <div className="mt-4 rounded-xl border border-dashed border-border p-4 sm:p-5">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Or - make your current price work
           </div>
           {currentMeets ? (

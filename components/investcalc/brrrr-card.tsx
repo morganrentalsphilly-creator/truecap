@@ -243,7 +243,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={rehabId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Rehab Budget
             </Label>
@@ -275,7 +275,7 @@ export function BrrrrCard({
               message={strategyInputErrors?.rehabBudget}
             />
             {defaultRehab && defaultRehab > 0 && inputs.rehabBudget == null && (
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-3xs text-muted-foreground mt-1">
                 Using estimator total
               </p>
             )}
@@ -283,7 +283,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={arvId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               ARV
             </Label>
@@ -314,14 +314,14 @@ export function BrrrrCard({
               id={`${arvId}-error`}
               message={strategyInputErrors?.strategyArv}
             />
-            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-3xs leading-relaxed text-muted-foreground">
               Your estimate · verify with relevant sold comps or an appraisal.
             </p>
           </div>
           <div>
             <Label
               htmlFor={refiLtvId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Refi LTV
             </Label>
@@ -358,7 +358,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={refiRateId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Refi Rate
             </Label>
@@ -395,7 +395,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={refiTermId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Refi Term
             </Label>
@@ -432,7 +432,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={holdId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Hold (rehab → refi)
             </Label>
@@ -469,7 +469,7 @@ export function BrrrrCard({
           <div>
             <Label
               htmlFor={refiCloseId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Refi Closing
             </Label>
@@ -564,7 +564,7 @@ export function BrrrrCard({
           {/* Breakdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                 Cash going in
               </div>
               <Row
@@ -587,7 +587,7 @@ export function BrrrrCard({
               />
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                 Refi
               </div>
               <Row
@@ -641,7 +641,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
         {label}
       </div>
       <div

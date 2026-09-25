@@ -74,7 +74,7 @@ export function ScoreBreakdown({
   const applicabilityAdjustment = breakdown.applicabilityAdjustment;
   return (
     <div className="w-[min(20rem,78vw)] text-sm">
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mb-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Deal score factors
       </p>
       <ul className="space-y-2">
@@ -124,7 +124,7 @@ export function ScoreBreakdown({
         <span>Deal score</span>
         <span className="tabular-nums">{Math.round(score)} / 100</span>
       </div>
-      <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+      <p className="mt-2 text-2xs leading-snug text-muted-foreground">
         {floorApplied ? (
           <>
             The factors above sum to {Math.round(getScoreBreakdownSum(breakdown))}, but this deal
@@ -140,12 +140,12 @@ export function ScoreBreakdown({
         )}
       </p>
       {applicabilityAdjustment != null ? (
-        <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+        <p className="mt-2 text-2xs leading-snug text-muted-foreground">
           Cash-on-cash is N/A because modeled cash invested is $0. The remaining applicable
           factors are normalized to 100; the historical 0% sentinel is not scored.
         </p>
       ) : null}
-      <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+      <p className="mt-2 text-2xs leading-snug text-muted-foreground">
         A heuristic summary of the modeled numbers, 0–100.
       </p>
     </div>

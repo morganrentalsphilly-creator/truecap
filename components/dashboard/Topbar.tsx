@@ -291,7 +291,7 @@ export function Topbar({
                 : undefined
             }
             autoComplete="off"
-            className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
           <span
             id="dashboard-search-status"

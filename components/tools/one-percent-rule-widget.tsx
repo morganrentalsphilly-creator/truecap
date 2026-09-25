@@ -130,7 +130,7 @@ export function OnePercentRuleWidget() {
                   <Check className="w-4 h-4" /> Passes 1% rule
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[var(--metric-negative)] font-bold text-sm">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-negative/10 text-[var(--metric-negative)] font-bold text-sm">
                   <X className="w-4 h-4" /> Fails 1% rule
                 </span>
               )}

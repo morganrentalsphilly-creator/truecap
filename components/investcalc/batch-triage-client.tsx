@@ -162,7 +162,7 @@ function PreviewInput({
     <div className="min-w-0">
       <label
         htmlFor={inputId}
-        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground lg:sr-only"
+        className="mb-1 block text-3xs font-bold uppercase tracking-wider text-muted-foreground lg:sr-only"
       >
         {label}
       </label>
@@ -175,7 +175,7 @@ function PreviewInput({
         aria-invalid={issue?.severity === "error" || undefined}
         aria-describedby={issueId}
         className={cn(
-          "h-11 w-full min-w-0 rounded-lg border bg-background px-3 text-base text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
+          "h-11 w-full min-w-0 rounded-lg border bg-background px-3 text-base text-foreground outline-none transition focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm",
           issue?.severity === "error" ? "border-destructive" : "border-border",
         )}
       />
@@ -183,8 +183,8 @@ function PreviewInput({
         <p
           id={issueId}
           className={cn(
-            "mt-1 text-[10px] leading-snug",
-            issue.severity === "error" ? "text-destructive" : "text-amber-700",
+            "mt-1 text-3xs leading-snug",
+            issue.severity === "error" ? "text-destructive" : "text-caution-text",
           )}
         >
           {issue.message}
@@ -198,11 +198,11 @@ function PreviewRowContext({ row }: { row: TriagePreviewRow }) {
   const location = resolvedTriageLocation(row.address);
   const rowIssues = row.issues.filter((issue) => issue.field === "row");
   return (
-    <div className="mt-2 space-y-1 text-[11px]">
+    <div className="mt-2 space-y-1 text-2xs">
       <p
         className={cn(
           "inline-flex items-center gap-1.5",
-          location.label ? "text-muted-foreground" : "text-amber-700",
+          location.label ? "text-muted-foreground" : "text-caution-text",
         )}
       >
         <MapPin className="size-3.5" aria-hidden />
@@ -213,7 +213,7 @@ function PreviewRowContext({ row }: { row: TriagePreviewRow }) {
       {rowIssues.map((issue) => (
         <p
           key={issue.message}
-          className="flex items-start gap-1.5 text-amber-700"
+          className="flex items-start gap-1.5 text-caution-text"
         >
           <AlertTriangle className="mt-0.5 size-3 shrink-0" aria-hidden />
           {issue.message}
@@ -491,10 +491,10 @@ export function BatchTriageClient({
         spellCheck={false}
         placeholder={PLACEHOLDER}
         aria-label="Listings to screen"
-        className="min-h-32 w-full resize-y rounded-xl border border-border bg-card p-3 font-mono text-base text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
+        className="min-h-32 w-full resize-y rounded-xl border border-border bg-card p-3 font-mono text-base text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
       />
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-2xs text-muted-foreground">
           {aiEnabled
             ? "Tip: paste a listing description or email and hit Auto-extract, or paste columns straight from a spreadsheet."
             : "Tip: paste straight from a spreadsheet — the columns line up automatically."}
@@ -505,7 +505,7 @@ export function BatchTriageClient({
               type="button"
               onClick={extract}
               disabled={extracting || pending || text.trim() === ""}
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
             >
               {extracting ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -519,7 +519,7 @@ export function BatchTriageClient({
             type="button"
             onClick={previewRows ? screen : review}
             disabled={pending || extracting || text.trim() === ""}
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md outline-none hover:bg-primary/95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md outline-none hover:bg-primary/95 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
           >
             {pending ? (
               <Loader2 className="size-4 animate-spin" />
@@ -580,7 +580,7 @@ export function BatchTriageClient({
                 key={row.id}
                 className="rounded-xl border border-border bg-background p-3"
               >
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="mb-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   Listing {index + 1}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -632,7 +632,7 @@ export function BatchTriageClient({
             <table className="w-full table-fixed text-sm">
               <caption className="sr-only">Editable listing preview</caption>
               <thead>
-                <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <tr className="text-left text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   <th scope="col" className="w-[42%] pb-2 pr-2">
                     Address
                   </th>
@@ -712,7 +712,7 @@ export function BatchTriageClient({
               {result.truncated
                 ? ` (first ${MAX_TRIAGE_ROWS} of your paste)`
                 : ""}
-              <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+              <span className="mt-0.5 block text-2xs font-normal text-muted-foreground">
                 {result.buyBoxActive
                   ? "Each Offer Ceiling is the highest price that still meets the Buy Box criteria shown on that row."
                   : "Core underwriting is shown without an Offer Ceiling. Adopt return targets in a Buy Box and TrueCap calculates one for every row."}
@@ -725,7 +725,7 @@ export function BatchTriageClient({
                   onClick={() => setPassersOnly((v) => !v)}
                   aria-pressed={passersOnly}
                   className={cn(
-                    "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                    "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     passersOnly
                       ? "border-[var(--brand-green)]/40 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
                       : "border-border bg-background text-muted-foreground hover:text-foreground",
@@ -747,7 +747,7 @@ export function BatchTriageClient({
                     aria-pressed={sort === o.id}
                     onClick={() => setSort(o.id)}
                     className={cn(
-                      "min-h-11 rounded-md px-3 py-2 text-xs font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-ring",
+                      "min-h-11 rounded-md px-3 py-2 text-xs font-semibold outline-none transition focus-visible:ring-[3px] focus-visible:ring-ring/50",
                       sort === o.id
                         ? "bg-card text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
@@ -808,7 +808,7 @@ export function BatchTriageClient({
               {/* Desktop table */}
               <div className="mt-4 hidden overflow-hidden rounded-2xl border border-border lg:block">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/50 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <thead className="bg-muted/50 text-left text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                     <tr>
                       <th scope="col" className="px-4 py-2.5">
                         Listing
@@ -858,7 +858,7 @@ export function BatchTriageClient({
                           </div>
                           <div
                             className={cn(
-                              "mt-1 text-[10px] leading-snug",
+                              "mt-1 text-3xs leading-snug",
                               row.assumptionContext?.enrichmentStatus === "live"
                                 ? "text-muted-foreground"
                                 : "text-warning-foreground",
@@ -907,7 +907,7 @@ export function BatchTriageClient({
                         >
                           <span>{money(row.maxOffer)}</span>
                           {row.targetLabel ? (
-                            <span className="mt-0.5 block max-w-40 text-[10px] font-sans font-normal leading-tight text-muted-foreground">
+                            <span className="mt-0.5 block max-w-40 text-3xs font-sans font-normal leading-tight text-muted-foreground">
                               {row.targetLabel}
                             </span>
                           ) : null}
@@ -940,7 +940,7 @@ export function BatchTriageClient({
                                 source: "triage",
                               })
                             }
-                            className="-my-2 inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                            className="-my-2 inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
                           >
                             Open <ArrowUpRight className="size-3.5" />
                           </AnalyzerHandoffLink>
@@ -974,7 +974,7 @@ export function BatchTriageClient({
                         </div>
                         <div
                           className={cn(
-                            "mt-1 text-[10px] leading-snug",
+                            "mt-1 text-3xs leading-snug",
                             row.assumptionContext?.enrichmentStatus === "live"
                               ? "text-muted-foreground"
                               : "text-warning-foreground",
@@ -995,7 +995,7 @@ export function BatchTriageClient({
                               ? triageVerdictLabel(row.recommendation)
                               : "—"}
                           </span>
-                          <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                             Deal score {row.score ?? "—"}
                           </span>
                         </div>
@@ -1007,7 +1007,7 @@ export function BatchTriageClient({
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
                       <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
                           Cash flow
                         </div>
                         <div
@@ -1022,7 +1022,7 @@ export function BatchTriageClient({
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
                           CoC
                         </div>
                         <div className="font-mono font-semibold text-foreground">
@@ -1030,7 +1030,7 @@ export function BatchTriageClient({
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
                           DSCR
                         </div>
                         <div className="font-mono font-semibold text-foreground">
@@ -1040,7 +1040,7 @@ export function BatchTriageClient({
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                        <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                           Offer Ceiling
                         </div>
                         <div
@@ -1050,13 +1050,13 @@ export function BatchTriageClient({
                           {money(row.maxOffer)}
                         </div>
                         {row.targetLabel ? (
-                          <div className="mt-1 text-[10px] leading-snug text-muted-foreground">
+                          <div className="mt-1 text-3xs leading-snug text-muted-foreground">
                             {row.targetLabel}
                           </div>
                         ) : null}
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                        <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                           Gap to asking
                         </div>
                         <div
@@ -1091,7 +1091,7 @@ export function BatchTriageClient({
                             source: "triage",
                           })
                         }
-                        className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                        className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       >
                         Open in analyzer <ArrowUpRight className="size-3.5" />
                       </AnalyzerHandoffLink>
@@ -1103,7 +1103,7 @@ export function BatchTriageClient({
           )}
 
           {result.parseErrors.length > 0 ? (
-            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            <div className="mt-4 rounded-xl border border-caution/30 bg-caution-light p-3 text-xs text-caution-text">
               <p className="font-semibold">
                 {result.parseErrors.length} line
                 {result.parseErrors.length === 1 ? "" : "s"} couldn&apos;t be

@@ -214,8 +214,8 @@ export function validateTargetDraft(
 function TargetFit({ meets, target }: { meets: boolean; target: string }) {
   return (
     <p
-      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        meets ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"
+      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-semibold ${
+        meets ? "bg-positive-light text-positive" : "bg-caution-light text-caution-text"
       }`}
     >
       {meets ? "Meets" : "Misses"} {target}
@@ -243,7 +243,7 @@ function FirstYearSnapshot({
       aria-label="First-year investment snapshot"
     >
       <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           {isScenarioActive
             ? "Base cash flow after reserve"
             : "Cash flow after reserve"}
@@ -259,14 +259,14 @@ function FirstYearSnapshot({
         ) : null}
       </div>
       <div className="rounded-xl border border-border bg-muted/30 p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           Model DSCR
         </p>
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
           {dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL}
         </p>
         {!dscrApplies ? (
-          <p className="mt-1 text-[10px] text-muted-foreground">
+          <p className="mt-1 text-3xs text-muted-foreground">
             No modeled debt service
           </p>
         ) : typeof dscrTarget === "number" ? (
@@ -816,7 +816,7 @@ export function FocusedDecisionSummary({
               {displayAddress}
             </p>
             {isScenarioActive ? (
-              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground">
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-3xs font-bold uppercase tracking-wider text-foreground">
                 Base analysis
               </span>
             ) : null}
@@ -849,7 +849,7 @@ export function FocusedDecisionSummary({
           >
             {offerCeilingAnnouncement}
           </span>
-          <p className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
+          <p className="text-2xs font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
             {!targetAdopted
               ? "Optional decision criteria"
               : isScenarioActive
@@ -870,13 +870,13 @@ export function FocusedDecisionSummary({
             </p>
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
-            <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-[11px] leading-relaxed text-foreground">
+            <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-2xs leading-relaxed text-foreground">
               {targetDeltaNotice.message} This comparison is session-only; Save
               to record the current criteria with the analysis.
             </p>
           ) : null}
           {offerCeilingError && offerCeilingErrorCode === "RATE_LIMITED" ? (
-            <p className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-2xs leading-relaxed text-muted-foreground">
               You&apos;ve reached the hourly limit for exact ceiling solves.
               It resets on its own — no need to retry; the rest of this
               analysis is unaffected.
@@ -885,7 +885,7 @@ export function FocusedDecisionSummary({
             <button
               type="button"
               onClick={onRetryOfferCeiling}
-              className="mt-2 inline-flex min-h-11 items-center rounded-lg border border-primary/30 px-3 text-xs font-bold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="mt-2 inline-flex min-h-11 items-center rounded-lg border border-primary/30 px-3 text-xs font-bold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Retry Offer Ceiling
             </button>
@@ -943,14 +943,14 @@ export function FocusedDecisionSummary({
             </div>
           ) : null}
           <details className="group mt-2 border-t border-primary/15 pt-1">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
               How this ceiling was calculated
               <ChevronDown
                 aria-hidden
                 className="size-4 transition-transform group-open:rotate-180"
               />
             </summary>
-            <div className="space-y-1.5 pb-1 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="space-y-1.5 pb-1 text-2xs leading-relaxed text-muted-foreground">
               <p>
                 {advocacyContractEnabled
                   ? `${isSampleCriteria ? "Example criteria" : targetContext.profileName}${
@@ -1123,7 +1123,7 @@ export function FocusedDecisionSummary({
           )}
           {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
           {isSaveLocked ? (
-            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-3xs font-bold uppercase text-white">
               PRO
             </span>
           ) : null}
@@ -1146,7 +1146,7 @@ export function FocusedDecisionSummary({
       {targetDraftBlocksActions ? (
         <p
           role="status"
-          className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-200"
+          className="mt-2 text-xs font-medium text-caution-text dark:text-caution-light"
         >
           {targetDraftBlockMessage}
         </p>
@@ -1268,7 +1268,7 @@ export function FocusedDecisionSummary({
         className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5"
         data-result-next-action=""
       >
-        <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/75">
+        <p className="text-3xs font-bold uppercase tracking-widest text-foreground/75">
           Best next step
         </p>
         <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1296,7 +1296,7 @@ export function FocusedDecisionSummary({
 
       {viabilityLabels.length > 0 ? (
         <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             Fastest paths to meet your criteria
           </p>
           <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
@@ -1311,8 +1311,8 @@ export function FocusedDecisionSummary({
       ) : null}
 
       {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3">
+          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             {targetAdopted
               ? "Two assumptions most likely to move the decision"
               : "What can move the result"}
@@ -1329,7 +1329,7 @@ export function FocusedDecisionSummary({
       ) : null}
 
       <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           Decision context and key numbers
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"
@@ -1342,7 +1342,7 @@ export function FocusedDecisionSummary({
             aria-label="Secondary first-year metrics"
           >
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Cash to close
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1350,7 +1350,7 @@ export function FocusedDecisionSummary({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Annual NOI
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1358,7 +1358,7 @@ export function FocusedDecisionSummary({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Cap rate
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1366,7 +1366,7 @@ export function FocusedDecisionSummary({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Cash-on-cash
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1379,7 +1379,7 @@ export function FocusedDecisionSummary({
             className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-3"
           >
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 {advocacyContractEnabled
                   ? "Criteria profile"
                   : "Offer criteria"}
@@ -1400,11 +1400,11 @@ export function FocusedDecisionSummary({
               {advocacyContractEnabled ? (
                 <>
                   {targetAdopted ? (
-                    <p className="mt-1 break-all text-[10px] text-muted-foreground">
+                    <p className="mt-1 break-all text-3xs text-muted-foreground">
                       {targetVersionLabel}
                     </p>
                   ) : null}
-                  <p className="mt-1 break-all text-[10px] text-muted-foreground">
+                  <p className="mt-1 break-all text-3xs text-muted-foreground">
                     Exact criteria are shown with the Offer Ceiling.
                   </p>
                 </>
@@ -1412,14 +1412,14 @@ export function FocusedDecisionSummary({
             </div>
             {!advocacyContractEnabled ? (
               <div className="rounded-xl border border-border bg-background p-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   Assumption status
                 </p>
                 <p className="mt-1 text-sm font-extrabold text-foreground">
                   {readinessLabel}
                 </p>
                 {nextVerification ? (
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-3xs text-muted-foreground">
                     Weakest material input: {nextVerification.label}
                   </p>
                 ) : null}
@@ -1427,19 +1427,19 @@ export function FocusedDecisionSummary({
             ) : null}
             {advocacyContractEnabled ? (
               <div className="rounded-xl border border-border bg-background p-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   User decision
                 </p>
                 <p className="mt-1 text-sm font-extrabold text-foreground">
                   {userDecisionLabel(userDecision)}
                 </p>
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 text-3xs text-muted-foreground">
                   Recorded by you, never inferred
                 </p>
               </div>
             ) : null}
             <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Margin of Safety
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1468,7 +1468,7 @@ export function FocusedDecisionSummary({
       </details>
 
       <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           More actions
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"

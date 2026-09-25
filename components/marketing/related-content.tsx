@@ -31,16 +31,16 @@ export function RelatedContent({
   if (links.length === 0) return null;
   return (
     <nav aria-label={heading} data-related-content="" className={`rounded-2xl border border-border bg-card p-5 ${className}`.trim()}>
-      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{heading}</p>
+      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">{heading}</p>
       <ul className="mt-2 grid gap-1 sm:grid-cols-2">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
               prefetch={false}
-              className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground underline decoration-border underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground underline decoration-border underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                 {KIND_LABEL[link.kind]}
               </span>
               <span>{link.label}</span>

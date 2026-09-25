@@ -176,7 +176,7 @@ function Metric({
         : "text-foreground";
   return (
     <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       <span className={`text-sm font-semibold tabular-nums ${valueClass}`}>{value}</span>
@@ -762,7 +762,7 @@ export default async function DealWorkspacePage({
                     Everything for this deal — checklist, documents, notes &amp; scenarios.
                   </p>
                 )}
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 text-3xs text-muted-foreground">
                   {!isLegacySavedMethodologyVersion(storedMethodologyVersion) ? (
                     <>
                       TrueCap Underwriting Standard v{storedMethodologyVersion}
@@ -914,7 +914,7 @@ export default async function DealWorkspacePage({
               <div className="mt-2 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
                 <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Offer Ceiling
                   </div>
                   {maoLine.kind === "blocked" ? (
@@ -962,7 +962,7 @@ export default async function DealWorkspacePage({
                       <div className="mt-0.5 text-xs text-muted-foreground">
                         Targets: {maoBasisLabel}
                       </div>
-                      <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                      <div className="mt-1 text-2xs leading-relaxed text-muted-foreground">
                         The highest price that still clears {maoBasisLabel}{" "}
                         under the assumptions shown.
                       </div>

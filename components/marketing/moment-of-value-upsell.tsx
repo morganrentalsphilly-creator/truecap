@@ -99,11 +99,11 @@ export function MomentOfValueUpsell({
     <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(0,112,196,0.10)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-3xs font-extrabold uppercase tracking-widest text-primary-foreground">
             <TrendingUp className="size-3" />
             Free screen complete
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <span className="text-3xs font-semibold uppercase tracking-widest text-muted-foreground">
             decide + act with Pro
           </span>
         </div>
@@ -151,14 +151,14 @@ export function MomentOfValueUpsell({
       <div className="mt-4 rounded-2xl border-2 border-primary/35 bg-card p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
+            <div className="flex items-center gap-1.5 text-3xs font-extrabold uppercase tracking-widest text-primary">
               <Target className="size-3.5" /> Interactive target solver
             </div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-extrabold text-foreground">
               <Lock className="size-5 text-primary" aria-hidden /> Unlock
             </div>
           </div>
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-3xs font-bold uppercase tracking-wider text-primary">
             Pro underwriting
           </span>
         </div>
@@ -172,7 +172,7 @@ export function MomentOfValueUpsell({
       {/* Next steps: keep refining for free or upgrade to the supported Pro
           report workflow. New one-time purchases are temporarily disabled. */}
       <div className="mt-5 space-y-2.5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           Next steps
         </p>
 
@@ -216,7 +216,7 @@ export function MomentOfValueUpsell({
       </div>
 
       {/* Inline note — softens the upsell */}
-      <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
+      <p className="mt-4 border-t border-border/60 pt-3 text-2xs text-muted-foreground">
         Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC{" "}
         {totalCashRequired > 0 ? `${cocReturn.toFixed(1)}%` : "N/A"}.
         Calculations are estimates based on your inputs. Verify assumptions
@@ -241,14 +241,14 @@ function FeatureChip({
     <div className="rounded-xl border border-border bg-card p-3">
       <div className="flex items-center gap-1.5">
         <Icon className="size-3.5 text-primary" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           {label}
         </span>
       </div>
       <div className="mt-1 text-base font-extrabold tabular-nums text-foreground">
         {value}
       </div>
-      <div className="text-[11px] text-muted-foreground">{sub}</div>
+      <div className="text-2xs text-muted-foreground">{sub}</div>
     </div>
   );
 }

@@ -46,9 +46,6 @@ export function AnalyzePageContent({ analyzerProps }: { analyzerProps: AnalyzerP
         className="border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] to-background"
       >
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            Free analyzer
-          </p>
           <h1 id="analyze-page-title" className="mt-1 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Analyze a rental deal
           </h1>

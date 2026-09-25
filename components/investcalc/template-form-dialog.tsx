@@ -129,13 +129,13 @@ function NumberInputField({
             </span>
           </div>
           {hint ? (
-            <p className="mt-1 text-[11px] text-muted-foreground min-h-[14px]">
+            <p className="mt-1 text-2xs text-muted-foreground min-h-[14px]">
               {hint}
             </p>
           ) : (
             <p className="mt-1 min-h-[14px]" />
           )}
-          <FormMessage className="text-[11px]" />
+          <FormMessage className="text-2xs" />
         </FormItem>
       )}
     />
@@ -206,7 +206,7 @@ function BuyBoxField({
               </span>
             ) : null}
           </div>
-          <FormMessage className="text-[11px]" />
+          <FormMessage className="text-2xs" />
         </FormItem>
       )}
     />
@@ -388,11 +388,11 @@ export function TemplateFormDialog({
                             </button>
                           ))}
                         </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground min-h-[14px]">
+                        <p className="mt-1 text-2xs text-muted-foreground min-h-[14px]">
                           Save insurance assumptions as an annual percent or a
                           flat monthly cost.
                         </p>
-                        <FormMessage className="text-[11px]" />
+                        <FormMessage className="text-2xs" />
                       </FormItem>
                     )}
                   />
@@ -553,7 +553,7 @@ export function TemplateFormDialog({
                                   </select>
                                 </FormControl>
                                 <p className="mt-1 min-h-[14px]" />
-                                <FormMessage className="text-[11px]" />
+                                <FormMessage className="text-2xs" />
                               </FormItem>
                             )}
                           />
@@ -576,7 +576,7 @@ export function TemplateFormDialog({
                           >
                             Include Interest Deduction
                           </FormLabel>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-2xs text-muted-foreground">
                             Include mortgage interest deduction in cash flow and
                             taxes.
                           </p>

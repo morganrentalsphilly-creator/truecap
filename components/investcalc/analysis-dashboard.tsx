@@ -1485,7 +1485,7 @@ export function AnalysisDashboard({
           </p>
           <Button
             size="sm"
-            className="h-7 shrink-0 gap-1 rounded-full bg-primary px-3 text-[11px] font-bold text-primary-foreground"
+            className="h-7 shrink-0 gap-1 rounded-full bg-primary px-3 text-2xs font-bold text-primary-foreground"
             onClick={goToBilling}
           >
             Get Pro
@@ -1494,7 +1494,7 @@ export function AnalysisDashboard({
             type="button"
             aria-label="Dismiss the sample deal banner"
             onClick={() => setSampleBannerDismissed(true)}
-            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <X className="size-3.5" aria-hidden />
           </button>
@@ -1503,7 +1503,7 @@ export function AnalysisDashboard({
       {deferredWhatIfState?.isAdjusted ? (
         <div
           role="status"
-          className="sticky top-16 z-20 rounded-xl border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
+          className="sticky top-16 z-20 rounded-xl border border-caution/40 bg-caution-light px-4 py-3 text-sm text-caution-text shadow-sm"
         >
           <strong>Scenario only.</strong> These numbers are temporary. Your
           saved base assumptions have not changed. Scenario values below are
@@ -1526,7 +1526,7 @@ export function AnalysisDashboard({
           className={cn(
             "flex flex-col gap-2 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
             buyBoxTargetResolutionState === "error"
-              ? "border-amber-300 bg-amber-50 text-amber-950"
+              ? "border-caution/30 bg-caution-light text-caution-text"
               : "border-primary/20 bg-[var(--brand-blue-light)] text-foreground",
           )}
         >
@@ -1535,7 +1535,7 @@ export function AnalysisDashboard({
             <button
               type="button"
               onClick={retryBuyBoxResolution}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-amber-500/50 bg-background px-3 font-semibold text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-caution/40 bg-background px-3 font-semibold text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Retry Buy Box
             </button>
@@ -1564,7 +1564,7 @@ export function AnalysisDashboard({
           </h2>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Cash flow after reserve
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1576,7 +1576,7 @@ export function AnalysisDashboard({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Model DSCR
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1704,13 +1704,13 @@ export function AnalysisDashboard({
               id="screening-index"
               className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-border bg-muted/20 px-4 py-2.5"
             >
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Deal score
               </p>
               <p className="font-mono text-sm font-extrabold tabular-nums text-foreground">
                 {Math.round(dealScoreResult.data.score)}/100
               </p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 A heuristic summary of the modeled numbers, 0–100. Method v
                 {dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
               </p>
@@ -1864,12 +1864,12 @@ export function AnalysisDashboard({
             </span>
             <span
               className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                "rounded-full border px-2 py-0.5 text-3xs font-bold uppercase tracking-wide",
                 isSaved
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  ? "border-positive/30 bg-positive-light text-positive"
                   : isExistingSavedDeal
-                    ? "border-orange-200 bg-orange-50 text-orange-700"
-                    : "border-amber-200 bg-amber-50 text-amber-700",
+                    ? "border-caution/30 bg-caution-light text-caution-text"
+                    : "border-caution/30 bg-caution-light text-caution-text",
               )}
               title={
                 isSaved
@@ -1923,7 +1923,7 @@ export function AnalysisDashboard({
                   ? targetActionsBlockedReason
                   : saveLockedHint
               }
-              className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+              className="h-11 gap-1 rounded-xl px-2 text-2xs sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
             >
               {isSaving ? (
                 <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
@@ -1932,7 +1932,7 @@ export function AnalysisDashboard({
               )}
               <span>Save</span>
               {isSaveLockedByPlan && (
-                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[10px] sm:text-[10px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
+                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-3xs sm:text-3xs font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
                   PRO
                 </span>
               )}
@@ -1941,7 +1941,7 @@ export function AnalysisDashboard({
             <Button
               variant="outline"
               size="sm"
-              className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+              className="hidden h-11 gap-1 rounded-xl px-2 text-2xs sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
               onClick={() => void onCompareDeals()}
               disabled={!isSaved || !canCompareDeals || isComparing}
               title={
@@ -1963,7 +1963,7 @@ export function AnalysisDashboard({
             </Button>
             <Button
               size="sm"
-              className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+              className="h-11 gap-1 rounded-xl bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
               onClick={() => handleExportPdf()}
               // Clickable for users WITHOUT the entitlement on purpose:
               // the click opens the Pro report upgrade dialog. Existing
@@ -2013,7 +2013,7 @@ export function AnalysisDashboard({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-64 p-1.5">
-                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
                     Export as…
                   </p>
                   {REPORT_MODES.map((m) => (
@@ -2027,7 +2027,7 @@ export function AnalysisDashboard({
                       <span className="text-sm font-semibold text-foreground">
                         {m.label}
                       </span>
-                      <span className="block text-[11px] leading-snug text-muted-foreground">
+                      <span className="block text-2xs leading-snug text-muted-foreground">
                         {m.description}
                       </span>
                     </button>
@@ -2046,7 +2046,7 @@ export function AnalysisDashboard({
               // col-span-2: the label is the feature ("same assumptions" in
               // the user's own words) and Button is whitespace-nowrap — one
               // minmax(0,1fr) column would clip it.
-              className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              className="hidden h-11 gap-1 rounded-xl px-2 text-2xs sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
               onClick={onAnalyzeAnotherLikeThis}
               title="Keeps your assumptions — just enter the next property"
             >
@@ -2060,7 +2060,7 @@ export function AnalysisDashboard({
                   markets TrueCap for free. */}
             <Button
               size="sm"
-              className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
               onClick={() => void onNewAnalysis()}
               title="Create a new analysis"
             >
@@ -2139,7 +2139,7 @@ export function AnalysisDashboard({
                     <span className="block text-sm font-semibold text-foreground">
                       Analyze another like this
                     </span>
-                    <span className="block text-[11px] leading-snug text-muted-foreground">
+                    <span className="block text-2xs leading-snug text-muted-foreground">
                       Keeps your assumptions — just enter the next property
                     </span>
                   </span>
@@ -2158,7 +2158,7 @@ export function AnalysisDashboard({
                 </button>
                 {canExportPdf && isSaved ? (
                   <>
-                    <p className="px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    <p className="px-2 pt-2 pb-1 text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
                       Export as…
                     </p>
                     {REPORT_MODES.map((m) => (
@@ -2175,7 +2175,7 @@ export function AnalysisDashboard({
                         <span className="text-sm font-semibold text-foreground">
                           {m.label}
                         </span>
-                        <span className="block text-[11px] leading-snug text-muted-foreground">
+                        <span className="block text-2xs leading-snug text-muted-foreground">
                           {m.description}
                         </span>
                       </button>
@@ -2319,7 +2319,7 @@ export function AnalysisDashboard({
                   Offer Ceiling
                 </h2>
                 {maoQaContext.fromBuyBox ? (
-                  <span className="rounded-full border border-primary/25 bg-card px-2 py-0.5 text-[10px] font-semibold">
+                  <span className="rounded-full border border-primary/25 bg-card px-2 py-0.5 text-3xs font-semibold">
                     From your Buy Box
                   </span>
                 ) : null}
@@ -2371,7 +2371,7 @@ export function AnalysisDashboard({
                     block: "start",
                   });
                 }}
-                className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Review and tune targets{" "}
                 <ArrowUpRight className="size-4" aria-hidden />
@@ -2477,7 +2477,7 @@ export function AnalysisDashboard({
                             <button
                               type="button"
                               aria-label={`${c.label}: ${c.value}. Show definition`}
-                              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                             >
                               <span className="text-muted-foreground">
                                 {c.label}
@@ -2544,7 +2544,7 @@ export function AnalysisDashboard({
             collapsed by default so the first read stays uncrowded. One tap
             reveals the full metric set. */}
             <details className="group">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
                 <ChevronRight
                   aria-hidden
                   className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
@@ -3067,7 +3067,7 @@ function ProFeaturePreview({
                 key={metric}
                 className="rounded-2xl border border-border bg-card p-4"
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   {metric}
                 </p>
                 {/* Real numbers can be negative — don't tint a loss green. */}
@@ -3116,11 +3116,11 @@ function ProFeaturePreview({
                   <div
                     className={cn(
                       "w-full rounded-t-lg",
-                      kind === "tax-strategy" ? "bg-emerald-600" : "bg-primary",
+                      kind === "tax-strategy" ? "bg-positive" : "bg-primary",
                     )}
                     style={{ height }}
                   />
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-3xs text-muted-foreground">
                     {index + 1}
                   </span>
                 </div>
@@ -3262,10 +3262,10 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
       className="rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Cash flow over time
         </p>
-        <p className="text-[10px] font-medium text-muted-foreground hidden sm:block">
+        <p className="text-3xs font-medium text-muted-foreground hidden sm:block">
           monthly · 10-yr horizon
         </p>
       </div>
@@ -3291,7 +3291,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
                 index === 0 ? "border-primary/30 bg-primary/[0.03]" : null,
               )}
             >
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 {point.label}
               </p>
               <p
@@ -3302,7 +3302,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
               >
                 {formatMonthly(point.monthly)}
               </p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground sm:text-[11px]">
+              <p className="mt-0.5 text-3xs text-muted-foreground sm:text-2xs">
                 /mo
               </p>
             </div>
@@ -3310,7 +3310,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
         })}
       </div>
       {growthInsight ? (
-        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+        <p className="mt-3 text-2xs leading-relaxed text-muted-foreground sm:text-xs">
           {growthInsight}
         </p>
       ) : null}
@@ -3393,7 +3393,7 @@ function CashFlowTab({
           aria-expanded={showBreakdown}
           className="group flex w-full items-center justify-between gap-2 rounded-xl px-1 py-1.5 text-left hover:bg-muted/50"
         >
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Full breakdown
           </span>
           <ChevronDown

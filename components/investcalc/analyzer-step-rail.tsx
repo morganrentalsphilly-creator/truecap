@@ -47,7 +47,7 @@ function StepIndicator({
     <span
       aria-hidden
       className={cn(
-        "flex size-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold tabular-nums",
+        "flex size-5 shrink-0 items-center justify-center rounded-full border text-3xs font-bold tabular-nums",
         status === "partial" && "border-[var(--brand-orange)] text-[var(--brand-orange)]",
         status === "pending" && "border-dashed border-muted-foreground/40 text-muted-foreground",
         status === "empty" && "border-border text-muted-foreground"

@@ -64,7 +64,7 @@ export function ToolEmbedInvite({ slug }: { slug: string }) {
   return (
     <section className="mt-12 border-t border-border pt-6">
       <details className="group">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md text-sm font-bold text-foreground/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md text-sm font-bold text-foreground/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-1.5">
             <span
               aria-hidden

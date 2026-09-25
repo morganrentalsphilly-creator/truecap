@@ -93,7 +93,7 @@ export function OwnedEquityChart({ data = [] }: { data?: OwnedEquitySeriesPoint[
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-display text-lg font-semibold">Equity since close</h3>
-            <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-2xs font-semibold text-success">
               <TrendingUp className="h-3 w-3" /> Owned
             </span>
           </div>
@@ -103,7 +103,7 @@ export function OwnedEquityChart({ data = [] }: { data?: OwnedEquitySeriesPoint[
         </div>
         {last ? (
           <div className="text-right">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Equity today
             </div>
             <div className="text-lg font-extrabold tabular-nums text-foreground">

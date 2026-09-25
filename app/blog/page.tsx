@@ -23,6 +23,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Rental Property Investing Blog",
@@ -817,6 +818,7 @@ export default function BlogIndexPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd) }}
@@ -850,7 +852,7 @@ export default function BlogIndexPage() {
         {/* Browse by topic — hubs that group the posts by investor journey
             (P2-4) and pair each with the relevant calculators. */}
         <nav aria-label="Browse by topic" className="mb-8">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Browse by topic
           </p>
           <div className="flex flex-wrap gap-2">
@@ -858,14 +860,14 @@ export default function BlogIndexPage() {
               <Link
                 key={t.slug}
                 href={`/blog/topics/${t.slug}`}
-                className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {t.title}
               </Link>
             ))}
             <Link
               href="/blog/topics"
-              className="inline-flex min-h-11 min-w-11 items-center rounded-full px-3 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 min-w-11 items-center rounded-full px-3 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               All topics →
             </Link>
@@ -892,7 +894,7 @@ export default function BlogIndexPage() {
                     {topic ? (
                       <Link
                         href={`/blog/topics/${topic.slug}`}
-                        className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       >
                         Topic guide →
                       </Link>
@@ -909,7 +911,7 @@ export default function BlogIndexPage() {
                       <Link
                         href={`/blog/${post.slug}`}
                         data-blog-post-link=""
-                        className="group flex h-full min-h-11 flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group flex h-full min-h-11 flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       >
                         <div className="mb-2 flex items-center justify-between">
                           <BookOpen
@@ -927,7 +929,7 @@ export default function BlogIndexPage() {
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                           {compactExcerpt(post.excerpt)}
                         </p>
-                        <p className="mt-auto pt-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <p className="mt-auto pt-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                           {post.modifiedAt ? "Updated " : ""}
                           {new Date(
                             post.modifiedAt ?? post.publishedAt,

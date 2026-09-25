@@ -74,7 +74,7 @@ export function SignupPromptCard({
     <div className="rounded-2xl border border-[var(--brand-green)]/25 bg-gradient-to-br from-[var(--brand-green-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(22,163,74,0.10)] sm:p-6">
       {/* Header — pill + dismiss */}
       <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-3xs font-extrabold uppercase tracking-widest text-white">
           <Bookmark className="size-3" />
           Free plan
         </span>
@@ -139,7 +139,7 @@ export function SignupPromptCard({
           />
         </Suspense>
 
-        <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 text-2xs text-muted-foreground">
           <span className="h-px w-8 bg-border" />
           <span>OR</span>
           <span className="h-px w-8 bg-border" />
@@ -156,12 +156,12 @@ export function SignupPromptCard({
       </div>
 
       {/* Risk-reversal */}
-      <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
+      <p className="mt-4 border-t border-border/60 pt-3 text-2xs text-muted-foreground">
         Free plan · No card · Already have an account?{" "}
         <Link
           href="/auth/login?next=/dashboard/new"
           onClick={() => beginSignup("sign_in")}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Sign in
         </Link>
@@ -184,7 +184,7 @@ function BenefitChip({
       <Icon className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
       <div className="min-w-0">
         <div className="text-sm font-bold text-foreground">{label}</div>
-        <div className="text-[11px] leading-snug text-muted-foreground">
+        <div className="text-2xs leading-snug text-muted-foreground">
           {sub}
         </div>
       </div>

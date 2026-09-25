@@ -181,7 +181,7 @@ export function FinancingProfileSelector({
             </Button>
           </div>
           {unmodeled.length > 0 ? (
-            <p className="mt-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+            <p className="mt-2 text-2xs leading-relaxed text-caution-text dark:text-caution-light">
               Recorded but not included in current return calculations: {unmodeled.join(", ")}.
             </p>
           ) : null}
@@ -197,7 +197,7 @@ export function FinancingProfileSelector({
               value={selectedId}
               onChange={(event) => setSelectedId(event.target.value)}
               aria-describedby={selectedProfile ? "financing-profile-selector-summary" : undefined}
-              className="mt-1.5 h-11 w-full rounded-md border border-[var(--brand-green)] bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="mt-1.5 h-11 w-full rounded-md border border-[var(--brand-green)] bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               {profiles.map((profile) => (
                 <option key={profile.id} value={profile.id}>
@@ -206,7 +206,7 @@ export function FinancingProfileSelector({
               ))}
             </select>
             {selectedProfile ? (
-              <p id="financing-profile-selector-summary" className="mt-1 text-[11px] text-muted-foreground">
+              <p id="financing-profile-selector-summary" className="mt-1 text-2xs text-muted-foreground">
                 {profileSummary(selectedProfile)} · {formatVerified(selectedProfile.lastVerifiedAt)}
               </p>
             ) : null}
@@ -225,7 +225,7 @@ export function FinancingProfileSelector({
       <div className="mt-2 text-right">
         <Link
           href="/settings#financing-profiles"
-          className="inline-flex min-h-11 items-center text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center text-2xs font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Manage financing profiles
         </Link>

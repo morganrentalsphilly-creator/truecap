@@ -126,7 +126,7 @@ export function FinancingSection({
                 errors.downPaymentPct ? "downPaymentPct-error" : undefined
               }
               className={cn(
-                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring/50",
                 errors.downPaymentPct && "border-destructive",
               )}
             />
@@ -137,7 +137,7 @@ export function FinancingSection({
             message={errors.downPaymentPct?.message}
           />
           {isAllCash && (
-            <p className="mt-1 text-[11px] leading-snug text-[var(--brand-green)] [overflow-wrap:anywhere]">
+            <p className="mt-1 text-2xs leading-snug text-[var(--brand-green)] [overflow-wrap:anywhere]">
               Modeling this as an all-cash purchase — no mortgage, so
               there&apos;s no debt-coverage ratio (DSCR). You&apos;ll still get
               cash-on-cash and monthly cash flow.
@@ -172,7 +172,7 @@ export function FinancingSection({
                 errors.interestRate ? "interestRate-error" : undefined
               }
               className={cn(
-                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring/50",
                 errors.interestRate && "border-destructive",
               )}
             />
@@ -210,7 +210,7 @@ export function FinancingSection({
               errors.loanTermYears ? "loanTermYears-error" : undefined
             }
             className={cn(
-              "border-input bg-background focus-visible:border-ring focus-visible:ring-ring",
+              "border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50",
               errors.loanTermYears && "border-destructive",
             )}
           />
@@ -229,7 +229,7 @@ export function FinancingSection({
               {closingCostsInputMode === "fixed"
                 ? "Closing Costs $"
                 : "Closing Costs %"}{" "}
-              <span className="text-[10px] text-muted-foreground sm:text-xs">
+              <span className="text-3xs text-muted-foreground sm:text-xs">
                 (Optional)
               </span>
             </Label>
@@ -257,7 +257,7 @@ export function FinancingSection({
                   })
                 }
                 className={cn(
-                  "min-h-11 rounded-md px-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "min-h-11 rounded-md px-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   closingCostsInputMode === option.value
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -293,7 +293,7 @@ export function FinancingSection({
                           : undefined
                       }
                       className={cn(
-                        "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring",
+                        "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring/50",
                         errors.closingCostsFixed && "border-destructive",
                       )}
                     />
@@ -320,7 +320,7 @@ export function FinancingSection({
                       : undefined
                   }
                   className={cn(
-                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring/50",
                     errors.closingCostsPct && "border-destructive",
                   )}
                 />
@@ -328,7 +328,7 @@ export function FinancingSection({
               </>
             )}
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
+          <p className="mt-1 text-2xs text-muted-foreground [overflow-wrap:anywhere]">
             {closingCostsInputMode === "fixed"
               ? "Exact modeled cash closing costs."
               : "Defaults to 3% of purchase price if left blank."}
@@ -349,7 +349,7 @@ export function FinancingSection({
             className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
           >
             Rehab / Initial Repairs{" "}
-            <span className="text-[10px] sm:text-xs text-muted-foreground">
+            <span className="text-3xs sm:text-xs text-muted-foreground">
               (Optional)
             </span>
           </Label>
@@ -375,14 +375,14 @@ export function FinancingSection({
                     errors.rehabBudget ? "rehabBudget-error" : undefined
                   }
                   className={cn(
-                    "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring",
+                    "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring/50",
                     errors.rehabBudget && "border-destructive",
                   )}
                 />
               )}
             />
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
+          <p className="mt-1 text-2xs text-muted-foreground [overflow-wrap:anywhere]">
             Up-front repairs — added to cash invested (lowers cash-on-cash).
           </p>
           <FieldError
@@ -430,13 +430,13 @@ export function FinancingSection({
                       : undefined
                   }
                   className={cn(
-                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring/50",
                     errors.pmiAnnualRatePct && "border-destructive",
                   )}
                 />
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+              <p className="mt-1 text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                 {usesOwnerOccupantPmiDefault
                   ? "Annual mortgage insurance, % of loan. Owner-occupant screening default: 0.8%; replace it with the lender's premium or enter 0 if none."
                   : "Annual mortgage insurance, % of loan. No premium is assumed for an investment property when this is blank; enter the lender's rate if one applies."}
@@ -460,13 +460,13 @@ export function FinancingSection({
                 />
                 <span className="min-w-0 text-xs leading-snug text-foreground [overflow-wrap:anywhere]">
                   Runs for the life of the loan
-                  <span className="block text-[11px] text-muted-foreground">
+                  <span className="block text-2xs text-muted-foreground">
                     Select for loan-life MIP; conventional PMI otherwise uses scheduled 78% termination.
                   </span>
                 </span>
               </label>
             ) : (
-              <p className="rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-950 @xl:mt-7 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+              <p className="rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-caution-text @xl:mt-7 dark:border-caution dark:bg-caution/20 dark:text-caution-light">
                 Rental-loan mortgage insurance is conservatively modeled through payoff. Confirm any earlier cancellation in the written loan terms.
               </p>
             )}

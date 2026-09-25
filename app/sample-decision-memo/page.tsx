@@ -54,7 +54,7 @@ export default function SampleDecisionMemoPage() {
   return (
     <main id="main" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+        <div className="rounded-2xl border border-caution/30 bg-caution-light px-4 py-3 text-sm text-caution-text">
           <strong>Illustrative sample — not a customer result.</strong> The address and every
           input below are illustrative assumptions, not verified property facts.
         </div>
@@ -156,7 +156,7 @@ export default function SampleDecisionMemoPage() {
         <section className="mt-8 grid gap-4 md:grid-cols-2">
           <article className="rounded-2xl border border-border bg-card p-5 sm:p-6">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="size-5 text-amber-700" aria-hidden />
+              <ShieldAlert className="size-5 text-caution-text" aria-hidden />
               <h2 className="text-lg font-extrabold">What could break the decision?</h2>
             </div>
             <ul className="mt-4 space-y-3 text-sm leading-relaxed">

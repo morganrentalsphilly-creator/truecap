@@ -27,6 +27,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Mashvisor vs TrueCap for STR Deals (2026)",
@@ -210,6 +211,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -222,14 +224,14 @@ export default function VsMashvisorForShortTermRentalsPage() {
         <div className="mb-2">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
         </div>
 
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             Short-term rentals-specific comparison
           </div>
@@ -276,7 +278,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -296,7 +298,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
               </ul>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                 Use Mashvisor when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -332,13 +334,13 @@ export default function VsMashvisorForShortTermRentalsPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Feature
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
                     TrueCap
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Mashvisor
                   </th>
                 </tr>

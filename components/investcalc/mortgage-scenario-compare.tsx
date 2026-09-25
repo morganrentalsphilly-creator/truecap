@@ -97,11 +97,11 @@ export function MortgageScenarioCompare({
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">
             Compare financing scenarios
-            <span className="ml-1.5 align-middle text-[10px] font-bold uppercase tracking-wide text-primary">
+            <span className="ml-1.5 align-middle text-3xs font-bold uppercase tracking-wide text-primary">
               Pro
             </span>
           </span>
-          <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+          <span className="mt-0.5 block text-2xs leading-snug text-muted-foreground">
             +5pp down, 15-yr term, DSCR loan - side-by-side
           </span>
         </span>
@@ -121,7 +121,7 @@ export function MortgageScenarioCompare({
           <p className="text-xs font-bold uppercase tracking-widest text-foreground">
             Compare financing
           </p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 text-2xs text-muted-foreground">
             Same property, four different ways to finance it
           </p>
         </div>
@@ -144,20 +144,20 @@ export function MortgageScenarioCompare({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th scope="col" className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <th scope="col" className="py-2 pr-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   Scenario
                 </th>
                 {scenarios.map((s) => (
                   <th
                     key={s.key}
                     scope="col"
-                    className={`py-2 px-3 text-[11px] font-bold ${
+                    className={`py-2 px-3 text-2xs font-bold ${
                       s.isBaseline ? "text-foreground" : "text-foreground/80"
                     }`}
                   >
                     {s.label}
                     {s.isBaseline ? (
-                      <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                      <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
                         Now
                       </span>
                     ) : null}
@@ -237,7 +237,7 @@ export function MortgageScenarioCompare({
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-bold text-foreground">{s.label}</span>
               {s.isBaseline ? (
-                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">
+                <span className="rounded-full bg-primary px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary-foreground">
                   Current
                 </span>
               ) : null}
@@ -276,14 +276,14 @@ export function MortgageScenarioCompare({
                 }
               />
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
+            <p className="mt-2 text-2xs text-muted-foreground">
               Cash needed: <span className="font-bold text-foreground">{fmtUsd(s.result.totalCashRequired)}</span>
             </p>
           </div>
         ))}
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-2xs leading-relaxed text-muted-foreground">
         Cap rate, rent, and operating expenses are independent of financing - only debt service,
         cash flow, DSCR, and total cash needed change. DSCR scenario assumes the same property
         with a typical DSCR-loan rate premium (~1.5pp).
@@ -305,7 +305,7 @@ function ScenarioRow({
 }) {
   return (
     <tr className="border-b border-border/50 last:border-b-0">
-      <th scope="row" className="py-2 pr-3 text-left text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <th scope="row" className="py-2 pr-3 text-left text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
       </th>
       {cells.map((cell, i) => {
@@ -348,7 +348,7 @@ function MobileMetric({
         : "text-foreground";
   return (
     <div className="rounded-lg bg-muted/30 px-2 py-1.5">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </p>
       <p className={`mt-0.5 text-sm font-bold tabular-nums ${toneClass}`}>{value}</p>

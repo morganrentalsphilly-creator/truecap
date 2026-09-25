@@ -167,7 +167,7 @@ export function PortfolioRollupStrip({
       className="mx-auto mt-1 w-full max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6"
     >
       <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
-        <p className="line-clamp-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="line-clamp-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           {scopeLabel(scope, items.length)}
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
@@ -273,13 +273,13 @@ function RollupTile({
         : "text-foreground";
   return (
     <div>
-      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </div>
       <div className={`mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl ${valueColor}`}>
         {value}
       </div>
-      <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>
+      <div className="mt-0.5 text-2xs text-muted-foreground">{sub}</div>
     </div>
   );
 }

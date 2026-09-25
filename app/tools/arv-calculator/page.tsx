@@ -29,6 +29,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -145,6 +146,7 @@ export default function ArvCalculatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/arv-calculator" toolName="ARV calculator" />
       <script
         type="application/ld+json"
@@ -165,7 +167,7 @@ export default function ArvCalculatorPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← TrueCap free tools
             </Link>
@@ -184,7 +186,7 @@ export default function ArvCalculatorPage() {
           <ArvCalculatorWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <p>
               <strong>Educational guide:</strong> The material below explains
               how practitioners use ARV and the 70% rule. TrueCap does not

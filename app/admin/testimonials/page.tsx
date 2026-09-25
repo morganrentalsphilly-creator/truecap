@@ -158,7 +158,7 @@ export default async function AdminTestimonialsPage() {
               key={row.id}
               className="rounded-2xl border border-border bg-card p-5"
             >
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <span>{new Date(row.created_at).toLocaleDateString()}</span>
                 <span>· {row.source_event}</span>
                 <span>· {row.status}</span>
@@ -200,7 +200,7 @@ export default async function AdminTestimonialsPage() {
                   <summary className="cursor-pointer text-xs font-bold text-primary">
                     Copy-ready proof-records skeleton
                   </summary>
-                  <pre tabIndex={0} aria-label="Testimonial payload" className="mt-2 overflow-x-auto rounded-lg bg-muted p-3 text-[11px] leading-relaxed">
+                  <pre tabIndex={0} aria-label="Testimonial payload" className="mt-2 overflow-x-auto rounded-lg bg-muted p-3 text-2xs leading-relaxed">
                     {promotionSkeleton(row)}
                   </pre>
                 </details>

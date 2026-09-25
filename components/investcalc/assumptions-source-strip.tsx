@@ -141,7 +141,7 @@ export function AssumptionsSourceStrip({
       }
     >
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           <Database className="size-3.5 text-primary" />
           Assumptions used
           <span className="font-semibold normal-case tracking-normal text-[var(--metric-positive)]">
@@ -185,7 +185,7 @@ export function AssumptionsSourceStrip({
       >
         {entries.map((s) => (
           <li key={s.label} className="min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               {s.label}
             </div>
             <div
@@ -199,7 +199,7 @@ export function AssumptionsSourceStrip({
             </div>
             {s.freshness ? (
               <div
-                className="truncate text-[10px] text-muted-foreground"
+                className="truncate text-3xs text-muted-foreground"
                 title={s.freshness}
               >
                 {s.freshness}
@@ -210,7 +210,7 @@ export function AssumptionsSourceStrip({
       </ul>
       <p
         className={cn(
-          "mt-3 border-t border-border/60 pt-2.5 text-[11px] leading-relaxed text-muted-foreground",
+          "mt-3 border-t border-border/60 pt-2.5 text-2xs leading-relaxed text-muted-foreground",
           expanded ? "block" : "hidden sm:block",
         )}
       >

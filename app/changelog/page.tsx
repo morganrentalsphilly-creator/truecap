@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Changelog",
@@ -666,11 +667,12 @@ const ENTRIES: Entry[] = [
 export default function ChangelogPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
@@ -681,7 +683,7 @@ export default function ChangelogPage() {
             What&apos;s new in TrueCap — features, improvements, fixes, and
             content. Updated as we ship.
           </p>
-          <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-foreground">
+          <p className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3 text-sm leading-relaxed text-foreground">
             This archive preserves historical release notes. Some older entries
             describe modules that aren&apos;t offered right now,
             including tax-specific, modeled-exit, BRRRR, and fix-and-flip views.
@@ -708,7 +710,7 @@ export default function ChangelogPage() {
                 <div className="flex flex-wrap items-center gap-3 mb-2">
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest",
+                      "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-3xs font-bold uppercase tracking-widest",
                       style.bg,
                       style.color,
                     )}
@@ -718,7 +720,7 @@ export default function ChangelogPage() {
                   </span>
                   <time
                     dateTime={entry.date}
-                    className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold"
+                    className="text-2xs uppercase tracking-widest text-muted-foreground font-bold"
                   >
                     {date.toLocaleDateString("en-US", {
                       year: "numeric",

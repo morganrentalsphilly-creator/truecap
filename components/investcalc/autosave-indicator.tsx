@@ -113,7 +113,7 @@ export function AutosaveIndicator({ form }: Props) {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"
+      className="inline-flex items-center gap-1.5 text-2xs font-medium text-muted-foreground"
       aria-live="polite"
     >
       {isSaving ? (

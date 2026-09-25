@@ -175,7 +175,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
           <MapPin className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Deal details</h3>
         </div>
-        <span aria-live="polite" aria-atomic="true" className="inline-flex min-h-6 items-center gap-1 text-[11px] text-muted-foreground">
+        <span aria-live="polite" aria-atomic="true" className="inline-flex min-h-6 items-center gap-1 text-2xs text-muted-foreground">
           {isSaving || saveStatus === "saving" ? (
             <>
             <Loader2 className="size-3 animate-spin" /> Saving…
@@ -187,7 +187,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
               <span className="font-semibold text-destructive">Couldn’t save</span>
               <button
                 type="button"
-                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 onClick={() => {
                   if (!failedPatch) return;
                   const retry = Object.fromEntries(
@@ -213,7 +213,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
       <div className="grid gap-3 sm:grid-cols-3">
         {fields.map((f) => (
           <label key={f.key} className="flex flex-col gap-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</span>
+            <span className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</span>
             <Input
               type="text"
               value={drafts[f.key] ?? ""}
@@ -253,7 +253,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
           </label>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className="mt-2 text-2xs text-muted-foreground">
         A nickname shows in place of the address across My Deals. Market &amp; neighborhood are optional columns there.
       </p>
     </section>

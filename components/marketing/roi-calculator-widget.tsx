@@ -95,7 +95,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         <h3 className="text-base font-extrabold uppercase tracking-widest text-muted-foreground sm:text-sm">
           Estimate the time value of TrueCap Pro
         </h3>
-        <span className="hidden rounded-full bg-[var(--brand-green-light)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] sm:inline-flex">
+        <span className="hidden rounded-full bg-[var(--brand-green-light)] px-2.5 py-1 text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)] sm:inline-flex">
           Your numbers
         </span>
       </div>
@@ -103,7 +103,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
       {/* Persona presets — one tap to seed the two inputs below, then
           edit freely. Highlighted when the inputs match a preset. */}
       <div className="mt-4">
-        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <span className="mb-1.5 block text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
           Start from a preset
         </span>
         <div className="flex flex-wrap gap-2" role="group" aria-label="ROI presets">
@@ -225,7 +225,7 @@ export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
         </div>
       ) : null}
 
-      <p className="mt-4 text-[11px] text-muted-foreground leading-relaxed">
+      <p className="mt-4 text-2xs text-muted-foreground leading-relaxed">
         Illustrative estimate based only on the inputs above. Change the time
         saving to match your current workflow. It does not estimate investment
         returns, negotiated savings, or avoided losses. Annual billing may
@@ -251,7 +251,7 @@ function ResultTile({
     <div className="rounded-xl border border-border bg-background p-4">
       <div className="flex items-center gap-1.5">
         <Icon className={cn("size-4 shrink-0", valueColor)} />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           {label}
         </span>
       </div>

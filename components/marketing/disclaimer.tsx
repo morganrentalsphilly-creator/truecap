@@ -29,7 +29,7 @@ export function Disclaimer({
       published in our{" "}
       <Link
         href="/methodology"
-        className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         Methodology
       </Link>

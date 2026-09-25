@@ -51,7 +51,7 @@ function classify(cf: number): { label: string; color: string; note: string } {
   if (cf < 100)
     return {
       label: "Break-even territory",
-      color: "text-amber-700",
+      color: "text-caution-text",
       note: "Technically positive, but one vacancy or repair wipes out the year's cash flow.",
     };
   if (cf < 400)
@@ -276,7 +276,7 @@ export function RentalCashFlowCalculatorWidget() {
             />
           </div>
           {result.pmiLikely && (
-            <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+            <p className="mt-3 text-2xs text-muted-foreground leading-relaxed">
               Under 20% down usually adds monthly PMI on top of P&amp;I — the
               full analyzer models it automatically.
             </p>

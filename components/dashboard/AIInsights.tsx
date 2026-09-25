@@ -42,7 +42,7 @@ export function AIInsights({
           <TrendingUp className="h-3.5 w-3.5 text-white" />
         </div>
         <h3 className="font-display text-lg font-semibold">Portfolio Signals</h3>
-        <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full text-white ml-1" style={{ background: "var(--gradient-gold)" }}>PREMIUM</span>
+        <span className="text-3xs font-bold tracking-wider px-2 py-0.5 rounded-full text-white ml-1" style={{ background: "var(--gradient-gold)" }}>PREMIUM</span>
       </div>
       <p className="relative text-sm text-muted-foreground mb-4">Comparative signals from your saved deals</p>
 
@@ -55,15 +55,15 @@ export function AIInsights({
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Risk vs Return</div>
             <div className="space-y-3">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Best risk-adjusted deal</div>
+                <div className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">Best risk-adjusted deal</div>
                 <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.bestRiskAdjusted || "-"}</div>
               </div>
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Highest return</div>
+                <div className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">Highest return</div>
                 <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.highestReturn || "-"}</div>
               </div>
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Highest financed-deal DSCR</div>
+                <div className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">Highest financed-deal DSCR</div>
                 <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.safest || "-"}</div>
               </div>
             </div>

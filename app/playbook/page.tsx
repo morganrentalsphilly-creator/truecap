@@ -145,7 +145,7 @@ export default function PlaybookPage() {
       <main id="main" className="bg-background">
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+            <p className="text-2xs font-bold uppercase tracking-widest text-primary">
               The First Offer Playbook
             </p>
             <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
@@ -180,7 +180,7 @@ export default function PlaybookPage() {
               id={step.id}
               className="mb-12 scroll-mt-24 sm:mb-16"
             >
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary">
                 {step.kicker}
               </p>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">

@@ -86,7 +86,7 @@ function MetricCard({
   onSelect?: () => void;
 }) {
   const labelEl = (
-    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+    <span className="text-3xs sm:text-2xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
       {label}
     </span>
   );
@@ -111,7 +111,7 @@ function MetricCard({
           onClick={onSelect}
           aria-label={`${label} — jump to the section that explains this number`}
           title="Jump to the section that explains this number"
-          className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       ) : null}
       {glossaryTerm ? (
@@ -136,7 +136,7 @@ function MetricCard({
         </span>
       )}
       {sub && !isLoading && (
-        <span className="text-[10px] leading-tight text-muted-foreground sm:text-[11px]">
+        <span className="text-3xs leading-tight text-muted-foreground sm:text-2xs">
           {sub}
         </span>
       )}
@@ -487,7 +487,7 @@ export function MetricsBand({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 px-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           Overview
         </span>
         <span className="h-px flex-1 bg-border" />

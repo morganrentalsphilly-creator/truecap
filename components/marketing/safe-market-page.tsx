@@ -93,7 +93,7 @@ export function MarketFmrSection({
   safmr?: CitySafmr;
 }) {
   const cell =
-    "px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground";
+    "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
   return (
     <section
       data-market-fmr=""
@@ -258,7 +258,7 @@ export function MarketSampleUnderwrite({
             key={stat.label}
             className="rounded-xl border border-border bg-card p-4"
           >
-            <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               {stat.label}
             </dt>
             <dd className="mt-1 text-2xl font-extrabold text-foreground">
@@ -354,7 +354,7 @@ export function MarketRelatedReading({
   }));
   if (glossary.length === 0 && blog.length === 0) return null;
   const chip =
-    "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   return (
     <section
       data-market-related-reading=""
@@ -469,7 +469,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
         </div>
 
         <header className="mb-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary">
             <MapPin className="size-3" />
             {city}, {stateCode}
           </div>

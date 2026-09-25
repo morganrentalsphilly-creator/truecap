@@ -64,7 +64,7 @@ export function RenovationModelDisclosure({
   if (!hasRehab && !hasTiming) return null;
 
   return (
-    <p className="rounded-xl border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+    <p className="rounded-xl border border-caution/30 bg-caution-light px-3 py-2 text-xs leading-relaxed text-caution-text dark:border-caution dark:bg-caution/20 dark:text-caution-light">
       {hasTiming
         ? SIMPLIFIED_RENOVATION_DOWNTIME_LABEL
         : STEADY_STATE_RENOVATION_LABEL}
@@ -237,7 +237,7 @@ export function AdvancedBuyAndHoldSummary({
         </ScrollX>
       ) : null}
       {(result.balloonPayment ?? 0) > 0 ? (
-        <p className="mt-3 text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+        <p className="mt-3 text-xs leading-relaxed text-caution-text dark:text-caution-light">
           Headline and Year-1 operating cash flow are recurring figures and
           exclude the maturity balloon. The 10-year projection shows the balloon
           as a separate financing outflow and includes it in net and cumulative

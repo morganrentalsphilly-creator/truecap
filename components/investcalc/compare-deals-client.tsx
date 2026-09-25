@@ -74,19 +74,19 @@ import { ScrollX } from "@/components/ui/scroll-x";
 const MAX_COMPARE_ITEMS = 4;
 const MOBILE_DEAL_COLORS = [
   {
-    chip: "bg-emerald-500 text-white",
+    chip: "bg-positive text-white",
     border: "border-success/30",
   },
   {
-    chip: "bg-blue-500 text-white",
+    chip: "bg-primary text-white",
     border: "border-primary/30",
   },
   {
-    chip: "bg-rose-500 text-white",
-    border: "border-rose-500/30",
+    chip: "bg-negative text-white",
+    border: "border-negative/30",
   },
   {
-    chip: "bg-amber-500 text-white",
+    chip: "bg-caution text-white",
     border: "border-warning/30",
   },
 ] as const;
@@ -194,7 +194,7 @@ function AssumptionConsistencyPanel({
           : "The reviewed financing and operating assumptions match across these saved deals."}
       </p>
       <details className="mt-3 rounded-xl border border-current/15 bg-background/70 px-3">
-        <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ">
           Review assumption matrix
         </summary>
         <ScrollX label="Comparison table" className="overflow-x-auto pb-3">
@@ -224,7 +224,7 @@ function AssumptionConsistencyPanel({
                   <th scope="row" className="border-b border-border/70 px-3 py-2 font-semibold text-foreground">
                     {row.label}
                     {row.differs ? (
-                      <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-warning-foreground">
+                      <span className="ml-2 text-3xs font-bold uppercase tracking-wide text-warning-foreground">
                         Differs
                       </span>
                     ) : null}
@@ -374,7 +374,7 @@ function CompareSnapshotPanel({
       {showTaxComparison ? (
         <div className="border-t border-border pt-3">
           <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Illustrative tax impact (10 yr)</p>
-          <p className="flex flex-wrap items-baseline gap-x-1 text-[11px] text-muted-foreground">
+          <p className="flex flex-wrap items-baseline gap-x-1 text-2xs text-muted-foreground">
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
                 <span className="cursor-help underline decoration-dotted decoration-muted-foreground/60 underline-offset-2">
@@ -392,7 +392,7 @@ function CompareSnapshotPanel({
           </p>
         </div>
       ) : null}
-      <p className="border-t border-border pt-2 text-[11px] leading-snug text-muted-foreground">
+      <p className="border-t border-border pt-2 text-2xs leading-snug text-muted-foreground">
         {source === "recorded"
           ? "Loaded from the recorded saved analysis (no recalculation)."
           : "Recomputed as one current-methodology result from the saved inputs; recorded and current projection rows are not mixed."}
@@ -412,7 +412,7 @@ function AssumptionsPanel({ assumptions, purchasePrice }: { assumptions: DealAss
           <li>Loan term: {financing.loanTermYears != null ? `${financing.loanTermYears} yr` : "—"}</li>
           <li>Down payment: {fmtPct(financing.downPaymentPct)}</li>
           {purchasePrice != null && (
-            <li className="text-[11px] text-muted-foreground/90">Purchase: {formatCurrency(purchasePrice)}</li>
+            <li className="text-2xs text-muted-foreground/90">Purchase: {formatCurrency(purchasePrice)}</li>
           )}
         </ul>
       </div>
@@ -446,7 +446,7 @@ function AssumptionsPanel({ assumptions, purchasePrice }: { assumptions: DealAss
           </li>
         </ul>
       </div>
-      <p className="border-t border-border pt-2 text-[11px] leading-snug text-muted-foreground">
+      <p className="border-t border-border pt-2 text-2xs leading-snug text-muted-foreground">
         Saved from your analysis inputs. Small rounding differences vs. the table are normal.
       </p>
     </div>
@@ -969,7 +969,7 @@ function MetricValueWithTooltip({
         <button
           type="button"
           aria-label={`${row.label} for ${getDealLabel(deal, { short: true })}. Show calculation details.`}
-          className="inline-flex min-h-11 min-w-11 cursor-help items-center justify-center gap-1.5 rounded-md px-2 underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="inline-flex min-h-11 min-w-11 cursor-help items-center justify-center gap-1.5 rounded-md px-2 underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         >
           {children}
         </button>
@@ -1048,12 +1048,12 @@ function MobileLongTermLabel({
 }) {
   const label = scaleAwareMetricLabel(row, normalizationMode, true);
   if (!row.labelTooltip) {
-    return <p className="text-[11px] font-bold text-muted-foreground">{label}</p>;
+    return <p className="text-2xs font-bold text-muted-foreground">{label}</p>;
   }
 
   return (
     <div className="flex items-center gap-1.5">
-      <p className="text-[11px] font-bold text-muted-foreground">{label}</p>
+      <p className="text-2xs font-bold text-muted-foreground">{label}</p>
       <Popover>
         <PopoverTrigger asChild>
           {/* before:-inset-2 = invisible 36px tap band around the 20px icon
@@ -1104,7 +1104,7 @@ function CompareMobileDealStrip({
                 from a 20px circle into an 11px oval. shrink-0 on the chip means
                 it can never be the shock absorber again. */}
             <div className="flex items-start justify-between gap-1 max-[424px]:flex-wrap">
-              <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold", color.chip)}>
+              <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-2xs font-extrabold", color.chip)}>
                 {index + 1}
               </span>
               <div className="flex items-center gap-0.5 max-[424px]:mt-1 max-[424px]:basis-full max-[424px]:justify-start">
@@ -1171,11 +1171,11 @@ function CompareMobileDealStrip({
                 </Popover>
               </div>
             </div>
-            <p className="mt-1.5 line-clamp-2 text-[11px] font-extrabold leading-tight text-foreground">
+            <p className="mt-1.5 line-clamp-2 text-2xs font-extrabold leading-tight text-foreground">
               {getDealLabel(deal, { short: true })}
             </p>
             {deal.methodologyLabel ? (
-              <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
+              <p className="mt-0.5 text-3xs leading-tight text-muted-foreground">
                 {deal.methodologyLabel}
               </p>
             ) : null}
@@ -1186,18 +1186,18 @@ function CompareMobileDealStrip({
                 propertyType={deal.propertyType}
               />
             </div>
-            <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
+            <p className="mt-auto pt-2 text-3xs font-semibold text-muted-foreground">
               {formatCurrency(deal.purchasePrice)}
             </p>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
-              <Button asChild variant="outline" size="sm" className="min-h-11 rounded-xl px-2 text-[11px]">
+              <Button asChild variant="outline" size="sm" className="min-h-11 rounded-xl px-2 text-2xs">
                 <Link href={`/dashboard/saved-analyses/${deal.id}`}>Open</Link>
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="min-h-11 rounded-xl px-2 text-[11px] text-muted-foreground"
+                className="min-h-11 rounded-xl px-2 text-2xs text-muted-foreground"
                 onClick={() => onRemove(deal)}
                 disabled={selectionPending}
                 aria-label={`Remove ${deal.address} from comparison`}
@@ -1219,7 +1219,7 @@ function CompareMobileDealStrip({
           <span className="mb-2 flex size-8 items-center justify-center rounded-full border border-border bg-background">
             <Plus className="size-4" />
           </span>
-          <span className="text-[11px] font-bold">Add</span>
+          <span className="text-2xs font-bold">Add</span>
         </button>
       ) : null}
     </div>
@@ -1484,7 +1484,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                   aria-pressed={normalizationMode === mode}
                   onClick={() => setNormalizationMode(mode)}
                   className={cn(
-                    "min-h-11 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    "min-h-11 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ",
                     normalizationMode === mode
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
@@ -1574,7 +1574,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                 Renders nothing without an active box. */}
             {buyBoxFitById ? (
               <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="text-3xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
                   Your buy box
                 </p>
                 <ul className="mt-3 space-y-3">
@@ -1585,7 +1585,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                       <li key={deal.id} className="flex items-start gap-2.5">
                         <span
                           className={cn(
-                            "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold",
+                            "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-3xs font-extrabold",
                             color.chip
                           )}
                         >
@@ -1600,7 +1600,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                             <DataConfidenceBadge confidence={deal.dataConfidence} size="xs" propertyType={deal.propertyType} />
                           </div>
                           {entry?.personalLine ? (
-                            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                            <p className="mt-0.5 text-2xs leading-snug text-muted-foreground">
                               {entry.personalLine}
                             </p>
                           ) : null}
@@ -1634,7 +1634,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                         );
                         return (
                           <div key={row.key} className="space-y-2 border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
-                            <p className="text-[11px] font-bold text-muted-foreground">
+                            <p className="text-2xs font-bold text-muted-foreground">
                               {scaleAwareMetricLabel(row, normalizationMode)}
                             </p>
                             <div className={cn("grid gap-2", comparisonGridColumns(deals.length))}>
@@ -1660,7 +1660,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                     )}
                                   >
                                     <span className="mb-1 inline-flex items-center justify-center">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-3xs font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isDirectionalEdge ? (
@@ -1676,14 +1676,14 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                       row={row}
                                       value={value}
                                       normalizationMode={normalizationMode}
-                                      className="truncate text-[11px] font-extrabold text-foreground"
+                                      className="truncate text-2xs font-extrabold text-foreground"
                                     />
                                   </div>
                                 );
                               })}
                             </div>
                             {row.key === "maxOffer" ? (
-                              <ul className="space-y-1 rounded-xl bg-muted/25 p-2 text-[10px] leading-snug text-muted-foreground">
+                              <ul className="space-y-1 rounded-xl bg-muted/25 p-2 text-3xs leading-snug text-muted-foreground">
                                 {deals.map((deal, index) =>
                                   deal.metrics.maxOffer != null && deal.maxOfferBasisLabel ? (
                                     <li key={`${deal.id}-mobile-max-offer-criteria`}>
@@ -1747,7 +1747,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                     )}
                                   >
                                     <span className="mx-auto mb-1 inline-flex items-center justify-center">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-3xs font-extrabold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isDirectionalEdge ? (
@@ -1759,7 +1759,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                       ) : null}
                                     </span>
                                     <p
-                                      className="truncate text-[11px] font-extrabold text-foreground"
+                                      className="truncate text-2xs font-extrabold text-foreground"
                                       title={longTermRoiCellTitle(row, value)}
                                     >
                                       {formatCompactLongTermMetric(row, value)}
@@ -1805,13 +1805,13 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                     <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <TypeIcon className="size-3.5" />
                     </span>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
+                    <p className="text-2xs font-extrabold uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
                   <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
                     {getDealLabel(deal)}
                   </h2>
                   {deal.methodologyLabel ? (
-                    <p className="mt-1 text-[10px] text-muted-foreground">
+                    <p className="mt-1 text-3xs text-muted-foreground">
                       {deal.methodologyLabel}
                     </p>
                   ) : null}
@@ -1926,7 +1926,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                           <>
                             <BuyBoxFitBadge fit={entry.fit} />
                             {entry.personalLine ? (
-                              <p className="text-[11px] leading-snug text-muted-foreground">
+                              <p className="text-2xs leading-snug text-muted-foreground">
                                 {entry.personalLine}
                               </p>
                             ) : null}
@@ -2010,7 +2010,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                 </MetricValueWithTooltip>
                                 {row.key === "maxOffer" && value != null && deal.maxOfferBasisLabel ? (
                                   <span className={cn(
-                                    "mt-0.5 max-w-full text-[10px] font-normal leading-tight text-muted-foreground",
+                                    "mt-0.5 max-w-full text-3xs font-normal leading-tight text-muted-foreground",
                                     index > 0 && "text-center"
                                   )}>
                                     Criteria: {deal.maxOfferBasisLabel}
@@ -2050,7 +2050,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                   <div key={row.key} className="space-y-2">
                     {showSubsection ? (
                       <div className="grid grid-cols-4">
-                        <p className="col-span-4 px-1 pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/90">
+                        <p className="col-span-4 px-1 pt-1 text-3xs font-bold uppercase tracking-[0.18em] text-muted-foreground/90">
                           {row.subsection}
                         </p>
                       </div>

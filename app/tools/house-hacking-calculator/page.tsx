@@ -25,6 +25,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -152,6 +153,7 @@ export default function HouseHackingCalculatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema
         toolPath="/tools/house-hacking-calculator"
         toolName="House hacking calculator"
@@ -178,7 +180,7 @@ export default function HouseHackingCalculatorPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← TrueCap free tools
             </Link>
@@ -196,7 +198,7 @@ export default function HouseHackingCalculatorPage() {
           <HouseHackingCalculatorWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What is house hacking?</h2>
             <p>
               House hacking is buying a small multifamily property — a duplex,

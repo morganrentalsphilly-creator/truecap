@@ -97,7 +97,7 @@ function CaptureForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           aria-label="Email address"
-          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
         <button
           type="submit"
@@ -136,7 +136,7 @@ function CaptureForm({
           ) : null}
         </>
       ) : (
-        <p className="mt-2 text-[11px] text-muted-foreground">
+        <p className="mt-2 text-2xs text-muted-foreground">
           One link email plus two short follow-ups. Unsubscribe anytime.
         </p>
       )}
@@ -172,9 +172,6 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
 
   return (
     <section className="rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 sm:p-6">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-        Free guide
-      </p>
       <h3 className="mt-1 text-lg font-extrabold tracking-tight text-foreground">
         The First Offer Playbook
       </h3>
@@ -262,7 +259,7 @@ export function LeadMagnetExitIntent() {
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <X className="size-4" />
       </button>

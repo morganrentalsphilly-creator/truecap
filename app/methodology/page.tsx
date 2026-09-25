@@ -28,6 +28,7 @@ import {
 } from "@/lib/underwriting-methodology";
 import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Methodology",
@@ -82,6 +83,7 @@ export default function MethodologyPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
@@ -91,7 +93,7 @@ export default function MethodologyPage() {
         <header className="mb-8">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
@@ -146,7 +148,7 @@ export default function MethodologyPage() {
           </ul>
         </div>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <h2 className="text-2xl sm:text-3xl">The core formulas</h2>
 
           <h3>Cap rate</h3>

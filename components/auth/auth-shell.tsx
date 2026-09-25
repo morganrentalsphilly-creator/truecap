@@ -92,7 +92,7 @@ export function AuthShell({
                 ))}
               </div>
 
-              <div className="mt-auto flex items-center gap-2 text-[11px] text-white/76">
+              <div className="mt-auto flex items-center gap-2 text-2xs text-white/76">
                 <ShieldCheck className="size-4" />
                 <span>Authenticated access</span>
                 <span className="text-white/35">•</span>

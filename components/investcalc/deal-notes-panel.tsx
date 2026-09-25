@@ -349,7 +349,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
             Deal notes
           </h3>
         </div>
-        <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <div role="status" aria-live="polite" className="flex items-center gap-2 text-2xs text-muted-foreground">
           {isSaving || saveStatus === "saving" ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="size-3 animate-spin" /> Saving…
@@ -362,13 +362,13 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
               <button
                 type="button"
                 onClick={persistOnBlur}
-                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Retry
               </button>
             </span>
           ) : saveStatus === "conflict" ? (
-            <span className="font-semibold text-amber-700">Needs review</span>
+            <span className="font-semibold text-caution-text">Needs review</span>
           ) : saveStatus === "dirty" ? (
             <span>Unsaved changes</span>
           ) : (
@@ -379,7 +379,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
       {conflict ? (
         <div
           role="alert"
-          className="mb-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-3"
+          className="mb-3 rounded-xl border border-caution/40 bg-caution-light p-3"
         >
           <p className="text-sm font-semibold text-foreground">
             A newer note was saved elsewhere
@@ -458,7 +458,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         placeholder="Seller motivation, inspector findings, offer strategy — anything to remember about this deal."
         className="w-full resize-none rounded-xl border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
-      <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
+      <p className="mt-1.5 text-right text-3xs text-muted-foreground">
         {remaining.toLocaleString()} characters left
       </p>
     </section>

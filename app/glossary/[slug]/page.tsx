@@ -247,7 +247,7 @@ export default async function GlossaryTermPage({
           </nav>
 
           {/* Category eyebrow */}
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+          <p className="text-2xs uppercase tracking-widest text-primary font-bold">
             {GLOSSARY_CATEGORY_LABELS[entry.category]}
           </p>
 

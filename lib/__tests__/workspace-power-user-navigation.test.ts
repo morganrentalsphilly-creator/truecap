@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+// 2026-09 audit: the product uses one focus vocabulary — the primitives'
+// 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
@@ -14,7 +16,7 @@ describe("saved deal power-user navigation", () => {
     expect(nav).toContain('className="sticky top-16');
     expect(nav).toContain("overflow-x-auto");
     expect(nav).toContain('aria-current={isActive ? "location" : undefined}');
-    expect(nav).toContain('focus-visible:ring-2');
+    expect(nav).toContain('focus-visible:ring-[3px]');
     expect(nav).toContain('{ id: "deal-overview", label: "Overview", always: true }');
 
     expect(page).toContain('id="deal-overview" className="min-w-0 scroll-mt-36"');

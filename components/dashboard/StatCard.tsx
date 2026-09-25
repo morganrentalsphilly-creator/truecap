@@ -48,7 +48,7 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
         <div>
           <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{label}</div>
           {badge ? (
-            <span className="mt-1 inline-flex rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-bold text-success">
+            <span className="mt-1 inline-flex rounded-full bg-success/10 px-2 py-0.5 text-3xs font-bold text-success">
               {badge}
             </span>
           ) : null}

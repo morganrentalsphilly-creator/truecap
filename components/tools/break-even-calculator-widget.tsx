@@ -56,13 +56,13 @@ function classify(
   if (months <= 180) {
     return {
       label: "10 to 15 years",
-      color: "text-amber-700",
+      color: "text-caution-text",
       note: "At the entered monthly cash flow, modeled recovery takes between 120 and 180 months.",
     };
   }
   return {
     label: "More than 15 years",
-    color: "text-amber-700",
+    color: "text-caution-text",
     note: "Cash-flow recovery alone takes more than 180 months under the entered assumptions.",
   };
 }
@@ -216,7 +216,7 @@ export function BreakEvenCalculatorWidget() {
               : `${verdict.label}. Modeled break-even ${Math.round(result.months)} months, or ${result.years?.toFixed(1)} years.`
             : "Fix the highlighted inputs to calculate cash-flow break-even."}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Break-even
         </p>
         <p

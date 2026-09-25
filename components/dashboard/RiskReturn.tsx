@@ -209,10 +209,10 @@ export function RiskReturn({
             {/* Factual quadrant orientation only — no safety or investment verdict.
                 pointer-events-none so they never block the chart tooltip. */}
             <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
-              <span className="absolute right-3 top-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+              <span className="absolute right-3 top-1 rounded bg-primary/10 px-1.5 py-0.5 text-3xs font-semibold text-primary">
                 Above both references
               </span>
-              <span className="absolute bottom-9 left-10 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              <span className="absolute bottom-9 left-10 rounded bg-muted px-1.5 py-0.5 text-3xs font-semibold text-muted-foreground">
                 Below both references
               </span>
             </div>

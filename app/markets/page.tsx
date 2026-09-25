@@ -95,7 +95,7 @@ export default function MarketsIndexPage() {
       <Header />
 
       <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
-        <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-primary font-bold">
+        <p className="flex items-center gap-1.5 text-2xs uppercase tracking-widest text-primary font-bold">
           <MapPin className="size-3.5" /> Markets
         </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
@@ -119,14 +119,14 @@ export default function MarketsIndexPage() {
           </p>
           <Link
             href="/analyze" prefetch={false}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             Run a deal free →
           </Link>
         </section>
 
         <nav aria-label="Jump to market directory group" className="mt-10">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Browse states alphabetically
           </p>
           <div className="flex flex-wrap gap-2">
@@ -134,7 +134,7 @@ export default function MarketsIndexPage() {
               <a
                 key={group.slug}
                 href={`#markets-${group.slug}`}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-bold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-bold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {group.label}
               </a>
@@ -173,7 +173,7 @@ export default function MarketsIndexPage() {
                           {stateSlug ? (
                             <Link
                               href={`/states/${stateSlug}`}
-                              className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             >
                               {stateName}
                               <span className="sr-only"> investing guide</span>
@@ -188,7 +188,7 @@ export default function MarketsIndexPage() {
                               <Link
                                 href={`/markets/${city.slug}`}
                                 data-market-city-link=""
-                                className="inline-flex min-h-11 min-w-11 w-full items-center rounded-lg px-3 text-sm font-semibold text-foreground/80 transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="inline-flex min-h-11 min-w-11 w-full items-center rounded-lg px-3 text-sm font-semibold text-foreground/80 transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                               >
                                 {city.name} →
                               </Link>

@@ -22,6 +22,7 @@ import {
   CALCULATOR_NAMES_LIST,
   calculatorsByCategory,
 } from "@/lib/calculator-registry";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators",
@@ -70,6 +71,7 @@ export default function ToolsLandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
@@ -78,7 +80,7 @@ export default function ToolsLandingPage() {
         <header className="mb-8">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>

@@ -19,6 +19,7 @@ import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-f
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
@@ -76,15 +77,16 @@ export default function VsRentometerPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <VsBreadcrumbSchema vsPath="/vs/rentometer" pageName="TrueCap vs Rentometer" />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← TrueCap</Link>
+          <Link href="/" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← TrueCap</Link>
         </div>
 
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             Honest comparison
           </div>
@@ -120,7 +122,7 @@ export default function VsRentometerPage() {
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">TL;DR</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a FULL deal underwrite — cap rate, CoC, DSCR, NCF, 10-yr projection.</li>
                 <li>You want to decide whether to buy, not just what rent to charge.</li>
@@ -130,7 +132,7 @@ export default function VsRentometerPage() {
               </ul>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Use Rentometer if</p>
+              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Use Rentometer if</p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You ONLY need a quick rent comp — and already have a deal model elsewhere.</li>
                 <li>You&apos;re a property manager checking comp prices for a rent renewal.</li>
@@ -150,9 +152,9 @@ export default function VsRentometerPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Feature</th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">TrueCap</th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rentometer</th>
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">Feature</th>
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">TrueCap</th>
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">Rentometer</th>
                 </tr>
               </thead>
               <tbody>

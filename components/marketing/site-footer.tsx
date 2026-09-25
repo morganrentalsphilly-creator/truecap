@@ -171,7 +171,7 @@ export function SiteFooter({
             (col) => !(hideAccountLinks && col.title === "Account"),
           ).map((col) => (
             <div key={col.title}>
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}
               </h2>
               <ul className="mt-3">
@@ -206,7 +206,7 @@ export function SiteFooter({
           </p>
           {/* Trust badges — moved here so the brand column stays compact
               and the badges are still visible on every page. */}
-          <ul className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold sm:order-2">
+          <ul className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-2xs font-semibold sm:order-2">
             <li className="inline-flex items-center gap-1.5">
               <Lock className="size-3.5 text-primary/70" />
               <span>SSL encrypted</span>

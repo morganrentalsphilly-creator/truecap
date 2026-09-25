@@ -62,7 +62,7 @@ export function VacancyRateCalculatorWidget() {
           : "Distressed";
   const verdictColor =
     result.vacancyPct < 5
-      ? "text-amber-700"
+      ? "text-caution-text"
       : result.vacancyPct < 12
         ? "text-[var(--metric-positive)]"
         : "text-[var(--metric-negative)]";
@@ -140,7 +140,7 @@ export function VacancyRateCalculatorWidget() {
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Effective vacancy rate
         </p>
         <p

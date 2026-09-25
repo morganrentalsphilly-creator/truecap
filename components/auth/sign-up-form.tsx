@@ -180,7 +180,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
         aria-labelledby="evaluation-summary-title"
         className="rounded-xl border border-primary/25 bg-primary/5 p-4"
       >
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-3xs font-bold uppercase tracking-widest text-primary">
           $0 today · no card
         </p>
         <h2
@@ -244,7 +244,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="bg-card px-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             or
           </span>
         </div>
@@ -309,7 +309,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   <button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -351,7 +351,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     aria-label={
                       showConfirmPassword
                         ? "Hide confirmation password"

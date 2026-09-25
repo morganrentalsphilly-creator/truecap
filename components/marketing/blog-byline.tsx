@@ -19,7 +19,7 @@ import Link from "next/link";
 
 export function BlogByline() {
   return (
-    <p className="mt-1.5 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+    <p className="mt-1.5 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
       By{" "}
       <Link
         href="/about"

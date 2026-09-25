@@ -23,6 +23,7 @@ import {
   type GlossaryEntry,
 } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Real Estate Glossary",
@@ -364,6 +365,7 @@ export default function GlossaryPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(definedTermSetLd) }}
@@ -396,7 +398,7 @@ export default function GlossaryPage() {
             <a
               key={t.slug}
               href={`#${t.slug}`}
-              className="inline-flex min-h-11 min-w-11 items-center rounded-full bg-muted px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-xs"
+              className="inline-flex min-h-11 min-w-11 items-center rounded-full bg-muted px-3 text-2xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:text-xs"
             >
               {t.term}
             </a>
@@ -430,7 +432,7 @@ export default function GlossaryPage() {
                   // minimum — 44 nodes, and the only axe-detectable WCAG AA
                   // failure on the page. The full token is #596877 = 5.72:1,
                   // which clears AA with margin and still reads as secondary.
-                  className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   PERMALINK →
                 </Link>
@@ -451,7 +453,7 @@ export default function GlossaryPage() {
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold">
                 <Link
                   href={`/glossary/${t.slug}`}
-                  className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   Full definition, formula, example
                   <ArrowUpRight className="size-3.5" />
@@ -459,7 +461,7 @@ export default function GlossaryPage() {
                 {t.toolPath ? (
                   <Link
                     href={t.toolPath}
-                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     Calculator
                   </Link>
@@ -467,7 +469,7 @@ export default function GlossaryPage() {
                 {t.postPath ? (
                   <Link
                     href={t.postPath}
-                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <BookOpen className="size-3.5" />
                     Deep dive

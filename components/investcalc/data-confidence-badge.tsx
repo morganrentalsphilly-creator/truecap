@@ -40,7 +40,7 @@ export function DataConfidenceBadge({
           aria-label="Input sources"
           className={cn(
             "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 font-semibold text-muted-foreground",
-            size === "xs" ? "text-[10px]" : "text-[11px]",
+            size === "xs" ? "text-3xs" : "text-2xs",
           )}
         >
           <Database className="size-3" />
@@ -51,7 +51,7 @@ export function DataConfidenceBadge({
         <p className="mb-2 font-semibold text-foreground">
           Input sources
         </p>
-        <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="mb-2 text-2xs leading-relaxed text-muted-foreground">
           See where key starting inputs came from and which ones you confirmed
           in TrueCap. This is not property-specific evidence.
         </p>
@@ -67,7 +67,7 @@ export function DataConfidenceBadge({
                       ? "Confirmed by you"
                       : dataConfidenceSourceLabel(p.source)}
                     {p.detail || p.fetchedAt ? (
-                      <span className="block text-[10px] font-normal text-muted-foreground">
+                      <span className="block text-3xs font-normal text-muted-foreground">
                         {[p.detail, p.fetchedAt].filter(Boolean).join(" · ")}
                       </span>
                     ) : null}

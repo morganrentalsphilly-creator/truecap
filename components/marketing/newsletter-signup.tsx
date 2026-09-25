@@ -104,7 +104,7 @@ export function NewsletterSignup({
         className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8"
       >
         <div className="md:max-w-md">
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
+          <div className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
             <Mail className="size-3" />
             Weekly investor digest
           </div>
@@ -149,7 +149,7 @@ export function NewsletterSignup({
           </form>
           {error ? (
             <p
-              className="mt-2 text-[11px] text-[var(--metric-negative,#dc2626)]"
+              className="mt-2 text-2xs text-[var(--metric-negative,#dc2626)]"
               role="alert"
             >
               {error}
@@ -168,7 +168,7 @@ export function NewsletterSignup({
       >
         <h3
           id="newsletter-compact-heading"
-          className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
+          className="text-2xs font-bold uppercase tracking-widest text-muted-foreground"
         >
           Weekly investor digest
         </h3>
@@ -200,7 +200,7 @@ export function NewsletterSignup({
           </button>
         </form>
         {error ? (
-          <p className="mt-2 text-[11px] text-[var(--metric-negative,#dc2626)]" role="alert">
+          <p className="mt-2 text-2xs text-[var(--metric-negative,#dc2626)]" role="alert">
             {error}
           </p>
         ) : null}
@@ -214,7 +214,7 @@ export function NewsletterSignup({
       aria-labelledby="newsletter-expanded-heading"
       className="my-12 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:p-8"
     >
-      <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-3">
+      <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-3">
         <Mail className="size-3" />
         Weekly digest
       </div>
@@ -258,7 +258,7 @@ export function NewsletterSignup({
           {error}
         </p>
       ) : null}
-      <p className="mt-3 text-[11px] text-muted-foreground">
+      <p className="mt-3 text-2xs text-muted-foreground">
         We respect your inbox. One email a week, no resold lists, easy
         unsubscribe.
       </p>

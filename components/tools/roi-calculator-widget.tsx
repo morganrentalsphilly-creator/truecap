@@ -33,7 +33,7 @@ function classify(roi: number): { label: string; color: string; note: string } {
   if (roi < 4) {
     return {
       label: "Modeled ROI below 4%",
-      color: "text-amber-700",
+      color: "text-caution-text",
       note: "This is the combined modeled return from cash flow, principal paydown, and appreciation entered above.",
     };
   }
@@ -218,7 +218,7 @@ export function RoiCalculatorWidget() {
             ? `${verdict.label}. Total modeled ROI ${fmtPct(result.roi)}. Annual modeled return ${fmtMoney(result.totalReturn)}.`
             : "Fix the highlighted inputs to calculate total modeled ROI."}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Total ROI
         </p>
         <p
@@ -234,7 +234,7 @@ export function RoiCalculatorWidget() {
             ? `${fmtMoney(result.totalReturn)} annual modeled return on cash invested`
             : "Fix the highlighted inputs to calculate"}
         </p>
-        <div className="mt-4 grid grid-cols-3 gap-3 text-[11px]">
+        <div className="mt-4 grid grid-cols-3 gap-3 text-2xs">
           <div>
             <p className="font-bold uppercase tracking-widest text-muted-foreground">
               Cash flow

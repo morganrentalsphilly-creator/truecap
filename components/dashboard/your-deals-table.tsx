@@ -73,7 +73,7 @@ function SortableTh({
       <button
         type="button"
         onClick={() => onToggle(sortKey)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-2xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {label}
         <span className="sr-only">
@@ -153,7 +153,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
         </h2>
         <Link
           href="/dashboard/saved-analyses"
-          className="inline-flex min-h-11 items-center rounded-md px-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center rounded-md px-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           View all
         </Link>
@@ -179,7 +179,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                 setSortKey(event.target.value as SortKey);
                 setDesc(true);
               }}
-              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               <option value="gap">Gap to ceiling</option>
               <option value="maxOffer">Offer Ceiling</option>
@@ -191,7 +191,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             type="button"
             onClick={() => setDesc((current) => !current)}
             aria-label={`Sort ${mobileDirectionLabel}. Activate to reverse the order.`}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 text-xs font-bold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 text-xs font-bold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <ArrowUpDown aria-hidden className="size-4" />
             <span>{mobileDirectionLabel}</span>
@@ -214,7 +214,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   <p className="text-xs font-bold text-foreground">
                     {deal.methodologyGroupLabel ?? "Current underwriting"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-2xs text-muted-foreground">
                     Sorted only within this model version.
                   </p>
                 </div>
@@ -226,7 +226,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                 <Link
                   id={dealHeadingId}
                   href={`/dashboard/saved-analyses/${deal.id}`}
-                  className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md font-bold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md font-bold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   title={deal.address ?? undefined}
                 >
                   <span className="min-w-0 break-words">{deal.address ?? "Untitled deal"}</span>
@@ -234,7 +234,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                 </Link>
                 {deal.methodologyLabel ? (
                   <span
-                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
                     title={
                       deal.methodologyIsCurrent === false
                         ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
@@ -247,7 +247,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
 
                 <dl className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Offer Ceiling
                     </dt>
                     <dd className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -255,7 +255,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </dd>
                   </div>
                   <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Price
                     </dt>
                     <dd className="mt-1 font-mono text-lg font-bold tabular-nums text-foreground">
@@ -275,7 +275,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </div>
                   ) : null}
                   <div className="rounded-lg border border-border p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Gap
                     </dt>
                     <dd
@@ -298,7 +298,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </dd>
                   </div>
                   <div className="rounded-lg border border-border p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Deal score
                     </dt>
                     <dd className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
@@ -332,11 +332,11 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             <tr>
               <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
               <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <th scope="col" className="px-3 py-2 text-right text-2xs font-bold uppercase tracking-wider text-muted-foreground">
                 Price
               </th>
               <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <th scope="col" className="px-3 py-2 text-left text-2xs font-bold uppercase tracking-wider text-muted-foreground">
                 Screening result
               </th>
               <SortableTh label="Deal score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
@@ -358,7 +358,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                       <span className="text-xs font-bold text-foreground">
                         {deal.methodologyGroupLabel ?? "Current underwriting"}
                       </span>
-                      <span className="ml-2 text-[11px] text-muted-foreground">
+                      <span className="ml-2 text-2xs text-muted-foreground">
                         Sorted only within this model version
                       </span>
                     </td>
@@ -368,14 +368,14 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   <td className="max-w-[240px] px-3 py-2.5">
                     <Link
                       href={`/dashboard/saved-analyses/${deal.id}`}
-                      className="flex min-h-11 items-center truncate rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="flex min-h-11 items-center truncate rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       title={deal.address ?? undefined}
                     >
                       {deal.address ?? "Untitled deal"}
                     </Link>
                     {deal.methodologyLabel ? (
                       <span
-                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
                         title={
                           deal.methodologyIsCurrent === false
                             ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
@@ -419,7 +419,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     ) : (
                       <>
                         {money(Math.abs(gap))}
-                        <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide">
+                        <span className="ml-1 text-3xs font-semibold uppercase tracking-wide">
                           {gap > 0 ? "over" : gap < 0 ? "under" : "at"}
                         </span>
                         <span className="sr-only">
@@ -452,7 +452,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
       {/* Exact per-deal criteria render beneath each ceiling; the footer can
           therefore explain the gap without pretending a mixed table shares
           one target basis. */}
-      <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground sm:px-5">
+      <p className="border-t border-border px-4 py-2 text-2xs text-muted-foreground sm:px-5">
         Gap is the asking price minus the Offer Ceiling, the highest price that
         still meets the targets shown for that deal. A positive gap means the
         asking price is above your ceiling. Deal score is a heuristic summary of

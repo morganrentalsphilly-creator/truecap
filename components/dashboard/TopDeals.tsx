@@ -201,7 +201,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           const Icon = typeIcon[d.type] ?? Building2;
           const dealId = getDealId(d);
           return (
-            <article id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <article id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
               <div className="flex items-start gap-3">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
@@ -209,7 +209,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 <div className="min-w-0 flex-1">
                   <h4 className="text-base font-bold leading-tight text-foreground">
                     {d.id ? (
-                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                         {d.name}
                       </Link>
                     ) : (
@@ -218,7 +218,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </h4>
                   <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
                   {d.methodologyLabel ? (
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    <p className="mt-0.5 text-3xs text-muted-foreground">
                       {d.methodologyLabel}
                     </p>
                   ) : null}
@@ -253,13 +253,13 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
 
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
+                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
                   <p className={`mt-1 text-sm font-extrabold tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
                     {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString("en-US")}/mo`}
                   </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">10-Yr ROI</p>
+                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">10-Yr ROI</p>
                   {/* Extreme cumulative ROI (finding 5): framed band in the
                       cell, raw figure on the title attr — never a bare 673%. */}
                   <p
@@ -270,18 +270,18 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
+                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
                   <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Risk</p>
+                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Risk</p>
                   <p className="mt-1 text-sm font-extrabold text-foreground">{d.riskLevel ?? "-"}</p>
                 </div>
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 {d.signal ? (
-                  <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
+                  <span className={`text-2xs font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                 ) : null}
                 {/* Buy-box fit (PV-6) — the shared My Deals pill; renders
                     nothing for users without an active box. */}
@@ -290,7 +290,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 {d.breakdown && d.score != null ? (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-2xs font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                     </PopoverTrigger>
                     <PopoverContent align="start" className="w-auto p-3">
                       <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />
@@ -298,7 +298,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </Popover>
                 ) : null}
                 {d.tags?.map((tag) => (
-                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
                     {tag}
                   </span>
                 ))}
@@ -320,7 +320,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
       <ScrollX label="Top deals table" className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
+            <tr className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
               <th scope="col" className="text-left px-6 py-3">Property</th>
               <th scope="col" className="text-left px-3 py-3">Deal score</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
@@ -335,7 +335,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               const Icon = typeIcon[d.type] ?? Building2;
               const dealId = getDealId(d);
               return (
-                <tr id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                <tr id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="border-b border-border last:border-0 hover:bg-muted/30 transition scroll-mt-24 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-primary">
@@ -344,7 +344,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       <div>
                         <div className="font-semibold">
                           {d.id ? (
-                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                               {d.name}
                             </Link>
                           ) : (
@@ -353,14 +353,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                         </div>
                         <div className="text-xs text-muted-foreground">{d.address}</div>
                         {d.methodologyLabel ? (
-                          <div className="text-[10px] text-muted-foreground">
+                          <div className="text-3xs text-muted-foreground">
                             {d.methodologyLabel}
                           </div>
                         ) : null}
                         {d.tags?.length ? (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {d.tags.map((tag) => (
-                              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
                                 {tag}
                               </span>
                             ))}
@@ -379,7 +379,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                               strokeDasharray={`${(d.score / 100) * 94.2} 94.2`} strokeLinecap="round" />
                           ) : null}
                         </svg>
-                        <div aria-hidden className="absolute inset-0 grid place-items-center text-[11px] font-bold">{d.score ?? "-"}</div>
+                        <div aria-hidden className="absolute inset-0 grid place-items-center text-2xs font-bold">{d.score ?? "-"}</div>
                         <span className="sr-only">
                           {d.score != null
                             ? `Deal score ${d.score} out of 100`
@@ -402,7 +402,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </td>
                   <td className="px-3 py-4 text-right hidden xl:table-cell">
                     {d.riskLevel ? (
-                      <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${riskStyle[d.riskLevel] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.riskLevel}</span>
+                      <span className={`text-2xs font-semibold px-2 py-1 rounded-md ring-1 ${riskStyle[d.riskLevel] ?? "bg-muted text-muted-foreground ring-border"}`}>{d.riskLevel}</span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -415,11 +415,11 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       <DataConfidenceBadge confidence={d.dataConfidence} size="xs" propertyType={d.propertyType} />
                       {d.signal ? (
                         <span className="inline-flex items-center justify-end gap-1.5">
-                          <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
+                          <span className={`text-2xs font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                           {d.breakdown && d.score != null ? (
                             <Popover>
                               <PopoverTrigger asChild>
-                                <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                                <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-2xs font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                               </PopoverTrigger>
                               <PopoverContent align="end" className="w-auto p-3">
                                 <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />

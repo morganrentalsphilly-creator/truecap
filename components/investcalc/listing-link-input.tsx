@@ -115,7 +115,7 @@ export function ListingLinkInput({
         <button
           type="button"
           onClick={() => onFocusMissingField?.(firstMissingField.path)}
-          className="mt-2 inline-flex min-h-11 max-w-full items-center rounded-lg border border-primary/30 bg-background px-3 py-2 text-left text-xs font-semibold text-primary shadow-sm hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="mt-2 inline-flex min-h-11 max-w-full items-center rounded-lg border border-primary/30 bg-background px-3 py-2 text-left text-xs font-semibold text-primary shadow-sm hover:border-primary/60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         >
           Continue with {firstMissingField.label}
         </button>
@@ -130,7 +130,7 @@ export function ListingLinkInput({
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         >
           {importStatus
             ? "Use a different listing link"
@@ -151,7 +151,7 @@ export function ListingLinkInput({
       </label>
       <p
         id="listing-url-help"
-        className="mt-0.5 text-[11px] text-muted-foreground"
+        className="mt-0.5 text-2xs text-muted-foreground"
       >
         Zillow, Redfin, or Realtor.com — TrueCap extracts the address. When
         available, a signed-in lookup can also fill the active asking price and
@@ -178,13 +178,13 @@ export function ListingLinkInput({
           aria-describedby={
             hasError ? "listing-url-help listing-url-error" : "listing-url-help"
           }
-          className="min-h-11 min-w-0 flex-[1_1_18rem] rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="min-h-11 min-w-0 flex-[1_1_18rem] rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         />
         <button
           type="button"
           onClick={onSubmit}
           disabled={!value.trim()}
-          className="min-h-11 max-w-full shrink-0 whitespace-normal rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-11 max-w-full shrink-0 whitespace-normal rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Use address from link
         </button>
@@ -194,7 +194,7 @@ export function ListingLinkInput({
           id="listing-url-error"
           role="alert"
           aria-live="assertive"
-          className="mt-1.5 text-[11px] text-[var(--metric-negative,#dc2626)]"
+          className="mt-1.5 text-2xs text-[var(--metric-negative,#dc2626)]"
         >
           Couldn&apos;t read that link — type the full property address instead.
         </p>
@@ -202,7 +202,7 @@ export function ListingLinkInput({
       <button
         type="button"
         onClick={() => onOpenChange(false)}
-        className="mt-2 inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="mt-2 inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
       >
         Use the address instead
       </button>

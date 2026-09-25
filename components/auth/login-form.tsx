@@ -184,7 +184,7 @@ export function LoginForm() {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="bg-card px-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             or
           </span>
         </div>
@@ -245,7 +245,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -257,18 +257,18 @@ export function LoginForm() {
         />
 
         {unconfirmedEmail ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          <div className="rounded-xl border border-caution/30 bg-caution-light p-3 text-xs text-caution-text">
             <p className="font-semibold">
               Your email <span className="font-mono">{unconfirmedEmail}</span> isn&apos;t confirmed yet.
             </p>
-            <p className="mt-0.5 leading-relaxed text-amber-800">
+            <p className="mt-0.5 leading-relaxed text-caution-text">
               Check your inbox + spam folder, or resend the confirmation link.
             </p>
             <button
               type="button"
               onClick={handleResendConfirmation}
               disabled={isResending}
-              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-amber-200 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-amber-900 hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50"
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-caution-light px-3 py-2 text-2xs font-bold uppercase tracking-wide text-caution-text hover:bg-caution-light focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-caution disabled:opacity-50"
             >
               {isResending ? (
                 <>

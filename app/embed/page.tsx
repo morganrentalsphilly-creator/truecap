@@ -52,7 +52,7 @@ export default function EmbedHubPage() {
         <header className="mb-10">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
@@ -102,7 +102,7 @@ export default function EmbedHubPage() {
 
         {/* Quick-start instructions */}
         <section className="mb-10 rounded-2xl border border-border bg-muted/30 p-5 sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             How to embed
           </p>
           <ol className="mt-3 space-y-2 text-sm text-foreground list-decimal list-inside">

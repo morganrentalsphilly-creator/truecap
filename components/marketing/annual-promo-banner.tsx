@@ -74,7 +74,7 @@ export function AnnualPromoBanner() {
       className="relative w-full border-b border-primary/20 bg-gradient-to-r from-[var(--brand-blue-light)] via-card to-[var(--brand-blue-light)]"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-2 text-center text-xs font-semibold text-foreground sm:gap-4 sm:text-sm">
-        <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-widest text-primary">
+        <span className="hidden sm:inline text-3xs font-bold uppercase tracking-widest text-primary">
           Annual plan
         </span>
         <p>

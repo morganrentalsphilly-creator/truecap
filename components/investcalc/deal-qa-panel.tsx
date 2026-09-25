@@ -111,7 +111,7 @@ export function DealQaPanel({
           {/* Pill hidden below sm - the AI summary card renders directly
               above with the identical Beta pill; one flag covers the pair
               on phones. */}
-          <span className="hidden rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground sm:inline">
+          <span className="hidden rounded-full bg-muted px-1.5 py-0.5 text-3xs font-extrabold uppercase tracking-widest text-muted-foreground sm:inline">
             Beta
           </span>
         </p>
@@ -193,8 +193,8 @@ export function DealQaPanel({
         </form>
       )}
 
-      {notice && <p className="mt-2 text-[11px] text-muted-foreground">{notice}</p>}
-      <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground/70">
+      {notice && <p className="mt-2 text-2xs text-muted-foreground">{notice}</p>}
+      <p className="mt-2 text-3xs leading-relaxed text-muted-foreground/70">
         Answers are generated from this analysis&apos;s numbers only. Not financial advice.
       </p>
     </div>

@@ -192,7 +192,7 @@ export function MortgagePaymentWidget() {
               value={fmtMoney(result.totalInterest)}
             />
             {result.monthlyPmi > 0 ? (
-              <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
+              <p className="pt-2 text-2xs leading-relaxed text-muted-foreground">
                 PMI uses TrueCap&apos;s {DEFAULT_PMI_ANNUAL_RATE_PCT}% annual
                 screening estimate on the starting loan. Verify the actual
                 premium and cancellation rules with the lender.

@@ -53,7 +53,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
               className="group flex h-full flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary sm:p-5"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   {post.readingTimeMinutes} min read
                 </span>
                 <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
