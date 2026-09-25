@@ -44,6 +44,10 @@ export RENT_ALERTS_MODE="off"
 export LIFECYCLE_EMAILS_MODE="off"
 export FEEDBACK_EMAIL_MODE="off"
 export BILLING_RECONCILE_MODE="dry"
+# Never report a local run to the production Sentry project (client value is
+# inlined at build time, so it only takes effect for builds made with it set).
+export SENTRY_DISABLED="1"
+export NEXT_PUBLIC_SENTRY_DISABLED="1"
 
 # Stripe stays on the TEST-mode keys from .env (sk_test_/pk_test_) so /pricing
 # can resolve display prices; refuse to start on a live key.

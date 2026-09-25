@@ -411,7 +411,7 @@ async function auditAssets(context: BrowserContext, baseURL: string): Promise<vo
 }
 
 async function newAuditContext(browser: Browser, width: number, colorScheme: "light" | "dark" = "light") {
-  return browser.newContext({
+  const context = await browser.newContext({
     viewport: { width, height: width < 700 ? 812 : width < 1000 ? 1024 : 900 },
     deviceScaleFactor: 1,
     isMobile: width < 700,
@@ -422,6 +422,11 @@ async function newAuditContext(browser: Browser, width: number, colorScheme: "li
     timezoneId: "America/New_York",
     ...(STORAGE_STATE ? { storageState: STORAGE_STATE } : {}),
   });
+  // Belt and braces with NEXT_PUBLIC_SENTRY_DISABLED: a crawl of 1,700 page
+  // visits must never post 1,700 transactions to the production Sentry
+  // project (that is how the 429s in the first baseline happened).
+  await context.route("**/monitoring**", (route) => route.abort());
+  return context;
 }
 
 test.describe.configure({ mode: "parallel" });
