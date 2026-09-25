@@ -105,7 +105,7 @@ export function AnalyzerStepRail({
                 className={cn(
                   "flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
                   active
-                    ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+                    ? "bg-brand-blue-light text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >

@@ -129,7 +129,7 @@ function FieldLabel({
       ) : null}
       <Label
         htmlFor={htmlFor}
-        className="min-w-0 flex-1 py-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
+        className="min-w-0 flex-1 py-3 text-2xs font-bold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
       >
         {label}
       </Label>
@@ -775,7 +775,7 @@ export function OperatingExpensesSection({
         >
           <p
             className={cn(
-              "px-2 pb-2 pt-1 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)]",
+              "px-2 pb-2 pt-1 text-2xs font-bold uppercase tracking-wide text-muted-foreground",
               !showAdvanced && "hidden",
             )}
           >
@@ -1013,7 +1013,7 @@ export function OperatingExpensesSection({
             !showAdvanced && "hidden",
           )}
         >
-          <p className="mb-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)]">
+          <p className="mb-3 text-2xs font-bold uppercase tracking-wide text-muted-foreground">
             Advanced Options (Optional)
           </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1301,7 +1301,7 @@ export function OperatingExpensesSection({
                     <div className="mb-2 flex min-h-11 min-w-0 items-start gap-1.5">
                       <Label
                         htmlFor="include-interest-deduction"
-                        className="min-w-0 flex-1 cursor-pointer py-3 text-2xs font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
+                        className="min-w-0 flex-1 cursor-pointer py-3 text-2xs font-bold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
                       >
                         Include Interest Deduction
                       </Label>
