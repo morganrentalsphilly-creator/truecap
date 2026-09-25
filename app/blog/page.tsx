@@ -840,14 +840,6 @@ export default function BlogIndexPage() {
           </p>
         </header>
 
-        {/* Real product screenshot (Phase 4): the writing is about
-            underwriting; this is what the underwriting looks like. */}
-        <ProductShot
-          shot="verdict"
-          alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-          caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run your own numbers →</Link></>}
-          className="mb-8"
-        />
 
         {/* Browse by topic — hubs that group the posts by investor journey
             (P2-4) and pair each with the relevant calculators. */}
@@ -954,6 +946,16 @@ export default function BlogIndexPage() {
             /vs/<competitor> pages still exist as SEO landing surfaces
             (visitors arrive direct from Google) but the hub is hidden
             from internal navigation. */}
+
+
+        {/* Real product screenshot (Phase 4): the writing is about
+            underwriting; this is what the underwriting looks like. */}
+        <ProductShot
+          shot="verdict"
+          alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+          caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run your own numbers →</Link></>}
+          className="mt-10"
+        />
 
         <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
