@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
@@ -40,7 +41,13 @@ import type {
 import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
-import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import {
+  METRIC_TONE_TEXT_CLASS,
+  NO_DEBT_SERVICE_DSCR_LABEL,
+  cashFlowTone,
+  formatRatioPct,
+  formatSignedPct,
+} from "@/lib/financial-presentation";
 import {
   buildDecisionTargetContext,
   deriveRuleFit,
@@ -235,20 +242,34 @@ function FirstYearSnapshot({
 }) {
   const cashFlowTarget = target?.monthlyCashFlow;
   const dscrTarget = target?.dscr;
+  const capRateTarget = target?.capRate;
+  const cocTarget = target?.cocReturn;
   // A cash purchase has no debt service, so DSCR is N/A rather than failing.
   const dscrApplies = result.monthlyPayment > 0;
+  // The four first-year numbers sit together on the decision card (2026-09
+  // audit: cap rate and cash-on-cash used to hide one disclosure down, at two
+  // decimals while every other surface showed one). Labels carry the same
+  // GlossaryTip the metrics band uses, so each term is defined where it first
+  // appears. Colour follows the shared tone rules in lib/financial-presentation.
   return (
     <div
-      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
+      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 sm:grid-cols-4"
       aria-label="First-year investment snapshot"
     >
       <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
         <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-          {isScenarioActive
-            ? "Base cash flow after reserve"
-            : "Cash flow after reserve"}
+          <GlossaryTip term="cashFlow" className="!no-underline">
+            {isScenarioActive
+              ? "Base cash flow after reserve"
+              : "Cash flow after reserve"}
+          </GlossaryTip>
         </p>
-        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+        <p
+          className={`mt-1 font-mono text-xl font-extrabold tabular-nums ${
+            METRIC_TONE_TEXT_CLASS[cashFlowTone(result.netCashFlow)] ??
+            "text-foreground"
+          }`}
+        >
           {money(result.netCashFlow)}/mo
         </p>
         {typeof cashFlowTarget === "number" ? (
@@ -260,7 +281,9 @@ function FirstYearSnapshot({
       </div>
       <div className="rounded-xl border border-border bg-muted/30 p-3">
         <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-          Model DSCR
+          <GlossaryTip term="dscr" className="!no-underline">
+            Model DSCR
+          </GlossaryTip>
         </p>
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
           {dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL}
@@ -273,6 +296,44 @@ function FirstYearSnapshot({
           <TargetFit
             meets={result.dscr >= dscrTarget}
             target={`${dscrTarget.toFixed(2)} target`}
+          />
+        ) : null}
+      </div>
+      <div className="rounded-xl border border-border bg-muted/30 p-3">
+        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <GlossaryTip term="capRate" className="!no-underline">
+            Cap rate
+          </GlossaryTip>
+        </p>
+        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+          {formatRatioPct(result.capRate)}
+        </p>
+        {typeof capRateTarget === "number" ? (
+          <TargetFit
+            meets={result.capRate >= capRateTarget}
+            target={`${formatRatioPct(capRateTarget)} target`}
+          />
+        ) : null}
+      </div>
+      <div className="rounded-xl border border-border bg-muted/30 p-3">
+        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <GlossaryTip term="coc" className="!no-underline">
+            Cash-on-cash
+          </GlossaryTip>
+        </p>
+        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+          {result.totalCashRequired > 0
+            ? formatSignedPct(result.cocReturn)
+            : "N/A"}
+        </p>
+        {result.totalCashRequired <= 0 ? (
+          <p className="mt-1 text-3xs text-muted-foreground">
+            No modeled cash invested
+          </p>
+        ) : typeof cocTarget === "number" ? (
+          <TargetFit
+            meets={result.cocReturn >= cocTarget}
+            target={`${formatSignedPct(cocTarget)} target`}
           />
         ) : null}
       </div>
@@ -856,7 +917,7 @@ export function FocusedDecisionSummary({
                 ? "Base Offer Ceiling"
                 : "Offer Ceiling"}
           </p>
-          <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary max-[250px]:text-2xl">
+          <p className="mt-1 font-mono text-2xl font-extrabold tabular-nums text-primary [overflow-wrap:anywhere] sm:text-3xl">
             {offerCeilingHeadline}
           </p>
           {targetBlocked ? (
@@ -1338,7 +1399,7 @@ export function FocusedDecisionSummary({
         </summary>
         <div className="space-y-3 border-t border-border px-2 py-3">
           <div
-            className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-4"
+            className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
             aria-label="Secondary first-year metrics"
           >
             <div className="rounded-xl border border-border bg-background p-3">
@@ -1355,22 +1416,6 @@ export function FocusedDecisionSummary({
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
                 {money(result.noiAnnual)}
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                Cap rate
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
-                {result.capRate.toFixed(2)}%
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                Cash-on-cash
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
-                {result.cocReturn.toFixed(2)}%
               </p>
             </div>
           </div>

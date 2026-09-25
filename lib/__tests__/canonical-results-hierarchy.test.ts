@@ -19,11 +19,19 @@ describe("canonical first-year results hierarchy", () => {
 
   it("uses factual metric context instead of investment or lender directives", () => {
     const metrics = read("components/investcalc/metrics-band.tsx");
+    // The context strings live in the shared presentation module since the
+    // 2026-09 audit (one rule set for the band, decision card, shared viewer
+    // and memo); the band must consume them rather than restate its own.
+    const presentation = read("lib/financial-presentation.ts");
 
     expect(metrics).toContain('label={sourcedLabel("Model DSCR", "scenario")}');
-    expect(metrics).toContain("Positive before tax and after reserve");
-    expect(metrics).toContain("At or above the 1.25 reference");
-    expect(metrics).not.toMatch(/Bankable|Underwater|Strong \(≥|\bhealthy\b|\bweak\b|fair for market/i);
+    expect(metrics).toContain("cashFlowBenchmarkLabel(");
+    expect(metrics).toContain("dscrBandLabel(");
+    expect(presentation).toContain("Positive before tax and after reserve");
+    expect(presentation).toContain("At or above the 1.25 reference");
+    for (const source of [metrics, presentation]) {
+      expect(source).not.toMatch(/Bankable|Underwater|Strong \(≥|\bhealthy\b|\bweak\b|fair for market/i);
+    }
   });
 
   it("does not let a stored persona lens reorder or narrate the core result", () => {

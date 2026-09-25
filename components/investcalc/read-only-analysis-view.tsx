@@ -48,7 +48,22 @@ import {
   hasAnySpecialistStrategyEnabled,
   isSpecialistStrategyEnabled,
 } from "@/lib/feature-flags";
-import { formatDscr } from "@/lib/financial-presentation";
+import {
+  METRIC_TONE_TEXT_CLASS,
+  capRateContextLabel,
+  capRateTone,
+  cashFlowTone,
+  cocBenchmarkLabel,
+  cocTone,
+  dscrBandLabel,
+  dscrTone,
+  formatDscr,
+  formatRatioPct,
+  formatSignedPct,
+  type MetricTone,
+} from "@/lib/financial-presentation";
+import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import type { GLOSSARY } from "@/lib/glossary";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import {
   AdvancedBuyAndHoldSummary,
@@ -96,24 +111,44 @@ function MetricTile({
   sub,
   positive,
   negative,
+  tone,
+  glossaryTerm,
 }: {
   label: string;
   value: string;
   sub?: string;
   positive?: boolean;
   negative?: boolean;
+  /** Shared colour rule (lib/financial-presentation) — preferred over the
+   *  boolean pair so the recipient sees the same tone the sender saw. */
+  tone?: MetricTone;
+  /** Defines the term where it first appears, like the in-app metrics band. */
+  glossaryTerm?: keyof typeof GLOSSARY;
 }) {
+  const labelEl = (
+    <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+      {label}
+    </span>
+  );
+  const toneClass = tone ? METRIC_TONE_TEXT_CLASS[tone] : undefined;
   return (
     <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
-      <span className="text-3xs sm:text-3xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
-        {label}
-      </span>
+      {glossaryTerm ? (
+        <span className="self-start">
+          <GlossaryTip term={glossaryTerm} className="!no-underline">
+            {labelEl}
+          </GlossaryTip>
+        </span>
+      ) : (
+        labelEl
+      )}
       <span
         className={cn(
           "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
-          positive && "text-[var(--metric-positive)]",
-          negative && "text-[var(--metric-negative)]",
-          !positive && !negative && "text-foreground",
+          toneClass,
+          !toneClass && positive && "text-[var(--metric-positive)]",
+          !toneClass && negative && "text-[var(--metric-negative)]",
+          !toneClass && !positive && !negative && "text-foreground",
         )}
       >
         {value}
@@ -908,45 +943,50 @@ export function ReadOnlyAnalysisView({
               : "Monthly Cash Flow"
           }
           value={fmtCash(result.netCashFlow)}
-          positive={result.netCashFlow >= 0}
-          negative={result.netCashFlow < 0}
+          glossaryTerm="cashFlow"
+          tone={cashFlowTone(result.netCashFlow)}
         />
         <MetricTile
           label="CoC Return"
+          glossaryTerm="coc"
           value={
-            result.totalCashRequired <= 0 ? "N/A" : fmtPct(result.cocReturn)
+            result.totalCashRequired <= 0
+              ? "N/A"
+              : formatSignedPct(result.cocReturn)
           }
           sub={
             result.totalCashRequired <= 0
               ? "No modeled cash invested"
-              : undefined
+              : cocBenchmarkLabel(result.cocReturn)
           }
-          positive={result.totalCashRequired > 0 && result.cocReturn >= 0}
-          negative={result.totalCashRequired > 0 && result.cocReturn < 0}
+          tone={cocTone(result.cocReturn, result.totalCashRequired)}
         />
         <MetricTile
           label="Cap Rate"
-          value={fmtPct(result.capRate)}
-          positive={result.capRate >= 0}
-          negative={result.capRate < 0}
+          glossaryTerm="capRate"
+          // Ratio, not a signed delta: no "+" prefix (matches the band).
+          value={formatRatioPct(result.capRate)}
+          sub={capRateContextLabel(result.capRate)}
+          tone={capRateTone(result.capRate)}
         />
         <MetricTile
           label="DSCR"
+          glossaryTerm="dscr"
           // Cash purchases have no debt service so DSCR is undefined.
           // calc-analysis returns 0 in that case - surface a clear sub
-          // rather than a misleading "Underwater" badge.
+          // rather than a misleading badge. Same band labels and colour
+          // rule as the in-app metrics band.
           value={formatDscr(result.dscr, result.monthlyPayment > 0)}
-          sub={
-            result.monthlyPayment <= 0
-              ? undefined
-              : result.dscr >= 1.25
-                ? "Common screening threshold (≥1.25)"
-                : result.dscr >= 1.0
-                  ? "Tight (≥1.0)"
-                  : "Underwater"
-          }
-          positive={result.monthlyPayment > 0 && result.dscr >= 1.25}
-          negative={result.monthlyPayment > 0 && result.dscr < 1.25}
+          sub={dscrBandLabel(
+            result.dscr,
+            result.monthlyPayment > 0,
+            values.propertyType === "owner-occupant",
+          )}
+          tone={dscrTone(
+            result.dscr,
+            result.monthlyPayment > 0,
+            values.propertyType === "owner-occupant",
+          )}
         />
         {showTaxMetrics && proResult ? (
           <>

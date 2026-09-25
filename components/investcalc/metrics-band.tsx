@@ -21,38 +21,20 @@ import type { AnalysisResult } from "@/lib/calc-analysis";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
 import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
-import { formatDscr } from "@/lib/financial-presentation";
-
-/**
- * Cap rate is a property-specific output, not evidence about the surrounding
- * market. The retired rough-market registry must never turn it into an
- * "above/below local median" claim. Keep the context purely formulaic and the
- * color neutral unless the modeled NOI is negative.
- */
-function capRateContextLabel(capRatePct: number): string {
-  return capRatePct < 0
-    ? "Negative modeled NOI relative to purchase price"
-    : "Modeled NOI divided by purchase price";
-}
-
-function capRateOutputColor(capRatePct: number): string | undefined {
-  if (capRatePct < 0) return "text-[var(--metric-negative)]";
-  return undefined;
-}
-
-function cocBenchmarkLabel(cocPct: number): string {
-  if (cocPct > 7) return "Above the 7% reference";
-  if (cocPct > 5) return "Between 5% and 7%";
-  if (cocPct > 3) return "Between 3% and 5%";
-  if (cocPct >= 0) return "Between 0% and 3%";
-  return "Negative first-year cash return";
-}
-
-function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
-  if (monthlyCashFlow > 0) return "Positive before tax and after reserve";
-  if (monthlyCashFlow > -100) return "Near break-even before tax";
-  return "Negative before tax";
-}
+import {
+  METRIC_TONE_TEXT_CLASS,
+  capRateContextLabel,
+  capRateTone,
+  cashFlowBenchmarkLabel,
+  cashFlowTone,
+  cocBenchmarkLabel,
+  cocTone,
+  dscrBandLabel,
+  dscrTone,
+  formatDscr,
+  formatRatioPct,
+  formatSignedPct,
+} from "@/lib/financial-presentation";
 
 /** Pre-tax cash-flow context shared by the metric band and answer hero. */
 export function cashFlowSubLabel(
@@ -245,11 +227,7 @@ export function buildMetricTiles({
         // a -$40/mo deal is "≈break-even", not alarm-red.
         color={
           displayResult
-            ? displayResult.netCashFlow > 0
-              ? "text-[var(--metric-positive)]"
-              : displayResult.netCashFlow > -100
-                ? undefined
-                : "text-[var(--metric-negative)]"
+            ? METRIC_TONE_TEXT_CLASS[cashFlowTone(displayResult.netCashFlow)]
             : undefined
         }
         isLoading={isLoading}
@@ -264,7 +242,7 @@ export function buildMetricTiles({
         value={
           displayResult
             ? displayResult.totalCashRequired > 0
-              ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%`
+              ? formatSignedPct(displayResult.cocReturn)
               : "N/A"
             : "—"
         }
@@ -278,12 +256,10 @@ export function buildMetricTiles({
         // Threshold-driven: green only above the shared 5% reference. A bare
         // non-negative return stays neutral.
         color={
-          displayResult && displayResult.totalCashRequired > 0
-            ? displayResult.cocReturn > 5
-              ? "text-[var(--metric-positive)]"
-              : displayResult.cocReturn >= 0
-                ? undefined
-                : "text-[var(--metric-negative)]"
+          displayResult
+            ? METRIC_TONE_TEXT_CLASS[
+                cocTone(displayResult.cocReturn, displayResult.totalCashRequired)
+              ]
             : undefined
         }
         isLoading={isLoading}
@@ -299,12 +275,14 @@ export function buildMetricTiles({
         // reads like a change vs baseline to a first-timer. Cash flow and
         // CoC keep their signs (they're genuinely signed returns); a
         // negative cap rate still shows its "-" via toFixed.
-        value={displayResult ? `${displayResult.capRate.toFixed(1)}%` : "—"}
+        value={displayResult ? formatRatioPct(displayResult.capRate) : "—"}
         sub={
           displayResult ? capRateContextLabel(displayResult.capRate) : undefined
         }
         color={
-          displayResult ? capRateOutputColor(displayResult.capRate) : undefined
+          displayResult
+            ? METRIC_TONE_TEXT_CLASS[capRateTone(displayResult.capRate)]
+            : undefined
         }
         isLoading={isLoading}
         onSelect={jump("capRate")}
@@ -322,33 +300,22 @@ export function buildMetricTiles({
         }
         sub={
           displayResult
-            ? displayResult.monthlyPayment <= 0
-              ? undefined
-              : displayResult.dscr >= 1.25
-                ? "At or above the 1.25 reference"
-                : displayResult.dscr >= 1.0
-                  ? "Between 1.00 and 1.25"
-                  : propertyType === "owner-occupant"
-                    ? "Below 1.00; full debt service exceeds modeled NOI"
-                    : "Below 1.00"
+            ? dscrBandLabel(
+                displayResult.dscr,
+                displayResult.monthlyPayment > 0,
+                propertyType === "owner-occupant",
+              )
             : undefined
         }
         color={
           displayResult
-            ? displayResult.monthlyPayment <= 0
-              ? undefined
-              : displayResult.dscr >= 1.25
-                ? "text-[var(--metric-positive)]"
-                : // Keep the 1.00-1.25 reference band neutral. Only modeled
-                  // NOI below full debt service receives the negative tone.
-                  displayResult.dscr >= 1.0
-                  ? undefined
-                  : // A sub-1 DSCR is expected for an owner-occupied house-hack
-                    // (rent intentionally doesn't cover full PITI), so don't
-                    // paint it alarm-red there - keep it neutral.
-                    propertyType === "owner-occupant"
-                    ? undefined
-                    : "text-[var(--metric-negative)]"
+            ? METRIC_TONE_TEXT_CLASS[
+                dscrTone(
+                  displayResult.dscr,
+                  displayResult.monthlyPayment > 0,
+                  propertyType === "owner-occupant",
+                )
+              ]
             : undefined
         }
         isLoading={isLoading}
