@@ -27,8 +27,12 @@ export CRON_SECRET="${CRON_SECRET:-truecap-local-audit-cron-secret}"
 
 # Paid / external providers and outbound channels: off.
 export RENTCAST_API_KEY=""
-export FRED_API_KEY=""
+export FRED_API_KEY="${AUDIT_FRED_API_KEY:-}"
 export HUD_API_KEY="${AUDIT_HUD_API_KEY:-}"
+# Loopback-only provider mocks for the enrichment browser tests (see
+# e2e/support/enrichment-mock-server.ts); the action ignores non-loopback values.
+export FRED_API_BASE_URL="${FRED_API_BASE_URL:-}"
+export HUD_API_BASE_URL="${HUD_API_BASE_URL:-}"
 export RESEND_API_KEY=""
 export RESEND_AUDIENCE_ID=""
 export NEXT_PUBLIC_POSTHOG_KEY=""
