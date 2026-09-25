@@ -404,16 +404,6 @@ export default function FiftyPercentRuleCalculatorPage() {
             hook="The 50% rule is a 3-second triage. TrueCap's preliminary analyzer replaces the bundled guess with itemized tax, insurance, vacancy, and CapEx assumptions, then shows how the property fits the rules you select. It's free to start."
           />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link
-              href="/"
-              className="font-bold text-foreground hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

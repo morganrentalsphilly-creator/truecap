@@ -400,16 +400,6 @@ export default function TwoPercentRuleCalculatorPage() {
 
           <RelatedContent kind="tool" slug="2-percent-rule-calculator" title="2% Rule Calculator" className="mt-10" />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link
-              href="/"
-              className="font-bold text-foreground hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

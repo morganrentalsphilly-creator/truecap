@@ -487,16 +487,6 @@ export default function HouseHackingCalculatorPage() {
             hook="TrueCap's House Hack mode adds per-unit rents and owner-occupant math for the live-in screen. Save a separate full-rental scenario to compare the later move-out state."
           />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link
-              href="/"
-              className="font-bold text-foreground hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>
