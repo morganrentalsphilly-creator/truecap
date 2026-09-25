@@ -36,13 +36,12 @@ export function AIInsights({
 }) {
   return (
     <div className="rounded-2xl border border-border p-6 relative overflow-hidden h-full" style={{ background: "var(--ai-insights-bg)" }}>
-      <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-premium)" }} />
       <div className="relative flex items-center gap-2 mb-1">
-        <div className="h-7 w-7 rounded-lg grid place-items-center" style={{ background: "var(--gradient-premium)" }}>
-          <TrendingUp className="h-3.5 w-3.5 text-white" />
+        <div className="h-7 w-7 rounded-lg grid place-items-center bg-primary/10 text-primary">
+          <TrendingUp className="h-3.5 w-3.5" />
         </div>
-        <h3 className="font-display text-lg font-semibold">Portfolio Signals</h3>
-        <span className="text-3xs font-bold tracking-wider px-2 py-0.5 rounded-full text-white ml-1" style={{ background: "var(--gradient-gold)" }}>PREMIUM</span>
+        <h3 className="text-lg font-semibold">Portfolio Signals</h3>
+        <span className="text-3xs font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary ml-1">PREMIUM</span>
       </div>
       <p className="relative text-sm text-muted-foreground mb-4">Comparative signals from your saved deals</p>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, Sparkles } from "lucide-react";
+import { Menu, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -384,13 +384,9 @@ export function Topbar({
                 requestMountedNewAnalysis();
               }
             }}
-            className="inline-flex size-11 items-center justify-center rounded-lg text-white transition hover:opacity-90 md:hidden"
-            style={{
-              background: "var(--gradient-premium)",
-              boxShadow: "var(--shadow-glow)",
-            }}
+            className="inline-flex size-11 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary/90 md:hidden"
           >
-            <Sparkles className="h-5 w-5" />
+            <Plus className="h-5 w-5" />
           </Link>
           <Link
             href="/dashboard/new?fresh=1"
@@ -401,13 +397,9 @@ export function Topbar({
                 requestMountedNewAnalysis();
               }
             }}
-            className="hidden min-h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition hover:opacity-90 md:inline-flex"
-            style={{
-              background: "var(--gradient-premium)",
-              boxShadow: "var(--shadow-glow)",
-            }}
+            className="hidden min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 md:inline-flex"
           >
-            <Sparkles className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
             New Analysis
           </Link>
 

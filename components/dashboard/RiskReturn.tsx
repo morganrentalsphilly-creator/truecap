@@ -176,7 +176,7 @@ export function RiskReturn({
     <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-display text-lg font-semibold">Return vs model DSCR</h3>
+          <h3 className="text-lg font-semibold">Return vs model DSCR</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
             Each point uses saved assumptions. Right means a higher selected modeled return; up means a higher model DSCR. Neither direction establishes safety or recommends a deal. Dashed lines are fixed comparison references, not your adopted targets.
           </p>

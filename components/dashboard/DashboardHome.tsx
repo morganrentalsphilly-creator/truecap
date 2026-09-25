@@ -1959,10 +1959,6 @@ export function DashboardHome({
             <Button
               asChild
               className="mt-5 min-h-11 rounded-xl px-5"
-              style={{
-                background: "var(--gradient-premium)",
-                boxShadow: "var(--shadow-glow)",
-              }}
             >
               <Link href="/dashboard/new?fresh=1">
                 <Plus className="h-4 w-4" />

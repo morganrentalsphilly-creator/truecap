@@ -51,7 +51,7 @@ const typeIcon: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const signalStyle: Record<string, string> = {
   "Strong Buy": "bg-success/10 text-success ring-success/20",
-  Buy: "bg-primary/10 text-primary ring-primary/20",
+  Buy: "bg-success/10 text-success ring-success/20",
   Neutral: "bg-warning/15 text-warning-foreground ring-warning/30",
   Risky: "bg-warning/15 text-warning-foreground ring-warning/30",
   Hold: "bg-warning/15 text-warning-foreground ring-warning/30",
@@ -163,7 +163,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
     <div className="rounded-2xl bg-card border border-border overflow-hidden">
       <div className="flex flex-col gap-4 p-4 pb-3 sm:flex-row sm:items-start sm:justify-between sm:p-6 sm:pb-4">
         <div>
-          <h3 className="font-display text-lg font-semibold">Deal Screening List</h3>
+          <h3 className="text-lg font-semibold">Deal Screening List</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
             Sort your saved deals by Deal score, ROI, or cash flow.
           </p>

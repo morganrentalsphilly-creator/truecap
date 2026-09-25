@@ -33,7 +33,7 @@ export async function DealLeadsCard({ limit = 8 }: { limit?: number }) {
     <section>
       <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-foreground">
+          <h2 className="text-lg font-semibold text-foreground">
             Leads from your shared deals
           </h2>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">

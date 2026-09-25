@@ -22,11 +22,13 @@ interface Props {
   changeSuffix?: string;
 }
 
+// `color` feeds the sparkline stroke; `tile` is the flat tinted icon tile
+// (the analyzer's own tile vocabulary — no gradient, no coloured drop shadow).
 const toneMap = {
-  primary: { color: "oklch(0.54 0.18 240)", grad: "var(--gradient-premium)" },
-  success: { color: "oklch(0.68 0.17 158)", grad: "var(--gradient-success)" },
-  gold: { color: "oklch(0.78 0.14 85)", grad: "var(--gradient-gold)" },
-  violet: { color: "oklch(0.66 0.13 210)", grad: "linear-gradient(135deg, oklch(0.66 0.13 210), oklch(0.54 0.18 240))" },
+  primary: { color: "oklch(0.54 0.18 240)", tile: "bg-primary/10 text-primary" },
+  success: { color: "oklch(0.68 0.17 158)", tile: "bg-success/10 text-success" },
+  gold: { color: "oklch(0.78 0.14 85)", tile: "bg-warning/15 text-warning-foreground" },
+  violet: { color: "oklch(0.66 0.13 210)", tile: "bg-primary/10 text-primary" },
 };
 
 export function StatCard({ label, value, change, changeLabel, icon: Icon, spark, tone = "primary", onClick, badge, changeSuffix = "%" }: Props) {
@@ -41,9 +43,8 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
         if (!onClick) return;
         if (event.key === "Enter" || event.key === " ") onClick();
       }}
-      className={`group relative overflow-hidden rounded-2xl bg-card border border-border p-5 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] ${onClick ? "cursor-pointer" : ""}`}
+      className={`group relative overflow-hidden rounded-2xl bg-card border border-border p-5 transition-colors ${onClick ? "cursor-pointer hover:border-primary/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" : ""}`}
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition" style={{ background: "var(--gradient-card-glow)" }} />
       <div className="relative flex items-start justify-between mb-4">
         <div>
           <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{label}</div>
@@ -53,8 +54,8 @@ export function StatCard({ label, value, change, changeLabel, icon: Icon, spark,
             </span>
           ) : null}
         </div>
-        <div className="h-9 w-9 rounded-xl grid place-items-center" style={{ background: t.grad, boxShadow: `0 8px 20px -8px ${t.color}` }}>
-          <Icon className="h-4 w-4 text-white" />
+        <div className={`h-9 w-9 rounded-xl grid place-items-center ${t.tile}`}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
       <div className="relative font-mono text-3xl font-bold tabular-nums tracking-tight">{value}</div>
