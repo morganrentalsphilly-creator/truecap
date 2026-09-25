@@ -9447,21 +9447,13 @@ export function InvestCalcPage({
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
-            {/* Heading level is auth-aware: for cold visitors the
-                marketing hero above already renders the page's single
-                <h1> ("Stop losing deals to bad math.") - two H1s on
-                one page dilutes the SEO signal and confuses screen-
-                reader document outlines. For signed-in users the hero
-                is skipped entirely, so this becomes the page's H1. */}
-            {isAuthenticated ? (
-              <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                {underwritingHeading}
-              </h1>
-            ) : (
-              <h2 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                {underwritingHeading}
-              </h2>
-            )}
+            {/* The page's single H1 in every auth state: /analyze mounts
+                no intro above the form (2026-09 audit) and the signed-in
+                homes never did, so nothing else on the page competes for
+                the document outline. */}
+            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
+              {underwritingHeading}
+            </h1>
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
                 heading IS the hero title now — the hero card below lost its
                 internal "Analyze a deal" title row, and the old
@@ -9474,6 +9466,9 @@ export function InvestCalcPage({
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               Confirm the property, price, income, and assumptions. TrueCap then
               shows whether the deal works and why.
+              {!isAuthenticated
+                ? " Your first full decision is free, with no account."
+                : null}
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any
@@ -9633,7 +9628,7 @@ export function InvestCalcPage({
                   </span>
                 </div>
                 {tab.isFree && !canUseProjections && (
-                  <span className="inline-flex text-3xs sm:text-3xs font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
+                  <span className="inline-flex text-3xs font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
                     FREE
                   </span>
                 )}

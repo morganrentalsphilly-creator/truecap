@@ -33,29 +33,19 @@ export const ANON_ANALYZER_PROPS: AnalyzerProps = {
 };
 
 /**
- * The /analyze page body — a short intro and the full analyzer. The homepage
- * no longer mounts the analyzer at all; the hero's address capture hands off
- * here (sessionStorage handoff for JS, `?address=` / `?url=` / `?sample=1` for
+ * The /analyze page body — the full analyzer. The homepage no longer mounts
+ * the analyzer at all; the hero's address capture hands off here
+ * (sessionStorage handoff for JS, `?address=` / `?url=` / `?sample=1` for
  * plain links).
+ *
+ * There is deliberately no page-level intro above the form: the analyzer's
+ * own heading is the page's H1 and its signpost line carries the "first
+ * decision is free" promise for anonymous visitors (2026-09 audit — the
+ * first phone screen used to show two intros before the address field).
  */
 export function AnalyzePageContent({ analyzerProps }: { analyzerProps: AnalyzerProps }) {
   return (
     <>
-      <section
-        aria-labelledby="analyze-page-title"
-        className="border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] to-background"
-      >
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-          <h1 id="analyze-page-title" className="mt-1 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Analyze a rental deal
-          </h1>
-          <p className="mt-2 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Enter an address or paste a listing link. Every assumption is
-            labeled and editable. Your first full decision is free, with no
-            account.
-          </p>
-        </div>
-      </section>
       <AnalyzeEntryFromQuery />
       <InvestCalcPage {...analyzerProps} />
     </>
