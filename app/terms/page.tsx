@@ -14,6 +14,7 @@ import {
   PRODUCT_EVALUATION_DEAL_LIMIT,
   PRODUCT_EVALUATION_DAYS,
 } from "@/lib/product-access";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -47,13 +48,8 @@ const LAST_UPDATED = "August 27, 2026";
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <Link
-          href="/"
-          className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-        >
-          ← TrueCap
-        </Link>
         <h1 className="mt-2 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
           Terms of Service
         </h1>

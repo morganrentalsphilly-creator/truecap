@@ -20,7 +20,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import { EMBED_LIST } from "@/lib/embed-registry";
 import { EMBEDDABLE_COUNT, CALCULATOR_COUNT } from "@/lib/calculator-registry";
-import { getSiteUrl } from "@/lib/site-url";
+import { CANONICAL_HOST, CANONICAL_SITE_URL, getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Embed TrueCap Calculators on Your Site (Free)",
@@ -45,17 +46,23 @@ export const metadata: Metadata = {
 
 export default function EmbedHubPage() {
   const siteUrl = getSiteUrl();
+  // A partner pastes a snippet once and never updates it, so the hub must
+  // never hand out an iframe src on a non-canonical origin (a stale-env build
+  // once emitted truecap-pink.vercel.app here). Same rule as ToolEmbedInvite:
+  // the exact canonical host or no snippet at all.
+  let snippetHost: string | null = null;
+  try {
+    snippetHost = new URL(siteUrl).host.toLowerCase();
+  } catch {
+    snippetHost = null;
+  }
+  const snippetsAvailable = snippetHost === CANONICAL_HOST;
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-10">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight tracking-tight">
             Embed our calculators on your site
           </h1>
@@ -102,7 +109,7 @@ export default function EmbedHubPage() {
 
         {/* Quick-start instructions */}
         <section className="mb-10 rounded-2xl border border-border bg-muted/30 p-5 sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             How to embed
           </p>
           <ol className="mt-3 space-y-2 text-sm text-foreground list-decimal list-inside">
@@ -165,12 +172,25 @@ export default function EmbedHubPage() {
                 <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                   {entry.description}
                 </p>
-                <EmbedCodeBlock
-                  slug={entry.slug}
-                  title={entry.title}
-                  siteUrl={siteUrl}
-                  defaultHeight={entry.defaultHeight}
-                />
+                {snippetsAvailable ? (
+                  <EmbedCodeBlock
+                    slug={entry.slug}
+                    title={entry.title}
+                    siteUrl={siteUrl}
+                    defaultHeight={entry.defaultHeight}
+                  />
+                ) : (
+                  <p className="rounded-xl border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                    Embed code is issued from{" "}
+                    <a
+                      href={`${CANONICAL_SITE_URL}/embed`}
+                      className="font-semibold text-foreground underline underline-offset-4"
+                    >
+                      {CANONICAL_HOST}/embed
+                    </a>{" "}
+                    so partner snippets always point at the live site.
+                  </p>
+                )}
               </article>
             ))}
           </div>

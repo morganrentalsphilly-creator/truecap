@@ -24,6 +24,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
@@ -125,6 +127,7 @@ export default function SeventyPercentRulePost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -143,7 +146,7 @@ export default function SeventyPercentRulePost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -152,7 +155,7 @@ export default function SeventyPercentRulePost() {
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
               {TITLE}
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -175,7 +178,7 @@ export default function SeventyPercentRulePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What the 70% rule actually says
             </h2>
@@ -272,8 +275,8 @@ export default function SeventyPercentRulePost() {
               offer, put $45,000 into it, and sell it six months later at the
               $300,000 ARV. Here is the whole ledger:
             </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ScrollX label="Data table" className="overflow-x-auto">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Line</th>
@@ -323,7 +326,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               That $52,200 is about 17% of ARV — a healthy flip. Watch how the
               $90,000 spread split: roughly $37,800 went to buying, holding, and
@@ -367,10 +370,10 @@ export default function SeventyPercentRulePost() {
               The workhorse method is price per finished square foot. Say three
               renovated comps nearby sold like this:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-right">Sold price</th>
                     <th className="text-right">Size</th>
@@ -398,7 +401,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               They cluster around $210/sqft. Your subject is 1,450 finished square
               feet, so 1,450 × $210 ≈ $304,500 — round down to $300,000 to stay
@@ -469,10 +472,10 @@ export default function SeventyPercentRulePost() {
               house as on a $400,000 one — so on cheap houses those fixed costs
               eat a much bigger share of a much smaller spread.
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Situation</th>
                     <th className="text-left">What&apos;s different</th>
                     <th className="text-right">Offer as % of ARV</th>
@@ -506,7 +509,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               <em>
                 *Higher isn&apos;t permission to overpay — it&apos;s a warning

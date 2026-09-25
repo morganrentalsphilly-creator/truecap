@@ -149,7 +149,8 @@ test("guest Share returns from sign-in to the same result and reopens disclosure
       .click();
 
     await signInFromCurrentPage(guest.page);
-    await assertFocusedDecision(guest.page, SAMPLE_DEAL_FIXTURE.values.address);
+    // The sample never shows its internal fixture address (B-12, 2026-09 audit).
+    await assertFocusedDecision(guest.page, SAMPLE_DEAL_FIXTURE.display.shortAddress);
 
     const resumedDialog = guest.page.getByRole("dialog", {
       name: "Share this analysis",

@@ -15,6 +15,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_TOPICS, getBlogTopic } from "@/lib/blog-topics";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { getCalculator } from "@/lib/calculator-registry";
+import { Header } from "@/components/investcalc/header";
 
 export const dynamicParams = false;
 
@@ -87,6 +88,7 @@ export default async function BlogTopicHubPage({
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
@@ -103,9 +105,6 @@ export default async function BlogTopicHubPage({
         </nav>
 
         <header className="mb-8">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Topic hub
-          </p>
           <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
             {topic.title}
           </h1>
@@ -126,7 +125,7 @@ export default async function BlogTopicHubPage({
               >
                 <h3 className="font-bold text-foreground group-hover:text-primary">{post.title}</h3>
                 <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
-                <span className="mt-auto text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <span className="mt-auto text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
                   {post.readingTimeMinutes} min read
                 </span>
               </Link>
@@ -176,7 +175,7 @@ export default async function BlogTopicHubPage({
 
         {/* Other topics */}
         <section className="border-t border-border pt-6">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             More topics
           </p>
           <div className="flex flex-wrap gap-2">

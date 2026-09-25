@@ -21,13 +21,16 @@ describe("strategy-aware underwriting heading", () => {
     }
   });
 
-  it("uses the shared heading in both auth outlines without replacing the role-aware CTA", () => {
+  it("uses the shared heading as the one page H1 without replacing the role-aware CTA", () => {
     const page = readFileSync(
       resolve(process.cwd(), "components/investcalc/investcalc-page.tsx"),
       "utf8",
     );
 
-    expect(page.match(/\{underwritingHeading\}/g)).toHaveLength(2);
+    // One heading for both auth states (2026-09 audit): /analyze no longer
+    // stacks a page intro above the form, so the form heading is the H1.
+    expect(page.match(/\{underwritingHeading\}/g)).toHaveLength(1);
+    expect(page).toMatch(/<h1[^>]*>\s*\{underwritingHeading\}\s*<\/h1>/);
     expect(page).toContain("const analyzerCta = getAnalyzerCta({");
     expect(page).toContain("strategyRunCta: activeStrategy?.runCta");
     expect(page).toContain(

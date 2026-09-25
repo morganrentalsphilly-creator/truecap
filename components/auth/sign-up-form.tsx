@@ -6,13 +6,14 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
-import { signUpAction } from "@/app/actions/auth";
+import { CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { resendConfirmationAction, signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import {
   internalNextPathOrNull,
   safeInternalNextPath,
+  PASSWORD_POLICY_TEXT,
   signUpSchema,
   type SignUpInput,
 } from "@/lib/auth-schema";
@@ -26,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -60,6 +62,17 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [hasPendingDeal, setHasPendingDeal] = useState(false);
+  // Inline, announced failure state (2026-09 audit: a rejected sign-up used
+  // to be a single toast that TOAST_LIMIT could drop, with the fields never
+  // marked invalid).
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Email-confirmation flow: with confirmation ON there is no session after
+  // sign-up, so pushing to ?next (often a signed-in route) bounced a brand-new
+  // account to the login form. Hold a "check your email" state instead.
+  const [confirmationSentTo, setConfirmationSentTo] = useState<string | null>(
+    null,
+  );
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     setHasPendingDeal(hasPendingSaveIntent());
@@ -79,6 +92,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   // address (e.g. the calculator's pending save) survives the sign-up → login
   // hop. Same internal-paths-only validation as the post-auth redirect below.
   const safeNextPath = internalNextPathOrNull(searchParams.get("next"));
+  // Only claim a plan was reviewed when the visitor arrived from a plan CTA.
+  const reviewedPlanFromQuery =
+    searchParams.get("plan") !== null || searchParams.get("billing") !== null;
   const selectedPlan =
     agentProConfigured && searchParams.get("plan") === "agent-pro"
       ? "agent-pro"
@@ -112,13 +128,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       );
 
       if (!result.ok) {
-        toast({
-          title: "Sign up failed",
-          description: result.message,
-          variant: "destructive",
-        });
+        // A server-side password policy (Supabase) can be stricter than the
+        // form's own rule; pin that message to the field it is about.
+        if (/password/i.test(result.message)) {
+          form.setError("password", { message: result.message });
+        }
+        setSubmitError(result.message);
         return;
       }
+      setSubmitError(null);
 
       // Fire the Google Ads conversion event before navigating away. Safe
       // to call from anywhere; no-ops if gtag isn't loaded or the
@@ -141,17 +159,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       //    messaging. Old flow pushed to /auth/login which forced 3+
       //    extra clicks before any value.
       if (result.needsEmailConfirmation) {
-        toast({
-          title: "Account created — confirm your email",
-          description:
-            "We sent a confirmation link. You can start using the free calculator right now while you wait.",
-        });
-      } else {
-        toast({
-          title: "Welcome to TrueCap",
-          description: "You're signed in. Run your first deal below.",
-        });
+        // No session yet: show the sent state in place (with resend) instead
+        // of navigating to a route that would bounce to the login form.
+        setConfirmationSentTo(values.email.trim());
+        return;
       }
+      toast({
+        title: "Welcome to TrueCap",
+        description: "You're signed in. Run your first deal below.",
+      });
       form.reset();
       // Honor ?next (internal paths only) so a gated action returns the user to
       // where they were instead of the homepage. The shared validator rejects the
@@ -174,13 +190,92 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
     }
   }
 
+  async function handleResendConfirmation() {
+    if (!confirmationSentTo) return;
+    setIsResending(true);
+    try {
+      const result = await resendConfirmationAction(
+        { email: confirmationSentTo, captchaToken: captchaToken ?? undefined },
+        safeNextPath ?? undefined,
+      );
+      toast(
+        result.ok
+          ? {
+              title: "Confirmation email sent",
+              description: `Check ${confirmationSentTo} — and the spam folder.`,
+            }
+          : {
+              title: "Couldn't resend",
+              description: result.message,
+              variant: "destructive",
+            },
+      );
+    } catch {
+      toast({
+        title: "Couldn't resend",
+        description:
+          "Something interrupted the request. Check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  }
+
+  if (confirmationSentTo) {
+    return (
+      <div role="status" className="space-y-5 text-center">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-positive-light text-positive">
+          <CheckCircle2 className="size-7" aria-hidden />
+        </div>
+        <h2 className="text-lg font-bold text-foreground">
+          Confirm your email to finish
+        </h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          We sent a confirmation link to{" "}
+          <strong className="text-foreground">{confirmationSentTo}</strong>.
+          Open it to activate your account
+          {hasPendingDeal ? " — your analysis will be saved automatically" : ""}
+          . Check the spam folder if it hasn&apos;t arrived in a minute.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-12 w-full rounded-xl"
+          onClick={handleResendConfirmation}
+          disabled={isResending}
+        >
+          {isResending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Sending…
+            </>
+          ) : (
+            "Resend the confirmation email"
+          )}
+        </Button>
+        <p className="text-sm text-muted-foreground">
+          Meanwhile, you can{" "}
+          <Link
+            href="/analyze"
+            prefetch={false}
+            className="inline-flex min-h-11 items-center font-medium text-primary hover:underline"
+          >
+            run a free analysis
+          </Link>{" "}
+          without waiting.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <section
         aria-labelledby="evaluation-summary-title"
         className="rounded-xl border border-primary/25 bg-primary/5 p-4"
       >
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-3xs font-bold uppercase tracking-widest text-primary">
           $0 today · no card
         </p>
         <h2
@@ -195,23 +290,31 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             "Nothing auto-renews and no subscription starts when you create the account."
           }
         </p>
-        <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-lg bg-card p-2.5">
-            <dt className="text-muted-foreground">Plan you reviewed</dt>
-            <dd className="mt-0.5 font-semibold text-foreground">
-              {selectedPlanName} · {selectedBilling}
-            </dd>
-          </div>
-          <div className="rounded-lg bg-card p-2.5">
-            <dt className="text-muted-foreground">
-              Only if you subscribe later
-            </dt>
-            <dd className="mt-0.5 font-semibold text-foreground">
-              {formatPublicUsd(selectedPrice)}
-              {selectedPriceSuffix}
-            </dd>
-          </div>
-        </dl>
+        {reviewedPlanFromQuery ? (
+          <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div className="rounded-lg bg-card p-2.5">
+              <dt className="text-muted-foreground">Plan you reviewed</dt>
+              <dd className="mt-0.5 font-semibold text-foreground">
+                {selectedPlanName} · {selectedBilling}
+              </dd>
+            </div>
+            <div className="rounded-lg bg-card p-2.5">
+              <dt className="text-muted-foreground">
+                Only if you subscribe later
+              </dt>
+              <dd className="mt-0.5 font-semibold text-foreground">
+                {formatPublicUsd(selectedPrice)}
+                {selectedPriceSuffix}
+              </dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Pro is {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month or{" "}
+            {formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}/year — only if you
+            subscribe after the trial.
+          </p>
+        )}
       </section>
       {hasPendingDeal ? (
         <div
@@ -244,7 +347,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="bg-card px-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             or
           </span>
         </div>
@@ -302,6 +405,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       aria-required="true"
                       placeholder="Create a password"
                       disabled={isSubmitting}
+                      aria-describedby="password-policy"
                       className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
                       {...field}
                     />
@@ -309,7 +413,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   <button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -321,6 +425,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                     )}
                   </button>
                 </div>
+                <FormDescription id="password-policy" className="text-xs">
+                  {PASSWORD_POLICY_TEXT}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -351,7 +458,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     aria-label={
                       showConfirmPassword
                         ? "Hide confirmation password"
@@ -369,6 +476,28 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
               </FormItem>
             )}
           />
+
+          {submitError ? (
+            <div
+              role="alert"
+              className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground"
+            >
+              <p className="font-semibold text-destructive">Sign up failed</p>
+              <p className="mt-0.5 leading-relaxed">{submitError}</p>
+              {/already exists|signing in/i.test(submitError) ? (
+                <Link
+                  href={
+                    safeNextPath
+                      ? `/auth/login?next=${encodeURIComponent(safeNextPath)}`
+                      : "/auth/login"
+                  }
+                  className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
+                >
+                  Sign in instead
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
 
           <CaptchaWidget
             onToken={setCaptchaToken}

@@ -15,6 +15,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "how-to-refinance-a-rental-property";
 const TITLE = "How to refinance a rental property — rate-and-term, cash-out, and DSCR options";
@@ -114,15 +115,16 @@ export default function RefinancePost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
-        <div className="mb-2"><Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">← Blog</Link></div>
+        <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
-          <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
           </p>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
@@ -132,7 +134,7 @@ export default function RefinancePost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The three reasons to refinance</h2>
           <p>
             Refi exists for three core jobs. Be honest about which one applies to your situation — they have different math.

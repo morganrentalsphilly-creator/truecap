@@ -8,6 +8,8 @@ export type AuthenticatedE2EEnvironment =
   | {
       enabled: true;
       email: string;
+      /** Seeded FREE account (no subscription); see seed-local-user.mjs. */
+      freeEmail: string;
       password: string;
       baseUrl: string;
     };
@@ -84,5 +86,7 @@ export function resolveAuthenticatedE2EEnvironment(
     );
   }
 
-  return { enabled: true, email, password, baseUrl };
+  const at = email.indexOf("@");
+  const freeEmail = `${email.slice(0, at)}-free${email.slice(at)}`;
+  return { enabled: true, email, freeEmail, password, baseUrl };
 }

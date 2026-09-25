@@ -272,14 +272,9 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             <Badge className="rounded-full bg-primary/10 text-primary border border-primary/15">
               {currentPlanTitle}
             </Badge>
-            {currentSubscription && currentSubscription?.cancelAtPeriodEnd === false ? (
+            {currentSubscription ? (
               <Badge variant="outline" className="rounded-full capitalize">
                 {currentStatusLabel(currentSubscription)}
-              </Badge>
-            ) : null}
-            {currentSubscription?.cancelAtPeriodEnd ? (
-              <Badge className="rounded-full border border-amber-200 bg-amber-100 text-amber-700">
-                Cancels at period end
               </Badge>
             ) : null}
           </div>
@@ -293,7 +288,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 className={cn(
                   "mt-2 rounded-xl border px-3 py-2.5",
                   subscriptionDisplay.isGrandfatheredTwenty
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                    ? "border-positive/30 bg-positive-light text-positive"
                     : "border-border bg-muted/30 text-foreground"
                 )}
               >
@@ -305,12 +300,16 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 ))}
               </div>
             ) : null}
+            {/* ONE status line (2026-09 audit: a scheduled cancellation used
+                to be said four ways — badge, status, disabled button and a
+                trailing sentence — and none of them said what happens to
+                saved deals). */}
             {currentSubscription ? (
-              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
-                <p>Valid until {formatBillingDate(currentSubscription.currentPeriodEnd)}</p>
-                {/* <p>Billing period start: {formatBillingDate(currentSubscription.currentPeriodStart)}</p> */}
-              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {currentSubscription.cancelAtPeriodEnd
+                  ? `Cancels on ${formatBillingDate(currentSubscription.currentPeriodEnd)}. Your saved deals stay readable after that; Pro editing ends.`
+                  : `Renews on ${formatBillingDate(currentSubscription.currentPeriodEnd)}.`}
+              </p>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Status: free</p>
             )}
@@ -338,20 +337,8 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 {isCancelPending ? <Loader2 className="animate-spin" /> : <XCircle />}
                 Cancel plan
               </Button>
-            ) : currentSubscription?.cancelAtPeriodEnd ? (
-              <Button type="button" variant="outline" className="rounded-xl" disabled>
-                Cancellation scheduled
-              </Button>
             ) : null}
           </div>
-
-          {currentSubscription ? (
-            <p className="text-sm text-muted-foreground">
-              {currentSubscription.cancelAtPeriodEnd
-                ? `Your subscription will end on ${formatBillingDate(currentSubscription.currentPeriodEnd)}.`
-                : `Renew date: ${formatBillingDate(currentSubscription.currentPeriodEnd)}`}
-            </p>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -373,7 +360,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                     <div className="flex items-center gap-2">
                       <CardTitle>{plan.title}</CardTitle>
                       {plan.badge ? (
-                        <Badge className="rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        <Badge className="rounded-full bg-positive-light text-positive border border-positive/30">
                           {plan.badge}
                         </Badge>
                       ) : null}
@@ -393,7 +380,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-600" />
+                      <Check className="h-4 w-4 text-positive" />
                       <span>{feature}</span>
                     </li>
                   ))}

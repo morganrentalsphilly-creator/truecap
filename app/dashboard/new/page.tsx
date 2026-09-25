@@ -29,7 +29,12 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { AnalyzeEntryFromQuery } from "@/components/marketing/analyze-entry-from-query";
 import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
-import { getDashboardNavAccess, hasPaidPlanSubscription } from "@/lib/entitlements";
+import {
+  getDashboardNavAccess,
+  getProductEvaluationAccessForUser,
+  hasPaidPlanSubscription,
+} from "@/lib/entitlements";
+import { TrialAllowanceStrip } from "@/components/dashboard/trial-allowance-strip";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
@@ -104,15 +109,17 @@ export default async function NewAnalysisPage({
     ? await getSavedDealForEditingAction(requestedSavedDealId)
     : null;
 
-  const [capabilities, { data: profile }, isPremium] = await Promise.all([
-    getAnalyzerCapabilities(supabase, user),
-    supabase
-      .from("profiles")
-      .select("first_name, last_name, display_name, avatar_url")
-      .eq("id", user.id)
-      .maybeSingle(),
-    hasPaidPlanSubscription(supabase, user.id),
-  ]);
+  const [capabilities, { data: profile }, isPremium, evaluationAccess] =
+    await Promise.all([
+      getAnalyzerCapabilities(supabase, user),
+      supabase
+        .from("profiles")
+        .select("first_name, last_name, display_name, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle(),
+      hasPaidPlanSubscription(supabase, user.id),
+      getProductEvaluationAccessForUser(supabase, user.id),
+    ]);
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
 
@@ -136,6 +143,8 @@ export default async function NewAnalysisPage({
         <BillingSuccessBanner />
       </Suspense>
       <div className="flex-1">
+        {/* Trial budget, one line, only while a no-card evaluation is active. */}
+        {!isPremium ? <TrialAllowanceStrip access={evaluationAccess} /> : null}
         {/* Same entry island as /analyze: a signed-in click on
             "/analyze?sample=1" arrives here (proxy → /home-authed forwards
             the flag) and must still run the sample deal. */}

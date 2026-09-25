@@ -21,6 +21,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "short-term-rental-underwriting-playbook";
 const TITLE =
@@ -146,6 +147,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -163,14 +165,14 @@ export default function BlogPost() {
         <header className="mb-8 sm:mb-10">
           <Link
             href="/blog"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
+          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -186,7 +188,7 @@ export default function BlogPost() {
           </p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             Short-term rentals look great on paper. A 3-bedroom mountain cabin
             renting for $300/night at 60% occupancy grosses ~$65K/year — far
@@ -576,9 +578,9 @@ export default function BlogPost() {
           </p>
         </footer>
       </main>
+      <BlogStickyCta />
       <SiteFooter />
       <ScrollDepthTracker />
-      <BlogStickyCta />
     </div>
   );
 }

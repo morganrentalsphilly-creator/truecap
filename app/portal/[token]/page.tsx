@@ -32,7 +32,7 @@ function recTone(rec: PortalDeal["recommendation"]): string {
       return "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]";
     case "Risky":
     case "Avoid":
-      return "border-amber-300 bg-amber-50 text-amber-800";
+      return "border-caution/30 bg-caution-light text-caution-text";
     default:
       return "border-border bg-muted/50 text-muted-foreground";
   }
@@ -98,7 +98,7 @@ export default async function ClientPortalPage({
               credible if the buyer can see what the bar actually is. */}
           {criteriaSummary ? (
             <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Your criteria
               </p>
               <p className="mt-0.5 text-sm font-semibold text-foreground">{criteriaSummary}</p>
@@ -117,7 +117,7 @@ export default async function ClientPortalPage({
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
                       <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${recTone(deal.recommendation)}`}
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-2xs font-semibold ${recTone(deal.recommendation)}`}
                       >
                         {/* Was the raw internal enum ("Strong Buy"/"Avoid").
                             This page is what an agent's BUYER sees, so it
@@ -125,19 +125,19 @@ export default async function ClientPortalPage({
                         {verdictLabel(deal.recommendation)} · Deal score {Math.round(deal.score)}
                       </span>
                       {deal.meetsCriteria === true ? (
-                        <span className="inline-flex items-center rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-green)]">
+                        <span className="inline-flex items-center rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-2xs font-semibold text-[var(--brand-green)]">
                           Meets your criteria
                         </span>
                       ) : deal.meetsCriteria === false ? (
-                        <span className="inline-flex items-center rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                        <span className="inline-flex items-center rounded-full border border-border bg-muted/50 px-2 py-0.5 text-2xs font-semibold text-muted-foreground">
                           Below your criteria
                         </span>
                       ) : null}
                     </div>
                     {deal.gapLine ? (
-                      <p className="mt-1 text-[11px] text-muted-foreground">{deal.gapLine}</p>
+                      <p className="mt-1 text-2xs text-muted-foreground">{deal.gapLine}</p>
                     ) : null}
-                    <p className="mt-1 text-[10px] text-muted-foreground">
+                    <p className="mt-1 text-3xs text-muted-foreground">
                       {deal.methodologyLabel}
                     </p>
                   </div>
@@ -147,17 +147,17 @@ export default async function ClientPortalPage({
                 </div>
                 <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg bg-muted/40 py-2">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash flow</dt>
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cash flow</dt>
                     <dd className={`text-sm font-extrabold ${deal.netCashFlowMonthly >= 0 ? "text-success" : "text-[var(--metric-negative)]"}`}>
-                      {money(deal.netCashFlowMonthly)}<span className="text-[10px] font-normal text-muted-foreground">/mo</span>
+                      {money(deal.netCashFlowMonthly)}<span className="text-3xs font-normal text-muted-foreground">/mo</span>
                     </dd>
                   </div>
                   <div className="rounded-lg bg-muted/40 py-2">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap rate</dt>
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cap rate</dt>
                     <dd className="text-sm font-extrabold text-foreground">{pct(deal.capRatePct)}</dd>
                   </div>
                   <div className="rounded-lg bg-muted/40 py-2">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</dt>
+                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">CoC</dt>
                     <dd className="text-sm font-extrabold text-foreground">{pct(deal.cocReturnPct)}</dd>
                   </div>
                 </dl>

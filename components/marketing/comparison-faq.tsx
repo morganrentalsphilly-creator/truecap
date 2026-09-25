@@ -93,7 +93,7 @@ export function ComparisonFaq({
             key={item.question}
             className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 sm:p-5"
           >
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-bold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-base">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-bold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:text-base">
               <span>{item.question}</span>
               <span
                 aria-hidden

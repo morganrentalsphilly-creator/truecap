@@ -98,7 +98,7 @@ export function StickyConversionBar() {
           <p className="truncate text-xs font-bold text-foreground sm:text-sm">
             Have a rental in mind? See whether the numbers work.
           </p>
-          <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
+          <p className="hidden truncate text-2xs text-muted-foreground sm:block">
             No card · No signup · Editable assumptions
           </p>
         </div>
@@ -127,7 +127,7 @@ export function StickyConversionBar() {
             }
           }}
           aria-label="Dismiss"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X className="size-4" />
         </button>

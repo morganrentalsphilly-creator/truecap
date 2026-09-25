@@ -25,6 +25,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "how-to-calculate-arv";
 const TITLE_PLAIN =
@@ -122,6 +124,7 @@ export default function HowToCalculateArvPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -140,7 +143,7 @@ export default function HowToCalculateArvPost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -150,7 +153,7 @@ export default function HowToCalculateArvPost() {
               How to calculate ARV (after-repair value): the comps method, step
               by step (2026)
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -175,7 +178,7 @@ export default function HowToCalculateArvPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What ARV is — and the mistake baked into most estimates
             </h2>
@@ -287,10 +290,10 @@ export default function HowToCalculateArvPost() {
               comps&apos; raw sale prices.
             </p>
             <p>Our four best comps:</p>
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-right">Sq ft</th>
                     <th className="text-right">Sale price</th>
@@ -324,7 +327,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>{" "}
               (the median is $182.38 — when the two agree this closely, no
@@ -444,10 +447,10 @@ export default function HowToCalculateArvPost() {
               that changes is what the property is actually worth when the work
               is done:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Actual value vs. $255K ARV</th>
                     <th className="text-right">BRRRR cash left in</th>
                     <th className="text-right">Flip profit</th>
@@ -476,7 +479,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The asymmetry is the lesson. A 10% ARV miss — the difference
               between a careful comp set and a hopeful one — cuts the flip

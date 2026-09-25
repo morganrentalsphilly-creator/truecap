@@ -193,7 +193,7 @@ export function StickyCalculateBar({
       role="presentation"
     >
       {contextLabel ? (
-        <p className="mb-1.5 truncate text-center text-[11px] text-muted-foreground">
+        <p className="mb-1.5 truncate text-center text-2xs text-muted-foreground">
           {contextLabel}
         </p>
       ) : null}
@@ -226,7 +226,7 @@ export function StickyCalculateBar({
           }}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
               Cap rate
             </span>
             <span className="font-mono text-sm font-bold tabular-nums text-foreground">
@@ -234,7 +234,7 @@ export function StickyCalculateBar({
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
               DSCR
             </span>
             <span className="font-mono text-sm font-bold tabular-nums text-foreground">
@@ -259,7 +259,7 @@ export function StickyCalculateBar({
             aria-label={`Live underwriting preview: cash flow ${Math.round(livePreview.netCashFlow)} dollars per month. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
             className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 py-2 text-left"
           >
-            <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-primary">
+            <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2 py-0.5 text-3xs font-extrabold uppercase tracking-wide text-primary">
               Preview
             </span>
             <span className="min-w-0">

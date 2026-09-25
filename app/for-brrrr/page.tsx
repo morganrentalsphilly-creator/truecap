@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Calculator, Hammer, Home, Landmark } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
@@ -62,13 +63,8 @@ const RESOURCES = [
 export default function ForBrrrrPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <Link
-          href="/"
-          className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
-        >
-          ← TrueCap
-        </Link>
 
         <section className="mb-12 mt-3 sm:mb-16">
           <p className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">
@@ -83,7 +79,7 @@ export default function ForBrrrrPage() {
             financing, refinance proceeds, capital recovery, and post-refinance
             returns—isn&apos;t offered right now.
           </p>
-          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground">
+          <div className="mt-6 rounded-2xl border border-caution/40 bg-caution-light p-4 text-sm leading-relaxed text-foreground">
             <strong>Steady-state rental analysis — use after renovation is complete.</strong>{" "}
             The core analyzer does not join a construction-period cash-flow ledger to
             a later cash-out refinance. Track every capital contribution and lender fee

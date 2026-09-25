@@ -163,7 +163,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 disabled={logoUploading}
-                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {logoUploading ? (
                   <Loader2
@@ -183,7 +183,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 <button
                   type="button"
                   onClick={() => setLogoUrl(null)}
-                  className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <X className="h-3 w-3" />
                   Remove
@@ -230,7 +230,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               <button
                 type="button"
                 onClick={() => setPrimaryColor("")}
-                className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Reset
               </button>
@@ -342,7 +342,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
           <button
             type="submit"
             disabled={isPending || logoUploading}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
           >
             {isPending ? (
               <>
@@ -393,19 +393,19 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 Investment Analysis Report
               </p>
               <p>123 Sample Street, Philadelphia PA</p>
-              <p className="mt-1 text-[10px]">
+              <p className="mt-1 text-3xs">
                 Prepared{preparedDate ? ` ${preparedDate}` : ""}
               </p>
             </div>
             <div className="border-t border-border pt-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 Prepared by
               </p>
               <p className="mt-1 text-xs font-bold text-foreground">
                 {companyName || contactName || "TrueCap"}
               </p>
               {[contactName, contactEmail, contactPhone, contactWebsite].some(Boolean) ? (
-                <p className="mt-1 break-words text-[10px] leading-relaxed text-muted-foreground">
+                <p className="mt-1 break-words text-3xs leading-relaxed text-muted-foreground">
                   {[contactName, contactEmail, contactPhone, contactWebsite]
                     .filter(Boolean)
                     .join(" · ")}
@@ -438,7 +438,7 @@ function Field({
       </legend>
       {children}
       {hint ? (
-        <p className="text-[11px] text-muted-foreground">{hint}</p>
+        <p className="text-2xs text-muted-foreground">{hint}</p>
       ) : null}
     </fieldset>
   );
@@ -473,7 +473,7 @@ function TextInput({
       name={name}
       autoComplete={autoComplete}
       aria-label={ariaLabel}
-      className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
     />
   );
 }

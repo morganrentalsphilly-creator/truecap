@@ -208,7 +208,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
           type="button"
           aria-label="Close"
           onClick={dismiss}
-          className="absolute right-1 top-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute right-1 top-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X className="h-4 w-4" />
         </button>
@@ -225,9 +225,6 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
           </div>
         ) : (
           <>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-              Free underwriting checklist
-            </p>
             <h3 className="mt-1 text-lg font-extrabold leading-tight text-foreground">
               Get the 7-number deal checklist
             </h3>
@@ -269,12 +266,12 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 aria-describedby={
                   errorMsg ? "post-analysis-email-error" : "post-analysis-email-hint"
                 }
-                className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
               <button
                 type="submit"
                 disabled={status === "submitting" || email.trim().length === 0}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
               >
                 {status === "submitting" ? "Sending…" : "Send me the checklist"}
               </button>
@@ -289,7 +286,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
               ) : null}
               <p
                 id="post-analysis-email-hint"
-                className="mt-1 text-[10px] text-muted-foreground"
+                className="mt-1 text-3xs text-muted-foreground"
               >
                 No spam. Unsubscribe anytime.
               </p>

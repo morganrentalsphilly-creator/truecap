@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { cn } from "@/lib/utils";
 import type { ProjectionYear } from "@/lib/ten-year-projections";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export function TenYearProjectionTable({
   projectionYears,
@@ -154,7 +155,7 @@ export function TenYearProjectionTable({
       </div>
 
       <div className="hidden rounded-2xl border border-border bg-card overflow-hidden sm:block">
-        <div className="overflow-x-auto">
+        <ScrollX label="Table" className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-sm">
             <thead className="bg-muted/40">
               <tr className="h-12 border-b border-border">
@@ -248,7 +249,7 @@ export function TenYearProjectionTable({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollX>
       </div>
     </>
   );

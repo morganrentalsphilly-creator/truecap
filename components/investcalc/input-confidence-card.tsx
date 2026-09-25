@@ -26,6 +26,7 @@ import {
   type AssumptionSourceClass,
 } from "@/lib/decision-contract";
 import { cn } from "@/lib/utils";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type Props = {
   confidence: InputConfidenceResult;
@@ -42,9 +43,9 @@ type Props = {
 };
 
 const RISK_STYLE = {
-  low: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  moderate: "border-amber-200 bg-amber-50 text-amber-800",
-  high: "border-red-200 bg-red-50 text-red-700",
+  low: "border-positive/30 bg-positive-light text-positive",
+  moderate: "border-caution/30 bg-caution-light text-caution-text",
+  high: "border-negative/30 bg-negative/10 text-destructive-text",
 } as const;
 
 const SOURCE_CLASS_LABEL: Record<AssumptionSourceClass, string> = {
@@ -288,7 +289,7 @@ export function InputConfidenceCard({
         tabIndex={-1}
         aria-labelledby="input-confidence-title"
         data-verification-plan=""
-        className="rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
           <h2
@@ -306,7 +307,7 @@ export function InputConfidenceCard({
         {actionsBlocked && actionsBlockedReason ? (
           <p
             role="status"
-            className="mx-4 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs font-medium leading-relaxed text-amber-900 sm:mx-5"
+            className="mx-4 mb-3 rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-xs font-medium leading-relaxed text-caution-text sm:mx-5"
           >
             {actionsBlockedReason}
           </p>
@@ -396,7 +397,7 @@ export function InputConfidenceCard({
       ref={cardRef}
       tabIndex={-1}
       aria-labelledby="input-confidence-title"
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-6"
+      className="rounded-2xl border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
@@ -487,7 +488,7 @@ export function InputConfidenceCard({
             />
           ) : (
             <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+              <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground sm:text-3xs">
                 Sensitivity risk
               </p>
               <span
@@ -498,7 +499,7 @@ export function InputConfidenceCard({
               >
                 {confidence.sensitivityRisk}
               </span>
-              <p className="mt-1 text-[10px] text-muted-foreground">
+              <p className="mt-1 text-3xs text-muted-foreground">
                 Unverified-input risk
               </p>
             </div>
@@ -523,7 +524,7 @@ export function InputConfidenceCard({
                   current
                     ? "border-primary/40 bg-primary/[0.06]"
                     : completed
-                      ? "border-emerald-300/60 bg-emerald-50/60"
+                      ? "border-positive/30 bg-positive-light"
                       : "border-border bg-muted/20",
                 )}
               >
@@ -531,9 +532,9 @@ export function InputConfidenceCard({
                   <span
                     aria-hidden
                     className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-extrabold",
+                      "flex size-6 shrink-0 items-center justify-center rounded-full border text-2xs font-extrabold",
                       completed
-                        ? "border-emerald-600 bg-emerald-600 text-white"
+                        ? "border-positive bg-positive text-white"
                         : current
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-muted-foreground",
@@ -545,7 +546,7 @@ export function InputConfidenceCard({
                     {step.label}
                   </span>
                 </div>
-                <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+                <p className="mt-1.5 text-3xs leading-relaxed text-muted-foreground">
                   {step.detail}
                 </p>
                 <span className="sr-only">
@@ -561,7 +562,7 @@ export function InputConfidenceCard({
         <div className="mt-5 border-t border-border pt-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <CircleAlert aria-hidden className="size-3.5 text-amber-600" />
+              <CircleAlert aria-hidden className="size-3.5 text-caution-text" />
               {advocacyContractEnabled ? "Resolve next" : "Verify next"}
             </p>
             <Button
@@ -590,7 +591,7 @@ export function InputConfidenceCard({
                     <p className="text-sm font-bold text-foreground">
                       {item.label}
                     </p>
-                    <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="mt-0.5 text-3xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {item.sourceDisplay}
                     </p>
                   </div>
@@ -613,9 +614,9 @@ export function InputConfidenceCard({
                           : `Confirm ${item.label} as verified`
                     }
                     className={cn(
-                      "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border px-3 text-[10px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border px-3 text-3xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                       verified.has(item.key)
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                        ? "border-positive/30 bg-positive-light text-positive"
                         : "border-border bg-background text-foreground hover:border-primary/40",
                     )}
                   >
@@ -636,7 +637,7 @@ export function InputConfidenceCard({
                   <button
                     type="button"
                     onClick={onEditAssumptions}
-                    className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     {item.verifyAction} →
                   </button>
@@ -646,7 +647,7 @@ export function InputConfidenceCard({
           </ul>
         </div>
       ) : (
-        <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-800">
+        <div className="mt-5 flex items-start gap-2 rounded-xl border border-positive/30 bg-positive-light p-3 text-positive">
           <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
           <p className="text-sm">
             {advocacyContractEnabled
@@ -659,7 +660,7 @@ export function InputConfidenceCard({
       )}
 
       <details className="group mt-4 border-t border-border pt-3">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-xs font-semibold text-muted-foreground marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-xs font-semibold text-muted-foreground marker:content-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
           {advocacyContractEnabled
             ? "Open the Assumption Ledger"
             : "See all input sources and scoring rules"}
@@ -676,7 +677,7 @@ export function InputConfidenceCard({
               : "All input sources and confidence scoring"
           }
           tabIndex={0}
-          className="mt-3 rounded-xl border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="mt-3 rounded-xl border border-border focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           {advocacyContractEnabled ? (
             <>
@@ -719,9 +720,9 @@ export function InputConfidenceCard({
                               )
                             }
                             className={cn(
-                              "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                               verified.has(item.key)
-                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                ? "border-positive/30 bg-positive-light text-positive"
                                 : "border-border bg-background text-muted-foreground hover:text-foreground",
                             )}
                           >
@@ -740,7 +741,7 @@ export function InputConfidenceCard({
                         {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
                       </p>
                       {ledgerItem.hardFlags.length > 0 ? (
-                        <p className="font-semibold text-amber-800">
+                        <p className="font-semibold text-caution-text">
                           Flags:{" "}
                           {ledgerItem.hardFlags.join(", ").replaceAll("-", " ")}
                         </p>
@@ -749,13 +750,13 @@ export function InputConfidenceCard({
                   );
                 })}
               </ul>
-              <div className="hidden overflow-x-auto sm:block">
+              <ScrollX label="Input confidence table" className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[720px] text-left text-xs">
                   <caption className="sr-only">
                     Assumption values, sources, confirmation types, evidence
                     flags, and review controls
                   </caption>
-                  <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted/50 text-3xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -810,9 +811,9 @@ export function InputConfidenceCard({
                                   )
                                 }
                                 className={cn(
-                                  "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                  "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                                   verified.has(item.key)
-                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                    ? "border-positive/30 bg-positive-light text-positive"
                                     : "border-border bg-background text-muted-foreground hover:text-foreground",
                                 )}
                               >
@@ -828,7 +829,7 @@ export function InputConfidenceCard({
                     })}
                   </tbody>
                 </table>
-              </div>
+              </ScrollX>
             </>
           ) : (
             <>
@@ -875,9 +876,9 @@ export function InputConfidenceCard({
                             onToggleVerified(item.key, !verified.has(item.key))
                           }
                           className={cn(
-                            "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                             verified.has(item.key)
-                              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                              ? "border-positive/30 bg-positive-light text-positive"
                               : "border-border bg-background text-muted-foreground hover:text-foreground",
                           )}
                         >
@@ -889,8 +890,8 @@ export function InputConfidenceCard({
                   </li>
                 ))}
               </ul>
-              <div
-                className="hidden overflow-x-auto sm:block"
+              <ScrollX
+                label="Input confidence table" className="hidden overflow-x-auto sm:block"
                 tabIndex={0}
                 aria-label="Scrollable input confidence table"
               >
@@ -899,7 +900,7 @@ export function InputConfidenceCard({
                     Input value, source, scoring points, and confirmation status
                     for every underwriting input
                   </caption>
-                  <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted/50 text-3xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -953,9 +954,9 @@ export function InputConfidenceCard({
                                 )
                               }
                               className={cn(
-                                "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                                 verified.has(item.key)
-                                  ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                  ? "border-positive/30 bg-positive-light text-positive"
                                   : "border-border bg-background text-muted-foreground hover:text-foreground",
                               )}
                             >
@@ -968,10 +969,10 @@ export function InputConfidenceCard({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollX>
             </>
           )}
-          <p className="border-t border-border bg-muted/20 px-3 py-2 text-[10px] leading-relaxed text-muted-foreground">
+          <p className="border-t border-border bg-muted/20 px-3 py-2 text-3xs leading-relaxed text-muted-foreground">
             {advocacyContractEnabled
               ? `Legacy Input Confidence v${confidence.methodVersion} remains stored for compatibility, but its percentage and Offer Ready stages do not control this view. Browser self-confirmation remains “User confirmed”; only server-resolved, owner-scoped evidence may count as evidence-verified.`
               : `Deterministic Input Confidence v${confidence.methodVersion}: verified 100%, property-specific 80%, local estimate 65%, user estimate 50%, market benchmark 45%, generic default 20%, missing 0%. Field weights reflect decision impact. The score is not statistical certainty. Strategy-specific ARV, refinance, hold-time, and flip assumptions are outside this base score and must be verified separately in their strategy panels.`}
@@ -995,7 +996,7 @@ function SummaryMetric({
 }) {
   return (
     <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+      <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground sm:text-3xs">
         {label}
       </p>
       <p className="mt-1 break-words font-mono text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
@@ -1004,7 +1005,7 @@ function SummaryMetric({
           <span className="text-xs text-muted-foreground">{suffix}</span>
         ) : null}
       </p>
-      <p className="mt-0.5 text-[10px] text-muted-foreground">{help}</p>
+      <p className="mt-0.5 text-3xs text-muted-foreground">{help}</p>
     </div>
   );
 }

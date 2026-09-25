@@ -156,7 +156,7 @@ export function HouseHackingCalculatorWidget() {
                 control, so it wires up via aria-labelledby instead. */}
             <p
               id={unitGroupLabelId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5"
             >
               Property — you live in one unit
             </p>
@@ -220,7 +220,7 @@ export function HouseHackingCalculatorWidget() {
             setValue={setInsurancePct}
           />
 
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground pt-1">
+          <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground pt-1">
             Rent from the units you don&apos;t live in
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -266,7 +266,7 @@ export function HouseHackingCalculatorWidget() {
                 </div>
                 <div
                   className={cn(
-                    "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                    "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
                     result.effectiveCost <= 0
                       ? "text-[var(--metric-positive)]"
                       : "text-foreground",
@@ -361,7 +361,7 @@ function FieldMoney({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -397,7 +397,7 @@ function FieldPct({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -432,7 +432,7 @@ function FieldNum({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>

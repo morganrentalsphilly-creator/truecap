@@ -87,7 +87,7 @@ export function ToolNumberField({
         ) : null}
       </div>
       {hint ? (
-        <p id={hintId} className="mt-1 text-[11px] text-muted-foreground">
+        <p id={hintId} className="mt-1 text-2xs text-muted-foreground">
           {hint}
         </p>
       ) : null}

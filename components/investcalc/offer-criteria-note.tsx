@@ -33,14 +33,14 @@ export function OfferCriteriaNote({
           // -m-2.5 keeps its LAYOUT footprint at 24px so the dense desktop
           // rows don't grow. The oversized hit area overlaps only
           // non-interactive text.
-          className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-72 p-3 text-left text-[11px] leading-relaxed"
+        className="w-72 p-3 text-left text-2xs leading-relaxed"
       >
         <p className="font-semibold text-foreground">
           Criteria: {basisLabel ?? "Captured targets"}

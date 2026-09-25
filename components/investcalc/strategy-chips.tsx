@@ -129,7 +129,7 @@ export function StrategyChips({
         title={display.tagline}
         onClick={() => chooseStrategy(strategy)}
         className={cn(
-          "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ",
           isActive
             ? "border-primary bg-primary/10 text-foreground"
             : isPending
@@ -142,17 +142,17 @@ export function StrategyChips({
           <span className="block text-xs font-bold [overflow-wrap:anywhere]">
             {display.label}
           </span>
-          <span className="block text-[11px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">
+          <span className="block text-2xs leading-snug text-muted-foreground [overflow-wrap:anywhere]">
             {display.tagline}
             {strategy.primaryOutputIsPro ? " · Pro output" : ""}
           </span>
         </span>
         {isPending ? (
-          <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">
+          <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-3xs font-bold text-primary">
             Review
           </span>
         ) : isActive ? (
-          <span className="shrink-0 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground">
+          <span className="shrink-0 rounded-full bg-primary px-2 py-1 text-3xs font-bold text-primary-foreground">
             Selected
           </span>
         ) : null}
@@ -171,12 +171,12 @@ export function StrategyChips({
         <div>
           <p
             id={labelId}
-            className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+            className="text-3xs font-bold uppercase tracking-widest text-muted-foreground"
           >
             {label}
           </p>
           {description ? (
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
               {description}
             </p>
           ) : null}
@@ -200,7 +200,7 @@ export function StrategyChips({
             </span>
           </span>
           {active.productStage !== "core" ? (
-            <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground sm:inline">
+            <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-3xs font-bold text-muted-foreground sm:inline">
               {active.productStage === "advanced-beta"
                 ? "Advanced / Beta"
                 : "Secondary"}
@@ -220,7 +220,7 @@ export function StrategyChips({
               setExpanded(true);
             }
           }}
-          className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-xs font-bold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-xs font-bold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         >
           {expanded ? "Done" : "Change"}
         </button>
@@ -229,7 +229,7 @@ export function StrategyChips({
       {activeKey && active.productStage !== "core" ? (
         <div
           role="note"
-          className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground"
+          className="mt-2 rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground"
         >
           <span className="font-bold">{activeDisplay.label} mode.</span>{" "}
           {active.focusHint}
@@ -260,7 +260,7 @@ export function StrategyChips({
             }
           }}
         >
-          <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground">
+          <p className="rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground">
             <span className="font-bold">
               Changing analysis type can change your property model and apply
               starter assumptions.
@@ -293,15 +293,15 @@ export function StrategyChips({
                   ref={keepAssumptionsButtonRef}
                   type="button"
                   onClick={() => confirmStrategyChange("keep")}
-                  className="min-h-11 rounded-xl border border-primary bg-primary px-3 py-2 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="min-h-11 rounded-xl border border-primary bg-primary px-3 py-2 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                 >
                   <span className="flex items-center justify-between gap-2 text-xs font-extrabold">
                     Keep my assumptions
-                    <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-bold">
+                    <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-3xs font-bold">
                       Recommended
                     </span>
                   </span>
-                  <span className="mt-1 block text-[11px] leading-snug text-primary-foreground/85">
+                  <span className="mt-1 block text-2xs leading-snug text-primary-foreground/85">
                     Keep financing, expenses, growth, and tax inputs. Only
                     model-required fields may change.
                   </span>
@@ -318,7 +318,7 @@ export function StrategyChips({
                         : "starter",
                     )
                   }
-                  className="min-h-11 rounded-xl border border-border bg-background px-3 py-2 text-left text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="min-h-11 rounded-xl border border-border bg-background px-3 py-2 text-left text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                 >
                   <span className="text-xs font-extrabold">
                     {pendingStrategy.key === DEFAULT_STRATEGY_KEY
@@ -327,7 +327,7 @@ export function StrategyChips({
                         : "Apply Buy & Hold starter values"
                       : "Apply strategy starter values"}
                   </span>
-                  <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">
+                  <span className="mt-1 block text-2xs leading-snug text-muted-foreground">
                     {pendingStrategy.key === DEFAULT_STRATEGY_KEY
                       ? canRestoreAssumptions
                         ? "Return shared fields to the values captured before the specialist strategy was applied."
@@ -360,7 +360,7 @@ export function StrategyChips({
                     disclosureButtonRef.current?.focus(),
                   );
                 }}
-                className="mt-2 inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="mt-2 inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
               >
                 Cancel
               </button>

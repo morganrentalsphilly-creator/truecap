@@ -11,6 +11,9 @@ const eslintConfig = [
       "build/**",
       "artifacts/**",
       "next-env.d.ts",
+      // Vendored, minified runtime for the Impeccable design skill
+      // (.claude/skills/impeccable/scripts/*.js). Not project source.
+      ".claude/skills/impeccable/scripts/**",
     ],
   },
   ...coreWebVitals,

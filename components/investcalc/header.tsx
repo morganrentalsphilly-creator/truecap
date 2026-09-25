@@ -408,19 +408,19 @@ export function Header({
              <Link href="/pricing"
             >
             <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
-              <span className="inline-flex items-center gap-1 bg-[var(--brand-orange-solid)] text-white text-[10px] font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1 bg-[var(--brand-orange-solid)] text-white text-3xs font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
                 <Crown className="w-2.5 h-2.5" />
                 Pro
               </span>
-              <span className="text-[11px] font-bold text-[var(--brand-orange-text)] tracking-[0.01em]">
+              <span className="text-2xs font-bold text-[var(--brand-orange-text)] tracking-[0.01em]">
                 See Pro pricing
               </span>
-              <span className="text-muted-foreground/40 text-[11px]">&bull;</span>
-              <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">
+              <span className="text-muted-foreground/40 text-2xs">&bull;</span>
+              <span className="text-2xs text-muted-foreground font-medium tracking-[0.01em]">
                 Projections
               </span>
-              <span className="text-muted-foreground/40 text-[11px]">&bull;</span>
-              <span className="text-[11px] text-muted-foreground font-medium tracking-[0.01em]">
+              <span className="text-muted-foreground/40 text-2xs">&bull;</span>
+              <span className="text-2xs text-muted-foreground font-medium tracking-[0.01em]">
                 Reports
               </span>
             </div>

@@ -96,14 +96,14 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
           <p className="text-xs font-bold uppercase tracking-widest text-foreground">
             Where the rent goes
           </p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 text-2xs text-muted-foreground">
             Monthly - every dollar in, every dollar out. Percentages are
             each cost&apos;s share of gross rent.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="text-left sm:text-right">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               Gross rent
             </p>
             <p className="text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
@@ -112,7 +112,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
           </div>
           <div className="text-left sm:text-right">
             <p
-              className={`text-[10px] font-bold uppercase tracking-widest ${
+              className={`text-3xs font-bold uppercase tracking-widest ${
                 ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
               }`}
             >
@@ -177,7 +177,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             </span>
             <span className="shrink-0 tabular-nums text-muted-foreground">
               <span className="font-semibold text-foreground">{fmtUsd(seg.value)}</span>
-              <span className="ml-1.5 text-[11px]">({fmtPct(seg.value, gross)})</span>
+              <span className="ml-1.5 text-2xs">({fmtPct(seg.value, gross)})</span>
             </span>
           </li>
         ))}

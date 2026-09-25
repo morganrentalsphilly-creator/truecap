@@ -227,7 +227,7 @@ export default async function SearchPage({
                   href={hit.href}
                   className="group block rounded-xl border border-border bg-card p-5 transition hover:border-primary hover:shadow-sm"
                 >
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {hit.category}
                   </div>
                   <div className="mt-1 flex items-start justify-between gap-3">

@@ -14,6 +14,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -120,6 +121,7 @@ export default function VacancyRateCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
@@ -158,9 +160,6 @@ export default function VacancyRateCalculatorPage() {
           </ol>
         </nav>
 
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          Free calculator
-        </p>
         <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           Rental Property Vacancy Rate Calculator
         </h1>

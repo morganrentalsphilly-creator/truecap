@@ -40,7 +40,7 @@ export function PrepareOfferCard({
             Package the asking price, Offer Ceiling, target basis, assumptions, downside case, key risks, and underwriting-method version for partner, agent, or lender review.
           </p>
           {stage && stage !== "offer-ready" && remainingVerificationCount != null ? (
-            <p className="mt-2 text-xs font-semibold text-amber-700">
+            <p className="mt-2 text-xs font-semibold text-caution-text">
               {remainingVerificationCount} priority {remainingVerificationCount === 1 ? "input remains" : "inputs remain"} unconfirmed; the report will still show the assumptions used.
             </p>
           ) : null}
@@ -58,13 +58,13 @@ export function PrepareOfferCard({
             <FileDown aria-hidden className="size-4" />
             {isPreparing ? "Preparing…" : "Create review package"}
           </Button>
-          <p className="mt-2 max-w-56 text-[10px] leading-relaxed text-muted-foreground sm:text-right">
+          <p className="mt-2 max-w-56 text-3xs leading-relaxed text-muted-foreground sm:text-right">
             Creates an analysis package. It does not submit or sign a purchase agreement.
           </p>
           {actionsBlocked && actionsBlockedReason ? (
             <p
               role="status"
-              className="mt-2 max-w-56 text-xs font-semibold leading-relaxed text-amber-800 sm:text-right dark:text-amber-200"
+              className="mt-2 max-w-56 text-xs font-semibold leading-relaxed text-caution-text sm:text-right dark:text-caution-light"
             >
               {actionsBlockedReason}
             </p>

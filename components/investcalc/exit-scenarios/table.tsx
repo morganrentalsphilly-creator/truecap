@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { cn } from "@/lib/utils";
 import type { ExitScenarioYear } from "@/lib/exit-scenarios";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const COLUMNS = [
   "Year",
@@ -80,7 +81,7 @@ export function ExitScenarioTable({
       </div>
 
       <div className="hidden rounded-2xl border border-border bg-card overflow-hidden sm:block">
-        <div className="overflow-x-auto">
+        <ScrollX label="Table" className="overflow-x-auto">
         <table className="w-full min-w-[840px] text-sm">
           <thead className="bg-muted/40">
             <tr className="h-12 border-b border-border">
@@ -132,7 +133,7 @@ export function ExitScenarioTable({
             ))}
           </tbody>
         </table>
-        </div>
+        </ScrollX>
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { Building2, Calculator, Database, ShieldCheck } from "lucide-react";
+import {Calculator, Database, ShieldCheck} from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,9 @@ export function AuthShell({
   return (
     <main id="main" className="min-h-[100dvh] bg-white px-4 py-8 text-foreground sm:px-6 lg:bg-[#eef4f8] lg:px-8">
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-6xl flex-col items-center justify-center">
-        <div className="mb-8 flex flex-col items-center text-center sm:mb-12">
+        {/* Phones and tablets get this logo; on lg+ the illustrated aside
+            carries its own, so the page never shows the mark twice. */}
+        <div className="mb-8 flex flex-col items-center text-center sm:mb-12 lg:hidden">
           <AppLogo
             priority
             className="items-center"
@@ -92,7 +94,7 @@ export function AuthShell({
                 ))}
               </div>
 
-              <div className="mt-auto flex items-center gap-2 text-[11px] text-white/76">
+              <div className="mt-auto flex items-center gap-2 text-2xs text-white/76">
                 <ShieldCheck className="size-4" />
                 <span>Authenticated access</span>
                 <span className="text-white/35">•</span>
@@ -106,9 +108,6 @@ export function AuthShell({
           <div className="flex min-h-0 items-center justify-center px-1 py-4 sm:min-h-[540px] sm:px-9 sm:py-8 lg:min-h-[610px] lg:px-14">
             <div className="w-full max-w-[350px]">
               <div className="mb-8 text-center lg:text-left">
-                <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.95),rgba(0,112,196,0.12))] text-primary shadow-[0_18px_42px_rgba(0,112,196,0.16)] ring-1 ring-primary/10 lg:hidden">
-                  <Building2 className="size-12 stroke-[1.8]" />
-                </div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {title}
                 </h1>

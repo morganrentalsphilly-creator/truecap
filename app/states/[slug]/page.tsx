@@ -31,6 +31,7 @@ import {
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
@@ -97,7 +98,7 @@ export default async function StatePage({
   const bespoke = getStateBespokeMarkets(state.name);
   const description = `${state.name} starting numbers for a rental screen: market tier, landlord-tenant lean, property tax, and HUD Fair Market Rent by city.`;
   const cell =
-    "px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground";
+    "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
 
   const placeLd = {
     "@context": "https://schema.org",
@@ -218,9 +219,6 @@ export default async function StatePage({
           </ol>
         </nav>
 
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          {state.abbr} · Rental property guide
-        </p>
         <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           {state.name} rental property guide
         </h1>
@@ -242,7 +240,7 @@ export default async function StatePage({
           <dl className="mt-4 grid gap-4 sm:grid-cols-3">
             {facts.map((fact) => (
               <div key={fact.label}>
-                <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                   {fact.label}
                 </dt>
                 <dd className="mt-1 text-lg font-extrabold text-foreground">
@@ -264,7 +262,7 @@ export default async function StatePage({
             {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
           </p>
           {hudCities.length > 0 ? (
-            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+            <ScrollX label="Table" className="mt-4 overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-[24rem] text-sm">
                 <caption className="sr-only">
                   HUD Fair Market Rent, FY{year}, by {state.name} market city
@@ -307,7 +305,7 @@ export default async function StatePage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
           ) : (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               TrueCap has no published HUD rent benchmark for a {state.name}{" "}

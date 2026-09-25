@@ -130,13 +130,13 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
             Every displayed boundary changes one input at a time and is re-run through the full underwriting engine against {targetBasis}.
           </p>
         </div>
-        <span className="w-fit shrink-0 rounded-full border border-primary/25 bg-card px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+        <span className="w-fit shrink-0 rounded-full border border-primary/25 bg-card px-2.5 py-1 text-3xs font-bold uppercase tracking-wide text-primary">
           {targetSource === "buy-box" ? "From your Buy Box" : targetSource === "custom" ? "Custom targets" : "Default target"}
         </span>
       </div>
 
       {result.targetAlreadyMet ? (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-positive/30 bg-positive-light p-3 text-sm text-positive">
           <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0" />
           <p>
             At {money(values.purchasePrice)}, the modeled economics clear your targets. The Offer Ceiling above is still the highest price that meets them under these assumptions.
@@ -153,7 +153,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
               >
                 <div className="min-w-0">
                   <p className="break-words font-mono text-sm font-extrabold tabular-nums text-foreground sm:text-base">{display}</p>
-                  <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                  <p className="mt-1 text-3xs leading-relaxed text-muted-foreground">
                     Exact one-variable boundary · full target rechecked
                   </p>
                 </div>
@@ -187,7 +187,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
       ) : null}
 
       <details className="group mt-4 border-t border-primary/15 pt-3">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-xs font-semibold text-muted-foreground marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-xs font-semibold text-muted-foreground marker:content-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
           See calculation notes and unsupported paths
           <ChevronDown aria-hidden className="size-4 transition-transform group-open:rotate-180" />
         </summary>

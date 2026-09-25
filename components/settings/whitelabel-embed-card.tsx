@@ -120,7 +120,7 @@ export function WhitelabelEmbedCard() {
 
       <div className="mt-3 space-y-3">
         <div className="space-y-1">
-          <label htmlFor="wl-embed-calc" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <label htmlFor="wl-embed-calc" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Calculator
           </label>
           <select
@@ -140,7 +140,7 @@ export function WhitelabelEmbedCard() {
 
         {snippet ? (
           <div className="space-y-2">
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground">
+            <pre tabIndex={0} aria-label="Embed code" className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-3 text-2xs leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
               <code>{snippet}</code>
             </pre>
             <Button type="button" size="sm" onClick={copy} disabled={isBusy} className="gap-1.5">

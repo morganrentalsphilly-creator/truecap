@@ -228,7 +228,7 @@ export function DecisionTier({
           {/* --brand-blue-text, not --primary: the label is small uppercase
               text and --primary measures 4.34:1 here, under the 4.5:1 AA bar.
               The codebase already ships this AA-safe sibling token. */}
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+          <p className="text-2xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
             Offer Ceiling
           </p>
           {isLoading ? (
@@ -279,7 +279,7 @@ export function DecisionTier({
             {score != null ? (
               <span
                 title="A heuristic summary of the modeled numbers, 0–100."
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-semibold text-muted-foreground"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-2xs font-semibold text-muted-foreground"
               >
                 <span>Deal score</span>
                 <span className="tabular-nums text-foreground">{score}</span>
@@ -344,7 +344,7 @@ export function DecisionTier({
             }}
             aria-expanded={tuneOpen}
             aria-controls={`${fieldId}-tune`}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <SlidersHorizontal aria-hidden className="size-4" />
             Tune targets

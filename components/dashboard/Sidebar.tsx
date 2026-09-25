@@ -95,12 +95,12 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
           onDark
           className="max-w-[150px]"
           imageClassName="h-auto"
-          subtitleClassName="text-[11px]"
+          subtitleClassName="text-2xs"
         />
       </div>
 
       <div className="px-3 py-5">
-        <div className="px-3 mb-2 text-[10px] font-semibold tracking-[0.18em] text-sidebar-foreground/40">MAIN MENU</div>
+        <div className="px-3 mb-2 text-3xs font-semibold tracking-[0.18em] text-sidebar-foreground/40">MAIN MENU</div>
         <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"} className="space-y-1">
           {nav
             // Disabled items normally render greyed as a one-tier-up upsell
@@ -145,12 +145,12 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                 <Icon className="h-[18px] w-[18px]" />
                 <span className="flex-1">{item.label}</span>
                 {item.badge && (
-                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-sidebar-accent text-sidebar-foreground/80">
+                  <span className="text-3xs font-semibold px-1.5 py-0.5 rounded bg-sidebar-accent text-sidebar-foreground/80">
                     {item.badge}
                   </span>
                 )}
                 {!item.enabled ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-[10px] font-bold text-sidebar-foreground/80">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-3xs font-bold text-sidebar-foreground/80">
                     <LockKeyhole className="size-2.5" aria-hidden />
                     PRO
                   </span>

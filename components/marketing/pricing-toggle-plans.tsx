@@ -146,20 +146,6 @@ export function PricingTogglePlans({
   proOfferName = "Pro",
 }: PricingTogglePlansProps) {
   const isPaid = activePaidPlanSlug != null || billingRecoveryRequired;
-  const evaluationAllowance = formatPricingEvaluationAllowance(evaluation);
-  const evaluationBadge = billingRecoveryRequired
-    ? "Billing attention needed"
-    : isPaid
-      ? "Paid access active"
-      : !isAuthenticated
-        ? `${PRODUCT_EVALUATION_DAYS} days · 3 Pro deals + 1 comparison · no card`
-        : evaluation.status === "active" && evaluationAllowance
-          ? `${evaluationAllowance} · no card`
-          : evaluation.status === "exhausted"
-            ? "Free-trial runs complete"
-            : evaluation.status === "expired"
-              ? "Free trial ended · Free screening remains"
-              : "Paid access available now";
   // Annual-first (docs/site-overhaul.md Phase 9): the card shows the
   // effective monthly figure with "billed annually (total)" under it, so the
   // visitor sees the lower monthly number AND the real charge. A current
@@ -282,7 +268,7 @@ export function PricingTogglePlans({
           </p>
         ) : null}
       </div>
-      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
+      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5"}>
         <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
@@ -290,7 +276,7 @@ export function PricingTogglePlans({
                 Showing it to an anonymous visitor told them they already
                 hold a plan — a status-quo anchor toward staying on Free. */}
             {isAuthenticated && !isPaid && (
-              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
+              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
                 Current
               </span>
             )}
@@ -330,7 +316,7 @@ export function PricingTogglePlans({
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}
           {period === "annual" && (annualSavingsPct ?? 0) > 0 ? (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-md">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-3xs font-extrabold uppercase tracking-widest text-primary-foreground shadow-md">
               {annualSavingsDollars && annualSavingsDollars > 0
                 ? `Save $${annualSavingsDollars}/yr`
                 : monthsFreeWithAnnual && monthsFreeWithAnnual > 0
@@ -343,17 +329,12 @@ export function PricingTogglePlans({
             {/* Badges share the header row. "Best value" (annual only) used
                 to be pinned absolute top-right, landing on "Recommended". */}
             <div className="flex flex-wrap items-center gap-1.5">
-              {period === "annual" ? (
-                <span className="rounded-full bg-[var(--brand-green,#16a34a)]/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green,#16a34a)]">
-                  ★ Best value
-                </span>
-              ) : null}
               {proCardDecision.kind === "current" ? (
-                <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
+                <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
                   Current
                 </span>
               ) : (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
                   Recommended
                 </span>
               )}
@@ -380,8 +361,8 @@ export function PricingTogglePlans({
               onClick={() => setPeriod("monthly")}
               className={
                 period === "monthly"
-                  ? "min-h-11 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  : "min-h-11 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  ? "min-h-11 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  : "min-h-11 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               }
             >
               Monthly
@@ -392,15 +373,13 @@ export function PricingTogglePlans({
               onClick={() => setPeriod("annual")}
               className={
                 period === "annual"
-                  ? "inline-flex min-h-11 items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  : "inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  ? "inline-flex min-h-11 items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  : "inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               }
             >
               Annual
               {annualSavingsPct && annualSavingsPct > 0 ? (
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground">
-                  −{annualSavingsPct}%
-                </span>
+                <span className="text-xs font-semibold">−{annualSavingsPct}%</span>
               ) : null}
             </button>
           </div>
@@ -411,12 +390,7 @@ export function PricingTogglePlans({
             </span>
             <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
-          <div className="mt-3 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-foreground">
-               <Sparkles className="size-3" />{evaluationBadge}
-            </span>
-          </div>
+          <div className="mt-1 text-sm text-muted-foreground">{proCard.subline}</div>
 
           <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.045] p-4">
             <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
@@ -426,7 +400,7 @@ export function PricingTogglePlans({
               {PRO_DECISION_ANSWERS.map((item) => (
                 <div key={item.answer}>
                   <p className="text-sm font-bold leading-tight text-foreground">{item.answer}</p>
-                  <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{item.proof}</p>
+                  <p className="mt-0.5 text-2xs leading-tight text-muted-foreground">{item.proof}</p>
                 </div>
               ))}
             </div>
@@ -435,7 +409,7 @@ export function PricingTogglePlans({
              {billingRecoveryRequired ? (
                <Link
                  href="/profile#billing"
-                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                >
                  Manage billing to reactivate
                </Link>
@@ -478,11 +452,11 @@ export function PricingTogglePlans({
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <div className="flex flex-wrap justify-end gap-1.5">
                 {agentCardDecision.kind === "current" ? (
-                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
+                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
                     Current
                   </span>
                 ) : null}
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
                   For agents
                 </span>
               </div>
@@ -498,17 +472,12 @@ export function PricingTogglePlans({
               </span>
               <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
-            <div className="mt-3 flex justify-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
-                 <Sparkles className="size-3" />{evaluationBadge}
-              </span>
-             </div>
+            <div className="mt-1 text-sm text-muted-foreground">{agentCard.subline}</div>
              <div className="mt-5">
                {billingRecoveryRequired ? (
                  <Link
                    href="/profile#billing"
-                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                  >
                    Manage billing to reactivate
                  </Link>

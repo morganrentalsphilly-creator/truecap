@@ -116,12 +116,9 @@ export function HowTrueCapWorks() {
     >
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            How TrueCap works
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             From listing to offer{" "}
-            <span className="text-primary">in three steps.</span>
+            in three steps.
           </h2>
         </div>
         <ol className="tc-reveal relative grid gap-10 sm:grid-cols-3 sm:gap-8">
@@ -135,7 +132,7 @@ export function HowTrueCapWorks() {
                 <step.icon className="size-5" strokeWidth={2} />
               </span>
               <div className="min-w-0">
-                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-primary sm:mt-4 sm:block">
+                <span className="font-mono text-2xs font-bold uppercase tracking-widest text-primary sm:mt-4 sm:block">
                   {step.label}
                 </span>
                 <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">
@@ -145,7 +142,7 @@ export function HowTrueCapWorks() {
                   {step.body}
                 </p>
                 {"proNote" in step && step.proNote ? (
-                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-orange-text)]">
+                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-2xs font-semibold text-[var(--brand-orange-text)]">
                     {step.proNote}
                   </p>
                 ) : null}
@@ -183,12 +180,9 @@ export function ProblemBlock() {
   return (
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          The real problem
-        </p>
         <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           The calculator isn&apos;t the hard part.{" "}
-          <span className="text-primary">The offer is.</span>
+          The offer is.
         </h2>
         <p className="mx-auto mt-4 max-w-[58ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
           Traditional calculators tell you what a property&apos;s returns look
@@ -263,12 +257,12 @@ export function OfferEngineSection() {
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          <p className="text-2xs font-bold uppercase tracking-widest text-primary">
             {proOfferName}
           </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Focused first-pass rental{" "}
-            <span className="text-primary">underwriting.</span>
+            underwriting.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Free shows the core economics. Pro adds reusable assumptions,
@@ -310,7 +304,7 @@ export function OfferEngineSection() {
         </div>
 
         <div className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          <p className="text-2xs font-bold uppercase tracking-widest text-primary">
             Everything you get
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -359,9 +353,6 @@ export function BuiltByInvestor() {
       className="border-t border-border bg-card/40"
     >
       <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-16">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-          Who builds TrueCap
-        </p>
         <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
           Built by a rental investor, for rental investors.
         </h2>
@@ -401,7 +392,7 @@ export function FinalCta() {
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
         <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
           Paste a listing.{" "}
-          <span className="text-primary">Know your walk-away price.</span>
+          Know your walk-away price.
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
@@ -410,7 +401,7 @@ export function FinalCta() {
         </p>
         <AnalyzeCtaLink
           analyticsSource="final_cta"
-          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         >
           Analyze a property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -438,9 +429,6 @@ export function SocialProof() {
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Used by real investors
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Built for people who actually close deals.
           </h2>
@@ -549,9 +537,6 @@ export function VsCompetitors() {
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Why TrueCap
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Choose the workflow that fits how you invest.
           </h2>
@@ -571,7 +556,7 @@ export function VsCompetitors() {
                   : "border-border bg-card"
               }`}
             >
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 {item.name}
               </p>
               <h3 className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
@@ -731,7 +716,7 @@ export function HomepageFaq({
       <section className="border-t border-border bg-background">
         <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mb-10 text-center sm:mb-12">
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">
+            <p className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
               <HelpCircle className="size-3" />
               Common questions
             </p>
@@ -742,7 +727,7 @@ export function HomepageFaq({
           <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
             {faqs.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                   <span className="text-left font-semibold text-foreground">
                     {faq.q}
                   </span>
@@ -763,7 +748,7 @@ export function HomepageFaq({
             Still have a question?{" "}
             <a
               href="mailto:hello@usetruecap.com"
-              className="inline-flex min-h-11 items-center rounded px-1 font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center rounded px-1 font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Email us
             </a>
@@ -833,12 +818,9 @@ export function DataSourcesSection() {
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Built on real data
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Visible sources.{" "}
-            <span className="text-primary">Editable assumptions.</span>
+            Editable assumptions.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             TrueCap labels sourced benchmarks and manual fallbacks, and keeps
@@ -863,7 +845,7 @@ export function DataSourcesSection() {
                   <h3 className="text-base font-bold text-foreground">
                     {s.source}
                   </h3>
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <span className="font-mono text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     {s.label}
                   </span>
                 </div>
@@ -941,12 +923,9 @@ export function PdfProUpsell() {
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-8 text-center sm:mb-10">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            What you get
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Free screens the deal.{" "}
-            <span className="text-primary">{proOfferName}</span> tells you what
+            {proOfferName} tells you what
             to offer.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -988,7 +967,7 @@ export function PdfProUpsell() {
                     }
                   >
                     {h}
-                    <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span className="mt-0.5 block text-3xs font-medium uppercase tracking-wider text-muted-foreground">
                       {LADDER_SUBHEADERS[i]}
                     </span>
                   </th>
@@ -1055,7 +1034,7 @@ export function PdfProUpsell() {
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles aria-hidden className="size-5" />
             </div>
-            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
               {proOfferName}
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">
@@ -1151,9 +1130,6 @@ export function Personas() {
     <section className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            Who it&apos;s for
-          </p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             One tool, whatever you&apos;re underwriting.
           </h2>
@@ -1203,7 +1179,7 @@ export function Personas() {
               {p.pagePath ? (
                 <Link
                   href={p.pagePath.href}
-                  className={`mt-2 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${i === 0 ? "lg:justify-center" : ""}`}
+                  className={`mt-2 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${i === 0 ? "lg:justify-center" : ""}`}
                 >
                   {p.pagePath.label} <ArrowRight className="size-3.5" />
                 </Link>

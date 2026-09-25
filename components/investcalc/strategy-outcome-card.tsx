@@ -372,7 +372,7 @@ function WholesaleOutcome({
       <p className="mt-2 text-sm text-muted-foreground">
         Criteria: {targetsLabel}.
       </p>
-      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
         The highest price that still meets your wholesale targets under the
         assumptions shown.
       </p>

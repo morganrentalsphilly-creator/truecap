@@ -18,6 +18,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "how-to-estimate-rent-rental-property";
 const TITLE = "How to estimate rent on a rental property (2026)";
@@ -114,6 +116,7 @@ export default function HowToEstimateRentPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -132,7 +135,7 @@ export default function HowToEstimateRentPost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -141,7 +144,7 @@ export default function HowToEstimateRentPost() {
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
               {TITLE}
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -161,7 +164,7 @@ export default function HowToEstimateRentPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               The number you&apos;re actually after
             </h2>
@@ -233,10 +236,10 @@ export default function HowToEstimateRentPost() {
               same neighborhood:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-left">Beds / Baths</th>
                     <th className="text-left">Sq ft</th>
@@ -285,7 +288,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Walk through Comp A: it has an extra half-bath versus the subject
@@ -396,10 +399,10 @@ export default function HowToEstimateRentPost() {
               about 8%:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Metric</th>
                     <th className="text-right">Rent $1,900 (honest)</th>
                     <th className="text-right">Rent $2,050 (optimistic)</th>
@@ -428,7 +431,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               An 8% rent error moves the cap rate by about 0.6 points, swings

@@ -9,13 +9,27 @@ export const loginSchema = z.object({
   captchaToken: z.string().max(4096).optional(),
 });
 
+/**
+ * ONE password policy, the same one `supabase/config.toml` enforces on the
+ * server (12+ characters with lower/upper/digits), so the form never accepts
+ * a password the server rejects and the rule under the field is the real
+ * rule (2026-09 audit, D-5). Change both together.
+ */
+export const PASSWORD_POLICY_TEXT =
+  "At least 12 characters, with an uppercase letter, a lowercase letter, and a number.";
+const passwordSchema = z
+  .string()
+  .min(12, "Password must be at least 12 characters")
+  .max(72, "Password is too long")
+  .refine(
+    (value) => /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value),
+    "Password needs an uppercase letter, a lowercase letter, and a number",
+  );
+
 export const signUpSchema = z
   .object({
     email: z.string().min(1, "Enter your email").email("Enter a valid email"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(72, "Password is too long"),
+    password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm your password"),
     captchaToken: z.string().max(4096).optional(),
   })
@@ -31,10 +45,7 @@ export const forgotPasswordSchema = z.object({
 
 export const updatePasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(72, "Password is too long"),
+    password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {

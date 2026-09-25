@@ -32,6 +32,8 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "is-a-duplex-a-good-investment";
 const TITLE =
@@ -160,6 +162,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
@@ -177,14 +180,14 @@ export default function BlogPost() {
         <header className="mb-8 sm:mb-10">
           <Link
             href="/blog"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
+          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -198,7 +201,7 @@ export default function BlogPost() {
           </p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             &ldquo;Is a duplex a good investment&rdquo; is the wrong question by
             one word. A duplex is not one investment; it is two, and which one
@@ -258,8 +261,8 @@ export default function BlogPost() {
             . Both paths below use identical property facts, so every difference
             in the results comes from the financing.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">
@@ -328,7 +331,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             $3,200 on $400,000 is a <strong>9.6% gross yield</strong>. Hold that
             number — it is the reason a duplex can survive a 25% down payment
@@ -344,10 +347,10 @@ export default function BlogPost() {
             $300,000 and principal and interest are <strong>$2,046.53</strong> a
             month.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line
                   </th>
@@ -426,7 +429,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             That produces a <strong>5.31% </strong>
             <Link
@@ -462,8 +465,8 @@ export default function BlogPost() {
             before you pay for an appraisal.
           </p>
           <p>And the cash to get there:</p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">
@@ -513,7 +516,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             $138,140 to lose $277 a month. That is not a broken example — it is
             what a 9.6%-gross-yield duplex does at 2026 investment rates with
@@ -550,10 +553,10 @@ export default function BlogPost() {
             0.8% is $253.33, taxes are $366.67 and insurance $200 — PITIA of{" "}
             <strong>$3,284.68</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line
                   </th>
@@ -603,7 +606,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Cash to close: $20,000 down, $10,500 of closing costs, $4,921 of
             prepaids and escrow setup, $3,000 to make the rental unit ready —{" "}
@@ -677,10 +680,10 @@ export default function BlogPost() {
             value, nowhere near the 80% where PMI can be cancelled — for{" "}
             <strong>$32,616</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Structure
                   </th>
@@ -722,7 +725,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             <strong>−$974 a month.</strong> The loan that made the purchase
             possible makes the rental unprofitable. And rent growth will not
@@ -756,10 +759,10 @@ export default function BlogPost() {
             down payment: 20% conventional, or 15% if you accept mortgage
             insurance.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Metric
                   </th>
@@ -828,7 +831,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             The duplex wins on every income measure, and the last row is the one
             that matters: it reaches break-even cash flow with{" "}
@@ -1103,9 +1106,9 @@ export default function BlogPost() {
           </p>
         </footer>
       </main>
+      <BlogStickyCta />
       <SiteFooter />
       <ScrollDepthTracker />
-      <BlogStickyCta />
     </div>
   );
 }

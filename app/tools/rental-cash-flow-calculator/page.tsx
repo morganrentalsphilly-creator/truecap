@@ -29,6 +29,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -156,6 +158,7 @@ export default function RentalCashFlowCalculatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema
         toolPath="/tools/rental-cash-flow-calculator"
         toolName="Rental cash flow calculator"
@@ -182,9 +185,9 @@ export default function RentalCashFlowCalculatorPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              ← TrueCap free tools
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Rental Property Cash Flow Calculator
@@ -201,7 +204,7 @@ export default function RentalCashFlowCalculatorPage() {
           <RentalCashFlowCalculatorWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">
               What is rental property cash flow?
             </h2>
@@ -240,7 +243,7 @@ export default function RentalCashFlowCalculatorPage() {
               hand — a $250,000 single-family rental at $2,400/mo rent, bought
               with 20% down at 6.75% on a 30-year loan:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -301,7 +304,7 @@ export default function RentalCashFlowCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Notice what the honest version of this deal looks like: roughly
               $97/mo, not the $770/mo you&apos;d get by computing &ldquo;rent
@@ -362,7 +365,7 @@ export default function RentalCashFlowCalculatorPage() {
               Phoenix. But the bands TrueCap&apos;s own Buy Box classifier
               uses are a screening reference:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -407,7 +410,7 @@ export default function RentalCashFlowCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Two caveats. First, cash flow scales with deal size — judge it
               alongside{" "}
@@ -619,16 +622,6 @@ export default function RentalCashFlowCalculatorPage() {
             hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
           />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link
-              href="/"
-              className="font-bold text-foreground hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

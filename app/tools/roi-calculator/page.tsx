@@ -16,6 +16,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -126,6 +127,7 @@ export default function RoiCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
@@ -162,9 +164,6 @@ export default function RoiCalculatorPage() {
           </ol>
         </nav>
 
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          Free calculator
-        </p>
         <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           Rental Property ROI Calculator
         </h1>

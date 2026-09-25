@@ -131,7 +131,7 @@ export function SourceFirstArticle({
           <h1 className="mt-2 text-balance text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
             {article.title}
           </h1>
-          <p className="mt-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mt-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             {new Date(article.publishedAt).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",

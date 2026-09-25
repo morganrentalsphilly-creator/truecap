@@ -16,7 +16,6 @@ import { toServerErrorResult } from "@/lib/db-error";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
-  getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
   requireVerifiedEntitlements,

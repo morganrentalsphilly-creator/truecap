@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { EMBED_LIST, getEmbedEntry } from "@/lib/embed-registry";
 import { EmbedResizeReporter } from "@/components/embed/embed-resize-reporter";
 import { readSignedToken } from "@/lib/signed-token";
 import { loadWhitelabelEmbed, EMBED_SCOPE } from "@/lib/whitelabel-embed";
@@ -37,8 +38,12 @@ export default async function WhitelabelEmbedPage({
   // Fall back to the standard TrueCap-branded embed when the token can't be
   // honored — never a calculator with no attribution at all.
   if (!wl) {
-    if (decoded?.s) redirect(`/embed/${decoded.s}`);
-    redirect("/embed/rental-cash-flow-calculator");
+    if (decoded?.s && getEmbedEntry(decoded.s)) redirect(`/embed/${decoded.s}`);
+    // The historical fallback pointed at rental-cash-flow-calculator, which
+    // is an unreleased widget: an expired or malformed partner token landed
+    // on a 404 (2026-09 audit, B-1). Fall back to the first released widget.
+    const fallback = EMBED_LIST[0]?.slug;
+    redirect(fallback ? `/embed/${fallback}` : "/embed");
   }
 
   const { entry, branding } = wl;

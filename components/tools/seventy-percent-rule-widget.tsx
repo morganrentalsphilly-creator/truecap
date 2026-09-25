@@ -81,7 +81,7 @@ export function SeventyPercentRuleWidget() {
           <div>
             <Label
               htmlFor="seventypct-arv"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
             >
               After-repair value (ARV)
             </Label>
@@ -115,7 +115,7 @@ export function SeventyPercentRuleWidget() {
           <div>
             <Label
               htmlFor="seventypct-repairs"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
             >
               Repair costs
             </Label>
@@ -137,7 +137,7 @@ export function SeventyPercentRuleWidget() {
           <div>
             <Label
               htmlFor="seventypct-multiplier"
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
             >
               Rule multiplier
             </Label>
@@ -177,7 +177,7 @@ export function SeventyPercentRuleWidget() {
                 </div>
                 <div
                   className={cn(
-                    "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                    "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
                     result.mao > 0
                       ? "text-[var(--metric-positive)]"
                       : "text-[var(--metric-negative)]",
@@ -206,7 +206,7 @@ export function SeventyPercentRuleWidget() {
               )}
 
               {result.mao > 0 && result.arv < 150_000 && (
-                <p className="text-xs font-semibold text-amber-700 mt-3">
+                <p className="text-xs font-semibold text-caution-text mt-3">
                   Sub-$150k ARV: fixed costs (title, permits, utilities,
                   insurance) eat a big share of a small spread — many flippers
                   drop the multiplier to 60&ndash;65% here.
@@ -220,7 +220,7 @@ export function SeventyPercentRuleWidget() {
               )}
 
               <div className="text-xs mt-5 pt-4 border-t border-border">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+                <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                   Price screen at other multipliers
                 </div>
                 {result.ladder.map((step) => (

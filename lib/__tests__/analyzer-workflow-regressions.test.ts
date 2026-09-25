@@ -216,7 +216,7 @@ describe("atomic Save & compare", () => {
     );
     expect(summary).not.toContain("disabled={!isSaved || isComparing}");
     expect(summary).toContain(
-      "Your current analysis and Offer criteria will be saved before it is",
+      "Your current analysis and targets will be saved before it is",
     );
   });
 });

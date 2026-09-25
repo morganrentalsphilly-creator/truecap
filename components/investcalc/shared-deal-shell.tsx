@@ -125,7 +125,7 @@ export function SharedDealShell({
           <Link href="/" className="font-bold underline underline-offset-2">
             TrueCap
           </Link>{" "}
-          — view-only. Want to edit, save, or run your own? Start free at{" "}
+          — view-only. Run your own free analysis at{" "}
           <Link href="/" className="font-bold underline underline-offset-2">
             usetruecap.com
           </Link>
@@ -168,7 +168,7 @@ export function SharedDealShell({
           {outputsRecomputed ? (
             <p
               role="status"
-              className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground"
+              className="mt-2 rounded-lg border border-caution/40 bg-caution-light p-3 text-xs leading-relaxed text-foreground"
             >
               {inputsSource === "live-saved"
                 ? `This view uses the agent’s current saved inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"}. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`
@@ -237,15 +237,11 @@ export function SharedDealShell({
           </div>
         )}
 
+        {/* One disclaimer per page (docs/voice.md rule 3): the analysis view
+            above renders <Disclaimer />, so this footer carries only the
+            brand line. */}
         <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
-          <p className="mx-auto max-w-2xl">
-            This shared analysis is for informational purposes only and is not
-            financial, tax, or legal advice. The figures are estimates based on
-            the assumptions entered by whoever created this link — verify rent,
-            expenses, and financing independently before making any investment
-            decision.
-          </p>
-          <p className="mt-3">
+          <p>
             Built with{" "}
             <Link
               href="/"

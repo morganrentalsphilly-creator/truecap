@@ -25,6 +25,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "operating-expense-ratio-rental-property";
 const TITLE_PLAIN =
@@ -122,6 +124,7 @@ export default function OperatingExpenseRatioPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -140,7 +143,7 @@ export default function OperatingExpenseRatioPost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -150,7 +153,7 @@ export default function OperatingExpenseRatioPost() {
               Operating expense ratio (OER): what&apos;s a good one for a
               rental? (2026)
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -174,7 +177,7 @@ export default function OperatingExpenseRatioPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What the operating expense ratio measures
             </h2>
@@ -284,8 +287,8 @@ export default function OperatingExpenseRatioPost() {
               <strong>$28,200 of effective gross income</strong>. Here are the
               operating expenses, line by line:
             </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ScrollX label="Data table" className="overflow-x-auto">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Operating expense</th>
@@ -327,7 +330,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               So the ratio is $11,156 ÷ $28,200 ≈ <strong>40%</strong>, and NOI
               is $28,200 − $11,156 = <strong>$17,044</strong>, a 6.8% cap rate on
@@ -357,8 +360,8 @@ export default function OperatingExpenseRatioPost() {
               punishing the local tax bill is. As a working set of 2026 bands,
               measured on effective gross income and excluding debt service:
             </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ScrollX label="Data table" className="overflow-x-auto">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Property profile</th>
@@ -384,7 +387,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Two cautions before you use these. First, a high OER isn&apos;t
               automatically a bad deal — a building can run at 55% and still be a

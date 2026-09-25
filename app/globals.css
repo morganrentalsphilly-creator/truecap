@@ -121,6 +121,12 @@
 @theme inline {
   --font-sans: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-variable), "DM Mono", ui-monospace, monospace;
+  /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
+     "Label-2xs"). Defined as font-size only so they behave exactly like the
+     arbitrary text-[11px] / text-[10px] values they replace (line-height
+     keeps coming from the leading-* utility or inherits). 10px is the floor. */
+  --text-2xs: 0.6875rem;
+  --text-3xs: 0.625rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -138,6 +144,18 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-text: var(--destructive-text);
+  /* Status/signal aliases so Tailwind utilities (bg-caution-light,
+     text-positive, border-caution/30 …) replace the raw amber/emerald/red
+     palette classes that had drifted in: one caution orange, one positive
+     green, one negative red (2026-09 audit, Sign Rule). */
+  --color-caution: var(--brand-orange);
+  --color-caution-light: var(--brand-orange-light);
+  --color-caution-text: var(--brand-orange-text);
+  --color-positive: var(--brand-green);
+  --color-positive-light: var(--brand-green-light);
+  --color-negative: var(--metric-negative);
+  --color-brand-blue-light: var(--brand-blue-light);
+  --color-brand-blue-text: var(--brand-blue-text);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-gold: var(--gold);

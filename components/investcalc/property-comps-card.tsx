@@ -34,7 +34,7 @@ function CompList({ title, comps, suffix }: { title: string; comps: EnrichmentCo
   if (comps.length === 0) return null;
   return (
     <div>
-      <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</div>
+      <div className="mb-1 text-3xs font-bold uppercase tracking-widest text-muted-foreground">{title}</div>
       <ul className="divide-y divide-border/60">
         {comps.map((c, i) => (
           <li key={`${c.address}-${i}`} className="flex items-center justify-between gap-2 py-1.5 text-xs">
@@ -145,6 +145,9 @@ export function PropertyCompsCard({
     return () => {
       active = false;
     };
+    // onDataChange is a stable setter in practice (see the clear effect
+    // above); keying on it would re-load saved comps on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, savedDealId]);
 
   if (!enabled || !address || unavailable) return null;
@@ -252,29 +255,29 @@ export function PropertyCompsCard({
       ) : (
         <div className="mt-3 space-y-3">
           {freshness?.stale ? (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground">
+            <div className="rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground">
               Comps are {freshness.ageDays} days old — refresh to re-check against today&apos;s
               market.
             </div>
           ) : null}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. value</div>
+              <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Est. value</div>
               <div className="mt-1 text-lg font-bold text-foreground">{money(data.valueEstimate)}</div>
               {data.valueRange && (data.valueRange.low != null || data.valueRange.high != null) ? (
-                <div className="text-[11px] text-muted-foreground">
+                <div className="text-2xs text-muted-foreground">
                   {money(data.valueRange.low)}–{money(data.valueRange.high)}
                 </div>
               ) : null}
             </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. rent</div>
+              <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Est. rent</div>
               <div className="mt-1 text-lg font-bold text-foreground">
                 {money(data.rentEstimate)}
                 {data.rentEstimate != null ? <span className="text-xs font-medium text-muted-foreground">/mo</span> : null}
               </div>
               {data.rentRange && (data.rentRange.low != null || data.rentRange.high != null) ? (
-                <div className="text-[11px] text-muted-foreground">
+                <div className="text-2xs text-muted-foreground">
                   {money(data.rentRange.low)}–{money(data.rentRange.high)}
                 </div>
               ) : null}
@@ -288,8 +291,8 @@ export function PropertyCompsCard({
                   key={i}
                   className={
                     w.tone === "warn"
-                      ? "rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground"
-                      : "rounded-lg border border-border bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground"
+                      ? "rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground"
+                      : "rounded-lg border border-border bg-muted/30 px-3 py-2 text-2xs leading-relaxed text-muted-foreground"
                   }
                 >
                   {w.text}
@@ -318,7 +321,7 @@ export function PropertyCompsCard({
           <CompList title="Sale comps" comps={data.saleComps} />
           <CompList title="Rent comps" comps={data.rentComps} suffix="/mo" />
 
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-3xs text-muted-foreground">
             Source: RentCast · {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}.
             Automated estimates - verify against local comps before relying on them.
           </p>

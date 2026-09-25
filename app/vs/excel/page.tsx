@@ -29,6 +29,8 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Excel vs TrueCap for Rental Analysis (2026)",
@@ -186,6 +188,7 @@ export default function VsExcelPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -193,16 +196,10 @@ export default function VsExcelPage() {
       <VsBreadcrumbSchema vsPath="/vs/excel" pageName="TrueCap vs Excel" />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
         </div>
 
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             Honest comparison
           </div>
@@ -252,7 +249,7 @@ export default function VsExcelPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
                 Pick TrueCap if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -276,7 +273,7 @@ export default function VsExcelPage() {
               </ul>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                 Stick with Excel if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -309,17 +306,17 @@ export default function VsExcelPage() {
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
             Where each wins, where it&apos;s a wash.
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Feature
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
                     TrueCap
                   </th>
-                  <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                     Excel / Sheets
                   </th>
                 </tr>
@@ -349,7 +346,7 @@ export default function VsExcelPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">

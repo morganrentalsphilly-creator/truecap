@@ -31,11 +31,11 @@ const toastVariants = cva(
       variant: {
         default: 'border-border/80 bg-card/95 text-foreground',
         success:
-          'success border-emerald-200 bg-emerald-50/95 text-emerald-950',
+          'success border-positive/30 bg-positive-light text-positive',
         warning:
-          'warning border-amber-200 bg-amber-50/95 text-amber-950',
+          'warning border-caution/30 bg-caution-light text-caution-text',
         destructive:
-          'destructive border-red-200 bg-red-50/95 text-red-950',
+          'destructive border-negative/30 bg-negative/10 text-destructive-text',
       },
     },
     defaultVariants: {
@@ -82,7 +82,7 @@ const ToastClose = React.forwardRef<
     ref={ref}
     aria-label="Close notification"
     className={cn(
-      'absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-all hover:bg-background/70 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring group-[.success]:text-emerald-700 group-[.success]:hover:text-emerald-800 group-[.warning]:text-amber-700 group-[.warning]:hover:text-amber-800 group-[.destructive]:text-red-700 group-[.destructive]:hover:text-red-800',
+      'absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-all hover:bg-background/70 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring group-[.success]:text-positive group-[.success]:hover:text-positive group-[.warning]:text-caution-text group-[.warning]:hover:text-caution-text group-[.destructive]:text-destructive-text group-[.destructive]:hover:text-destructive-text',
       className,
     )}
     toast-close=""
@@ -111,7 +111,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn('text-sm leading-relaxed text-muted-foreground group-[.success]:text-emerald-800/80 group-[.warning]:text-amber-800/80 group-[.destructive]:text-red-800/80', className)}
+    className={cn('text-sm leading-relaxed text-muted-foreground group-[.success]:text-positive group-[.warning]:text-caution-text group-[.destructive]:text-destructive-text', className)}
     {...props}
   />
 ))

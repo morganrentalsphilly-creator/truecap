@@ -26,7 +26,7 @@ const fmtMoney = (n: number) =>
 function Delta({ label, before, after }: { label: string; before: string; after: string }) {
   return (
     <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       <span className="text-sm tabular-nums text-muted-foreground">{before}</span>
@@ -106,7 +106,7 @@ export function RateAlertReUnderwriteBanner({
     <div className="flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
       <Bell aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
       <div className="min-w-0 flex-1">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           Rate alert preview
         </div>
         <div className="text-sm font-bold text-foreground">

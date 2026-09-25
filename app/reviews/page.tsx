@@ -58,7 +58,7 @@ export function generateMetadata(): Metadata {
 }
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+  "inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ";
 
 export default async function ReviewsPage() {
   // Decide whether the "Real usage" block exists at all, so an empty
@@ -86,9 +86,6 @@ export default async function ReviewsPage() {
         {/* (a) Hero */}
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-              Proof &amp; methodology
-            </p>
             <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
               Proof, not praise.
             </h1>
@@ -323,7 +320,7 @@ export default async function ReviewsPage() {
             </p>
             <AnalyzeCtaLink
               analyticsSource="reviews"
-              className="mt-6 inline-flex min-h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="mt-6 inline-flex min-h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
             >
               Analyze a deal free
             </AnalyzeCtaLink>

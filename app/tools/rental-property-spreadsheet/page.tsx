@@ -33,6 +33,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { Header } from "@/components/investcalc/header";
 
 const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 
@@ -138,6 +139,7 @@ export default function RentalPropertySpreadsheetPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema
         toolPath="/tools/rental-property-spreadsheet"
         toolName="Rental property spreadsheet"
@@ -160,9 +162,9 @@ export default function RentalPropertySpreadsheetPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              ← TrueCap free tools
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Free Rental Property Spreadsheet
@@ -208,7 +210,7 @@ export default function RentalPropertySpreadsheetPage() {
           </section>
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">
               Why this spreadsheet is un-gated
             </h2>
@@ -494,16 +496,6 @@ export default function RentalPropertySpreadsheetPage() {
             hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
           />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link
-              href="/"
-              className="font-bold text-foreground hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

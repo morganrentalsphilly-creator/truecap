@@ -26,15 +26,27 @@ export type IpRateLimit = {
   isOverLimit: (ip: string) => boolean;
 };
 
+/**
+ * Test runs only: a whole Playwright suite is ONE IP making hundreds of
+ * anonymous calls in an hour, which is exactly the pattern every brake here
+ * exists to stop. IP_RATE_LIMIT_MAX_OVERRIDE lifts every cap for the isolated
+ * local server and CI; unset (production) leaves each caller's own cap.
+ */
+function overriddenMaxPerWindow(maxPerWindow: number): number {
+  const raw = Number(process.env.IP_RATE_LIMIT_MAX_OVERRIDE);
+  return Number.isInteger(raw) && raw > 0 ? raw : maxPerWindow;
+}
+
 export function createIpRateLimit({
   windowMs,
-  maxPerWindow,
+  maxPerWindow: configuredMaxPerWindow,
   maxTrackedIps = 5000,
 }: {
   windowMs: number;
   maxPerWindow: number;
   maxTrackedIps?: number;
 }): IpRateLimit {
+  const maxPerWindow = overriddenMaxPerWindow(configuredMaxPerWindow);
   const buckets = new Map<string, { windowStart: number; count: number }>();
 
   return {

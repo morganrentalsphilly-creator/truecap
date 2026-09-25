@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "For Buy-and-Hold Investors",
@@ -80,26 +81,21 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
 export default function ForBuyAndHoldPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Eyebrow + back link */}
         <div className="mb-2">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
         </div>
 
         {/* Hero */}
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             For buy-and-hold investors
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             The numbers that decide whether to hold —{" "}
-            <span className="text-primary">in one screen.</span>
+            in one screen.
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Screen cap rate, cash-on-cash, DSCR, and cash flow free. Pro adds

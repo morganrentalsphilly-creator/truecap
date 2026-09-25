@@ -104,7 +104,7 @@ export function DealDriverInsight({
         <Crosshair className="size-4" />
       </span>
       <div className="min-w-0 space-y-1">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+        <p className="text-3xs font-bold uppercase tracking-widest text-primary">
           What decides this deal
         </p>
         <p className="text-sm font-bold text-foreground">

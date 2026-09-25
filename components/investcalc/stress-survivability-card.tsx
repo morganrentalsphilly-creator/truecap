@@ -46,7 +46,7 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
       className={`flex items-start gap-3 rounded-2xl border p-3 sm:p-4 ${
         good
           ? "border-[var(--brand-green)]/25 bg-[var(--brand-green-light)]"
-          : "border-rose-600/25 bg-rose-500/5"
+          : "border-negative/30 bg-negative/10"
       }`}
     >
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -54,25 +54,25 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
       </span>
       <span
         className={`flex size-8 shrink-0 items-center justify-center rounded-lg bg-card ${
-          good ? "text-[var(--brand-green)]" : "text-rose-600"
+          good ? "text-[var(--brand-green)]" : "text-destructive-text"
         }`}
       >
         {good ? <ShieldCheck className="size-4" aria-hidden /> : <ShieldAlert className="size-4" aria-hidden />}
       </span>
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             Survivability
           </span>
           {adjustmentLabel ? (
-            <span className="text-[10px] font-semibold text-muted-foreground">
+            <span className="text-3xs font-semibold text-muted-foreground">
               under {adjustmentLabel}
             </span>
           ) : null}
         </div>
         <p
           className={`text-sm font-bold ${
-            good ? "text-[var(--brand-green)]" : "text-rose-600"
+            good ? "text-[var(--brand-green)]" : "text-destructive-text"
           }`}
         >
           {s.headline}

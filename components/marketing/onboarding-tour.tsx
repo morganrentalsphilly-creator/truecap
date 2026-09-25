@@ -207,7 +207,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
                 aria-hidden
               />
             ))}
-            <span className="ml-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <span className="ml-1 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               {activeStep + 1} / {steps.length}
             </span>
           </div>
@@ -215,7 +215,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
             type="button"
             onClick={dismissTour}
             aria-label="Skip onboarding tour"
-            className="inline-flex size-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex size-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <X className="size-4" />
           </button>

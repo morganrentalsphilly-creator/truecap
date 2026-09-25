@@ -86,12 +86,12 @@ export function DealHistoryTimeline({
                     </p>
                     <time
                       dateTime={event.occurredAt}
-                      className="text-[10px] tabular-nums text-muted-foreground"
+                      className="text-3xs tabular-nums text-muted-foreground"
                     >
                       {formatEventTime(event.occurredAt)}
                     </time>
                   </div>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  <p className="mt-0.5 text-2xs text-muted-foreground">
                     You
                     {event.decisionStatus !== "undecided"
                       ? ` · Decision: ${dealHistoryDecisionLabel(event.decisionStatus)}`

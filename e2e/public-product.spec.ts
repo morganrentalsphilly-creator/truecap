@@ -260,20 +260,34 @@ test("tablet investors keep one reachable analysis action below the desktop cock
     await page.evaluate(() => window.scrollTo(0, 0));
 
     // Stop just before the in-form action enters the viewport. This is the
-    // long tablet-form gap where the fixed action must remain available.
-    await page.evaluate(() => {
+    // long tablet-form gap where the fixed action must remain available. If
+    // the form is short enough that no such gap exists past the 600px arming
+    // point (the 2026-09 audit removed the duplicate page intro above the
+    // form), the in-form action itself is the one reachable action.
+    const hasGap = await page.evaluate(() => {
       const submit = document.querySelector('[data-inform-submit="true"]');
       if (!(submit instanceof HTMLElement)) {
         throw new Error("Missing in-form analysis action");
       }
       const submitTop = submit.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, Math.max(601, submitTop - window.innerHeight - 80));
+      const target = submitTop - window.innerHeight - 80;
+      window.scrollTo(0, Math.max(601, target));
+      return target >= 601;
     });
 
     await expect(form).toBeInViewport();
-    await expect(inFormAction).not.toBeInViewport();
-    await expect(stickyAction).toBeVisible();
-    await expectMinimumTouchTarget(stickyAction.getByRole("button"));
+    if (hasGap) {
+      await expect(inFormAction).not.toBeInViewport();
+      await expect(stickyAction).toBeVisible();
+      await expectMinimumTouchTarget(stickyAction.getByRole("button"));
+    } else {
+      // The in-form action sits within a screen of the arming point; it is
+      // the reachable action, and the block below proves the fixed bar
+      // retires once it is in view.
+      await inFormAction.scrollIntoViewIfNeeded();
+      await expect(inFormAction).toBeInViewport();
+      await expect(stickyAction).toBeHidden();
+    }
 
     // The observer retires the fixed action as soon as its in-form equivalent
     // is visible, so extending it to tablets never produces duplicate CTAs.
@@ -567,7 +581,7 @@ test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
 
   await expect(
     page.getByRole("heading", {
-      level: 2,
+      level: 1,
       name: "Underwrite a Buy & Hold Rental",
     }),
   ).toBeVisible();
@@ -729,7 +743,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   ).toBeVisible();
   await expect(summary.getByText(/cash flow after reserve/i)).toBeVisible();
   await expect(summary.getByText("Model DSCR", { exact: true })).toBeVisible();
-  const tuneTargets = summary.getByRole("button", { name: /tune criteria/i });
+  const tuneTargets = summary.getByRole("button", { name: /tune targets/i });
   const save = summary.getByRole("button", { name: /^save/i });
   const nextDeal = summary.getByRole("button", {
     name: "Next deal · keep assumptions",
@@ -1054,7 +1068,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   await expect(anotherDialog).toBeHidden();
   await expect(
     page.getByRole("heading", {
-      level: 2,
+      level: 1,
       name: "Buy & Hold Underwriting",
     }),
   ).toBeVisible();

@@ -296,12 +296,12 @@ export function BuyBoxVerdictCard({
       <section
         aria-label="Buy Box rules unavailable"
         role="alert"
-        className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 sm:p-5"
+        className="rounded-2xl border border-caution/30 bg-caution-light p-4 text-sm text-caution-text sm:p-5"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-bold">Buy Box rules are temporarily unavailable</p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-900/80">
+            <p className="mt-1 text-xs leading-relaxed text-caution-text">
               No Buy Box fit or Offer Ceiling is being claimed.
               You can still save, share, or export the base underwriting;
               your own targets stay labeled separately.
@@ -311,7 +311,7 @@ export function BuyBoxVerdictCard({
             type="button"
             onClick={onRetry}
             disabled={!onRetry}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-500/50 bg-background px-3 text-xs font-bold text-amber-950 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-caution/40 bg-background px-3 text-xs font-bold text-caution-text transition-colors hover:bg-caution-light focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw className="size-4" aria-hidden />
             Retry Buy Box
@@ -354,14 +354,14 @@ export function BuyBoxVerdictCard({
         r.passes
           ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]"
           : r.failedLabels.length > 0
-            ? "border-amber-300 bg-amber-50"
+            ? "border-caution/30 bg-caution-light"
             : "border-border bg-muted/20"
       )}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Target className="size-4 text-muted-foreground" />
-          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <h3 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             {multi ? "Your buy boxes" : "Your buy box"}
           </h3>
         </div>
@@ -377,7 +377,7 @@ export function BuyBoxVerdictCard({
       {multi ? (
         <p className="mt-2 text-xs font-semibold text-muted-foreground">
           Meets{" "}
-          <span className={summary.passingCount > 0 ? "text-[var(--brand-green)]" : "text-amber-700"}>
+          <span className={summary.passingCount > 0 ? "text-[var(--brand-green)]" : "text-caution-text"}>
             {summary.passingCount} of {summary.activeCount}
           </span>{" "}
           of your buy boxes
@@ -388,16 +388,16 @@ export function BuyBoxVerdictCard({
         <span
           className={cn(
             "flex size-6 shrink-0 items-center justify-center rounded-full",
-            r.passes ? "bg-[var(--brand-green)] text-white" : "bg-amber-500 text-white"
+            r.passes ? "bg-[var(--brand-green)] text-white" : "bg-caution text-white"
           )}
         >
           {r.passes ? <Check className="size-3.5" /> : <X className="size-3.5" />}
         </span>
-        <p className={cn("text-base font-bold", r.passes ? "text-[var(--brand-green)]" : "text-amber-800")}>
+        <p className={cn("text-base font-bold", r.passes ? "text-[var(--brand-green)]" : "text-caution-text")}>
           {headline}
         </p>
         {multi ? (
-          <span className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+          <span className="rounded-full border border-border bg-card px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
             {primary.box.name}
           </span>
         ) : null}
@@ -455,24 +455,24 @@ export function BuyBoxVerdictCard({
         {r.checks.map((c) => (
           <div key={c.id} className="rounded-lg border border-border/70 bg-card px-2.5 py-1.5">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[11px] font-semibold text-foreground">{c.label}</span>
+              <span className="text-2xs font-semibold text-foreground">{c.label}</span>
               {c.pass === true ? (
                 <Check className="size-3.5 text-[var(--brand-green)]" />
               ) : c.pass === false ? (
-                <X className="size-3.5 text-red-600" />
+                <X className="size-3.5 text-destructive-text" />
               ) : (
                 <Minus className="size-3.5 text-muted-foreground" />
               )}
             </div>
-            <div className="mt-0.5 text-[11px] text-muted-foreground">
+            <div className="mt-0.5 text-2xs text-muted-foreground">
               <span className="font-medium text-foreground">{c.actual}</span>{" "}
               <span className="text-muted-foreground">vs {c.target}</span>
             </div>
             {c.gapText ? (
               <div
                 className={cn(
-                  "mt-0.5 text-[10px] font-semibold",
-                  c.pass === false ? "text-red-600" : "text-[var(--brand-green)]"
+                  "mt-0.5 text-3xs font-semibold",
+                  c.pass === false ? "text-destructive-text" : "text-[var(--brand-green)]"
                 )}
               >
                 {c.gapText}

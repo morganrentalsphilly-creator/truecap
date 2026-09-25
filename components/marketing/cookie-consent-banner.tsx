@@ -187,7 +187,7 @@ export function CookieConsentBanner() {
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Privacy
               </Link>
@@ -199,7 +199,7 @@ export function CookieConsentBanner() {
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 privacy policy
               </Link>
@@ -211,14 +211,14 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-4 sm:text-sm"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-4 sm:text-sm"
           >
             <span className="sm:hidden">Accept</span>
             <span className="hidden sm:inline">Accept all</span>
@@ -232,7 +232,7 @@ export function CookieConsentBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Dismiss (counts as reject)"
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <X className="size-4" />
           </button>

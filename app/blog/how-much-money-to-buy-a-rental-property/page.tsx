@@ -27,6 +27,8 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "how-much-money-to-buy-a-rental-property";
 const TITLE =
@@ -151,6 +153,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
@@ -168,14 +171,14 @@ export default function BlogPost() {
         <header className="mb-8 sm:mb-10">
           <Link
             href="/blog"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
+          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -189,7 +192,7 @@ export default function BlogPost() {
           </p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             The short answer: at 20% down and mid-2026 investment-property
             rates, budget <strong>28% to 34% of the purchase price</strong> in
@@ -332,10 +335,10 @@ export default function BlogPost() {
             7.25%, which is $818.61 a month of principal and interest, so PITIA
             comes to <strong>$1,131 a month</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line item
                   </th>
@@ -420,7 +423,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Note what the reserve is quietly doing: if the house sits empty for
             a month while you finish the make-ready, that $1,131 comes out of
@@ -437,10 +440,10 @@ export default function BlogPost() {
             rent $2,400. Loan of $240,000 at 7.25% is $1,637.23 a month, and
             PITIA is <strong>$2,071</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Bucket
                   </th>
@@ -490,7 +493,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Closing costs here break down as $2,400 origination, $750 appraisal,
             $1,000 underwriting and processing, $2,200 title and settlement,
@@ -515,10 +518,10 @@ export default function BlogPost() {
             Taxes at 1.0% ($5,000), insurance $2,600. Loan of $400,000 at 7.25%
             is $2,728.72 a month; PITIA is <strong>$3,362</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Bucket
                   </th>
@@ -568,7 +571,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           <h2 className="text-2xl sm:text-3xl">
             The pattern: 1.4x to 1.7x your down payment
@@ -577,10 +580,10 @@ export default function BlogPost() {
             Line the three tiers up and the useful number falls out. It is not a
             percentage of price — it is a multiple of the down payment:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Price
                   </th>
@@ -622,7 +625,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             The multiple shrinks as price rises, and the reason is worth
             internalising if you are shopping cheap houses:{" "}
@@ -730,10 +733,10 @@ export default function BlogPost() {
             return in a less obvious one. Same $300,000 house, three
             conventional tiers:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Down
                   </th>
@@ -775,7 +778,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Three things in that table. First, 15% down is the worst of the
             three: it adds mortgage insurance — budget roughly 1% of the loan
@@ -819,8 +822,8 @@ export default function BlogPost() {
             taxes at 1.1% are $367, insurance is $183 — PITIA{" "}
             <strong>$3,268</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">
@@ -862,7 +865,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             <strong>
               A $400,000 two-unit costs less cash to buy than a $150,000
@@ -1135,9 +1138,9 @@ export default function BlogPost() {
           </p>
         </footer>
       </main>
+      <BlogStickyCta />
       <SiteFooter />
       <ScrollDepthTracker />
-      <BlogStickyCta />
     </div>
   );
 }

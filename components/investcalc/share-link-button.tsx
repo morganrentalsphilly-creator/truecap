@@ -662,7 +662,7 @@ export function ShareLinkButton({
           {!needsSignIn && sharesListState === "error" ? (
             <div
               role="alert"
-              className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs"
+              className="rounded-xl border border-caution/40 bg-caution-light p-3 text-xs"
             >
               <p className="font-semibold text-foreground">
                 Existing links could not be loaded
@@ -846,7 +846,7 @@ export function ShareLinkButton({
             </div>
           ) : null}
 
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-2xs text-muted-foreground">
             {needsSignIn ? (
               <>
                 Existing links still open without an account. Creating a new

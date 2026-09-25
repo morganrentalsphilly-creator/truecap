@@ -76,7 +76,7 @@ export function PdfPurchaseDialog({
             </span>
           </Link>
 
-          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-2xs leading-relaxed text-muted-foreground">
             <p>
               <strong className="text-foreground">
                 Already purchased a one-time report?
@@ -104,7 +104,7 @@ export function PdfPurchaseDialog({
           </div>
         </div>
 
-        <p className="text-[11px] leading-relaxed text-muted-foreground">
+        <p className="text-2xs leading-relaxed text-muted-foreground">
           Payments are processed by Stripe. Calculations are estimates based on
           your current inputs; verify assumptions independently before acting.
         </p>

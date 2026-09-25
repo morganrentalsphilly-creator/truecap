@@ -87,26 +87,26 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
     return (
       <section
         aria-label="Analysis dashboard fallback"
-        className="rounded-2xl border border-amber-300/40 bg-amber-50/50 p-4 sm:p-6"
+        className="rounded-2xl border border-caution/30 bg-caution-light p-4 sm:p-6"
       >
         <div className="flex items-start gap-3">
           <span
             aria-hidden
-            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"
+            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-caution-light text-caution-text"
           >
             <AlertTriangle className="size-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-bold text-amber-900">
+            <h2 className="text-base font-bold text-caution-text">
               Something glitched while rendering the dashboard
             </h2>
-            <p className="mt-1 text-sm text-amber-800/90">
+            <p className="mt-1 text-sm text-caution-text">
               Your numbers are safe - only the visualization broke. Try refreshing
               the page, or recalculate. The error has been logged.
             </p>
 
             {result ? (
-              <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl border border-amber-200 bg-background p-3 sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl border border-caution/30 bg-background p-3 sm:grid-cols-4">
                 <FallbackMetric
                   label="Monthly cash flow"
                   value={fmtSignedUsd(result.netCashFlow)}
@@ -186,7 +186,7 @@ function FallbackMetric({
         : "text-foreground";
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </p>
       <p className={`mt-0.5 text-base font-extrabold tabular-nums ${color}`}>{value}</p>
