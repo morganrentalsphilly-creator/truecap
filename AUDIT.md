@@ -245,7 +245,7 @@ the same variables.
 
 | # | Flow | Spec | Where it runs | Result |
 | --- | --- | --- | --- | --- |
-| 2.1 | Free analysis: typed address → HUD rent (state-average path) + FRED rate autofill, labelled sources, values editable; provider timeout / 500 / malformed / empty leave the form usable; manual annual property tax moves cash flow by exactly the difference; every assumption group editable after a run | `e2e/audit-analyzer-autofill.spec.ts` (10) | local + CI | ✅ 10/10 local |
+| 2.1 | Free analysis: typed address → HUD rent (state-average path) + FRED rate autofill, labelled sources, values editable; provider timeout / 500 / malformed / empty leave the form usable; manual annual property tax moves cash flow by exactly the difference; every assumption group editable after a run | `e2e/audit-analyzer-autofill.spec.ts` (10) | local + CI | ✅ 10/10 local; CI green only after the 2026-09-25 harness fixes below |
 | 2.1 | Results render verdict, Deal score, four metrics, Offer Ceiling; consistent `$1,234` / `x.xx%` formatting; one-shot anonymous exact decision, second deal gated with a sign-up CTA | `e2e/audit-analyzer-results.spec.ts` (2) | local + CI | ✅ |
 | 2.1 | ZIP/county/SAFMR resolution ladder + every failure mode with the network stubbed | `lib/__tests__/audit-enrichment-resolution.test.ts` (15) | vitest | ✅ |
 | 2.2 | New deal in the dashboard: create → save → edit → save → deep link → duplicate → compare → delete; sample deal inside the shell | `e2e/authenticated-audit-pro.spec.ts` (2) | CI | ⏳ PR CI |
@@ -269,6 +269,20 @@ convention is undocumented — v1 rounds each monthly expense line (tax,
 insurance, HOA, utilities, maintenance, vacancy, management, CapEx) to a
 whole dollar before summing, so a hand calculation from the literal formula
 lands within a few dollars a month (M-1, copy fix in Phase 3).
+
+**CI correction (2026-09-25).** The browser job had been red on every push of
+this branch since Phase 2, hidden because each new push superseded the
+previous run before it concluded (the PR bar only ever showed "pending").
+Reading the job's traces found one product bug and two harness defects:
+B-12 (a signed-in user running the sample saw the fixture address), the
+per-IP Offer Ceiling brake exhausting under a whole-suite run from one
+runner IP (now `OFFER_CEILING_IP_RATE_LIMIT_MAX` in CI and the isolated
+server; production stays at 120/hour), and the FREE setup "passing" before
+sign-in because the login URL's unencoded `?next=/dashboard/new` satisfied a
+loose URL check, so every free-tier spec had run anonymously. The
+post-login checks are anchored on the pathname now, and the Pro spec's
+saved-deal rent edit replaces-and-verifies the field (Playwright's fill
+appended to the old value on a re-rendering input).
 
 Test-isolation lessons recorded for the next person: the action caches HUD
 state data and FRED observations in memory for 24 h per server process and
@@ -357,6 +371,7 @@ on pages that gained the site header.
 | B-9 | Low | results skeleton | eight grey blocks inside `aria-hidden` with no visible or announced text | visible `role="status"` line | 0aeeaab |
 | B-10 | Low | `/sample-decision-memo`, `/s/[token]`, decision card | internal strings reached customers: "Sample targets v1.0", "sample fixture synthetic-rental-v2", "method recorded-unversioned", "Method v1.4", "profile v3", "frozen profile v2" | human provenance phrasing, versions kept in data | 188162f, 6e4b8d8 |
 | B-11 | Low | mortgage payment widget | a pasted negative rate produced a negative payment | clamped at 0 | 11d527c |
+| B-12 | Medium | `/dashboard/new?sample=1` (signed-in) | the sample's "Philadelphia rental example" label keyed on the sample target profile only, so a signed-in user (own targets) saw "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA" | label also keys on the address (`isTrueCapSyntheticSampleAddress`) | dc85997 |
 | L-9 | Low | `.claude/skills/impeccable/scripts/**` | vendored skill runtime was linted with the app's rules | excluded in `eslint.config.mjs` (manifest re-pinned in its own commit) | df9b83b, af2a6f4 |
 
 ## 7. Needs the founder's decision
