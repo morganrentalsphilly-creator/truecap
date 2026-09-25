@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronDown,
@@ -229,6 +229,12 @@ export function TemplateFormDialog({
     resolver: zodResolver(analysisTemplateSchema),
     defaultValues: initialValues,
   });
+  // useWatch (not form.watch inside JSX) so the React Compiler can still
+  // compile this component; same subscription semantics for one field.
+  const insuranceInputMode = useWatch({
+    control: templateForm.control,
+    name: "insuranceInputMode",
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -390,7 +396,7 @@ export function TemplateFormDialog({
                       </FormItem>
                     )}
                   />
-                  {templateForm.watch("insuranceInputMode") === "percent" ? (
+                  {insuranceInputMode === "percent" ? (
                     <NumberInputField
                       form={templateForm}
                       name="insurancePct"

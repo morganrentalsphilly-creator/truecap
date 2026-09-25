@@ -146,7 +146,7 @@ const fail = (message) => {
 
 // ---------------------------------------------------------- the live sitemap
 /** @type {{ url: string, lastmod: string | null }[]} */
-let sitemapEntries = [];
+const sitemapEntries = [];
 try {
   const response = await fetch(`${BASE}/sitemap.xml`, {
     headers: { "user-agent": "TrueCap-IndexNow/1.0" },

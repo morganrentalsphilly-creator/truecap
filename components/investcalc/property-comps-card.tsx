@@ -145,6 +145,9 @@ export function PropertyCompsCard({
     return () => {
       active = false;
     };
+    // onDataChange is a stable setter in practice (see the clear effect
+    // above); keying on it would re-load saved comps on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, savedDealId]);
 
   if (!enabled || !address || unavailable) return null;

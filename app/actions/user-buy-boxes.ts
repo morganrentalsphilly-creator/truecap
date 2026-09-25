@@ -36,7 +36,6 @@ import {
 } from "@/lib/buy-box";
 import { isStrategyKind } from "@/lib/strategy-kinds";
 import {
-  getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
   requireVerifiedEntitlements,

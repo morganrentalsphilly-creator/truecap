@@ -8132,6 +8132,10 @@ export function InvestCalcPage({
     if (!analysisResult) return;
     autoExportPdfRef.current = false;
     void handleExportPdf();
+    // One-shot: the ref gate above makes re-runs no-ops, and handleExportPdf
+    // is a plain per-render function, so listing it would run this effect on
+    // every render instead of once per new result.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysisResult]);
 
   /**
