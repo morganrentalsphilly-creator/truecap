@@ -124,3 +124,16 @@ config.bat
 
 # Local PDF render output from `npm run pdf:check`
 .pdf-check/
+
+# Impeccable design skill, installed with `impeccable install --project`
+# (2026-09-24 audit). The skill's markdown references, agents, and small
+# launcher scripts are source; the ~12 MB native engine under scripts/bin/ is
+# downloaded on first run and must never be committed. Critique snapshots and
+# the live-mode config are per-machine working state.
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/impeccable/
+.claude/skills/impeccable/scripts/bin/
+!.claude/agents/
+.impeccable/*
+!.impeccable/design.json
