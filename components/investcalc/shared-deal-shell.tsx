@@ -125,7 +125,7 @@ export function SharedDealShell({
           <Link href="/" className="font-bold underline underline-offset-2">
             TrueCap
           </Link>{" "}
-          — view-only. Want to edit, save, or run your own? Start free at{" "}
+          — view-only. Run your own free analysis at{" "}
           <Link href="/" className="font-bold underline underline-offset-2">
             usetruecap.com
           </Link>
@@ -237,15 +237,11 @@ export function SharedDealShell({
           </div>
         )}
 
+        {/* One disclaimer per page (docs/voice.md rule 3): the analysis view
+            above renders <Disclaimer />, so this footer carries only the
+            brand line. */}
         <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
-          <p className="mx-auto max-w-2xl">
-            This shared analysis is for informational purposes only and is not
-            financial, tax, or legal advice. The figures are estimates based on
-            the assumptions entered by whoever created this link — verify rent,
-            expenses, and financing independently before making any investment
-            decision.
-          </p>
-          <p className="mt-3">
+          <p>
             Built with{" "}
             <Link
               href="/"
