@@ -50,7 +50,7 @@ set pinned by tests; sign-up with email confirmation no longer bounces to
 login; the sample fixture address never reaches the save prompt; article
 tables keep their numbers on phones; embed snippets are canonical-origin
 only; the analyzer opens on the form. Full ledger in §5–§6; the decisions and their outcomes are in §7 — three
-(D-2, D-3, D-4) still need the founder's accounts.
+(D-2, D-3, D-4) were declined by the founder on 2026-09-25 and are closed.
 
 ## 1. Codebase map (Phase 0)
 
@@ -409,10 +409,10 @@ and business"). Outcome, per item:
 | ID | Outcome |
 | --- | --- |
 | D-1 | **Done, separate PR #111** (`chore/og-images-node-runtime`): all 134 OG routes on the Node runtime; verified 135/135 routes return `image/png` on a local production build, zero build warnings. Merge after or independently of #110. |
-| D-2 | **Still yours** — needs a dev Supabase project (or deleting the live keys from the laptop) and a service-role key rotation. |
-| D-3 | **Still yours** — install OrbStack or Docker Desktop; CI remains the only place the authenticated gate runs until then. |
-| D-4 | **Still yours** — add test-mode Stripe secrets to a protected GitHub environment; then a `billing-e2e` job can be written. |
-| D-5 | **Done in this PR** (`3bdc30f`): the form mirrors `supabase/config.toml` (12+ characters with lower/upper/digits) for sign-up and password reset, stated under both fields from one constant. **One follow-up for you:** set the production project to the same policy (Supabase dashboard → Authentication → Password requirements), otherwise the form is merely stricter than the server. |
+| D-2 | **Declined by the founder (2026-09-25)** — the current service-role key stays; no dev project. |
+| D-3 | **Declined by the founder (2026-09-25)** — no local Docker; CI is the authenticated gate. |
+| D-4 | **Declined by the founder (2026-09-25)** — billing stays covered by the route and unit tests. |
+| D-5 | **Done in this PR** (`3bdc30f`): the form mirrors `supabase/config.toml` (12+ characters with lower/upper/digits) for sign-up and password reset, stated under both fields from one constant. The production Supabase policy was set to the same rule by the founder on 2026-09-25. |
 | D-6 | **Kept as is** — the filled sample button stays; revisit only if the sample click-through on `/analyze` is low in analytics. |
 | D-7 | **Done in this PR** (`4ef741f`): the pre-run editor legend, the context tile and the save/next-deal dialogs say "targets"; guards re-anchored. |
 | D-8 | **Kept as is** — "$0" is the modelled value. |
