@@ -43,14 +43,14 @@ artifact), UI bugs **9** (residuals in §8 are cosmetic), consistency **8**
 (one type ramp, one focus ring, one colour vocabulary, one metric rule set;
 widget label case and the tool-page CTA stack are still two-voiced).
 
-What changed: 49 one-theme commits on `audit/full-site` (PR #110, **not
+What changed: 55 one-theme commits on `audit/full-site` (PR #110, **not
 merged, not deployed**). Highlights — a11y 121 serious → 0; the shared
 viewer, decision card, band and memo now share one metric colour/format rule
 set pinned by tests; sign-up with email confirmation no longer bounces to
 login; the sample fixture address never reaches the save prompt; article
 tables keep their numbers on phones; embed snippets are canonical-origin
-only; the analyzer opens on the form. Full ledger in §5–§6; five founder
-decisions in §7.
+only; the analyzer opens on the form. Full ledger in §5–§6; the decisions and their outcomes are in §7 — three
+(D-2, D-3, D-4) still need the founder's accounts.
 
 ## 1. Codebase map (Phase 0)
 
@@ -372,6 +372,23 @@ on pages that gained the site header.
 | D-7 | Unify the pre-run editor's "Offer criteria" legend (and the lib's "selected rules" labels) with "targets" | every other customer-facing label now says targets; these two are guard-pinned contract vocabulary shared with the advocacy decision contract | one small copy PR that updates `ruleFitLabel` and the legend together with their guards |
 | D-8 | BRRRR widget: show "—" instead of "$0" for an empty rehab budget | $0 is what the model uses; the critique wanted an explicit blank | leave as is (truthful), or make the field required |
 | D-9 | Remove the "← TrueCap" back-links on the 145 pages that gained the site header | they were the only navigation before; now they duplicate the header's logo link | remove in one mechanical PR; keep the breadcrumb on `/blog/topics/*` |
+
+### Decisions taken on 2026-09-25
+
+The founder delegated the calls ("do what you think is best for the website
+and business"). Outcome, per item:
+
+| ID | Outcome |
+| --- | --- |
+| D-1 | **Done, separate PR #111** (`chore/og-images-node-runtime`): all 134 OG routes on the Node runtime; verified 135/135 routes return `image/png` on a local production build, zero build warnings. Merge after or independently of #110. |
+| D-2 | **Still yours** — needs a dev Supabase project (or deleting the live keys from the laptop) and a service-role key rotation. |
+| D-3 | **Still yours** — install OrbStack or Docker Desktop; CI remains the only place the authenticated gate runs until then. |
+| D-4 | **Still yours** — add test-mode Stripe secrets to a protected GitHub environment; then a `billing-e2e` job can be written. |
+| D-5 | **Done in this PR** (`3bdc30f`): the form mirrors `supabase/config.toml` (12+ characters with lower/upper/digits) for sign-up and password reset, stated under both fields from one constant. **One follow-up for you:** set the production project to the same policy (Supabase dashboard → Authentication → Password requirements), otherwise the form is merely stricter than the server. |
+| D-6 | **Kept as is** — the filled sample button stays; revisit only if the sample click-through on `/analyze` is low in analytics. |
+| D-7 | **Done in this PR** (`4ef741f`): the pre-run editor legend, the context tile and the save/next-deal dialogs say "targets"; guards re-anchored. |
+| D-8 | **Kept as is** — "$0" is the modelled value. |
+| D-9 | **Done in this PR** (`9d15c3d`): the 52 "← TrueCap" home links under the new header are gone; section back-links use one wording ("← Blog", "← Free tools", "← Glossary"). |
 
 ## 8. Known issues and next steps
 
