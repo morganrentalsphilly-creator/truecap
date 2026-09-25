@@ -26,7 +26,9 @@ const source = readFileSync(
 const lines = source.split("\n");
 
 function desktopTableHeaders(): string[] {
-  const start = source.indexOf('<div className="hidden overflow-x-auto xl:block">');
+  // The desktop table now sits in the keyboard-reachable ScrollX region
+  // (2026-09 audit); the contract below is unchanged.
+  const start = source.indexOf('<ScrollX label="Deals table" className="hidden overflow-x-auto xl:block">');
   expect(start, "the desktop deal table was restructured").toBeGreaterThan(-1);
   const a = source.indexOf("<thead", start);
   const b = source.indexOf("</thead>", a);

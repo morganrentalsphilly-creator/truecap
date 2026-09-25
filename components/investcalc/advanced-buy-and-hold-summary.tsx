@@ -4,6 +4,7 @@ import {
   SIMPLIFIED_RENOVATION_DOWNTIME_LABEL,
   STEADY_STATE_RENOVATION_LABEL,
 } from "@/lib/financial-presentation";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type AdvancedResult = Pick<
   AnalysisResult,
@@ -193,7 +194,7 @@ export function AdvancedBuyAndHoldSummary({
       </dl>
       {values?.propertyType !== "single-family" &&
       (values?.units?.length ?? 0) > 0 ? (
-        <div className="mt-4 overflow-x-auto rounded-lg border border-border bg-background">
+        <ScrollX label="Table" className="mt-4 overflow-x-auto rounded-lg border border-border bg-background">
           <table className="w-full min-w-[420px] text-left text-xs">
             <caption className="sr-only">
               Shared current and stabilized unit rent roll
@@ -233,7 +234,7 @@ export function AdvancedBuyAndHoldSummary({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollX>
       ) : null}
       {(result.balloonPayment ?? 0) > 0 ? (
         <p className="mt-3 text-xs leading-relaxed text-amber-800 dark:text-amber-200">

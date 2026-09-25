@@ -29,6 +29,7 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "Excel vs TrueCap for Rental Analysis (2026)",
@@ -309,7 +310,7 @@ export default function VsExcelPage() {
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
             Where each wins, where it&apos;s a wash.
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -349,7 +350,7 @@ export default function VsExcelPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
         </section>
 
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">

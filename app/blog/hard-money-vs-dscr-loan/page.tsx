@@ -21,6 +21,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "hard-money-vs-dscr-loan";
 const TITLE =
@@ -296,7 +297,7 @@ export default function BlogPost() {
           </ul>
 
           <h2 className="text-2xl sm:text-3xl">Side-by-side comparison</h2>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -382,7 +383,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           <h2 className="text-2xl sm:text-3xl">
             The BRRRR sequencing playbook

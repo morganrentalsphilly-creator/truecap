@@ -19,6 +19,7 @@ import {
 import type { CitySafmr } from "@/lib/markets/safmr-rents";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export type SafeMarketPageIdentity = {
   city: string;
@@ -107,7 +108,7 @@ export function MarketFmrSection({
         property. Use it as your starting rent, then replace it with current
         leases for the address.
       </p>
-      <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+      <ScrollX label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[18rem] text-sm">
           <caption className="sr-only">
             HUD Fair Market Rent, FY{hud.year}, by bedroom count for {city}
@@ -141,7 +142,7 @@ export function MarketFmrSection({
             </tr>
           </tbody>
         </table>
-      </div>
+      </ScrollX>
 
       {safmr ? (
         <div className="mt-6">
@@ -152,7 +153,7 @@ export function MarketFmrSection({
             HUD also publishes ZIP-level rents for the {safmr.areaName}, the
             region that includes {city}. Rent varies by ZIP and bedroom count.
           </p>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+          <ScrollX label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[24rem] text-sm">
               <caption className="sr-only">
                 HUD Small Area Fair Market Rent by ZIP code, {safmr.areaName},
@@ -190,7 +191,7 @@ export function MarketFmrSection({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
             {safmr.rows.length < safmr.zipCount
               ? `${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, sampled highest to lowest.`

@@ -25,6 +25,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "2-percent-rule-vs-1-percent-rule";
 const TITLE =
@@ -287,7 +288,7 @@ export default function BlogPost() {
             is what the 1% and 2% bars ask for across three common price points,
             next to the kind of rent those properties actually command in 2026:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -336,7 +337,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             The pattern is the story. In cheaper, cash-flow-oriented markets the
             1% rule is a live screen — plenty of properties near it, a few over.
@@ -390,7 +391,7 @@ export default function BlogPost() {
             $18,750 invested that&apos;s a <strong>16.4% cash-on-cash</strong>{" "}
             return.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -433,7 +434,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             On the numbers alone, the 2% deal buries the 1% deal — higher cap
             rate, real cash flow, a return you can retire on. So why

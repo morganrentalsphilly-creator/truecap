@@ -21,6 +21,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "mortgage-points-investment-property";
 const TITLE =
@@ -235,7 +236,7 @@ export default function MortgagePointsPost() {
               :
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -277,7 +278,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Under those assumptions, one point trims the payment about $33 per
@@ -297,7 +298,7 @@ export default function MortgagePointsPost() {
               Calculate each pair of actual quotes separately.
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -324,7 +325,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               These three assumed ladders show that the break-even can change
@@ -377,7 +378,7 @@ export default function MortgagePointsPost() {
               NOI:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -410,7 +411,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               In the example, two points move modeled DSCR from 1.14 to 1.20. If
@@ -443,7 +444,7 @@ export default function MortgagePointsPost() {
               $18,200 NOI:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -468,7 +469,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Under the hypothetical inputs, cash-on-cash rises from 3.88% to

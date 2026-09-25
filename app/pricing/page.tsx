@@ -49,6 +49,7 @@ import {
   summarizePricingEvaluation,
 } from "@/lib/pricing-evaluation";
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -537,7 +538,7 @@ export default async function PricingPage() {
               ),
             )}
           </div>
-          <div className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
+          <ScrollX label="Table" className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full text-sm">
               <caption className="sr-only">
                 Features included with Free and {proOfferName}
@@ -573,7 +574,7 @@ export default async function PricingPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
         </section>
 
         {/* FAQ */}

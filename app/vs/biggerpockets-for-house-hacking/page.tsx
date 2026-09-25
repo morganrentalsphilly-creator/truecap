@@ -30,6 +30,7 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "BiggerPockets vs TrueCap for House Hacking (2026)",
@@ -347,7 +348,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
             Where each tool wins on the house-hack-specific workflow.
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -399,7 +400,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-3 text-[11px] text-muted-foreground">
             BiggerPockets calculator details based on publicly available product
             info as of 2026. See{" "}

@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/formatters";
 import { cn } from "@/lib/utils";
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const COLUMNS = [
   "Year",
@@ -90,7 +91,7 @@ export function TaxStrategyTable({
       </div>
 
       <div className="hidden rounded-2xl border border-border bg-card overflow-hidden sm:block">
-        <div className="overflow-x-auto">
+        <ScrollX label="Table" className="overflow-x-auto">
         <table className="w-full min-w-[1320px] text-sm">
           <thead className="bg-muted/40">
             <tr className="h-12 border-b border-border">
@@ -153,7 +154,7 @@ export function TaxStrategyTable({
             ))}
           </tbody>
         </table>
-        </div>
+        </ScrollX>
       </div>
     </>
   );

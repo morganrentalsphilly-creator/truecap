@@ -69,6 +69,7 @@ import {
 } from "@/components/ui/dialog";
 import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog";
 import Link from "next/link";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const TEMPLATE_PAGE_SIZE = 10;
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
@@ -808,7 +809,7 @@ export function TemplatesManagementPage({
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto xl:block">
+          <ScrollX label="Table" className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[880px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
@@ -975,7 +976,7 @@ export function TemplatesManagementPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           {filteredTemplates.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">

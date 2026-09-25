@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { ScrollX } from "@/components/ui/scroll-x";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -244,7 +245,7 @@ export default function CoCCalculatorPage() {
             <h2 className="text-2xl sm:text-3xl">
               What&apos;s a good cash-on-cash return?
             </h2>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -288,7 +289,7 @@ export default function CoCCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Compare CoC with current, like-for-like alternatives using the
               same horizon, liquidity, volatility, taxes, and transaction-cost

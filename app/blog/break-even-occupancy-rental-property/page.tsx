@@ -21,6 +21,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "break-even-occupancy-rental-property";
 const TITLE = "Break-even occupancy: how much vacancy a rental can survive (2026)";
@@ -248,7 +249,7 @@ export default function BreakEvenOccupancyPost() {
               pays water, with operating expenses laid out like this:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -287,7 +288,7 @@ export default function BreakEvenOccupancyPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Now plug in. Operating expenses ($10,900) plus debt service ($17,964)
@@ -387,7 +388,7 @@ export default function BreakEvenOccupancyPost() {
               cost:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -425,7 +426,7 @@ export default function BreakEvenOccupancyPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               At $340,000, fixed cost is $32,064 and break-even occupancy jumps to

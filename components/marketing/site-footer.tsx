@@ -171,9 +171,9 @@ export function SiteFooter({
             (col) => !(hideAccountLinks && col.title === "Account"),
           ).map((col) => (
             <div key={col.title}>
-              <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}
-              </h3>
+              </h2>
               <ul className="mt-3">
                 {col.links.map((link) => (
                   <li key={link.label}>

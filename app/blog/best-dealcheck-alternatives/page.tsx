@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "best-dealcheck-alternatives";
 const TITLE_PLAIN = "7 Best DealCheck Alternatives for Rental Analysis (2026)";
@@ -373,7 +374,7 @@ export default function BestDealCheckAlternativesPost() {
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The alternatives at a glance</h2>
 
-            <div className="not-prose mb-8 overflow-x-auto rounded-2xl border border-border bg-card">
+            <ScrollX label="Data table" className="not-prose mb-8 overflow-x-auto rounded-2xl border border-border bg-card">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40">
                   <tr className="text-left">
@@ -407,7 +408,7 @@ export default function BestDealCheckAlternativesPost() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <h2>The 7 alternatives, ranked</h2>
 

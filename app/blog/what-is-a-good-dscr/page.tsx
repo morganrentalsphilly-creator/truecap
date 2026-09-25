@@ -28,6 +28,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "what-is-a-good-dscr";
 const TITLE =
@@ -215,7 +216,7 @@ export default function BlogPost() {
             the property doesn&apos;t earn enough to pay its own mortgage, and
             you make up the difference from your paycheck every month.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -279,7 +280,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             The 1.25 convention isn&apos;t arbitrary. It&apos;s roughly the
             cushion that lets a property absorb a vacant month, a repair bill,
@@ -461,7 +462,7 @@ export default function BlogPost() {
             and you can watch the duplex climb toward 1.25. Same NOI ($16,802),
             same 7% / 30-year loan — only the amount borrowed changes:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -506,7 +507,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Every extra 5% down buys roughly <strong>0.07–0.08 of DSCR</strong>{" "}
             here, and the 1.25 bar falls between the 30% and 35% rows — the same

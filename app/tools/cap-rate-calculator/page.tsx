@@ -21,6 +21,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { ScrollX } from "@/components/ui/scroll-x";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -265,7 +266,7 @@ export default function CapRateCalculatorPage() {
               bad relative to your market and risk tolerance. The general
               benchmarks:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -311,7 +312,7 @@ export default function CapRateCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               A great cap rate in San Francisco might be 5%. A great cap rate in
               Memphis might be 9%. Use the metric for <em>comparison</em> within

@@ -25,6 +25,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "how-to-calculate-arv";
 const TITLE_PLAIN =
@@ -287,7 +288,7 @@ export default function HowToCalculateArvPost() {
               comps&apos; raw sale prices.
             </p>
             <p>Our four best comps:</p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -324,7 +325,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>{" "}
               (the median is $182.38 — when the two agree this closely, no
@@ -444,7 +445,7 @@ export default function HowToCalculateArvPost() {
               that changes is what the property is actually worth when the work
               is done:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -476,7 +477,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The asymmetry is the lesson. A 10% ARV miss — the difference
               between a careful comp set and a hopeful one — cuts the flip

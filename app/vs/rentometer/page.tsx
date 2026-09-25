@@ -18,6 +18,7 @@ import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
@@ -145,7 +146,7 @@ export default function VsRentometerPage() {
 
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">Feature-by-feature</h2>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -168,7 +169,7 @@ export default function VsRentometerPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
             <Link href="/analyze" prefetch={false} className="font-semibold text-primary hover:underline">free deal analyzer</Link>

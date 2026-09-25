@@ -24,6 +24,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "cap-rate-vs-cash-on-cash-vs-dscr";
 const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
@@ -401,7 +402,7 @@ export default function BlogPost() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Side-by-side comparison</h2>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -454,7 +455,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           <h2 className="text-2xl sm:text-3xl">So which one matters most?</h2>
           <p>

@@ -28,6 +28,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { ScrollX } from "@/components/ui/scroll-x";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -274,7 +275,7 @@ export default function ArvCalculatorPage() {
               $45,000 of work to reach the neighborhood&apos;s renovated
               standard. The four best renovated comps:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -311,7 +312,7 @@ export default function ArvCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>.
               Applied to 1,400 finished square feet: 1,400 × $182.44 ≈
@@ -365,7 +366,7 @@ export default function ArvCalculatorPage() {
               assumptions, and when those don&apos;t hold, the multiplier
               should move:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -397,7 +398,7 @@ export default function ArvCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               That&apos;s why the multiplier in this calculator is an input,
               not a constant. And it&apos;s why the rule is a screen, not

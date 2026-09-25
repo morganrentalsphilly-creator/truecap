@@ -28,6 +28,7 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "Buildium vs TrueCap (2026): PM vs Deal Analysis",
@@ -288,7 +289,7 @@ export default function VsBuildiumPage() {
             Side-by-side on every dimension that matters for a
             comparison-shopping investor.
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -331,7 +332,7 @@ export default function VsBuildiumPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Buildium details based on publicly available product info as of
             2026. See{" "}

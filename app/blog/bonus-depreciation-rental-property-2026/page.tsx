@@ -21,6 +21,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "bonus-depreciation-rental-property-2026";
 const TITLE =
@@ -252,7 +253,7 @@ export default function BlogPost() {
             .
           </p>
           <p>The date boundary is essential:</p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[400px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -279,7 +280,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Acquisition can involve binding-contract and related rules, and
             &ldquo;placed in service&rdquo; generally means ready and available

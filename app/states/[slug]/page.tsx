@@ -31,6 +31,7 @@ import {
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
@@ -264,7 +265,7 @@ export default async function StatePage({
             {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
           </p>
           {hudCities.length > 0 ? (
-            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+            <ScrollX label="Table" className="mt-4 overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-[24rem] text-sm">
                 <caption className="sr-only">
                   HUD Fair Market Rent, FY{year}, by {state.name} market city
@@ -307,7 +308,7 @@ export default async function StatePage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
           ) : (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               TrueCap has no published HUD rent benchmark for a {state.name}{" "}

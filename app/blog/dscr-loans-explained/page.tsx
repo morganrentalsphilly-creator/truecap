@@ -25,6 +25,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "dscr-loans-explained";
 const TITLE =
@@ -359,7 +360,7 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">
             DSCR vs conventional — side by side
           </h2>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -419,7 +420,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="text-xs text-muted-foreground">
             This comparison describes common structures, not a commitment or
             universal program matrix. Requirements vary by lender and program.

@@ -24,6 +24,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "cap-rate-vs-gross-yield";
 const TITLE =
@@ -313,7 +314,7 @@ export default function BlogPost() {
             roughly a 6% cap. It&apos;s triage math, not underwriting — but it
             converts any listing quote into any other in your head.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -379,7 +380,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Read across any row and you&apos;re looking at one property quoted
             four ways. The familiar screening rules fall out of the table: the
@@ -406,7 +407,7 @@ export default function BlogPost() {
             twin sits in a high-tax jurisdiction paying $7,200 a year instead of
             $3,750.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -449,7 +450,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Gross yield and GRM score these buildings as identical. The cap rate
             says Duplex B earns $3,450 a year less — a 22% haircut on NOI.

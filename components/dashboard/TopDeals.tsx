@@ -11,6 +11,7 @@ import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import type { BuyBoxFitSummary } from "@/lib/buy-box";
 import type { DataConfidence } from "@/lib/data-confidence";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -316,7 +317,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
         ) : null}
       </div>
 
-      <div className="hidden overflow-x-auto md:block">
+      <ScrollX label="Top deals table" className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
@@ -436,7 +437,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollX>
     </div>
   );
 }

@@ -25,6 +25,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "exit-cap-rate-rental-property";
 const TITLE_PLAIN =
@@ -276,7 +277,7 @@ export default function ExitCapRatePost() {
               7% cost of sale and the loan payoff, and the five-year internal rate
               of return on your $84,000:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -313,7 +314,7 @@ export default function ExitCapRatePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Read down that table slowly, because it&apos;s the whole point of
               the article. The property is identical in every row — same rent,

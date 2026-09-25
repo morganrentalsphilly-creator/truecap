@@ -26,6 +26,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "debt-to-income-ratio-investment-property";
 const TITLE =
@@ -319,7 +320,7 @@ export default function DtiInvestmentPropertyPost() {
               To see the haircut&apos;s bite, run the same property both ways —
               once crediting the full rent, once at 75%:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -344,7 +345,7 @@ export default function DtiInvestmentPropertyPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Three points of modeled DTI hang on that one assumption. On a file
               near its applicable program limit, that difference can affect the

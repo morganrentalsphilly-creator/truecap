@@ -22,6 +22,7 @@ import {
   buildLoanAmortizationSchedule,
   summarizeLoanByYear,
 } from "@/lib/loan-amortization";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type YearRow = {
   year: number;
@@ -122,7 +123,7 @@ export function LoanAmortizationView({
         </span>
       </summary>
 
-      <div className="mt-4 overflow-x-auto">
+      <ScrollX label="Table" className="mt-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
@@ -193,7 +194,7 @@ export function LoanAmortizationView({
             faster in later years as interest tapers off.
           </p>
         ) : null}
-      </div>
+      </ScrollX>
     </details>
   );
 }

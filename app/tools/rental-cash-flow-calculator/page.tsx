@@ -29,6 +29,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
+import { ScrollX } from "@/components/ui/scroll-x";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -240,7 +241,7 @@ export default function RentalCashFlowCalculatorPage() {
               hand — a $250,000 single-family rental at $2,400/mo rent, bought
               with 20% down at 6.75% on a 30-year loan:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -301,7 +302,7 @@ export default function RentalCashFlowCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Notice what the honest version of this deal looks like: roughly
               $97/mo, not the $770/mo you&apos;d get by computing &ldquo;rent
@@ -362,7 +363,7 @@ export default function RentalCashFlowCalculatorPage() {
               Phoenix. But the bands TrueCap&apos;s own Buy Box classifier
               uses are a screening reference:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -407,7 +408,7 @@ export default function RentalCashFlowCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Two caveats. First, cash flow scales with deal size — judge it
               alongside{" "}

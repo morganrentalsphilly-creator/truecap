@@ -104,7 +104,7 @@ export function EmbedCodeBlock({ slug, title, siteUrl, defaultHeight }: Props) {
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto rounded-lg bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground font-mono">
+      <pre tabIndex={0} aria-label="Embed code" className="overflow-x-auto rounded-lg bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground font-mono focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
         <code>{snippet}</code>
       </pre>
     </div>

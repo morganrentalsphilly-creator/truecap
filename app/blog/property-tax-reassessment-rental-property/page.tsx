@@ -24,6 +24,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "property-tax-reassessment-rental-property";
 const TITLE =
@@ -310,7 +311,7 @@ export default function PropertyTaxReassessmentPost() {
               Here is what that single number does to the whole underwrite:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -369,7 +370,7 @@ export default function PropertyTaxReassessmentPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               On the seller&apos;s bill the deal looks like a thin but real

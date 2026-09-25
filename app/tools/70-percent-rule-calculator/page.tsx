@@ -24,6 +24,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { ScrollX } from "@/components/ui/scroll-x";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -246,7 +247,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               cheap houses those fixed costs eat a much bigger share of a
               much smaller spread.
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -283,7 +284,7 @@ export default function SeventyPercentRuleCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               <em>
                 *Higher isn&apos;t permission to overpay — it&apos;s a

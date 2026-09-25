@@ -55,7 +55,9 @@ describe("advocacy decision accessibility and reflow guards", () => {
 
   it("uses mobile ledger cards before enabling the wide table", () => {
     expect(ledger).toContain('<ul className="divide-y divide-border sm:hidden">');
-    expect(ledger).toContain('<div className="hidden overflow-x-auto sm:block">');
+    // The wide table sits in the keyboard-reachable ScrollX region (2026-09
+    // audit); the reflow contract (cards below sm, table from sm) is unchanged.
+    expect(ledger).toContain('<ScrollX label="Input confidence table" className="hidden overflow-x-auto sm:block">');
     expect(ledger).toContain("data-assumption-ledger-value={item.key}");
     expect(ledger).toContain(">Value</th>");
     expect(dashboard).toContain("values={values}");

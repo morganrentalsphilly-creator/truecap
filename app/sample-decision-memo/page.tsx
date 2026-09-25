@@ -119,8 +119,8 @@ export default function SampleDecisionMemoPage() {
                 <dd className="mt-1 text-sm font-semibold">
                   {ceiling.range.lower == null ? "No feasible downside price" : money(ceiling.range.lower)}–
                   {ceiling.range.upper == null ? "No feasible upside price" : money(ceiling.range.upper)}
+                  <span className="mt-1 block text-xs font-normal text-muted-foreground">If {ceiling.range.label}.</span>
                 </dd>
-                <p className="mt-1 text-xs text-muted-foreground">If {ceiling.range.label}.</p>
               </div>
             </dl>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">

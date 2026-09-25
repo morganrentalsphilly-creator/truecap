@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "how-much-money-to-buy-a-rental-property";
 const TITLE =
@@ -332,7 +333,7 @@ export default function BlogPost() {
             7.25%, which is $818.61 a month of principal and interest, so PITIA
             comes to <strong>$1,131 a month</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -420,7 +421,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Note what the reserve is quietly doing: if the house sits empty for
             a month while you finish the make-ready, that $1,131 comes out of
@@ -437,7 +438,7 @@ export default function BlogPost() {
             rent $2,400. Loan of $240,000 at 7.25% is $1,637.23 a month, and
             PITIA is <strong>$2,071</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -490,7 +491,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Closing costs here break down as $2,400 origination, $750 appraisal,
             $1,000 underwriting and processing, $2,200 title and settlement,
@@ -515,7 +516,7 @@ export default function BlogPost() {
             Taxes at 1.0% ($5,000), insurance $2,600. Loan of $400,000 at 7.25%
             is $2,728.72 a month; PITIA is <strong>$3,362</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -568,7 +569,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           <h2 className="text-2xl sm:text-3xl">
             The pattern: 1.4x to 1.7x your down payment
@@ -577,7 +578,7 @@ export default function BlogPost() {
             Line the three tiers up and the useful number falls out. It is not a
             percentage of price — it is a multiple of the down payment:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -622,7 +623,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             The multiple shrinks as price rises, and the reason is worth
             internalising if you are shopping cheap houses:{" "}
@@ -730,7 +731,7 @@ export default function BlogPost() {
             return in a less obvious one. Same $300,000 house, three
             conventional tiers:
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -775,7 +776,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             Three things in that table. First, 15% down is the worst of the
             three: it adds mortgage insurance — budget roughly 1% of the loan
@@ -819,7 +820,7 @@ export default function BlogPost() {
             taxes at 1.1% are $367, insurance is $183 — PITIA{" "}
             <strong>$3,268</strong>.
           </p>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -862,7 +863,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p>
             <strong>
               A $400,000 two-unit costs less cash to buy than a $150,000

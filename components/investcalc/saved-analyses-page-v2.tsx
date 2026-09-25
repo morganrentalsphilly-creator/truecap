@@ -187,6 +187,7 @@ import {
 import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
 import { savedDealsListCountLabel } from "@/lib/saved-deals-list-copy";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -3883,7 +3884,7 @@ export function SavedAnalysesPage({
             })}
           </div>
 
-          <div className="hidden overflow-x-auto xl:block">
+          <ScrollX label="Deals table" className="hidden overflow-x-auto xl:block">
             {/* Cells carried NO horizontal padding, so "-$575/mo" "-43.1%"
                 "+5.2%" "$200,000" ran together into one stream of digits. The
                 min-width goes up with it: at 900px across seven-plus columns
@@ -4429,7 +4430,7 @@ export function SavedAnalysesPage({
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           {displayItems.length === 0 && (
             <div className="py-16 px-6 text-center">

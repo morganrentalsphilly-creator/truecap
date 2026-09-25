@@ -23,7 +23,7 @@ export function BlogByline() {
       By{" "}
       <Link
         href="/about"
-        className="text-foreground/80 transition-colors hover:text-primary"
+        className="text-foreground/80 underline decoration-border underline-offset-2 transition-colors hover:text-primary hover:decoration-primary"
       >
         TrueCap
       </Link>{" "}

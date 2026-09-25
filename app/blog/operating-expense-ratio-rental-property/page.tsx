@@ -25,6 +25,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "operating-expense-ratio-rental-property";
 const TITLE_PLAIN =
@@ -284,7 +285,7 @@ export default function OperatingExpenseRatioPost() {
               <strong>$28,200 of effective gross income</strong>. Here are the
               operating expenses, line by line:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -327,7 +328,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               So the ratio is $11,156 ÷ $28,200 ≈ <strong>40%</strong>, and NOI
               is $28,200 − $11,156 = <strong>$17,044</strong>, a 6.8% cap rate on
@@ -357,7 +358,7 @@ export default function OperatingExpenseRatioPost() {
               punishing the local tax bill is. As a working set of 2026 bands,
               measured on effective gross income and excluding debt service:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -384,7 +385,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Two cautions before you use these. First, a high OER isn&apos;t
               automatically a bad deal — a building can run at 55% and still be a

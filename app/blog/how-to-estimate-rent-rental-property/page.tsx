@@ -18,6 +18,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "how-to-estimate-rent-rental-property";
 const TITLE = "How to estimate rent on a rental property (2026)";
@@ -233,7 +234,7 @@ export default function HowToEstimateRentPost() {
               same neighborhood:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -285,7 +286,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Walk through Comp A: it has an extra half-bath versus the subject
@@ -396,7 +397,7 @@ export default function HowToEstimateRentPost() {
               about 8%:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -428,7 +429,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               An 8% rent error moves the cap rate by about 0.6 points, swings

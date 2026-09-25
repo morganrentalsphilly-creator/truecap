@@ -25,6 +25,7 @@ import type { AnalysisResult } from "@/lib/calc-analysis";
 import { formatDscr } from "@/lib/financial-presentation";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { buildMortgageScenarioComparisons } from "@/lib/mortgage-scenario-compare";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 function fmtUsd(n: number, withDecimals = false): string {
   return new Intl.NumberFormat("en-US", {
@@ -139,7 +140,7 @@ export function MortgageScenarioCompare({
       {/* Desktop: 4-column table. Mobile: stacked cards (horizontal
           scroll feels cramped on this much data). */}
       <div className="hidden sm:block">
-        <div className="overflow-x-auto">
+        <ScrollX label="Comparison table" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
@@ -219,7 +220,7 @@ export function MortgageScenarioCompare({
               />
             </tbody>
           </table>
-        </div>
+        </ScrollX>
       </div>
 
       {/* Mobile - vertical cards */}

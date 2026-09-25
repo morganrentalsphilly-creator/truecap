@@ -25,6 +25,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "negative-leverage-real-estate";
 const TITLE =
@@ -307,7 +308,7 @@ export default function NegativeLeveragePost() {
               up to 9% and watch what leverage does to the same $75,000 of cash:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -358,7 +359,7 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               The crossover sits exactly at the 7.98% loan constant. Below it,
@@ -425,7 +426,7 @@ export default function NegativeLeveragePost() {
               property ($18,000 of NOI) and change only the down payment:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -452,7 +453,7 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               The return moves the <em>opposite</em> way to the textbook. Every
@@ -483,7 +484,7 @@ export default function NegativeLeveragePost() {
               amortization:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -515,7 +516,7 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               In the cheap-money era a 5.4% loan constant sat comfortably below

@@ -29,6 +29,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "free-biggerpockets-calculator-alternatives";
 const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
@@ -346,7 +347,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The free alternatives at a glance</h2>
 
-            <div className="not-prose mb-8 overflow-x-auto rounded-2xl border border-border bg-card">
+            <ScrollX label="Data table" className="not-prose mb-8 overflow-x-auto rounded-2xl border border-border bg-card">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40">
                   <tr className="text-left">
@@ -380,7 +381,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <h2>The 6 alternatives, ranked</h2>
 

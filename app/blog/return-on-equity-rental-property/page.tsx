@@ -22,6 +22,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "return-on-equity-rental-property";
 const TITLE =
@@ -281,7 +282,7 @@ export default function ReturnOnEquityPost() {
               watch what happens as that slice thickens:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -322,7 +323,7 @@ export default function ReturnOnEquityPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Look at what the table is doing. The dollar return nearly doubles —

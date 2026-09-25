@@ -29,6 +29,7 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "TrueCap vs Stessa (2026): Acquisition Workflows",
@@ -288,7 +289,7 @@ export default function VsStessaPage() {
             Note: green check ≠ &quot;better&quot; — it means &quot;this is what
             the tool is built for.&quot;
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -328,7 +329,7 @@ export default function VsStessaPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
             <p className="font-semibold text-foreground">
               Sources reviewed August 27, 2026:

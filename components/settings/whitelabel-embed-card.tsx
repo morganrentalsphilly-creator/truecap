@@ -140,7 +140,7 @@ export function WhitelabelEmbedCard() {
 
         {snippet ? (
           <div className="space-y-2">
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground">
+            <pre tabIndex={0} aria-label="Embed code" className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
               <code>{snippet}</code>
             </pre>
             <Button type="button" size="sm" onClick={copy} disabled={isBusy} className="gap-1.5">

@@ -69,6 +69,7 @@ import {
   type ComparisonNormalizationMode,
 } from "@/lib/compare-normalization";
 import { CompareDealPicker, type ComparePickerDeal } from "@/components/investcalc/compare-deal-picker";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const MAX_COMPARE_ITEMS = 4;
 const MOBILE_DEAL_COLORS = [
@@ -196,7 +197,7 @@ function AssumptionConsistencyPanel({
         <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           Review assumption matrix
         </summary>
-        <div className="overflow-x-auto pb-3">
+        <ScrollX label="Comparison table" className="overflow-x-auto pb-3">
           <table className="min-w-[42rem] w-full border-separate border-spacing-0 text-left text-xs">
             <caption className="sr-only">
               Saved financing and operating assumptions for each compared deal
@@ -240,7 +241,7 @@ function AssumptionConsistencyPanel({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollX>
       </details>
     </section>
   );

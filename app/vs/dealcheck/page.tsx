@@ -21,6 +21,7 @@ import {
 } from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "DealCheck Alternative for Rental Analysis (2026)",
@@ -250,7 +251,7 @@ export default function VsDealCheckPage() {
             Both products analyze rentals. The difference is how each gets you
             from inputs to action.
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left">
@@ -284,7 +285,7 @@ export default function VsDealCheckPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Pricing, plan limits, and exact feature availability change.
             DealCheck details were reviewed against its official{" "}

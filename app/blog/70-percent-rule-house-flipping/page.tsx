@@ -24,6 +24,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
@@ -272,7 +273,7 @@ export default function SeventyPercentRulePost() {
               offer, put $45,000 into it, and sell it six months later at the
               $300,000 ARV. Here is the whole ledger:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -323,7 +324,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               That $52,200 is about 17% of ARV — a healthy flip. Watch how the
               $90,000 spread split: roughly $37,800 went to buying, holding, and
@@ -367,7 +368,7 @@ export default function SeventyPercentRulePost() {
               The workhorse method is price per finished square foot. Say three
               renovated comps nearby sold like this:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -398,7 +399,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               They cluster around $210/sqft. Your subject is 1,450 finished square
               feet, so 1,450 × $210 ≈ $304,500 — round down to $300,000 to stay
@@ -469,7 +470,7 @@ export default function SeventyPercentRulePost() {
               house as on a $400,000 one — so on cheap houses those fixed costs
               eat a much bigger share of a much smaller spread.
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
@@ -506,7 +507,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               <em>
                 *Higher isn&apos;t permission to overpay — it&apos;s a warning

@@ -337,6 +337,7 @@ import {
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
 import dynamic from "next/dynamic";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 // Dialogs below are opened only after explicit post-analysis actions. Keep
 // their UI modules out of the anonymous landing bootstrap, but retain the
@@ -9438,6 +9439,7 @@ export function InvestCalcPage({
       ) : null}
       {/* Hero section */}
       <section
+        aria-label="Analysis setup"
         className={cn(
           "max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6",
           focusedResultsMode && "hidden",
@@ -9589,7 +9591,7 @@ export function InvestCalcPage({
             on sm/xl. The 4-col mobile grid was previously too cramped
             and would force 10px text with tiny tap targets. */}
         {areAnalysisTabsEnabled ? (
-          <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
+          <ScrollX label="Table" className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
             {RELEASED_INPUT_TABS.map((tab) => (
               <button
                 type="button"
@@ -9647,7 +9649,7 @@ export function InvestCalcPage({
                   )}
               </button>
             ))}
-          </div>
+          </ScrollX>
         ) : null}
       </section>
 

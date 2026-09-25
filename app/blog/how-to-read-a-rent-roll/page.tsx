@@ -16,6 +16,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const SLUG = "how-to-read-a-rent-roll";
 const TITLE =
@@ -201,7 +202,7 @@ export default function HowToReadARentRollPost() {
             very different numbers out of it.
           </p>
 
-          <div className="not-prose my-6 overflow-x-auto">
+          <ScrollX label="Data table" className="not-prose my-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-muted text-left">
@@ -278,7 +279,7 @@ export default function HowToReadARentRollPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The bottom line is three numbers, not one

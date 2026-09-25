@@ -26,6 +26,7 @@ import {
   type AssumptionSourceClass,
 } from "@/lib/decision-contract";
 import { cn } from "@/lib/utils";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type Props = {
   confidence: InputConfidenceResult;
@@ -749,7 +750,7 @@ export function InputConfidenceCard({
                   );
                 })}
               </ul>
-              <div className="hidden overflow-x-auto sm:block">
+              <ScrollX label="Input confidence table" className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[720px] text-left text-xs">
                   <caption className="sr-only">
                     Assumption values, sources, confirmation types, evidence
@@ -828,7 +829,7 @@ export function InputConfidenceCard({
                     })}
                   </tbody>
                 </table>
-              </div>
+              </ScrollX>
             </>
           ) : (
             <>
@@ -889,8 +890,8 @@ export function InputConfidenceCard({
                   </li>
                 ))}
               </ul>
-              <div
-                className="hidden overflow-x-auto sm:block"
+              <ScrollX
+                label="Input confidence table" className="hidden overflow-x-auto sm:block"
                 tabIndex={0}
                 aria-label="Scrollable input confidence table"
               >
@@ -968,7 +969,7 @@ export function InputConfidenceCard({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollX>
             </>
           )}
           <p className="border-t border-border bg-muted/20 px-3 py-2 text-[10px] leading-relaxed text-muted-foreground">

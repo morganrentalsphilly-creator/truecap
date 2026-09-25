@@ -14,6 +14,7 @@ import {
 } from "@/components/investcalc/form-field-helpers";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type MoneyFieldName =
   | "stabilizedMonthlyRent"
@@ -301,7 +302,7 @@ export function BuyAndHoldAssumptionsSection({
           </div>
 
           {propertyType !== "single-family" && units.length > 0 ? (
-            <div className="mt-5 overflow-x-auto rounded-lg border border-border">
+            <ScrollX label="Table" className="mt-5 overflow-x-auto rounded-lg border border-border">
               <table className="w-full min-w-[520px] text-left text-sm">
                 <caption className="sr-only">
                   Current and stabilized unit rent roll
@@ -371,7 +372,7 @@ export function BuyAndHoldAssumptionsSection({
                   })}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
           ) : null}
         </AssumptionGroup>
 
