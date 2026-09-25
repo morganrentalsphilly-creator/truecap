@@ -110,7 +110,46 @@ follow.)_
 
 ## 4. Phase 2 — functional end-to-end tests
 
-_(pending)_
+Harness notes: the authenticated project needs the disposable Supabase stack
+(Docker), so those specs run in CI's `browser-regressions` job on the PR;
+public specs ran locally against `scripts/dev-isolated.sh` (dev on :3102,
+production build on :3100). Address enrichment is served by a loopback
+HUD/FRED mock (`e2e/support/enrichment-mock-server.ts`) through the new
+loopback-only `HUD_API_BASE_URL` / `FRED_API_BASE_URL` overrides; CI sets
+the same variables.
+
+| # | Flow | Spec | Where it runs | Result |
+| --- | --- | --- | --- | --- |
+| 2.1 | Free analysis: typed address → HUD rent (state-average path) + FRED rate autofill, labelled sources, values editable; provider timeout / 500 / malformed / empty leave the form usable; manual annual property tax moves cash flow by exactly the difference; every assumption group editable after a run | `e2e/audit-analyzer-autofill.spec.ts` (10) | local + CI | ✅ 10/10 local |
+| 2.1 | Results render verdict, Deal score, four metrics, Offer Ceiling; consistent `$1,234` / `x.xx%` formatting; one-shot anonymous exact decision, second deal gated with a sign-up CTA | `e2e/audit-analyzer-results.spec.ts` (2) | local + CI | ✅ |
+| 2.1 | ZIP/county/SAFMR resolution ladder + every failure mode with the network stubbed | `lib/__tests__/audit-enrichment-resolution.test.ts` (15) | vitest | ✅ |
+| 2.2 | New deal in the dashboard: create → save → edit → save → deep link → duplicate → compare → delete; sample deal inside the shell | `e2e/authenticated-audit-pro.spec.ts` (2) | CI | ⏳ PR CI |
+| 2.3 | Pro never gated (projections + stress test open); free account with an expired trial sees Pro badges, gated PDF, Pro-only routes bounce, saving still works | `e2e/authenticated-audit-pro.spec.ts`, `e2e/authenticated-free-gating.spec.ts` (2) | CI | ⏳ PR CI |
+| 2.4 | Sign up (lands in the app; trial = 3 Pro deals + 1 comparison), sign out, wrong password, reset request, reset page without a session | `e2e/authenticated-audit-account.spec.ts` (4) | CI | ⏳ PR CI |
+| 2.4 | Upgrade, cancel, failed payment (Stripe test cards), webhook → plan | — | ⛔ | CI has placeholder Stripe keys and this machine has no Docker; the webhook route is covered by `lib/__tests__/stripe-webhook-route-binding.test.ts` (claim/duplicate/retry/foreign-app/unresolved) and `subscription-sync-binding.test.ts`. Browser-level billing needs test-mode Stripe secrets in CI (🧭 D-4). |
+| 2.5 | 1% Rule calculator pass/fail + bad data; spreadsheet is a real, ungated `.xlsx` | `e2e/audit-free-tools.spec.ts` (2) | local + CI | ✅ |
+| 2.6 | Form hardening: empty, zero, negative, huge, decimals, commas, currency symbols, pasted text, invalid ZIP, aborted network, double submit — no NaN/Infinity/undefined/blank/stuck spinner | `e2e/audit-form-hardening.spec.ts` (5) | local + CI | ✅ |
+| 2.7 | Math: 8 fixture deals re-derived from /methodology (cash flow, cap rate, DSCR, CoC to the cent under v1's whole-dollar line convention; within the rounding envelope of the literal formula), verdict tiers, Deal score arithmetic + bands, Offer Ceiling by independent bisection | `lib/__tests__/audit-independent-math.test.ts` (27) | vitest | ✅ engine unchanged |
+| 2.8 | Refresh mid-form restores the draft; back/forward keep it; second tab sees it; result/draft survives reload | `e2e/audit-state-persistence.spec.ts` (3) | local + CI | ✅ |
+
+Existing coverage reused rather than duplicated: `public-product.spec.ts`
+(sample decision, anonymous exact decision + bound PDF, next-deal reset,
+axe on / and /pricing, protected-destination login handoff),
+`authenticated-core-workflows.spec.ts` (criteria, shortlist, scenarios,
+compare, document validation, PDF export), `authenticated-product.spec.ts`
+(guest save/share survive sign-in).
+
+Methodology vs code (2.7): the page's formulas match the engine. One
+convention is undocumented — v1 rounds each monthly expense line (tax,
+insurance, HOA, utilities, maintenance, vacancy, management, CapEx) to a
+whole dollar before summing, so a hand calculation from the literal formula
+lands within a few dollars a month (M-1, copy fix in Phase 3).
+
+Test-isolation lessons recorded for the next person: the action caches HUD
+state data and FRED observations in memory for 24 h per server process and
+the Offer Ceiling has a 120/hour per-IP limiter, so repeated local runs
+against one long-lived server change outcomes — restart the server between
+runs (CI is fresh per run).
 
 ## 5. Phase 3 — Impeccable UI/UX pass
 
@@ -120,14 +159,15 @@ _(pending)_
 
 | ID | Sev | Route / area | Root cause | Fix | Commit |
 | --- | --- | --- | --- | --- | --- |
-| L-1 | Low | `app/actions/{batch-triage,saved-analyses,user-buy-boxes}.ts` | unused `getEntitlementsForUser` import left behind by the `requireVerifiedEntitlements` refactor | import removed | _pending_ |
-| L-2 | Low | `components/ui/use-toast.ts` | byte-identical dead duplicate of `hooks/use-toast.ts` (nothing imports it) | deleted | _pending_ |
-| L-3 | Low | `hooks/use-toast.ts` | `actionTypes` const used only as a type | replaced by a type alias | _pending_ |
-| L-4 | Low | `components/investcalc/investcalc-page.tsx` auto-export effect | ref-gated one-shot effect flagged by exhaustive-deps | intent documented, rule disabled on that line | _pending_ |
-| L-5 | Low | `components/investcalc/property-comps-card.tsx` saved-comps effect | same as L-4 (stable setter) | same | _pending_ |
-| L-6 | Low | `emails/weekly-digest.tsx`, `lib/__tests__/signed-token.test.ts`, `scripts/preview-daily-campaign.ts` | unused imports / destructures | removed | _pending_ |
-| L-7 | Low | `scripts/seo/indexnow.mjs` | `let` never reassigned | `const` | _pending_ |
-| L-8 | Low | `components/investcalc/template-form-dialog.tsx` | `form.watch()` inside JSX skips React-Compiler compilation for the component | `useWatch` at the top of the component | _pending_ |
+| L-1 | Low | `app/actions/{batch-triage,saved-analyses,user-buy-boxes}.ts` | unused `getEntitlementsForUser` import left behind by the `requireVerifiedEntitlements` refactor | import removed | ad43606 |
+| L-2 | Low | `components/ui/use-toast.ts` | byte-identical dead duplicate of `hooks/use-toast.ts` (nothing imports it) | deleted | ad43606 |
+| L-3 | Low | `hooks/use-toast.ts` | `actionTypes` const used only as a type | replaced by a type alias | ad43606 |
+| L-4 | Low | `components/investcalc/investcalc-page.tsx` auto-export effect | ref-gated one-shot effect flagged by exhaustive-deps | intent documented, rule disabled on that line | ad43606 |
+| L-5 | Low | `components/investcalc/property-comps-card.tsx` saved-comps effect | same as L-4 (stable setter) | same | ad43606 |
+| L-6 | Low | `emails/weekly-digest.tsx`, `lib/__tests__/signed-token.test.ts`, `scripts/preview-daily-campaign.ts` | unused imports / destructures | removed | ad43606 |
+| L-7 | Low | `scripts/seo/indexnow.mjs` | `let` never reassigned | `const` | ad43606 |
+| L-8 | Low | `components/investcalc/template-form-dialog.tsx` | `form.watch()` inside JSX skips React-Compiler compilation for the component | `useWatch` at the top of the component | ad43606 |
+| M-1 | Low | `/methodology` | the page never states that monthly expense lines are rounded to whole dollars before summing, so a reader reproducing the formula gets a slightly different NOI | one sentence added under "Cap rate" (Phase 3 clarify) | _pending_ |
 
 ## 7. Needs Morgan's decision
 
@@ -136,6 +176,7 @@ _(pending)_
 | D-1 | Move the ~120 `opengraph-image.tsx` routes (and `app/og/home/route.tsx`) off `runtime = "edge"` | Next 16 warns the Edge Runtime is deprecated; `next/og` renders under the Node runtime too, but this changes where ~120 functions execute on Vercel (cold-start and pricing profile) | migrate in one PR after this audit, verify one OG image per family |
 | D-2 | Replace the production keys in the checkout's `.env` with a development project | a stray `npm run dev` on this machine writes to production with service-role power | create a dev Supabase project, or delete `.env` and rely on `scripts/dev-isolated.sh` |
 | D-3 | Install Docker Desktop (or OrbStack) on this machine | without it the authenticated Playwright gate and the seeded free/Pro crawls cannot run locally; CI is the only place they run | install; the CI recipe (`supabase start`, `db reset`, seed) then works locally verbatim |
+| D-4 | Add test-mode Stripe secrets (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, the two Pro price ids) as GitHub Actions secrets for a billing lane | CI currently runs with `sk_test_ci_placeholder`, so upgrade / cancel / failed-payment / webhook flows cannot be exercised end-to-end anywhere; only the route-level unit tests cover them | add the secrets to a protected environment and gate a `billing-e2e` job on it |
 
 ## 8. Known issues and next steps
 
