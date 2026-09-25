@@ -91,8 +91,9 @@ test("Pro is never gated: projections and stress test open, then save → edit �
     // ledger row is collapsed by default, so assert the value, not visibility).
     await expect(page.locator('[data-assumption-ledger-value="rent"]').first()).toContainText("2,700");
 
-    // Duplicate from the deal workspace → the analyzer carries the assumptions
-    // but asks for the new property.
+    // Duplicate from the deal workspace → a labelled scenario copy of the SAME
+    // property opens in the analyzer with every assumption carried over
+    // (same-address duplicates are labelled, not merged).
     await page.goto(`/dashboard/saved-analyses/${dealId}`, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1, name: addressA })).toBeVisible({ timeout: 30_000 });
     const duplicate = page.getByRole("button", { name: /duplicate|new deal from this/i }).first();
@@ -105,18 +106,30 @@ test("Pro is never gated: projections and stress test open, then save → edit �
     await expect(target).toHaveURL(/\/dashboard\/new/, { timeout: 30_000 });
     const dupForm = target.locator('form[data-calc-form="true"]');
     await expect(dupForm).toHaveAttribute("data-calculator-ready", "true", { timeout: 30_000 });
-    await expect(dupForm.getByLabel("Property Address", { exact: true })).toHaveValue("");
-    await dupForm.getByLabel("Property Address", { exact: true }).fill(addressB);
-    await dupForm.getByLabel("Price to analyze", { exact: true }).fill("230000");
-    await dupForm.getByLabel("Expected gross monthly rent", { exact: true }).fill("2500");
-    await dupForm.locator('button[data-inform-submit="true"]').click();
-    const dupSummary = target.locator("section[aria-labelledby='decision-summary-title']");
-    await expect(dupSummary).toBeVisible({ timeout: 30_000 });
-    const saveB = dupSummary.getByRole("button", { name: "Save", exact: true });
+    await expect(dupForm.getByLabel("Property Address", { exact: true })).toHaveValue(addressA);
+    await expect(dupForm.getByLabel("Price to analyze", { exact: true })).toHaveValue(/250,?000/);
+    if (dupPage) await dupPage.close();
+
+    // A second property for the comparison, entered fresh.
+    await page.goto("/dashboard/new?fresh=1", { waitUntil: "domcontentloaded" });
+    const formB = page.locator('form[data-calc-form="true"]');
+    await expect(formB).toHaveAttribute("data-calculator-ready", "true", { timeout: 30_000 });
+    await formB.getByLabel("Property Address", { exact: true }).fill(addressB);
+    await formB.getByLabel("Price to analyze", { exact: true }).fill("230000");
+    await formB.getByLabel("Expected gross monthly rent", { exact: true }).fill("2500");
+    const useNewProperty = page.getByRole("dialog", { name: "Use this new property?" });
+    if (await useNewProperty.isVisible().catch(() => false)) {
+      await useNewProperty.getByRole("button", { name: "Use new property", exact: true }).click();
+      await formB.getByLabel("Price to analyze", { exact: true }).fill("230000");
+      await formB.getByLabel("Expected gross monthly rent", { exact: true }).fill("2500");
+    }
+    await formB.locator('button[data-inform-submit="true"]').click();
+    const summaryB = page.locator("section[aria-labelledby='decision-summary-title']");
+    await expect(summaryB).toBeVisible({ timeout: 30_000 });
+    const saveB = summaryB.getByRole("button", { name: "Save", exact: true });
     await expect(saveB).toBeEnabled({ timeout: 20_000 });
     await saveB.click();
-    await expect(target).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, { timeout: 30_000 });
-    if (dupPage) await dupPage.close();
+    await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, { timeout: 30_000 });
 
     // Compare the two saved deals side by side.
     await page.goto("/dashboard/saved-analyses", { waitUntil: "domcontentloaded" });
