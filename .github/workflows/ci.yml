@@ -792,6 +792,9 @@ jobs:
       FRED_API_BASE_URL: http://127.0.0.1:3199
       HUD_API_KEY: audit-hud-key
       FRED_API_KEY: audit-fred-key
+      # Browser runs must not report to the production Sentry project.
+      SENTRY_DISABLED: "1"
+      NEXT_PUBLIC_SENTRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v7
 

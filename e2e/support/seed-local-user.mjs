@@ -145,10 +145,14 @@ export async function seedLocalAuthenticatedUser(environment = process.env) {
   // AFTER that evaluation, so expire it; the Pro fixture keeps its row (a paid
   // subscription outranks it). A missing row means the migration did not
   // apply — fail loudly rather than test the wrong tier.
-  const expiredAt = new Date(periodStart.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  // The table enforces a window check on (started_at, expires_at), so move
+  // both bounds into the past as one consistent 21-day evaluation.
+  const DAY = 24 * 60 * 60 * 1000;
+  const expiredStart = new Date(periodStart.getTime() - 30 * DAY).toISOString();
+  const expiredAt = new Date(periodStart.getTime() - 9 * DAY).toISOString();
   const { data: expired, error: expireError } = await admin
     .from("product_evaluations")
-    .update({ expires_at: expiredAt })
+    .update({ started_at: expiredStart, expires_at: expiredAt })
     .eq("user_id", createdFree.user.id)
     .select("user_id");
   if (expireError) {
