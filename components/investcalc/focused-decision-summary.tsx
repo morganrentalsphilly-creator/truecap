@@ -20,6 +20,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import {
+  isTrueCapSyntheticSampleAddress,
+  SAMPLE_DEAL_DISPLAY,
+} from "@/lib/sample-deal";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
@@ -480,9 +484,13 @@ export function FocusedDecisionSummary({
   );
   const isSampleCriteria =
     targetProfileId === "truecap-synthetic-sample-target";
-  const displayAddress = isSampleCriteria
-    ? "Philadelphia rental example"
-    : values.address;
+  // Keyed on the ADDRESS, not the target profile: a signed-in user runs the
+  // sample under their own targets, and used to see the internal fixture
+  // string "TrueCap Synthetic Sample, …" as the deal's address (CI caught it).
+  const displayAddress =
+    isSampleCriteria || isTrueCapSyntheticSampleAddress(values.address)
+      ? SAMPLE_DEAL_DISPLAY.shortAddress
+      : values.address;
   // Human phrasing only — the underlying contract identifiers (profileVersion,
   // rulesSnapshotVersion) are untouched. Raw slugs and schema-version suffixes
   // read as debug output on the main result, so they never render verbatim.

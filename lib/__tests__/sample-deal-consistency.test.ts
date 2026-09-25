@@ -234,8 +234,13 @@ describe("sample Pro preview only runs when it can still show something", () => 
     );
     expect(normalize(summary)).toContain(
       normalize(
-        `const displayAddress = isSampleCriteria ? "${SAMPLE_DEAL_FIXTURE.display.shortAddress}" : values.address;`,
+        "const displayAddress = isSampleCriteria || isTrueCapSyntheticSampleAddress(values.address) ? SAMPLE_DEAL_DISPLAY.shortAddress : values.address;",
       ),
     );
+    // A signed-in user runs the sample under their OWN targets, so the
+    // profile-keyed hop alone let the fixture address "TrueCap Synthetic
+    // Sample, …" reach the dashboard (CI, 2026-09-25); the address itself is
+    // the second key.
+    expect(summary).toContain("isTrueCapSyntheticSampleAddress");
   });
 });
