@@ -137,3 +137,4 @@ config.bat
 !.claude/agents/
 .impeccable/*
 !.impeccable/design.json
+!.impeccable/config.json

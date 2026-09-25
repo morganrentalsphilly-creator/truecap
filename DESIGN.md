@@ -33,34 +33,73 @@ colors:
 typography:
   display:
     fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "2.25rem → 3rem (sm) → 2.4rem (lg)"
+    fontSize: "3rem"
+    fontWeight: 800
+    lineHeight: 1.04
+    letterSpacing: "-0.025em"
+  display-lg:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.4rem"
     fontWeight: 800
     lineHeight: 1.04
     letterSpacing: "-0.025em"
   headline:
     fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.5rem → 1.875rem (sm)"
+    fontSize: "2.25rem"
+    fontWeight: 800
+    lineHeight: 1.1
+    letterSpacing: "-0.025em"
+  headline-sm:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.875rem"
     fontWeight: 800
     lineHeight: 1.2
     letterSpacing: "-0.025em"
+  title-lg:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 700
+    lineHeight: 1.25
   title:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 700
+    lineHeight: 1.35
+  title-sm:
     fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 700
     lineHeight: 1.35
   body:
     fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem (0.875rem in dense product UI)"
+    fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.6
+  body-sm:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.5
   label:
     fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: "0.04em"
+  label-xs:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.6875rem"
+    fontWeight: 600
+    lineHeight: 1.35
+  label-2xs:
+    fontFamily: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.625rem"
+    fontWeight: 600
+    lineHeight: 1.3
     letterSpacing: "0.04em"
   numeral:
     fontFamily: "DM Mono, ui-monospace, monospace"
-    fontSize: "inherit"
+    fontSize: "1rem"
     fontWeight: 500
     fontVariation: "tabular-nums"
 rounded:
@@ -238,6 +277,10 @@ figures. Tight tracking (`tracking-tight`, −0.025em) on every heading;
   copy runs in `prose` at `max-w-3xl` (≈70ch).
 - **Label** (600, `text-xs`, uppercase with `tracking-wide` where used):
   metric labels, source chips ("HUD FMR", "Your input"), table headers.
+- **Label-xs / Label-2xs** (600, 11px / 10px): the two dense product-UI
+  steps below `text-xs` — ledger sub-labels, chip captions, table footnotes.
+  10px is the floor. Use the named `text-2xs` / `text-3xs` utilities, not
+  arbitrary `text-[11px]` / `text-[10px]` values.
 - **Numeral** (DM Mono 500, `tabular-nums`): every currency, percent and
   ratio in cards, tables and the metrics band.
 
