@@ -16,7 +16,7 @@
  */
 
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { checkAdmin } from "@/lib/admin-guard";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { TestimonialReviewForm } from "@/components/admin/testimonial-review-form";
@@ -107,7 +107,12 @@ function isPromotionEligible(row: SubmissionRow): boolean {
 
 export default async function AdminTestimonialsPage() {
   const adminCheck = await checkAdmin();
-  if (!adminCheck.ok) notFound();
+  if (!adminCheck.ok) {
+    // Same shape as /admin/seo and /admin/email-preview: a signed-out visitor
+    // gets the login page with a return path; a signed-in non-admin gets 404.
+    if (adminCheck.reason === "UNAUTHENTICATED") redirect("/auth/login?next=/admin/testimonials");
+    notFound();
+  }
 
   const admin = createAdminSupabaseClient();
   const { data, error } = await admin
@@ -195,7 +200,7 @@ export default async function AdminTestimonialsPage() {
                   <summary className="cursor-pointer text-xs font-bold text-primary">
                     Copy-ready proof-records skeleton
                   </summary>
-                  <pre className="mt-2 overflow-x-auto rounded-lg bg-muted p-3 text-[11px] leading-relaxed">
+                  <pre tabIndex={0} aria-label="Testimonial payload" className="mt-2 overflow-x-auto rounded-lg bg-muted p-3 text-[11px] leading-relaxed">
                     {promotionSkeleton(row)}
                   </pre>
                 </details>
