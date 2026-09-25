@@ -56,11 +56,14 @@ export function UpdatePasswordForm() {
         return;
       }
 
+      // The recovery link already established a session, so the user is
+      // signed in with the new password — send them into the product rather
+      // than back to a login form they don't need.
       toast({
         title: "Password updated",
-        description: "You can sign in with your new password.",
+        description: "You're signed in with your new password.",
       });
-      router.push("/auth/login");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       // A thrown action here strands the user mid-reset on a one-time link

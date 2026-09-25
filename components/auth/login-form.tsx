@@ -39,6 +39,10 @@ export function LoginForm() {
   // they tried so the resend goes to the right address.
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
+  // Inline, announced failure (2026-09 audit: a wrong password used to be a
+  // toast only — droppable by TOAST_LIMIT and invisible to a screen reader
+  // focused on the form).
+  const [signInError, setSignInError] = useState<string | null>(null);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -92,18 +96,16 @@ export function LoginForm() {
         const isUnconfirmed = /confirm your email/i.test(result.message);
         if (isUnconfirmed) {
           setUnconfirmedEmail(values.email.trim());
+          setSignInError(null);
         } else {
           setUnconfirmedEmail(null);
+          setSignInError(result.message);
         }
-        toast({
-          title: "Sign in failed",
-          description: result.message,
-          variant: "destructive",
-        });
         return;
       }
 
       setUnconfirmedEmail(null);
+      setSignInError(null);
       toast({
         title: "Welcome back",
         description: "You are signed in.",
@@ -279,6 +281,24 @@ export function LoginForm() {
                 "Resend confirmation"
               )}
             </button>
+          </div>
+        ) : null}
+
+        {signInError ? (
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground"
+          >
+            <p className="font-semibold text-destructive">Sign in failed</p>
+            <p className="mt-0.5 leading-relaxed">{signInError}</p>
+            {/password/i.test(signInError) ? (
+              <Link
+                href="/auth/forgot-password"
+                className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
+              >
+                Reset your password
+              </Link>
+            ) : null}
           </div>
         ) : null}
 

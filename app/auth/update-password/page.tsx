@@ -13,7 +13,6 @@ export default function UpdatePasswordPage() {
   return (
     <AuthShell
       title="Create new password"
-      description="Choose a strong password to secure your TrueCap account."
     >
       <UpdatePasswordForm />
     </AuthShell>
