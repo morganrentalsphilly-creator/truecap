@@ -1711,8 +1711,7 @@ export function AnalysisDashboard({
                 {Math.round(dealScoreResult.data.score)}/100
               </p>
               <p className="text-2xs text-muted-foreground">
-                A heuristic summary of the modeled numbers, 0–100. Method v
-                {dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
+                A heuristic summary of the modeled numbers, 0–100.
               </p>
             </div>
           ) : null}
@@ -1932,7 +1931,7 @@ export function AnalysisDashboard({
               )}
               <span>Save</span>
               {isSaveLockedByPlan && (
-                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-3xs sm:text-3xs font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
+                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-3xs font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
                   PRO
                 </span>
               )}

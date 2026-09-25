@@ -88,7 +88,7 @@ describe("free users are never instructed to perform a Pro-only action", () => {
   it("internal provenance slugs stay out of the UI labels", () => {
     expect(summary).not.toContain('"captured rules · schema v1"');
     expect(summary).toContain('? "example rules"');
-    expect(summary).toContain('"rules recorded with this analysis"');
+    expect(summary).toContain('"targets recorded with this analysis"');
   });
 });
 

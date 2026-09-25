@@ -526,16 +526,16 @@ export function FocusedDecisionSummary({
   // rulesSnapshotVersion) are untouched. Raw slugs and schema-version suffixes
   // read as debug output on the main result, so they never render verbatim.
   const targetVersionLabel = isSampleCriteria
-    ? "example criteria profile"
+    ? "example targets"
     : targetSource === "starter-criteria"
       ? "TrueCap starter criteria"
       : targetContext.identityStatus === "screening-defaults"
         ? "example rules"
         : targetContext.profileVersion
-          ? `profile v${targetContext.profileVersion}`
+          ? "your saved targets"
           : targetContext.identityStatus === "captured-rules-only"
-            ? "rules recorded with this analysis"
-            : "profile version unavailable";
+            ? "targets recorded with this analysis"
+            : "targets not recorded";
   const ruleFit = deriveRuleFit({
     result,
     values,
@@ -554,7 +554,7 @@ export function FocusedDecisionSummary({
       : "Negative operating screen at entered assumptions"
     : advocacyContractEnabled
       ? isSampleCriteria
-        ? ruleFitLabel(ruleFit).replace(/selected rules|your targets/, "sample criteria")
+        ? ruleFitLabel(ruleFit).replace(/selected rules|your targets/, "sample targets")
         : targetSource === "starter-criteria"
           ? ruleFitLabel(ruleFit).replace(
               /selected rules|your targets/,
@@ -566,7 +566,7 @@ export function FocusedDecisionSummary({
   // pinned elsewhere): an estimated price can't be judged "at asking" in the
   // same card whose subtitle says "Est. price".
   const sourceAwareDecisionLabel = isSampleCriteria
-    ? rawDecisionLabel.replace(/selected rules|your targets/, "sample criteria")
+    ? rawDecisionLabel.replace(/selected rules|your targets/, "sample targets")
     : rawDecisionLabel;
   const decisionLabel = priceIsEstimated
     ? sourceAwareDecisionLabel.replace(
@@ -637,17 +637,17 @@ export function FocusedDecisionSummary({
           // on the default path most visitors are on.
           rangePreview?.downsideFeasible && rangePreview.lower != null
           ? {
-              label: "Review the active target rules",
+              label: "Review your targets",
               reason: `A modeled range of ${money(rangePreview.lower)}–${money(rangePreview.upper)} still meets your targets; the exact Offer Ceiling is not part of this preview. Record the investment decision yourself.`,
             }
           : rangePreview
             ? {
-                label: "Review the active target rules",
+                label: "Review your targets",
                 reason:
                   "No feasible downside case was found under the current assumptions. Record the investment decision yourself.",
               }
             : {
-                label: "Review the active target rules",
+                label: "Review your targets",
                 reason:
                   "No qualifying Offer Ceiling was found under the current assumptions. Record the investment decision yourself.",
               }
@@ -927,7 +927,7 @@ export function FocusedDecisionSummary({
           ) : null}
           {!targetBlocked ? (
             <p className="mt-1 text-xs leading-relaxed text-foreground">
-              {targetAdopted ? "Criteria" : "Example criteria"}: {targetLabel}
+              {targetAdopted ? "Targets" : "Example targets"}: {targetLabel}
             </p>
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
@@ -1014,20 +1014,20 @@ export function FocusedDecisionSummary({
             <div className="space-y-1.5 pb-1 text-2xs leading-relaxed text-muted-foreground">
               <p>
                 {advocacyContractEnabled
-                  ? `${isSampleCriteria ? "Example criteria" : targetContext.profileName}${
+                  ? `${isSampleCriteria ? "Example targets" : targetContext.profileName}${
                       targetContext.origin &&
                       targetContext.origin !== "user-selected"
                         ? ` · ${targetContext.origin.replaceAll("-", " ")}`
                         : ""
                     } · ${targetVersionLabel}`
-                  : `${isSampleCriteria ? "Under sample criteria" : targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "starter-criteria" ? "Under TrueCap starter criteria" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
+                  : `${isSampleCriteria ? "Under sample targets" : targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "starter-criteria" ? "Under TrueCap starter criteria" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
               </p>
               <p>
                 Underwriting model v{result.methodologyVersion ?? "current"} ·
                 10-year projection{" "}
                 {result.tenYearProjectionVersion
                   ? `method v${result.tenYearProjectionVersion}`
-                  : "method recorded-unversioned"}
+                  : "method not recorded"}
               </p>
               {advocacyContractEnabled && targetAdopted ? (
                 <p>
@@ -1126,16 +1126,16 @@ export function FocusedDecisionSummary({
             disabled={targetBlocked}
             // Wrap-on-phones treatment (same as "Next deal" below): the
             // 320-639px window renders this grid 2-up with ~145px cells,
-            // and the nowrap "Cancel criteria edits" state ran ~23px past
+            // and the nowrap "Cancel target edits" state ran ~23px past
             // the button border on each side.
             className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             {tuneOpen
-              ? "Cancel criteria edits"
+              ? "Cancel target edits"
               : targetAdopted
-                ? "Tune criteria"
-                : "Set criteria"}
+                ? "Tune targets"
+                : "Set targets"}
             <ChevronDown
               className={`size-4 transition-transform ${tuneOpen ? "rotate-180" : ""}`}
               aria-hidden
@@ -1358,7 +1358,7 @@ export function FocusedDecisionSummary({
       {viabilityLabels.length > 0 ? (
         <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3">
           <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-            Fastest paths to meet your criteria
+            Fastest paths to meet your targets
           </p>
           <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
             {viabilityLabels.map((label, index) => (
@@ -1426,7 +1426,7 @@ export function FocusedDecisionSummary({
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                 {advocacyContractEnabled
-                  ? "Criteria profile"
+                  ? "Targets"
                   : "Offer criteria"}
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1435,7 +1435,7 @@ export function FocusedDecisionSummary({
                   : advocacyContractEnabled
                     ? targetContext.profileName
                     : targetSource !== "buy-box"
-                      ? "Selected criteria"
+                      ? "Selected targets"
                       : buyBoxFit == null
                         ? "Checking…"
                         : buyBoxFit
@@ -1450,7 +1450,7 @@ export function FocusedDecisionSummary({
                     </p>
                   ) : null}
                   <p className="mt-1 break-all text-3xs text-muted-foreground">
-                    Exact criteria are shown with the Offer Ceiling.
+                    Exact targets are shown with the Offer Ceiling.
                   </p>
                 </>
               ) : null}

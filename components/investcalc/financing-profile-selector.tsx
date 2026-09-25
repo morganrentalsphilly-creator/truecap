@@ -167,7 +167,7 @@ export function FinancingProfileSelector({
               </div>
               <p className="mt-1 text-sm text-foreground/80">{profileSummary(appliedProfile)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {formatVerified(appliedProfile.lastVerifiedAt)} · frozen profile v{appliedProfile.termsVersion}
+                {formatVerified(appliedProfile.lastVerifiedAt)} · terms locked when applied
               </p>
             </div>
             <Button
