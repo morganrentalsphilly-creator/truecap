@@ -329,7 +329,7 @@ export function ClosingCostCalculatorWidget() {
         </p>
         <p
           className={cn(
-            "mt-1 text-4xl font-extrabold tabular-nums",
+            "mt-1 font-mono text-4xl sm:text-5xl font-extrabold tabular-nums",
             verdictColor,
           )}
         >

@@ -87,7 +87,8 @@ export function MortgagePaymentWidget() {
     return calculateMortgagePaymentEstimate({
       price: num(priceInput),
       downPaymentPct: num(downPctInput),
-      interestRate: num(rateInput),
+      // A pasted negative rate must not turn the payment into a credit.
+      interestRate: Math.max(0, num(rateInput)),
       loanTermYears: num(termInput),
       propertyTaxPct: num(taxPctInput),
       homeownerInsurancePct: num(insurancePctInput),
@@ -161,7 +162,7 @@ export function MortgagePaymentWidget() {
             </div>
             <div
               className={cn(
-                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums text-foreground",
+                "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums text-foreground",
               )}
             >
               {fmtMoney(result.monthlyTotal)}

@@ -165,7 +165,7 @@ export function NoiCalculatorWidget() {
             </div>
             <div
               className={cn(
-                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
                 result.annualNoi >= 0
                   ? "text-[var(--metric-positive)]"
                   : "text-[var(--metric-negative)]",

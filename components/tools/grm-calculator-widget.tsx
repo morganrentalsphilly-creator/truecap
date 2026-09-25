@@ -155,7 +155,7 @@ export function GrmCalculatorWidget() {
                 Break-Even tools use for an input they do not have. */}
             <div
               className={cn(
-                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
                 c.color,
               )}
             >
