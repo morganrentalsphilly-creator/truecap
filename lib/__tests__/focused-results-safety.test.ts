@@ -28,7 +28,7 @@ describe("focused decision safety", () => {
     expect(summary).toContain("rangePreview");
     expect(summary).toContain('"Coarse range preview"');
     expect(summary).toContain("meetsMaoTarget(result, target, values)");
-    expect(summary).toContain("Offer criteria");
+    expect(summary).toContain("Targets");
     expect(summary).toContain("aria-expanded={tuneOpen}");
     expect(summary).toContain('aria-live="polite"');
     expect(summary).toContain("canTunePriceCeiling ? (");
@@ -91,7 +91,7 @@ describe("focused decision safety", () => {
       "utf8",
     );
     const editorStart = summary.indexOf(
-      'legend className="text-sm font-bold text-foreground">\n              Offer criteria',
+      'legend className="text-sm font-bold text-foreground">\n              Targets',
     );
     const editor = summary.slice(editorStart);
     const changeHandler = editor.indexOf("onChange={(event) =>");

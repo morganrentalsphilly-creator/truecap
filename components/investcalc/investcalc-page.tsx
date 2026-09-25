@@ -7982,7 +7982,7 @@ export function InvestCalcPage({
         title: "Analyze another property?",
         body: hasUnappliedTargetDraft
           ? "Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
-          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
+          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Targets will be matched again for the next property. Save first if you want to keep this deal.",
         confirmLabel: "Analyze another",
       }));
     if (!ok) return;
@@ -8114,7 +8114,7 @@ export function InvestCalcPage({
     toast({
       title: "Reusable assumptions kept",
       description:
-        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Offer criteria, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
+        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Targets, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
     });
     // Land the user on the (now visible again) address input. Deferred a
     // beat so the results section has unmounted and the input phase is the

@@ -1184,7 +1184,7 @@ export function FocusedDecisionSummary({
         >
           <fieldset>
             <legend className="text-sm font-bold text-foreground">
-              Offer criteria
+              Targets
             </legend>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {targetAdopted
@@ -1408,9 +1408,7 @@ export function FocusedDecisionSummary({
           >
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                {advocacyContractEnabled
-                  ? "Targets"
-                  : "Offer criteria"}
+                Targets
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
                 {!targetAdopted
@@ -1620,7 +1618,7 @@ export function FocusedDecisionSummary({
         </div>
         {canCompareDeals && !isSaved ? (
           <p className="px-2 pb-3 text-xs text-muted-foreground" role="status">
-            Your current analysis and Offer criteria will be saved before it is
+            Your current analysis and targets will be saved before it is
             added to Compare.
           </p>
         ) : null}
