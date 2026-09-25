@@ -99,7 +99,7 @@ function normalizedLength(raw: string): number {
 }
 
 const CONTROL_CLASS =
-  "min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60";
+  "min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60";
 
 type TestimonialFormProps = {
   trigger: TestimonialTrigger;
@@ -317,7 +317,7 @@ export function TestimonialForm({
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
           disabled={status === "submitting"}
-          className="mt-0.5 size-4 shrink-0 rounded border-border accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="mt-0.5 size-4 shrink-0 rounded border-border accent-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
         <span>{CONSENT_LABEL}</span>
       </label>
@@ -335,7 +335,7 @@ export function TestimonialForm({
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 motion-reduce:transition-none"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60 motion-reduce:transition-none"
       >
         {status === "submitting" ? "Sending…" : "Send"}
       </button>
@@ -469,7 +469,7 @@ export function TestimonialPrompt() {
           type="button"
           aria-label="Close"
           onClick={() => (submitted ? closeCard() : dismissForever("button"))}
-          className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+          className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 motion-reduce:transition-none"
         >
           <X aria-hidden className="size-4" />
         </button>
@@ -480,7 +480,7 @@ export function TestimonialPrompt() {
           </span>
           <h2
             id="testimonial-prompt-heading"
-            className="text-[10px] font-bold uppercase tracking-widest text-primary"
+            className="text-3xs font-bold uppercase tracking-widest text-primary"
           >
             One question
           </h2>
@@ -498,7 +498,7 @@ export function TestimonialPrompt() {
           <button
             type="button"
             onClick={() => dismissForever("never_again")}
-            className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+            className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 motion-reduce:transition-none"
           >
             Don&apos;t ask again
           </button>

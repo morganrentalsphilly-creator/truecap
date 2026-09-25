@@ -310,7 +310,7 @@ export default async function MarketCityPage({
         </nav>
 
         {/* Hero */}
-        <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-primary font-bold">
+        <p className="flex items-center gap-1.5 text-2xs uppercase tracking-widest text-primary font-bold">
           <MapPin className="size-3.5" /> {data.name}, {data.stateCode}
         </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">

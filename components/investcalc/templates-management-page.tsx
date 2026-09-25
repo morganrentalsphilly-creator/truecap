@@ -69,6 +69,7 @@ import {
 } from "@/components/ui/dialog";
 import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog";
 import Link from "next/link";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const TEMPLATE_PAGE_SIZE = 10;
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
@@ -585,14 +586,14 @@ export function TemplatesManagementPage({
                   <h3 className="text-sm font-bold leading-tight text-foreground">
                     {starter.template.templateName.replace(/^Starter - /, "")}
                   </h3>
-                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
                     {starter.tag}
                   </span>
                 </div>
                 <p className="flex-1 text-xs leading-snug text-muted-foreground">
                   {starter.cardDescription}
                 </p>
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-2xs text-muted-foreground">
                   <span>
                     <strong className="text-foreground">
                       {starter.template.downPaymentPct}%
@@ -668,7 +669,7 @@ export function TemplatesManagementPage({
                         {template.templateName}
                       </h2>
                       {template.isDefault ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
                           <Star className="size-3" /> Default
                         </span>
                       ) : null}
@@ -676,12 +677,12 @@ export function TemplatesManagementPage({
                     <p className="mt-1 text-sm text-muted-foreground">
                       {template.templateDescription?.trim() || "No description"}
                     </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 text-2xs text-muted-foreground">
                       Used by {template.usedCount ?? 0}{" "}
                       {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                     </p>
                     {template.buyBox ? (
-                      <p className="mt-1 text-[11px] font-medium text-primary">
+                      <p className="mt-1 text-2xs font-medium text-primary">
                         Targets: {formatBuyBoxSummary(template.buyBox)}
                       </p>
                     ) : null}
@@ -690,7 +691,7 @@ export function TemplatesManagementPage({
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Down Payment
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -698,7 +699,7 @@ export function TemplatesManagementPage({
                     </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Interest Rate
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -706,7 +707,7 @@ export function TemplatesManagementPage({
                     </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                       Vacancy
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -715,7 +716,7 @@ export function TemplatesManagementPage({
                   </div>
                   {TAX_STRATEGY_RELEASED ? (
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                         Tax Rate
                       </p>
                       <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -808,7 +809,7 @@ export function TemplatesManagementPage({
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto xl:block">
+          <ScrollX label="Table" className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[880px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
@@ -854,12 +855,12 @@ export function TemplatesManagementPage({
                               {template.templateName}
                             </p>
                             {template.isDefault ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
                                 <Star className="size-2.5" /> Default
                               </span>
                             ) : null}
                           </div>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-2xs text-muted-foreground">
                             Used by {template.usedCount ?? 0}{" "}
                             {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                           </p>
@@ -975,7 +976,7 @@ export function TemplatesManagementPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
 
           {filteredTemplates.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1250,7 +1251,7 @@ export function TemplatesManagementPage({
                       v{v.version}
                       {i === 0 ? " · current" : ""}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-2xs text-muted-foreground">
                       {new Date(v.createdAt).toLocaleString()} ·{" "}
                       {v.downPaymentPct ?? "—"}% down ·{" "}
                       {v.interestRatePct ?? "—"}% rate · {v.vacancyPct ?? "—"}%

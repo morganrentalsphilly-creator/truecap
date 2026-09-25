@@ -19,11 +19,11 @@ import Link from "next/link";
 
 export function BlogByline() {
   return (
-    <p className="mt-1.5 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+    <p className="mt-1.5 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
       By{" "}
       <Link
         href="/about"
-        className="text-foreground/80 transition-colors hover:text-primary"
+        className="text-foreground/80 underline decoration-border underline-offset-2 transition-colors hover:text-primary hover:decoration-primary"
       >
         TrueCap
       </Link>{" "}

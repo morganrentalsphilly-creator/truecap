@@ -99,7 +99,7 @@ export function ArvCalculatorWidget() {
         ARV + 70% Rule Calculator
       </h2>
 
-      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
         Sold comps — renovated, recent, nearby
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
@@ -123,7 +123,7 @@ export function ArvCalculatorWidget() {
         <Plain label="Comp 3 sq ft" value={comp3Sqft} setValue={setComp3Sqft} />
       </div>
 
-      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
         Your property + the rule
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
@@ -166,14 +166,14 @@ export function ArvCalculatorWidget() {
             {/* Sanity check straight from the comps method: a credible ARV
                 sits inside the range the comps actually sold in. */}
             {result.arv > result.maxCompPrice ? (
-              <p className="text-xs font-semibold text-amber-700">
+              <p className="text-xs font-semibold text-caution-text">
                 Sanity check: this ARV is ABOVE every comp&apos;s actual sale
                 price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
                 Be suspicious — check the subject square footage and whether the
                 comps are truly comparable before trusting it.
               </p>
             ) : result.arv < result.minCompPrice ? (
-              <p className="text-xs font-semibold text-amber-700">
+              <p className="text-xs font-semibold text-caution-text">
                 Sanity check: this ARV is below every comp&apos;s actual sale
                 price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
                 That can happen when the subject is much smaller than the comps
@@ -196,7 +196,7 @@ export function ArvCalculatorWidget() {
               </p>
             )}
             {result.mao > 0 && result.arv < 150_000 && (
-              <p className="text-xs font-semibold text-amber-700">
+              <p className="text-xs font-semibold text-caution-text">
                 Sub-$150k ARV: fixed costs (title, permits, utilities,
                 insurance) eat a big share of a small spread — many flippers
                 drop the multiplier to 60–65% here.
@@ -210,7 +210,7 @@ export function ArvCalculatorWidget() {
             )}
 
             <div className="text-xs">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                 Comp breakdown
               </div>
               {result.comps.map((c, i) => (
@@ -263,7 +263,7 @@ function Money({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -299,7 +299,7 @@ function Pct({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -334,7 +334,7 @@ function Plain({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -362,7 +362,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
         {label}
       </div>
       <div

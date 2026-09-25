@@ -25,6 +25,8 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "dscr-loans-explained";
 const TITLE =
@@ -151,6 +153,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -168,14 +171,14 @@ export default function BlogPost() {
         <header className="mb-8 sm:mb-10">
           <Link
             href="/blog"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
+          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -189,7 +192,7 @@ export default function BlogPost() {
           </p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             Conventional mortgage underwriting commonly uses documented personal
             income and debt-to-income ratios. That approach may be a constraint
@@ -359,10 +362,10 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">
             DSCR vs conventional — side by side
           </h2>
-          <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Feature
                   </th>
@@ -419,7 +422,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="text-xs text-muted-foreground">
             This comparison describes common structures, not a commitment or
             universal program matrix. Requirements vary by lender and program.
@@ -506,9 +509,9 @@ export default function BlogPost() {
           </p>
         </footer>
       </main>
+      <BlogStickyCta />
       <SiteFooter />
       <ScrollDepthTracker />
-      <BlogStickyCta />
     </div>
   );
 }

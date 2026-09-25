@@ -34,6 +34,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Win the Investor. Keep the Investor.",
@@ -105,27 +106,22 @@ export default async function ForAgentsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <AgentProPageTracker />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Eyebrow + back link */}
         <div className="mb-2">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
         </div>
 
         {/* Hero */}
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             For real estate agents
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             Win the investor.{" "}
-            <span className="text-primary">Keep the investor.</span>
+            Keep the investor.
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Instead of sending a listing and asking an investor what they
@@ -195,9 +191,6 @@ export default async function ForAgentsPage() {
             the commission-math block: agent copy describes the workflow and
             never promises closings, commissions, or returns. */}
         <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-            A listing vs. an analysis
-          </p>
           <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Investors answer the agent who already did the math.
           </h2>

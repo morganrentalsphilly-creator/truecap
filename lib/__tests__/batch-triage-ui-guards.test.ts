@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+// 2026-09 audit: the product uses one focus vocabulary — the primitives'
+// 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(
@@ -22,7 +24,7 @@ describe("batch triage review accessibility guards", () => {
     expect(editor).toContain("aria-invalid=");
     expect(editor).toContain("aria-describedby={issueId}");
     expect(editor).toContain("h-11");
-    expect(editor).toContain("focus-visible:ring-2");
+    expect(editor).toContain("focus-visible:ring-[3px]");
   });
 
   it("keeps primary, filtering, and sorting controls at least 44px high", () => {

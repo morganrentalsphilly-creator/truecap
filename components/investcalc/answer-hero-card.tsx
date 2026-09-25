@@ -88,37 +88,37 @@ const RECOMMENDATION_STYLES: Record<
   "strong-buy": {
     scoreRing: "ring-[var(--brand-green)]/40 bg-[var(--brand-green-light)]",
     scoreText: "text-[var(--brand-green)]",
-    riskChip: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    metricCell: "bg-emerald-50 border border-emerald-100",
-    descriptionText: "text-emerald-800",
+    riskChip: "bg-positive-light text-positive border-positive/30",
+    metricCell: "bg-positive-light border border-positive/30",
+    descriptionText: "text-positive",
   },
   buy: {
     scoreRing: "ring-primary/35 bg-[var(--brand-blue-light)]",
     scoreText: "text-primary",
-    riskChip: "bg-blue-100 text-blue-700 border-blue-200",
-    metricCell: "bg-blue-50 border border-blue-100",
-    descriptionText: "text-blue-800",
+    riskChip: "bg-brand-blue-light text-brand-blue-text border-primary/30",
+    metricCell: "bg-brand-blue-light border border-primary/30",
+    descriptionText: "text-brand-blue-text",
   },
   neutral: {
-    scoreRing: "ring-amber-300/50 bg-amber-50",
-    scoreText: "text-amber-700",
-    riskChip: "bg-amber-100 text-amber-700 border-amber-200",
-    metricCell: "bg-amber-50 border border-amber-100",
-    descriptionText: "text-amber-800",
+    scoreRing: "ring-caution/40 bg-caution-light",
+    scoreText: "text-caution-text",
+    riskChip: "bg-caution-light text-caution-text border-caution/30",
+    metricCell: "bg-caution-light border border-caution/30",
+    descriptionText: "text-caution-text",
   },
   risky: {
-    scoreRing: "ring-orange-300/50 bg-orange-50",
-    scoreText: "text-orange-700",
-    riskChip: "bg-orange-100 text-orange-700 border-orange-200",
-    metricCell: "bg-orange-50 border border-orange-100",
-    descriptionText: "text-orange-800",
+    scoreRing: "ring-caution/40 bg-caution-light",
+    scoreText: "text-caution-text",
+    riskChip: "bg-caution-light text-caution-text border-caution/30",
+    metricCell: "bg-caution-light border border-caution/30",
+    descriptionText: "text-caution-text",
   },
   avoid: {
-    scoreRing: "ring-red-300/50 bg-red-50",
-    scoreText: "text-red-700",
-    riskChip: "bg-red-100 text-red-700 border-red-200",
-    metricCell: "bg-red-50 border border-red-100",
-    descriptionText: "text-red-800",
+    scoreRing: "ring-negative/40 bg-negative/10",
+    scoreText: "text-destructive-text",
+    riskChip: "bg-negative/10 text-destructive-text border-negative/30",
+    metricCell: "bg-negative/10 border border-negative/30",
+    descriptionText: "text-destructive-text",
   },
 };
 
@@ -307,7 +307,7 @@ function DealScoreCard({
             {riskLevel}
           </span>
           {isAppreciationPlay ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--brand-green)]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-2 py-0.5 text-3xs font-bold text-[var(--brand-green)]">
               <TrendingUp aria-hidden className="size-3" />
               Appreciation play
             </span>
@@ -318,7 +318,7 @@ function DealScoreCard({
           the Monthly Cash Flow tile uses, directly under the score so the
           0-100 number gets a plain-English yardstick. */}
       {benchmarkSublabel ? (
-        <p className="-mt-1 mb-2 text-[11px] leading-snug text-muted-foreground">
+        <p className="-mt-1 mb-2 text-2xs leading-snug text-muted-foreground">
           {benchmarkSublabel}
         </p>
       ) : null}
@@ -569,7 +569,7 @@ function ScoreBreakdownTile({
         <span className="font-semibold">{label}</span>
         <span className="tabular-nums text-foreground/80">{valueDisplay}</span>
       </div>
-      <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{explanation}</p>
+      <p className="mt-0.5 text-2xs leading-snug text-muted-foreground">{explanation}</p>
     </div>
   );
 }
@@ -698,9 +698,9 @@ export function AnswerHeroCard({
           recommendation?.variant === "strong-buy" &&
             "bg-[var(--brand-green-light)] border-[var(--brand-green)]/25",
           recommendation?.variant === "buy" && "bg-[var(--brand-blue-light)] border-primary/20",
-          recommendation?.variant === "neutral" && "bg-amber-50 border-amber-200",
-          recommendation?.variant === "risky" && "bg-orange-50 border-orange-200",
-          recommendation?.variant === "avoid" && "bg-red-50 border-red-200",
+          recommendation?.variant === "neutral" && "bg-caution-light border-caution/30",
+          recommendation?.variant === "risky" && "bg-caution-light border-caution/30",
+          recommendation?.variant === "avoid" && "bg-negative/10 border-negative/30",
           !recommendation && "bg-muted border-border"
         )}
       >
@@ -754,9 +754,9 @@ export function AnswerHeroCard({
                   "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
                   recommendation.variant === "strong-buy" && "bg-[var(--brand-green)]",
                   recommendation.variant === "buy" && "bg-primary",
-                  recommendation.variant === "neutral" && "bg-amber-500",
-                  recommendation.variant === "risky" && "bg-orange-500",
-                  recommendation.variant === "avoid" && "bg-red-600"
+                  recommendation.variant === "neutral" && "bg-caution",
+                  recommendation.variant === "risky" && "bg-caution",
+                  recommendation.variant === "avoid" && "bg-negative"
                 )}
               >
                 {recommendation.variant === "strong-buy" || recommendation.variant === "buy" ? (
@@ -800,7 +800,7 @@ export function AnswerHeroCard({
                     "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
                     buyBoxFit
                       ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
-                      : "border-amber-300 bg-amber-50 text-amber-700"
+                      : "border-caution/30 bg-caution-light text-caution-text"
                   )}
                 >
                   <Target className="size-3" aria-hidden />
@@ -845,7 +845,7 @@ export function AnswerHeroCard({
                 ) : null}
                 {hasScoreBreakdown ? (
                   <div className="mt-3 space-y-2">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                       Deal score breakdown
                     </p>
                     <ScoreBreakdownReceipts
@@ -865,9 +865,9 @@ export function AnswerHeroCard({
                     "text-xs font-bold uppercase tracking-widest mb-2",
                     recommendation.variant === "strong-buy" && "text-[var(--brand-green)]",
                     recommendation.variant === "buy" && "text-primary",
-                    recommendation.variant === "neutral" && "text-amber-700",
-                    recommendation.variant === "risky" && "text-orange-700",
-                    recommendation.variant === "avoid" && "text-red-700"
+                    recommendation.variant === "neutral" && "text-caution-text",
+                    recommendation.variant === "risky" && "text-caution-text",
+                    recommendation.variant === "avoid" && "text-destructive-text"
                   )}
                 >
                   {recommendation.variant === "strong-buy" || recommendation.variant === "buy"
@@ -884,9 +884,9 @@ export function AnswerHeroCard({
                           "w-3.5 h-3.5 shrink-0 mt-0.5",
                           recommendation.variant === "strong-buy" && "text-[var(--brand-green)]",
                           recommendation.variant === "buy" && "text-primary",
-                          recommendation.variant === "neutral" && "text-amber-700",
-                          recommendation.variant === "risky" && "text-orange-700",
-                          recommendation.variant === "avoid" && "text-red-700"
+                          recommendation.variant === "neutral" && "text-caution-text",
+                          recommendation.variant === "risky" && "text-caution-text",
+                          recommendation.variant === "avoid" && "text-destructive-text"
                         )}
                       />
                       {tip}

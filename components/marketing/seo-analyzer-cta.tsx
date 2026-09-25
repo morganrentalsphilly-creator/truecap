@@ -63,7 +63,10 @@ export function SeoAnalyzerCta({
               ? "tool"
               : "seo_content";
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
+    <aside
+      aria-label="Analyze your own deal"
+      className="rounded-2xl border border-border bg-card p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
+    >
       <div>
         <p className="text-sm font-bold text-foreground">
           Ready to run {context ?? "a real deal"}?
@@ -83,6 +86,6 @@ export function SeoAnalyzerCta({
         Analyze a property free
         <ArrowRight className="size-4" />
       </TrackedContentCtaLink>
-    </div>
+    </aside>
   );
 }

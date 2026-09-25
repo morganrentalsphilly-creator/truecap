@@ -9,6 +9,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
@@ -113,6 +114,7 @@ export default function RehabEstimatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/rehab-cost-estimator" toolName="Rehab cost estimator" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
@@ -121,8 +123,8 @@ export default function RehabEstimatorPage() {
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
-              ← TrueCap free tools
+            <Link href="/tools" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Rehab Cost Estimator
@@ -137,7 +139,7 @@ export default function RehabEstimatorPage() {
 
           <RehabEstimatorCard />
 
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <p>
               <strong>Educational guide:</strong> This page estimates renovation
               scope only. TrueCap does not currently expose integrated flip or
@@ -303,11 +305,6 @@ export default function RehabEstimatorPage() {
 
           <RelatedContent kind="tool" slug="rehab-cost-estimator" title="Rehab Cost Estimator" className="mt-10" />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

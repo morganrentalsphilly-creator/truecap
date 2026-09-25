@@ -24,6 +24,8 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -134,6 +136,7 @@ export default function SeventyPercentRuleCalculatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/70-percent-rule-calculator" toolName="70% rule calculator" />
       <script
         type="application/ld+json"
@@ -154,9 +157,9 @@ export default function SeventyPercentRuleCalculatorPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              ← TrueCap free tools
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               70% Rule Calculator
@@ -172,7 +175,7 @@ export default function SeventyPercentRuleCalculatorPage() {
           <SeventyPercentRuleWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <p>
               <strong>Educational guide:</strong> The material below explains
               this early acquisition rule and its common use cases. TrueCap
@@ -246,7 +249,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               cheap houses those fixed costs eat a much bigger share of a
               much smaller spread.
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -283,7 +286,7 @@ export default function SeventyPercentRuleCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               <em>
                 *Higher isn&apos;t permission to overpay — it&apos;s a
@@ -421,13 +424,6 @@ export default function SeventyPercentRuleCalculatorPage() {
 
           <RelatedContent kind="tool" slug="70-percent-rule-calculator" title="70% Rule Calculator" className="mt-10" />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

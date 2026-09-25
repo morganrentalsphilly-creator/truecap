@@ -202,10 +202,10 @@ describe("My Deals methodology truth wiring", () => {
 
   it("shows compact methodology pills beside signals and removes the old footnote", () => {
     expect(listSource).toContain(
-      'className="rounded-full text-[10px] font-semibold text-muted-foreground"',
+      'className="rounded-full text-3xs font-semibold text-muted-foreground"',
     );
     expect(listSource).not.toContain(
-      '<p className="mt-1 text-[10px] text-muted-foreground">\n                          {item.methodologyLabel}',
+      '<p className="mt-1 text-3xs text-muted-foreground">\n                          {item.methodologyLabel}',
     );
     expect(listSource).toMatch(
       /Current and recorded\s+calculations are never ranked against each other/,

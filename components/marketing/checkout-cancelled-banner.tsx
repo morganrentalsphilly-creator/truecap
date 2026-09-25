@@ -65,7 +65,7 @@ export function CheckoutCancelledBanner({
         type="button"
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <X className="size-4" />
       </button>

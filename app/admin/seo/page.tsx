@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { checkAdmin } from "@/lib/admin-guard";
 import { loadSeoDashboard } from "@/lib/seo/control-plane/dashboard";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export const metadata: Metadata = {
   title: "SEO Control Plane · TrueCap Admin",
@@ -17,7 +18,7 @@ const percent = (value: number | null) => value === null ? "—" : `${(value * 1
 function Card({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="mt-2 text-3xl font-extrabold text-foreground">{value}</p>
       {note ? <p className="mt-1 text-xs text-muted-foreground">{note}</p> : null}
     </div>
@@ -38,7 +39,7 @@ export default async function SeoAdminPage() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Admin · SEO control plane</p>
+            <p className="text-2xs font-bold uppercase tracking-widest text-primary">Admin · SEO control plane</p>
             <h1 className="mt-1 text-3xl font-extrabold text-foreground">Search growth, truth, and health</h1>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
               Mode: <strong className="text-foreground">{config.enabled ? config.mode : "observe (global switch off)"}</strong>
@@ -51,7 +52,7 @@ export default async function SeoAdminPage() {
         </header>
 
         {!data.configured ? (
-          <section className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm text-foreground">
+          <section className="mb-8 rounded-2xl border border-caution/40 bg-caution-light p-5 text-sm text-foreground">
             <strong>Control plane is not receiving database data yet.</strong>{" "}
             Apply <code>20260815120000_seo_control_plane.sql</code>, then add the documented GSC and Supabase GitHub Actions secrets.
             {data.error ? <span className="mt-2 block text-xs text-muted-foreground">Diagnostic: {data.error}</span> : null}
@@ -115,12 +116,12 @@ export default async function SeoAdminPage() {
 
             <section aria-labelledby="jobs">
               <h2 id="jobs" className="mb-4 text-xl font-extrabold text-foreground">Recent autonomous jobs</h2>
-              <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+              <ScrollX label="Admin table" className="overflow-x-auto rounded-2xl border border-border bg-card">
                 <table className="w-full min-w-[480px] text-left text-xs">
                   <thead className="border-b border-border bg-muted/40"><tr><th className="p-3">Job</th><th className="p-3">Cadence</th><th className="p-3">Mode</th><th className="p-3">Status</th><th className="p-3">Started</th></tr></thead>
                   <tbody>{data.jobs.map((job, index) => <tr key={index} className="border-b border-border last:border-0"><td className="p-3 font-semibold">{String(job.job_name)}</td><td className="p-3">{String(job.cadence)}</td><td className="p-3">{String(job.mode)}</td><td className="p-3">{String(job.status)}</td><td className="p-3">{String(job.started_at).slice(0, 16).replace("T", " ")}</td></tr>)}</tbody>
                 </table>
-              </div>
+              </ScrollX>
             </section>
           </div>
         </div>

@@ -169,7 +169,7 @@ export function BrrrrCalculatorWidget() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+            <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
               Cash going in
             </div>
             <Row label="Down payment" value={fmt(result.originalDownPayment)} />
@@ -189,7 +189,7 @@ export function BrrrrCalculatorWidget() {
             />
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+            <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
               Refi
             </div>
             <Row label="New loan amount" value={fmt(result.newLoanAmount)} />
@@ -251,7 +251,7 @@ function Money({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -287,7 +287,7 @@ function Pct({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -322,7 +322,7 @@ function Plain({
     <div>
       <Label
         htmlFor={id}
-        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
       >
         {label}
       </Label>
@@ -350,7 +350,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
         {label}
       </div>
       <div

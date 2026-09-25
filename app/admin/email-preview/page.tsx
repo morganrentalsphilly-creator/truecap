@@ -124,7 +124,7 @@ export default async function EmailPreviewPage({
         <div className="mx-auto max-w-5xl">
           <header className="mb-6 flex flex-col gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+              <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold">
                 Admin · Email Preview
               </p>
               <h1 className="mt-1 text-2xl font-extrabold text-foreground">{subject}</h1>
@@ -186,7 +186,7 @@ export default async function EmailPreviewPage({
         <header className="mb-6 flex flex-col gap-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+              <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold">
                 Admin · Email Preview
               </p>
               <h1 className="mt-1 text-2xl font-extrabold text-foreground">{subject}</h1>

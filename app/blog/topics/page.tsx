@@ -10,6 +10,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Blog Topics",
@@ -52,6 +53,7 @@ export default function BlogTopicsIndexPage() {
   };
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
@@ -86,7 +88,7 @@ export default function BlogTopicsIndexPage() {
                 <ArrowUpRight className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
               </div>
               <p className="text-sm text-muted-foreground">{topic.description}</p>
-              <span className="mt-auto text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <span className="mt-auto text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
                 {topic.postSlugs.length} guides
               </span>
             </Link>

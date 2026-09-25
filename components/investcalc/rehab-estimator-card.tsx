@@ -155,7 +155,7 @@ export function RehabEstimatorCard({
 
       <div className="grid grid-cols-3 gap-3 mb-3">
         <div>
-          <Label htmlFor={sqftId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={sqftId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Sq ft
           </Label>
           <Input
@@ -170,7 +170,7 @@ export function RehabEstimatorCard({
           />
         </div>
         <div>
-          <Label htmlFor={bathId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={bathId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Baths
           </Label>
           <Input
@@ -185,7 +185,7 @@ export function RehabEstimatorCard({
           />
         </div>
         <div>
-          <Label htmlFor={contingencyId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+          <Label htmlFor={contingencyId} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Contingency
           </Label>
           <div className="relative">
@@ -210,7 +210,7 @@ export function RehabEstimatorCard({
         <div className="space-y-4 mt-2">
           {orderedCategories.map((cat) => (
             <div key={cat}>
-              <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                 {CATEGORY_LABELS[cat]}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -256,7 +256,7 @@ export function RehabEstimatorCard({
       <div className="mt-5 rounded-xl border border-border bg-[var(--background)] p-4">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
               Estimated rehab cost
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-primary mt-1 tabular-nums">

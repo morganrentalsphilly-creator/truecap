@@ -35,7 +35,7 @@ export function MakePriceWorkCard({
 
   return (
     <div className="rounded-xl border border-dashed border-border p-4 sm:p-5">
-      <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Or — make your current price work
       </div>
       {result.currentMeets ? (

@@ -153,7 +153,7 @@ export function SingleFamilyUnitSection({
               : "Unit Details"}
           </span>
           {isSecondary ? (
-            <span className="text-[11px] font-normal text-muted-foreground">
+            <span className="text-2xs font-normal text-muted-foreground">
               (optional)
             </span>
           ) : null}
@@ -230,7 +230,7 @@ export function SingleFamilyUnitSection({
             {showRentNudge ? (
               <p
                 id="monthlyRent-help"
-                className="mt-1 text-[11px] text-muted-foreground"
+                className="mt-1 text-2xs text-muted-foreground"
               >
                 {bedsEmpty
                   ? "Add bedrooms to auto-estimate rent (HUD area data)."
@@ -412,7 +412,7 @@ export function SingleFamilyUnitSection({
             </div>
           </div>
           <p
-            className="mt-3 text-[11px] text-muted-foreground"
+            className="mt-3 text-2xs text-muted-foreground"
             aria-live="polite"
           >
             {strMonthlyRevenue != null ? (

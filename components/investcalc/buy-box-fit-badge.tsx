@@ -22,7 +22,7 @@ export function BuyBoxFitBadge({ fit }: { fit: BuyBoxFitSummary | undefined }) {
         "gap-1 rounded-full border text-xs font-semibold",
         fit.anyPass
           ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
-          : "border-amber-300 bg-amber-50 text-amber-700"
+          : "border-caution/30 bg-caution-light text-caution-text"
       )}
     >
       <Target className="size-3" />

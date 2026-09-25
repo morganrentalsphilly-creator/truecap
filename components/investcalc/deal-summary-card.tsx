@@ -72,7 +72,7 @@ export function DealSummaryCard({
             <WandSparkles className="size-4" />
           </span>
           AI summary
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+          <span className="rounded-full bg-muted px-1.5 py-0.5 text-3xs font-extrabold uppercase tracking-widest text-muted-foreground">
             Beta
           </span>
         </p>
@@ -81,7 +81,7 @@ export function DealSummaryCard({
             type="button"
             onClick={() => void generate()}
             disabled={isGenerating}
-            className="text-[11px] font-semibold text-primary hover:underline disabled:opacity-50"
+            className="text-2xs font-semibold text-primary hover:underline disabled:opacity-50"
           >
             Regenerate
           </button>
@@ -127,8 +127,8 @@ export function DealSummaryCard({
         </button>
       )}
 
-      {notice && <p className="mt-2 text-[11px] text-muted-foreground">{notice}</p>}
-      <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+      {notice && <p className="mt-2 text-2xs text-muted-foreground">{notice}</p>}
+      <p className="mt-2 text-3xs leading-relaxed text-muted-foreground">
         Generated from this analysis&apos;s numbers only. Not financial advice.
       </p>
     </div>

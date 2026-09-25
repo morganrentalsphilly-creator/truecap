@@ -626,7 +626,7 @@ export function AddressAutocomplete({
         <p
           id={autocompleteWarningId}
           role="status"
-          className="mt-1 text-xs text-amber-800"
+          className="mt-1 text-xs text-caution-text"
         >
           {autocompleteWarning}
         </p>

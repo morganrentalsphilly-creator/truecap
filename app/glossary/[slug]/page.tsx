@@ -247,7 +247,7 @@ export default async function GlossaryTermPage({
           </nav>
 
           {/* Category eyebrow */}
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+          <p className="text-2xs uppercase tracking-widest text-primary font-bold">
             {GLOSSARY_CATEGORY_LABELS[entry.category]}
           </p>
 
@@ -351,7 +351,7 @@ export default async function GlossaryTermPage({
               href="/glossary"
               className="text-sm text-muted-foreground hover:text-foreground font-semibold"
             >
-              ← Back to full glossary
+              ← Glossary
             </Link>
           </div>
           {/* Where the term shows up in the product (true for every entry in

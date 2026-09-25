@@ -101,7 +101,7 @@ export function UserMenu({
               {displayName}
             </span>
             {email ? (
-              <span className="text-[11px] text-muted-foreground max-w-[120px] truncate">
+              <span className="text-2xs text-muted-foreground max-w-[120px] truncate">
                 {email}
               </span>
             ) : null}

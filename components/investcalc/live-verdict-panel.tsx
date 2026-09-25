@@ -141,7 +141,7 @@ export function LiveVerdictPanel({
           className="hidden min-h-56 items-center rounded-2xl border border-dashed border-border/80 bg-card/60 p-6 lg:flex"
         >
           <div className="max-w-sm">
-            <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="inline-flex items-center gap-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               <span
                 aria-hidden="true"
                 className="size-2 rounded-full bg-primary/35"
@@ -174,7 +174,7 @@ export function LiveVerdictPanel({
           className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5 lg:motion-safe:animate-in lg:motion-safe:fade-in lg:motion-safe:slide-in-from-bottom-2 lg:motion-safe:duration-300"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+            <span className="inline-flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-primary" />
@@ -191,7 +191,7 @@ export function LiveVerdictPanel({
               : `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month negative at these assumptions.`}
           </p>
           {assumptionBasis ? (
-            <p className="mb-3 text-[11px] leading-snug text-muted-foreground">
+            <p className="mb-3 text-2xs leading-snug text-muted-foreground">
               Key assumptions shown: {assumptionBasis}. Price, rent, financing,
               taxes, and all expenses are included; review them before relying
               on this screen.
@@ -199,7 +199,7 @@ export function LiveVerdictPanel({
           ) : null}
           <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                 Cash flow
               </div>
               <div
@@ -221,7 +221,7 @@ export function LiveVerdictPanel({
                   the preview renders before the tipped metrics band exists,
                   so a first-timer meets "Cap rate"/"DSCR" here first. Same
                   no-underline treatment as the MetricCard labels. */}
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                 <GlossaryTip term="capRate" className="!no-underline">
                   Cap rate
                 </GlossaryTip>
@@ -231,7 +231,7 @@ export function LiveVerdictPanel({
               </div>
             </div>
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                 <GlossaryTip term="dscr" className="!no-underline">
                   DSCR
                 </GlossaryTip>
@@ -250,7 +250,7 @@ export function LiveVerdictPanel({
               it into an invitation to play with the one lever they control. */}
           {Math.round(livePreview.netCashFlow) < 0 &&
           livePreview.breakEvenPrice != null ? (
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
               Breaks even near{" "}
               <span className="font-mono font-bold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
@@ -259,7 +259,7 @@ export function LiveVerdictPanel({
               assumption.
             </p>
           ) : Math.round(livePreview.netCashFlow) < 0 ? (
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
               Negative at these assumptions. Run the full analysis to review the
               price, rent, financing, and expense levers.
             </p>
@@ -268,11 +268,11 @@ export function LiveVerdictPanel({
             // already has: name the one metric dragging the verdict (facts
             // only — thresholds mirror classifyDeal, see lib/limiting-factor.ts)
             // so the amber pill isn't a dead end.
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
               {livePreview.limitingFactor}
             </p>
           ) : null}
-          <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
+          <p className="mt-2.5 text-2xs leading-snug text-muted-foreground">
             Updating as you type — run the full analysis for your
             Offer Ceiling, sensitivity, and 10-year cash-flow and equity projections.
           </p>

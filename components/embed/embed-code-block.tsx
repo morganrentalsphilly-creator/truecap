@@ -83,13 +83,13 @@ export function EmbedCodeBlock({ slug, title, siteUrl, defaultHeight }: Props) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Embed code (HTML)
         </p>
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           {copied ? (
             <>
@@ -104,7 +104,7 @@ export function EmbedCodeBlock({ slug, title, siteUrl, defaultHeight }: Props) {
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto rounded-lg bg-muted/40 p-3 text-[11px] leading-relaxed text-foreground font-mono">
+      <pre tabIndex={0} aria-label="Embed code" className="overflow-x-auto rounded-lg bg-muted/40 p-3 text-2xs leading-relaxed text-foreground font-mono focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
         <code>{snippet}</code>
       </pre>
     </div>

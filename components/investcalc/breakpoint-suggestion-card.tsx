@@ -59,10 +59,10 @@ export function BreakpointSuggestionCard({ values, result }: Props) {
     >
       <div className="mb-2 flex items-center gap-1.5">
         <Target className="size-3.5 text-primary" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+        <span className="text-3xs font-bold uppercase tracking-widest text-primary">
           What would make it {targetTier}
         </span>
-        <span className="text-[10px] text-muted-foreground">
+        <span className="text-3xs text-muted-foreground">
           · currently {currentTier}
         </span>
       </div>
@@ -113,7 +113,7 @@ export function BreakpointSuggestionCard({ values, result }: Props) {
           </>
         ) : null}
       </p>
-      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-2 text-2xs leading-relaxed text-muted-foreground">
         Use this in negotiation: ask for a price cut, verify market rents,
         or walk if neither moves.
       </p>

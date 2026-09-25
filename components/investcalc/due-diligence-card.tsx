@@ -287,13 +287,13 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           <ClipboardCheck className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Due diligence</h3>
         </div>
-        <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-2 text-2xs text-muted-foreground">
           {dueSummary.overdue > 0 ? (
             <span className="rounded-full bg-[var(--metric-negative)]/10 px-2 py-0.5 font-semibold text-[var(--metric-negative)]">
               {dueSummary.overdue} overdue
             </span>
           ) : dueSummary.dueSoon > 0 ? (
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-700">
+            <span className="rounded-full bg-caution-light px-2 py-0.5 font-semibold text-caution-text">
               {dueSummary.dueSoon} due soon
             </span>
           ) : null}
@@ -353,11 +353,11 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                       {item.label}
                     </span>
                     {status === "overdue" ? (
-                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--metric-negative)] sm:mt-0">
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-[var(--metric-negative)] sm:mt-0">
                         Overdue
                       </span>
                     ) : status === "due-soon" ? (
-                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 sm:mt-0">
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-caution-light px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-caution-text sm:mt-0">
                         Due soon
                       </span>
                     ) : null}
@@ -377,7 +377,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                   disabled={isSaving}
                   aria-label={`Due date for ${item.label}`}
                   className={cn(
-                    "col-span-2 col-start-2 row-start-2 h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:w-[9.5rem] sm:text-[11px]",
+                    "col-span-2 col-start-2 row-start-2 h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:w-[9.5rem] sm:text-2xs",
                     status === "overdue"
                       ? "text-[var(--metric-negative)]"
                       : item.dueDate

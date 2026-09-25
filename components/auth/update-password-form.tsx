@@ -8,12 +8,17 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { updatePasswordAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { updatePasswordSchema, type UpdatePasswordInput } from "@/lib/auth-schema";
+import {
+  PASSWORD_POLICY_TEXT,
+  type UpdatePasswordInput,
+  updatePasswordSchema,
+} from "@/lib/auth-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -56,11 +61,14 @@ export function UpdatePasswordForm() {
         return;
       }
 
+      // The recovery link already established a session, so the user is
+      // signed in with the new password — send them into the product rather
+      // than back to a login form they don't need.
       toast({
         title: "Password updated",
-        description: "You can sign in with your new password.",
+        description: "You're signed in with your new password.",
       });
-      router.push("/auth/login");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       // A thrown action here strands the user mid-reset on a one-time link
@@ -124,12 +132,15 @@ export function UpdatePasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              <FormDescription id="new-password-policy" className="text-xs">
+                {PASSWORD_POLICY_TEXT}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -156,7 +167,7 @@ export function UpdatePasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
-                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   aria-label={
                     showConfirmPassword
                       ? "Hide confirmation password"

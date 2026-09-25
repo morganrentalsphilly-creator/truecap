@@ -97,7 +97,7 @@ export function RentalPropertyTaxCalculatorWidget() {
   const verdictColor =
     result.taxableIncome <= 0
       ? "text-[var(--metric-positive)]"
-      : "text-amber-700";
+      : "text-caution-text";
 
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
@@ -107,7 +107,7 @@ export function RentalPropertyTaxCalculatorWidget() {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Property + financing
       </p>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -147,7 +147,7 @@ export function RentalPropertyTaxCalculatorWidget() {
         </div>
       </div>
 
-      <p className="mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
         Annual income + expenses
       </p>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -250,12 +250,12 @@ export function RentalPropertyTaxCalculatorWidget() {
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
           Taxable income (Schedule E)
         </p>
         <p
           className={cn(
-            "mt-1 text-4xl font-extrabold tabular-nums",
+            "mt-1 font-mono text-4xl sm:text-5xl font-extrabold tabular-nums",
             verdictColor,
           )}
         >
@@ -268,7 +268,7 @@ export function RentalPropertyTaxCalculatorWidget() {
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
           <div className="rounded-lg border border-border bg-card p-3">
-            <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">
+            <p className="font-bold uppercase tracking-widest text-3xs text-muted-foreground">
               Pre-tax cash flow
             </p>
             <p className="mt-1 text-lg font-extrabold tabular-nums text-foreground">
@@ -276,7 +276,7 @@ export function RentalPropertyTaxCalculatorWidget() {
             </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-3">
-            <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">
+            <p className="font-bold uppercase tracking-widest text-3xs text-muted-foreground">
               After-tax cash flow
             </p>
             <p className="mt-1 text-lg font-extrabold tabular-nums text-foreground">

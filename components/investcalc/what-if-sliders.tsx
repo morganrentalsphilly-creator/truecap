@@ -197,19 +197,19 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
             What-if
           </span>
         </div>
         <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${tierToneClass}`}
+          className={`rounded-full px-2 py-0.5 text-3xs font-extrabold uppercase tracking-wider ${tierToneClass}`}
           aria-live="polite"
           aria-atomic="true"
         >
           {tier}
         </span>
         {isAdjusted ? (
-          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-semibold text-primary">
             {formatAdjustmentLabel(rentPct, pricePct, ratePp, vacancyPp)}
           </span>
         ) : null}
@@ -218,7 +218,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold text-foreground/80 hover:bg-muted"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-2xs font-semibold text-foreground/80 hover:bg-muted"
             aria-label="Reset what-if sliders to actuals"
           >
             <RotateCcw className="size-3" />
@@ -234,7 +234,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           type="button"
           onClick={applyWorstCase}
           aria-pressed={isWorstCase}
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-2xs font-semibold transition-colors ${
             isWorstCase
               ? "border-primary bg-primary/10 text-primary"
               : "border-border bg-background text-foreground/80 hover:bg-muted"
@@ -251,7 +251,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           onClick={reset}
           aria-pressed={!isAdjusted}
           disabled={!isAdjusted}
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-2xs font-semibold transition-colors ${
             !isAdjusted
               ? "border-primary bg-primary/10 text-primary"
               : "border-border bg-background text-foreground/80 hover:bg-muted"
@@ -260,7 +260,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           Base case
         </button>
         {isCashPurchase ? (
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-3xs text-muted-foreground">
             Cash purchase — no loan, so rate stress is skipped.
           </span>
         ) : null}
@@ -316,7 +316,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
         />
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-2xs leading-relaxed text-muted-foreground">
         Drag to stress-test the deal. The Overview metrics above update in
         real time. Projections and Pro panels stay on your actuals.
       </p>
@@ -341,10 +341,10 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
  */
 const TIER_TONE: Record<DealTier, string> = {
   Strong: "bg-[var(--brand-green)] text-white",
-  Solid: "bg-emerald-100 text-emerald-900",
-  Mixed: "bg-amber-100 text-amber-900",
-  Marginal: "bg-orange-100 text-orange-900",
-  Negative: "bg-rose-600 text-white",
+  Solid: "bg-positive-light text-positive",
+  Mixed: "bg-caution-light text-caution-text",
+  Marginal: "bg-caution-light text-caution-text",
+  Negative: "bg-negative text-white",
 };
 
 /** "rent −10% · vacancy +5pp · rate +1pp" style summary of the current
@@ -420,7 +420,7 @@ function SliderRow({
           className="whatif-range h-2 w-full cursor-pointer appearance-none rounded-full bg-muted"
         />
       </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground">
+      <div className="flex justify-between text-3xs text-muted-foreground">
         <span>
           {min > 0 ? "+" : ""}
           {min}

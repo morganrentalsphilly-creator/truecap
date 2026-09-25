@@ -47,12 +47,6 @@ export function MarketingHero() {
          <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14">
           {/* ── Left: value prop + the primary action ─────────────── */}
           <div className="tc-rise-in max-w-2xl">
-            {/* Friction-removal eyebrow: answers cost, signup, and card
-                objections before the visitor reaches the address field. */}
-            <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
-              <Target className="size-3 shrink-0" />
-              <span>Rental property underwriting</span>
-            </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
                 not runaway scale. Left-aligned (anti-center bias). */}
@@ -197,7 +191,7 @@ function HeroProductShot({ decisionPositioning }: { decisionPositioning: boolean
         <Link
           href="/analyze?sample=1"
           prefetch={false}
-          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Live sample →
         </Link>
@@ -268,10 +262,10 @@ function HeroProductMock({
         {/* browser chrome + a small LIVE indicator communicating that the
             analyzer is running, not a static screenshot. */}
         <div className="mb-4 flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-red-400/80" />
-          <span className="size-2.5 rounded-full bg-amber-400/80" />
-          <span className="size-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
+          <span className="size-2.5 rounded-full bg-negative/80" />
+          <span className="size-2.5 rounded-full bg-caution-light" />
+          <span className="size-2.5 rounded-full bg-positive/80" />
+          <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-3xs font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
             <span className="hidden sm:inline">
               usetruecap.com / {SAMPLE_DEAL_FIXTURE.display.shortAddress}
@@ -279,7 +273,7 @@ function HeroProductMock({
           </span>
           <span
             aria-label="Example analysis"
-            className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
+            className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-3xs font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
           >
             <span
               aria-hidden
@@ -330,7 +324,7 @@ function HeroProductMock({
           data-hero-sample-offer=""
           className="tc-hero-step-2 mt-4 min-w-0 rounded-xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-3 min-[320px]:p-4"
         >
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
+          <div className="flex items-center gap-1.5 text-3xs font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
             <Target aria-hidden className="size-3.5" /> Offer Ceiling
           </div>
           <div className="mt-1 break-words font-mono text-2xl font-extrabold tabular-nums tracking-tight text-primary min-[320px]:text-3xl">
@@ -345,7 +339,7 @@ function HeroProductMock({
            <p className="mt-1 text-xs text-foreground/80">
              Sample targets · {targetLabel}.
            </p>
-           <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
+           <p className="mt-1 text-3xs leading-relaxed text-foreground/80">
              The highest price that still clears these targets.
            </p>
         </div>
@@ -353,7 +347,7 @@ function HeroProductMock({
         {decisionPositioning ? (
           !askingClears ? (
             <div className="tc-hero-step-3 mt-3 min-w-0 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+              <p className="text-3xs font-extrabold uppercase tracking-wider text-primary">
                 What would make this sample work
               </p>
               <p className="mt-1 break-words font-semibold leading-relaxed">
@@ -402,7 +396,7 @@ function HeroProductMock({
             </span>
           </div>
         ) : null}
-        <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-3xs leading-relaxed text-muted-foreground">
           Illustrative analysis using editable sample inputs. Estimates are not
           an appraisal or investment guarantee.
         </p>
@@ -439,7 +433,7 @@ function MockTile({
       className={`min-w-0 rounded-xl border border-border bg-background p-3 ${stepClass ?? ""}`}
     >
       <div
-        className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}
+        className={`text-3xs font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-3xs"}`}
       >
         {label}
       </div>
@@ -449,7 +443,7 @@ function MockTile({
         {value}
       </div>
       {sub ? (
-        <div className="text-[10px] text-muted-foreground">{sub}</div>
+        <div className="text-3xs text-muted-foreground">{sub}</div>
       ) : null}
     </div>
   );

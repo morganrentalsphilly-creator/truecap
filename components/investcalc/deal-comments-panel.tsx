@@ -169,11 +169,11 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Comments</h3>
         </div>
         {isBusy ? (
-          <span role="status" aria-live="polite" className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+          <span role="status" aria-live="polite" className="inline-flex items-center gap-1 text-2xs text-muted-foreground">
             <Loader2 className="size-3 animate-spin" /> Saving…
           </span>
         ) : (
-          <span role="status" aria-live="polite" className="text-[11px] text-muted-foreground">
+          <span role="status" aria-live="polite" className="text-2xs text-muted-foreground">
             {comments.length} {comments.length === 1 ? "entry" : "entries"}
           </span>
         )}
@@ -208,7 +208,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           {comments.map((c) => (
             <li key={c.id} className="group rounded-xl border border-border/60 bg-muted/20 p-3">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="text-[11px] font-semibold text-muted-foreground">
+                <span className="text-2xs font-semibold text-muted-foreground">
                   {c.authorName ? `${c.authorName} · ` : ""}
                   {formatWhen(c.createdAt)}
                 </span>
@@ -221,7 +221,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
                       type="button"
                       aria-label="Delete comment"
                       disabled={isBusy}
-                      className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                      className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
                     >
                       <X className="size-3.5" />
                     </button>

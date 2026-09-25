@@ -21,6 +21,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "break-even-occupancy-rental-property";
 const TITLE = "Break-even occupancy: how much vacancy a rental can survive (2026)";
@@ -121,6 +123,7 @@ export default function BreakEvenOccupancyPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -139,7 +142,7 @@ export default function BreakEvenOccupancyPost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -148,7 +151,7 @@ export default function BreakEvenOccupancyPost() {
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
               {TITLE}
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -168,7 +171,7 @@ export default function BreakEvenOccupancyPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               Two different &quot;break-evens&quot; — don&apos;t confuse them
             </h2>
@@ -248,8 +251,8 @@ export default function BreakEvenOccupancyPost() {
               pays water, with operating expenses laid out like this:
             </p>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ScrollX label="Data table" className="overflow-x-auto">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Annual operating expense</th>
@@ -287,7 +290,7 @@ export default function BreakEvenOccupancyPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Now plug in. Operating expenses ($10,900) plus debt service ($17,964)
@@ -387,10 +390,10 @@ export default function BreakEvenOccupancyPost() {
               cost:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Metric</th>
                     <th className="text-right">$300k (disciplined)</th>
                     <th className="text-right">$340k (overpaid)</th>
@@ -425,7 +428,7 @@ export default function BreakEvenOccupancyPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               At $340,000, fixed cost is $32,064 and break-even occupancy jumps to

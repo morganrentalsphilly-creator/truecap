@@ -25,6 +25,15 @@ function mapAuthError(message: string): string {
   if (m.includes("user already registered")) {
     return "An account with this email already exists. Try signing in.";
   }
+  if (/rate ?limit|too many/.test(m)) {
+    return "Too many attempts in a row. Wait a minute and try again.";
+  }
+  if (m.startsWith("password should")) {
+    // Supabase's policy sentence ("Password should be at least 12 characters"
+    // / "…contain at least one …") is already human; keep it but make it a
+    // complete instruction.
+    return `${message.replace(/\.$/, "")}. Choose a different password.`;
+  }
   return message;
 }
 

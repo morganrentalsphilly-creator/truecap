@@ -9,7 +9,6 @@ import {
   buildDealScoreInputFromAnalysis,
 } from "@/lib/deal-score";
 import {
-  getEntitlementsForUser,
   getSavedDealLimitLabel,
   hasPaidPlanSubscription,
   hasPlanFeature,

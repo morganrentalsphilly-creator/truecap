@@ -28,6 +28,7 @@ import {
 } from "@/lib/underwriting-methodology";
 import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Methodology",
@@ -82,6 +83,7 @@ export default function MethodologyPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
@@ -89,12 +91,6 @@ export default function MethodologyPage() {
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
             Methodology
           </h1>
@@ -146,7 +142,7 @@ export default function MethodologyPage() {
           </ul>
         </div>
 
-        <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <h2 className="text-2xl sm:text-3xl">The core formulas</h2>
 
           <h3>Cap rate</h3>
@@ -160,6 +156,11 @@ export default function MethodologyPage() {
             include property tax, insurance, maintenance, management, HOA, and
             owner-paid utilities. The vacancy allowance is shown above NOI as a
             reduction to scheduled income. The CapEx reserve is shown below NOI.
+            TrueCap works in monthly line items and rounds each expense line
+            (tax, insurance, HOA, utilities, maintenance, vacancy, management,
+            CapEx reserve) to the nearest dollar before summing, so a hand
+            calculation from the annual formula can differ by a few dollars a
+            month.
           </p>
           <p>
             <strong>Other income:</strong> Standard v

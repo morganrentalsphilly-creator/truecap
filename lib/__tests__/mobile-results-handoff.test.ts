@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+// 2026-09 audit: the product uses one focus vocabulary — the primitives'
+// 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
@@ -57,7 +59,7 @@ describe("completed-result focus handoff", () => {
     expect(resultRegion).toContain("tabIndex={-1}");
     expect(resultRegion).toContain('aria-label="Analysis results"');
     expect(calculator).toContain(
-      "scroll-mt-20 focus-visible:outline-none focus-visible:ring-2",
+      "scroll-mt-20 focus-visible:outline-none focus-visible:ring-[3px]",
     );
     expect(calculator).toContain("sm:scroll-mt-24");
     expect(handoff).toContain("requestAnimationFrame");

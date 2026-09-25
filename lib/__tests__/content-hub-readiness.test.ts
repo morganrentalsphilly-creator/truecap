@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+// 2026-09 audit: the product uses one focus vocabulary — the primitives'
+// 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
@@ -117,7 +119,7 @@ describe("content hub touch targets", () => {
         source.indexOf("</summary>"),
       );
       expect(summary, path).toContain("min-h-11");
-      expect(summary, path).toContain("focus-visible:ring-2");
+      expect(summary, path).toContain("focus-visible:ring-[3px]");
     }
   });
 });

@@ -32,7 +32,7 @@ export function EmbedAttributionLink({
           referral_source: "embed",
         })
       }
-      className="inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       Underwrite a full property in TrueCap
       <ArrowUpRight className="h-3 w-3" />

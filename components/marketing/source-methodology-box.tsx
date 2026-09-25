@@ -49,7 +49,7 @@ export function SourceMethodologyBox({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-muted/20 px-4 py-3 text-[11px] leading-relaxed text-muted-foreground",
+        "rounded-xl border border-border bg-muted/20 px-4 py-3 text-2xs leading-relaxed text-muted-foreground",
         className
       )}
     >

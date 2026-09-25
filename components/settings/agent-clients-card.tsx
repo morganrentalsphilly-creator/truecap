@@ -170,7 +170,7 @@ export function AgentClientsCard() {
       {editor ? (
         <div className="mt-3 space-y-3 rounded-xl border border-border bg-muted/20 p-3">
           <div className="space-y-1">
-            <Label htmlFor="client-name" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor="client-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
               Name
             </Label>
             <Input
@@ -183,7 +183,7 @@ export function AgentClientsCard() {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="client-email" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="client-email" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 Email (optional)
               </Label>
               <Input
@@ -195,7 +195,7 @@ export function AgentClientsCard() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="client-phone" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="client-phone" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 Phone (optional)
               </Label>
               <Input

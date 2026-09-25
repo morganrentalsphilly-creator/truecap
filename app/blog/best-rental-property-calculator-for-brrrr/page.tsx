@@ -13,6 +13,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "best-rental-property-calculator-for-brrrr";
 const TITLE = "Best rental property calculator for BRRRR investors (2026)";
@@ -223,6 +224,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -244,15 +246,15 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
         <div className="mb-2">
           <Link
             href="/blog"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
         </div>
 
         <article>
           <header className="mb-8 sm:mb-10">
-            <div className="text-[11px] uppercase tracking-widest text-primary font-bold mb-3">
+            <div className="text-2xs uppercase tracking-widest text-primary font-bold mb-3">
               Ranking · {READING_TIME_MIN} min read
             </div>
             <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
@@ -280,7 +282,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             </p>
           </section>
 
-          <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for BRRRR investors</h2>
 
             {TOOLS.map((t) => (
@@ -290,7 +292,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
               >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
+                    <div className="text-2xs font-bold uppercase tracking-widest text-primary mb-1.5">
                       #{t.rank} · {t.bestFor}
                     </div>
                     <h3 className="text-xl sm:text-2xl font-extrabold text-foreground leading-tight">
@@ -311,7 +313,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
+                    <p className="text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
                       Free tier covers
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
@@ -326,7 +328,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                     </ul>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                    <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                       Where the gates kick in
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">

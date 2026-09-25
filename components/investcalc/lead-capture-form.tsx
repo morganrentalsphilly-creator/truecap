@@ -186,7 +186,7 @@ export function LeadCaptureForm({
         )}
         Send to {agentName}
       </button>
-      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-2xs leading-relaxed text-muted-foreground">
         By sending, you agree to share your contact details with {agentName} so
         they can respond. Your info is not used for anything else.
       </p>

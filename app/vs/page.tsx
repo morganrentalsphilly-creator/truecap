@@ -400,12 +400,12 @@ export default function VsHubPage() {
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero */}
         <section className="mb-12 sm:mb-16 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
             <Sparkles className="size-3" />
             Honest comparisons
           </div>
           <h1 className="mx-auto max-w-3xl text-balance text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-            TrueCap vs every <span className="text-primary">rental tool</span>{" "}
+            TrueCap vs every rental tool{" "}
             that matters.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-balance text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -446,7 +446,7 @@ export default function VsHubPage() {
             className={gi === 0 ? "mb-10 sm:mb-14" : "mb-10 sm:mb-14"}
           >
             <div className="mb-5">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
+              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-1.5">
                 {group.label}
               </p>
               <p className="text-sm leading-relaxed text-muted-foreground max-w-2xl">
@@ -461,7 +461,7 @@ export default function VsHubPage() {
                   className="group flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                       TrueCap vs
                     </span>
                     <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />

@@ -28,7 +28,7 @@ export function SummaryCardGrid({
           {item.labelTooltip ? (
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
-                <p className="text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 cursor-help">
+                <p className="text-left text-3xs font-bold uppercase tracking-widest text-muted-foreground underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 cursor-help">
                   {item.label}
                 </p>
               </TooltipTrigger>
@@ -41,7 +41,7 @@ export function SummaryCardGrid({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</p>
+            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">{item.label}</p>
           )}
           <p
             className={cn(

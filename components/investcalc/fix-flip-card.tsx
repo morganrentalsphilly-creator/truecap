@@ -216,7 +216,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={rehabId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Rehab Budget
             </Label>
@@ -252,7 +252,7 @@ export function FixFlipCard({
               message={strategyInputErrors?.rehabBudget}
             />
             {defaultRehab && defaultRehab > 0 && inputs.rehabBudget == null && (
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-3xs text-muted-foreground mt-1">
                 Using estimator total
               </p>
             )}
@@ -260,7 +260,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={arvId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               ARV
             </Label>
@@ -291,14 +291,14 @@ export function FixFlipCard({
               id={`${arvId}-error`}
               message={strategyInputErrors?.strategyArv}
             />
-            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-3xs leading-relaxed text-muted-foreground">
               Your estimate · verify with relevant sold comps or an appraisal.
             </p>
           </div>
           <div>
             <Label
               htmlFor={holdId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Hold Time
             </Label>
@@ -334,7 +334,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={sellPctId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Selling Costs
             </Label>
@@ -371,7 +371,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={dpId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Down Payment
             </Label>
@@ -403,14 +403,14 @@ export function FixFlipCard({
               id={`${dpId}-error`}
               message={strategyInputErrors?.fixFlipDownPaymentPct}
             />
-            <p className="text-[10px] text-muted-foreground mt-1">
+            <p className="text-3xs text-muted-foreground mt-1">
               100 for cash buy
             </p>
           </div>
           <div>
             <Label
               htmlFor={carryId}
-              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
             >
               Carry / mo (optional)
             </Label>
@@ -453,7 +453,7 @@ export function FixFlipCard({
               id={`${carryId}-error`}
               message={strategyInputErrors?.fixFlipCarryMonthly}
             />
-            <p className="text-[10px] leading-relaxed text-muted-foreground mt-1">
+            <p className="text-3xs leading-relaxed text-muted-foreground mt-1">
               Screening estimate from modeled tax, insurance, utilities, and
               interest-only debt. Verify actual holding costs and loan terms.
             </p>
@@ -506,7 +506,7 @@ export function FixFlipCard({
           {/* Breakdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                 Cash going in
               </div>
               <Row label="Cash at close" value={fmt(analysis.cashAtClose)} />
@@ -519,7 +519,7 @@ export function FixFlipCard({
               />
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
                 Sale
               </div>
               <Row label="Selling costs" value={fmt(analysis.sellingCosts)} />
@@ -554,7 +554,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
         {label}
       </div>
       <div

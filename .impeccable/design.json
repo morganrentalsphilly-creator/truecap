@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T20:10:00Z",
+  "title": "Design System: TrueCap",
+  "extensions": {
+    "colorMeta": {
+      "signal-blue": { "role": "primary", "displayName": "Signal Blue", "canonical": "oklch(0.49 0.18 240)", "tonalRamp": ["oklch(0.15 0.10 240)", "oklch(0.25 0.14 240)", "oklch(0.35 0.17 240)", "oklch(0.49 0.18 240)", "oklch(0.62 0.16 240)", "oklch(0.75 0.11 240)", "oklch(0.87 0.07 238)", "oklch(0.95 0.03 236)"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(0.15 0.02 250)", "tonalRamp": ["oklch(0.15 0.02 250)", "oklch(0.25 0.02 250)", "oklch(0.35 0.02 250)", "oklch(0.51 0.03 250)", "oklch(0.65 0.02 240)", "oklch(0.80 0.015 240)", "oklch(0.94 0.01 240)", "oklch(0.97 0.005 240)"] },
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "oklch(0.97 0.005 240)", "tonalRamp": ["oklch(0.15 0.02 250)", "oklch(0.35 0.02 250)", "oklch(0.51 0.03 250)", "oklch(0.65 0.02 240)", "oklch(0.80 0.015 240)", "oklch(0.94 0.01 240)", "oklch(0.97 0.005 240)", "oklch(1 0 0)"] },
+      "ledger-green": { "role": "semantic", "displayName": "Ledger Green", "canonical": "oklch(0.5 0.15 155)", "tonalRamp": ["oklch(0.15 0.06 155)", "oklch(0.25 0.09 155)", "oklch(0.35 0.12 155)", "oklch(0.5 0.15 155)", "oklch(0.62 0.14 155)", "oklch(0.75 0.10 155)", "oklch(0.87 0.06 155)", "oklch(0.95 0.04 155)"] },
+      "caution-orange": { "role": "semantic", "displayName": "Caution Orange", "canonical": "oklch(0.58 0.18 42)", "tonalRamp": ["oklch(0.15 0.06 42)", "oklch(0.28 0.10 42)", "oklch(0.42 0.15 42)", "oklch(0.58 0.18 42)", "oklch(0.68 0.16 42)", "oklch(0.80 0.10 42)", "oklch(0.90 0.06 42)", "oklch(0.96 0.04 42)"] },
+      "metric-negative": { "role": "semantic", "displayName": "Metric Negative", "canonical": "oklch(0.55 0.22 15)", "tonalRamp": ["oklch(0.15 0.08 15)", "oklch(0.28 0.13 15)", "oklch(0.42 0.18 15)", "oklch(0.55 0.22 15)", "oklch(0.66 0.19 15)", "oklch(0.78 0.12 15)", "oklch(0.89 0.06 15)", "oklch(0.96 0.03 15)"] },
+      "sidebar-navy": { "role": "neutral", "displayName": "Sidebar Navy", "canonical": "oklch(0.18 0.04 260)", "tonalRamp": ["oklch(0.15 0.04 260)", "oklch(0.18 0.04 260)", "oklch(0.24 0.05 262)", "oklch(0.35 0.05 260)", "oklch(0.50 0.04 258)", "oklch(0.70 0.03 255)", "oklch(0.85 0.02 250)", "oklch(0.96 0.01 250)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Homepage hero headline only." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles." },
+      "title": { "displayName": "Title", "purpose": "Card and section titles." },
+      "body": { "displayName": "Body", "purpose": "Reading copy; 14px in product UI." },
+      "label": { "displayName": "Label", "purpose": "Metric labels, source chips, table headers." },
+      "numeral": { "displayName": "Numeral", "purpose": "Every comparable number: DM Mono, tabular figures." }
+    },
+    "shadows": [
+      { "name": "resting-card", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Every card at rest, over a 1px hairline." },
+      { "name": "floating", "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", "purpose": "Popovers, dropdowns, dialogs, sticky bars." },
+      { "name": "dashboard-hero", "value": "0 12px 32px -8px oklch(0.2 0.04 260 / 0.12), 0 4px 8px -4px oklch(0.2 0.04 260 / 0.06)", "purpose": "Dashboard stat cards and the portfolio chart." }
+    ],
+    "motion": [
+      { "name": "rise-in", "value": "tc-rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both", "purpose": "One load-in cascade for above-the-fold hero elements." },
+      { "name": "reveal", "value": "animation-timeline: view(); animation-range: entry 2% cover 26%", "purpose": "Scroll-driven section reveal; no-op where unsupported and under reduced motion." },
+      { "name": "press", "value": "transform: scale(0.98) on :active", "purpose": "Button press feedback." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action per screen: Analyze, Run, Save, Upgrade.",
+      "html": "<button class=\"ds-btn-primary\">Analyze this deal</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; min-width:44px; padding:8px 16px; border:0; border-radius:0.625rem; background:var(--primary, oklch(0.49 0.18 240)); color:oklch(0.99 0 0); font:500 0.875rem/1.25 'Plus Jakarta Sans', system-ui, sans-serif; white-space:nowrap; transition:background .15s, transform .15s; cursor:pointer; } .ds-btn-primary:hover { background:oklch(0.49 0.18 240 / 0.9); } .ds-btn-primary:active { transform:scale(0.98); } .ds-btn-primary:focus-visible { outline:3px solid oklch(0.52 0.18 240); outline-offset:2px; } .ds-btn-primary:disabled { opacity:.5; pointer-events:none; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions beside a primary: Edit assumptions, Share, Cancel.",
+      "html": "<button class=\"ds-btn-outline\">Edit assumptions</button>",
+      "css": ".ds-btn-outline { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; min-width:44px; padding:8px 16px; border:1px solid oklch(0.65 0.02 240); border-radius:0.625rem; background:oklch(0.97 0.005 240); color:oklch(0.15 0.02 250); font:500 0.875rem/1.25 'Plus Jakarta Sans', system-ui, sans-serif; box-shadow:0 1px 2px 0 rgb(0 0 0 / .05); transition:background .15s; cursor:pointer; } .ds-btn-outline:hover { background:oklch(0.94 0.01 240); } .ds-btn-outline:focus-visible { outline:3px solid oklch(0.52 0.18 240); outline-offset:2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Every form field; 44px tall, 16px text below md so iOS never zooms.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Purchase price</span><input class=\"ds-input\" inputmode=\"decimal\" placeholder=\"265,000\" /></label>",
+      "css": ".ds-field { display:grid; gap:6px; font-family:'Plus Jakarta Sans', system-ui, sans-serif; } .ds-field-label { font-size:0.875rem; font-weight:500; color:oklch(0.15 0.02 250); } .ds-input { height:44px; width:100%; padding:4px 12px; border:1px solid oklch(0.65 0.02 240); border-radius:0.625rem; background:transparent; color:oklch(0.15 0.02 250); font-size:1rem; box-shadow:0 1px 2px 0 rgb(0 0 0 / .05); outline:none; transition:box-shadow .15s, border-color .15s; } .ds-input::placeholder { color:oklch(0.51 0.03 250); } .ds-input:focus-visible { border-color:oklch(0.52 0.18 240); box-shadow:0 0 0 3px oklch(0.52 0.18 240 / .5); } .ds-input[aria-invalid='true'] { border-color:oklch(0.577 0.245 27.325); }"
+    },
+    {
+      "name": "Source Chip",
+      "kind": "chip",
+      "refersTo": "badge-outline",
+      "description": "Names where an assumption came from: HUD FMR, FRED rate, TrueCap default, Your input.",
+      "html": "<span class=\"ds-chip\">HUD FMR</span> <span class=\"ds-chip ds-chip-blue\">Your input</span>",
+      "css": ".ds-chip { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border:1px solid oklch(0.65 0.02 240); border-radius:0.625rem; font:500 0.75rem/1.4 'Plus Jakarta Sans', system-ui, sans-serif; color:oklch(0.15 0.02 250); white-space:nowrap; } .ds-chip-blue { border-color:transparent; background:oklch(0.93 0.05 235); color:oklch(0.49 0.18 240); }"
+    },
+    {
+      "name": "Metric Tile",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "One of the four metrics band tiles: label, mono numeral, signed colour.",
+      "html": "<div class=\"ds-metric\"><span class=\"ds-metric-label\">Monthly cash flow</span><span class=\"ds-metric-value ds-pos\">+$554</span><span class=\"ds-metric-note\">after all expenses and debt</span></div>",
+      "css": ".ds-metric { display:grid; gap:4px; padding:16px; border:1px solid oklch(0.65 0.02 240); border-radius:1rem; background:oklch(1 0 0); box-shadow:0 1px 2px 0 rgb(0 0 0 / .05); font-family:'Plus Jakarta Sans', system-ui, sans-serif; } .ds-metric-label { font-size:0.75rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:oklch(0.51 0.03 250); } .ds-metric-value { font:500 1.5rem/1.1 'DM Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; color:oklch(0.15 0.02 250); } .ds-pos { color:oklch(0.5 0.16 155); } .ds-neg { color:oklch(0.55 0.22 15); } .ds-metric-note { font-size:0.75rem; color:oklch(0.51 0.03 250); }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "sidebar-navy",
+      "description": "Dashboard rail row: icon + label, active row tinted.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-rail-item ds-rail-active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1\"/></svg>Dashboard</a><a class=\"ds-rail-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M8 12h8M12 8v8\"/></svg>New analysis</a></nav>",
+      "css": ".ds-rail { display:grid; gap:4px; width:220px; padding:12px; border-radius:0.875rem; background:linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260)); font-family:'Plus Jakarta Sans', system-ui, sans-serif; } .ds-rail-item { display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 12px; border-radius:0.625rem; color:oklch(0.85 0.02 250); font-size:0.875rem; font-weight:500; text-decoration:none; transition:background .15s; } .ds-rail-item:hover { background:oklch(0.24 0.05 262 / .7); color:oklch(0.99 0 0); } .ds-rail-active { background:oklch(0.24 0.05 262); color:oklch(0.99 0 0); } .ds-rail-item:focus-visible { outline:3px solid oklch(0.62 0.18 240); outline-offset:2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Underwriter's Ledger",
+    "overview": "TrueCap looks like a clean sheet of underwriting paper: a cool, slightly blue off-white page, dark ink, one electric-blue signal colour, and numbers set in a monospace face so a column of dollars reads like a ledger. Nothing on the page decorates; every colour that is not ink or paper carries a meaning (positive, negative, caution, action). The product surface is denser and quieter than the marketing surface, but they share the same ink, blue, radii and font, so a visitor who arrives from an ad and ends up in the dashboard never feels they changed products. The system is light-only by decision.",
+    "keyCharacteristics": [
+      "One accent (electric blue, hue 240) for actions, links, focus and charts; green/orange/red are reserved for the sign of a number or a status.",
+      "Numbers first: font-mono + tabular-nums on every metric, table and ledger row.",
+      "Generous, calm rhythm on marketing pages; compact 14px/12px type in product UI.",
+      "Borders, not shadows, do most of the work; shadow-sm is the resting elevation for a card.",
+      "Every interactive element is at least 44×44px, enforced globally."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Blue is the only colour that means \"act here\". If something is blue it is a link, a button, a focus ring or the active item.", "section": "colors" },
+      { "name": "The Sign Rule", "body": "Green and red are earned only by the sign of a number or a verdict tier; never use them for emphasis.", "section": "colors" },
+      { "name": "The Always-Light Rule", "body": "There is no dark theme. Do not wire the .dark tokens to a toggle or to prefers-color-scheme.", "section": "colors" },
+      { "name": "The Ledger Rule", "body": "A number that a user will compare with another number is set in DM Mono with tabular figures. Prose numbers stay in the sans.", "section": "typography" },
+      { "name": "The 10px Floor", "body": "No text below 10px.", "section": "typography" },
+      { "name": "The Border-First Rule", "body": "If a hairline separates it, it does not also need a shadow. Shadows appear on things that float.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the semantic tokens (text-success, text-metric-negative, bg-brand-blue-light) rather than raw Tailwind palette colours.",
+      "Do set every comparable number in font-mono tabular-nums.",
+      "Do keep controls at ≥44×44px and rely on the global :focus-visible ring; never remove an outline without replacing it.",
+      "Do render exactly one <Disclaimer /> per marketing page and define each feature name once per page.",
+      "Do keep text-base on inputs below md so iOS does not zoom."
+    ],
+    "donts": [
+      "Don't introduce a second accent colour or use green/red for emphasis.",
+      "Don't add a dark theme, a kicker/eyebrow above headings, gradient text, or thick coloured side borders.",
+      "Don't request Plus Jakarta Sans at weight 900.",
+      "Don't use raw <img>; use next/image with intrinsic sizes to avoid layout shift.",
+      "Don't put text below 10px or reduce tap targets below 44px."
+    ]
+  }
+}

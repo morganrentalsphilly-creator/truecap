@@ -64,9 +64,6 @@ export default function StatesIndexPage() {
       <Header />
 
       <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          By state
-        </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           Rental-property verification by state
         </h1>
@@ -86,7 +83,7 @@ export default function StatesIndexPage() {
                 href={`/states/${s.slug}`}
                 className="block rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
-                <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+                <p className="text-2xs uppercase tracking-widest text-primary font-bold">
                   {s.abbr} · Verification guide
                 </p>
                 <p className="mt-1 text-lg font-extrabold text-foreground">

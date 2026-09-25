@@ -218,6 +218,30 @@ async function fetchWithTimeout(
   }
 }
 
+/**
+ * Provider origin, overridable ONLY for automated tests. Production never
+ * sets these variables, so the public HUD/FRED hosts stay hard defaults; the
+ * browser regression suite points them at a loopback mock (see
+ * e2e/support/enrichment-mock-server.ts) to exercise the timeout, 5xx and
+ * malformed-payload paths that no live provider will reproduce on demand.
+ * Only loopback/localhost origins are honoured so a stray variable can never
+ * redirect a keyed request off the machine.
+ */
+function providerBaseUrl(envName: "FRED_API_BASE_URL" | "HUD_API_BASE_URL", fallback: string): string {
+  const raw = process.env[envName]?.trim();
+  if (!raw) return fallback;
+  try {
+    const url = new URL(raw);
+    if (url.protocol === "http:" && ["127.0.0.1", "localhost", "::1", "[::1]"].includes(url.hostname)) {
+      return url.origin;
+    }
+  } catch {
+    /* fall through to the real provider */
+  }
+  console.warn("[enrichProperty] ignoring non-loopback provider override", { envName });
+  return fallback;
+}
+
 // In-memory cache: serverless instances stay warm for a while, so even
 // a simple module-level cache cuts FRED traffic by 100x.
 type CachedRate = { rate: number; asOf: string; fetchedAt: number };
@@ -235,7 +259,7 @@ async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string 
     return { rate: mortgageRateCache.rate, asOf: mortgageRateCache.asOf };
   }
 
-  const url = new URL("https://api.stlouisfed.org/fred/series/observations");
+  const url = new URL(`${providerBaseUrl("FRED_API_BASE_URL", "https://api.stlouisfed.org")}/fred/series/observations`);
   url.searchParams.set("series_id", "MORTGAGE30US");
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("file_type", "json");
@@ -343,7 +367,7 @@ async function fetchSafmrRows(
     return cached;
   }
 
-  const url = `https://www.huduser.gov/hudapi/public/fmr/data/${encodeURIComponent(entityId)}`;
+  const url = `${providerBaseUrl("HUD_API_BASE_URL", "https://www.huduser.gov")}/hudapi/public/fmr/data/${encodeURIComponent(entityId)}`;
   const res = await fetchWithTimeout(url, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -390,7 +414,7 @@ async function fetchHudStateData(
     return cached;
   }
 
-  const url = `https://www.huduser.gov/hudapi/public/fmr/statedata/${encodeURIComponent(key)}`;
+  const url = `${providerBaseUrl("HUD_API_BASE_URL", "https://www.huduser.gov")}/hudapi/public/fmr/statedata/${encodeURIComponent(key)}`;
   const res = await fetchWithTimeout(url, {
     headers: {
       Authorization: `Bearer ${apiKey}`,

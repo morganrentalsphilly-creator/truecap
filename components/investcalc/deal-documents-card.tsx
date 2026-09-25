@@ -455,7 +455,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                 <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={label}>
                   {label}
                 </span>
-                <span className="shrink-0 text-[11px] text-muted-foreground">{formatSize(doc.size)}</span>
+                <span className="shrink-0 text-2xs text-muted-foreground">{formatSize(doc.size)}</span>
                 {/* Both icons were bare 16px glyphs 8px apart, so a fat-finger
                     tap aimed at Download landed on a permanent delete.
                     min-h-11/min-w-11 gives each a real 44px target; the row's
@@ -583,7 +583,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                           : "/yr"}
                       </span>
                       {candidate.confidence === "weak" ? (
-                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+                        <span className="ml-2 rounded-full bg-caution-light px-2 py-0.5 text-3xs font-semibold text-caution-text">
                           Verify — loose match
                         </span>
                       ) : null}
@@ -605,7 +605,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                   {/* The exact source text IS the trust mechanism: the user
                       verifies the number against their own document before
                       anything is written. */}
-                  <p className="mt-1.5 rounded bg-muted/50 px-2 py-1 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                  <p className="mt-1.5 rounded bg-muted/50 px-2 py-1 font-mono text-2xs leading-relaxed text-muted-foreground">
                     “…{candidate.snippet}…”
                   </p>
                 </li>

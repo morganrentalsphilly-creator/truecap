@@ -88,7 +88,7 @@ export function DrillRow({
           // scroll-mt clears the sticky site header when metric-tap /
           // jump wiring smooth-scrolls this row into view (same offsets
           // the tab buttons carried).
-          className="scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-4"
+          className="scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:px-4"
         >
           {icon ? (
             <span
@@ -102,7 +102,7 @@ export function DrillRow({
             <span className="flex items-center gap-2">
               <span className="text-sm font-bold text-foreground">{title}</span>
               {locked ? (
-                <span className="inline-flex shrink-0 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white sm:text-[10px]">
+                <span className="inline-flex shrink-0 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-3xs font-bold uppercase text-white sm:text-3xs">
                   PRO
                 </span>
               ) : null}

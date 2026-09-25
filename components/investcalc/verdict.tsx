@@ -62,7 +62,7 @@ export function Verdict({ recommendation, variant = "badge", className }: Verdic
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border font-semibold",
-        isCompact ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs",
+        isCompact ? "px-2 py-0.5 text-2xs" : "px-2.5 py-1 text-xs",
         VERDICT_TONE_CLASSES[display.tone],
         className
       )}

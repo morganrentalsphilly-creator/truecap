@@ -19,6 +19,7 @@ import {
 import type { CitySafmr } from "@/lib/markets/safmr-rents";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 export type SafeMarketPageIdentity = {
   city: string;
@@ -92,7 +93,7 @@ export function MarketFmrSection({
   safmr?: CitySafmr;
 }) {
   const cell =
-    "px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground";
+    "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
   return (
     <section
       data-market-fmr=""
@@ -107,7 +108,7 @@ export function MarketFmrSection({
         property. Use it as your starting rent, then replace it with current
         leases for the address.
       </p>
-      <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+      <ScrollX label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[18rem] text-sm">
           <caption className="sr-only">
             HUD Fair Market Rent, FY{hud.year}, by bedroom count for {city}
@@ -141,7 +142,7 @@ export function MarketFmrSection({
             </tr>
           </tbody>
         </table>
-      </div>
+      </ScrollX>
 
       {safmr ? (
         <div className="mt-6">
@@ -152,7 +153,7 @@ export function MarketFmrSection({
             HUD also publishes ZIP-level rents for the {safmr.areaName}, the
             region that includes {city}. Rent varies by ZIP and bedroom count.
           </p>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+          <ScrollX label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[24rem] text-sm">
               <caption className="sr-only">
                 HUD Small Area Fair Market Rent by ZIP code, {safmr.areaName},
@@ -190,7 +191,7 @@ export function MarketFmrSection({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
             {safmr.rows.length < safmr.zipCount
               ? `${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, sampled highest to lowest.`
@@ -257,7 +258,7 @@ export function MarketSampleUnderwrite({
             key={stat.label}
             className="rounded-xl border border-border bg-card p-4"
           >
-            <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
               {stat.label}
             </dt>
             <dd className="mt-1 text-2xl font-extrabold text-foreground">
@@ -353,7 +354,7 @@ export function MarketRelatedReading({
   }));
   if (glossary.length === 0 && blog.length === 0) return null;
   const chip =
-    "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   return (
     <section
       data-market-related-reading=""
@@ -468,7 +469,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
         </div>
 
         <header className="mb-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary">
             <MapPin className="size-3" />
             {city}, {stateCode}
           </div>

@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "emails/**",
+      "app/actions/capture-deal-lead.ts",
+      "app/actions/lead-magnet-capture.ts",
+      "app/actions/post-analysis-email-capture.ts",
+      "app/**/opengraph-image.tsx",
+      "app/og/**",
+      "lib/pdf/**",
+      "lib/pdf-generator.ts"
+    ],
+    "ignoreValues": []
+  }
+}

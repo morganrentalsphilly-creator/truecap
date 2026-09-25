@@ -571,7 +571,7 @@ export default async function DashboardSavedAnalysesPage({
               aria-label="Underwriting version notice"
               className="mx-auto mt-1 w-full max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6"
             >
-              <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm">
+              <div className="rounded-xl border border-caution/40 bg-caution-light px-4 py-3 text-sm">
                 <p className="font-bold text-foreground">
                   Recorded and current results are kept separate
                 </p>

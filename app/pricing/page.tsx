@@ -18,7 +18,7 @@ import { Testimonials } from "@/components/marketing/testimonials";
 import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Check, ShieldCheck, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
@@ -49,6 +49,7 @@ import {
   summarizePricingEvaluation,
 } from "@/lib/pricing-evaluation";
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -253,10 +254,6 @@ export default async function PricingPage() {
             className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
           />
           <div className="mx-auto max-w-5xl px-4 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16 text-center">
-            <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-sm backdrop-blur">
-              <Sparkles className="size-3" />
-              Analyze free · No card required
-            </div>
             {/* Lead with the outcome (docs/site-overhaul.md Phase 9). The
                 arithmetic is deliberately simple and checkable and every
                 figure comes from PRICING_OUTCOME_EXAMPLE, not this file. */}
@@ -267,7 +264,7 @@ export default async function PricingPage() {
               Overpaying by {PRICING_OUTCOME_EXAMPLE.overpayPct}% on a{" "}
               {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.purchasePriceUsd)} rental costs{" "}
               {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.overpayUsd)}{" "}
-              <span className="text-primary">— before you collect a dollar of rent.</span>
+              — before you collect a dollar of rent.
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {!user
@@ -285,13 +282,13 @@ export default async function PricingPage() {
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/analyze" prefetch={false}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
               >
                 Analyze a property free
               </Link>
               <Link
                 href="#pro"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
               >
                 See Pro plans
               </Link>
@@ -352,7 +349,7 @@ export default async function PricingPage() {
             </p>
             <Link
               href={DEALCHECK_COMPARISON.href}
-              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
             >
               Read the full DealCheck comparison
             </Link>
@@ -387,7 +384,7 @@ export default async function PricingPage() {
             <li>
               <Link
                 href="/methodology"
-                className="font-bold text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="font-bold text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
               >
                 Methodology is public
               </Link>
@@ -400,9 +397,6 @@ export default async function PricingPage() {
           className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12"
         >
           <div className="text-center">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-              Choose the job
-            </p>
             <h2
               id="pricing-stage-title"
               className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
@@ -438,7 +432,7 @@ export default async function PricingPage() {
                 key={item.job}
                 className="rounded-2xl border border-border bg-card p-4 shadow-sm"
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                <p className="text-3xs font-bold uppercase tracking-widest text-primary">
                   {item.product}
                 </p>
                 <h3 className="mt-1 text-lg font-extrabold text-foreground">
@@ -517,7 +511,7 @@ export default async function PricingPage() {
                   <h3 className="text-sm font-bold text-foreground">{label}</h3>
                   <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div className="rounded-xl bg-muted/30 p-3">
-                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
                         Free
                       </dt>
                       <dd className="mt-1">
@@ -525,7 +519,7 @@ export default async function PricingPage() {
                       </dd>
                     </div>
                     <div className="rounded-xl bg-primary/5 p-3">
-                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                      <dt className="text-3xs font-bold uppercase tracking-wider text-primary">
                         {proOfferName}
                       </dt>
                       <dd className="mt-1">
@@ -537,7 +531,7 @@ export default async function PricingPage() {
               ),
             )}
           </div>
-          <div className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
+          <ScrollX label="Table" className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full text-sm">
               <caption className="sr-only">
                 Features included with Free and {proOfferName}
@@ -573,7 +567,7 @@ export default async function PricingPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </ScrollX>
         </section>
 
         {/* FAQ */}
@@ -584,7 +578,7 @@ export default async function PricingPage() {
           <div className="tc-reveal mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
             {faqs.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                   <span className="font-semibold text-foreground">{faq.q}</span>
                   <span
                     aria-hidden
@@ -603,13 +597,13 @@ export default async function PricingPage() {
           <div className="mt-10 flex flex-col items-center gap-3 text-center">
             <p className="text-sm text-muted-foreground">
               Still have a question?{" "}
-              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                 Email hello@usetruecap.com
               </a>
             </p>
             <Link
               href="/analyze" prefetch={false}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Analyze a deal free →
             </Link>

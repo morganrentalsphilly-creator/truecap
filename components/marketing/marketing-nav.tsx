@@ -88,13 +88,13 @@ export function MarketingNav() {
 export function MarketingMobileMenu() {
   const [open, setOpen] = useState(false);
   const itemClass =
-    "flex min-h-12 flex-col justify-center rounded-lg px-3 py-2 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "flex min-h-12 flex-col justify-center rounded-lg px-3 py-2 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         aria-label="Open menu"
         data-marketing-mobile-menu-trigger=""
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:hidden"
       >
         <Menu className="size-5" aria-hidden />
       </SheetTrigger>
@@ -112,7 +112,7 @@ export function MarketingMobileMenu() {
           <Link href="/pricing" className={itemClass} onClick={() => setOpen(false)}>
             Pricing
           </Link>
-          <p className="mt-3 px-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mt-3 px-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
             Learn
           </p>
           {LEARN_LINKS.map((l) => (
@@ -124,14 +124,14 @@ export function MarketingMobileMenu() {
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
             <Link
               href="/auth/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               onClick={() => setOpen(false)}
             >
               Sign in
             </Link>
             <Link
               href="/auth/sign-up"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               onClick={() => setOpen(false)}
             >
               Create account

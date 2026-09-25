@@ -15,9 +15,9 @@ const TONE = {
     iconClass: "text-[var(--metric-negative)]",
   },
   review: {
-    wrap: "border-amber-500/30 bg-amber-500/10",
+    wrap: "border-caution/40 bg-caution-light",
     icon: AlertCircle,
-    iconClass: "text-amber-600",
+    iconClass: "text-caution-text",
   },
   ready: {
     wrap: "border-[var(--metric-positive)]/30 bg-[var(--metric-positive)]/10",
@@ -44,7 +44,7 @@ export function NextActionBanner({
       <div className="flex min-w-0 flex-1 items-start gap-3">
       <Icon aria-hidden className={`mt-0.5 size-5 shrink-0 ${t.iconClass}`} />
       <div className="min-w-0 flex-1">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
           Next action
         </div>
         <div className="text-sm font-bold text-foreground">{action.label}</div>
@@ -54,7 +54,7 @@ export function NextActionBanner({
       {cta ? (
         <Link
           href={cta.href}
-          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto sm:self-center"
+          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-auto sm:self-center"
         >
           {cta.label}
         </Link>

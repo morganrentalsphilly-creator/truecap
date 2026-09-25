@@ -67,7 +67,7 @@ describe("signed-token", () => {
 
   it("FAILS SAFE when the secret is unset — no token minted, none accepted", async () => {
     delete process.env.SHARE_LINK_SECRET;
-    const { mintSignedToken, readSignedToken } = await fresh();
+    const { mintSignedToken } = await fresh();
     expect(mintSignedToken("s", { a: "1" })).toBeNull();
     // A token minted earlier (with a secret) must not verify once the secret is gone.
     process.env.SHARE_LINK_SECRET = SECRET;

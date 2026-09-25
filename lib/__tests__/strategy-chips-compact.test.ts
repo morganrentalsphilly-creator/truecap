@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+// 2026-09 audit: the product uses one focus vocabulary — the primitives'
+// 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_STRATEGY_KEY,
@@ -63,7 +65,7 @@ describe("compact strategy selector", () => {
     );
     expect(source).toContain('aria-label="Choose analysis type"');
     expect(source).toContain("min-h-11");
-    expect(source).toContain("focus-visible:ring-2");
+    expect(source).toContain("focus-visible:ring-[3px]");
     expect(source).toContain("collapseAndRestoreFocus");
     expect(source).toContain("flex-wrap items-center");
     expect(source).toContain("basis-[9rem]");
@@ -129,7 +131,7 @@ describe("compact strategy selector", () => {
   it("keeps confirmation actions keyboard-visible and touch-friendly", () => {
     expect(source).toContain("aria-labelledby={confirmationTitleId}");
     expect(source.match(/min-h-11/g)?.length).toBeGreaterThanOrEqual(4);
-    expect(source).toContain("focus-visible:ring-2");
+    expect(source).toContain("focus-visible:ring-[3px]");
     expect(source).toContain("collapseAndRestoreFocus");
   });
 

@@ -67,12 +67,12 @@ export function DealAgingNudge({
         : "Stay on top of inspection, financing, and your due-diligence deadlines.";
 
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-amber-300/70 bg-amber-50 p-4 sm:p-5">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-amber-600">
+    <div className="flex items-start gap-3 rounded-2xl border border-caution/30 bg-caution-light p-4 sm:p-5">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-caution-text">
         <Clock className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Keep it moving</p>
+        <p className="text-3xs font-bold uppercase tracking-widest text-caution-text">Keep it moving</p>
         <p className="mt-0.5 text-sm font-semibold text-foreground">
           You saved {address} {days} days ago and it&apos;s still marked {label}.
         </p>

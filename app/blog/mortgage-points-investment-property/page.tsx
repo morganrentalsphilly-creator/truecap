@@ -21,6 +21,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "mortgage-points-investment-property";
 const TITLE =
@@ -128,6 +130,7 @@ export default function MortgagePointsPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -146,7 +149,7 @@ export default function MortgagePointsPost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -155,7 +158,7 @@ export default function MortgagePointsPost() {
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
               {TITLE}
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -172,7 +175,7 @@ export default function MortgagePointsPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What a point actually buys
             </h2>
@@ -235,10 +238,10 @@ export default function MortgagePointsPost() {
               :
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Points (cost)</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">P&amp;I / mo</th>
@@ -277,7 +280,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Under those assumptions, one point trims the payment about $33 per
@@ -297,10 +300,10 @@ export default function MortgagePointsPost() {
               Calculate each pair of actual quotes separately.
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Rate cut per point</th>
                     <th className="text-right">Saved / mo (1 pt)</th>
                     <th className="text-right">Break-even</th>
@@ -324,7 +327,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               These three assumed ladders show that the break-even can change
@@ -377,10 +380,10 @@ export default function MortgagePointsPost() {
               NOI:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Points</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">Annual debt service</th>
@@ -410,7 +413,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               In the example, two points move modeled DSCR from 1.14 to 1.20. If
@@ -443,10 +446,10 @@ export default function MortgagePointsPost() {
               $18,200 NOI:
             </p>
 
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Scenario</th>
                     <th className="text-right">Cash in</th>
                     <th className="text-right">Cash flow / mo</th>
@@ -468,7 +471,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
 
             <p>
               Under the hypothetical inputs, cash-on-cash rises from 3.88% to

@@ -38,7 +38,7 @@ export default function GlobalAppError({
 
   return (
     <main id="main" className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
-      <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-[var(--metric-negative)]">
+      <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-negative/10 text-[var(--metric-negative)]">
         <AlertTriangle className="size-6" />
       </div>
       <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">

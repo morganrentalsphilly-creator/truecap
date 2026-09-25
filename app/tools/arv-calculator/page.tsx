@@ -28,6 +28,8 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -144,6 +146,7 @@ export default function ArvCalculatorPage() {
 
   return (
     <>
+      <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/arv-calculator" toolName="ARV calculator" />
       <script
         type="application/ld+json"
@@ -164,9 +167,9 @@ export default function ArvCalculatorPage() {
           <header className="mb-6 sm:mb-8">
             <Link
               href="/tools"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              ← TrueCap free tools
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               ARV Calculator (After-Repair Value + 70% Rule)
@@ -183,7 +186,7 @@ export default function ArvCalculatorPage() {
           <ArvCalculatorWidget />
 
           {/* Long-form content */}
-          <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <p>
               <strong>Educational guide:</strong> The material below explains
               how practitioners use ARV and the 70% rule. TrueCap does not
@@ -274,7 +277,7 @@ export default function ArvCalculatorPage() {
               $45,000 of work to reach the neighborhood&apos;s renovated
               standard. The four best renovated comps:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -311,7 +314,7 @@ export default function ArvCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>.
               Applied to 1,400 finished square feet: 1,400 × $182.44 ≈
@@ -365,7 +368,7 @@ export default function ArvCalculatorPage() {
               assumptions, and when those don&apos;t hold, the multiplier
               should move:
             </p>
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
@@ -397,7 +400,7 @@ export default function ArvCalculatorPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               That&apos;s why the multiplier in this calculator is an input,
               not a constant. And it&apos;s why the rule is a screen, not
@@ -547,13 +550,6 @@ export default function ArvCalculatorPage() {
 
           <RelatedContent kind="tool" slug="arv-calculator" title="ARV Calculator (After-Repair Value + 70% Rule)" className="mt-10" />
 
-          <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-            Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
-              TrueCap
-            </Link>{" "}
-            — transparent, editable rental analysis, free to start.
-          </footer>
         </main>
         <SiteFooter />
       </div>

@@ -25,6 +25,8 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
+import { ScrollX } from "@/components/ui/scroll-x";
+import { Header } from "@/components/investcalc/header";
 
 const SLUG = "exit-cap-rate-rental-property";
 const TITLE_PLAIN =
@@ -122,6 +124,7 @@ export default function ExitCapRatePost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header initialUser={null} initialEntitlements={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -140,7 +143,7 @@ export default function ExitCapRatePost() {
           <div className="mb-2">
             <Link
               href="/blog"
-              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Blog
             </Link>
@@ -150,7 +153,7 @@ export default function ExitCapRatePost() {
               Exit cap rate: how to pick the number that sets your sale price
               (2026)
             </h1>
-            <p className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
+            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -175,7 +178,7 @@ export default function ExitCapRatePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none text-foreground space-y-6 leading-relaxed">
+          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What the exit cap rate is
             </h2>
@@ -276,10 +279,10 @@ export default function ExitCapRatePost() {
               7% cost of sale and the loan payoff, and the five-year internal rate
               of return on your $84,000:
             </p>
-            <div className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Exit cap rate</th>
                     <th className="text-right">Sale price</th>
                     <th className="text-right">Net proceeds</th>
@@ -313,7 +316,7 @@ export default function ExitCapRatePost() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
             <p>
               Read down that table slowly, because it&apos;s the whole point of
               the article. The property is identical in every row — same rent,

@@ -14,6 +14,7 @@ import {
 } from "@/components/investcalc/form-field-helpers";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 type MoneyFieldName =
   | "stabilizedMonthlyRent"
@@ -93,7 +94,7 @@ function MoneyField({
       {hint ? (
         <p
           id={hintId}
-          className="mt-1 text-[11px] leading-relaxed text-muted-foreground"
+          className="mt-1 text-2xs leading-relaxed text-muted-foreground"
         >
           {hint}
         </p>
@@ -168,7 +169,7 @@ function NumberField({
       {hint ? (
         <p
           id={hintId}
-          className="mt-1 text-[11px] leading-relaxed text-muted-foreground"
+          className="mt-1 text-2xs leading-relaxed text-muted-foreground"
         >
           {hint}
         </p>
@@ -260,7 +261,7 @@ export function BuyAndHoldAssumptionsSection({
                   })
                 }
                 className={cn(
-                  "min-h-11 rounded-md px-3 text-xs font-semibold capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "min-h-11 rounded-md px-3 text-xs font-semibold capitalize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   operatingScenario === scenario
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -301,7 +302,7 @@ export function BuyAndHoldAssumptionsSection({
           </div>
 
           {propertyType !== "single-family" && units.length > 0 ? (
-            <div className="mt-5 overflow-x-auto rounded-lg border border-border">
+            <ScrollX label="Table" className="mt-5 overflow-x-auto rounded-lg border border-border">
               <table className="w-full min-w-[520px] text-left text-sm">
                 <caption className="sr-only">
                   Current and stabilized unit rent roll
@@ -371,7 +372,7 @@ export function BuyAndHoldAssumptionsSection({
                   })}
                 </tbody>
               </table>
-            </div>
+            </ScrollX>
           ) : null}
         </AssumptionGroup>
 
@@ -544,7 +545,7 @@ export function BuyAndHoldAssumptionsSection({
               hint="Used only in pre-tax hold-return math; no exit or tax strategy is implied."
             />
           </div>
-          <p className="mt-4 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="mt-4 rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-caution-text dark:border-caution dark:bg-caution/20 dark:text-caution-light">
             This is not a renovation lifecycle model. Draw/funding timing,
             placed-in-service and lease-up timing, repair-versus-capital
             classification, basis and tax treatment, and financed improvements

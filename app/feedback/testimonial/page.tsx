@@ -43,7 +43,7 @@ export default async function FeedbackTestimonialPage({
     <>
       <Header initialUser={user} initialEntitlements={null} />
       <main id="main" className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">One question</p>
+        <p className="text-2xs font-bold uppercase tracking-widest text-primary">One question</p>
         <h1 className="mt-2 text-balance text-3xl font-extrabold tracking-tight text-foreground">
           What did TrueCap change about how you evaluate deals?
         </h1>

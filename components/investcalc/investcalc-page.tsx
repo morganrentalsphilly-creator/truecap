@@ -337,6 +337,7 @@ import {
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
 import dynamic from "next/dynamic";
+import { ScrollX } from "@/components/ui/scroll-x";
 
 // Dialogs below are opened only after explicit post-analysis actions. Keep
 // their UI modules out of the anonymous landing bootstrap, but retain the
@@ -7981,7 +7982,7 @@ export function InvestCalcPage({
         title: "Analyze another property?",
         body: hasUnappliedTargetDraft
           ? "Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
-          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
+          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Targets will be matched again for the next property. Save first if you want to keep this deal.",
         confirmLabel: "Analyze another",
       }));
     if (!ok) return;
@@ -8113,7 +8114,7 @@ export function InvestCalcPage({
     toast({
       title: "Reusable assumptions kept",
       description:
-        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Offer criteria, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
+        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Targets, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
     });
     // Land the user on the (now visible again) address input. Deferred a
     // beat so the results section has unmounted and the input phase is the
@@ -8132,6 +8133,10 @@ export function InvestCalcPage({
     if (!analysisResult) return;
     autoExportPdfRef.current = false;
     void handleExportPdf();
+    // One-shot: the ref gate above makes re-runs no-ops, and handleExportPdf
+    // is a plain per-render function, so listing it would run this effect on
+    // every render instead of once per new result.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysisResult]);
 
   /**
@@ -9410,7 +9415,7 @@ export function InvestCalcPage({
       {deletedDealRecoveryActive ? (
         <div
           role="alert"
-          className="mx-auto mt-4 flex max-w-7xl flex-col gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm sm:flex-row sm:items-center"
+          className="mx-auto mt-4 flex max-w-7xl flex-col gap-3 rounded-xl border border-caution/40 bg-caution-light px-4 py-3 text-sm sm:flex-row sm:items-center"
         >
           <div className="min-w-0 flex-1">
             <p className="font-bold text-foreground">
@@ -9434,6 +9439,7 @@ export function InvestCalcPage({
       ) : null}
       {/* Hero section */}
       <section
+        aria-label="Analysis setup"
         className={cn(
           "max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6",
           focusedResultsMode && "hidden",
@@ -9441,21 +9447,13 @@ export function InvestCalcPage({
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
-            {/* Heading level is auth-aware: for cold visitors the
-                marketing hero above already renders the page's single
-                <h1> ("Stop losing deals to bad math.") - two H1s on
-                one page dilutes the SEO signal and confuses screen-
-                reader document outlines. For signed-in users the hero
-                is skipped entirely, so this becomes the page's H1. */}
-            {isAuthenticated ? (
-              <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                {underwritingHeading}
-              </h1>
-            ) : (
-              <h2 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                {underwritingHeading}
-              </h2>
-            )}
+            {/* The page's single H1 in every auth state: /analyze mounts
+                no intro above the form (2026-09 audit) and the signed-in
+                homes never did, so nothing else on the page competes for
+                the document outline. */}
+            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
+              {underwritingHeading}
+            </h1>
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
                 heading IS the hero title now — the hero card below lost its
                 internal "Analyze a deal" title row, and the old
@@ -9468,6 +9466,9 @@ export function InvestCalcPage({
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               Confirm the property, price, income, and assumptions. TrueCap then
               shows whether the deal works and why.
+              {!isAuthenticated
+                ? " Your first full decision is free, with no account."
+                : null}
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any
@@ -9488,7 +9489,7 @@ export function InvestCalcPage({
                 <Sparkles className="size-4" />
                 Try a sample rental
               </span>
-              <span className="text-[11px] font-medium text-primary-foreground">
+              <span className="text-2xs font-medium text-primary-foreground">
                 Preview a sample Pro report
               </span>
             </button>
@@ -9585,7 +9586,7 @@ export function InvestCalcPage({
             on sm/xl. The 4-col mobile grid was previously too cramped
             and would force 10px text with tiny tap targets. */}
         {areAnalysisTabsEnabled ? (
-          <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
+          <ScrollX label="Table" className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
             {RELEASED_INPUT_TABS.map((tab) => (
               <button
                 type="button"
@@ -9627,7 +9628,7 @@ export function InvestCalcPage({
                   </span>
                 </div>
                 {tab.isFree && !canUseProjections && (
-                  <span className="inline-flex text-[10px] sm:text-[10px] font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
+                  <span className="inline-flex text-3xs font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
                     FREE
                   </span>
                 )}
@@ -9643,7 +9644,7 @@ export function InvestCalcPage({
                   )}
               </button>
             ))}
-          </div>
+          </ScrollX>
         ) : null}
       </section>
 
@@ -9747,9 +9748,9 @@ export function InvestCalcPage({
                     aria-live="polite"
                     aria-atomic="true"
                     className={cn(
-                      "text-[10px] font-bold uppercase tracking-widest",
+                      "text-3xs font-bold uppercase tracking-widest",
                       staleResultsWarning
-                        ? "text-amber-700 dark:text-amber-300"
+                        ? "text-caution-text dark:text-caution-light"
                         : "text-primary",
                     )}
                   >
@@ -9759,7 +9760,7 @@ export function InvestCalcPage({
                   </p>
                   <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                         Cash flow
                       </dt>
                       <dd
@@ -9778,7 +9779,7 @@ export function InvestCalcPage({
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                         Cap rate
                       </dt>
                       <dd className="font-mono font-bold tabular-nums text-foreground">
@@ -9786,7 +9787,7 @@ export function InvestCalcPage({
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
                         DSCR
                       </dt>
                       <dd className="font-mono font-bold tabular-nums text-foreground">
@@ -9870,7 +9871,7 @@ export function InvestCalcPage({
                 id="step-property"
                 tabIndex={-1}
                 aria-label="Analyze a deal"
-                className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-6 lg:col-span-3 lg:col-start-1"
+                className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6 lg:col-span-3 lg:col-start-1"
               >
                 <div className="space-y-6">
                   <PropertyDetailsSection
@@ -9951,7 +9952,7 @@ export function InvestCalcPage({
                   <fieldset
                     id="step-income"
                     tabIndex={-1}
-                    className="min-w-0 scroll-mt-24 rounded-xl border-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="min-w-0 scroll-mt-24 rounded-xl border-0 p-0 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <legend className="mb-2 text-sm font-semibold text-foreground">
                       3. Rental income
@@ -9967,7 +9968,7 @@ export function InvestCalcPage({
                         }
                         aria-expanded={advancedOpen}
                         aria-controls="advanced-options"
-                        className="mb-4 flex min-h-11 w-full min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-left text-sm transition-colors hover:border-primary/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="mb-4 flex min-h-11 w-full min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-left text-sm transition-colors hover:border-primary/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                       >
                         <span className="min-w-0 text-muted-foreground [overflow-wrap:anywhere]">
                           Property type:{" "}
@@ -10052,7 +10053,7 @@ export function InvestCalcPage({
                           {primaryActionLabel}
                           <ArrowUpRight className="ml-2 size-5" />
                         </Button>
-                        <p className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">
+                        <p className="mt-2 text-center text-2xs leading-snug text-muted-foreground">
                           {activeRunPromisesOfferCeiling
                             ? `Offer Ceiling criteria: ${decisionTargetLabel}`
                             : "Run the complete analysis with the assumptions shown."}
@@ -10151,7 +10152,7 @@ export function InvestCalcPage({
                           <span className="font-semibold text-sm text-foreground">
                             Property extras
                           </span>
-                          <span className="text-[11px] font-normal text-muted-foreground">
+                          <span className="text-2xs font-normal text-muted-foreground">
                             (optional)
                           </span>
                         </div>
@@ -10171,7 +10172,7 @@ export function InvestCalcPage({
                 <div
                   id="step-financing"
                   tabIndex={-1}
-                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <FinancingSection
                     form={form}
@@ -10182,7 +10183,7 @@ export function InvestCalcPage({
                 <div
                   id="step-expenses"
                   tabIndex={-1}
-                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <OperatingExpensesSection
                     form={form}
@@ -10208,7 +10209,7 @@ export function InvestCalcPage({
                   <div
                     id="step-extras"
                     tabIndex={-1}
-                    className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <SingleFamilyUnitSection
                       form={form}
@@ -10255,7 +10256,7 @@ export function InvestCalcPage({
                     </p>
                     {preRunBuyBoxState === "error" &&
                     !hasAdoptedAnalysisTarget ? (
-                      <p className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-200">
+                      <p className="mt-2 text-xs font-medium text-caution-text dark:text-caution-light">
                         Your Buy Boxes could not be loaded. TrueCap will use the
                         starter criteria shown here; you can change them before
                         calculating.
@@ -10264,7 +10265,7 @@ export function InvestCalcPage({
                   </div>
                   {preRunBuyBoxState !== "loading" ? (
                     <details className="group mt-3 rounded-xl border border-primary/20 bg-background/70 px-2 py-1">
-                      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
                         Change criteria
                         <ChevronDown
                           aria-hidden
@@ -10303,7 +10304,7 @@ export function InvestCalcPage({
                                       setPreRunCriteriaChoice(box.id)
                                     }
                                     className={cn(
-                                      "min-h-11 rounded-xl border px-3 py-2 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                      "min-h-11 rounded-xl border px-3 py-2 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                                       selected
                                         ? "border-primary bg-primary text-primary-foreground"
                                         : "border-border bg-background text-foreground hover:bg-muted",
@@ -10337,7 +10338,7 @@ export function InvestCalcPage({
                                   setPreRunCriteriaChoice("starter")
                                 }
                                 className={cn(
-                                  "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                  "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                                   preRunCriteriaChoice === "starter" ||
                                     (!shouldUseAdoptedPreRunTarget &&
                                       !hasExplicitPreRunCriteriaChoice &&
@@ -10393,7 +10394,7 @@ export function InvestCalcPage({
               </Button>
               {needsPreRunTargetChoice ? (
                 <details className="group w-full lg:col-span-3">
-                  <summary className="mx-auto flex min-h-11 w-fit cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                  <summary className="mx-auto flex min-h-11 w-fit cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
                     More analysis options
                     <ChevronDown
                       aria-hidden
@@ -10406,7 +10407,7 @@ export function InvestCalcPage({
                       void handlePrimaryRunAction({ withoutOfferCeiling: true })
                     }
                     disabled={isCalculating}
-                    className="mx-auto flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="mx-auto flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     Analyze cash flow without an Offer Ceiling
                   </button>
@@ -10416,12 +10417,12 @@ export function InvestCalcPage({
                 (right). Both desktop-only - mobile users get the
                 sticky bottom Calculate bar instead, and the autosave
                 indicator there would compete with iOS keyboard chrome. */}
-              <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground lg:col-span-3 lg:col-start-1">
+              <div className="hidden sm:flex items-center justify-between gap-3 text-2xs text-muted-foreground lg:col-span-3 lg:col-start-1">
                 <p className="flex items-center gap-1.5">
-                  <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                  <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-3xs font-semibold text-foreground">
                     {kbdModifier}
                   </kbd>
-                  <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
+                  <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-3xs font-semibold text-foreground">
                     Enter
                   </kbd>
                   <span>to calculate from anywhere</span>
@@ -10482,7 +10483,7 @@ export function InvestCalcPage({
         {!isEditingAssumptions &&
           (showResults || isCalculating || analysisResult !== null) && (
             <div
-              className="mt-8 scroll-mt-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
+              className="mt-8 scroll-mt-20 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:scroll-mt-24"
               data-analysis-results="true"
               role="region"
               tabIndex={-1}
@@ -10497,10 +10498,10 @@ export function InvestCalcPage({
               {analysisResult && !isCalculating && staleResultsWarning ? (
                 <div
                   role="status"
-                  className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 text-sm shadow-sm"
+                  className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/40 bg-caution-light p-3.5 text-sm shadow-sm"
                 >
                   <span
-                    className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-500"
+                    className="mt-1.5 size-2 shrink-0 rounded-full bg-caution"
                     aria-hidden
                   />
                   <p className="min-w-0 flex-1 text-foreground">
@@ -10510,14 +10511,14 @@ export function InvestCalcPage({
                   <button
                     type="button"
                     onClick={handleJumpToFirstInvalidField}
-                    className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     Go to field
                   </button>
                 </div>
               ) : null}
               {analysisResult && !isCalculating && savedMethodologyLabel ? (
-                <p className="mb-3 text-[11px] font-semibold text-muted-foreground">
+                <p className="mb-3 text-2xs font-semibold text-muted-foreground">
                   {savedMethodologyLabel} ·{" "}
                   <Link
                     href="/methodology"
@@ -10534,7 +10535,7 @@ export function InvestCalcPage({
               {analysisResult && !isCalculating && priceEstimated ? (
                 <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-border bg-card p-3.5 text-sm shadow-sm">
                   <span
-                    className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-500"
+                    className="mt-1.5 size-2 shrink-0 rounded-full bg-caution"
                     aria-hidden
                   />
                   <div className="min-w-0 flex-1">
@@ -10556,7 +10557,7 @@ export function InvestCalcPage({
                   <button
                     type="button"
                     onClick={handleEditPrice}
-                    className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     Enter price
                   </button>

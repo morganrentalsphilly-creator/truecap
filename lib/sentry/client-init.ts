@@ -23,6 +23,11 @@ export function initSentryClient(): void {
   initialized = true;
   Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
+  // Local audits and CI browser runs used to report every page view (100%
+  // tracing) to the production project — enough to hit its rate limit
+  // (HTTP 429 on /monitoring). NEXT_PUBLIC_SENTRY_DISABLED=1 is set only by
+  // scripts/dev-isolated.sh and the CI browser job; Vercel never sets it.
+  enabled: process.env.NEXT_PUBLIC_SENTRY_DISABLED !== "1",
 
   // Keep optional integrations explicit. Replay is deliberately absent; see
   // the zero sampling policy below.

@@ -124,7 +124,7 @@ export function DealWorkspaceAnchorChips() {
                 target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
               }}
               className={cn(
-                "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border px-3 py-2 text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border px-3 py-2 text-2xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ",
                 isActive
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
