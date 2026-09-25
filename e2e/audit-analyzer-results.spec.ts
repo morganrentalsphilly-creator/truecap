@@ -11,6 +11,23 @@ async function runDeal(page: Page, address: string, price: string, rent: string)
   await form.getByLabel("Property Address", { exact: true }).fill(address);
   await form.getByLabel("Price to analyze", { exact: true }).fill(price);
   await form.getByLabel("Expected gross monthly rent", { exact: true }).fill(rent);
+  // A second deal typed over a kept form can trigger the product's own
+  // "Use this new property?" confirmation once the address handler settles
+  // (it runs after the address lookup, so it races the price/rent fills on a
+  // slow server). A real user confirms it; so does the harness.
+  const useNewProperty = page.getByRole("dialog", { name: "Use this new property?" });
+  const confirmNewProperty = async () => {
+    if (await useNewProperty.isVisible().catch(() => false)) {
+      await useNewProperty.getByRole("button", { name: "Use new property", exact: true }).click();
+      await expect(useNewProperty).toBeHidden();
+      // Confirming clears the previous property's price and rent — re-enter.
+      await form.getByLabel("Price to analyze", { exact: true }).fill(price);
+      await form.getByLabel("Expected gross monthly rent", { exact: true }).fill(rent);
+    }
+  };
+  await confirmNewProperty();
+  await form.locator('button[data-inform-submit="true"]').click({ trial: true }).catch(() => undefined);
+  await confirmNewProperty();
   await form.locator('button[data-inform-submit="true"]').click();
   const summary = page.locator("section[aria-labelledby='decision-summary-title']");
   await expect(summary).toBeVisible({ timeout: 30_000 });
