@@ -288,7 +288,7 @@ export default function OperatingExpenseRatioPost() {
               operating expenses, line by line:
             </p>
             <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Operating expense</th>
@@ -361,7 +361,7 @@ export default function OperatingExpenseRatioPost() {
               measured on effective gross income and excluding debt service:
             </p>
             <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Property profile</th>

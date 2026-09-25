@@ -332,10 +332,10 @@ export default function BlogPost() {
             </Link>{" "}
             before assuming this 7% scenario matches your loan.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Market type
                   </th>

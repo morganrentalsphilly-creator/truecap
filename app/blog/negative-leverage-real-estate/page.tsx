@@ -310,10 +310,10 @@ export default function NegativeLeveragePost() {
               up to 9% and watch what leverage does to the same $75,000 of cash:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Cap rate (NOI)</th>
                     <th className="text-right">All-cash return</th>
                     <th className="text-right">Levered CoC</th>
@@ -428,10 +428,10 @@ export default function NegativeLeveragePost() {
               property ($18,000 of NOI) and change only the down payment:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Financing</th>
                     <th className="text-right">Loan</th>
                     <th className="text-right">Cash-on-cash</th>
@@ -486,10 +486,10 @@ export default function NegativeLeveragePost() {
               amortization:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">30-yr rate</th>
                     <th className="text-right">Loan constant</th>
                     <th className="text-left">Typical residential cap rate</th>

@@ -276,7 +276,7 @@ export default function SeventyPercentRulePost() {
               $300,000 ARV. Here is the whole ledger:
             </p>
             <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Line</th>
@@ -370,10 +370,10 @@ export default function SeventyPercentRulePost() {
               The workhorse method is price per finished square foot. Say three
               renovated comps nearby sold like this:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-right">Sold price</th>
                     <th className="text-right">Size</th>
@@ -472,10 +472,10 @@ export default function SeventyPercentRulePost() {
               house as on a $400,000 one — so on cheap houses those fixed costs
               eat a much bigger share of a much smaller spread.
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Situation</th>
                     <th className="text-left">What&apos;s different</th>
                     <th className="text-right">Offer as % of ARV</th>

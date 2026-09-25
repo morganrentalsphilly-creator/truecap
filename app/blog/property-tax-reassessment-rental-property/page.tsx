@@ -313,10 +313,10 @@ export default function PropertyTaxReassessmentPost() {
               Here is what that single number does to the whole underwrite:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Annual figure</th>
                     <th className="text-right">Seller&apos;s bill ($3,400)</th>
                     <th className="text-right">Reassessed ($6,000)</th>

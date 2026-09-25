@@ -335,10 +335,10 @@ export default function BlogPost() {
             7.25%, which is $818.61 a month of principal and interest, so PITIA
             comes to <strong>$1,131 a month</strong>.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line item
                   </th>
@@ -440,10 +440,10 @@ export default function BlogPost() {
             rent $2,400. Loan of $240,000 at 7.25% is $1,637.23 a month, and
             PITIA is <strong>$2,071</strong>.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Bucket
                   </th>
@@ -518,10 +518,10 @@ export default function BlogPost() {
             Taxes at 1.0% ($5,000), insurance $2,600. Loan of $400,000 at 7.25%
             is $2,728.72 a month; PITIA is <strong>$3,362</strong>.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Bucket
                   </th>
@@ -580,10 +580,10 @@ export default function BlogPost() {
             Line the three tiers up and the useful number falls out. It is not a
             percentage of price — it is a multiple of the down payment:
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Price
                   </th>
@@ -733,10 +733,10 @@ export default function BlogPost() {
             return in a less obvious one. Same $300,000 house, three
             conventional tiers:
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Down
                   </th>
@@ -823,7 +823,7 @@ export default function BlogPost() {
             <strong>$3,268</strong>.
           </p>
           <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">

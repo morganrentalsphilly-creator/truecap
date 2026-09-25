@@ -262,7 +262,7 @@ export default function BlogPost() {
             in the results comes from the financing.
           </p>
           <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">
@@ -347,10 +347,10 @@ export default function BlogPost() {
             $300,000 and principal and interest are <strong>$2,046.53</strong> a
             month.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line
                   </th>
@@ -466,7 +466,7 @@ export default function BlogPost() {
           </p>
           <p>And the cash to get there:</p>
           <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[440px] text-sm">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">
@@ -553,10 +553,10 @@ export default function BlogPost() {
             0.8% is $253.33, taxes are $366.67 and insurance $200 — PITIA of{" "}
             <strong>$3,284.68</strong>.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Line
                   </th>
@@ -680,10 +680,10 @@ export default function BlogPost() {
             value, nowhere near the 80% where PMI can be cancelled — for{" "}
             <strong>$32,616</strong>.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Structure
                   </th>
@@ -759,10 +759,10 @@ export default function BlogPost() {
             down payment: 20% conventional, or 15% if you accept mortgage
             insurance.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-muted">
                   <th className="text-left p-3 font-bold text-foreground">
                     Metric
                   </th>

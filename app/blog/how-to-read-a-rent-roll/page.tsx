@@ -204,7 +204,7 @@ export default function HowToReadARentRollPost() {
             very different numbers out of it.
           </p>
 
-          <ScrollX label="Data table" className="not-prose my-6 overflow-x-auto">
+          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose my-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-muted text-left">

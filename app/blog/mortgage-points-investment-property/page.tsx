@@ -238,10 +238,10 @@ export default function MortgagePointsPost() {
               :
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Points (cost)</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">P&amp;I / mo</th>
@@ -300,10 +300,10 @@ export default function MortgagePointsPost() {
               Calculate each pair of actual quotes separately.
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Rate cut per point</th>
                     <th className="text-right">Saved / mo (1 pt)</th>
                     <th className="text-right">Break-even</th>
@@ -380,10 +380,10 @@ export default function MortgagePointsPost() {
               NOI:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Points</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">Annual debt service</th>
@@ -446,10 +446,10 @@ export default function MortgagePointsPost() {
               $18,200 NOI:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Scenario</th>
                     <th className="text-right">Cash in</th>
                     <th className="text-right">Cash flow / mo</th>

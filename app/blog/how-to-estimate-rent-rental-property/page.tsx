@@ -236,10 +236,10 @@ export default function HowToEstimateRentPost() {
               same neighborhood:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-left">Beds / Baths</th>
                     <th className="text-left">Sq ft</th>
@@ -399,10 +399,10 @@ export default function HowToEstimateRentPost() {
               about 8%:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Metric</th>
                     <th className="text-right">Rent $1,900 (honest)</th>
                     <th className="text-right">Rent $2,050 (optimistic)</th>

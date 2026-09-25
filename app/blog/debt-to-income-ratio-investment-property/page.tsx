@@ -322,10 +322,10 @@ export default function DtiInvestmentPropertyPost() {
               To see the haircut&apos;s bite, run the same property both ways —
               once crediting the full rent, once at 75%:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Method</th>
                     <th className="text-right">Credited rent</th>
                     <th className="text-right">Net vs PITIA</th>

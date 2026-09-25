@@ -290,10 +290,10 @@ export default function HowToCalculateArvPost() {
               comps&apos; raw sale prices.
             </p>
             <p>Our four best comps:</p>
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Comp</th>
                     <th className="text-right">Sq ft</th>
                     <th className="text-right">Sale price</th>
@@ -447,10 +447,10 @@ export default function HowToCalculateArvPost() {
               that changes is what the property is actually worth when the work
               is done:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Actual value vs. $255K ARV</th>
                     <th className="text-right">BRRRR cash left in</th>
                     <th className="text-right">Flip profit</th>

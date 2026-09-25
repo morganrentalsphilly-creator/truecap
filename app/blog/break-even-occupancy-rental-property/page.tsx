@@ -252,7 +252,7 @@ export default function BreakEvenOccupancyPost() {
             </p>
 
             <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Annual operating expense</th>
@@ -390,10 +390,10 @@ export default function BreakEvenOccupancyPost() {
               cost:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Metric</th>
                     <th className="text-right">$300k (disciplined)</th>
                     <th className="text-right">$340k (overpaid)</th>

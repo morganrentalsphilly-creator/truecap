@@ -256,7 +256,7 @@ export default function BlogPost() {
           </p>
           <p>The date boundary is essential:</p>
           <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[400px] text-sm">
+            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="text-left p-3 font-bold text-foreground">

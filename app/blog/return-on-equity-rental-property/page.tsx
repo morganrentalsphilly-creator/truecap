@@ -284,10 +284,10 @@ export default function ReturnOnEquityPost() {
               watch what happens as that slice thickens:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
+            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr>
+                  <tr className="bg-muted">
                     <th className="text-left">Start of year</th>
                     <th className="text-right">Market value</th>
                     <th className="text-right">Your equity</th>
