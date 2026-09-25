@@ -108,7 +108,7 @@ paid Pro/Agent Pro entitlement, **AP** Agent Pro, **Adm** admin
 | `/for-buy-and-hold`, `/for-house-hackers`, `/for-brrrr`, `/for-flippers`, `/for-agents` | 5 | P | `/for-agents` 308→`/pricing` unless Agent Pro prices are configured at build time |
 | `/guarantee` | 1 | P | permanent redirect → `/pricing` (page fails closed) |
 | `/blog`, `/blog/topics`, `/blog/topics/[topic]` (10), `/blog/[slug]` (78 static posts) | 90 | P | `BLOG_POSTS` registry; `available` flag |
-| `/tools`, `/tools/[19 released calculators]`, `/tools/rental-property-spreadsheet` | 21 | P | 9 unreleased calculator slugs deliberately `notFound()` |
+| `/tools`, `/tools/[10 released calculators]` (9 of them embeddable), `/tools/rental-property-spreadsheet` | 21 | P | the other 10 `app/tools/*` slugs are deliberate `notFound()` stubs or permanent redirects (`lib/historical-tool-redirects.ts`) |
 | `/embed`, `/embed/[slug]` (embeddable calculators), `/embed/brand/[token]` | 2 + n | P / T | framing-friendly headers; brand variant is token-bound |
 | `/glossary`, `/glossary/[slug]` (45) | 46 | P | |
 | `/markets`, `/markets/[city]` (25 registry + 12 bespoke), `/markets/[city]/[strategy]` | 38 + combos | P | non-enriched cities are `noindex,follow` |

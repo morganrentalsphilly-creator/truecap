@@ -274,7 +274,7 @@ figures. Tight tracking (`tracking-tight`, −0.025em) on every heading;
 - **Title** (700, `text-lg`–`text-xl`): card and section titles; `text-2xl`
   for section headings on marketing pages.
 - **Body** (400, `text-base`, 1.6; `text-sm` inside product UI): article
-  copy runs in `prose` at `max-w-3xl` (≈70ch).
+  copy runs in `prose` inside `max-w-3xl`, with block-level children capped at 68ch (`[&>p]:max-w-[68ch]` and siblings), so no line runs past the measure at any width.
 - **Label** (600, `text-xs`, uppercase with `tracking-wide` where used):
   metric labels, source chips ("HUD FMR", "Your input"), table headers.
 - **Label-xs / Label-2xs** (600, 11px / 10px): the two dense product-UI
