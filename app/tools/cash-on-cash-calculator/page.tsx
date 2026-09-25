@@ -161,7 +161,7 @@ export default function CoCCalculatorPage() {
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
-              ← TrueCap free tools
+              ← Free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Cash-on-Cash Return Calculator

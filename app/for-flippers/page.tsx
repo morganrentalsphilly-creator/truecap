@@ -65,12 +65,6 @@ export default function ForFlippersPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <Link
-          href="/"
-          className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
-        >
-          ← TrueCap
-        </Link>
 
         <section className="mb-12 mt-3 sm:mb-16">
           <p className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">

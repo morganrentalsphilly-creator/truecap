@@ -327,7 +327,7 @@ export default function BestDealCheckAlternativesPost() {
             href="/blog"
             className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
           >
-            ← TrueCap Blog
+            ← Blog
           </Link>
         </div>
 

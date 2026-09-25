@@ -63,12 +63,6 @@ export default function EmbedHubPage() {
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-10">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight tracking-tight">
             Embed our calculators on your site
           </h1>

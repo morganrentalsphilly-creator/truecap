@@ -46,12 +46,6 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← TrueCap
-        </Link>
         <h1 className="mt-2 text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
           Privacy Policy
         </h1>

@@ -92,12 +92,6 @@ export default function VsFundrisePage() {
       <VsBreadcrumbSchema vsPath="/vs/fundrise" pageName="TrueCap vs Fundrise" />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← TrueCap
-          </Link>
         </div>
 
         {/* Hero */}
