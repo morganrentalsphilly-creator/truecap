@@ -272,14 +272,9 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             <Badge className="rounded-full bg-primary/10 text-primary border border-primary/15">
               {currentPlanTitle}
             </Badge>
-            {currentSubscription && currentSubscription?.cancelAtPeriodEnd === false ? (
+            {currentSubscription ? (
               <Badge variant="outline" className="rounded-full capitalize">
                 {currentStatusLabel(currentSubscription)}
-              </Badge>
-            ) : null}
-            {currentSubscription?.cancelAtPeriodEnd ? (
-              <Badge className="rounded-full border border-caution/30 bg-caution-light text-caution-text">
-                Cancels at period end
               </Badge>
             ) : null}
           </div>
@@ -305,12 +300,16 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 ))}
               </div>
             ) : null}
+            {/* ONE status line (2026-09 audit: a scheduled cancellation used
+                to be said four ways — badge, status, disabled button and a
+                trailing sentence — and none of them said what happens to
+                saved deals). */}
             {currentSubscription ? (
-              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
-                <p>Valid until {formatBillingDate(currentSubscription.currentPeriodEnd)}</p>
-                {/* <p>Billing period start: {formatBillingDate(currentSubscription.currentPeriodStart)}</p> */}
-              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {currentSubscription.cancelAtPeriodEnd
+                  ? `Cancels on ${formatBillingDate(currentSubscription.currentPeriodEnd)}. Your saved deals stay readable after that; Pro editing ends.`
+                  : `Renews on ${formatBillingDate(currentSubscription.currentPeriodEnd)}.`}
+              </p>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Status: free</p>
             )}
@@ -338,20 +337,8 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 {isCancelPending ? <Loader2 className="animate-spin" /> : <XCircle />}
                 Cancel plan
               </Button>
-            ) : currentSubscription?.cancelAtPeriodEnd ? (
-              <Button type="button" variant="outline" className="rounded-xl" disabled>
-                Cancellation scheduled
-              </Button>
             ) : null}
           </div>
-
-          {currentSubscription ? (
-            <p className="text-sm text-muted-foreground">
-              {currentSubscription.cancelAtPeriodEnd
-                ? `Your subscription will end on ${formatBillingDate(currentSubscription.currentPeriodEnd)}.`
-                : `Renew date: ${formatBillingDate(currentSubscription.currentPeriodEnd)}`}
-            </p>
-          ) : null}
         </CardContent>
       </Card>
 
