@@ -309,7 +309,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://dealcheck.io/pricing/"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               DealCheck pricing
             </a>
@@ -318,7 +318,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://www.stessa.com/pricing/"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               Stessa pricing
             </a>
@@ -327,7 +327,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://www.stessa.com/investment-property-marketplace/"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               Stessa marketplace
             </a>
@@ -336,7 +336,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://www.stessa.com/rental-returns-and-income-tax-calculator/"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               Stessa returns calculator
             </a>
@@ -345,7 +345,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               BiggerPockets calculator
             </a>
@@ -354,7 +354,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://www.biggerpockets.com/pro"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               BiggerPockets Pro
             </a>
@@ -363,7 +363,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               href="https://usetruecap.com/pricing"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
             >
               TrueCap pricing
             </a>{" "}
