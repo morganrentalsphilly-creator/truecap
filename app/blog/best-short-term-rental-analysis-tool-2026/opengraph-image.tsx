@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "Best short-term rental analysis tool 2026: 6 tools STR investors compare — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

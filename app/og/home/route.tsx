@@ -14,7 +14,6 @@ import { findProductShot } from "@/components/marketing/product-shot";
  * would override the per-page OG images the tools, blog, and /vs pages set.
  */
 
-export const runtime = "edge";
 const size = { width: 1200, height: 630 };
 
 const BLUE = "#0070c4";

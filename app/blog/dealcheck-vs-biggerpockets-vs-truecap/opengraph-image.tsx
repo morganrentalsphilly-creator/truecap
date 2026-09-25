@@ -11,7 +11,6 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const runtime = "edge";
 export const alt = "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins? — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";

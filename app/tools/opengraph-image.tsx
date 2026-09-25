@@ -6,7 +6,6 @@
 import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
 import { CALCULATOR_COUNT } from "@/lib/calculator-registry";
 
-export const runtime = "edge";
 export const alt = "Free real estate calculators — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";
