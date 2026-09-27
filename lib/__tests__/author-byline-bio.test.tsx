@@ -12,6 +12,7 @@ import { SourceFirstArticle } from "@/components/marketing/source-first-article"
 import { AUTHOR_BIO, AUTHOR_BYLINE_SUFFIX } from "@/lib/author";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { forbiddenGivenName, forbiddenHandle } from "./helpers/founder-identity";
+import { mainTextOf } from "../../seo/scripts/lib/html.ts";
 
 /**
  * F1 — the unnamed author, everywhere (founder decision, 2026-09-27: "Stay
@@ -294,6 +295,16 @@ describe("every blog post in the registry renders the byline and the bio", () =>
     // The end of the article: after the bio, only the "Keep reading" list follows in <main>.
     const after = h2Texts(html.slice(bio, mainEnd)).filter((text) => text !== "About TrueCap" && text !== "Keep reading");
     expect(after, `${file}: no article section after the bio`).toEqual([]);
+
+    // What the SEO loop measures (seo/ARCHITECTURE.md, Authorship): the whole
+    // RelatedBlogPosts block (the bio, then "Keep reading" with the lead
+    // magnet) is main content on every post, so it counts in the crawl's
+    // wordCount and outbound links and in the main hash render-diff compares.
+    const keepReading = html.indexOf('aria-label="Related blog posts"');
+    expect(keepReading > bio && keepReading < mainEnd, `${file}: "Keep reading" sits inside <main>, after the bio`).toBe(true);
+    const measured = mainTextOf(html);
+    expect(measured, `${file}: the loop's main text holds the bio`).toContain(norm(AUTHOR_BIO));
+    expect(measured, `${file}: the loop's main text holds "Keep reading"`).toContain("Keep reading");
   });
 });
 
@@ -323,5 +334,7 @@ describe("every /vs/<slug> page renders the byline and the bio", () => {
     expect(html, `${file}: byline directly under the H1`).toContain(`</h1>${BYLINE_HTML}`);
     // The end of the page: no section heading follows the bio in <main>.
     expect(h2Texts(html.slice(bio, mainEnd)).filter((text) => text !== "About TrueCap"), `${file}: nothing after the bio but links`).toEqual([]);
+    // The bio is main content here too: the SEO loop's main text holds it.
+    expect(mainTextOf(html), `${file}: the loop's main text holds the bio`).toContain(norm(AUTHOR_BIO));
   });
 });

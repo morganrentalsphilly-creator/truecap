@@ -19,7 +19,10 @@
  *     presentation-only sweeps in seo/config.json `sweepCommits`. When every
  *     change was a skipped sweep, the commit that introduced the content is
  *     used. Never a deploy date, never today. A blog post's date is clamped up
- *     to its registry publishedAt.
+ *     to its registry publishedAt. It refuses to run in a shallow clone, or
+ *     when a listed sweep is not in HEAD's history: the F-series lands on main
+ *     rebased, so a sweep listed under its branch SHA would skip nothing
+ *     (the error names the landed copy when it can find it).
  *
  * What counts as a URL's content (SOURCES below):
  *   · blog posts, /vs pages, tools, core pages: their own page.tsx; the thin
@@ -196,15 +199,49 @@ class History {
     return execFileSync("git", args, { cwd: this.root, stdio: ["ignore", "pipe", "pipe"], maxBuffer: 512 * 1024 * 1024 }).toString("utf8");
   }
 
-  /** Newest-first topological position of every commit reachable from HEAD. */
-  position(sha: string): number {
+  private orderMap(): Map<string, number> {
     if (!this.order) {
       const list = this.git(["rev-list", "--topo-order", "HEAD"]).split("\n").filter(Boolean);
       this.order = new Map(list.map((s, i) => [s, i]));
     }
-    const at = this.order.get(sha);
+    return this.order;
+  }
+
+  /** Newest-first topological position of every commit reachable from HEAD. */
+  position(sha: string): number {
+    const at = this.orderMap().get(sha);
     if (at === undefined) throw new Error(`commit ${sha.slice(0, 9)} is not reachable from HEAD`);
     return at;
+  }
+
+  /** Every commit reachable from HEAD (full SHAs). */
+  reachable(): string[] {
+    return [...this.orderMap().keys()];
+  }
+
+  /** True in a shallow clone: its history, and so every date a seed would take from it, is incomplete. */
+  isShallow(): boolean {
+    return this.git(["rev-parse", "--is-shallow-repository"]).trim() === "true";
+  }
+
+  /**
+   * Commits in HEAD's history with the same author timestamp and subject as
+   * `sha` — the copy a rebase or cherry-pick landed — when `sha` itself still
+   * exists in this clone (e.g. on its branch). Empty when it does not.
+   */
+  landedCopies(sha: string): string[] {
+    let identity: string;
+    try {
+      identity = this.git(["log", "-1", "--format=%at%x00%s", `${sha}^{commit}`]).trim();
+    } catch {
+      return [];
+    }
+    return this.git(["log", "--format=%H%x00%at%x00%s", "HEAD"])
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => line.split("\u0000"))
+      .filter(([, at, subject]) => `${at}\u0000${subject}` === identity)
+      .map(([full]) => full);
   }
 
   /** Every commit that changed `file`, with the blob before and after (merges without a diff are skipped). */
@@ -314,6 +351,38 @@ function digest(parts: string[]): string {
 
 export type SeedChoice = { change: Change; fallback: boolean };
 
+/** A sweepCommits entry: an abbreviated or full lowercase commit SHA. An empty prefix would skip every commit. */
+export const SWEEP_SHA_RE = /^[0-9a-f]{7,40}$/;
+
+/**
+ * What is wrong with the sweepCommits list against HEAD's history (empty when
+ * nothing is). A listed SHA that no reachable commit starts with skips
+ * nothing, silently: the F-series lands on main rebased, so a sweep
+ * registered under its branch SHA is exactly that case (F1 is 033d63c on its
+ * branch). `landed` names the rebased copy when it can be found.
+ */
+export function sweepProblems(shas: readonly string[], reachable: readonly string[], landed: (sha: string) => string[] = () => []): string[] {
+  const problems: string[] = [];
+  for (const s of shas) {
+    if (!SWEEP_SHA_RE.test(s)) {
+      problems.push(`"${s}" is not a 7-40 character lowercase hex commit SHA`);
+      continue;
+    }
+    const matches = reachable.filter((sha) => sha.startsWith(s));
+    if (matches.length > 1) {
+      problems.push(`${s} matches ${matches.length} commits in HEAD's history: list more characters`);
+    } else if (matches.length === 0) {
+      const copies = landed(s);
+      problems.push(
+        copies.length
+          ? `${s} is not in HEAD's history; ${copies.map((c) => c.slice(0, 7)).join(", ")} has its author date and subject (the landed copy): list that SHA instead`
+          : `${s} is not in HEAD's history: if it landed rebased or squashed, list the landed SHA instead`,
+      );
+    }
+  }
+  return problems;
+}
+
 /** Newest change not made by a skipped sweep; else the change that introduced the content. */
 export function chooseChange(changes: Change[], isSkipped: (sha: string) => boolean): SeedChoice | null {
   if (!changes.length) return null;
@@ -402,6 +471,17 @@ export function renderReport(rows: SeedRow[], map: LastmodMap, skip: readonly st
   return `${lines.join("\n")}\n`;
 }
 
+/**
+ * seo/config.json sweepCommits checked against the history of the clone at
+ * `root`, or null in a shallow clone (CI's unit job), where history cannot
+ * answer. `seed` refuses to run on any problem; a test reports them locally.
+ */
+export function sweepHistoryProblems(root: string = REPO_ROOT, shas: readonly string[] = loadConfig().sweepCommits.shas): string[] | null {
+  const history = new History(root);
+  if (history.isShallow()) return null;
+  return sweepProblems(shas, history.reachable(), (s) => history.landedCopies(s));
+}
+
 async function seed(args: Args): Promise<number> {
   await loadSignatures();
   const sitemapFile = flagString(args, "sitemap");
@@ -412,6 +492,12 @@ async function seed(args: Args): Promise<number> {
   const isSkipped = (sha: string): boolean => skip.some((s) => sha.startsWith(s));
   const exists = (file: string): boolean => existsSync(path.join(REPO_ROOT, file));
   const history = new History(REPO_ROOT);
+  // Every date comes from history: a shallow clone would invent them, and a
+  // listed sweep that is not in this history (a rebased landing) would skip
+  // nothing and date its presentation-only changes as content.
+  if (history.isShallow()) throw new Error("seed needs the full git history, and this clone is shallow (git fetch --unshallow)");
+  const problems = sweepProblems(skip, history.reachable(), (s) => history.landedCopies(s));
+  if (problems.length) throw new Error(`seo/config.json sweepCommits does not match this history; fix it before seeding:\n  ${problems.join("\n  ")}`);
   const published = signatureLib().entryStringField("lib/blog-posts.ts", readFileSync(path.join(REPO_ROOT, "lib", "blog-posts.ts"), "utf8"), "BLOG_POSTS", "publishedAt");
 
   const map: LastmodMap = {};
@@ -568,6 +654,18 @@ async function selfTest(): Promise<void> {
   const only = chooseChange([ch("b9ebd44aa", "2026-09-25")], skipped);
   check(only?.change.date === "2026-09-25" && only.fallback, "falls back to the introducing commit, never today");
   check(chooseChange([], skipped) === null, "no history, no date");
+
+  // The sweep list must name commits in this history, or it skips nothing.
+  const reach = ["b9ebd44aa0c1", "033d63c3c47a", "af6211a5d2e0"];
+  check(sweepProblems(["b9ebd44", "033d63c"], reach).length === 0, "listed sweeps in HEAD's history pass");
+  check(sweepProblems(["185be48"], reach).length === 1, "a sweep missing from history is an error, not a silent no-op");
+  const rebased = sweepProblems(["185be48"], reach, (s) => (s === "185be48" ? ["af6211a5d2e0"] : []));
+  check(rebased.length === 1 && rebased[0].includes("af6211a"), "a rebased sweep names its landed copy");
+  check(sweepProblems(["af6211"], reach).length === 1, "an entry shorter than 7 characters is an error");
+  check(sweepProblems(["af6211a", "af6211"], ["af6211a1", "af6211a2"]).length === 2, "an ambiguous or short entry is an error");
+  check(sweepProblems([""], reach).length === 1, "an empty entry (it would skip every commit) is an error");
+  check(sweepProblems(["B9EBD44"], reach).length === 1, "an uppercase entry (it never matches git's lowercase SHAs) is an error");
+  for (const s of loadConfig().sweepCommits.shas) check(SWEEP_SHA_RE.test(s), `seo/config.json sweepCommits entry "${s}" is a 7-40 character lowercase hex SHA`);
 
   // Sources.
   const none = (): boolean => false;

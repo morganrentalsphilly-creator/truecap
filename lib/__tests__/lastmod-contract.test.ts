@@ -12,6 +12,7 @@ import { BLOG_POSTS } from "@/lib/blog-posts";
 import { NOINDEX_PATHS } from "@/lib/seo/noindex";
 import { LASTMOD, lastmodFor, lastmodOrPublished } from "@/lib/seo/lastmod";
 import { dateSlotsOf, postDateWiringViolations } from "../../seo/scripts/verify-static.ts";
+import { sweepHistoryProblems } from "../../seo/scripts/lastmod.ts";
 
 /**
  * F2: content/seo/lastmod.json is the ONE source of last-modified dates.
@@ -150,5 +151,26 @@ describe("lastmod map contract", () => {
       .sort()
       .at(-1);
     expect(xml).toContain(`<lastBuildDate>${new Date(`${newestPost}T00:00:00Z`).toUTCString()}</lastBuildDate>`);
+  });
+});
+
+/** True in a shallow clone (CI's unit job checks out 2 commits), where history cannot answer. */
+function isShallowClone(): boolean {
+  try {
+    return execFileSync("git", ["rev-parse", "--is-shallow-repository"], { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8").trim() !== "false";
+  } catch {
+    return true;
+  }
+}
+
+describe("lastmod seed sweeps (seo/config.json sweepCommits)", () => {
+  // A listed sweep that is not in this history skips nothing: a re-seed then
+  // dates its presentation-only changes as content. The F-series lands on main
+  // rebased, so a sweep listed under its branch SHA is exactly that case (F1,
+  // 033d63c, re-dates /about and the bonus-depreciation post). `lastmod.ts
+  // seed` refuses to run on the same problems; this reports them in a full
+  // clone, naming the landed copy of a rebased commit.
+  it.skipIf(isShallowClone())("lists only commits in HEAD's history, each matched by exactly one commit", () => {
+    expect(sweepHistoryProblems(ROOT)).toEqual([]);
   });
 });
