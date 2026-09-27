@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
@@ -48,12 +49,16 @@ function mapAuthError(message: string): string {
 /**
  * Save the consent-gated first-touch cookie (a source category and a landing
  * section, lib/first-touch.ts) to the new account's app_metadata. Runs only
- * after Supabase accepted the sign-up. Best-effort: no cookie means no consent
- * or no first touch, and any failure is reported without PII and swallowed so
- * attribution can never fail a sign-up. Not exported: every export of a
- * "use server" module is a callable server action.
+ * after Supabase accepted the sign-up. The cookie is read and validated here,
+ * during the action; the service-role write runs in `after()`, off the
+ * response, exactly as the OAuth callback does it, so a slow or hung Auth
+ * admin call can never hold up the form (the account already exists by now).
+ * Best-effort: no cookie means no consent or no first touch, and any failure
+ * is reported without PII and swallowed so attribution can never fail a
+ * sign-up. Not exported: every export of a "use server" module is a callable
+ * server action.
  */
-async function saveSignUpFirstTouch(user: {
+async function scheduleSignUpFirstTouch(user: {
   id: string;
   app_metadata?: Record<string, unknown> | null;
 }): Promise<void> {
@@ -63,10 +68,16 @@ async function saveSignUpFirstTouch(user: {
       cookieStore.get(FIRST_TOUCH_COOKIE)?.value,
     );
     if (!firstTouch) return;
-    await persistFirstTouch({
-      admin: createAdminSupabaseClient(),
-      user,
-      firstTouch,
+    after(async () => {
+      try {
+        await persistFirstTouch({
+          admin: createAdminSupabaseClient(),
+          user,
+          firstTouch,
+        });
+      } catch (error) {
+        reportFirstTouchFailure("email_signup", error);
+      }
     });
   } catch (error) {
     reportFirstTouchFailure("email_signup", error);
@@ -141,7 +152,7 @@ export async function signUpAction(
     };
   }
 
-  if (data.user) await saveSignUpFirstTouch(data.user);
+  if (data.user) await scheduleSignUpFirstTouch(data.user);
 
   const needsEmailConfirmation = !data.session;
   return { ok: true, needsEmailConfirmation };
