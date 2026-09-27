@@ -162,7 +162,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
   - Weekly organic counts are written to the private `seo_conversions_daily` table and shown only on `/admin/seo`, never in the public repo.
   - No migration is needed.
 - **Built (F5):**
-  - `lib/first-touch.ts` holds the taxonomy, the classifier (sign-in round trips record nothing; webmail is `email`, not search), the landing sections and the `tc_ft` cookie rules; `lib/first-touch-server.ts` validates the cookie with zod and writes app_metadata.
+  - `lib/first-touch.ts` holds the taxonomy, the classifier (sign-in round trips record nothing; webmail is `email`, not search; an auto-tagged ad click such as `gclid` or `msclkid` is `paid_search`, never organic), the landing sections and the `tc_ft` cookie rules; `lib/first-touch-server.ts` validates the cookie with zod and writes app_metadata (in `after()`, off the sign-up response).
   - `seo/scripts/signups.ts` runs daily in `seo-control-plane.yml` (`--days 35`, non-fatal) and prints no count on the public runner.
 
 ## 4. Can git supply honest last-modified dates?

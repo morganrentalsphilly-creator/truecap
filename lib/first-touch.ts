@@ -8,10 +8,12 @@
  *
  * The pieces, in order:
  *   1. The browser classifies the first page load of a tab
- *      (`classifyFirstTouchReferralSource` + `landingSection`) and keeps the
- *      result in sessionStorage (lib/analytics.ts `setFirstTouchAttribution`).
- *      The raw referrer host and `utm_medium` are read only for that
- *      synchronous classification and are discarded.
+ *      (`classifyFirstTouchReferralSource` + `landingSection`, run by
+ *      lib/analytics.ts `recordFirstTouchLanding`) and keeps the result in
+ *      sessionStorage, unless the visitor has already rejected analytics
+ *      storage. The raw referrer host, `utm_medium` and the presence of an ad
+ *      click id are read only for that synchronous classification and are
+ *      discarded.
  *   2. Only once cookie consent is `granted`, `syncFirstTouchCookie` copies the
  *      two enum values into the first-party `tc_ft` cookie
  *      (`<source>.<section>`, 90 days, first touch wins). A `denied` or absent
@@ -80,18 +82,49 @@ const WEBMAIL_REFERRER_RE =
   /(^|\.)(mail\.google|mail\.yahoo|outlook\.live|outlook\.office|outlook\.office365|mail\.proton)\.|^com\.google\.android\.gm$/;
 
 /**
- * Map one page load's referrer host and `utm_medium` onto the fixed taxonomy.
- * Returns null when the load is a sign-in round trip (Google account chooser,
- * the Supabase auth hop): that is not an acquisition touch, so nothing should
- * be recorded or counted for it.
+ * Auto-tagging parameters an ad platform appends to every paid click: Google
+ * Ads (`gclid`, and `gbraid`/`wbraid` on iOS), Google Marketing Platform
+ * (`dclid`) and Microsoft Ads (`msclkid`). TrueCap's ads use Final URLs with
+ * no UTM parameters (google-ads/ad-copy.md), so without this a paid click from
+ * google.com or bing.com classified as organic search. Only the parameter's
+ * PRESENCE is read; its value is never read, stored or sent.
+ */
+export const AD_CLICK_ID_PARAMS = [
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "dclid",
+  "msclkid",
+] as const;
+
+/** True when the landing URL's query carries any ad click-id parameter. */
+export function hasAdClickId(
+  query: { has(name: string): boolean } | null | undefined,
+): boolean {
+  if (!query) return false;
+  return AD_CLICK_ID_PARAMS.some((name) => query.has(name));
+}
+
+/**
+ * Map one page load's referrer host, `utm_medium` and ad-click flag onto the
+ * fixed taxonomy. Returns null when the load is a sign-in round trip (Google
+ * account chooser, the Supabase auth hop): that is not an acquisition touch,
+ * so nothing should be recorded or counted for it.
  */
 export function classifyFirstTouchReferralSource(input: {
   referrerHost: string;
   currentHost: string;
   campaignMedium: string;
+  /** `hasAdClickId(query)`: the click came from a paid ad (auto-tagged). */
+  adClick: boolean;
 }): FirstTouchReferralSource | null {
-  const { referrerHost, currentHost, campaignMedium } = input;
+  const { referrerHost, currentHost, campaignMedium, adClick } = input;
   if (referrerHost && AUTH_REFERRER_RE.test(referrerHost)) return null;
+  // An auto-tagged click is paid whatever the referrer (google.com, bing.com)
+  // or a manual utm_medium says. The taxonomy has no display bucket; for this
+  // site's search ads (and to keep them out of the organic counts) paid_search
+  // is the right one.
+  if (adClick) return "paid_search";
   if (["cpc", "ppc", "paid_search", "paidsearch"].includes(campaignMedium)) {
     return "paid_search";
   }

@@ -7,7 +7,9 @@ import {
   FIRST_TOUCH_COOKIE_MAX_AGE_SECONDS,
   FIRST_TOUCH_REFERRAL_SOURCES,
   LANDING_SECTIONS,
+  AD_CLICK_ID_PARAMS,
   classifyFirstTouchReferralSource,
+  hasAdClickId,
   landingSection,
   parseFirstTouchCookie,
   serializeFirstTouchCookie,
@@ -48,8 +50,8 @@ function fakeJar(secure = true): CookieJar & { writes: string[]; store: Map<stri
   };
 }
 
-const classify = (referrerHost: string, campaignMedium = "") =>
-  classifyFirstTouchReferralSource({ referrerHost, currentHost: "usetruecap.com", campaignMedium });
+const classify = (referrerHost: string, campaignMedium = "", adClick = false) =>
+  classifyFirstTouchReferralSource({ referrerHost, currentHost: "usetruecap.com", campaignMedium, adClick });
 
 describe("classifyFirstTouchReferralSource", () => {
   it("never counts a Google or Supabase sign-in round trip as organic search", () => {
@@ -88,12 +90,43 @@ describe("classifyFirstTouchReferralSource", () => {
     expect(classify("", "some-private-campaign-name")).toBe("campaign");
   });
 
-  it("is the classifier the provider uses (one classifier, not two)", () => {
+  it("counts an auto-tagged ad click as paid search, never organic", () => {
+    // TrueCap's Google Ads Final URLs carry no UTM parameters, so the click id
+    // is the only thing that tells a paid google.com / bing.com visit apart.
+    expect(classify("www.google.com", "", true)).toBe("paid_search");
+    expect(classify("www.bing.com", "", true)).toBe("paid_search");
+    expect(classify("", "", true)).toBe("paid_search");
+    // An auto-tagged click is paid whatever a manual utm_medium claims.
+    expect(classify("www.google.com", "organic", true)).toBe("paid_search");
+    // A sign-in round trip is still not a landing.
+    expect(classify("accounts.google.com", "", true)).toBeNull();
+    // Without the flag nothing changes.
+    expect(classify("www.google.com", "", false)).toBe("organic_search");
+  });
+
+  it("detects the ad platforms' click-id parameters by presence only", () => {
+    const query = (search: string) => new URLSearchParams(search);
+    expect(AD_CLICK_ID_PARAMS).toEqual(["gclid", "gbraid", "wbraid", "dclid", "msclkid"]);
+    for (const search of ["gclid=Cj0KCQjw", "gbraid=0AAAAA", "wbraid=CjkKCQ", "dclid=CL7s", "msclkid=abc123", "utm_source=google&gclid="]) {
+      expect(hasAdClickId(query(search)), search).toBe(true);
+    }
+    // fbclid is appended to organic Facebook links too, so it proves nothing.
+    for (const search of ["", "utm_source=google&utm_medium=organic", "fbclid=IwAR", "GCLID=x", "ref=gclid"]) {
+      expect(hasAdClickId(query(search)), search).toBe(false);
+    }
+    expect(hasAdClickId(null)).toBe(false);
+    expect(hasAdClickId(undefined)).toBe(false);
+  });
+
+  it("is the one classifier (the provider has none of its own)", () => {
     const provider = read("components/analytics/posthog-provider.tsx");
-    expect(provider).toContain("classifyFirstTouchReferralSource,");
-    expect(provider).toContain('from "@/lib/first-touch"');
     expect(provider).not.toMatch(/function classifyFirstTouchReferralSource/);
     expect(provider).not.toContain("SEARCH_REFERRER_RE");
+    expect(provider).not.toContain("classifyFirstTouchReferralSource");
+    const analytics = read("lib/analytics.ts");
+    expect(analytics).not.toMatch(/function classifyFirstTouchReferralSource/);
+    expect(analytics).toContain("classifyFirstTouchReferralSource,");
+    expect(analytics).toContain('from "@/lib/first-touch"');
   });
 });
 
@@ -239,13 +272,20 @@ describe("syncFirstTouchCookie consent gating", () => {
 describe("the browser wiring (lib/analytics.ts + banner + provider)", () => {
   let session: Map<string, string>;
   let jar: ReturnType<typeof fakeJar>;
+  /** The banner's stored decision (localStorage truecap_cookie_consent_v1). */
+  let storedConsent: string | null;
 
   beforeEach(() => {
     session = new Map();
     jar = fakeJar(true);
+    storedConsent = null;
     vi.stubGlobal("window", {
       location: { protocol: "https:", hostname: "usetruecap.com" },
-      localStorage: { getItem: () => null, setItem: () => undefined, removeItem: () => undefined },
+      localStorage: {
+        getItem: (key: string) => (key === "truecap_cookie_consent_v1" ? storedConsent : null),
+        setItem: () => undefined,
+        removeItem: () => undefined,
+      },
       sessionStorage: {
         getItem: (key: string) => session.get(key) ?? null,
         setItem: (key: string, value: string) => session.set(key, value),
@@ -314,7 +354,73 @@ describe("the browser wiring (lib/analytics.ts + banner + provider)", () => {
     });
   });
 
-  it("the banner applies each decision to the cookie; the provider applies the stored one", () => {
+  const SESSION_KEY = "truecap_first_touch_attribution_v1";
+  const landing = (overrides: Partial<{ referrer: string; pathname: string; search: string }> = {}) => ({
+    referrer: overrides.referrer ?? "https://www.google.com/",
+    currentHost: "usetruecap.com",
+    query: new URLSearchParams(overrides.search ?? ""),
+    pathname: overrides.pathname ?? "/blog/what-is-a-good-cap-rate",
+  });
+
+  it("a visitor who consented earlier gets tc_ft on a single landing (record before sync)", async () => {
+    // Everyone who accepted before tc_ft existed, or whose 90 days ran out:
+    // consent is already `granted` and there is no cookie. The provider runs
+    // this once per document, so the landing itself must write the cookie.
+    storedConsent = "granted";
+    const a = await analytics();
+    expect(a.recordFirstTouchLanding(landing())).toBe("organic_search");
+    expect(jar.store.get("tc_ft")).toBe("organic_search.blog");
+    expect(jar.writes).toHaveLength(1);
+  });
+
+  it("before a decision: records the tab's first touch, writes no cookie; accepting later writes it", async () => {
+    const a = await analytics();
+    expect(a.recordFirstTouchLanding(landing({ referrer: "https://chatgpt.com/c/x", pathname: "/tools/dscr-calculator" }))).toBe("organic_ai");
+    expect(JSON.parse(session.get(SESSION_KEY) ?? "{}")).toEqual({ referral_source: "organic_ai", landing_section: "tools" });
+    expect(jar.writes).toEqual([]);
+    // The banner's Accept on a later page.
+    expect(a.syncFirstTouchCookieWithConsent("granted")).toBe("written");
+    expect(jar.store.get("tc_ft")).toBe("organic_ai.tools");
+  });
+
+  it("after an explicit Reject: stores nothing at all, not even for the tab", async () => {
+    storedConsent = "denied";
+    const a = await analytics();
+    expect(a.recordFirstTouchLanding(landing())).toBe("organic_search");
+    expect(session.has(SESSION_KEY)).toBe(false);
+    expect(jar.writes).toEqual([]);
+  });
+
+  it("the banner's Reject clears the record kept before the decision", async () => {
+    const a = await analytics();
+    a.recordFirstTouchLanding(landing());
+    expect(session.has(SESSION_KEY)).toBe(true);
+    expect(a.syncFirstTouchCookieWithConsent("denied")).toBe("absent");
+    expect(session.has(SESSION_KEY)).toBe(false);
+  });
+
+  it("an auto-tagged ad click is recorded as paid search, and the click id value goes nowhere", async () => {
+    storedConsent = "granted";
+    const a = await analytics();
+    const source = a.recordFirstTouchLanding(
+      landing({ pathname: "/tools/cap-rate-calculator", search: "gclid=Cj0KCQjw-private-click-id" }),
+    );
+    expect(source).toBe("paid_search");
+    expect(jar.store.get("tc_ft")).toBe("paid_search.tools");
+    expect(session.get(SESSION_KEY)).toBe(JSON.stringify({ referral_source: "paid_search", landing_section: "tools" }));
+    expect(JSON.stringify([...session.values(), ...jar.writes])).not.toContain("Cj0K");
+  });
+
+  it("a sign-in round trip records nothing and never overwrites the real first touch", async () => {
+    storedConsent = "granted";
+    const a = await analytics();
+    a.recordFirstTouchLanding(landing({ referrer: "https://www.bing.com/", pathname: "/glossary/noi" }));
+    expect(a.recordFirstTouchLanding(landing({ referrer: "https://accounts.google.com/", pathname: "/pricing" }))).toBeNull();
+    expect(JSON.parse(session.get(SESSION_KEY) ?? "{}")).toEqual({ referral_source: "organic_search", landing_section: "glossary" });
+    expect(jar.store.get("tc_ft")).toBe("organic_search.glossary");
+  });
+
+  it("the banner applies each decision; the provider leaves the landing order to recordFirstTouchLanding", () => {
     const banner = read("components/marketing/cookie-consent-banner.tsx");
     const accept = banner.slice(banner.indexOf("const handleAccept"), banner.indexOf("const handleReject"));
     const reject = banner.slice(banner.indexOf("const handleReject"), banner.indexOf("// Suppress entirely"));
@@ -323,9 +429,12 @@ describe("the browser wiring (lib/analytics.ts + banner + provider)", () => {
     expect(reject).not.toContain('"granted"');
 
     const provider = read("components/analytics/posthog-provider.tsx");
-    expect(provider).toContain("syncFirstTouchCookieWithConsent(readStoredCookieConsent())");
-    expect(provider).toContain("landing_section: landingSection(pathname)");
-    // A sign-in round trip records nothing and fires no organic_landing.
+    expect(provider).toContain("recordFirstTouchLanding({");
+    expect(provider).toContain("query: searchParams,");
+    // The order (record, then sync) is recordFirstTouchLanding's, tested above.
+    expect(provider).not.toContain("setFirstTouchAttribution(");
+    expect(provider).not.toContain("syncFirstTouchCookieWithConsent(");
+    // A sign-in round trip fires no organic_landing.
     expect(provider).toContain("if (referralSource === null) return;");
   });
 });

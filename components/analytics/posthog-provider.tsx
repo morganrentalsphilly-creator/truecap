@@ -35,17 +35,11 @@ import {
   identifyUser,
   initAnalytics,
   disableAnalyticsForDocument,
-  readStoredCookieConsent,
+  recordFirstTouchLanding,
   resetAnalytics,
-  setFirstTouchAttribution,
-  syncFirstTouchCookieWithConsent,
   trackEvent,
   trackPageview,
 } from "@/lib/analytics";
-import {
-  classifyFirstTouchReferralSource,
-  landingSection,
-} from "@/lib/first-touch";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 
 function routeCategory(pathname: string): string {
@@ -184,9 +178,10 @@ function PostHogTracker() {
     trackPageview(`${window.location.origin}${pathname}`);
   }, [pathname, searchParams, telemetryDisabledForDocument]);
 
-  // First-party attribution. The raw referrer host and UTM value are used only
-  // for this synchronous classification; persistence and event payloads get a
-  // fixed referral taxonomy plus a coarse landing section / route category.
+  // First-party attribution. The raw referrer host, UTM medium and ad click-id
+  // presence are used only for this synchronous classification; persistence
+  // and event payloads get a fixed referral taxonomy plus a coarse landing
+  // section / route category.
   useEffect(() => {
     if (
       telemetryDisabledForDocument ||
@@ -195,29 +190,15 @@ function PostHogTracker() {
     )
       return;
     firstTouchClassified.current = true;
-    let host = "";
-    try {
-      host = document.referrer
-        ? new URL(document.referrer).hostname.toLowerCase()
-        : "";
-    } catch {
-      host = "";
-    }
-    const referralSource = classifyFirstTouchReferralSource({
-      referrerHost: host,
-      currentHost: window.location.hostname.toLowerCase(),
-      campaignMedium: searchParams?.get("utm_medium")?.toLowerCase() ?? "",
+    // Classify, record the tab's first touch, then apply the stored consent to
+    // the tc_ft cookie, in that order (lib/analytics.ts). The banner applies a
+    // decision made on this page itself.
+    const referralSource = recordFirstTouchLanding({
+      referrer: document.referrer,
+      currentHost: window.location.hostname,
+      query: searchParams,
+      pathname,
     });
-    if (referralSource !== null) {
-      setFirstTouchAttribution({
-        referral_source: referralSource,
-        landing_section: landingSection(pathname),
-      });
-    }
-    // The consent-gated tc_ft cookie: written only after a `granted` decision
-    // and only if absent; any other stored decision deletes it. The banner
-    // applies a decision made on this page itself.
-    syncFirstTouchCookieWithConsent(readStoredCookieConsent());
     // null = a sign-in round trip (e.g. the Google OAuth return), not a landing.
     if (referralSource === null) return;
     if (
