@@ -24,7 +24,7 @@ import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, getCalculator } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {

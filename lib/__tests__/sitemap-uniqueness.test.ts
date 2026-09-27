@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import { SITE_OVERHAUL_LAST_MODIFIED } from "@/app/sitemap";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { HISTORICAL_TOOL_PATHS } from "@/lib/historical-tool-redirects";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 
@@ -101,7 +101,7 @@ describe("sitemap URL uniqueness", () => {
     const availablePosts = new Map(
       BLOG_POSTS.filter((post) => post.available).map((post) => [
         `/blog/${post.slug}`,
-        new Date(post.modifiedAt ?? post.publishedAt).toISOString(),
+        new Date(post.publishedAt).toISOString(),
       ]),
     );
 

@@ -8,14 +8,14 @@
  *
  * Spec: https://www.rssboard.org/rss-specification
  *
- * Auto-stays-current: imports BLOG_POSTS from /app/blog/page.tsx,
+ * Auto-stays-current: imports BLOG_POSTS from lib/blog-posts.ts,
  * which is also the source of truth for the blog index + sitemap.
  * Adding a new post anywhere flows through automatically.
  *
  * Caching: public, 1-hour cache. Cheap to regenerate (no DB calls).
  */
 
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";

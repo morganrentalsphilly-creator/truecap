@@ -4,6 +4,10 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 const CUSTOMER_SURFACE_ROOTS = ["app", "components", "emails"] as const;
+/** Customer copy that lives outside those roots: the blog registry's titles
+ *  and excerpts render on /blog, the topic hubs, every post's related-posts
+ *  block, feed.xml and llms.txt. */
+const CUSTOMER_SURFACE_FILES = ["lib/blog-posts.ts"] as const;
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".json"]);
 
 function sourceFiles(directory: string): string[] {
@@ -12,6 +16,13 @@ function sourceFiles(directory: string): string[] {
     if (entry.isDirectory()) return sourceFiles(path);
     return SOURCE_EXTENSIONS.has(extname(entry.name)) ? [path] : [];
   });
+}
+
+function customerSurfaceFiles(): string[] {
+  return [
+    ...CUSTOMER_SURFACE_ROOTS.flatMap((root) => sourceFiles(join(ROOT, root))),
+    ...CUSTOMER_SURFACE_FILES.map((file) => join(ROOT, file)),
+  ];
 }
 
 function withoutComments(source: string): string {
@@ -32,14 +43,12 @@ describe("customer-facing decision vocabulary", () => {
     ];
     const violations: string[] = [];
 
-    for (const root of CUSTOMER_SURFACE_ROOTS) {
-      for (const file of sourceFiles(join(ROOT, root))) {
-        const visibleSource = withoutComments(readFileSync(file, "utf8"));
-        for (const pattern of forbidden) {
-          const match = visibleSource.match(pattern);
-          if (match) {
-            violations.push(`${relative(ROOT, file)}: ${match[0]}`);
-          }
+    for (const file of customerSurfaceFiles()) {
+      const visibleSource = withoutComments(readFileSync(file, "utf8"));
+      for (const pattern of forbidden) {
+        const match = visibleSource.match(pattern);
+        if (match) {
+          violations.push(`${relative(ROOT, file)}: ${match[0]}`);
         }
       }
     }
@@ -77,12 +86,10 @@ describe("customer-facing decision vocabulary", () => {
     // docs/voice.md term map: "Screening Index" is retired customer-facing
     // vocabulary; the one public name is "Deal score" (0–100).
     const violations: string[] = [];
-    for (const root of CUSTOMER_SURFACE_ROOTS) {
-      for (const file of sourceFiles(join(ROOT, root))) {
-        const visibleSource = withoutComments(readFileSync(file, "utf8"));
-        const match = visibleSource.match(/\bScreening Index\b/i);
-        if (match) violations.push(`${relative(ROOT, file)}: ${match[0]}`);
-      }
+    for (const file of customerSurfaceFiles()) {
+      const visibleSource = withoutComments(readFileSync(file, "utf8"));
+      const match = visibleSource.match(/\bScreening Index\b/i);
+      if (match) violations.push(`${relative(ROOT, file)}: ${match[0]}`);
     }
 
     expect(violations).toEqual([]);

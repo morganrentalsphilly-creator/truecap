@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");

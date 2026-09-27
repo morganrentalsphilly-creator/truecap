@@ -133,7 +133,7 @@ describe("public funnel and trust guards", () => {
     const comparisonArticleCard = read(
       "app/blog/dealcheck-vs-stessa-vs-truecap/opengraph-image.tsx",
     );
-    const blogIndex = read("app/blog/page.tsx");
+    const registry = read("lib/blog-posts.ts");
     for (const source of [comparison, article, operationsComparison]) {
       expect(source).toContain("2026-08-27");
       expect(source).toContain("stessa.com/investment-property-marketplace");
@@ -184,11 +184,14 @@ describe("public funnel and trust guards", () => {
       "dealcheck-vs-stessa-vs-truecap",
       "stessa-vs-avail-vs-baselane",
     ]) {
-      expect(blogIndex).toMatch(
-        new RegExp(`slug: "${slug}"[\\s\\S]{0,700}modifiedAt: "2026-08-27"`),
+      // The correction's date lives on each post (its MODIFIED_AT), not in
+      // the registry: F2 keeps modified dates out of lib/blog-posts.ts.
+      expect(read(`app/blog/${slug}/page.tsx`), slug).toMatch(
+        /const MODIFIED_AT(?::\s*string)?\s*=\s*"2026-08-27"/,
       );
+      expect(registry).toContain(`slug: "${slug}"`);
     }
-    expect(blogIndex).toContain("dateModified: p.modifiedAt ?? p.publishedAt");
+    expect(registry).not.toMatch(/modifiedAt/);
   });
 
   it("keeps the beta case-study intake unpublished and evidence based", () => {

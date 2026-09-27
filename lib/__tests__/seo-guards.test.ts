@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import {
   APP_DIR,
@@ -272,26 +273,23 @@ describe("HARD GATE: every blog post is registered in BLOG_POSTS", () => {
    * slug is registered. This closes that hole. It matters most for the
    * automated content workflow, where "add it to BLOG_POSTS" is an
    * instruction to a model rather than something the compiler enforces.
+   *
+   * The registry lives in lib/blog-posts.ts (a pure data module since F2), so
+   * this imports the real array instead of pattern-matching a page's source.
    */
-  const blogIndex = readFileSync(
-    path.join(APP_DIR, "blog", "page.tsx"),
-    "utf8",
-  );
-  const registered = new Set(
-    [...blogIndex.matchAll(/slug:\s*"([a-z0-9-]+)"/g)].map((m) => m[1]),
-  );
+  const registered = new Set(BLOG_POSTS.map((post) => post.slug));
 
-  it("BLOG_POSTS parsed successfully", () => {
-    // Tripwire: if this regex stops matching the file's shape, every per-slug
-    // assertion below would fail confusingly. Fail here with a clear cause.
+  it("BLOG_POSTS loaded", () => {
+    // Tripwire: an empty or truncated registry would make every per-slug
+    // assertion below fail confusingly. Fail here with a clear cause.
     expect(registered.size).toBeGreaterThan(60);
   });
 
-  it.each(blogSlugs())("%s is listed in app/blog/page.tsx", (slug) => {
+  it.each(blogSlugs())("%s is listed in lib/blog-posts.ts", (slug) => {
     expect(
       registered.has(slug),
       `app/blog/${slug}/page.tsx exists but "${slug}" is not in BLOG_POSTS ` +
-        `(app/blog/page.tsx). The post would be live at its URL but missing ` +
+        `(lib/blog-posts.ts). The post would be live at its URL but missing ` +
         `from the /blog index, sitemap.xml, and feed.xml. Add an entry.`,
     ).toBe(true);
   });
@@ -434,11 +432,11 @@ describe("HARD GATE: sitemap covers every indexable route", () => {
    * This asserts set-containment against the route tree so the drift is
    * caught the day it's introduced rather than months later in GSC.
    *
-   * Reads sitemap.ts as TEXT rather than importing it: app/sitemap.ts imports
-   * BLOG_POSTS from app/blog/page.tsx, which drags next/link and the whole
-   * component tree into a plain-node context. (Lifting BLOG_POSTS into
-   * lib/blog-posts.ts would let this import the real thing — worth doing, but
-   * it is a bigger refactor than this guard should carry.)
+   * Reads sitemap.ts as TEXT rather than importing it. That was forced while
+   * app/sitemap.ts imported BLOG_POSTS from app/blog/page.tsx and so dragged
+   * next/link and the whole component tree along. F2 lifted the registry into
+   * lib/blog-posts.ts, so this guard could now import the real sitemap (as
+   * sitemap-uniqueness.test.ts does); it has not been rewritten yet.
    */
   const sitemapSource = readFileSync(path.join(APP_DIR, "sitemap.ts"), "utf8");
 

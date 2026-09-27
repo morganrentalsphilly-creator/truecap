@@ -185,6 +185,7 @@ describe("year rollover and factual consistency", () => {
       "app/blog/bonus-depreciation-rental-property-2026/page.tsx",
       "app/blog/how-to-calculate-rental-property-depreciation/page.tsx",
       "app/blog/page.tsx",
+      "lib/blog-posts.ts", // the registry excerpts /blog, feed.xml and llms.txt render
     ].map((file) => readFileSync(join(ROOT, file), "utf8")).join("\n");
     expect(publicFiles).not.toMatch(/20% (?:in|for|bonus).*2026|2026[^\n]{0,50}20%|None have passed|goes to zero in 2027/i);
     expect(publicFiles).toContain("100% bonus depreciation");

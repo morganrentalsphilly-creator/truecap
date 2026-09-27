@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
 
 const expectedBlogPaths = BLOG_POSTS.filter((post) => post.available)

@@ -13,7 +13,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_TOPICS, getBlogTopic } from "@/lib/blog-topics";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { getCalculator } from "@/lib/calculator-registry";
 import { Header } from "@/components/investcalc/header";
 

@@ -25,7 +25,7 @@
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   CALCULATOR_REGISTRY,

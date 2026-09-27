@@ -19,6 +19,9 @@ const PUBLIC_FILES = [
   "emails/lifecycle-content/trial-day1.json",
   "emails/lifecycle-content/welcome.json",
   "lib/product-facts.ts",
+  // The blog registry: titles and excerpts rendered on /blog, the topic hubs,
+  // related posts, feed.xml and llms.txt.
+  "lib/blog-posts.ts",
 ] as const;
 const SOURCE_EXTENSIONS = new Set([".json", ".ts", ".tsx"]);
 

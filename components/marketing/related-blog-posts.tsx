@@ -3,7 +3,7 @@
  * blog article to keep engaged readers on-site instead of bouncing.
  *
  * Strategy: filter out the current post, then pick up to 3 others
- * (most-recent first). Uses the BLOG_POSTS array from app/blog/page.tsx
+ * (most-recent first). Uses the BLOG_POSTS array from lib/blog-posts.ts
  * as the single source of truth so adding new posts auto-updates the
  * related-posts surface on every existing post.
  *
@@ -12,7 +12,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import {
   LeadMagnetInline,
   LeadMagnetExitIntent,
