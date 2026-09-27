@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assessPerformanceData, readAllPages } from "./performance-read.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const sourceManifest = JSON.parse(readFileSync(path.join(ROOT, "config/seo-sources.json"), "utf8"));
@@ -128,15 +129,11 @@ async function upsert(table, onConflict, rows) {
   return count;
 }
 
-async function pagedSelect(pathname, pageSize = 5000) {
+// Every page is capped server-side (max-rows), so see performance-read.mjs:
+// the offset advances by the rows returned and only an empty page stops it.
+async function pagedSelect(pathname) {
   if (!supabaseUrl || !serviceKey) return [];
-  const out = [];
-  for (let start = 0; ; start += pageSize) {
-    const rows = await rest(pathname, { headers: { range: `${start}-${start + pageSize - 1}` } });
-    out.push(...(rows ?? []));
-    if (!rows || rows.length < pageSize) break;
-  }
-  return out;
+  return readAllPages((start, end) => rest(pathname, { headers: { range: `${start}-${end}` } }));
 }
 
 function aggregateGsc(rows, from, to) {
@@ -353,7 +350,7 @@ const output = {
   persisted: Boolean(supabaseUrl && serviceKey),
   status: "RUNNING",
   inventory: {},
-  performance: { available: false },
+  performance: { available: false, degradedReason: "Supabase is not configured for this run" },
   linkGraph: { available: false },
   opportunities: [],
   actions: [],
@@ -434,14 +431,27 @@ try {
   await upsert("seo_page_source_dependencies", "page_path,source_id,claim_key", dependencies);
 
   if (supabaseUrl && serviceKey) {
-    const gscRows = await pagedSelect(`seo_gsc_daily?select=date,query,page,clicks,impressions,ctr,position&date=gte.${dateDaysAgo(60)}&order=date.asc`);
+    // Ordered by the full primary key: range paging needs a total order.
+    const gscRows = await pagedSelect(
+      `seo_gsc_daily?select=date,query,page,clicks,impressions,ctr,position&date=gte.${dateDaysAgo(60)}` +
+        "&order=date.asc,query.asc,page.asc,device.asc,country.asc",
+    );
     const current = aggregateGsc(gscRows, dateDaysAgo(30), dateDaysAgo(3));
     const previous = aggregateGsc(gscRows, dateDaysAgo(58), dateDaysAgo(31));
     const found = [...opportunities(current, previous, urls), ...linkReport.items]
       .sort((a, b) => b.score - a.score || a.key.localeCompare(b.key));
+    const health = assessPerformanceData(gscRows, {
+      currentFrom: dateDaysAgo(30),
+      currentTo: dateDaysAgo(3),
+      // gsc-ingest runs daily and lags 3 days; a week without a new row is broken.
+      staleBefore: dateDaysAgo(10),
+    });
     output.performance = {
-      available: gscRows.length > 0,
+      available: health.available,
+      degradedReason: health.reason,
       rows: gscRows.length,
+      newestDate: health.newestDate,
+      currentWindowRows: health.currentWindowRows,
       currentQueries: new Set(current.map((item) => item.query)).size,
       currentPages: new Set(current.map((item) => item.page)).size,
       clicks28d: current.reduce((sum, item) => sum + item.clicks, 0),

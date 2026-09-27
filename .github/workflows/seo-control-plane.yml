@@ -131,13 +131,17 @@ jobs:
               ...(health?.findings || []).filter(f => ['critical','high'].includes(f.severity)),
               ...(sources?.changed || []).map(s => ({ severity: 'high', check: 'source changed', detail: s.id })),
               ...(sources?.failed || []).map(s => ({ severity: 'high', check: 'source failed', detail: s.id })),
+              // A cycle that could not read current GSC data must say so: from
+              // 2026-08-30 a 1,000-row read cap left it blind while it reported
+              // SUCCEEDED (scripts/seo/performance-read.mjs).
+              ...(cycle?.status === 'DEGRADED' ? [{ severity: 'high', check: 'performance data degraded', detail: cycle?.performance?.degradedReason || 'unknown' }] : []),
             ];
             const body = [
               `# SEO control plane — ${process.env.CADENCE}`,
               '',
               `- Cycle: **${cycle?.status || 'missing'}** in **${cycle?.effectiveMode || 'unknown'}** mode`,
               `- Inventory: **${cycle?.inventory?.total ?? '—'}** sitemap URLs`,
-              `- GSC: **${gsc?.status || (cycle?.performance?.available ? 'available' : 'not run')}**`,
+              `- GSC: ingest **${gsc?.status || 'not run'}**; read-back **${cycle?.performance?.rows ?? '—'}** rows, newest **${cycle?.performance?.newestDate || '—'}**, current window **${cycle?.performance?.currentWindowRows ?? '—'}** rows`,
               `- Opportunities: **${cycle?.opportunities?.length ?? 0}** scored`,
               `- Source changes: **${sources?.changed?.length ?? 0}**; failures: **${sources?.failed?.length ?? 0}**`,
               `- Critical/high crawl findings: **${(health?.findings || []).filter(f => ['critical','high'].includes(f.severity)).length}**`,
