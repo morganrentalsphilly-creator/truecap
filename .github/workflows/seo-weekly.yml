@@ -415,7 +415,9 @@ jobs:
           git apply --index "$RUNNER_TEMP/proposal/patch.diff"
           npm run lint
           npx tsc --noEmit
-          npm test
+          # The same environment as CI's check job: the workflow-level loop
+          # variables must not leak into the suite (a test read SEO_RUN_ID).
+          env -u SEO_RUN_ID -u LOOP_BRANCH npm test
 
       - name: Render the patched build (new JSON-LD errors fail it)
         run: bash seo/scripts/render-build.sh "$RUNNER_TEMP/patched-hashes.json" "$RUNNER_TEMP/patched-jsonld.json" "$RUNNER_TEMP/base-jsonld.json"
@@ -760,6 +762,7 @@ jobs:
           name: seo-data
           path: seo
       - uses: actions/download-artifact@v8
+        if: needs.publish.result == 'success'
         continue-on-error: true
         with:
           name: published

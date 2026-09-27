@@ -532,3 +532,64 @@ describe("revert-commit.sh", () => {
     expect(existsSync(path.join(dir, ".git", "REVERT_HEAD"))).toBe(false);
   });
 });
+
+// ------------------------------------------- first live run (2026-09-27)
+
+describe("fixes from the first live run", () => {
+  const digest = (existing: string) => {
+    const dir = tmp();
+    mkdirSync(path.join(dir, "seo", "data"), { recursive: true });
+    mkdirSync(path.join(dir, "seo", "reports"), { recursive: true });
+    writeFileSync(path.join(dir, "seo", "data", "digest-2026-09-27.md"), "digest\n");
+    writeFileSync(path.join(dir, "seo", "reports", "2026-W39.md"), "report\n");
+    const calls = path.join(dir, "calls.txt");
+    // gh: the label search lags a just-created issue (it printed nothing live).
+    const bin = stubs(dir, {
+      gh: [
+        `echo "$*" >> "${calls}"`,
+        'case "$1 $2" in',
+        `  "issue list") printf '%s' "${existing}";;`,
+        '  "issue create") echo "https://github.com/o/r/issues/125";;',
+        "esac",
+        "exit 0",
+      ].join("\n"),
+    });
+    const run = spawnSync("bash", [path.join(SCRIPTS, "digest-issue.sh")], { cwd: dir, env: { ...process.env, PATH: `${bin}:${process.env.PATH}` }, encoding: "utf8" });
+    return { code: run.status, out: `${run.stdout}${run.stderr}`, calls: readFileSync(calls, "utf8") };
+  };
+
+  it("comments on the issue it just created, from create's own output", () => {
+    const first = digest("");
+    expect(first.code, first.out).toBe(0);
+    expect(first.calls).toMatch(/issue comment 125 --body-file/);
+  });
+
+  it("edits, reopens and comments on the existing digest issue", () => {
+    const later = digest("42");
+    expect(later.code, later.out).toBe(0);
+    expect(later.calls).toMatch(/issue edit 42 /);
+    expect(later.calls).toMatch(/issue comment 42 --body-file/);
+    expect(later.calls).not.toMatch(/issue create/);
+  });
+
+  it("runs the patch's test suite without the workflow's loop variables", () => {
+    const gate = weekly.jobs["verify-build"].steps.find((s) => s.name === "Apply the patch and gate it like CI") as Step;
+    expect(gate.run).toContain("env -u SEO_RUN_ID -u LOOP_BRANCH npm test");
+  });
+
+  it("downloads the published artifact only when publish succeeded", () => {
+    const step = weekly.jobs.report.steps.find((s) => s.with?.name === "published");
+    expect(step?.if).toBe("needs.publish.result == 'success'");
+  });
+
+  it("lets the model and the critic fetch every subdomain of a primary source (www.irs.gov)", () => {
+    for (const flag of ["--print-model-tools", "--print-critic-tools"]) {
+      const out = spawnSync(process.execPath, [path.join(SCRIPTS, "run-flags.ts"), flag], { cwd: ROOT, encoding: "utf8" });
+      expect(out.status, out.stderr).toBe(0);
+      for (const domain of ["irs.gov", "hud.gov", "huduser.gov", "census.gov"]) {
+        expect(out.stdout, `${flag} ${domain}`).toContain(`WebFetch(domain:${domain})`);
+        expect(out.stdout, `${flag} *.${domain}`).toContain(`WebFetch(domain:*.${domain})`);
+      }
+    }
+  });
+});
