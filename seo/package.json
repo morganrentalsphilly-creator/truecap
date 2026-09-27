@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Scopes seo/ to ES modules so the toolkit runs with plain `node seo/scripts/<name>.ts` (native type stripping, no tsx, no dependencies). Not a workspace; nothing is installed here."
+}

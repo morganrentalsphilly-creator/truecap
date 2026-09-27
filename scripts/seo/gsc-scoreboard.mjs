@@ -819,7 +819,7 @@ async function rateLimitSlot() {
  * counts what it missed), not a failure of the run. Pretending a partial sweep
  * is the whole sweep is the failure mode this guards against.
  */
-async function inspectUrl(inspectionUrl, site, token, { maxRetries = 4 } = {}) {
+export async function inspectUrl(inspectionUrl, site, token, { maxRetries = 4 } = {}) {
   let delay = 2000;
   for (let attempt = 0; ; attempt += 1) {
     await rateLimitSlot();
@@ -849,7 +849,7 @@ async function inspectUrl(inspectionUrl, site, token, { maxRetries = 4 } = {}) {
  * Bounded-concurrency sweep. Stops scheduling new work the moment quota is
  * exhausted and reports the shortfall; in-flight calls are allowed to finish.
  */
-async function inspectAll(urls, site, token, { concurrency, maxInspections }) {
+export async function inspectAll(urls, site, token, { concurrency, maxInspections }) {
   const capped = urls.slice(0, maxInspections);
   const results = new Array(urls.length).fill(null);
   const state = { quotaExhausted: false, done: 0, errors: 0 };

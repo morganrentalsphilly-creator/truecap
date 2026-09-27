@@ -138,3 +138,11 @@ config.bat
 .impeccable/*
 !.impeccable/design.json
 !.impeccable/config.json
+
+# SEO loop run state. It lives on the `seo-state` orphan branch and is
+# overlaid into place at the start of every run (seo/README.md), so it must
+# never ride along in a content PR. seo/data/ also holds regenerated pulls.
+/seo/data/
+/seo/ledger.jsonl
+/seo/lessons.md
+/seo/reports/
