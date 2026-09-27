@@ -24,6 +24,8 @@ import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
+import { buildStateSummary, buildStateTitle } from "@/lib/markets/indexability";
+import { stateFactsFor } from "@/lib/seo/state-facts";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, getCalculator } from "@/lib/calculator-registry";
 
@@ -113,14 +115,20 @@ function search(query: string): SearchHit[] {
     }
   }
 
-  // States — STATES is a Record keyed by slug, so iterate values.
+  // States — STATES is a Record keyed by slug, so iterate values. The blurb
+  // is the data-only summary from the state's sourced facts, never the
+  // unsourced lib/states.ts pitch.
   for (const state of Object.values(STATES)) {
-    if (matches(`${state.name} ${state.abbr} rental investment ${state.pitch}`)) {
+    const facts = stateFactsFor(state.slug);
+    const blurb = facts
+      ? buildStateSummary(state.name, facts)
+      : `HUD Fair Market Rent for ${state.name} cities.`;
+    if (matches(`${state.name} ${state.abbr} rental market data ${blurb}`)) {
       hits.push({
-        title: `${state.name} rental property investing`,
+        title: buildStateTitle(state.name),
         href: `/states/${state.slug}`,
         category: "State guide",
-        blurb: state.pitch,
+        blurb,
       });
     }
   }
@@ -130,10 +138,10 @@ function search(query: string): SearchHit[] {
     if (matches(`${city} market rental`)) {
       const name = city.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
       hits.push({
-        title: `${name} rental market`,
+        title: `${name} rental market data`,
         href: `/markets/${city}`,
         category: "Market",
-        blurb: `Rental market overview, cap rates, and strategy fit for ${name}.`,
+        blurb: `HUD Fair Market Rent, its sources, and a sample underwrite for ${name}.`,
       });
     }
   }

@@ -15,6 +15,7 @@ TrueCap is a tool a rental investor uses to decide what to offer. The copy shoul
 7. **Name features once, then use the name.** Offer Ceiling (define once per page: "the highest price that still meets your targets"). Buy Box (your targets). Deal score (0–100, a heuristic summary of the modeled numbers).
 8. **Short sentences.** One idea each. Cut "in order to", "it should be noted", "please note".
 9. **Confident about the math, honest about the inputs.** "Every assumption is labeled and editable" is the promise. The disclaimer covers the rest.
+10. **FMR is Fair Market Rent, nothing else.** HUD's Fair Market Rent is a 40th-percentile gross rent that HUD uses to set voucher payment standards. Call it `HUD Fair Market Rent (FY2026)` (or `HUD FMR` as a source label), with the fiscal year from the data, and explain it once per page in one sentence: `FMR_DEFINITION` in `lib/markets/data-copy.ts`, which cites HUD's FMR page. Never call it "average rent", "typical rent", "median rent" or "market rent", and never let it stand in for what a unit rents for. Market and state pages are data pages: titles say "{City}, {ST} Rental Market Data ({FY})", FAQ answers are only the page's own sourced numbers, and no copy says whether a city or state is a good investment.
 
 ## Term map
 
@@ -31,6 +32,8 @@ TrueCap is a tool a rental investor uses to decide what to offer. The copy shoul
 | Highest modeled price meeting these example criteria. This is not a recommended offer. | The highest price that still clears your targets. |
 | preliminary fallback | default — replace with your local number |
 | released / unreleased / registry / hand-curated / checked-in / as-of dates | (removed; say what is or isn't offered in plain words) |
+| average rent / typical rent / median rent / market rent (for HUD's FMR) | HUD Fair Market Rent (FY2026) |
+| Is {City} a good place to buy rental property? | {City}, {ST} Rental Market Data (2026) |
 
 ## The disclaimer (verbatim, one per page)
 
@@ -44,4 +47,4 @@ TrueCap is a tool a rental investor uses to decide what to offer. The copy shoul
 
 ## Checks
 
-`rg -i "synthetic sample|selected-rule|product evaluation|preliminary fallback|unreleased|hand-curated"` over `app/`, `components/`, `lib/`, `emails/` must return no customer-facing hits (identifiers and comments are not customer-facing). Every marketing page renders exactly one `<Disclaimer />`.
+`rg -i "synthetic sample|selected-rule|product evaluation|preliminary fallback|unreleased|hand-curated"` over `app/`, `components/`, `lib/`, `emails/` must return no customer-facing hits (identifiers and comments are not customer-facing). Every marketing page renders exactly one `<Disclaimer />`. `lib/__tests__/markets-states-data-first.test.tsx` renders every market and state page and fails on any FMR called an average, typical, median or market rent; `lib/seo/fact-source.ts` refuses the same phrases in `content/seo/*-facts.json`.

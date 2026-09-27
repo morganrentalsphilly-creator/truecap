@@ -1,32 +1,40 @@
 /**
- * Indexability rules for the programmatic market and state pages
- * (docs/site-overhaul.md Phase 8.1–8.2).
+ * Indexability rules for the market and state pages (docs/site-overhaul.md
+ * Phase 8.1–8.2; data-first reframe F8).
  *
  * A /markets/<city> page earns an index tag only when HUD Fair Market Rent
- * exists for its slug — that data is what turns the template into a page
- * worth ranking. A /states/<slug> page earns one only when it can render at
- * least STATE_PAGE_MIN_WORDS of real content: the state record's own fields
- * (pitch, tier, landlord-tenant lean, property-tax rate) plus at least one
- * market city in that state with HUD rent. Everything else renders with
- * `robots: noindex, follow` so crawl equity still flows through the links.
+ * exists for its slug (lib/markets/hud-rents.ts) — that data is what turns the
+ * template into a page worth ranking. The rule is the same for the 150
+ * programmatic cities and the 12 bespoke metros. A /states/<slug> page earns
+ * one only when it can render at least STATE_PAGE_MIN_WORDS of real content:
+ * the state's sourced facts (content/seo/state-facts.json via
+ * lib/seo/state-facts.ts), the data-only summary and FAQ built from them, and
+ * at least one market city in that state with HUD rent. Everything else
+ * renders with `robots: noindex, follow` so crawl equity still flows.
  *
- * app/sitemap.ts consumes the two slug helpers; the page templates consume
- * the booleans and the shared copy builders below. The word estimate counts
- * only the strings the state page actually renders (see STATE_PAGE_GUIDANCE),
- * so it is conservative — the rendered page always has more words than the
- * estimate, never fewer. lib/__tests__/markets-indexability.test.ts measures
- * the rendered HTML to keep that true.
+ * app/sitemap.ts and app/llms.txt consume the slug helpers; the page
+ * templates consume the booleans and the shared copy builders below. The word
+ * estimate counts only the strings the state page actually renders, so it is
+ * conservative — the rendered page always has more words than the estimate,
+ * never fewer. lib/__tests__/markets-indexability.test.ts measures the
+ * rendered HTML to keep that true.
  */
 
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
-import { HUD_RENTS, type HudRent } from "@/lib/markets/hud-rents";
 import {
-  STATES,
-  getStateBySlug,
-  type LandlordFriendliness,
-  type MarketTier,
-  type StateData,
-} from "@/lib/states";
+  FMR_DEFINITION,
+  HUD_FMR_OVERVIEW_RETRIEVED_AT,
+  HUD_FMR_OVERVIEW_URL,
+  count,
+  fmrLabel,
+  sharePct,
+  usd,
+  type DataFaqItem,
+  type SourceLink,
+} from "@/lib/markets/data-copy";
+import { HUD_RENTS, type HudRent } from "@/lib/markets/hud-rents";
+import { STATES, getStateBySlug } from "@/lib/states";
+import { stateFactsFor, type StateFacts } from "@/lib/seo/state-facts";
 
 /** Metadata `robots` value for a page that stays crawlable but unindexed. */
 export const NOINDEX_FOLLOW = { index: false, follow: true } as const;
@@ -34,7 +42,10 @@ export const NOINDEX_FOLLOW = { index: false, follow: true } as const;
 /** Visible words a state page must render before it may be indexed. */
 export const STATE_PAGE_MIN_WORDS = 300;
 
-/** Year to state when a page has no HUD figure to date itself by. */
+/**
+ * Year the strategy pages state when their city has no HUD figure. Market and
+ * state pages date themselves only by a HUD vintage (buildHudDataAsOfLine).
+ */
 export const DEFAULT_DATA_YEAR = 2026;
 
 function hudFor(slug: string): HudRent | null {
@@ -72,29 +83,33 @@ export function getMarketDataYear(slug: string): number {
   return hudFor(slug)?.year ?? DEFAULT_DATA_YEAR;
 }
 
-/** The one dating line every market, strategy, and state page renders. */
+/** The strategy pages' dating line (the market and state pages use buildHudDataAsOfLine). */
 export function buildDataAsOfLine(year: number): string {
   return `Data as of ${year}; verify locally before you offer.`;
 }
 
 export type StateHudCity = { slug: string; name: string; hud: HudRent };
 
-/** Market cities in a state (matched on the full state name) that have HUD rent. */
+/**
+ * Market pages in a state (matched on the full state name), programmatic and
+ * bespoke, that have HUD rent — sorted by city name.
+ */
 export function getStateHudCities(stateName: string): StateHudCity[] {
-  return MARKET_CITIES.filter((city) => city.stateName === stateName).flatMap(
-    (city) => {
+  return [...MARKET_CITIES, ...BESPOKE_MARKETS]
+    .filter((city) => city.stateName === stateName)
+    .flatMap((city) => {
       const hud = hudFor(city.slug);
       return hud ? [{ slug: city.slug, name: city.name, hud }] : [];
-    },
-  );
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Bespoke city pages in a state (no HUD rent today, still worth a link). */
+/** Bespoke city pages in a state that have no HUD rent (still worth a link). */
 export function getStateBespokeMarkets(
   stateName: string,
 ): { slug: string; name: string }[] {
   return BESPOKE_MARKETS.filter(
-    (market) => market.stateName === stateName,
+    (market) => market.stateName === stateName && hudFor(market.slug) === null,
   ).map((market) => ({ slug: market.slug, name: market.name }));
 }
 
@@ -106,57 +121,119 @@ export function getStateDataYear(slug: string): number {
   return years.length > 0 ? Math.max(...years) : DEFAULT_DATA_YEAR;
 }
 
-const TIER_NOTE: Record<MarketTier, string> = {
-  "Cash flow":
-    "Investors mostly buy here for monthly cash flow rather than price growth.",
-  Balanced:
-    "Investors buy here for a mix of monthly cash flow and price growth.",
-  Appreciation:
-    "Investors mostly buy here for price growth. Monthly cash flow is harder to find at asking prices.",
-};
+/** The days a state's HUD city rows were retrieved. */
+export function getStateHudRetrievedDates(slug: string): string[] {
+  const state = getStateBySlug(slug);
+  if (!state) return [];
+  return [...new Set(getStateHudCities(state.name).map((city) => city.hud.retrievedAt))].sort();
+}
 
-const LANDLORD_VALUE: Record<LandlordFriendliness, string> = {
-  Strong: "Landlord-leaning",
-  Mixed: "Mixed",
-  "Tenant-leaning": "Tenant-leaning",
-};
+export type StateFact = { label: string; value: string; note: string; source: SourceLink };
 
-export type StateFact = { label: string; value: string; note: string };
+const acsLabel = (year: number, table: string) => `American Community Survey ${year} 1-year, table ${table}`;
 
-/**
- * The three state-record facts the page renders, each with its source label.
- * Values come straight from lib/states.ts; nothing is retyped into prose.
- */
-export function buildStateFacts(state: StateData): StateFact[] {
+/** The state's sourced facts as the page lists them, each with its linked source. */
+export function buildStateFacts(facts: StateFacts): StateFact[] {
+  const { medianHomeValue, medianRealEstateTaxesPaid, occupiedHousingUnits, renterOccupiedUnits } = facts;
+  const link = (fact: StateFacts[keyof StateFacts]): SourceLink => ({
+    label: fact.source.title,
+    href: fact.source.url,
+    retrievedAt: fact.source.retrievedAt,
+  });
   return [
     {
-      label: "Market tier",
-      value: state.tier,
-      note: TIER_NOTE[state.tier],
+      label: "Median home value",
+      value: usd(medianHomeValue.value),
+      note: `Owner-occupied homes. ${acsLabel(medianHomeValue.year, "B25077")}.`,
+      source: link(medianHomeValue),
     },
     {
-      label: "Landlord-tenant law",
-      value: LANDLORD_VALUE[state.landlord],
-      note: "TrueCap's read of state law. Confirm the statute and local ordinances with counsel before you rely on a timeline.",
+      label: "Median real estate taxes paid",
+      value: `${usd(medianRealEstateTaxesPaid.value)} a year`,
+      note: `Owner-occupied homes. ${acsLabel(medianRealEstateTaxesPaid.year, "B25103")}.`,
+      source: link(medianRealEstateTaxesPaid),
     },
     {
-      label: "Typical effective property tax",
-      value: `${state.propertyTaxRatePct}% of value`,
-      note: "TrueCap default — replace it with the parcel's current bill from the county assessor.",
+      label: "Renter-occupied homes",
+      value: sharePct(renterOccupiedUnits.value, occupiedHousingUnits.value),
+      note: `${count(renterOccupiedUnits.value)} of ${count(occupiedHousingUnits.value)} occupied homes. ${acsLabel(renterOccupiedUnits.year, "B25003")}.`,
+      source: link(renterOccupiedUnits),
     },
   ];
+}
+
+/** "{State} Rental Market Data": its figures carry two vintages (HUD FY, ACS year), each named on the page. */
+export function buildStateTitle(stateName: string): string {
+  return `${stateName} Rental Market Data`;
+}
+
+/** Meta description from the state's sourced facts (≤160 characters). */
+export function buildStateDescription(slug: string, stateName: string): string {
+  const facts = stateFactsFor(slug);
+  if (!facts) {
+    return `${stateName} rental market data: HUD Fair Market Rent by city and what to verify locally before you offer.`;
+  }
+  return `${stateName} rental data: Census median home value ${usd(facts.medianHomeValue.value)}, real estate taxes ${usd(facts.medianRealEstateTaxesPaid.value)} a year, ${sharePct(facts.renterOccupiedUnits.value, facts.occupiedHousingUnits.value)} renters, and HUD FMR by city.`;
+}
+
+/** The data-only summary that replaced the unsourced state pitch. */
+export function buildStateSummary(stateName: string, facts: StateFacts): string {
+  const { medianHomeValue, medianRealEstateTaxesPaid, occupiedHousingUnits, renterOccupiedUnits } = facts;
+  return `U.S. Census Bureau figures for ${stateName} (American Community Survey, ${medianHomeValue.year} 1-year estimates): the median owner-occupied home is valued at ${usd(medianHomeValue.value)}, owner-occupied homes paid a median ${usd(medianRealEstateTaxesPaid.value)} a year in real estate taxes, and renters occupied ${count(renterOccupiedUnits.value)} of the state's ${count(occupiedHousingUnits.value)} occupied homes (${sharePct(renterOccupiedUnits.value, occupiedHousingUnits.value)}).`;
+}
+
+/** Row copy for one HUD city as the state page renders it. */
+export function describeStateHudCity(city: StateHudCity): string {
+  return `${city.name}: ${fmrLabel(city.hud.year)}, 2-bedroom ${usd(city.hud.rent2br)}, 3-bedroom ${usd(city.hud.rent3br)}.`;
+}
+
+/** The state page's visible FAQ: every answer is one of the page's own sourced numbers. */
+export function buildStateFaq(stateName: string, facts: StateFacts, cities: StateHudCity[], year: number): DataFaqItem[] {
+  const { medianHomeValue, medianRealEstateTaxesPaid, occupiedHousingUnits, renterOccupiedUnits } = facts;
+  const source = (fact: StateFacts[keyof StateFacts]): SourceLink => ({
+    label: fact.source.title,
+    href: fact.source.url,
+    retrievedAt: fact.source.retrievedAt,
+  });
+  const items: DataFaqItem[] = [
+    {
+      question: `What is the median home value in ${stateName}?`,
+      answer: `The U.S. Census Bureau's ${medianHomeValue.year} American Community Survey (1-year estimates) puts the median value of owner-occupied homes in ${stateName} at ${usd(medianHomeValue.value)}.`,
+      sources: [source(medianHomeValue)],
+    },
+    {
+      question: `How much do ${stateName} homeowners pay in real estate taxes?`,
+      answer: `Owner-occupied homes in ${stateName} paid a median ${usd(medianRealEstateTaxesPaid.value)} a year in real estate taxes in the Census Bureau's ${medianRealEstateTaxesPaid.year} American Community Survey (1-year estimates).`,
+      sources: [source(medianRealEstateTaxesPaid)],
+    },
+    {
+      question: `What share of ${stateName} homes are rented?`,
+      answer: `Renters occupied ${count(renterOccupiedUnits.value)} of ${stateName}'s ${count(occupiedHousingUnits.value)} occupied homes (${sharePct(renterOccupiedUnits.value, occupiedHousingUnits.value)}) in the Census Bureau's ${renterOccupiedUnits.year} American Community Survey (1-year estimates).`,
+      sources: [source(renterOccupiedUnits)],
+    },
+  ];
+  if (cities.length > 0) {
+    items.push({
+      question: `What is HUD's Fair Market Rent in ${stateName} cities for FY${year}?`,
+      answer: `${fmrLabel(year)}, 2-bedroom and 3-bedroom, for the HUD area that includes each city: ${cities
+        .map((city) => `${city.name} ${usd(city.hud.rent2br)} and ${usd(city.hud.rent3br)}`)
+        .join("; ")}.`,
+      sources: [{ label: "HUD Fair Market Rents (huduser.gov)", href: HUD_FMR_OVERVIEW_URL, retrievedAt: HUD_FMR_OVERVIEW_RETRIEVED_AT }],
+    });
+  }
+  return items;
 }
 
 /** The fixed guidance a state page renders, shared so the word estimate is honest. */
 export const STATE_PAGE_GUIDANCE = {
   intro: (stateName: string) =>
-    `This page gives you the ${stateName} starting numbers TrueCap uses: the market tier, how landlord-tenant law leans, a typical effective property-tax rate, and HUD Fair Market Rent for each ${stateName} city TrueCap covers. Use them to set your first assumptions, then verify the parcel before you offer.`,
+    `This page collects ${stateName} data from two federal sources: the Census Bureau's American Community Survey for home values, real estate taxes paid and the share of homes that are rented, and HUD's Fair Market Rent for each ${stateName} city TrueCap covers. Use them to set your first assumptions, then verify the parcel before you offer.`,
   fmr: (stateName: string, year: number) =>
-    `HUD Fair Market Rent is the FY${year} housing-program benchmark for the county or metro that contains each city. It is a starting rent for a 2-bedroom or 3-bedroom unit, not a comp for a specific property. Replace it with current leases for the address. When you enter a supported ${stateName} address, TrueCap starts from the HUD figure and labels it HUD FMR so you can see what you changed.`,
+    `${fmrLabel(year)} is set for the county or metro area that contains each city. ${FMR_DEFINITION} Use it as a starting rent for a 2-bedroom or 3-bedroom unit, then replace it with current leases for the address. When you enter a supported ${stateName} address, TrueCap starts from the HUD figure and labels it HUD FMR so you can see what you changed.`,
   verify: [
     {
       title: "Property tax bill",
-      body: "Pull the current bill for the parcel from the county assessor or treasurer, then check how the assessment resets after a sale. A statewide rate is a starting point, not the bill you will pay.",
+      body: "Pull the current bill for the parcel from the county assessor or treasurer, then check how the assessment resets after a sale. The statewide Census median describes owner-occupied homes, not the bill you will pay.",
     },
     {
       title: "Rental licensing and permits",
@@ -168,7 +245,7 @@ export const STATE_PAGE_GUIDANCE = {
     },
   ],
   run: (stateName: string) =>
-    `Enter an address and asking price. TrueCap shows cash flow, DSCR, cap rate, and the Offer Ceiling — the highest price that still meets your targets — with every assumption labeled and editable. Enter ${stateName} property tax and insurance from local evidence, not a statewide average.`,
+    `Enter an address and asking price. TrueCap shows cash flow, DSCR, cap rate, and the Offer Ceiling — the highest price that still meets your targets — with every assumption labeled and editable. Enter ${stateName} property tax and insurance from local evidence, not a statewide figure.`,
 } as const;
 
 /** Whitespace-separated word count of plain text. */
@@ -179,54 +256,37 @@ export function countWords(text: string): number {
     .filter((word) => /[A-Za-z0-9]/.test(word)).length;
 }
 
-/** Row copy for one HUD city as the state page renders it. */
-export function describeStateHudCity(city: StateHudCity): string {
-  return `${city.name}: HUD Fair Market Rent FY${city.hud.year}, 2-bedroom $${city.hud.rent2br.toLocaleString("en-US")}, 3-bedroom $${city.hud.rent3br.toLocaleString("en-US")}.`;
-}
-
 /**
  * Conservative estimate of the visible words a state page renders from real
- * content: pitch, the three facts, the HUD city rows, and the fixed guidance.
- * Headings, breadcrumbs, the CTA, and the footer are not counted.
+ * content: the data summary, the facts, the HUD city rows, the FAQ and the
+ * fixed guidance. Headings, breadcrumbs, the CTA and the footer are not counted.
  */
 export function estimateStatePageWords(slug: string): number {
   const state = getStateBySlug(slug);
-  if (!state) return 0;
+  const facts = stateFactsFor(slug);
+  if (!state || !facts) return 0;
   const year = getStateDataYear(slug);
   const cities = getStateHudCities(state.name);
   const text = [
-    state.pitch,
+    buildStateSummary(state.name, facts),
     STATE_PAGE_GUIDANCE.intro(state.name),
-    ...buildStateFacts(state).flatMap((fact) => [
-      fact.label,
-      fact.value,
-      fact.note,
-    ]),
+    ...buildStateFacts(facts).flatMap((fact) => [fact.label, fact.value, fact.note]),
     STATE_PAGE_GUIDANCE.fmr(state.name, year),
     ...cities.map(describeStateHudCity),
+    ...buildStateFaq(state.name, facts, cities, year).flatMap((item) => [item.question, item.answer]),
     ...STATE_PAGE_GUIDANCE.verify.flatMap((item) => [item.title, item.body]),
     STATE_PAGE_GUIDANCE.run(state.name),
   ].join(" ");
   return countWords(text);
 }
 
-function hasStateFacts(state: StateData): boolean {
-  return (
-    state.pitch.trim().length > 0 &&
-    state.tier in TIER_NOTE &&
-    state.landlord in LANDLORD_VALUE &&
-    Number.isFinite(state.propertyTaxRatePct) &&
-    state.propertyTaxRatePct > 0
-  );
-}
-
 /**
  * True only when the state page can render STATE_PAGE_MIN_WORDS of real
- * content from its own fields plus at least one market city with HUD rent.
+ * content from its sourced facts plus at least one market city with HUD rent.
  */
 export function isStateIndexable(slug: string): boolean {
   const state = getStateBySlug(slug);
-  if (!state || !hasStateFacts(state)) return false;
+  if (!state || stateFactsFor(slug) === null) return false;
   if (getStateHudCities(state.name).length === 0) return false;
   return estimateStatePageWords(slug) >= STATE_PAGE_MIN_WORDS;
 }

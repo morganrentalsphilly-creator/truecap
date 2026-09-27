@@ -181,7 +181,6 @@ final_source_code/
 │   ├── supabase/{admin,server,client,middleware}.ts
 │   ├── stripe/{client,subscription-sync}.ts
 │   ├── email/render-weekly.ts
-│   ├── property-enrichment/state-property-tax.ts
 │   ├── analytics/track-conversion.ts
 │   ├── stats/deals-analyzed-count.ts
 │   ├── calc-analysis.ts          # ★ rental math

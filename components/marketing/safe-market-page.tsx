@@ -1,22 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, MapPin } from "lucide-react";
-import { BLOG_POSTS } from "@/lib/blog-posts";
+import { Header } from "@/components/investcalc/header";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
+import { DataFaq } from "@/components/marketing/data-faq";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { getGlossaryEntryBySlug } from "@/lib/glossary";
+import {
+  FMR_DEFINITION_CLAUSE,
+  HUD_FMR_OVERVIEW_URL,
+  fmrLabel,
+  formatIsoDate,
+  usd,
+} from "@/lib/markets/data-copy";
 import type { HudRent } from "@/lib/markets/hud-rents";
 import {
   NOINDEX_FOLLOW,
   buildDataAsOfLine,
-  getMarketDataYear,
-  getMarketHudRent,
   isMarketIndexable,
 } from "@/lib/markets/indexability";
-import type { CitySafmr } from "@/lib/markets/safmr-rents";
+import {
+  buildMarketPageData,
+  type MarketPageData,
+} from "@/lib/markets/market-page-data";
+import { MARKET_DATA_ATTRIBUTE } from "@/lib/markets/thin";
+import type { MarketFacts } from "@/lib/seo/market-facts";
+import { lastmodFor } from "@/lib/seo/lastmod";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
@@ -31,30 +46,42 @@ export type SafeMarketPageIdentity = {
   analyzerAddress?: string;
 };
 
+/** Meta keywords for a market page: data framing, no verdict queries. */
+export function marketKeywords(city: string): string[] {
+  const c = city.toLowerCase();
+  return [
+    `${c} rental market data`,
+    `${c} fair market rent`,
+    `${c} hud fmr`,
+    `${c} rent by zip code`,
+    `${c} rental property analysis`,
+  ];
+}
+
 export function buildSafeMarketMetadata({
   city,
   stateCode,
   slug,
 }: SafeMarketPageIdentity): Metadata {
-  const title = `${city} rental property analysis`;
-  const description = `Start a ${city}, ${stateCode} rental-property screen with editable assumptions. Verify asking price, rent, property tax, insurance, financing, and local rules before you offer.`;
+  const data = buildMarketPageData({ slug, city, stateCode });
   return {
-    title,
-    description,
+    title: data.title,
+    description: data.description,
+    keywords: marketKeywords(city),
     alternates: { canonical: `/markets/${slug}` },
     // A city page without HUD rent is a template, not a page worth ranking.
     robots: isMarketIndexable(slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
-      title,
-      description,
+      title: data.title,
+      description: data.description,
       url: `/markets/${slug}`,
-      type: "website",
+      type: "article",
       images: [
         {
           url: "/home.jpg",
           width: 1200,
           height: 630,
-          alt: `TrueCap ${city} rental analysis`,
+          alt: data.title,
         },
       ],
     },
@@ -62,15 +89,13 @@ export function buildSafeMarketMetadata({
   };
 }
 
-const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
-
 /* ------------------------------------------------------------------------ */
 /* Shared market-page sections. Both city render paths (the programmatic     */
-/* app/markets/[city] template and the bespoke SafeMarketPage) use these so  */
-/* the markup cannot drift between them.                                     */
+/* app/markets/[city] template and the bespoke SafeMarketPage) use these and */
+/* one data builder (lib/markets/market-page-data.ts), so they cannot drift. */
 /* ------------------------------------------------------------------------ */
 
-/** The one dating line. Replaces every former boundary paragraph. */
+/** The strategy pages' dating line. Market and state pages date themselves in their sources box. */
 export function MarketDataAsOf({ year }: { year: number }) {
   return (
     <p
@@ -82,64 +107,178 @@ export function MarketDataAsOf({ year }: { year: number }) {
   );
 }
 
-/** HUD Fair Market Rent by bedroom count, plus ZIP-level SAFMR rows when HUD publishes them. */
-export function MarketFmrSection({
+/** Home › Markets › State › City. The state crumb appears only when a state guide exists. */
+export function MarketBreadcrumb({
   city,
-  hud,
-  safmr,
+  stateName,
+  stateSlug,
 }: {
   city: string;
-  hud: HudRent;
-  safmr?: CitySafmr;
+  stateName: string;
+  stateSlug: string | null;
 }) {
+  return (
+    <nav aria-label="Breadcrumb" className="mb-6 text-xs">
+      <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
+        <li>
+          <Link href="/" className="hover:text-foreground">
+            Home
+          </Link>
+        </li>
+        <li aria-hidden="true">›</li>
+        <li>
+          <Link href="/markets" className="hover:text-foreground">
+            Markets
+          </Link>
+        </li>
+        <li aria-hidden="true">›</li>
+        {stateSlug ? (
+          <>
+            <li>
+              <Link href={`/states/${stateSlug}`} className="hover:text-foreground">
+                {stateName}
+              </Link>
+            </li>
+            <li aria-hidden="true">›</li>
+          </>
+        ) : null}
+        <li className="font-semibold text-foreground">{city}</li>
+      </ol>
+    </nav>
+  );
+}
+
+/** The sample deal run through the real engine with the HUD 3-bedroom FMR as rent. */
+function sampleFor(city: string, hud: HudRent) {
+  return calculateAnalysis({
+    ...SAMPLE_DEAL_FIXTURE.values,
+    address: `${city} sample`,
+    monthlyRent: hud.rent3br,
+  });
+}
+
+/** Eyebrow, H1 (the data title), byline, and the HUD lead with FMR's definition. */
+export function MarketHero({
+  city,
+  stateCode,
+  data,
+}: {
+  city: string;
+  stateCode: string;
+  data: MarketPageData;
+}) {
+  const { hud } = data;
+  const sample = hud ? sampleFor(city, hud) : null;
+  const cashFlow = sample ? Math.round(sample.netCashFlow) : null;
+  const detail =
+    hud && sample && cashFlow !== null
+      ? `At a stated ${usd(SAMPLE_DEAL_FIXTURE.values.purchasePrice)} price with the 3-bedroom FMR as rent, TrueCap's sample underwrite below comes to ${cashFlow < 0 ? "−" : "+"}${usd(Math.abs(cashFlow))}/mo cash flow, a ${sample.capRate.toFixed(1)}% cap rate, and a ${sample.dscr.toFixed(2)} DSCR. A specific ${city} property runs on its own price, rent, tax bill, and insurance.`
+      : `TrueCap has no HUD figure for ${city}. Bring the property's own rent, tax bill, and insurance evidence, then run the address with every assumption labeled and editable.`;
+  return (
+    <header>
+      <p className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
+        <MapPin className="size-3.5" /> {city}, {stateCode}
+      </p>
+      <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+        {data.h1}
+      </h1>
+      <BlogByline />
+      <p className="mt-5 text-lg leading-relaxed text-foreground">
+        {data.lead ? (
+          <>
+            <strong>{data.lead}</strong> {FMR_DEFINITION_CLAUSE} (
+            <a
+              href={HUD_FMR_OVERVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline"
+            >
+              HUD
+            </a>
+            ).{" "}
+          </>
+        ) : null}
+        {detail}
+      </p>
+    </header>
+  );
+}
+
+/** HUD Fair Market Rent by bedroom count (with the prior fiscal year), plus ZIP-level SAFMR rows when HUD publishes them. */
+export function MarketFmrSection({
+  city,
+  data,
+}: {
+  city: string;
+  data: MarketPageData;
+}) {
+  const { hud, area, safmr } = data;
+  if (!hud) return null;
+  const prior = area?.prior ?? null;
   const cell =
     "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
+  const rows = [
+    { label: "2 bedrooms", now: hud.rent2br, before: prior?.rent2br ?? null },
+    { label: "3 bedrooms", now: hud.rent3br, before: prior?.rent3br ?? null },
+  ];
   return (
     <section
       data-market-fmr=""
       className="mt-10 rounded-2xl border border-border bg-card p-6"
     >
       <h2 className="text-2xl font-extrabold text-foreground">
-        {city} rent benchmark
+        {city} {fmrLabel(hud.year)}
       </h2>
       <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-        HUD Fair Market Rent, FY{hud.year}, for the county or metro that
-        contains {city}. It is a housing-program benchmark, not a comp for one
-        property. Use it as your starting rent, then replace it with current
-        leases for the address.
+        {fmrLabel(hud.year)} for {data.areaPhrase}. Use it as your starting
+        rent, then replace it with current leases for the address.
+        {area ? (
+          <>
+            {" "}
+            <a
+              href={area.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline"
+            >
+              HUD&apos;s FY{area.year} page for this area
+            </a>{" "}
+            shows every bedroom size.
+          </>
+        ) : null}
       </p>
       <ScrollX label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[18rem] text-sm">
           <caption className="sr-only">
-            HUD Fair Market Rent, FY{hud.year}, by bedroom count for {city}
+            {fmrLabel(hud.year)} by bedroom count, {area ? area.areaName : city}
           </caption>
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left">
               <th scope="col" className={cell}>
                 Bedrooms
               </th>
+              {prior ? (
+                <th scope="col" className={`${cell} text-right`}>
+                  FY{prior.year} / month
+                </th>
+              ) : null}
               <th scope="col" className={`${cell} text-right`}>
-                HUD FMR / month
+                FY{hud.year} / month
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-border">
-              <td className="px-4 py-2.5 font-semibold text-foreground">
-                2 bedrooms
-              </td>
-              <td className="px-4 py-2.5 text-right text-foreground">
-                {usd(hud.rent2br)}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2.5 font-semibold text-foreground">
-                3 bedrooms
-              </td>
-              <td className="px-4 py-2.5 text-right text-foreground">
-                {usd(hud.rent3br)}
-              </td>
-            </tr>
+            {rows.map((row) => (
+              <tr key={row.label} className="border-b border-border last:border-b-0">
+                <td className="px-4 py-2.5 font-semibold text-foreground">{row.label}</td>
+                {prior ? (
+                  <td className="px-4 py-2.5 text-right text-muted-foreground">
+                    {row.before === null ? "—" : usd(row.before)}
+                  </td>
+                ) : null}
+                <td className="px-4 py-2.5 text-right text-foreground">{usd(row.now)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </ScrollX>
@@ -147,17 +286,31 @@ export function MarketFmrSection({
       {safmr ? (
         <div className="mt-6">
           <h3 className="text-lg font-extrabold text-foreground">
-            By ZIP code: HUD Small Area Fair Market Rent, FY{safmr.year}
+            By ZIP code: HUD Small Area Fair Market Rent (FY{safmr.year})
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            HUD also publishes ZIP-level rents for the {safmr.areaName}, the
-            region that includes {city}. Rent varies by ZIP and bedroom count.
+            HUD also publishes ZIP-level Fair Market Rents for the{" "}
+            {safmr.areaName}, the region that includes {city}. They vary by
+            ZIP and bedroom count.
+            {area?.safmrSourceUrl ? (
+              <>
+                {" "}
+                <a
+                  href={area.safmrSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  HUD&apos;s ZIP table
+                </a>{" "}
+                lists every ZIP.
+              </>
+            ) : null}
           </p>
           <ScrollX label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[24rem] text-sm">
               <caption className="sr-only">
-                HUD Small Area Fair Market Rent by ZIP code, {safmr.areaName},
-                FY{safmr.year}
+                HUD Small Area Fair Market Rent (FY{safmr.year}) by ZIP code, {safmr.areaName}
               </caption>
               <thead>
                 <tr className="border-b border-border bg-muted/50 text-left">
@@ -195,7 +348,7 @@ export function MarketFmrSection({
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
             {safmr.rows.length < safmr.zipCount
               ? `${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, sampled highest to lowest.`
-              : `All ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, highest rent first.`}
+              : `All ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, highest first.`}
           </p>
         </div>
       ) : null}
@@ -205,7 +358,7 @@ export function MarketFmrSection({
 
 /**
  * A worked sample: the shared sample deal (lib/sample-deal.ts) run through
- * the real engine with the city's HUD 3-bedroom rent in place of the
+ * the real engine with the city's HUD 3-bedroom FMR in place of the
  * fixture's rent. Same price, same financing, same expense assumptions —
  * only the rent changes, so cities compare on one axis.
  */
@@ -245,11 +398,11 @@ export function MarketSampleUnderwrite({
   return (
     <section data-market-sample-underwrite="" className="mt-10">
       <h2 className="text-2xl font-extrabold text-foreground">
-        What the HUD rent pencils to
+        What the HUD FMR pencils to
       </h2>
       <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-        Sample underwrite at a stated {usd(price)} price using the HUD
-        3-bedroom benchmark — not a listing. TrueCap ran its sample deal with{" "}
+        Sample underwrite at a stated {usd(price)} price with the HUD
+        3-bedroom FMR as rent — not a listing. TrueCap ran its sample deal with{" "}
         {usd(hud.rent3br)}/mo of rent and every other assumption unchanged.
       </p>
       <dl className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -273,6 +426,78 @@ export function MarketSampleUnderwrite({
         analyzer and the numbers move with you.
       </p>
     </section>
+  );
+}
+
+/**
+ * Sourced local facts from content/seo/market-facts.json (county effective
+ * tax rate, rental licensing). Renders nothing until the slug has one.
+ */
+export function MarketLocalData({
+  city,
+  facts,
+}: {
+  city: string;
+  facts: MarketFacts | null;
+}) {
+  const tax = facts?.countyEffectiveTaxRate ?? null;
+  const licensing = facts?.rentalLicensing ?? null;
+  if (!tax && !licensing) return null;
+  const source = (s: { url: string; title: string; publisher: string; retrievedAt: string }) => (
+    <dd className="mt-1 text-xs leading-relaxed text-muted-foreground">
+      Source:{" "}
+      <a
+        href={s.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline decoration-dotted underline-offset-2 hover:text-foreground"
+      >
+        {s.title}
+      </a>{" "}
+      ({s.publisher}), retrieved {formatIsoDate(s.retrievedAt)}
+    </dd>
+  );
+  return (
+    <section data-market-local-data="" className="mt-10 rounded-2xl border border-border bg-card p-6">
+      <h2 className="text-2xl font-extrabold text-foreground">Local data for {city}</h2>
+      <dl className="mt-4 space-y-4">
+        {tax ? (
+          <div>
+            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              {tax.county} effective property tax rate
+            </dt>
+            <dd className="mt-1 text-lg font-extrabold text-foreground">
+              {tax.value}% (tax year {tax.year})
+            </dd>
+            {source(tax.source)}
+          </div>
+        ) : null}
+        {licensing ? (
+          <div>
+            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              Rental licensing or registration
+            </dt>
+            <dd className="mt-1 text-base font-semibold text-foreground">
+              {licensing.required ? "Required." : "Not required."}{" "}
+              <span className="font-normal text-muted-foreground">{licensing.summary}</span>
+            </dd>
+            {source(licensing.source)}
+          </div>
+        ) : null}
+      </dl>
+    </section>
+  );
+}
+
+/** The page's sources box: the dating line, every cited source, the reviewer. */
+export function MarketSources({ data }: { data: MarketPageData }) {
+  return (
+    <SourceMethodologyBox
+      className="mt-10"
+      dataAsOf={data.dataAsOf}
+      sources={data.sources}
+      note="HUD figures come from HUD's published tables for the area. The sample underwrite runs TrueCap's sample deal through the analyzer's own math."
+    />
   );
 }
 
@@ -402,21 +627,19 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${slug}`;
   const address = identity.analyzerAddress ?? `${city}, ${stateCode}`;
-  const title = `${city} rental property analysis`;
-  const hud = getMarketHudRent(slug);
-  const year = getMarketDataYear(slug);
-  const description = hud
-    ? `${city}, ${stateCode} rental screen: HUD Fair Market Rent, FY${hud.year}, a sample underwrite, and what to verify before you offer.`
-    : `Start a ${city}, ${stateCode} rental-property screen with labeled, editable assumptions. TrueCap has no published rent benchmark for ${city}; verify rent, tax, and insurance locally.`;
+  const data = buildMarketPageData({ slug, city, stateCode });
   const webpageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "@id": `${canonicalUrl}#page`,
-    name: title,
-    description,
+    name: data.title,
+    description: data.description,
     url: canonicalUrl,
+    // The page's own last significant change (content/seo/lastmod.json); omitted when it has none.
+    dateModified: lastmodFor(`/markets/${slug}`),
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
+    author: { "@id": `${siteUrl}/#organization` },
     about: {
       "@type": "Place",
       name: `${city}, ${stateCode}`,
@@ -432,21 +655,23 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "TrueCap",
-        item: siteUrl,
-      },
+      { "@type": "ListItem", position: 1, name: "TrueCap", item: siteUrl },
       {
         "@type": "ListItem",
         position: 2,
         name: "Markets",
         item: `${siteUrl}/markets`,
       },
-      { "@type": "ListItem", position: 3, name: city, item: canonicalUrl },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: stateName,
+        item: `${siteUrl}/states/${stateSlug}`,
+      },
+      { "@type": "ListItem", position: 4, name: city, item: canonicalUrl },
     ],
   };
+  const mainData = { [MARKET_DATA_ATTRIBUTE]: data.status };
 
   return (
     <div className="min-h-screen bg-background">
@@ -458,43 +683,32 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="mb-2">
-          <Link
-            href="/markets"
-            className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
-          >
-            ← Rental markets
-          </Link>
-        </div>
+      <Header />
+      <main
+        id="main"
+        {...mainData}
+        className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12"
+      >
+        <MarketBreadcrumb city={city} stateName={stateName} stateSlug={stateSlug} />
+        <MarketHero city={city} stateCode={stateCode} data={data} />
 
-        <header className="mb-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary">
-            <MapPin className="size-3" />
-            {city}, {stateCode}
-          </div>
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
-            {city} rental property analysis
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            {hud
-              ? `Start with the HUD rent benchmark for ${city}, see what it pencils to on a sample deal, then run your own address with every assumption labeled and editable.`
-              : `Start a ${city} property screen with every assumption labeled and editable. TrueCap has no published rent benchmark for ${city}, so bring the property's own rent, tax, and insurance evidence.`}
-          </p>
-          <MarketDataAsOf year={year} />
-        </header>
-
-        {hud ? (
+        {data.hud ? (
           <>
-            <MarketFmrSection city={city} hud={hud} />
-            <MarketSampleUnderwrite city={city} hud={hud} />
+            <MarketFmrSection city={city} data={data} />
+            <MarketSampleUnderwrite city={city} hud={data.hud} />
           </>
         ) : null}
+
+        <MarketLocalData city={city} facts={data.facts} />
+
+        <DataFaq heading={`${city} rental data: common questions`} items={data.faq} />
+
+        <MarketSources data={data} />
 
         <MarketVerifyLocally city={city} />
 
         <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-          For the state&apos;s starting numbers, see the{" "}
+          For {stateName} data, see the{" "}
           <Link
             href={`/states/${stateSlug}`}
             className="font-semibold text-primary hover:underline"
@@ -515,7 +729,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
 
         <CityStrategyGuides citySlug={slug} cityName={city} />
 
-        {hud ? <MarketRelatedReading /> : null}
+        {data.hud ? <MarketRelatedReading /> : null}
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

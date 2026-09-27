@@ -44,8 +44,10 @@ describe("market indexability (docs/site-overhaul.md Phase 8.1)", () => {
       .map((city) => city.slug)
       .filter((slug) => Object.prototype.hasOwnProperty.call(HUD_RENTS, slug));
     expect(getIndexableMarketSlugs()).toEqual(expected);
-    expect(getIndexableMarketSlugs().length).toBeGreaterThanOrEqual(150);
-    for (const city of MARKET_CITIES) {
+    // 150 programmatic cities + the 12 bespoke metros, which gained HUD FY rows
+    // from HUD's FMR documentation pages in F8 (2026-09-27).
+    expect(getIndexableMarketSlugs()).toHaveLength(162);
+    for (const city of [...MARKET_CITIES, ...BESPOKE_MARKETS]) {
       expect(isMarketIndexable(city.slug), city.slug).toBe(true);
     }
     expect(isMarketIndexable("not-a-market")).toBe(false);
@@ -110,8 +112,8 @@ describe("market indexability (docs/site-overhaul.md Phase 8.1)", () => {
   });
 });
 
-describe("state indexability (docs/site-overhaul.md Phase 8.2)", () => {
-  it("requires the four state fields plus at least one HUD city", () => {
+describe("state indexability (docs/site-overhaul.md Phase 8.2, F8 sourced facts)", () => {
+  it("requires sourced state facts plus at least one HUD city, and keeps all 33 states indexable on them", () => {
     expect(isStateIndexable("not-a-state")).toBe(false);
     for (const state of Object.values(STATES)) {
       if (isStateIndexable(state.slug)) {
@@ -126,6 +128,9 @@ describe("state indexability (docs/site-overhaul.md Phase 8.2)", () => {
         .map((state) => state.slug)
         .filter(isStateIndexable),
     );
+    // No state dropped out when the unsourced pitch, tier, landlord lean and
+    // tax rate left the page (F8): the sourced facts and FAQ carry them.
+    expect(getIndexableStateSlugs()).toHaveLength(33);
   });
 
   it.each(Object.values(STATES).map((state) => state.slug))(
@@ -148,7 +153,9 @@ describe("state indexability (docs/site-overhaul.md Phase 8.2)", () => {
         expect(metadata.robots).toEqual(NOINDEX_FOLLOW);
       }
       expect(metadata.alternates?.canonical).toBe(`/states/${slug}`);
-      expect(html.match(/Data as of \d{4}; verify locally before you offer\./g)).toHaveLength(1);
+      // One dating line, naming the HUD vintage and its retrieval (F8).
+      expect(html.match(/Data as of HUD FY\d{4} \(retrieved [A-Z][a-z]+ \d{1,2}, \d{4}/g)).toHaveLength(1);
+      expect(html).not.toMatch(/Data as of \d{4}; verify locally/);
       for (const city of getStateHudCities(STATES[slug].name)) {
         expect(html).toContain(`href="/markets/${city.slug}"`);
       }

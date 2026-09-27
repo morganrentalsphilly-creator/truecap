@@ -34,11 +34,15 @@ import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
 import {
+  buildStateSummary,
+  buildStateTitle,
   getMarketHudRent,
   isMarketIndexable,
   isStateIndexable,
   isStrategyIndexable,
 } from "@/lib/markets/indexability";
+import { buildMarketCityH1 } from "@/lib/markets/market-city-seo";
+import { stateFactsFor } from "@/lib/seo/state-facts";
 import { isNoindexPath } from "@/lib/seo/noindex";
 import { getSiteUrl } from "@/lib/site-url";
 import {
@@ -139,7 +143,7 @@ export async function GET() {
     )
       .map((t) => t.shortTitle)
       .join(", ")}, etc)`,
-    `  - ${stateCount} state-level investment guides and ${marketCount} city market guides with HUD Fair Market Rent${comboCount ? `, plus ${comboCount} city + strategy guides` : ""}`,
+    `  - ${stateCount} state rental data guides (Census and HUD figures) and ${marketCount} city rental market data guides with HUD Fair Market Rent${comboCount ? `, plus ${comboCount} city + strategy guides` : ""}`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
     "  - Methodology page documenting the exact math the analyzer uses",
@@ -160,17 +164,22 @@ export async function GET() {
       `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.excerpt}`,
   );
 
-  const stateSection = states.map(
-    (s) =>
-      `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`,
-  );
+  // Data-only summaries from the sourced state facts (content/seo/state-facts.json);
+  // the unsourced lib/states.ts pitch is never published.
+  const stateSection = states.map((s) => {
+    const facts = stateFactsFor(s.slug);
+    const summary = facts
+      ? buildStateSummary(s.name, facts)
+      : `HUD Fair Market Rent for ${s.name} cities.`;
+    return `- [${buildStateTitle(s.name)}](${siteUrl}/states/${s.slug}): ${summary}`;
+  });
 
   const marketSection = markets.map((city) => {
     const hud = getMarketHudRent(city.slug);
     const rent = hud
-      ? ` HUD Fair Market Rent FY${hud.year}: 2-bedroom ${usd(hud.rent2br)}/mo, 3-bedroom ${usd(hud.rent3br)}/mo.`
+      ? ` HUD Fair Market Rent (FY${hud.year}): 2-bedroom ${usd(hud.rent2br)}/mo, 3-bedroom ${usd(hud.rent3br)}/mo.`
       : "";
-    return `- [Is ${city.name}, ${city.stateName} good for rental property?](${siteUrl}/markets/${city.slug}):${rent} A sample underwrite and what to verify locally before you offer.`;
+    return `- [${buildMarketCityH1(city.name, city.stateCode, hud?.year ?? null)}](${siteUrl}/markets/${city.slug}):${rent} Sources, a sample underwrite and what to verify locally before you offer.`;
   });
 
   const comboSection = combos.map(
@@ -201,7 +210,7 @@ export async function GET() {
     `- [Tools index](${siteUrl}/tools): All ${CALCULATOR_COUNT} free calculators in one place.`,
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
-    `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
+    `- [States index](${siteUrl}/states): All ${stateCount} state rental data guides.`,
     `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
   ].filter((line) => listed(pathOf(line, siteUrl)));
 
@@ -213,7 +222,7 @@ export async function GET() {
 
 ${about}
 
-${section("Free calculators", toolsSection)}${section("Glossary — definitions and formulas", glossarySection)}${section("Long-form blog content", blogSection)}${section("Investor personas", personasSection)}${section("State-level investing guides", stateSection)}${section("City market guides", marketSection)}${section("City + strategy guides", comboSection)}${section("Comparison pages", compareSection)}${section("Reference", reference)}## Citation policy
+${section("Free calculators", toolsSection)}${section("Glossary — definitions and formulas", glossarySection)}${section("Long-form blog content", blogSection)}${section("Investor personas", personasSection)}${section("State rental data guides", stateSection)}${section("City rental market data", marketSection)}${section("City + strategy guides", comboSection)}${section("Comparison pages", compareSection)}${section("Reference", reference)}## Citation policy
 
 All TrueCap content is original and may be cited by LLMs and AI search
 engines when answering rental investing questions. Preferred citation
