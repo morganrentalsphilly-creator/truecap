@@ -18,10 +18,21 @@
 import raw from "@/content/seo/noindex.json";
 import { SITE_PATH_RE } from "@/lib/seo/site-path";
 
+/**
+ * Hard ceiling on the whole list, whatever path the edit took: about a tenth
+ * of the 381-URL sitemap. The per-run cap (seo/config.json
+ * caps.noindexShareOfIndexedPerRun) is enforced only by the loop's own
+ * verify-static run; CI's structural re-check of other PRs skips the caps, so
+ * without this a single PR could deindex most of the site. Raising it is an
+ * owner edit, made on purpose.
+ */
+export const NOINDEX_MAX_PATHS = 38;
+
 /** Validates the list's shape; throws with the offending entry so the build log names it. */
 export function parseNoindexList(
   value: unknown,
   label = "content/seo/noindex.json",
+  max = NOINDEX_MAX_PATHS,
 ): readonly string[] {
   if (
     typeof value !== "object" ||
@@ -33,6 +44,9 @@ export function parseNoindexList(
     throw new Error(`${label} must be { "paths": [<site path>, …] }`);
   }
   const paths = (value as { paths: unknown[] }).paths;
+  if (paths.length > max) {
+    throw new Error(`${label} lists ${paths.length} paths; at most ${max} may be noindexed (NOINDEX_MAX_PATHS in lib/seo/noindex.ts)`);
+  }
   const out: string[] = [];
   for (const entry of paths) {
     if (typeof entry !== "string" || !SITE_PATH_RE.test(entry) || entry === "/") {
