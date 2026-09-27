@@ -14,6 +14,7 @@ import {
 } from "@/lib/markets/indexability";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { isNoindexPath } from "@/lib/seo/noindex";
+import { researchSitemapPaths } from "@/lib/seo/research";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -151,6 +152,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const comparisonUrls = COMPARISON_PATHS.map((path) =>
     sitemapEntry(siteUrl, path),
   );
+  // Research pages (content/seo/research.json): published ones only.
+  const researchUrls = researchSitemapPaths().map((path) =>
+    sitemapEntry(siteUrl, path),
+  );
 
   const entries = [
     ...CORE_PATHS.map((path) => sitemapEntry(siteUrl, path)),
@@ -164,6 +169,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...topicUrls,
     ...blogUrls,
     ...comparisonUrls,
+    ...researchUrls,
     ...(guaranteeEnabled ? [sitemapEntry(siteUrl, "/guarantee")] : []),
     ...(isAgentProConfigured() ? [sitemapEntry(siteUrl, "/for-agents")] : []),
   ];
