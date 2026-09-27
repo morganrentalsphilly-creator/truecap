@@ -1,0 +1,1390 @@
+{
+  "states": {
+    "alabama": {
+      "medianHomeValue": {
+        "value": 233300,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US01",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 890,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US01",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2059528,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US01",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 598257,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US01",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "arizona": {
+      "medianHomeValue": {
+        "value": 426000,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US04",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1828,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US04",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2982475,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US04",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 961653,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US04",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "california": {
+      "medianHomeValue": {
+        "value": 759500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US06",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 5369,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US06",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 13797638,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US06",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 6095762,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US06",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "colorado": {
+      "medianHomeValue": {
+        "value": 574600,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US08",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2828,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US08",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2479892,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US08",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 844547,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US08",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "connecticut": {
+      "medianHomeValue": {
+        "value": 396900,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US09",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 6573,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US09",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1455235,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US09",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 484999,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US09",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "florida": {
+      "medianHomeValue": {
+        "value": 396900,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US12",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2993,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US12",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 9141675,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US12",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 2921559,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US12",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "georgia": {
+      "medianHomeValue": {
+        "value": 343300,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US13",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2554,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US13",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 4220732,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US13",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1422323,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US13",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "idaho": {
+      "medianHomeValue": {
+        "value": 446400,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US16",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1912,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US16",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 751181,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US16",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 212713,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US16",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "illinois": {
+      "medianHomeValue": {
+        "value": 280700,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US17",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 5399,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US17",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 5105448,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US17",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1655487,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US17",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "indiana": {
+      "medianHomeValue": {
+        "value": 243500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US18",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1798,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US18",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2775637,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US18",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 812741,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US18",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "iowa": {
+      "medianHomeValue": {
+        "value": 227300,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US19",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2937,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US19",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1343422,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US19",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 385209,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US19",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "kansas": {
+      "medianHomeValue": {
+        "value": 238700,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US20",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2983,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US20",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1204374,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US20",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 384119,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US20",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "kentucky": {
+      "medianHomeValue": {
+        "value": 226000,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US21",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1611,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US21",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1865456,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US21",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 594712,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US21",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "maryland": {
+      "medianHomeValue": {
+        "value": 436300,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US24",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 4144,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US24",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2401394,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US24",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 773227,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US24",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "massachusetts": {
+      "medianHomeValue": {
+        "value": 607400,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US25",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 6080,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US25",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2829804,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US25",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1064480,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US25",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "michigan": {
+      "medianHomeValue": {
+        "value": 254200,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US26",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2988,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US26",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 4131281,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US26",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1096483,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US26",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "minnesota": {
+      "medianHomeValue": {
+        "value": 344600,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US27",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 3501,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US27",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2363442,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US27",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 671007,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US27",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "missouri": {
+      "medianHomeValue": {
+        "value": 254400,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US29",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2021,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US29",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2563244,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US29",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 805811,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US29",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "nevada": {
+      "medianHomeValue": {
+        "value": 455500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US32",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2143,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US32",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1238925,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US32",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 494081,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US32",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "new-jersey": {
+      "medianHomeValue": {
+        "value": 496000,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US34",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 9358,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US34",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 3543944,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US34",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1279124,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US34",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "new-york": {
+      "medianHomeValue": {
+        "value": 449800,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US36",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 6542,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US36",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 7828074,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US36",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 3575503,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US36",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "north-carolina": {
+      "medianHomeValue": {
+        "value": 333000,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US37",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2044,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US37",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 4496359,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US37",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1491646,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US37",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "ohio": {
+      "medianHomeValue": {
+        "value": 239800,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US39",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2937,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US39",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 4929322,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US39",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1577508,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US39",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "oklahoma": {
+      "medianHomeValue": {
+        "value": 222100,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US40",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1672,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US40",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1603748,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US40",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 550566,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US40",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "oregon": {
+      "medianHomeValue": {
+        "value": 497500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US41",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 3895,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US41",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1744270,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US41",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 643365,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US41",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "pennsylvania": {
+      "medianHomeValue": {
+        "value": 277600,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US42",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 3214,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US42",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 5361724,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US42",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1647768,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US42",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "south-carolina": {
+      "medianHomeValue": {
+        "value": 299500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US45",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1337,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US45",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2222890,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US45",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 615532,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US45",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "tennessee": {
+      "medianHomeValue": {
+        "value": 332600,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US47",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 1488,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US47",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2928765,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US47",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 971761,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US47",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "texas": {
+      "medianHomeValue": {
+        "value": 313200,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US48",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 4108,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US48",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 11449769,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US48",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 4314892,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US48",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "utah": {
+      "medianHomeValue": {
+        "value": 545200,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US49",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2648,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US49",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 1184428,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US49",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 360409,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US49",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "virginia": {
+      "medianHomeValue": {
+        "value": 403500,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US51",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 2872,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US51",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 3449307,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US51",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1134049,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US51",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "washington": {
+      "medianHomeValue": {
+        "value": 602200,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US53",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 4729,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US53",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 3168080,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US53",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 1175739,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US53",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    },
+    "wisconsin": {
+      "medianHomeValue": {
+        "value": 294700,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25077?g=040XX00US55",
+          "title": "Median Value (Dollars), table B25077, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "medianRealEstateTaxesPaid": {
+        "value": 3680,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US55",
+          "title": "Mortgage Status by Median Real Estate Taxes Paid (Dollars), table B25103, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "occupiedHousingUnits": {
+        "value": 2535198,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US55",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      },
+      "renterOccupiedUnits": {
+        "value": 811672,
+        "year": 2024,
+        "source": {
+          "url": "https://data.census.gov/table/ACSDT1Y2024.B25003?g=040XX00US55",
+          "title": "Tenure, table B25003, American Community Survey 2024 1-year estimates",
+          "publisher": "U.S. Census Bureau",
+          "retrievedAt": "2026-09-27"
+        }
+      }
+    }
+  }
+}
