@@ -597,7 +597,7 @@ jobs:
                                    # file, which is the safe direction.
             for f in ${LIVE[@]+"${LIVE[@]}"}; do
               case "$f" in
-                app/blog/*|lib/blog-topics.ts)
+                app/blog/*|lib/blog-topics.ts|lib/blog-posts.ts)
                   # Explicitly named so the coverage check in the integrity
                   # manifest has something to match on.
                   case "$f" in
