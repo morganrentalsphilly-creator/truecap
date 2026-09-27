@@ -1246,6 +1246,11 @@ export function postModifiedWiring(slug: string): string {
 
 const ISO_DATE_LITERAL_RE = /^"\d{4}-\d{2}-\d{2}"$/;
 
+/** dateSlots for a file's source text (lib/__tests__/lastmod-contract.test.ts scans every template with it). */
+export function dateSlotsOf(file: string, source: string): DateSlot[] {
+  return dateSlots(parseTs(file, source), file);
+}
+
 /** newPostDateViolations for a file's source text (lib/__tests__/lastmod-contract.test.ts holds every post to it). */
 export function postDateWiringViolations(file: string, source: string): string[] {
   return newPostDateViolations(parseTs(file, source), file);
