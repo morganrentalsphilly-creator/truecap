@@ -8,8 +8,10 @@
  * attributes, JSON-LD object values and FAQ arrays. It leaves out:
  *
  *   · className/style (attributes, properties, cn()/clsx()/cva() arguments,
- *     and consts named like `cardClass` / `STYLES`) and other presentation
- *     attributes (key, id, role, target, rel, sizes, width, height, data-*, on*);
+ *     and consts named like `cardClass` / `STYLES`) and other presentation or
+ *     configuration attributes (key, id, role, kind, variant, size, target,
+ *     rel, sizes, width, height, data-*, on*): they choose how a component
+ *     renders, not what the page says (a text prop like heading= still counts);
  *   · import/export-from lines, type declarations and type annotations,
  *     directives ("use client") and route segment config (revalidate, dynamic…);
  *   · whitespace (all of it, so a Prettier reflow is not a change);
@@ -77,6 +79,10 @@ const PRESENTATION_ATTRS: ReadonlySet<string> = new Set([
   "id",
   "role",
   "tabIndex",
+  // A component's configuration, not its words: `<RelatedContent kind="blog" …>`
+  // renders links from lib/related-content.ts, so adding or moving the widget
+  // is markup (counting it dated two otherwise unchanged posts to 6b4ddb2).
+  "kind",
   "variant",
   "size",
   "tone",
@@ -211,7 +217,9 @@ function hasExport(node: ts.Node): boolean {
 function tokensOf(root: ts.Node, inMetadataRoot: boolean): string[] {
   const out: string[] = [];
   const push = (text: string): void => {
-    const flat = text.replace(LONG_DATE_RE, "").replace(ISO_DATE_RE, "").replace(/\s+/g, " ").trim();
+    // Collapse whitespace BEFORE stripping dates: a reflow that splits
+    // "January\n 19, 2025" across lines is whitespace, not content.
+    const flat = text.replace(/\s+/g, " ").replace(LONG_DATE_RE, "").replace(ISO_DATE_RE, "").replace(/\s+/g, " ").trim();
     if (flat) out.push(flat);
   };
   const visit = (node: ts.Node, inMetadata: boolean): void => {

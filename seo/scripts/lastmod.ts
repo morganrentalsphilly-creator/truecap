@@ -482,6 +482,15 @@ function selfTest(): void {
   check(!significant(base, page(`<p className="text-sm">\n        Cap rate is NOI\n        divided by price.\n      </p>`)), "a whitespace reflow is not significant");
   check(significant(base, page(`<p className="text-sm">Cap rate is NOI divided by price.</p><Link href="/glossary/noi">NOI</Link>`)), "a new link is significant");
   check(!significant(base, page(`<p className={cn("text-sm", "px-2")}>Cap rate is NOI divided by price.</p>`)), "class helpers are not content");
+  check(
+    !significant(base, page(`<p className="text-sm">Cap rate is NOI divided by price.</p><RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />`)),
+    "mounting a widget with configuration props only (RelatedContent kind) is not content",
+  );
+  check(significant(base, page(`<p className="text-sm">Cap rate is NOI divided by price.</p><RelatedContent kind="blog" slug={SLUG} heading="Read next" />`)), "a widget's visible text prop is content");
+  check(
+    !significant(page(`<p>Restored for property placed in service after January 19, 2025. That is new.</p>`), page(`<p>Restored for property placed in service after January\n        19, 2025. That is new.</p>`)),
+    "a reflow that splits a written date across lines is whitespace",
+  );
   const card = (label: string): string => page(`<p>{post.modifiedAt ? "${label}" : ""}{new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short" })}</p>`);
   check(!significant(card("Updated "), card("Revised ")), "text that only labels a date is not significant");
   const footer = (text: string): string => page(`<footer>${text}</footer>`);
