@@ -1,7 +1,9 @@
 name: SEO deployed
 
 # After Vercel reports a successful PRODUCTION deployment, check the pages a
-# merged SEO-loop PR changed and ping IndexNow for them.
+# merged SEO-loop PR changed and ping IndexNow for them — and, for every
+# deploy, ping IndexNow for the pages whose content/seo/lastmod.json or
+# noindex.json entry moved since the previous Production deploy.
 #
 # Why deployment_status and not push: loop PRs are auto-merged by
 # GITHUB_TOKEN, and events GITHUB_TOKEN causes start no workflows — so a
@@ -29,6 +31,9 @@ jobs:
       contents: read
       pull-requests: read
       issues: write
+      # post-deploy.ts finds the previous successful Production deployment, so
+      # it pings IndexNow for every page whose lastmod/noindex entry moved since.
+      deployments: read
     concurrency:
       group: seo-deployed
       cancel-in-progress: false
