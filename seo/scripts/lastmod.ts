@@ -134,6 +134,12 @@ const CORE_SOURCES: Record<string, SourceSpec[]> = {
     { file: "app/blog/page.tsx", kind: "file" },
     { file: "lib/blog-posts.ts", kind: "file" },
   ],
+  // "Who builds this" renders AUTHOR_BIO (F1): a bio edit changes /about's main
+  // content. On posts and /vs pages the same bio is boilerplate and moves no date.
+  "/about": [
+    { file: "app/about/page.tsx", kind: "file" },
+    { file: "lib/author.ts", kind: "decls", names: ["AUTHOR_BIO"] },
+  ],
 };
 
 /** Fields app/glossary/[slug]/page.tsx renders (toolUrl/postUrl/also are not rendered). */
@@ -568,6 +574,8 @@ async function selfTest(): Promise<void> {
   check(sourcesFor("/glossary/cap-rate", none)?.[0].kind === "entry", "glossary terms are data entries");
   check(sourcesFor("/markets/erie", none)?.length === 3, "a market is its city, HUD and SAFMR entries");
   check(sourcesFor("/blog", none)?.some((s) => s.file === "lib/blog-posts.ts") === true, "/blog includes its registry");
+  check(sourcesFor("/about", none)?.some((s) => s.file === "lib/author.ts") === true, "/about includes the author bio it renders");
+  check(sourcesFor("/blog/x", (f) => f === "app/blog/x/page.tsx")?.length === 1, "a post is its own page.tsx: the bio it ends with is boilerplate");
   // `bump` must move what a re-seed would: a loop-editable source of a core page makes verify-static declare that page.
   const agentAllow = loadConfig().paths.agentAllow;
   for (const [url, specs] of Object.entries(CORE_SOURCES)) {

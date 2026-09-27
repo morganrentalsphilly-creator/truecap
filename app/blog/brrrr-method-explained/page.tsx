@@ -92,7 +92,6 @@ export default function BrrrrMethodPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     url: canonicalUrl,
-    // Author points at the /about Person entity (E-E-A-T anchor @id).
     author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
@@ -580,8 +579,8 @@ export default function BrrrrMethodPost() {
         </div>
         </article>
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} />
       </main>
-      <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <NewsletterSignup variant="expanded" source="blog" />
       </div>

@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
@@ -170,6 +171,7 @@ export default function OnePercentRulePost() {
               })}{" "}
               · {READING_TIME} min read
             </p>
+            <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Glance at a listing price and a rent figure and you can screen a
               rental in about three seconds: is the monthly rent at least 1% of
@@ -537,8 +539,8 @@ export default function OnePercentRulePost() {
           </div>
         </article>
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} />
       </main>
-      <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <NewsletterSignup variant="expanded" source="blog" />
       </div>

@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -103,6 +105,7 @@ export default function VsArrivedPage() {
             TrueCap vs Arrived:{" "}
             <span className="text-primary">direct ownership vs fractional shares</span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Arrived is a fractional rental investing platform — buy shares of single-family rentals starting at $100, with Arrived handling acquisition, financing, property management, and eventual sale. TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Totally different ownership models — but investors deciding between active and passive real estate evaluate both.
           </p>
@@ -296,6 +299,7 @@ export default function VsArrivedPage() {
         </section>
 
         <RelatedContent kind="vs" slug="arrived" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

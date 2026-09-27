@@ -24,8 +24,8 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
 ## Reference files (read what the file under review needs)
 - `seo/config.json`: `paths.agentAllow`, `paths.agentDeny`, `primarySourceDomains`, `vendorDomains`, `excludedFromOptimization`.
 - `docs/voice.md`: rules, term map, and the internal-vocabulary check list.
-- Components: `components/marketing/blog-byline.tsx` (`BlogByline`), `components/marketing/disclaimer.tsx` (`DISCLAIMER_TEXT`), `components/marketing/comparison-faq.tsx`.
-- `seo/author.md`, when it exists. Its text is the only permitted author bio.
+- Components: `components/marketing/blog-byline.tsx` (`BlogByline`), `components/marketing/author-bio.tsx` (`AuthorBio`, rendered by `RelatedBlogPosts` on posts and directly on /vs pages), `components/marketing/disclaimer.tsx` (`DISCLAIMER_TEXT`), `components/marketing/comparison-faq.tsx`.
+- `seo/author.md`. Its Bio is the only permitted author bio (`lib/author.ts` renders it).
 - Guard tests in `lib/__tests__/`: `customer-facing-decision-vocabulary`, `public-underwriting-claims-guard`, `blog-title-length`, `seo-guards`, `comparison-claim-guards`, `vs-page-copy-integrity`, `trust-language-guards`, `public-funnel-trust-guards`, `internal-links`, `internal-glossary-links`, `passive-conversion-cta`, `content-hub-readiness` (each `.test.ts`), plus `e2e/`.
 - Two sibling posts from the same hub (`lib/blog-topics.ts` → `postSlugs`), for voice.
 - Subagent mode only: `seo/data/run-flags.json` (`date`, `activeHoldout`, `sitemapPaths`) and the newest `seo/data/candidates-<date>.json` and `seo/data/similarity-<date>.json`.
@@ -67,7 +67,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
 6. **Authorship.** The author is the TrueCap Organization.
    - A new post renders `<BlogByline />` after its date line.
    - Its Article JSON-LD `author` is the Organization `@id` (`${siteUrl}/#organization`).
-   - REJECT a Person node, a personal name presented as author, founder, reviewer or expert, a bio that is not `seo/author.md` verbatim (no file means no bio), or a first-person experience claim beyond what `BlogByline` already says.
+   - REJECT a Person node, a personal name presented as author, founder, reviewer or expert, a bio that is not `seo/author.md`'s Bio verbatim, or a first-person experience claim beyond what `BlogByline` and that Bio already say.
 7. **Repo pins.**
    - Grep `lib/__tests__/` and `e2e/` for the file's slug and path. Every string those tests pin (`toContain`, `toMatch`, `not.toMatch`, counts) must still hold.
    - Exactly one CTA wrapper per post: one `<BlogStickyCta />` or one `<SourceFirstArticle`, never both, never neither.

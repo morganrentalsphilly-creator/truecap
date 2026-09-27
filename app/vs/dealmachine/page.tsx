@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -196,6 +198,7 @@ export default function VsDealmachinePage() {
               find leads on the street vs underwrite them at the desk
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             DealMachine is the heavyweight in mobile-first driving for dollars —
             snap a photo of a distressed property, get owner contact info
@@ -434,6 +437,7 @@ export default function VsDealmachinePage() {
         </section>
 
         <RelatedContent kind="vs" slug="dealmachine" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

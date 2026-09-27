@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -182,6 +183,7 @@ export default function BlogPost() {
             })}{" "}
             · {READING_TIME_MIN} min read
           </p>
+          <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
             Hard money and DSCR loans solve different problems. Hard money is
             short-term capital for a deal you&apos;ll rehab and exit; DSCR is

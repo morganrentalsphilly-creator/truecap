@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -178,6 +180,7 @@ export default function VsHostfullyPage() {
               underwrite the STR, then host it
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Hostfully is short-term rental management software — channel manager
             (Airbnb, Vrbo, Booking.com), guest messaging, dynamic pricing,
@@ -416,6 +419,7 @@ export default function VsHostfullyPage() {
         </section>
 
         <RelatedContent kind="vs" slug="hostfully" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

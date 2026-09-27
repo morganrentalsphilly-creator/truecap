@@ -6,8 +6,9 @@ const ROOT = process.cwd();
 const CUSTOMER_SURFACE_ROOTS = ["app", "components", "emails"] as const;
 /** Customer copy that lives outside those roots: the blog registry's titles
  *  and excerpts render on /blog, the topic hubs, every post's related-posts
- *  block, feed.xml and llms.txt. */
-const CUSTOMER_SURFACE_FILES = ["lib/blog-posts.ts"] as const;
+ *  block, feed.xml and llms.txt. The author byline and bio (lib/author.ts)
+ *  render on /about, every post and every /vs page. */
+const CUSTOMER_SURFACE_FILES = ["lib/blog-posts.ts", "lib/author.ts"] as const;
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".json"]);
 
 function sourceFiles(directory: string): string[] {

@@ -7,12 +7,19 @@
  * as the single source of truth so adding new posts auto-updates the
  * related-posts surface on every existing post.
  *
+ * It also opens with the end-of-article "About TrueCap" author bio
+ * (components/marketing/author-bio.tsx): every post renders this block
+ * after its body (the SourceFirstArticle posts through that component), so
+ * mounting the bio here puts it at the end of all of them in one place.
+ * Posts render it inside <main>.
+ *
  * Server component — no client state needed, just data + links.
  */
 
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { AuthorBio } from "@/components/marketing/author-bio";
 import {
   LeadMagnetInline,
   LeadMagnetExitIntent,
@@ -31,51 +38,54 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
   // we don't need to re-sort.
   const related = BLOG_POSTS.filter((p) => p.available && p.slug !== currentSlug).slice(0, limit);
 
-  if (related.length === 0) return null;
+  if (related.length === 0) return <AuthorBio />;
 
   return (
-    <aside
-      aria-label="Related blog posts"
-      className="mt-12 border-t border-border pt-8"
-    >
-      <div className="flex items-center gap-2 mb-4">
-        <BookOpen className="size-4 text-primary" />
-        <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
-          Keep reading
-        </h2>
-      </div>
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-        {related.map((post) => (
-          <li key={post.slug}>
-            <Link
-              href={`/blog/${post.slug}`}
-              prefetch={false}
-              className="group flex h-full flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary sm:p-5"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                  {post.readingTimeMinutes} min read
-                </span>
-                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <h3 className="text-sm font-extrabold leading-snug text-foreground sm:text-base">
-                {post.title}
-              </h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                {post.excerpt}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {/* Lead magnet + exit-intent capture (2026-08 offer rollout): this
-          module renders on all 75 posts, so mounting here reaches the whole
-          blog family in one edit. Client islands inside this server
-          component; both self-cap via localStorage. */}
-      <div className="mt-8">
-        <LeadMagnetInline source="blog" />
-      </div>
-      <LeadMagnetExitIntent />
-    </aside>
+    <>
+      <AuthorBio />
+      <aside
+        aria-label="Related blog posts"
+        className="mt-12 border-t border-border pt-8"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <BookOpen className="size-4 text-primary" />
+          <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
+            Keep reading
+          </h2>
+        </div>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          {related.map((post) => (
+            <li key={post.slug}>
+              <Link
+                href={`/blog/${post.slug}`}
+                prefetch={false}
+                className="group flex h-full flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary sm:p-5"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                    {post.readingTimeMinutes} min read
+                  </span>
+                  <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <h3 className="text-sm font-extrabold leading-snug text-foreground sm:text-base">
+                  {post.title}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  {post.excerpt}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {/* Lead magnet + exit-intent capture (2026-08 offer rollout): this
+            module renders on all 75 posts, so mounting here reaches the whole
+            blog family in one edit. Client islands inside this server
+            component; both self-cap via localStorage. */}
+        <div className="mt-8">
+          <LeadMagnetInline source="blog" />
+        </div>
+        <LeadMagnetExitIntent />
+      </aside>
+    </>
   );
 }

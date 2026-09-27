@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
@@ -154,6 +155,7 @@ export default function SfrVsMfrPost() {
             })}{" "}
             · {READING_TIME} min read
           </p>
+          <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
             Single-family vs multi-family is one of the most common questions in rental investing — and one of the most poorly-answered. The honest answer isn&apos;t &quot;multi-family always wins on cash flow&quot; or &quot;SFRs are safer.&quot; The answer is: it depends on your stage, your market, and what you&apos;re actually trying to build. Here&apos;s the honest comparison.
           </p>
@@ -338,8 +340,8 @@ export default function SfrVsMfrPost() {
         </div>
         </article>
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} />
       </main>
-      <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <NewsletterSignup variant="expanded" source="blog" />
       </div>

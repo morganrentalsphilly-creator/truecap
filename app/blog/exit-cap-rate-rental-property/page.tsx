@@ -18,6 +18,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
@@ -162,6 +163,7 @@ export default function ExitCapRatePost() {
               })}{" "}
               · {READING_TIME} min read
             </p>
+            <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Every projection of what a rental returns five or ten years out
               rests on a number most investors pick in about four seconds and
@@ -515,8 +517,8 @@ export default function ExitCapRatePost() {
           </div>
         </article>
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} />
       </main>
-      <RelatedBlogPosts currentSlug={SLUG} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <NewsletterSignup variant="expanded" source="blog" />
       </div>

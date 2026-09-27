@@ -6,6 +6,8 @@
  * every blog post byline and Article JSON-LD author node points here.
  * The founder is described but never named (their request, 2026-09-07);
  * schema references the site-wide Organization @id instead of a Person.
+ * "Who builds this" renders AUTHOR_BIO (lib/author.ts ↔ seo/author.md), the
+ * same bio every blog post and /vs page ends with, so the three never drift.
  *
  * Deliberately short and hype-free — this page earns trust by being
  * plain, not by selling. Linked from the footer bottom strip only
@@ -16,6 +18,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { AUTHOR_BIO } from "@/lib/author";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 
@@ -88,13 +91,9 @@ export default function AboutPage() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_strong]:text-foreground">
           <h2 className="text-2xl sm:text-3xl">Who builds this</h2>
-          <p>
-            TrueCap is built by one person, a rental investor in
-            Philadelphia. It started as the tool he wanted
-            for his own underwriting — a way to get from an address to a
-            source-labeled first-pass answer in about a minute — and it&apos;s
-            still how he runs the deals he considers.
-          </p>
+          {/* The bio every post and /vs page ends with: lib/author.ts, which
+              must equal seo/author.md's Bio. Edit it there, not here. */}
+          <p>{AUTHOR_BIO}</p>
 
           <h2 className="text-2xl sm:text-3xl">How the numbers are built</h2>
           <p>

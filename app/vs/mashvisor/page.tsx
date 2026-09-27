@@ -18,6 +18,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -207,6 +209,7 @@ export default function VsMashvisorPage() {
             TrueCap vs Mashvisor:{" "}
             <span className="text-primary">per-deal math vs market data.</span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Mashvisor is built around market-level data — heatmaps, ZIP-code
             Airbnb occupancy, comps. TrueCap is built around per-deal math —
@@ -426,6 +429,7 @@ export default function VsMashvisorPage() {
         </section>
 
         <RelatedContent kind="vs" slug="mashvisor" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

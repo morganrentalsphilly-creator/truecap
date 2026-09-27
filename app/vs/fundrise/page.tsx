@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -105,6 +107,7 @@ export default function VsFundrisePage() {
             TrueCap vs Fundrise:{" "}
             <span className="text-primary">direct ownership vs REIT shares</span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Fundrise is one of the most popular non-traded REITs — pool your money with thousands of other investors into diversified real estate funds (commercial + multifamily + residential). TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
           </p>
@@ -294,6 +297,7 @@ export default function VsFundrisePage() {
         </section>
 
         <RelatedContent kind="vs" slug="fundrise" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

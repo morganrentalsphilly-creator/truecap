@@ -10,6 +10,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Sparkles } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -145,6 +147,7 @@ export default function VsDealCheckPage() {
               which rental analyzer fits you?
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             DealCheck has served investors for years. TrueCap uses a different
             sequence: start with an address, inspect the assumptions, see a
@@ -412,6 +415,7 @@ export default function VsDealCheckPage() {
         </section>
 
         <RelatedContent kind="vs" slug="dealcheck" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

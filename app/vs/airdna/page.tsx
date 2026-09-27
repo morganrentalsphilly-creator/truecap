@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -177,6 +179,7 @@ export default function VsAirdnaPage() {
               STR revenue data vs full underwriting
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             AirDNA is the gold standard for short-term rental market data —
             Airbnb / Vrbo occupancy rates, ADR, RevPAR by market and individual
@@ -421,6 +424,7 @@ export default function VsAirdnaPage() {
         </section>
 
         <RelatedContent kind="vs" slug="airdna" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

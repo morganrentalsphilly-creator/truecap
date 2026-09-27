@@ -96,7 +96,7 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
      - JSON-LD objects, metadata, or the `TITLE`/`DESCRIPTION` consts;
      - component props or data arrays (comparison matrices, `ComparisonFaq`);
      - sources or methodology notes;
-     - `RelatedContent`, `RelatedBlogPosts`, `BlogStickyCta`, `NewsletterSignup`, `SiteFooter`, `Header` or any CTA component.
+     - `RelatedContent`, `RelatedBlogPosts`, `AuthorBio`, `BlogStickyCta`, `NewsletterSignup`, `SiteFooter`, `Header` or any CTA component.
    - The sentence is about the target's subject.
    - It sits mid-line, with a space or punctuation mark directly before and after it on the same line. JSX drops the whitespace at a line break next to a tag, so an occurrence that touches a line break renders "GRMof". The fix would be `{" "}`, and that breaks tier 0.
    - It is not pinned by a test. In one Grep of `lib/__tests__` and `e2e` (case-insensitive), search for the alternation of the two words on either side of every chosen insertion point ("threshold, rehab|rehab condition"). If a pin spans a boundary, use another occurrence or another source.

@@ -11,6 +11,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -166,6 +167,7 @@ export default function ThreeWayComparisonPost() {
             <p className="mt-4 text-xs text-muted-foreground">
               Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
+            <BlogByline />
           </header>
 
           {/* TL;DR */}

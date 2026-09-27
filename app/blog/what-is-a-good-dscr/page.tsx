@@ -114,7 +114,6 @@ export default function BlogPost() {
     description: DESCRIPTION,
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    // Author points at the /about Person entity (E-E-A-T anchor @id).
     author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
