@@ -860,12 +860,67 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Start disposable Supabase
-        timeout-minutes: 12
+      # `supabase start` pulls its images from public.ecr.aws on every run, and
+      # anonymous pulls from GitHub's shared runner IPs hit ECR Public's data
+      # limit ("toomanyrequests: Data limit exceeded"). On 2026-09-27 that
+      # failed this required check on three PRs with no code at fault. The
+      # images are cached per CLI version and service set; a stale cache is
+      # still loaded (restore-keys) and the CLI pulls only what it lacks.
+      - name: Supabase image cache key
+        id: supabase-images-key
         shell: bash
         run: |
           set -euo pipefail
-          npx --no-install supabase start --yes > "$RUNNER_TEMP/truecap-supabase-start.out"
+          cli=$(node -p "require('./package-lock.json').packages['node_modules/supabase'].version")
+          echo "key=supabase-images-v1-${RUNNER_OS}-${cli}-${{ hashFiles('supabase/config.toml') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Supabase images
+        id: supabase-images
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/supabase-images.tar
+          key: ${{ steps.supabase-images-key.outputs.key }}
+          restore-keys: supabase-images-v1-${{ runner.os }}-
+
+      - name: Load cached Supabase images
+        if: steps.supabase-images.outputs.cache-matched-key != ''
+        continue-on-error: true
+        run: docker load -i "$RUNNER_TEMP/supabase-images.tar"
+
+      - name: Start disposable Supabase
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Up to three attempts: a throttled pull is the usual cause of a
+          # failed start, and a later attempt often gets through.
+          for attempt in 1 2 3; do
+            if npx --no-install supabase start --yes > "$RUNNER_TEMP/truecap-supabase-start.out"; then
+              exit 0
+            fi
+            echo "::warning::supabase start failed (attempt $attempt of 3)"
+            npx --no-install supabase stop --no-backup || true
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 45)); fi
+          done
+          exit 1
+
+      - name: Export Supabase images for the cache
+        if: steps.supabase-images.outputs.cache-hit != 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t images < <(docker images --format '{{.Repository}}:{{.Tag}}' | grep '/supabase/' | sort -u)
+          [ "${#images[@]}" -gt 0 ] || { echo "no Supabase images to cache"; exit 0; }
+          docker save -o "$RUNNER_TEMP/supabase-images.tar" "${images[@]}"
+
+      - name: Save Supabase images
+        if: steps.supabase-images.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/supabase-images.tar
+          key: ${{ steps.supabase-images-key.outputs.key }}
 
       - name: Replay all database migrations from a clean database
         timeout-minutes: 8
