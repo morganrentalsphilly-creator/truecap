@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { isNoindexPath } from "@/lib/seo/noindex";
 import { HISTORICAL_TOOL_PATHS } from "@/lib/historical-tool-redirects";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 
@@ -50,16 +51,18 @@ describe("sitemap URL uniqueness", () => {
     ).toEqual([]);
   });
 
-  it("emits each available blog post exactly once from the shared catalog", () => {
+  it("emits each available blog post exactly once from the shared catalog, unless the noindex list holds it", () => {
     const siteUrl = CANONICAL_SITE_URL;
     const urls = sitemap().map((entry) => entry.url);
 
     for (const post of BLOG_POSTS.filter((entry) => entry.available)) {
       const expectedUrl = `${siteUrl}/blog/${post.slug}`;
+      // content/seo/noindex.json (lib/seo/noindex) takes a pruned post out.
+      const expected = isNoindexPath(`/blog/${post.slug}`) ? 0 : 1;
       expect(
         urls.filter((url) => url === expectedUrl),
         expectedUrl,
-      ).toHaveLength(1);
+      ).toHaveLength(expected);
     }
   });
 

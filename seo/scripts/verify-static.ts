@@ -1661,32 +1661,44 @@ export function checkContentJson(
 
   let noindexAdded: string[] = [];
   if (file === "content/seo/noindex.json") {
-    if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string")) {
-      add("noindex", "noindex.json must be an array of site paths");
+    const list = noindexPaths(value);
+    if (list === null) {
+      add("noindex", 'noindex.json must be { "paths": [<site path>, …] } (lib/seo/noindex.ts)');
     } else {
-      const list = value as string[];
       for (let i = 1; i < list.length; i += 1) {
         if (!(list[i - 1] < list[i])) {
           add("noindex", `noindex.json must be sorted and unique (${preview(list[i - 1])} then ${preview(list[i])})`);
           break;
         }
       }
-      for (const entry of list) {
-        if (!ctx.sitemap.has(entry)) add("noindex", `${preview(entry)} is not a sitemap path`);
-        if (config.excludedFromOptimization.includes(entry)) add("noindex", `${entry} is excluded from optimization`);
-      }
       let before: string[] = [];
       try {
-        const parsed: unknown = pre === null ? [] : JSON.parse(pre);
-        before = Array.isArray(parsed) ? parsed.filter((entry): entry is string => typeof entry === "string") : [];
+        before = noindexPaths(pre === null ? { paths: [] } : JSON.parse(pre)) ?? [];
       } catch {
         before = [];
       }
       const prior = new Set(before);
       noindexAdded = list.filter((entry) => !prior.has(entry));
+      // An earlier prune has already left the sitemap (app/sitemap.ts drops listed
+      // paths), so only an ADDED path must be in it today.
+      for (const entry of noindexAdded) {
+        if (!ctx.sitemap.has(entry)) add("noindex", `${preview(entry)} is not a sitemap path`);
+      }
+      for (const entry of list) {
+        if (config.excludedFromOptimization.includes(entry)) add("noindex", `${entry} is excluded from optimization`);
+      }
     }
   }
   return { violations, noindexAdded };
+}
+
+/** The `paths` of a noindex.json value shaped `{ "paths": string[] }` (and nothing else), or null. */
+export function noindexPaths(value: unknown): string[] | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  if (Object.keys(value).some((key) => key !== "paths")) return null;
+  const paths = (value as { paths?: unknown }).paths;
+  if (!Array.isArray(paths) || !paths.every((entry) => typeof entry === "string")) return null;
+  return paths as string[];
 }
 
 /**

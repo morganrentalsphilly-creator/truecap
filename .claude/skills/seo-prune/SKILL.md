@@ -49,7 +49,7 @@ score.ts does not check the next rules (the step 3 keep rules); this skill does.
    - `content/seo/noindex.json` does not exist: "noindex list not ready (F2)".
    - The grep finds no reader in the sitemap code or in `proxy.ts`: "noindex list not wired (F2)". A list nothing reads removes nothing.
    - The reader feeds the body of a page other than the listed path (a related-links block, hub list or state guide that drops listed paths): "noindex list renders on other pages". verify-build's render diff fails on undeclared page changes. Robots metadata on the listed page itself is fine: that page is declared.
-   - An existing entry is missing from `run-flags.sitemapPaths`: "noindex.json holds a path outside the sitemap". verify-static's `checkContentJson` checks every entry against the sitemap, not only new ones, and a noindexed path leaves the sitemap. File the tier-2 issue "seo-prune: verify-static rejects noindex.json once a pruned path leaves the sitemap".
+   - An existing entry is NOT expected in `run-flags.sitemapPaths`: `app/sitemap.ts` drops every listed path, and verify-static's `checkContentJson` checks sitemap membership only for the paths a run adds.
 
    **Guard pins by family.** The model job cannot run vitest, so check these by reading. A match sends that family's prunes to the tier-2 issue only:
    - Grep `lib/markets/indexability.ts` for an import of the F2 reader or for `noindex.json` (`NOINDEX_FOLLOW` is already there and does not count). If it reads the list, and `lib/__tests__/markets-indexability.test.ts` references neither, the test still asserts `isMarketIndexable` true for every `MARKET_CITIES` slug and pins `getIndexableMarketSlugs()` to every slug with a HUD row. Every `market-city` prune gets "guard pins markets-indexability.test.ts".
@@ -74,7 +74,7 @@ score.ts does not check the next rules (the step 3 keep rules); this skill does.
 7. **Cap.** Count the paths already added to `content/seo/noindex.json` this run (`git diff -- content/seo/noindex.json`). At `caps.noindexPerRun`, skip with "noindex cap for this run (<n>)". Each path also counts toward `caps.pagesChangedPerRun`.
 8. **Edit** `content/seo/noindex.json` with Edit.
    - Insert the site path, e.g. `/glossary/x`: leading slash, no host, no trailing slash, query or fragment.
-   - Keep the array sorted in plain code-unit order (the order JavaScript's `<` gives) and unique, since verify-static requires `list[i-1] < list[i]`.
+   - The file is `{ "paths": [ … ] }` (lib/seo/noindex.ts refuses any other shape, and the build fails). Keep the `paths` array sorted in plain code-unit order (the order JavaScript's `<` gives) and unique, since verify-static requires `list[i-1] < list[i]`.
    - Keep the file's indentation and trailing newline. Never remove or reorder an existing entry: re-indexing is an owner edit.
    - Record the evidence for the critic and the summary: coverage state with the first and last matching inspection dates; `wordCount` and `uniqueRatio`; impressions and clicks (28 days); the Bing `linkCounts` value; the similarity top score.
 9. **Re-check before the manifest.** When the run's other edits are done (after seo-weekly steps 4 and 5), check every pruned path again:
@@ -86,7 +86,7 @@ Never edit the page, its robots metadata, a redirect, `lib/blog-posts.ts` (`avai
 
 ## Gate checks
 1. **Diff self-check.** Read `git diff -- content/seo/noindex.json` and confirm:
-   - the file parses as a JSON array of strings, sorted and unique;
+   - the file parses as `{ "paths": [ … ] }`, an array of strings, sorted and unique;
    - only this run's paths were added and nothing was removed;
    - each added path is in `run-flags.sitemapPaths`, and in neither `excludedFromOptimization` nor `activeHoldout`;
    - each added path's crawl `wordCount` is < 600;
