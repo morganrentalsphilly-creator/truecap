@@ -13,6 +13,7 @@ import {
   isStrategyIndexable,
 } from "@/lib/markets/indexability";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { isNoindexPath } from "@/lib/seo/noindex";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -25,6 +26,9 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
  *   the last significant change to the page's own content, seeded from git
  *   history and bumped by the SEO loop's publish job. A path with no entry gets
  *   no <lastmod> — never an invented date, never deployment time.
+ * - A path on the SEO loop's noindex list (content/seo/noindex.json,
+ *   lib/seo/noindex) leaves the sitemap; proxy.ts serves it with
+ *   `X-Robots-Tag: noindex`.
  * - Search engines ignore priority/changefreq hints, so neither is emitted.
  * - Released registries drive generated families; gated and retired routes
  *   therefore cannot leak into discovery surfaces.
@@ -148,7 +152,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntry(siteUrl, path),
   );
 
-  return [
+  const entries = [
     ...CORE_PATHS.map((path) => sitemapEntry(siteUrl, path)),
     sitemapEntry(siteUrl, "/tools/rental-property-spreadsheet"),
     ...toolUrls,
@@ -163,4 +167,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...(guaranteeEnabled ? [sitemapEntry(siteUrl, "/guarantee")] : []),
     ...(isAgentProConfigured() ? [sitemapEntry(siteUrl, "/for-agents")] : []),
   ];
+
+  return entries.filter(
+    (entry) => !isNoindexPath(new URL(entry.url).pathname),
+  );
 }

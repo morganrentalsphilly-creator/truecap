@@ -48,6 +48,9 @@ import type { VerifyVerdict } from "../../seo/scripts/lib/types.ts";
  */
 
 const config = loadConfig();
+/** content/seo/noindex.json as lib/seo/noindex.ts loads it: `{ "paths": [...] }`. */
+const noindexOf = (paths: string[]): string => `${JSON.stringify({ paths }, null, 2)}\n`;
+const NOINDEX_EMPTY = noindexOf([]);
 /** A backslash, and a `\\uXXXX` escape as it appears in TS source, built by concatenation so no editor decodes them. */
 const BS = "\\";
 const U = (hex: string): string => `${BS}${BS}u${hex}`;
@@ -841,22 +844,22 @@ describe("deriveTier", () => {
 
   it("tier 2: research pages, and noindex while calibrating", () => {
     expect(deriveTier("app/research/fmr-2026/page.tsx", null, BASE_PAGE, { calibrating: false }).tier).toBe(2);
-    expect(deriveTier("content/seo/noindex.json", "[]", '["/blog/dscr"]', { calibrating: true }).tier).toBe(2);
-    expect(deriveTier("content/seo/noindex.json", "[]", '["/blog/dscr"]', { calibrating: false }).tier).toBe(1);
+    expect(deriveTier("content/seo/noindex.json", NOINDEX_EMPTY, noindexOf(["/blog/dscr"]), { calibrating: true }).tier).toBe(2);
+    expect(deriveTier("content/seo/noindex.json", NOINDEX_EMPTY, noindexOf(["/blog/dscr"]), { calibrating: false }).tier).toBe(1);
   });
 
   it("takes the calibration tier for noindex.json from config.gates.pruneTierDuringCalibration", () => {
     const withTier = (value: unknown): typeof config => ({ ...config, gates: { ...config.gates, pruneTierDuringCalibration: value as number } });
-    expect(deriveTier("content/seo/noindex.json", "[]", '["/blog/dscr"]', { calibrating: true, config: withTier(1) }).tier).toBe(1);
+    expect(deriveTier("content/seo/noindex.json", NOINDEX_EMPTY, noindexOf(["/blog/dscr"]), { calibrating: true, config: withTier(1) }).tier).toBe(1);
     expect(pruneTierDuringCalibration(withTier(2))).toBe(2);
     expect(pruneTierDuringCalibration(withTier(1))).toBe(1);
     // Never looser than outside calibration (tier 1), and a broken value fails closed to 2.
     expect(pruneTierDuringCalibration(withTier(0))).toBe(1);
     expect(pruneTierDuringCalibration(withTier("two"))).toBe(2);
     expect(pruneTierDuringCalibration(withTier(undefined))).toBe(2);
-    const noindex = { "content/seo/noindex.json": `${JSON.stringify(["/blog/dscr"])}\n` };
+    const noindex = { "content/seo/noindex.json": noindexOf(["/blog/dscr"]) };
     const manifest = { changes: [{ path: "/blog/dscr", file: "content/seo/noindex.json" }] };
-    expect(run({ "content/seo/noindex.json": "[]\n" }, noindex, { manifest, indexed: 60, calibrating: true, config: withTier(1) }).tier).toBe(1);
+    expect(run({ "content/seo/noindex.json": NOINDEX_EMPTY }, noindex, { manifest, indexed: 60, calibrating: true, config: withTier(1) }).tier).toBe(1);
   });
 
   it("run tier is the max over files", () => {
@@ -978,19 +981,24 @@ describe("content/seo datasets", () => {
     expect(checkContentJson("content/seo/state-facts.json", "{ nope", null, { sitemap }, config).violations[0].rule).toBe("json-parse");
   });
 
-  it("noindex.json: sorted sitemap paths, excluded paths refused, additions counted", () => {
-    const check = (after: unknown, before: unknown = []): ReturnType<typeof checkContentJson> => checkContentJson("content/seo/noindex.json", json(after), json(before), { sitemap }, config);
-    expect(check(["/blog/dscr", "/glossary/noi"], ["/glossary/noi"])).toEqual({ violations: [], noindexAdded: ["/blog/dscr"] });
-    expect(check(["/glossary/noi", "/blog/dscr"]).violations[0].detail).toMatch(/sorted/);
-    expect(check(["/blog/dscr", "/blog/dscr"]).violations[0].detail).toMatch(/sorted and unique/);
-    expect(check(["/blog/not-listed"]).violations[0].detail).toMatch(/not a sitemap path/);
-    expect(check(["/pricing"]).violations[0].detail).toMatch(/excluded from optimization/);
-    expect(check({ a: 1 }).violations[0].detail).toMatch(/array/);
+  it("noindex.json: { paths } of sorted sitemap paths, excluded paths refused, additions counted", () => {
+    const check = (after: unknown, before: unknown = { paths: [] }): ReturnType<typeof checkContentJson> => checkContentJson("content/seo/noindex.json", json(after), json(before), { sitemap }, config);
+    expect(check({ paths: ["/blog/dscr", "/glossary/noi"] }, { paths: ["/glossary/noi"] })).toEqual({ violations: [], noindexAdded: ["/blog/dscr"] });
+    expect(check({ paths: ["/glossary/noi", "/blog/dscr"] }).violations[0].detail).toMatch(/sorted/);
+    expect(check({ paths: ["/blog/dscr", "/blog/dscr"] }).violations[0].detail).toMatch(/sorted and unique/);
+    expect(check({ paths: ["/blog/not-listed"] }).violations[0].detail).toMatch(/not a sitemap path/);
+    expect(check({ paths: ["/pricing"] }).violations[0].detail).toMatch(/excluded from optimization/);
+    // The shape lib/seo/noindex.ts loads, and nothing else: the pre-F2 bare array is refused.
+    expect(check({ a: 1 }).violations[0].detail).toMatch(/"paths"/);
+    expect(check(["/blog/dscr"]).violations[0].detail).toMatch(/"paths"/);
+    expect(check({ paths: ["/blog/dscr"], extra: true }).violations[0].detail).toMatch(/"paths"/);
+    // An earlier prune has already left the sitemap: only ADDED paths must be sitemap paths.
+    expect(check({ paths: ["/blog/dscr", "/blog/pruned-earlier"] }, { paths: ["/blog/pruned-earlier"] })).toEqual({ violations: [], noindexAdded: ["/blog/dscr"] });
   });
 
   it("caps noindex additions at floor(share × indexed) and holds noindex at tier 2 while calibrating", () => {
-    const base = { "content/seo/noindex.json": "[]\n" };
-    const after = { "content/seo/noindex.json": json(["/blog/dscr", "/glossary/noi", "/markets/philadelphia"]) };
+    const base = { "content/seo/noindex.json": NOINDEX_EMPTY };
+    const after = { "content/seo/noindex.json": noindexOf(["/blog/dscr", "/glossary/noi", "/markets/philadelphia"]) };
     const manifest = { changes: [{ path: "/blog/dscr", file: "content/seo/noindex.json" }] };
     const tooMany = run(base, after, { manifest, indexed: 40 });
     expect(rules(tooMany)).toContain("cap-noindex");
@@ -1272,7 +1280,7 @@ describe("demoted change types (brakes (d)) and the pages each file changes", ()
     expect(v.files[0]).toMatchObject({ path: "content/seo/market-facts.json", url: null, urls: ["/markets/philadelphia"] });
     const og = "app/blog/cap-rate-guide/opengraph-image.tsx";
     expect(urlForFile(og)).toBe("/blog/cap-rate-guide");
-    const noindex = run({ "content/seo/noindex.json": "[]\n" }, { "content/seo/noindex.json": `${JSON.stringify(["/blog/dscr"])}\n` }, { manifest: { changes: [{ path: "/blog/dscr", file: "content/seo/noindex.json" }] }, indexed: 60 });
+    const noindex = run({ "content/seo/noindex.json": NOINDEX_EMPTY }, { "content/seo/noindex.json": noindexOf(["/blog/dscr"]) }, { manifest: { changes: [{ path: "/blog/dscr", file: "content/seo/noindex.json" }] }, indexed: 60 });
     expect(noindex.files[0].urls).toEqual(["/blog/dscr"]);
     expect(noindex.noindexAdded).toEqual(["/blog/dscr"]);
   });

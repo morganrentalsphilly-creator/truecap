@@ -17,6 +17,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { isCanonicalHost } from "@/lib/site-url";
+import { noindexRobotsHeader } from "@/lib/seo/noindex";
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return request.cookies
@@ -47,6 +48,17 @@ function applyHostGuard(response: NextResponse, request: NextRequest): NextRespo
   if (!isCanonicalHost(request.headers.get("host"))) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
+  return response;
+}
+
+/**
+ * Stamp `X-Robots-Tag: noindex` on an exact path listed in
+ * content/seo/noindex.json (the SEO loop's prune list, lib/seo/noindex.ts).
+ * Runs after the host guard and never replaces a header it set.
+ */
+function applyNoindexList(response: NextResponse, request: NextRequest): NextResponse {
+  const value = noindexRobotsHeader(request.nextUrl.pathname, response.headers.get("X-Robots-Tag"));
+  if (value) response.headers.set("X-Robots-Tag", value);
   return response;
 }
 
@@ -85,10 +97,10 @@ export async function proxy(request: NextRequest) {
     for (const cookie of sessionResponse.cookies.getAll()) {
       rewritten.cookies.set(cookie);
     }
-    return applyHostGuard(rewritten, request);
+    return applyNoindexList(applyHostGuard(rewritten, request), request);
   }
 
-  return applyHostGuard(sessionResponse, request);
+  return applyNoindexList(applyHostGuard(sessionResponse, request), request);
 }
 
 export const config = {

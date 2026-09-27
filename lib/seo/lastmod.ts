@@ -22,20 +22,9 @@
  */
 
 import raw from "@/content/seo/lastmod.json";
+import { SITE_PATH_RE, isIsoDate } from "@/lib/seo/site-path";
 
 export type LastmodMap = Readonly<Record<string, string>>;
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-/** A site path: "/" or lowercase slug segments, no trailing slash, query or fragment. */
-export const SITE_PATH_RE = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?$/;
-
-/** YYYY-MM-DD that names a real calendar day. */
-export function isIsoDate(value: unknown): value is string {
-  if (typeof value !== "string" || !DATE_RE.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
 
 /** Validates the map's shape; throws with the offending key so the build log names it. */
 export function parseLastmodMap(
