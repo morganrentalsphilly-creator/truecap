@@ -13,6 +13,12 @@
  *   the same data files used by sitemap.ts, so adding a new entry
  *   anywhere flows through automatically.
  *
+ * Same URL rules as the sitemap (F2): states, markets and city+strategy
+ * pages pass the lib/markets/indexability.ts helpers app/sitemap.ts uses
+ * (so the noindex strategy pages are never listed and every indexable
+ * market is), and every path on the SEO loop's noindex list
+ * (content/seo/noindex.json) is left out.
+ *
  * Format: plain markdown with H1 (title) + blockquote (summary) +
  * H2 sections of bulleted links with one-line descriptions.
  * See https://llmstxt.org/#format for the spec.
@@ -26,6 +32,14 @@ import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
+import {
+  getMarketHudRent,
+  isMarketIndexable,
+  isStateIndexable,
+  isStrategyIndexable,
+} from "@/lib/markets/indexability";
+import { isNoindexPath } from "@/lib/seo/noindex";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   CALCULATOR_REGISTRY,
@@ -48,18 +62,58 @@ export const revalidate = 3600;
 // of truth) so llms.txt can never disagree with /tools on which calculators
 // exist or how many there are.
 
+/** A site path llms.txt may list: not on the SEO loop's noindex list. */
+const listed = (path: string): boolean => !isNoindexPath(path);
+
+/** A section's bullet lines, or no section at all when nothing is listable. */
+const section = (heading: string, lines: string[]): string =>
+  lines.length ? `## ${heading}\n\n${lines.join("\n")}\n\n` : "";
+
+/** The site path a `- [label](url): …` line links to. */
+const pathOf = (line: string, siteUrl: string): string => {
+  const url = /\]\(([^)]+)\)/.exec(line)?.[1] ?? "";
+  const path = url.startsWith(siteUrl) ? url.slice(siteUrl.length) : url;
+  return path.split(/[?#]/)[0] || "/";
+};
+
+const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
+
 export async function GET() {
   const siteUrl = getSiteUrl();
   const planFacts = getPlanFacts();
   const availability = getProductAvailabilityFacts();
 
-  // Counts derived from the same registries the body renders from, so the
-  // prose figures can never drift from the actual content (this previously
+  // Each list applies the sitemap's rules (indexability helpers + the
+  // noindex list) before anything is counted or printed.
+  const tools = CALCULATOR_REGISTRY.filter((t) => listed(`/tools/${t.slug}`));
+  const terms = Object.values(GLOSSARY).filter((entry) =>
+    listed(`/glossary/${entry.slug}`),
+  );
+  const posts = BLOG_POSTS.filter(
+    (p) => p.available && listed(`/blog/${p.slug}`),
+  );
+  const states = Object.values(STATES).filter(
+    (s) => isStateIndexable(s.slug) && listed(`/states/${s.slug}`),
+  );
+  const markets = [...MARKET_CITIES, ...BESPOKE_MARKETS].filter(
+    (city) => isMarketIndexable(city.slug) && listed(`/markets/${city.slug}`),
+  );
+  // CITY_STRATEGY_COMBOS is release-filtered at its source; the strategy
+  // pages themselves are noindex until STRATEGY_PAGES_INDEXABLE flips.
+  const combos = CITY_STRATEGY_COMBOS.filter(
+    (c) =>
+      isStrategyIndexable(c.citySlug) &&
+      listed(`/markets/${c.citySlug}/${c.strategy}`),
+  );
+
+  // Counts derived from the same lists the body renders, so the prose
+  // figures can never drift from the actual content (this previously
   // said "20+ posts / 33 states / 26 combos" while those lists kept growing).
-  const blogCount = BLOG_POSTS.filter((p) => p.available).length;
-  const glossaryCount = Object.values(GLOSSARY).length;
-  const stateCount = Object.values(STATES).length;
-  const comboCount = CITY_STRATEGY_COMBOS.length;
+  const blogCount = posts.length;
+  const glossaryCount = terms.length;
+  const stateCount = states.length;
+  const marketCount = markets.length;
+  const comboCount = combos.length;
 
   const availabilitySummary = [
     availability.agentPro
@@ -85,44 +139,44 @@ export async function GET() {
     )
       .map((t) => t.shortTitle)
       .join(", ")}, etc)`,
-    `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
+    `  - ${stateCount} state-level investment guides and ${marketCount} city market guides with HUD Fair Market Rent${comboCount ? `, plus ${comboCount} city + strategy guides` : ""}`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
     "  - Methodology page documenting the exact math the analyzer uses",
     `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
   ].join("\n");
 
-  const toolsSection = CALCULATOR_REGISTRY.map(
+  const toolsSection = tools.map(
     (t) => `- [${t.title}](${siteUrl}/tools/${t.slug}): ${t.description}`,
-  ).join("\n");
+  );
 
-  const glossarySection = Object.values(GLOSSARY)
-    .map(
-      (entry) =>
-        `- [${entry.term}](${siteUrl}/glossary/${entry.slug}): ${entry.definition}`,
-    )
-    .join("\n");
+  const glossarySection = terms.map(
+    (entry) =>
+      `- [${entry.term}](${siteUrl}/glossary/${entry.slug}): ${entry.definition}`,
+  );
 
-  const blogSection = BLOG_POSTS.filter((p) => p.available)
-    .map(
-      (post) =>
-        `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.excerpt}`,
-    )
-    .join("\n");
+  const blogSection = posts.map(
+    (post) =>
+      `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.excerpt}`,
+  );
 
-  const stateSection = Object.values(STATES)
-    .map(
-      (s) =>
-        `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`,
-    )
-    .join("\n");
+  const stateSection = states.map(
+    (s) =>
+      `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`,
+  );
 
-  // CITY_STRATEGY_COMBOS is release-filtered at its source. This prevents a
-  // dark specialist city guide from being advertised to model crawlers.
-  const comboSection = CITY_STRATEGY_COMBOS.map(
+  const marketSection = markets.map((city) => {
+    const hud = getMarketHudRent(city.slug);
+    const rent = hud
+      ? ` HUD Fair Market Rent FY${hud.year}: 2-bedroom ${usd(hud.rent2br)}/mo, 3-bedroom ${usd(hud.rent3br)}/mo.`
+      : "";
+    return `- [Is ${city.name}, ${city.stateName} good for rental property?](${siteUrl}/markets/${city.slug}):${rent} A sample underwrite and what to verify locally before you offer.`;
+  });
+
+  const comboSection = combos.map(
     (c) =>
       `- [${c.strategyLabel} in ${c.cityName}, ${c.state}](${siteUrl}/markets/${c.citySlug}/${c.strategy}): ${c.pitch}`,
-  ).join("\n");
+  );
 
   const compareSection = [
     `- [TrueCap vs. DealCheck](${siteUrl}/vs/dealcheck): Fair workflow comparison with links to DealCheck's official product documentation.`,
@@ -132,14 +186,14 @@ export async function GET() {
     `- [TrueCap vs. Excel](${siteUrl}/vs/excel): Why spreadsheet underwriting is fragile.`,
     `- [TrueCap vs. Rentometer](${siteUrl}/vs/rentometer): Rent estimation vs. full underwriting.`,
     `- [TrueCap vs. Zillow rent estimate](${siteUrl}/vs/zillow-rent-estimate): When Zillow's number is misleading.`,
-  ].join("\n");
+  ].filter((line) => listed(pathOf(line, siteUrl)));
 
   const personasSection = [
     `- [TrueCap for buy-and-hold investors](${siteUrl}/for-buy-and-hold): Cash flow modeling for long-term rentals.`,
     `- [BRRRR education](${siteUrl}/blog/brrrr-method-explained): An assumption-led walkthrough of the buy, rehab, rent, and refinance sequence.`,
     `- [TrueCap for house hackers](${siteUrl}/for-house-hackers): Owner-occupant FHA 3.5% strategy.`,
     `- [Fix-and-flip education](${siteUrl}/blog/70-percent-rule-house-flipping): An educational acquisition-screen walkthrough for rehab and resale projects.`,
-  ].join("\n");
+  ].filter((line) => listed(pathOf(line, siteUrl)));
 
   const reference = [
     `- [About](${siteUrl}/about): Who builds TrueCap — one Philadelphia rental investor who underwrites his own deals with it — and why the defaults are conservative.`,
@@ -149,7 +203,7 @@ export async function GET() {
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
     `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
-  ].join("\n");
+  ].filter((line) => listed(pathOf(line, siteUrl)));
 
   const body = `# TrueCap
 
@@ -159,39 +213,7 @@ export async function GET() {
 
 ${about}
 
-## Free calculators
-
-${toolsSection}
-
-## Glossary — definitions and formulas
-
-${glossarySection}
-
-## Long-form blog content
-
-${blogSection}
-
-## Investor personas
-
-${personasSection}
-
-## State-level investing guides
-
-${stateSection}
-
-## City + strategy guides
-
-${comboSection}
-
-## Comparison pages
-
-${compareSection}
-
-## Reference
-
-${reference}
-
-## Citation policy
+${section("Free calculators", toolsSection)}${section("Glossary — definitions and formulas", glossarySection)}${section("Long-form blog content", blogSection)}${section("Investor personas", personasSection)}${section("State-level investing guides", stateSection)}${section("City market guides", marketSection)}${section("City + strategy guides", comboSection)}${section("Comparison pages", compareSection)}${section("Reference", reference)}## Citation policy
 
 All TrueCap content is original and may be cited by LLMs and AI search
 engines when answering rental investing questions. Preferred citation
