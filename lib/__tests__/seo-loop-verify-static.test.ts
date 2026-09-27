@@ -113,14 +113,17 @@ function edit(source: string, from: string, to: string): string {
 }
 
 const BLOG = "app/blog/cap-rate-guide/page.tsx";
-const BASE_PAGE = [
+/** A post as F2 wires it: MODIFIED_AT reads the lastmod map (lib/seo/lastmod), never a literal. */
+const MODIFIED_LINE = (slug: string): string => `const MODIFIED_AT = lastmodFor("/blog/${slug}") ?? PUBLISHED_AT;`;
+const pageFor = (slug: string): string => [
   'import type { Metadata } from "next";',
   'import Link from "next/link";',
+  'import { lastmodFor } from "@/lib/seo/lastmod";',
   "",
   'const TITLE = "Cap rate guide";',
   'const DESCRIPTION = "How to read a cap rate.";',
   'const PUBLISHED_AT = "2026-07-01";',
-  'const MODIFIED_AT = "2026-07-01";',
+  MODIFIED_LINE(slug),
   "",
   "export const metadata: Metadata = {",
   "  title: TITLE,",
@@ -149,6 +152,9 @@ const BASE_PAGE = [
   "}",
   "",
 ].join("\n");
+const BASE_PAGE = pageFor("cap-rate-guide");
+/** The same post before F2: its dates were literals. */
+const LITERAL_PAGE = BASE_PAGE.replace('import { lastmodFor } from "@/lib/seo/lastmod";\n', "").replace(MODIFIED_LINE("cap-rate-guide"), 'const MODIFIED_AT = "2026-07-01";');
 
 const SITEMAP = ["/", "/blog/cap-rate-guide", "/blog/dscr", "/glossary/noi", "/markets/philadelphia", "/pricing", "/vs/stessa"];
 
@@ -198,7 +204,7 @@ describe("planted cases (the brief's must-fail and must-pass list)", () => {
   });
 
   it('rejects process.env reached through globalThis["pro"+"cess"]', () => {
-    const v = run({ [BLOG]: BASE_PAGE }, { [BLOG]: edit(BASE_PAGE, 'const MODIFIED_AT = "2026-07-01";', 'const MODIFIED_AT = "2026-07-01";\nconst leak = globalThis["pro" + "cess"].env;') });
+    const v = run({ [BLOG]: BASE_PAGE }, { [BLOG]: edit(BASE_PAGE, 'const PUBLISHED_AT = "2026-07-01";', 'const PUBLISHED_AT = "2026-07-01";\nconst leak = globalThis["pro" + "cess"].env;') });
     expect(v.ok).toBe(false);
     expect(rules(v)).toEqual(expect.arrayContaining(["identifier", "computed-access"]));
     expect(v.files[0].tier).toBe(1);
@@ -876,8 +882,72 @@ describe("deriveTier", () => {
   });
 
   it("refuses edited dates in an existing page (the publish job owns them)", () => {
-    const v = run({ [BLOG]: BASE_PAGE }, { [BLOG]: edit(BASE_PAGE, 'const MODIFIED_AT = "2026-07-01";', 'const MODIFIED_AT = "2026-09-27";') });
+    // A pre-F2 literal page.
+    const literal = run({ [BLOG]: LITERAL_PAGE }, { [BLOG]: edit(LITERAL_PAGE, 'const MODIFIED_AT = "2026-07-01";', 'const MODIFIED_AT = "2026-09-27";') });
+    expect(rules(literal)).toContain("date-edit");
+  });
+
+  it("refuses a build-time date in an F2-wired page, however it is written", () => {
+    const wiring = MODIFIED_LINE("cap-rate-guide");
+    const cases: Array<[string, string]> = [
+      ["MODIFIED_AT from the clock", edit(BASE_PAGE, wiring, "const MODIFIED_AT = new Date().toISOString().slice(0, 10);")],
+      // The wiring text survives in a comment (the pre-fix contract test only looked for the text).
+      ["the wiring moved into a comment", edit(BASE_PAGE, wiring, `// ${wiring.slice("const MODIFIED_AT = ".length)}\nconst MODIFIED_AT = new Date().toISOString().slice(0, 10);`)],
+      ["JSON-LD dateModified from the clock", edit(BASE_PAGE, "  dateModified: MODIFIED_AT,", "  dateModified: new Date().toISOString(),")],
+      ["the MODIFIED_AT const removed", edit(edit(BASE_PAGE, `${wiring}\n`, ""), "  dateModified: MODIFIED_AT,", '  dateModified: lastmodFor("/blog/cap-rate-guide"),')],
+      ["a second modified date added", edit(BASE_PAGE, wiring, `${wiring}\nconst UPDATED_AT = "2026-09-27";`)],
+      ["openGraph modifiedTime added", edit(BASE_PAGE, '  openGraph: { title: TITLE, description: "Read a cap rate." },', '  openGraph: { title: TITLE, description: "Read a cap rate.", modifiedTime: new Date().toISOString() },')],
+    ];
+    for (const [label, after] of cases) {
+      expect(rules(run({ [BLOG]: BASE_PAGE }, { [BLOG]: after })), label).toContain("date-edit");
+    }
+    // A body edit, and a reflow of the wiring, leave the dates alone.
+    const body = run({ [BLOG]: BASE_PAGE }, { [BLOG]: edit(BASE_PAGE, "<p>Cap rate is net operating income divided by price.</p>", "<p>Cap rate is NOI divided by the price you pay.</p>") });
+    expect(details(body)).toBe("");
+    const reflow = run({ [BLOG]: BASE_PAGE }, { [BLOG]: edit(BASE_PAGE, wiring, 'const MODIFIED_AT =\n  lastmodFor("/blog/cap-rate-guide") ?? PUBLISHED_AT;') });
+    expect(rules(reflow)).not.toContain("date-edit");
+  });
+
+  it("refuses an ARTICLE.modifiedAt edit in a source-first post", () => {
+    const FILE = "app/blog/source-first/page.tsx";
+    const article = (modified: string): string =>
+      [
+        'import { lastmodFor } from "@/lib/seo/lastmod";',
+        'const PUBLISHED_AT = "2026-05-24";',
+        `const ARTICLE = { title: "Cap rates", publishedAt: PUBLISHED_AT, modifiedAt: ${modified} };`,
+        "export default function Page() {",
+        "  return <main><h1>{ARTICLE.title}</h1></main>;",
+        "}",
+        "",
+      ].join("\n");
+    const v = run({ [FILE]: article('lastmodFor("/blog/source-first") ?? PUBLISHED_AT') }, { [FILE]: article("new Date().toISOString()") }, { sitemap: [...SITEMAP, "/blog/source-first"] });
     expect(rules(v)).toContain("date-edit");
+  });
+});
+
+describe("a new post's dates (the lastmod map owns MODIFIED_AT)", () => {
+  const NEW = "app/blog/brand-new/page.tsx";
+  const manifest = { changes: [{ path: "/blog/brand-new", file: NEW, newArticle: true }] };
+  const fresh = pageFor("brand-new").replace('<p>See <Link href="/legacy-page">the old page</Link>.</p>\n', "");
+  const newPost = (content: string): VerifyVerdict => run({ [BLOG]: BASE_PAGE }, { [NEW]: content }, { manifest });
+
+  it("accepts MODIFIED_AT wired to the map for its own path", () => {
+    expect(details(newPost(fresh))).toBe("");
+  });
+
+  it("refuses a literal, a clock read, another page's entry, or a JSON-LD date that bypasses MODIFIED_AT", () => {
+    const wiring = MODIFIED_LINE("brand-new");
+    const cases: Array<[string, string]> = [
+      ["a literal MODIFIED_AT (the pre-F2 skill text)", edit(fresh, wiring, 'const MODIFIED_AT = "2026-10-05";')],
+      ["a clock read", edit(fresh, wiring, "const MODIFIED_AT = new Date().toISOString().slice(0, 10);")],
+      ["another page's map entry", edit(fresh, wiring, MODIFIED_LINE("cap-rate-guide"))],
+      ["no MODIFIED_AT at all", edit(edit(fresh, `${wiring}\n`, ""), "  dateModified: MODIFIED_AT,", "  dateModified: PUBLISHED_AT,")],
+      ["a JSON-LD dateModified from the clock", edit(fresh, "  dateModified: MODIFIED_AT,", "  dateModified: new Date().toISOString(),")],
+      ["a PUBLISHED_AT from the clock", edit(fresh, 'const PUBLISHED_AT = "2026-07-01";', "const PUBLISHED_AT = new Date().toISOString().slice(0, 10);")],
+    ];
+    for (const [label, content] of cases) {
+      expect(rules(newPost(content)), label).toContain("date-wiring");
+    }
   });
 });
 
@@ -930,7 +1000,7 @@ describe("new articles", () => {
   const newArticle = (extra: Record<string, unknown> = {}): unknown => ({ changes: [{ path: "/blog/brand-new", file: NEW, newArticle: true, ...extra }] });
 
   it("allows a declared new article and lets it link to itself before the sitemap knows it", () => {
-    const page = edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <Link href="/blog/brand-new#faq">FAQ</Link> and <Link href="/blog/dscr">DSCR</Link>.</p>');
+    const page = edit(pageFor("brand-new"), "<p>Read the guide on DSCR next.</p>", '<p>Read the <Link href="/blog/brand-new#faq">FAQ</Link> and <Link href="/blog/dscr">DSCR</Link>.</p>');
     const v = run({ [BLOG]: BASE_PAGE }, { [NEW]: page.replace('<p>See <Link href="/legacy-page">the old page</Link>.</p>\n', "") }, { manifest: newArticle() });
     expect(details(v)).toBe("");
     expect(v.caps.newArticles).toBe(1);
@@ -1176,7 +1246,7 @@ describe("git sandbox (real git apply + the gate-1b scanner)", () => {
   });
 
   it("folds the scanner's findings into violations", () => {
-    const after = { [BLOG]: edit(BASE_PAGE, 'const MODIFIED_AT = "2026-07-01";', 'const MODIFIED_AT = "2026-07-01";\nconst NOTE = "node:fs";') };
+    const after = { [BLOG]: edit(BASE_PAGE, 'const PUBLISHED_AT = "2026-07-01";', 'const PUBLISHED_AT = "2026-07-01";\nconst NOTE = "node:fs";') };
     const v = run({ [BLOG]: BASE_PAGE }, after, { sandbox: gitSandbox });
     expect(v.violations.some((x) => x.rule === "content-scan" && x.path === BLOG && x.detail.includes("node-builtin-import"))).toBe(true);
   });
@@ -1301,7 +1371,7 @@ describe("main (CLI)", () => {
   });
 
   const NEW = "app/blog/zz-verify-static-cli-test/page.tsx";
-  const page = BASE_PAGE.replace('<p>See <Link href="/legacy-page">the old page</Link>.</p>\n', "");
+  const page = pageFor("zz-verify-static-cli-test").replace('<p>See <Link href="/legacy-page">the old page</Link>.</p>\n', "");
 
   function setup(content: string): { dir: string; args: string[] } {
     const dir = tmp();

@@ -11,6 +11,7 @@ import GlossaryTermPage from "@/app/glossary/[slug]/page";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { NOINDEX_PATHS } from "@/lib/seo/noindex";
 import { LASTMOD, lastmodFor, lastmodOrPublished } from "@/lib/seo/lastmod";
+import { postDateWiringViolations } from "../../seo/scripts/verify-static.ts";
 
 /**
  * F2: content/seo/lastmod.json is the ONE source of last-modified dates.
@@ -87,14 +88,20 @@ describe("lastmod map contract", () => {
   });
 
   it("wires every post's MODIFIED_AT to the map (its JSON-LD dateModified and visible Updated line follow)", () => {
+    // Read from the TypeScript AST (verify-static's date slots), not as text: the
+    // wiring must BE the MODIFIED_AT initializer (a copy in a comment does not
+    // count), dateModified/modifiedTime must name MODIFIED_AT, and no date slot
+    // may read the clock. The loop's fence applies the same rule to a new post.
     const blogDir = join(ROOT, "app", "blog");
     const unwired: string[] = [];
+    let posts = 0;
     for (const slug of readdirSync(blogDir)) {
-      const file = join("app", "blog", slug, "page.tsx");
+      const file = `app/blog/${slug}/page.tsx`;
       if (slug === "topics" || !existsSync(join(ROOT, file))) continue;
-      const source = read(file);
-      if (!source.includes(`lastmodFor("/blog/${slug}") ?? PUBLISHED_AT`)) unwired.push(slug);
+      posts += 1;
+      for (const problem of postDateWiringViolations(file, read(file))) unwired.push(`${slug}: ${problem}`);
     }
+    expect(posts).toBeGreaterThanOrEqual(75);
     expect(unwired).toEqual([]);
   });
 
