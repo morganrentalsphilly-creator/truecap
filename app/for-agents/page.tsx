@@ -35,6 +35,7 @@ import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 import { Header } from "@/components/investcalc/header";
+import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Win the Investor. Keep the Investor.",
@@ -366,17 +367,17 @@ export default async function ForAgentsPage() {
             Put the calculators on your own website
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
-            Every TrueCap calculator can be embedded on your site with a
-            one-line snippet (with &ldquo;Powered by TrueCap&rdquo; attribution)
-            — a working cap-rate or DSCR calculator on your agent site keeps
-            investor visitors on YOUR page instead of sending them off to
-            research alone. Grab the snippet from the &ldquo;Embed this
-            calculator&rdquo; block on any{" "}
+            {EMBEDDABLE_COUNT} of TrueCap&apos;s {CALCULATOR_COUNT} free
+            calculators can be embedded on your site with a copy-and-paste
+            snippet that carries a &ldquo;Powered by TrueCap&rdquo; credit — a
+            working calculator on your agent site keeps investor visitors on
+            YOUR page instead of sending them off to research alone. Copy a
+            snippet from the{" "}
             <Link
-              href="/tools"
+              href="/embed"
               className="text-primary font-semibold hover:underline"
             >
-              free calculator page
+              embed page
             </Link>
             .
           </p>
