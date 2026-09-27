@@ -73,6 +73,19 @@ export function pageUrlForFile(file: string): string | null {
   return editableSourceFor(url) === `app/${m[1]}/${m[2]}/page.tsx` ? url : null;
 }
 
+/**
+ * Pages a shared, loop-editable file always changes, whatever the run
+ * manifest declares. lib/blog-posts.ts is /blog's content: the /blog page
+ * lists every row, and `lastmod.ts seed` counts the file as a /blog source.
+ * So a registry edit (a new row, a title or excerpt) re-renders /blog and must
+ * move /blog's lastmod exactly as a re-seed would. /blog is excluded from
+ * optimization, so a manifest may never name it; verify-static declares it
+ * from here instead (render-diff, the publish plan's lastmodUrls).
+ */
+export function derivedPagesForFile(file: string): string[] {
+  return file === "lib/blog-posts.ts" ? ["/blog"] : [];
+}
+
 /** An OG image module: it changes the share card, not the page's main content. */
 export function isOgImageFile(file: string): boolean {
   return /^app\/(?:blog|vs|research)\/[^/]+\/opengraph-image\.tsx$/.test(file);

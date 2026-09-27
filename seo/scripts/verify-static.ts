@@ -88,7 +88,7 @@ import type { Args } from "./lib/cli.ts";
 import { check, flagNumber, flagString, hasFlag, log, runMain } from "./lib/cli.ts";
 import type { SeoConfig } from "./lib/config.ts";
 import { globMatch, loadConfig, matchesAny } from "./lib/config.ts";
-import { pageUrlForFile } from "./lib/family.ts";
+import { derivedPagesForFile, pageUrlForFile } from "./lib/family.ts";
 import { decodeEntities } from "./lib/html.ts";
 import { cleanChangeType, isKnownChangeType, CHANGE_TYPES } from "./lib/change-types.ts";
 import { readJsonIfExists, writeJson } from "./lib/io.ts";
@@ -2094,6 +2094,11 @@ export function verify(input: VerifyInput): VerifyVerdict {
     if (url) {
       declared.add(url);
       addFileUrl(file.path, url);
+    }
+    // A registry edit always changes the hub that lists it (lib/blog-posts.ts → /blog).
+    for (const page of derivedPagesForFile(file.path)) {
+      declared.add(page);
+      addFileUrl(file.path, page);
     }
   }
   for (const url of newPaths) declared.add(url);

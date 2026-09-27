@@ -47,7 +47,8 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { flagString, requireFlag, runMain, check, log } from "./lib/cli.ts";
 import type { Args } from "./lib/cli.ts";
-import { loadConfig } from "./lib/config.ts";
+import { loadConfig, matchesAny } from "./lib/config.ts";
+import { derivedPagesForFile } from "./lib/family.ts";
 import { entrySignatures, entryStringField, entryTokens, statementSignatures, statementTokens } from "./lib/content-signature.ts";
 import type { EntryFields } from "./lib/content-signature.ts";
 import { readJson, writeJson, writeText } from "./lib/io.ts";
@@ -548,6 +549,13 @@ function selfTest(): void {
   check(sourcesFor("/glossary/cap-rate", none)?.[0].kind === "entry", "glossary terms are data entries");
   check(sourcesFor("/markets/erie", none)?.length === 3, "a market is its city, HUD and SAFMR entries");
   check(sourcesFor("/blog", none)?.some((s) => s.file === "lib/blog-posts.ts") === true, "/blog includes its registry");
+  // `bump` must move what a re-seed would: a loop-editable source of a core page makes verify-static declare that page.
+  const agentAllow = loadConfig().paths.agentAllow;
+  for (const [url, specs] of Object.entries(CORE_SOURCES)) {
+    for (const spec of specs) {
+      if (matchesAny(agentAllow, spec.file)) check(derivedPagesForFile(spec.file).includes(url), `${spec.file} is loop-editable, so an edit to it must declare ${url} (lib/family.ts derivedPagesForFile)`);
+    }
+  }
   check(sourcesFor("/nope", none) === null, "unknown URL");
   check(evidence(["/tools", "keep"], ["keep", "/analyze"]) === '-"/tools" +"/analyze"', "evidence lists removed and added tokens");
   check(redact("By Jane Q Doe, see /about#jane or jane@example.com") === "[Words], see /about#… or [email]", "evidence masks names, anchors and e-mails");

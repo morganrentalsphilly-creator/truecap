@@ -83,7 +83,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
 10. **Disclaimer.** Add no per-page "not tax, legal or investment advice" line: `docs/voice.md` allows one disclaimer per page, and that is the sitewide `<Disclaimer />` (owner-only).
     - Check whether the page makes tax or legal claims and `DISCLAIMER_TEXT` lacks the words "tax" and "legal".
     - If so, add ONE `issues` entry per run (not one per page), titled "Sitewide disclaimer lacks tax/legal wording", listing the pages.
-11. **Registry.** Never edit the blog registry (`app/blog/page.tsx`, or `lib/blog-posts.ts` after F2). It re-renders `/blog`, which cannot be declared, so the render diff fails. If you changed or removed a figure that the post's registry excerpt quotes, add the slug and the stale excerpt to the run's single `issues` entry titled "Registry excerpts to sync" (create it the first time).
+11. **Registry.** Never edit the blog registry (`app/blog/page.tsx`, or `lib/blog-posts.ts` after F2). It re-renders the topic hubs and other posts' related-post blocks, which this skill cannot declare, so the render diff fails (verify-static declares only `/blog` for it). If you changed or removed a figure that the post's registry excerpt quotes, add the slug and the stale excerpt to the run's single `issues` entry titled "Registry excerpts to sync" (create it the first time).
 
 ## Gate checks (all must pass before you hand the change back)
 - **verify-static fence.** The model job cannot run it. In a local rehearsal, run `node seo/scripts/verify-static.ts --working-tree --base origin/main`. Otherwise check by hand:

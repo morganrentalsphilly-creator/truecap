@@ -35,6 +35,7 @@ import {
   workingTreePatch,
   type VerifyInput,
 } from "../../seo/scripts/verify-static.ts";
+import { buildPlan } from "../../seo/scripts/publish-plan.ts";
 import { parseArgs } from "../../seo/scripts/lib/cli.ts";
 import { loadConfig } from "../../seo/scripts/lib/config.ts";
 import type { VerifyVerdict } from "../../seo/scripts/lib/types.ts";
@@ -1353,6 +1354,29 @@ describe("demoted change types (brakes (d)) and the pages each file changes", ()
     const noindex = run({ "content/seo/noindex.json": NOINDEX_EMPTY }, { "content/seo/noindex.json": noindexOf(["/blog/dscr"]) }, { manifest: { changes: [{ path: "/blog/dscr", file: "content/seo/noindex.json" }] }, indexed: 60 });
     expect(noindex.files[0].urls).toEqual(["/blog/dscr"]);
     expect(noindex.noindexAdded).toEqual(["/blog/dscr"]);
+  });
+
+  it("a registry edit always changes /blog (the seed counts lib/blog-posts.ts as /blog's content), so publish bumps it", () => {
+    const REGISTRY = "lib/blog-posts.ts";
+    const registry = (excerpt: string): string =>
+      [
+        "export type BlogPost = { slug: string; title: string; excerpt: string; readingTimeMinutes: number; publishedAt: string; available: boolean };",
+        "export const BLOG_POSTS: BlogPost[] = [",
+        `  { slug: "cap-rate-guide", title: "Cap rate guide", excerpt: "${excerpt}", readingTimeMinutes: 6, publishedAt: "2026-07-01", available: true },`,
+        "];",
+        "",
+      ].join("\n");
+    const manifest = { changes: [{ path: "/blog/cap-rate-guide", file: REGISTRY, skill: "seo-ctr", changeType: "title-meta", summary: "s" }] };
+    const v = run({ [REGISTRY]: registry("5 free reports.") }, { [REGISTRY]: registry("five free reports.") }, { manifest, sitemap: [...SITEMAP, "/blog"] });
+    expect(details(v)).toBe("");
+    expect(v.files[0]).toMatchObject({ path: REGISTRY, url: null, urls: ["/blog", "/blog/cap-rate-guide"] });
+    expect(v.declaredUrls).toEqual(["/blog", "/blog/cap-rate-guide"]);
+    // The publish plan's lastmodUrls (what `lastmod.ts bump` moves) follow the verdict.
+    const plan = buildPlan("7", v, { verdicts: [{ file: REGISTRY, verdict: "APPROVE", reasons: [] }] });
+    expect(plan.lastmodUrls).toEqual(["/blog", "/blog/cap-rate-guide"]);
+    // A manifest still may not name /blog itself: it is excluded from optimization.
+    const claimed = run({ [REGISTRY]: registry("5 free reports.") }, { [REGISTRY]: registry("five free reports.") }, { manifest: { changes: [{ path: "/blog", file: REGISTRY }] }, sitemap: [...SITEMAP, "/blog"] });
+    expect(rules(claimed)).toContain("manifest");
   });
 });
 
