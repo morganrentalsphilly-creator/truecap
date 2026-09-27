@@ -224,7 +224,7 @@ export default function EmbedHubPage() {
             {[
               {
                 q: "Can I customize the calculator's look?",
-                a: "No. Inside the frame the calculator uses TrueCap's own styling, and the embed has no color, font, or branding settings. The snippet's style attribute sets only the frame's width and starting height on your page; the height then adjusts to the calculator.",
+                a: "No. Inside the frame the calculator uses TrueCap's own styling, and the embed has no color, font, or branding settings. On your page, the snippet's inline styles only lay out the frame (full width up to 640px, a starting height that then adjusts to the calculator, no border, on its own line) and set the small gray text of the credit line under it.",
               },
               {
                 q: "Do I have to keep the 'Powered by TrueCap' credit?",
@@ -236,11 +236,11 @@ export default function EmbedHubPage() {
               },
               {
                 q: "Can I track conversions from my embed?",
-                a: "Not through TrueCap: there are no per-site reports. The frame loads with no referrer, so TrueCap does not learn which page embedded it. The 'Underwrite a full property in TrueCap' link inside the calculator carries utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign, so TrueCap can count embed traffic in aggregate. No link carries your site's identity or anything a visitor enters.",
+                a: "Not through TrueCap: there are no per-site reports. Snippets copied from this page load the frame with no referrer, so loading the calculator does not tell TrueCap which page it sits on. The 'Underwrite a full property in TrueCap' link inside the calculator carries utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign, so TrueCap can count embed traffic in aggregate. No link carries your site's identity or anything a visitor enters.",
               },
               {
                 q: "What if the calculator changes?",
-                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet, and snippets copied earlier keep working as they are. Keep the credit line intact and periodically verify the embed as part of your own site checks.",
+                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet. Snippets for the calculators listed on this page keep working. If we withdraw a calculator, a frame that still points at it shows TrueCap's 'page not found' page instead. Keep the credit line intact and check the embed as part of your own site checks.",
               },
             ].map((f) => (
               <details key={f.q} className="group p-5">

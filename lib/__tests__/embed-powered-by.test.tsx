@@ -18,7 +18,10 @@
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import EmbedPage from "@/app/embed/[slug]/page";
+import EmbedPage, {
+  dynamicParams,
+  generateStaticParams,
+} from "@/app/embed/[slug]/page";
 import EmbedHubPage from "@/app/embed/page";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import {
@@ -26,6 +29,7 @@ import {
   CALCULATOR_REGISTRY,
   EMBEDDABLE_CALCULATORS,
   EMBEDDABLE_COUNT,
+  UNRELEASED_UNDERWRITING_CALCULATORS,
 } from "@/lib/calculator-registry";
 import { EMBED_LIST } from "@/lib/embed-registry";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
@@ -64,6 +68,37 @@ function anchorsIn(html: string): Anchor[] {
 function snippetsIn(html: string): string[] {
   return [...html.matchAll(/<code>([\s\S]*?)<\/code>/g)].map((match) =>
     decodeEntities(match[1]),
+  );
+}
+
+/** The answer text of one /embed FAQ entry, found by its question. */
+function faqAnswer(html: string, question: string): string {
+  for (const match of html.matchAll(
+    /<details\b[^>]*><summary\b[^>]*>([\s\S]*?)<\/summary><p\b[^>]*>([\s\S]*?)<\/p><\/details>/g,
+  )) {
+    if (textOf(match[1]) === question) return textOf(match[2]);
+  }
+  throw new Error(`no FAQ entry "${question}"`);
+}
+
+/** The inline style of the first <tag> in a snippet, as property -> value. */
+function inlineStyleOf(snippet: string, tag: string): Record<string, string> {
+  const style = snippet.match(
+    new RegExp(`<${tag}\\b[^>]*\\sstyle="([^"]*)"`),
+  )?.[1];
+  if (style === undefined) throw new Error(`no styled <${tag}> in snippet`);
+  return Object.fromEntries(
+    style
+      .split(";")
+      .map((declaration) => declaration.trim())
+      .filter(Boolean)
+      .map((declaration) => {
+        const colon = declaration.indexOf(":");
+        return [
+          declaration.slice(0, colon).trim(),
+          declaration.slice(colon + 1).trim(),
+        ];
+      }),
   );
 }
 
@@ -172,7 +207,9 @@ describe("the /embed hub", () => {
     const html = renderToStaticMarkup(EmbedHubPage());
     const text = textOf(html);
 
-    // Counts and the page-only list come from the registry.
+    // Counts and the page-only list match today's registry. That alone cannot
+    // tell a derived count from a hard-coded one; the "changed registry" test
+    // below does.
     const pageOnly = CALCULATOR_REGISTRY.filter((c) => !c.embeddable);
     expect(text).toContain(`${EMBEDDABLE_COUNT} embeddable`);
     expect(text).toContain(`Of ${CALCULATOR_COUNT} TrueCap calculators`);
@@ -208,5 +245,138 @@ describe("the /embed hub", () => {
     // No ranking promise: the calculator renders in our noindexed iframe.
     expect(text).not.toMatch(/ranks? for/i);
     expect(text).not.toContain("Not in v1");
+  });
+
+  it("derives every count from the registry: a changed registry changes the hub", async () => {
+    // Releasing BRRRR adds one calculator page and one embed. Re-import the
+    // registry and the hub under that flag, so a count typed into the page
+    // (instead of read from the registry) no longer matches.
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
+    vi.stubEnv("NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL", "true");
+    vi.resetModules();
+    try {
+      const registry = await import("@/lib/calculator-registry");
+      const hub = await import("@/app/embed/page");
+      const server = await import("react-dom/server");
+
+      // The probe proves nothing unless the registry actually moved.
+      expect(registry.EMBEDDABLE_COUNT).toBe(EMBEDDABLE_COUNT + 1);
+      expect(registry.CALCULATOR_COUNT).toBe(CALCULATOR_COUNT + 1);
+
+      const embeddable = registry.EMBEDDABLE_COUNT;
+      const total = registry.CALCULATOR_COUNT;
+      const html = server.renderToStaticMarkup(hub.default());
+      const text = textOf(html);
+      expect(text).toContain(`${embeddable} embeddable`);
+      expect(text).toContain(`Of ${total} TrueCap calculators`);
+      expect(text).toContain(`${embeddable} available`);
+      expect(text).toContain(`${embeddable} of our ${total} free calculators`);
+      expect(snippetsIn(html)).toHaveLength(embeddable);
+      expect(hub.metadata.description).toContain(
+        `Embed ${embeddable} of TrueCap's free`,
+      );
+      expect(hub.metadata.openGraph?.description).toContain(
+        `${embeddable} free embeddable calculators`,
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    }
+  });
+
+  it("describes the snippet's inline styles as they are", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
+    const html = renderToStaticMarkup(EmbedHubPage());
+    const answer = faqAnswer(html, "Can I customize the calculator's look?");
+    const snippets = snippetsIn(html);
+    expect(snippets).toHaveLength(EMBED_LIST.length);
+
+    // Every property the snippet styles is one the answer accounts for. A new
+    // property here means the answer needs a new clause.
+    for (const snippet of snippets) {
+      const frame = inlineStyleOf(snippet, "iframe");
+      expect(Object.keys(frame).sort()).toEqual([
+        "border",
+        "display",
+        "height",
+        "max-width",
+        "width",
+      ]);
+      expect(frame).toMatchObject({
+        width: "100%",
+        "max-width": "640px",
+        border: "0",
+        display: "block",
+      });
+      expect(frame.height).toMatch(/^\d+px$/);
+      expect(Object.keys(inlineStyleOf(snippet, "p")).sort()).toEqual([
+        "color",
+        "font",
+        "margin",
+        "max-width",
+      ]);
+    }
+    expect(answer).toContain(
+      "the snippet's inline styles only lay out the frame (full width up to 640px, a starting height that then adjusts to the calculator, no border, on its own line) and set the small gray text of the credit line under it.",
+    );
+    expect(answer).not.toContain("sets only the frame's width and starting height");
+  });
+
+  it("claims no referrer only for the snippet it hands out", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
+    const html = renderToStaticMarkup(EmbedHubPage());
+    const answer = faqAnswer(html, "Can I track conversions from my embed?");
+    const snippets = snippetsIn(html);
+    expect(snippets).toHaveLength(EMBED_LIST.length);
+    for (const snippet of snippets) {
+      expect(snippet).toMatch(/<iframe\b[^>]*\sreferrerpolicy="no-referrer"/);
+    }
+    // Snippets copied before 2026-08-30 have no referrerpolicy, so their frame
+    // request does carry the partner's origin. The claim must not cover them.
+    expect(answer).toContain(
+      "Snippets copied from this page load the frame with no referrer, so loading the calculator does not tell TrueCap which page it sits on.",
+    );
+    expect(answer).not.toContain("The frame loads with no referrer");
+  });
+
+  it("says a withdrawn calculator's embed stops loading, and it does", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
+    const answer = faqAnswer(
+      renderToStaticMarkup(EmbedHubPage()),
+      "What if the calculator changes?",
+    );
+    expect(answer).toContain(
+      "Snippets for the calculators listed on this page keep working.",
+    );
+    expect(answer).toContain(
+      "If we withdraw a calculator, a frame that still points at it shows TrueCap's 'page not found' page instead.",
+    );
+    expect(answer).not.toMatch(/copied earlier keep working/);
+
+    // Listed calculators are the only prerendered embed paths, and no other
+    // slug is rendered on demand.
+    expect(dynamicParams).toBe(false);
+    const listed: string[] = (await generateStaticParams()).map(
+      (param) => param.slug,
+    );
+    expect([...listed].sort()).toEqual(
+      EMBED_LIST.map((entry) => entry.slug).sort(),
+    );
+
+    // Calculators the hub handed out snippets for until 2026-08-28 and has
+    // since withdrawn: their frames get the 404 page.
+    const withdrawn = [
+      ...UNRELEASED_UNDERWRITING_CALCULATORS,
+      "brrrr-calculator",
+      "rental-property-tax-calculator",
+    ].filter((slug) => !listed.includes(slug));
+    expect(withdrawn.length).toBeGreaterThanOrEqual(
+      UNRELEASED_UNDERWRITING_CALCULATORS.length,
+    );
+    for (const slug of withdrawn) {
+      await expect(renderEmbedPage(slug), slug).rejects.toMatchObject({
+        digest: "NEXT_HTTP_ERROR_FALLBACK;404",
+      });
+    }
   });
 });
