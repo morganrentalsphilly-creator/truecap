@@ -1109,3 +1109,35 @@ describe("pre-existing fence failures", () => {
     expect(preexistingFenceFailure("no html injection here")).toBe(false);
   });
 });
+
+describe("market-data thin tag (F8, lib/markets/thin.ts)", () => {
+  it("tags MARKET_ENRICH on a page that crawled as data-market-data=thin, and only there", async () => {
+    const { MARKET_DATA_THIN_TAG } = await import("../../seo/scripts/score.ts");
+    const market = (p: string, marketData: "thin" | "enriched" | null) =>
+      ({ ...page(p, { family: "market-city" }), marketData }) as CrawlPage;
+    const out = buildCandidates(
+      {
+        generatedAt: `${TODAY}T08:00:00.000Z`,
+        today: TODAY,
+        gsc: null,
+        indexStatus: null,
+        crawl: crawlOf([market("/markets/boise", "thin"), market("/markets/columbus", "enriched"), market("/markets/reno", null)]),
+        ledger: [],
+        sitemapPaths: ["/markets/boise", "/markets/columbus", "/markets/reno"],
+        redirectStatus: new Map(),
+        marketFacts: new Set<string>(),
+        knownBacklinks: null,
+      },
+      cfg,
+    );
+    const detail = (p: string) => out.candidates.find((c) => c.path === p)?.reasons.find((r) => r.reason === "MARKET_ENRICH")?.detail ?? "";
+    expect(MARKET_DATA_THIN_TAG).toBe("market-data-thin");
+    expect(detail("/markets/boise")).toContain(`tag: ${MARKET_DATA_THIN_TAG}`);
+    expect(detail("/markets/columbus")).not.toContain(MARKET_DATA_THIN_TAG);
+    expect(detail("/markets/reno")).not.toContain(MARKET_DATA_THIN_TAG);
+    // A signal, never an index rule: every page stays a MARKET_ENRICH candidate for seo-market-enrich.
+    for (const p of ["/markets/boise", "/markets/columbus", "/markets/reno"]) {
+      expect(out.candidates.find((c) => c.path === p)?.skill).toBe("seo-market-enrich");
+    }
+  });
+});

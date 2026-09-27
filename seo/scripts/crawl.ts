@@ -134,8 +134,28 @@ export type FetchedPage = { status: number; location: string | null; xRobotsTag:
  *   xRobotsTag    — the header `noindex` also reads, kept for diagnosis
  *   externalHosts — distinct hosts linked from the main content, so score.ts
  *                   can test NEEDS_CITATIONS against primarySourceDomains
+ *   marketData    — a /markets page's `data-market-data` attribute on <main>
+ *                   ("thin": no SAFMR ZIP rows and no market-facts entry,
+ *                   lib/markets/thin.ts), or null when the page carries none;
+ *                   score.ts tags MARKET_ENRICH with it
  */
-export type CrawlPageRecord = CrawlPage & { fetchError: string | null; xRobotsTag: string | null; externalHosts: string[] };
+export type CrawlPageRecord = CrawlPage & {
+  fetchError: string | null;
+  xRobotsTag: string | null;
+  externalHosts: string[];
+  /** Optional: crawls written before F8 lack it. */
+  marketData?: MarketDataSignal;
+};
+
+/** The market templates' thin flag as crawled (lib/markets/thin.ts). */
+export type MarketDataSignal = "thin" | "enriched" | null;
+
+/** Reads `data-market-data="thin|enriched"` off the page's <main>; null when absent. */
+export function marketDataOf(html: string): MarketDataSignal {
+  const main = /<main\b[^>]*>/i.exec(html)?.[0] ?? "";
+  const value = /\bdata-market-data="(thin|enriched)"/.exec(main)?.[1];
+  return value === "thin" || value === "enriched" ? value : null;
+}
 
 export type LinkCheckSummary = {
   targets: number;
@@ -529,6 +549,7 @@ export function buildCrawlPage(
     textFile: textFileFor(entry.path),
     fetchError: fetched.error,
     xRobotsTag: fetched.xRobotsTag,
+    marketData: fetched.status === 200 ? marketDataOf(fetched.body) : null,
   };
   if (fetched.status !== 200) {
     return {
@@ -1038,6 +1059,9 @@ function selfTest(): void {
   check(built.page.canonicalIsSelf === true && !built.page.noindex, "self canonical, indexable");
   check(built.page.outboundInternal === 1 && built.page.outboundExternal === 1, "nav links are not counted as outbound content links");
   check(built.page.externalHosts.join() === "www.irs.gov", "external hosts recorded");
+  check(built.page.marketData === null, "a page without the market attribute has no market-data signal");
+  check(marketDataOf('<body><main id="main" data-market-data="thin" class="x">') === "thin", "market-data thin read off <main>");
+  check(marketDataOf('<main data-market-data="enriched">') === "enriched" && marketDataOf('<div data-market-data="thin"><main>') === null, "only <main> carries the signal");
 
   const pages = [built.page, { ...built.page, path: "/blog/dup", canonicalIsSelf: false, depth: 4 }, { ...built.page, path: "/gone", status: 404, title: null }];
   const issues = computeIssues(pages, { ran: true, orphans: [] }, []);
