@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "capex-maintenance-reserves-rental-property";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "CapEx & maintenance reserves for rentals (2026)";
 const DESCRIPTION =
   "The component-lifespan method for capex and maintenance reserves, worked numbers on a $220K rental, and what real reserves do to NOI, DSCR, and cash flow.";
 const PUBLISHED_AT = "2026-06-11";
-const MODIFIED_AT = "2026-09-04";
+const MODIFIED_AT = lastmodFor("/blog/capex-maintenance-reserves-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

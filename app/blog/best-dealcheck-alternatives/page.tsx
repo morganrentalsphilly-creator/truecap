@@ -29,6 +29,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-dealcheck-alternatives";
 const TITLE_PLAIN = "7 Best DealCheck Alternatives for Rental Analysis (2026)";
@@ -38,7 +39,7 @@ const SERP_TITLE = "7 Best DealCheck Alternatives (2026)";
 const DESCRIPTION =
   "Seven DealCheck alternatives for 2026 — TrueCap, BiggerPockets, Stessa, Mashvisor, RentCast, Rentometer, spreadsheets — plus when to stick with DealCheck.";
 const PUBLISHED_AT = "2026-07-14";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/best-dealcheck-alternatives") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

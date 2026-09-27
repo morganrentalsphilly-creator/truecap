@@ -32,6 +32,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "BiggerPockets vs TrueCap for House Hacking (2026)",
@@ -251,7 +252,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
     url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,
     description:
       "House-hack-specific comparison of TrueCap and BiggerPockets — owner-occupant modeling, FHA financing, effective rent saved.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/biggerpockets-for-house-hacking"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import sitemap, { SITE_OVERHAUL_LAST_MODIFIED } from "@/app/sitemap";
+import sitemap from "@/app/sitemap";
+import { lastmodFor } from "@/lib/seo/lastmod";
 import { getRelatedContent, tokensOf } from "@/lib/related-content";
 import { buildAggregateRating } from "@/lib/schema/aggregate-rating";
 
@@ -10,13 +11,13 @@ const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
 /** Phase 8 (docs/site-overhaul.md): structural SEO rules. */
 describe("SEO contract", () => {
-  it("gives every sitemap URL a lastmod", () => {
+  it("gives every sitemap URL its lastmod from the one date source (content/seo/lastmod.json)", () => {
     const entries = sitemap();
     expect(entries.length).toBeGreaterThan(100);
     for (const entry of entries) {
       expect(entry.lastModified, entry.url).toBeTruthy();
+      expect(entry.lastModified, entry.url).toBe(lastmodFor(new URL(entry.url).pathname));
     }
-    expect(SITE_OVERHAUL_LAST_MODIFIED.toISOString().startsWith("2026-09-06")).toBe(true);
   });
 
   it("keeps aggregateRating out until five published numeric ratings exist", () => {

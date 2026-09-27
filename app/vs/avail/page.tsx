@@ -34,6 +34,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Avail vs TrueCap (2026): Manage vs Underwrite",
@@ -172,7 +173,7 @@ export default function VsAvailPage() {
     url: `${siteUrl}/vs/avail`,
     description:
       "Side-by-side comparison of TrueCap (rental underwriting calculator) and Avail (DIY landlord operations).",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/avail"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

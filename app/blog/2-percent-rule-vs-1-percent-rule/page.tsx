@@ -27,6 +27,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "2-percent-rule-vs-1-percent-rule";
 const TITLE =
@@ -38,7 +39,7 @@ const SERP_TITLE = "2% Rule vs 1% Rule for Rentals (2026)";
 const DESCRIPTION =
   "The 1% and 2% rules are the same rent-to-price screen at two bars. What each one really tests, why the 2% rule is nearly extinct, and worked numbers.";
 const PUBLISHED_AT = "2026-07-20";
-const MODIFIED_AT = "2026-07-20";
+const MODIFIED_AT = lastmodFor("/blog/2-percent-rule-vs-1-percent-rule") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

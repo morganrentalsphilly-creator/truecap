@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "operating-expense-ratio-rental-property";
 const TITLE_PLAIN =
@@ -38,7 +39,7 @@ const SERP_TITLE = "Operating expense ratio (OER) for rentals (2026)";
 const DESCRIPTION =
   "OER = operating expenses ÷ effective gross income. The formula, what counts (and what doesn't), 2026 benchmark bands, and a worked duplex.";
 const PUBLISHED_AT = "2026-07-06";
-const MODIFIED_AT = "2026-07-06";
+const MODIFIED_AT = lastmodFor("/blog/operating-expense-ratio-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

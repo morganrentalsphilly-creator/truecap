@@ -34,6 +34,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 
@@ -117,7 +118,7 @@ export default function RentalPropertySpreadsheetPage() {
     encodingFormat:
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     isAccessibleForFree: true,
-    dateModified: "2026-08-27",
+    dateModified: lastmodFor("/tools/rental-property-spreadsheet"),
     description:
       "Free rental property analysis spreadsheet: monthly cash flow, NOI, cap rate, cash-on-cash, DSCR, 10-year projection, and a metric quick-reference. Direct download, no email gate.",
     publisher: {

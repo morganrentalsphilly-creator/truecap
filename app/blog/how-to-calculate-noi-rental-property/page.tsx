@@ -26,6 +26,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-calculate-noi-rental-property";
 const TITLE =
@@ -37,7 +38,7 @@ const SERP_TITLE = "How to calculate NOI on a rental property (2026)";
 const DESCRIPTION =
   "NOI = gross income minus operating expenses, before the mortgage. The formula, a full $250K duplex worked example, and how NOI drives cap rate and DSCR.";
 const PUBLISHED_AT = "2026-06-16";
-const MODIFIED_AT = "2026-06-16";
+const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-noi-rental-property") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

@@ -29,6 +29,18 @@ import {
 import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
+
+/** The page's last significant change (content/seo/lastmod.json): the visible line and dateModified agree. */
+const METHODOLOGY_MODIFIED_AT = lastmodFor("/methodology");
+const LAST_UPDATED_LABEL = METHODOLOGY_MODIFIED_AT
+  ? new Date(`${METHODOLOGY_MODIFIED_AT}T00:00:00Z`).toLocaleDateString("en-US", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
 
 export const metadata: Metadata = {
   title: "Methodology",
@@ -75,7 +87,7 @@ export default function MethodologyPage() {
       "How TrueCap computes cap rate, cash-on-cash, DSCR, Offer Ceiling, Deal score, and 10-year cash-flow and equity projections, plus archived model notes.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-08-27",
+    dateModified: METHODOLOGY_MODIFIED_AT,
     author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -673,8 +685,8 @@ export default function MethodologyPage() {
         </article>
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
-          Last updated: August 27, 2026. We update this page whenever the
-          methodology materially changes.
+          {LAST_UPDATED_LABEL ? <>Last updated: {LAST_UPDATED_LABEL}. </> : null}
+          We update this page whenever the methodology materially changes.
         </footer>
       </main>
       <SiteFooter />

@@ -23,6 +23,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "mortgage-points-investment-property";
 const TITLE =
@@ -34,7 +35,7 @@ const SERP_TITLE = "Mortgage points on an investment property";
 const DESCRIPTION =
   "Use a lender's written rate-and-fee ladder to compare point cost, payment savings, break-even, DSCR, cash-on-cash, and taxpayer-specific treatment.";
 const PUBLISHED_AT = "2026-06-29";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/mortgage-points-investment-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

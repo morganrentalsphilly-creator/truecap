@@ -28,6 +28,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "debt-to-income-ratio-investment-property";
 const TITLE =
@@ -39,7 +40,7 @@ const SERP_TITLE = "Debt-to-income ratio for investment property";
 const DESCRIPTION =
   "See an illustrative 75% rental-income DTI calculation, house-hack example, and DSCR alternative. Actual lender methods and approval requirements vary.";
 const PUBLISHED_AT = "2026-07-04";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/debt-to-income-ratio-investment-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

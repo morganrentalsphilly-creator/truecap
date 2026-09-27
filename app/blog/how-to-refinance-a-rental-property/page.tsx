@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-refinance-a-rental-property";
 const TITLE = "How to refinance a rental property — rate-and-term, cash-out, and DSCR options";
@@ -26,7 +27,7 @@ const SERP_TITLE = "How to refinance a rental property (2026)";
 const DESCRIPTION =
   "How to refinance a rental property: rate-and-term vs cash-out, LTV and DSCR considerations, break-even math, and five mistakes to avoid.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-08-28";
+const MODIFIED_AT = lastmodFor("/blog/how-to-refinance-a-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

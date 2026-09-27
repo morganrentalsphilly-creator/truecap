@@ -17,13 +17,14 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-states-for-rental-investors-2026";
 const TITLE = "Best states for rental property investors in 2026";
 const DESCRIPTION =
   "The top 10 US states for rental property investors in 2026, ranked on cap rates, property tax, income tax, landlord laws, and which fits your strategy.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/best-states-for-rental-investors-2026") ?? PUBLISHED_AT;
 const READING_TIME = 12;
 
 export const metadata: Metadata = {

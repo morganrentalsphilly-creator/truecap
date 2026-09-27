@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "dealcheck-vs-biggerpockets-vs-truecap";
 const TITLE =
@@ -30,7 +31,7 @@ const SERP_TITLE = "DealCheck vs BiggerPockets vs TrueCap (2026)";
 const DESCRIPTION =
   "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-16";
+const MODIFIED_AT = lastmodFor("/blog/dealcheck-vs-biggerpockets-vs-truecap") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

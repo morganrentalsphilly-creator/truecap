@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
@@ -71,7 +72,7 @@ export default function VsRentometerPage() {
     name: "Rentometer vs TrueCap (2026): Rent vs Full Deal",
     url: `${siteUrl}/vs/rentometer`,
     description: "Side-by-side comparison of TrueCap and Rentometer.",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/vs/rentometer"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

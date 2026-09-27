@@ -26,6 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Fundrise vs TrueCap (2026): REIT vs Ownership",
@@ -78,7 +79,7 @@ export default function VsFundrisePage() {
     url: `${siteUrl}/vs/fundrise`,
     description:
       "Fundrise is a non-traded REIT for passive real estate exposure. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/fundrise"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

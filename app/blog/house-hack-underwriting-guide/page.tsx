@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "house-hack-underwriting-guide";
 const TITLE =
@@ -33,7 +34,7 @@ const SERP_TITLE = "House hack underwriting: does it beat renting?";
 const DESCRIPTION =
   "Does a house hack beat renting? The honest math on housing cost, down payment, mortgage paydown, appreciation, and being your tenants' landlord.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/house-hack-underwriting-guide") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {

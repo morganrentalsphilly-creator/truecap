@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "rental-property-pro-forma-explained";
 const TITLE = "How to read a rental property pro forma (and verify its assumptions)";
@@ -26,7 +27,7 @@ const SERP_TITLE = "How to read a rental property pro forma (2026)";
 const DESCRIPTION =
   "A pro forma is a seller's projection, not a result. Learn how to verify rent, vacancy, insurance, taxes, maintenance, reserves, management, and bad debt.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/rental-property-pro-forma-explained") ?? PUBLISHED_AT;
 const READING_TIME = 9;
 
 export const metadata: Metadata = {

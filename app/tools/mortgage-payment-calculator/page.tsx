@@ -14,6 +14,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free Mortgage Payment Calculator — Full PITI",
@@ -82,7 +83,7 @@ export default function MortgagePaymentPage() {
     name: "TrueCap Mortgage Payment Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/mortgage-payment-calculator"),
     url: `${siteUrl}/tools/mortgage-payment-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

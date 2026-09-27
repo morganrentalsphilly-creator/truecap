@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
@@ -146,7 +147,7 @@ export default function VsHostfullyPage() {
     url: `${siteUrl}/vs/hostfully`,
     description:
       "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how STR investors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/hostfully"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

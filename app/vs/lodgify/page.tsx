@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
@@ -144,7 +145,7 @@ export default function VsLodgifyPage() {
     url: `${siteUrl}/vs/lodgify`,
     description:
       "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Honest comparison plus how 1-10 unit STR investors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/lodgify"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

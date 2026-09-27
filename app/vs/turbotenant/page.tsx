@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
@@ -170,7 +171,7 @@ export default function VsTurbotenantPage() {
     url: `${siteUrl}/vs/turbotenant`,
     description:
       "TurboTenant runs rentals after closing. TrueCap shows Buy Box fit, an Offer Ceiling, and what to verify before you record your decision.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/turbotenant"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

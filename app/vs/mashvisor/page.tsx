@@ -31,6 +31,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Mashvisor Alternative: Free Deal Analysis (2026)",
@@ -178,7 +179,7 @@ export default function VsMashvisorPage() {
     url: `${siteUrl}/vs/mashvisor`,
     description:
       "Side-by-side comparison of TrueCap and Mashvisor for rental investors.",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/vs/mashvisor"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

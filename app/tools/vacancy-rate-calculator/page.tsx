@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -78,7 +79,7 @@ export default function VacancyRateCalculatorPage() {
     name: "Vacancy Rate Calculator — TrueCap",
     description: "Free rental property vacancy rate calculator.",
     url: `${siteUrl}/tools/vacancy-rate-calculator`,
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/vacancy-rate-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

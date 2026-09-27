@@ -19,6 +19,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free NOI Calculator — Net Operating Income + OpEx",
@@ -94,7 +95,7 @@ export default function NoiCalculatorPage() {
     name: "TrueCap NOI Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/noi-calculator"),
     url: `${siteUrl}/tools/noi-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

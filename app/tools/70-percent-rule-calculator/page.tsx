@@ -26,6 +26,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -88,7 +89,7 @@ export default function SeventyPercentRuleCalculatorPage() {
     name: "TrueCap 70% Rule Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/70-percent-rule-calculator"),
     url: `${siteUrl}/tools/70-percent-rule-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

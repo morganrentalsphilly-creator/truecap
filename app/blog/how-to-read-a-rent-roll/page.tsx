@@ -18,6 +18,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-read-a-rent-roll";
 const TITLE =
@@ -29,7 +30,7 @@ const SERP_TITLE = "How to read a rent roll before you buy (2026)";
 const DESCRIPTION =
   "How to read a rent roll: a worked fourplex example, the five places rent rolls mislead, and how to verify in-place rent before you buy a rental in 2026.";
 const PUBLISHED_AT = "2026-06-30";
-const MODIFIED_AT = "2026-06-30";
+const MODIFIED_AT = lastmodFor("/blog/how-to-read-a-rent-roll") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

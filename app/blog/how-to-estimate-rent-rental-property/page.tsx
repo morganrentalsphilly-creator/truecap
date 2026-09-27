@@ -20,13 +20,14 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-estimate-rent-rental-property";
 const TITLE = "How to estimate rent on a rental property (2026)";
 const DESCRIPTION =
   "Estimate market rent with a comp-adjustment grid, GRM and 1% cross-checks — and see what a $150/month rent miss does to cap rate, DSCR, and cash flow.";
 const PUBLISHED_AT = "2026-06-25";
-const MODIFIED_AT = "2026-06-25";
+const MODIFIED_AT = lastmodFor("/blog/how-to-estimate-rent-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

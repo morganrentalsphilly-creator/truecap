@@ -21,6 +21,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "depreciation-recapture-rental-property";
 const TITLE =
@@ -32,7 +33,7 @@ const SERP_TITLE = "Rental-property depreciation recapture";
 const DESCRIPTION =
   "A hypothetical rental-sale example: how adjusted basis, gain character, transaction structure, and taxpayer facts can affect depreciation-related tax.";
 const PUBLISHED_AT = "2026-06-14";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/depreciation-recapture-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

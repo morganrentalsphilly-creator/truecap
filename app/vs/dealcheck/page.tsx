@@ -23,6 +23,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "DealCheck Alternative for Rental Analysis (2026)",
@@ -113,7 +114,7 @@ export default function VsDealCheckPage() {
     url: `${siteUrl}/vs/dealcheck`,
     description:
       "Side-by-side comparison of TrueCap and DealCheck for rental property underwriting.",
-    dateModified: "2026-08-15",
+    dateModified: lastmodFor("/vs/dealcheck"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

@@ -20,6 +20,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "rental-property-llc";
 const TITLE = "Should you put your rental property in an LLC? (2026)";
@@ -30,7 +31,7 @@ const SERP_TITLE = "Rental property LLC: worth it in 2026?";
 const DESCRIPTION =
   "What an LLC does (and doesn't) for asset protection and taxes, the due-on-sale trap when you transfer a mortgaged rental, and when it's worth the cost.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-06-23";
+const MODIFIED_AT = lastmodFor("/blog/rental-property-llc") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {

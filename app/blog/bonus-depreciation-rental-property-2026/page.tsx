@@ -23,6 +23,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "bonus-depreciation-rental-property-2026";
 const TITLE =
@@ -34,7 +35,7 @@ const SERP_TITLE = "Bonus depreciation on rental property in 2026";
 const DESCRIPTION =
   "The 2026 bonus depreciation rate is 100% for eligible property acquired and placed in service after January 19, 2025. Learn what rental assets qualify.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/bonus-depreciation-rental-property-2026") ?? PUBLISHED_AT;
 const FACT_CHECKED_AT = "2026-08-15";
 const READING_TIME_MIN = 10;
 

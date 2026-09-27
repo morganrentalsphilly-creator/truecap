@@ -14,6 +14,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-rental-property-calculator-for-brrrr";
 const TITLE = "Best rental property calculator for BRRRR investors (2026)";
@@ -24,7 +25,7 @@ const SERP_TITLE = "Best rental property calculator for BRRRR (2026)";
 const DESCRIPTION =
   "A 2026 ranking of the best BRRRR calculators — TrueCap, DealCheck, BiggerPockets — and how a BRRRR calculator differs from a standard rental analyzer.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/best-rental-property-calculator-for-brrrr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {

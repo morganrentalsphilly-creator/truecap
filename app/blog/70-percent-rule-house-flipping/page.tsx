@@ -26,6 +26,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
@@ -37,7 +38,7 @@ const SERP_TITLE = "70% rule for flipping: the price screen (2026)";
 const DESCRIPTION =
   "The 70% rule caps your offer at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
 const PUBLISHED_AT = "2026-07-05";
-const MODIFIED_AT = "2026-07-05";
+const MODIFIED_AT = lastmodFor("/blog/70-percent-rule-house-flipping") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

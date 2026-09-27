@@ -23,6 +23,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-calculate-cap-rate";
 const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
@@ -33,7 +34,7 @@ const SERP_TITLE = "How to calculate cap rate: worked examples (2026)";
 const DESCRIPTION =
   "Cap rate = NOI ÷ purchase price. Learn the lender-style NOI convention, vacancy and operating costs, where CapEx belongs, plus three worked examples.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-cap-rate") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 7;
 
 export const metadata: Metadata = {

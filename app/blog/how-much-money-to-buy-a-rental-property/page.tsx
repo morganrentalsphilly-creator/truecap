@@ -29,6 +29,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-much-money-to-buy-a-rental-property";
 const TITLE =
@@ -40,7 +41,7 @@ const SERP_TITLE = "How Much Money to Buy a Rental Property (2026)";
 const DESCRIPTION =
   "A $150K, $300K, and $500K rental need about $50,700, $89,400, and $142,200 in cash — 1.4 to 1.7x the down payment. Full line-item math for each tier.";
 const PUBLISHED_AT = "2026-08-02";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/how-much-money-to-buy-a-rental-property") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {

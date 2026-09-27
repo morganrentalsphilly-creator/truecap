@@ -25,6 +25,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "cash-flow-vs-appreciation";
 const TITLE =
@@ -36,7 +37,7 @@ const SERP_TITLE = "Cash flow vs appreciation: which wins in 2026?";
 const DESCRIPTION =
   "A 10-year side-by-side of cash flow vs. appreciation that shows when each strategy wins, and the 2026 conditions that have flipped the historical math.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-09-11";
+const MODIFIED_AT = lastmodFor("/blog/cash-flow-vs-appreciation") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {

@@ -26,6 +26,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -105,7 +106,7 @@ export default function HouseHackingCalculatorPage() {
     name: "TrueCap House Hacking Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/house-hacking-calculator"),
     url: `${siteUrl}/tools/house-hacking-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

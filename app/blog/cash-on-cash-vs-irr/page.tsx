@@ -16,13 +16,14 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "cash-on-cash-vs-irr";
 const TITLE = "Cash-on-cash vs IRR: which one tells the truth?";
 const DESCRIPTION =
   "Cash-on-cash and IRR answer different questions. Learn when each one is right, when each one misleads, and which to trust on which type of deal.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/cash-on-cash-vs-irr") ?? PUBLISHED_AT;
 const READING_TIME = 7;
 
 export const metadata: Metadata = {

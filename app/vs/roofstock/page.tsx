@@ -32,6 +32,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Roofstock vs TrueCap (2026): Verify the Numbers",
@@ -183,7 +184,7 @@ export default function VsRoofstockPage() {
     url: `${siteUrl}/vs/roofstock`,
     description:
       "Side-by-side comparison of TrueCap (underwriting calculator) and Roofstock (turnkey rental marketplace).",
-    dateModified: "2026-08-16",
+    dateModified: lastmodFor("/vs/roofstock"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

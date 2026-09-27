@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
@@ -141,7 +142,7 @@ export default function VsReonomyPage() {
     url: `${siteUrl}/vs/reonomy`,
     description:
       "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes — honest comparison.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/reonomy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

@@ -23,6 +23,7 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -102,7 +103,7 @@ export default function CapRateCalculatorPage() {
     name: "TrueCap Cap Rate Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/cap-rate-calculator"),
     url: `${siteUrl}/tools/cap-rate-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

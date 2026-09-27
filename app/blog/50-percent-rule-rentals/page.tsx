@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "50-percent-rule-rentals";
 const TITLE = "The 50% rule for rentals — is it still useful in 2026?";
@@ -26,7 +27,7 @@ const SERP_TITLE = "The 50% rule for rentals: still useful in 2026?";
 const DESCRIPTION =
   "The 50% rule says operating expenses run about half of gross rent. When it works as a triage tool, when it misleads, and what to do when it cannot.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-09-08";
+const MODIFIED_AT = lastmodFor("/blog/50-percent-rule-rentals") ?? PUBLISHED_AT;
 const READING_TIME = 6;
 
 export const metadata: Metadata = {

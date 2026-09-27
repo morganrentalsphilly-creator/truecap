@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Baselane vs TrueCap (2026): Banking vs Analysis",
@@ -164,7 +165,7 @@ export default function VsBaselanePage() {
     url: `${siteUrl}/vs/baselane`,
     description:
       "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/baselane"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

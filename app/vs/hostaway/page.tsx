@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
@@ -152,7 +153,7 @@ export default function VsHostawayPage() {
     url: `${siteUrl}/vs/hostaway`,
     description:
       "Hostaway runs your STR portfolio after closing. TrueCap underwrites the STR deal before. Honest comparison for short-term rental investors.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/hostaway"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

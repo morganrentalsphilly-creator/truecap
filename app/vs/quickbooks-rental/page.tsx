@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "QuickBooks vs TrueCap for Rentals (2026)",
@@ -146,7 +147,7 @@ export default function VsQuickbooksRentalPage() {
     url: `${siteUrl}/vs/quickbooks-rental`,
     description:
       "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
-    dateModified: "2026-08-27",
+    dateModified: lastmodFor("/vs/quickbooks-rental"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

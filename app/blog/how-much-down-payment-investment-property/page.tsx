@@ -18,6 +18,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-much-down-payment-investment-property";
 const TITLE =
@@ -29,7 +30,7 @@ const SERP_TITLE = "How much down payment for an investment property?";
 const DESCRIPTION =
   "Conventional investment loans need 15% down on a single-family, 25% on 2–4 units. Full 2026 breakdown, cash-on-cash and DSCR math, house-hack shortcut.";
 const PUBLISHED_AT = "2026-06-18";
-const MODIFIED_AT = "2026-06-18";
+const MODIFIED_AT = lastmodFor("/blog/how-much-down-payment-investment-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

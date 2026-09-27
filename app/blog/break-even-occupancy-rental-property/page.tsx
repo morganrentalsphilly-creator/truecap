@@ -23,6 +23,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "break-even-occupancy-rental-property";
 const TITLE = "Break-even occupancy: how much vacancy a rental can survive (2026)";
@@ -33,7 +34,7 @@ const SERP_TITLE = "Break-even occupancy for rental property (2026)";
 const DESCRIPTION =
   "Break-even occupancy is the rent or occupancy floor where a rental stops covering its bills. The formula, a worked 2026 example, and the DSCR-1.0 link.";
 const PUBLISHED_AT = "2026-06-26";
-const MODIFIED_AT = "2026-06-26";
+const MODIFIED_AT = lastmodFor("/blog/break-even-occupancy-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

@@ -20,6 +20,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "seller-financing-subject-to";
 const TITLE =
@@ -31,7 +32,7 @@ const SERP_TITLE = "Seller financing & subject-to deals, explained";
 const DESCRIPTION =
   "How seller financing and subject-to deals work, the due-on-sale risk, where Dodd-Frank applies, and how to underwrite the 2026 rate arbitrage.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-06-23";
+const MODIFIED_AT = lastmodFor("/blog/seller-financing-subject-to") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

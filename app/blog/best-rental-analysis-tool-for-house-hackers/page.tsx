@@ -14,13 +14,14 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-rental-analysis-tool-for-house-hackers";
 const TITLE = "Best rental analysis tool for house hackers (2026)";
 const DESCRIPTION =
   "Best calculators for house hackers in 2026: TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting needs that standard tools miss.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/best-rental-analysis-tool-for-house-hackers") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {

@@ -30,6 +30,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -98,7 +99,7 @@ export default function ArvCalculatorPage() {
     name: "TrueCap ARV Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/arv-calculator"),
     url: `${siteUrl}/tools/arv-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

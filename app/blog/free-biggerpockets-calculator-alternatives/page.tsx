@@ -31,13 +31,14 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "free-biggerpockets-calculator-alternatives";
 const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
 const DESCRIPTION =
   "BiggerPockets' calculators stop after 5 free reports, then Pro is $390/yr. Six genuinely free alternatives for 2026 — and what each free tier covers.";
 const PUBLISHED_AT = "2026-07-14";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/free-biggerpockets-calculator-alternatives") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

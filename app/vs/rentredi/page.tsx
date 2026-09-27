@@ -35,6 +35,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
@@ -182,7 +183,7 @@ export default function VsRentRediPage() {
     url: `${siteUrl}/vs/rentredi`,
     description:
       "Side-by-side comparison of TrueCap (rental underwriting calculator) and RentRedi (tenant + rent management).",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/rentredi"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

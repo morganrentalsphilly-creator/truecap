@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "1031-exchange-basics";
 const TITLE = "1031 exchange basics for individual rental investors";
@@ -26,7 +27,7 @@ const SERP_TITLE = "1031 exchange basics for rental investors";
 const DESCRIPTION =
   "How a 1031 exchange works in 2026: identification and exchange periods, qualified-intermediary safe harbor, like-kind rules, boot, and reverse exchanges.";
 const PUBLISHED_AT = "2026-05-25";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/1031-exchange-basics") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

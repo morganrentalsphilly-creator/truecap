@@ -24,13 +24,14 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-underwrite-a-rental-property-in-60-seconds";
 const TITLE = "How to screen a rental property in 60 seconds";
 const DESCRIPTION =
   "A fast rental screen: organize five inputs, review four modeled metrics, and see what still needs checking before a full underwrite.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-09-15";
+const MODIFIED_AT = lastmodFor("/blog/how-to-underwrite-a-rental-property-in-60-seconds") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {

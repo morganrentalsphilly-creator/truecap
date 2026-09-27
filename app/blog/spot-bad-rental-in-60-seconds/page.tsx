@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "spot-bad-rental-in-60-seconds";
 const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
@@ -26,7 +27,7 @@ const SERP_TITLE = "How to spot a bad rental deal: 7 red flags";
 const DESCRIPTION =
   "Seven red flags that tell you a rental doesn't pencil before you spend hours on a full underwrite — the triage experienced investors do in their head.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/spot-bad-rental-in-60-seconds") ?? PUBLISHED_AT;
 const READING_TIME = 8;
 
 export const metadata: Metadata = {

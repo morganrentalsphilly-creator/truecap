@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Cozy.co Alternatives (2026): What Replaced It",
@@ -136,7 +137,7 @@ export default function VsCozyPage() {
     url: `${siteUrl}/vs/cozy`,
     description:
       "Cozy.co shut down in 2022. Here's what TrueCap does (and doesn't), plus which modern tools replace each part of the Cozy workflow.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/cozy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

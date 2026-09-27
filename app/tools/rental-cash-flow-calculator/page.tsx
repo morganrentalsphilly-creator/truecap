@@ -31,6 +31,7 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -110,7 +111,7 @@ export default function RentalCashFlowCalculatorPage() {
     name: "TrueCap Rental Property Cash Flow Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/rental-cash-flow-calculator"),
     url: `${siteUrl}/tools/rental-cash-flow-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

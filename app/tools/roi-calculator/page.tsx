@@ -17,6 +17,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -84,7 +85,7 @@ export default function RoiCalculatorPage() {
     name: "Rental Property ROI Calculator — TrueCap",
     description: "Free rental property ROI calculator.",
     url: `${siteUrl}/tools/roi-calculator`,
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/roi-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

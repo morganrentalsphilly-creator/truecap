@@ -23,6 +23,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "rental-property-tax-deductions";
 const TITLE =
@@ -34,7 +35,7 @@ const SERP_TITLE = "Rental property tax deductions: the top 14 (2026)";
 const DESCRIPTION =
   "A practical Schedule E checklist for rental-property expenses, with worked deduction examples, eligibility limits, and links to current IRS guidance.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/rental-property-tax-deductions") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

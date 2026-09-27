@@ -31,6 +31,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "TrueCap vs Stessa (2026): Acquisition Workflows",
@@ -161,7 +162,7 @@ export default function VsStessaPage() {
     url: `${siteUrl}/vs/stessa`,
     description:
       "Side-by-side comparison of TrueCap and Stessa for rental investors.",
-    dateModified: "2026-08-27",
+    dateModified: lastmodFor("/vs/stessa"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

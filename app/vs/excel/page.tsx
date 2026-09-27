@@ -31,6 +31,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Excel vs TrueCap for Rental Analysis (2026)",
@@ -182,7 +183,7 @@ export default function VsExcelPage() {
     url: `${siteUrl}/vs/excel`,
     description:
       "Side-by-side comparison of TrueCap and Excel/Google Sheets for rental analysis.",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/vs/excel"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

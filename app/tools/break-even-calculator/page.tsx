@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free Break-Even Calculator — Months to Recoup Cash",
@@ -70,7 +71,7 @@ export default function BreakEvenCalculatorPage() {
     name: "Rental Property Break-Even Calculator — TrueCap",
     description: "Free rental property break-even calculator.",
     url: `${siteUrl}/tools/break-even-calculator`,
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/break-even-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

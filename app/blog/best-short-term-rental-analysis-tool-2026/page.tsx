@@ -14,6 +14,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-short-term-rental-analysis-tool-2026";
 const TITLE =
@@ -25,7 +26,7 @@ const SERP_TITLE = "Best short-term rental analysis tool 2026";
 const DESCRIPTION =
   "2026 ranking of the best STR analysis tools: AirDNA for revenue data, TrueCap for underwriting, Mashvisor for market discovery, plus the PMS platforms.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/best-short-term-rental-analysis-tool-2026") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

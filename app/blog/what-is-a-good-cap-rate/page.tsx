@@ -3,6 +3,9 @@ import {
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { lastmodFor } from "@/lib/seo/lastmod";
+
+const PUBLISHED_AT = "2026-05-24";
 
 const ARTICLE = {
   slug: "what-is-a-good-cap-rate",
@@ -10,8 +13,8 @@ const ARTICLE = {
   seoTitle: "Good cap rate: a property-specific framework",
   description:
     "There is no universal good cap rate. Learn what the ratio measures, how to compare consistent inputs, and which property-specific evidence to check first.",
-  publishedAt: "2026-05-24",
-  modifiedAt: "2026-08-29",
+  publishedAt: PUBLISHED_AT,
+  modifiedAt: lastmodFor("/blog/what-is-a-good-cap-rate") ?? PUBLISHED_AT,
   faqs: [
     {
       question: "How is cap rate calculated?",

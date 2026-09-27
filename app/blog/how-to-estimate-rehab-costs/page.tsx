@@ -3,6 +3,9 @@ import {
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { lastmodFor } from "@/lib/seo/lastmod";
+
+const PUBLISHED_AT = "2026-05-27";
 
 const ARTICLE = {
   slug: "how-to-estimate-rehab-costs",
@@ -10,8 +13,8 @@ const ARTICLE = {
   seoTitle: "How to estimate rehab costs without generic bands",
   description:
     "A rehab-budget framework: document scope and condition, get local written bids, add permits and carrying costs, and set a disclosed uncertainty reserve.",
-  publishedAt: "2026-05-27",
-  modifiedAt: "2026-08-29",
+  publishedAt: PUBLISHED_AT,
+  modifiedAt: lastmodFor("/blog/how-to-estimate-rehab-costs") ?? PUBLISHED_AT,
   faqs: [
     {
       question: "What should a property-specific rehab budget include?",

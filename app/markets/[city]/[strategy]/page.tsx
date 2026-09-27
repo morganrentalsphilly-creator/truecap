@@ -29,6 +29,7 @@ import {
   isStrategyIndexable,
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const dynamicParams = false;
 
@@ -128,7 +129,7 @@ export default async function CityStrategyPage({
     name: `${combo.strategyLabel} screening in ${combo.cityName}`,
     description,
     url: canonicalUrl,
-    dateModified: "2026-09-06",
+    dateModified: lastmodFor(`/markets/${combo.citySlug}/${combo.strategy}`),
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };

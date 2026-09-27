@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "gross-rent-multiplier-explained";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "Gross rent multiplier (GRM) explained (2026)";
 const DESCRIPTION =
   "GRM = price ÷ annual gross rent — the fastest rental screen. The formula, 2026 worked examples, GRM vs cap rate, a good GRM range, and where it lies.";
 const PUBLISHED_AT = "2026-06-17";
-const MODIFIED_AT = "2026-06-17";
+const MODIFIED_AT = lastmodFor("/blog/gross-rent-multiplier-explained") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

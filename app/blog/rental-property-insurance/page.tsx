@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "rental-property-insurance";
 const TITLE = "Rental property insurance: coverage, quotes, and underwriting";
@@ -29,7 +30,7 @@ const SERP_TITLE = "Rental property insurance: coverage & quotes";
 const DESCRIPTION =
   "How to collect property-specific landlord-insurance evidence, compare coverage and exclusions, and test a verified premium in NOI, cash flow, and DSCR.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/rental-property-insurance") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

@@ -14,6 +14,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-free-rental-property-calculator-2026";
 const TITLE =
@@ -25,7 +26,7 @@ const SERP_TITLE = "Best free rental property calculator 2026: 5 tools";
 const DESCRIPTION =
   "A 2026 ranking of five free rental-analysis tools: TrueCap, DealCheck Starter, Stessa, spreadsheet templates, and Zillow's mortgage calculator.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/best-free-rental-property-calculator-2026") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {

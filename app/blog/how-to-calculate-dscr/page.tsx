@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-calculate-dscr";
 const TITLE =
@@ -33,7 +34,7 @@ const SERP_TITLE = "How to calculate DSCR — 2026 guide";
 const DESCRIPTION =
   "DSCR compares income with debt service. Learn the formula, work through examples, and see why each lender's calculation and requirements differ by program.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-dscr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {

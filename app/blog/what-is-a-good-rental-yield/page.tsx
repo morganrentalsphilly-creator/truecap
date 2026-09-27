@@ -3,6 +3,9 @@ import {
   SourceFirstArticle,
 } from "@/components/marketing/source-first-article";
 import { RelatedContent } from "@/components/marketing/related-content";
+import { lastmodFor } from "@/lib/seo/lastmod";
+
+const PUBLISHED_AT = "2026-05-24";
 
 const ARTICLE = {
   slug: "what-is-a-good-rental-yield",
@@ -10,8 +13,8 @@ const ARTICLE = {
   seoTitle: "Rental yield: a consistent comparison method",
   description:
     "Rental yield depends on the formula and evidence behind it. Compare gross and net yield with consistent, property-specific inputs, not a market threshold.",
-  publishedAt: "2026-05-24",
-  modifiedAt: "2026-08-29",
+  publishedAt: PUBLISHED_AT,
+  modifiedAt: lastmodFor("/blog/what-is-a-good-rental-yield") ?? PUBLISHED_AT,
   faqs: [
     {
       question: "What is the difference between gross and net rental yield?",

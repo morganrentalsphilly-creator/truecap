@@ -30,6 +30,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Guesty vs TrueCap (2026): STR PM vs Underwriting",
@@ -154,7 +155,7 @@ export default function VsGuestyPage() {
     url: `${siteUrl}/vs/guesty`,
     description:
       "Guesty manages short-term rentals after purchase across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
-    dateModified: "2026-08-16",
+    dateModified: lastmodFor("/vs/guesty"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
@@ -134,8 +135,14 @@ describe("public funnel and trust guards", () => {
       "app/blog/dealcheck-vs-stessa-vs-truecap/opengraph-image.tsx",
     );
     const registry = read("lib/blog-posts.ts");
-    for (const source of [comparison, article, operationsComparison]) {
-      expect(source).toContain("2026-08-27");
+    for (const [path, source] of [
+      ["/vs/stessa", comparison],
+      ["/blog/dealcheck-vs-stessa-vs-truecap", article],
+      ["/blog/stessa-vs-avail-vs-baselane", operationsComparison],
+    ] as const) {
+      // The 2026-08-27 correction dates the page: its lastmod (the one date
+      // source, content/seo/lastmod.json, which dateModified reads) is not earlier.
+      expect((lastmodFor(path) ?? "") >= "2026-08-27", path).toBe(true);
       expect(source).toContain("stessa.com/investment-property-marketplace");
       expect(source).toContain(
         "support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
@@ -169,7 +176,12 @@ describe("public funnel and trust guards", () => {
     expect(comparisonHub).toMatch(
       /slug: "stessa"[\s\S]{0,260}group: "Direct alternative"/,
     );
-    expect(freeRoundup).toContain('const MODIFIED_AT = "2026-08-27"');
+    // The 2026-08-27 Stessa correction is reflected in the post's modified
+    // date: MODIFIED_AT reads the lastmod map, whose date is not earlier.
+    expect(freeRoundup).toContain(
+      'const MODIFIED_AT = lastmodFor("/blog/best-free-rental-property-calculator-2026") ?? PUBLISHED_AT;',
+    );
+    expect((lastmodFor("/blog/best-free-rental-property-calculator-2026") ?? "") >= "2026-08-27").toBe(true);
     expect(freeRoundup).toContain(
       "stessa.com/rental-returns-and-income-tax-calculator",
     );
@@ -184,11 +196,14 @@ describe("public funnel and trust guards", () => {
       "dealcheck-vs-stessa-vs-truecap",
       "stessa-vs-avail-vs-baselane",
     ]) {
-      // The correction's date lives on each post (its MODIFIED_AT), not in
-      // the registry: F2 keeps modified dates out of lib/blog-posts.ts.
-      expect(read(`app/blog/${slug}/page.tsx`), slug).toMatch(
-        /const MODIFIED_AT(?::\s*string)?\s*=\s*"2026-08-27"/,
+      // The correction's date lives in the lastmod map (F2 keeps modified
+      // dates out of lib/blog-posts.ts), and each post's MODIFIED_AT reads it.
+      expect(read(`app/blog/${slug}/page.tsx`), slug).toContain(
+        `const MODIFIED_AT = lastmodFor("/blog/${slug}") ?? PUBLISHED_AT;`,
       );
+      const modifiedAt = lastmodFor(`/blog/${slug}`);
+      expect(modifiedAt, slug).toBeDefined();
+      expect((modifiedAt ?? "") >= "2026-08-27", `${slug} lastmod ${modifiedAt} predates the 2026-08-27 correction`).toBe(true);
       expect(registry).toContain(`slug: "${slug}"`);
     }
     expect(registry).not.toMatch(/modifiedAt/);

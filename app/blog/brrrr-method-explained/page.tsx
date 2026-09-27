@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "brrrr-method-explained";
 const TITLE = "The BRRRR method in 2026: the complete numbers walkthrough";
@@ -27,7 +28,7 @@ const SERP_TITLE = "The BRRRR method in 2026: numbers walkthrough";
 const DESCRIPTION =
   "A BRRRR numbers walkthrough on stated financing assumptions. LTV, seasoning, DSCR, credit, reserves, appraisal, and approval vary by program and lender.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/brrrr-method-explained") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
