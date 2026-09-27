@@ -1,9 +1,9 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-09-27T22:26:07.274Z",
+  "generatedAt": "2026-09-27T22:53:47.970Z",
   "files": {
-    ".github/workflows/ci.yml": "5e223373dd45a0e800f050e1ec4456a87022a7b6a163bb32c53ed04f442d4172",
+    ".github/workflows/ci.yml": "371c359040ecdd765e5e07aaa74be3a6a7ece299c646259f1423f9c9b39d7ddb",
     "eslint.config.mjs": "d9787e67d053e8478afb11f3b26f67eb6b48ac2c7dabcd8b6a0f6e58ff8f462f",
     "instrumentation-client.ts": "084de5f29ad0db12deacb580065348490fb8e409752a745f1a0b92c30ecaaf56",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
@@ -11,7 +11,7 @@
     "package-lock.json": "c464b3bf71721d699ab166cff5e568560e3aeb66ce6c9f8e204cb26f97f72ba5",
     "package.json": "e2482cdba7f2d0bb21f4a528c0d611ae25e9204bd9ab2aa3709700c806426b33",
     "postcss.config.mjs": "54b5708e687b8c9ecc8dbeebf29801dbec1213f890c5e018d7ca9c1541a6f7e3",
-    "proxy.ts": "499fcbda1dc448c42cbd42c6d60630ba9fdb40e5425cffe4e0b03bd47c723b44",
+    "proxy.ts": "1b5df807a8c568c2bbadc0a70826bf3974282490a39dbcb1d6ad0874cc5db24f",
     "scripts/check-agent-blog-content.mjs": "a18480b403ca419192791f167a712cc789af741a7335670c4299e5ce6c94ae4f",
     "scripts/verify-build-integrity.mjs": "6378f59189a32b5737eaee6287d899c314178e7b3f5b676a825646d3cbd2d470",
     "sentry.edge.config.ts": "6fea65851e009e85c239976483ff3e573845638d4dd076eccc9046ae720a44ed",
@@ -22,7 +22,8 @@
   },
   "_contentScannedReadme": "Build-executed files the SEO agent is deliberately allowed to write, so they are NOT hash-pinned above — a pin would be red on every content PR and would turn `--update` into a reflex, which is the one habit that empties this control of meaning. Their control is gate 1b (scripts/check-agent-blog-content.mjs), a heuristic token scan, NOT a proof. Listed here so the registry of build-executed files is complete: verify-build-integrity.mjs fails if one of these disappears or if .github/workflows/ci.yml stops naming it, i.e. if it silently loses its coverage.",
   "contentScanned": {
-    "lib/blog-topics.ts": "Imported by app/blog/page.tsx, app/blog/topics/page.tsx, app/blog/topics/[topic]/page.tsx and app/sitemap.ts — all statically rendered by `next build`, so it executes on the Vercel builder with production secrets. The SEO prompt in .github/workflows/seo-content.yml tells the agent to register every new post in it, and step 4a of docs/SECURITY-HARDENING.md grants Write/Edit on it, so it cannot be hash-pinned without breaking the pipeline. Scanned by gate 1b instead."
+    "lib/blog-posts.ts": "The blog post registry (F2). Imported by app/blog/page.tsx, app/blog/topics/[topic]/page.tsx, app/sitemap.ts, app/feed.xml/route.ts, app/llms.txt/route.ts, app/search/page.tsx and components/marketing/{related-blog-posts,safe-market-page}.tsx — all statically rendered by `next build`, so it executes on the Vercel builder with production secrets. Agent-writable (seo/config.json paths.agentAllow; the gap-article skill appends rows, the loop may fix titles and excerpts), so it cannot be hash-pinned. A pure data module with no imports; scanned by gate 1b instead.",
+    "lib/blog-topics.ts": "Imported by app/blog/page.tsx, app/blog/topics/page.tsx, app/blog/topics/[topic]/page.tsx and app/sitemap.ts — all statically rendered by `next build`, so it executes on the Vercel builder with production secrets. The SEO loop (seo-weekly.yml; seo/config.json paths.agentAllow) may edit it — the gap-article skill registers a new post's hub — so it cannot be hash-pinned without breaking the pipeline. Scanned by gate 1b instead."
   },
   "_mustNotExistReadme": "Filenames the toolchain picks up automatically. None of these exist today; if one appears, it changes what runs at build time without changing any file that is already reviewed. Adding one is a deliberate act that has to be recorded here.",
   "mustNotExist": [
