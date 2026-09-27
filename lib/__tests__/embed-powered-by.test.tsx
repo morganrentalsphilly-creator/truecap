@@ -16,6 +16,8 @@
  * Everything here renders the real components (no source-text scans), so a
  * moved or renamed builder cannot leave these assertions guarding nothing.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import EmbedPage, {
@@ -378,5 +380,19 @@ describe("the /embed hub", () => {
         digest: "NEXT_HTTP_ERROR_FALLBACK;404",
       });
     }
+  });
+});
+
+describe("/for-agents embed claims", () => {
+  // It said every calculator embeds "with a one-line snippet" and offered a
+  // cap-rate or DSCR embed; one released calculator is not embeddable, the
+  // snippet is multi-line, and both of those calculators are unreleased.
+  const source = readFileSync(join(import.meta.dirname, "../../app/for-agents/page.tsx"), "utf8");
+
+  it("derives the counts from the registry and makes no blanket claim", () => {
+    expect(source).toContain("{EMBEDDABLE_COUNT} of TrueCap&apos;s {CALCULATOR_COUNT} free");
+    expect(source).not.toMatch(/Every TrueCap calculator can be embedded/);
+    expect(source).not.toMatch(/one-line snippet/);
+    expect(source).not.toMatch(/cap-rate or DSCR calculator on your agent site/);
   });
 });
