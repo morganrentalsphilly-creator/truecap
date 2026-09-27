@@ -27,11 +27,11 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 | `/` | SoftwareApplication `/#software` + Offer, FAQPage |
 | `/analyze` | none |
 | blog post (75) | Article/BlogPosting (author = Organization `@id`), BreadcrumbList, FAQPage on 68 |
-| market city (150) | WebPage (dateModified hard-coded 2026-09-06), BreadcrumbList, FAQPage **not rendered visibly** |
+| market city (150) | WebPage (dateModified from the lastmod map, F2), BreadcrumbList, FAQPage **not rendered visibly** |
 | bespoke market (12, noindex) | WebPage + Place, BreadcrumbList |
 | state (33) | Place, WebPage, BreadcrumbList, FAQPage **not rendered visibly** |
 | vs (38) | WebPage, 2-level BreadcrumbList, FAQPage (visible, via `ComparisonFaq`) |
-| glossary term (44) | DefinedTerm (dateModified 2026-06-01 on every term), FAQPage, BreadcrumbList |
+| glossary term (44) | DefinedTerm (dateModified from the lastmod map, F2), FAQPage, BreadcrumbList |
 | released tool (10) | WebApplication or WebPage **plus** a second SoftwareApplication with an inline publisher (two app entities, no `@id`), FAQPage, 3-level BreadcrumbList |
 | hubs `/blog /tools /vs /markets /states /glossary` | CollectionPage / ItemList / DefinedTermSet, **no BreadcrumbList** |
 | `/about` | AboutPage (mainEntity = Organization) |
@@ -40,11 +40,12 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 - **Sitemap** (`app/sitemap.ts`):
   - A single `urlset` of **381 URLs**, with no sitemap index. It includes only pages that pass the indexability helpers in `lib/markets/indexability.ts`.
   - Composition: 20 core, 11 tools, 44 glossary terms, 33 states, 150 markets, 9 blog topic pages, 75 posts, 38 comparisons and `/for-agents` (env-gated). 0 strategy pages (`STRATEGY_PAGES_INDEXABLE = false`).
-  - **275 URLs share `lastmod` 2026-09-06.** `sitemapEntry()` defaults to `SITE_OVERHAUL_LAST_MODIFIED`, and `lib/__tests__/sitemap-uniqueness.test.ts` pins that floor. Blog `lastmod` = `BLOG_POSTS.modifiedAt ?? publishedAt`.
+  - **`lastmod` has one source (F2):** `content/seo/lastmod.json` through `lib/seo/lastmod.ts` (`lastmodFor(path)`); a URL with no entry gets no `lastmod`. The same map feeds `feed.xml`, `/blog`, every post's `MODIFIED_AT` and the templates' JSON-LD `dateModified`. `lib/__tests__/lastmod-contract.test.ts` pins it (see §4).
+  - Paths on `content/seo/noindex.json` leave the sitemap (and `llms.txt`), and `proxy.ts` serves them with `X-Robots-Tag: noindex`; published pages in `content/seo/research.json` join it.
   - Five scripts parse the live sitemap as a flat urlset, so do not introduce a sitemap index without updating them: `scripts/seo/{control-plane,indexnow,healthcheck,gsc-scoreboard}.mjs`, `scripts/seo-audit.ts`.
 - **robots** (`app/robots.ts`): allows `/`; disallows `/api/ /admin/ /auth/ /dashboard/ /profile/ /settings/ /d/ /s/ /portal/ /embed/brand/ /home-authed`. AI crawlers are explicitly allowed. There is one `Sitemap:` line, pinned by `robots-policy.test.ts`.
 - **llms.txt** (`app/llms.txt/route.ts`): built from the registries.
-  - Known defect: it lists all states and 19 noindex strategy pages, and omits the 150 indexable market pages.
+  - Its lists use the sitemap's indexability helpers and the noindex list (F2): indexable states, all 150 indexable market pages, no strategy page.
   - `llms-full.txt` holds glossary and tool formulas, pinned by `seo-guards.test.ts`.
 - **OG images:**
   - 133 per-route `opengraph-image.tsx` files, but page metadata sets `openGraph.images: /home.jpg`, so production serves `/home.jpg` almost everywhere. Out of scope for the loop; tracked separately.
@@ -63,7 +64,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
   - F2 lifted it out of `app/blog/page.tsx` and dropped `modifiedAt`: a post's last-modified date is not the registry's to hold.
   - Consumers: `/blog`, the topic hubs, the sitemap, `feed.xml`, `llms.txt`, site search, related-post blocks and several tests.
   - Before F2, importing it pulled in the `/blog` page's React tree, which is why `seo-guards.test.ts` still reads `app/sitemap.ts` as text.
-  - **Drift:** 13 registry titles and some excerpts no longer match their pages (e.g. the rental-yield excerpt still quotes figures the page removed). 40 of 75 posts have a page `MODIFIED_AT` that disagrees with the registry date the sitemap uses.
+  - **Drift:** 13 registry titles and some excerpts no longer match their pages (e.g. the rental-yield excerpt still quotes figures the page removed). Every post's `MODIFIED_AT` now reads the lastmod map (F2), so it matches the sitemap.
 - **Topic hubs:** `lib/blog-topics.ts` holds 8 hubs (`slug, title, description, intro, postSlugs, calculatorSlugs`) rendered at `/blog/topics/<slug>`.
   - Tax hub: 7 posts. Financing hub: 12.
   - Five posts are in no hub.
@@ -106,7 +107,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 
 ### Comparisons — 38 `/vs/<competitor>` pages
 - **Files:** `app/vs/<competitor>/page.tsx`, each a standalone page with its own matrix, TL;DR, FAQ (`ComparisonFaq`, visible) and a "Sources & methodology … last reviewed" note.
-- **Registry and sitemap:** the hub list is `app/vs/page.tsx`, and the lastmod groups are hard-coded in `app/sitemap.ts`.
+- **Registry and sitemap:** the hub list is `app/vs/page.tsx`; the sitemap lists the 38 paths in `app/sitemap.ts` and takes their `lastmod` from the map.
 - **Sourcing:** only 3 pages (dealcheck, biggerpockets-calculator, stessa) carry exact review dates and primary-source links. Competitor prices on the rest lack a dated source.
 - **Pinned by tests:** heavily, in `comparison-claim-guards.test.ts` and `vs-page-copy-integrity.test.ts`. The union of all pages must say "see live pricing", and there must be more than 40 files, so deleting one fails CI.
 
@@ -170,10 +171,10 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 - First-commit dates also disagree with `publishedAt` for several posts.
 - Hand-typed JSON-LD dates disagree with the sitemap on most templates.
 
-**The honest source (F2):**
-- **Seed:** the newest commit that changed each URL's *own* content or data, skipping the listed sweep commits (`config.json` → `sweepCommits`).
+**The honest source (F2, built):** `content/seo/lastmod.json`, loaded and validated by `lib/seo/lastmod.ts`.
+- **Seed:** `node seo/scripts/lastmod.ts seed` takes, for each sitemap URL, the committer date of the newest commit that changed that URL's *content signature*, skipping the listed sweep commits (`config.json` → `sweepCommits`). The signature (`seo/scripts/lib/content-signature.ts`) is the page's visible text and data from the TypeScript AST — never classNames, imports, whitespace, social/robots metadata or the dates themselves — so a corpus-wide sweep only counts where it changed content. Sources: a post's, `/vs` page's or tool's own `page.tsx`; core pages add their content components; glossary terms, states, markets and topic hubs use their one data entry (rendered fields only). Re-running the seed reproduces the committed map.
 - **Afterwards:** the loop's publish step bumps a URL's date only when the hash of its rendered `<main>` text changed. Header and footer chrome don't count, and the model never writes dates.
-- **Market pages:** the HUD vintage belongs in the visible "data as of" line, not in `lastmod`.
+- **Market pages:** the HUD vintage belongs in the visible "data as of" line, not in `lastmod`; a changed rent value is a data change.
 
 ## 5. The SEO automation that already exists (before this loop)
 
