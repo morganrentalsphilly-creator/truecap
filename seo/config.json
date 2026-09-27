@@ -1,0 +1,379 @@
+{
+  "_readme": "Single source of truth for the SEO loop's caps, thresholds and fences. Read by seo/scripts/*. Changing this file is an owner-only act: seo/ is GUARDED in ci.yml, so an agent PR that touches it fails build-chain-guard. Brief values are kept verbatim; every deviation carries a `_why` that points at the measured reason (see seo/ARCHITECTURE.md \u00a7Deviations).",
+  "site": {
+    "base": "https://usetruecap.com",
+    "gscProperty": "sc-domain:usetruecap.com",
+    "userAgent": "TrueCap-SEO-Loop/1.0 (+https://usetruecap.com)"
+  },
+  "caps": {
+    "pagesChangedPerRun": 25,
+    "newArticlesPerRun": 2,
+    "noindexShareOfIndexedPerRun": 0.05,
+    "titleChangeCooldownDays": 30,
+    "pageTouchCooldownDays": 30,
+    "internalLinkSourcesPerTarget": 5,
+    "newLinksPerSourcePagePerRun": 1,
+    "maxChangedFilesPerRun": 40,
+    "maxChangedLinesPerRun": 4000,
+    "_why_files_lines": "Blast-radius backstop on top of the brief's page cap: one dataset edit can re-render many URLs, so verify-build also counts rendered URLs that changed."
+  },
+  "gates": {
+    "gapArticlesWhileCrawlStalled": 0,
+    "crawlStall": {
+      "minUnknownUrls": 5,
+      "crawledNotIndexedRisingWeeks": 1
+    },
+    "_why_crawlStall": "No newly listed URL was crawled between 2026-08-31 and 2026-09-27 and 20 sitemap URLs are 'URL is unknown to Google'. New URLs join a queue Google is not draining, so gap articles wait until it moves.",
+    "pruneTierDuringCalibration": 2,
+    "calculatorIntentPattern": "\\b(calculator|calc|estimator|spreadsheet|template)\\b"
+  },
+  "thresholds": {
+    "strikingDistance": {
+      "minImpressions28d": 100,
+      "positionMin": 6,
+      "positionMax": 20
+    },
+    "lowCtr": {
+      "binomialP": 0.05,
+      "minImpressions28d": 50
+    },
+    "refresh": {
+      "minBaselineClicks8w": 50,
+      "clickDropShare": 0.3
+    },
+    "gapArticle": {
+      "minQueryImpressions28d": 50,
+      "minWords": 1200,
+      "minInboundLinks": 3
+    },
+    "prune": {
+      "minDaysInSitemap": 60,
+      "maxImpressions28d": 10,
+      "minWords": 600,
+      "minUniqueRatio": 0.4,
+      "minConfirmingInspections": 2,
+      "minDaysBetweenInspections": 14
+    },
+    "similarity": {
+      "mergeAbove": 0.8,
+      "templateCommonShare": 0.3
+    },
+    "persistence": {
+      "minWeeksQualifying": 3,
+      "ofLastWeeks": 6
+    },
+    "_why_persistence": "Week-to-week overlap of the striking-distance set was 0.56-0.67 (Jaccard) across six snapshots; persistence keeps the loop from editing pages that only qualified by noise."
+  },
+  "brakes": {
+    "pageClickLoss": {
+      "minDaysLive": 14,
+      "lossShareVsHoldout": 0.25,
+      "minImpressions": 100
+    },
+    "siteWideWeekOverWeek": {
+      "dropShare": 0.2,
+      "minPriorWeekClicks": 50
+    },
+    "_why_siteWide_floor": "Site-wide clicks were 13-29 per 28 days (3-7 a week). A 20% drop is one click; without a floor the brake would halt the loop in roughly 40% of weeks on noise.",
+    "changeTypeLossRate": {
+      "maxLossRate": 0.4,
+      "minScoredNonNeutral": 10
+    }
+  },
+  "holdout": {
+    "share": 0.2,
+    "weeks": 8,
+    "neverWithhold": {
+      "minImpressions28d": 100,
+      "anyNonBrandClick": true
+    },
+    "crawlAgeBucketsDays": [
+      30,
+      90
+    ]
+  },
+  "outcomes": {
+    "minAgeDays": 56,
+    "neutralBandRatio": 3.9,
+    "_why_neutralBand": "A placebo split of the striking-distance pages (20,000 random splits, no treatment) showed a 95th-percentile gap of x3.83-3.93 between halves over 56 days. Anything inside that band is labelled neutral, not win or loss."
+  },
+  "calibration": {
+    "requiredOwnerMergedLoopPrs": 2
+  },
+  "brandTerms": [
+    "truecap",
+    "true cap",
+    "usetruecap"
+  ],
+  "excludedFromOptimization": [
+    "/",
+    "/about",
+    "/terms",
+    "/privacy",
+    "/pricing",
+    "/methodology",
+    "/analyze",
+    "/for-agents",
+    "/embed",
+    "/reviews",
+    "/why-truecap",
+    "/sample-decision-memo",
+    "/tools/rental-property-spreadsheet",
+    "/blog",
+    "/blog/topics",
+    "/vs",
+    "/markets",
+    "/states",
+    "/glossary",
+    "/tools"
+  ],
+  "_why_excluded": "Legal, billing, analyzer and hub pages are off-limits to scheduled runs (brief), and the hubs plus /about, /why-truecap, /sample-decision-memo and the spreadsheet have exact titles pinned by lib/__tests__/public-metadata-contract.test.ts.",
+  "primarySourceDomains": [
+    "irs.gov",
+    "treasury.gov",
+    "federalregister.gov",
+    "ecfr.gov",
+    "govinfo.gov",
+    "congress.gov",
+    "uscode.house.gov",
+    "hud.gov",
+    "huduser.gov",
+    "census.gov",
+    "bls.gov",
+    "bea.gov",
+    "fred.stlouisfed.org",
+    "stlouisfed.org",
+    "federalreserve.gov",
+    "consumerfinance.gov",
+    "fhfa.gov",
+    "fanniemae.com",
+    "singlefamily.fanniemae.com",
+    "freddiemac.com",
+    "sf.freddiemac.com",
+    "va.gov",
+    "benefits.va.gov",
+    "fema.gov",
+    "usa.gov"
+  ],
+  "_why_domains": "Outbound links an agent adds must land on a primary source. State statute, county assessor and city licensing domains are added here by the owner as markets are enriched (never by the model).",
+  "vendorDomains": [
+    "airdna.co",
+    "appfolio.com",
+    "arrived.com",
+    "avail.co",
+    "baselane.com",
+    "batchleads.io",
+    "biggerpockets.com",
+    "bricked.ai",
+    "buildium.com",
+    "cozy.co",
+    "crexi.com",
+    "dealcheck.io",
+    "dealmachine.com",
+    "fundrise.com",
+    "guesty.com",
+    "hostaway.com",
+    "hostfully.com",
+    "landlordstudio.com",
+    "lodgify.com",
+    "mashvisor.com",
+    "microsoft.com",
+    "privy.pro",
+    "propstream.com",
+    "quickbooks.intuit.com",
+    "rentcast.io",
+    "rentecdirect.com",
+    "rentometer.com",
+    "rentredi.com",
+    "rentspree.com",
+    "reonomy.com",
+    "roofstock.com",
+    "stessa.com",
+    "turbotenant.com",
+    "yardibreeze.com",
+    "zillow.com"
+  ],
+  "_why_vendorDomains": "A competitor claim on a /vs page must link the vendor's own dated page (its pricing or feature page). These hosts are allowed ONLY in app/vs/*/page.tsx files, only at tier 1, and only for competitor claims; they are never a source for a tax, legal or market fact.",
+  "paths": {
+    "agentAllow": [
+      "app/blog/*/page.tsx",
+      "app/blog/*/opengraph-image.tsx",
+      "app/vs/*/page.tsx",
+      "app/research/*/page.tsx",
+      "lib/blog-posts.ts",
+      "lib/blog-topics.ts",
+      "content/seo/*.json",
+      "public/research/*.csv",
+      "docs/seo/guard-baseline.json"
+    ],
+    "agentDeny": [
+      "app/blog/page.tsx",
+      "app/blog/topics/*",
+      "app/vs/page.tsx",
+      "app/pricing/*",
+      "app/terms/*",
+      "app/privacy/*",
+      "app/methodology/*",
+      "app/analyze/*",
+      "app/for-agents/*",
+      "app/embed/*",
+      "app/tools/*",
+      "app/api/*",
+      "app/auth/*",
+      "app/admin/*",
+      "app/dashboard/*",
+      "app/layout.tsx",
+      "app/sitemap.ts",
+      "app/robots.ts",
+      "app/llms.txt/*",
+      "components/*",
+      "lib/supabase/*",
+      "lib/stripe*",
+      "lib/entitlements*",
+      "proxy.ts",
+      "seo/*",
+      "scripts/*",
+      ".github/*",
+      ".claude/*",
+      "supabase/*",
+      "e2e/*",
+      "lib/__tests__/*"
+    ],
+    "articleFileNames": [
+      "page.tsx",
+      "opengraph-image.tsx"
+    ],
+    "forbiddenFileNames": [
+      "route.ts",
+      "route.tsx",
+      "layout.tsx",
+      "template.tsx",
+      "loading.tsx",
+      "error.tsx",
+      "not-found.tsx",
+      "default.tsx",
+      "sitemap.ts",
+      "robots.ts",
+      "manifest.ts",
+      "actions.ts",
+      "middleware.ts",
+      "proxy.ts",
+      "instrumentation.ts"
+    ],
+    "importAllow": [
+      "next",
+      "next/link",
+      "next/og",
+      "next/image",
+      "next/navigation",
+      "react",
+      "lucide-react",
+      "@/components/marketing/*",
+      "@/components/blog/*",
+      "@/components/seo/*",
+      "@/components/ui/*",
+      "@/lib/financial-presentation",
+      "@/components/investcalc/header",
+      "@/lib/site-url",
+      "@/lib/blog-topics",
+      "@/lib/blog-posts",
+      "@/lib/og/*",
+      "@/lib/utils",
+      "@/lib/glossary",
+      "@/lib/calculator-registry",
+      "@/lib/public-pricing"
+    ],
+    "importDenyPrefixes": [
+      "@/lib/supabase",
+      "@/lib/stripe",
+      "@/lib/entitlements",
+      "@/lib/analytics",
+      "@/app/",
+      "server-only",
+      "node:",
+      "fs",
+      "child_process",
+      "http",
+      "https",
+      "net"
+    ]
+  },
+  "sweepCommits": {
+    "_readme": "Commits that touched (nearly) every page for presentation-only reasons (vocabulary, identity, header, lint/format, runtime). lastmod seeding skips them; a URL's date is the newest non-sweep commit that changed its own content or data.",
+    "shas": [
+      "b9ebd44",
+      "70cf985",
+      "da4ef24",
+      "ef62efe"
+    ]
+  },
+  "ctrCurve": {
+    "_readme": "Approximate organic CTR by average position, used ONLY to rank opportunities relative to each other. Never published as a fact.",
+    "points": [
+      [
+        1,
+        0.28
+      ],
+      [
+        2,
+        0.16
+      ],
+      [
+        3,
+        0.11
+      ],
+      [
+        4,
+        0.08
+      ],
+      [
+        5,
+        0.06
+      ],
+      [
+        6,
+        0.045
+      ],
+      [
+        7,
+        0.035
+      ],
+      [
+        8,
+        0.028
+      ],
+      [
+        9,
+        0.023
+      ],
+      [
+        10,
+        0.02
+      ],
+      [
+        12,
+        0.015
+      ],
+      [
+        15,
+        0.01
+      ],
+      [
+        20,
+        0.006
+      ],
+      [
+        30,
+        0.003
+      ],
+      [
+        50,
+        0.001
+      ],
+      [
+        100,
+        0.0002
+      ]
+    ]
+  }
+}

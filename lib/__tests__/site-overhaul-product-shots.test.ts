@@ -83,11 +83,12 @@ describe("product screenshots are real and wired", () => {
  * (their request, 2026-09-07). Docs pasted from a local terminal are the
  * usual leak: a macOS home path carries the account name, and an OAuth or
  * marketing note carries a personal handle or mailbox. This sweep covers the
- * tracked text under docs/, scripts/, e2e/, .github/ and the root Markdown so
- * the rule is enforced rather than remembered.
+ * tracked text under docs/, scripts/, e2e/, .github/, seo/, the SEO loop's
+ * .claude/ skills and critic, and the root Markdown so the rule is enforced
+ * rather than remembered.
  */
 describe("no founder identity in tracked repo text", () => {
-  const TEXT_EXT = new Set([".md", ".mdx", ".ts", ".tsx", ".mjs", ".js", ".json", ".yml", ".yaml", ".sh", ".sql", ".txt"]);
+  const TEXT_EXT = new Set([".md", ".mdx", ".ts", ".tsx", ".mjs", ".js", ".json", ".jsonl", ".csv", ".yml", ".yaml", ".sh", ".sql", ".txt"]);
   const walk = (dir: string, out: string[] = []): string[] => {
     const absolute = join(ROOT, dir);
     if (!existsSync(absolute)) return out;
@@ -99,11 +100,27 @@ describe("no founder identity in tracked repo text", () => {
     }
     return out;
   };
+  // seo/ holds the SEO loop's toolkit and docs; its run state (ledger,
+  // lessons, reports) is published to a public branch, so it is swept too.
+  // seo/data/ is regenerated scratch and never committed. The loop's skills
+  // and critic under .claude/ are published agent instructions; the vendored
+  // design-skill runtime there is not project text and is left out.
+  const seoFiles = walk("seo").filter((path) => !path.startsWith("seo/data/"));
+  const claudeFiles = [
+    ...walk(".claude/agents").filter((path) => /\/seo-[^/]*$/.test(path)),
+    ...(existsSync(join(ROOT, ".claude/skills"))
+      ? readdirSync(join(ROOT, ".claude/skills"))
+          .filter((name) => name.startsWith("seo-"))
+          .flatMap((name) => walk(`.claude/skills/${name}`))
+      : []),
+  ];
   const files = [
     ...walk("docs"),
     ...walk("scripts"),
     ...walk("e2e"),
     ...walk(".github"),
+    ...seoFiles,
+    ...claudeFiles,
     ...readdirSync(ROOT).filter((name) => name.endsWith(".md")),
   ];
 
