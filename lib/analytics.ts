@@ -37,8 +37,11 @@ import { sanitizeAnalyticsEventProperties } from "@/lib/analytics-event-dictiona
 import {
   FIRST_TOUCH_REFERRAL_SOURCES,
   browserCookieJar,
+  classifyFirstTouchReferralSource,
+  hasAdClickId,
   isFirstTouchReferralSource,
   isLandingSection,
+  landingSection,
   syncFirstTouchCookie,
   type FirstTouch,
   type FirstTouchCookieSync,
@@ -444,14 +447,18 @@ export function readFirstTouch(): FirstTouch | null {
 }
 
 /**
- * Apply a cookie-consent decision to the first-touch cookie: `granted` copies
+ * Apply a cookie-consent decision to first-touch storage: `granted` copies
  * this tab's first touch into `tc_ft` if it is absent; anything else deletes
- * it. Called on every page load with the stored decision (PostHogProvider) and
- * by the banner the moment the visitor decides. Never throws.
+ * the cookie, and an explicit `denied` also clears this tab's session record
+ * (kept before a decision so that accepting on a later page still works, but
+ * there is no reason to keep it once the visitor has said no). Called on every
+ * landing with the stored decision (`recordFirstTouchLanding`) and by the
+ * banner the moment the visitor decides. Never throws.
  */
 export function syncFirstTouchCookieWithConsent(
   consent: "granted" | "denied" | null,
 ): FirstTouchCookieSync | null {
+  if (consent === "denied") clearFirstTouchSessionRecord();
   try {
     const jar = browserCookieJar();
     if (!jar) return null;
@@ -467,9 +474,74 @@ export function syncFirstTouchCookieWithConsent(
   }
 }
 
-/** The banner's stored decision, for callers outside this module. */
-export function readStoredCookieConsent(): "granted" | "denied" | null {
-  return readStoredConsent();
+function clearFirstTouchSessionRecord(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(FIRST_TOUCH_ATTRIBUTION_KEY);
+  } catch {
+    /* storage unavailable: nothing was stored */
+  }
+}
+
+/** The landing URL's query, as `useSearchParams()` returns it. */
+type LandingQuery = {
+  get(name: string): string | null;
+  has(name: string): boolean;
+};
+
+function referrerHostOf(referrer: string): string {
+  if (!referrer) return "";
+  try {
+    return new URL(referrer).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * One document's first-touch landing, in the only order that works:
+ *   1. classify the referrer host, `utm_medium` and ad-click flag onto the
+ *      fixed taxonomy (the raw values are read here and discarded);
+ *   2. record the tab's first touch (source + landing section) in
+ *      sessionStorage, unless the visitor has already rejected analytics
+ *      storage or the load is a sign-in round trip (source null);
+ *   3. only then apply the stored consent to `tc_ft`, so a visitor who
+ *      consented earlier (before this cookie existed, or whose 90 days ran out)
+ *      gets it on this very landing. PostHogProvider runs this once per
+ *      document, so syncing before recording would lose that visit for good.
+ * Returns the source (null for a sign-in round trip) for the organic_landing
+ * event. Never throws.
+ */
+export function recordFirstTouchLanding(input: {
+  /** `document.referrer`: only its host is read. */
+  referrer: string;
+  currentHost: string;
+  /** Only `utm_medium` and the presence of an ad click-id parameter are read. */
+  query: LandingQuery | null;
+  pathname: string;
+}): FirstTouchReferralSource | null {
+  try {
+    const referralSource = classifyFirstTouchReferralSource({
+      referrerHost: referrerHostOf(input.referrer),
+      currentHost: input.currentHost.toLowerCase(),
+      campaignMedium: input.query?.get("utm_medium")?.toLowerCase() ?? "",
+      adClick: hasAdClickId(input.query),
+    });
+    const consent = readStoredConsent();
+    // After an explicit Reject nothing is written at all (the sync below
+    // would also clear it, as it does for a Reject on the landing page).
+    if (referralSource !== null && consent !== "denied") {
+      setFirstTouchAttribution({
+        referral_source: referralSource,
+        landing_section: landingSection(input.pathname),
+      });
+    }
+    syncFirstTouchCookieWithConsent(consent);
+    return referralSource;
+  } catch {
+    // Attribution must never interfere with navigation.
+    return null;
+  }
 }
 
 type QueuedCall =

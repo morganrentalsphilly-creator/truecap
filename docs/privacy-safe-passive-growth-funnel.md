@@ -43,8 +43,15 @@ events receive no caller-supplied properties.
   merged. An explicit in-product source such as `opaque_share` or `embed`
   overrides first touch on that event only. Classification lives in
   `lib/first-touch.ts`; a sign-in round trip (the Google account chooser or the
-  Supabase auth hop as referrer) records nothing, and webmail referrers
-  classify as `email`, not search.
+  Supabase auth hop as referrer) records nothing, webmail referrers classify
+  as `email`, not search, and an ad platform's auto-tagging parameter
+  (`gclid`, `gbraid`, `wbraid`, `dclid`, `msclkid`) makes the landing
+  `paid_search` whatever the referrer says (the ads' Final URLs carry no UTM
+  parameters). Only that parameter's presence is read; its value is never
+  read, stored or sent. `recordFirstTouchLanding` (`lib/analytics.ts`) runs the
+  landing in order: classify, record, then apply the stored consent. After an
+  explicit Reject nothing is recorded, and a Reject on the landing page clears
+  the tab's record.
 - Consent-gated first-touch cookie: only after the cookie decision is
   `granted`, the two values above are copied into the first-party `tc_ft`
   cookie as `<source>.<section>` (90 days, `SameSite=Lax`, `Secure` on https,
@@ -52,7 +59,8 @@ events receive no caller-supplied properties.
   validates it against both enums and writes
   `app_metadata.tc_first_touch = { source, section, v: 1 }` with the service
   role (the email action and the new-Google-account branch of the OAuth
-  callback); no cookie means nothing is stored. The Google server events use
+  callback, both in `after()`, off the response, so a slow Auth API call never
+  delays sign-up); no cookie means nothing is stored. The Google server events use
   that source as `referral_source` (`direct` without a cookie), never the
   sign-up method. Organic counts by section are written daily by
   `seo/scripts/signups.ts` to the private `seo_conversions_daily` table and are
