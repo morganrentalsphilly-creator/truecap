@@ -15,7 +15,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { EMBED_LIST, getEmbedEntry } from "@/lib/embed-registry";
-import { CANONICAL_HOST } from "@/lib/site-url";
+import { buildEmbedSnippet } from "@/lib/embed-snippet";
+import { CANONICAL_HOST, CANONICAL_SITE_URL } from "@/lib/site-url";
 
 const TOOLS_DIR = join(process.cwd(), "app/tools");
 const toolSlugs = readdirSync(TOOLS_DIR).filter((d) =>
@@ -81,16 +82,22 @@ describe("embed invite wiring", () => {
   });
 
   it("the generated snippet links to the indexed /tools page, dofollow", () => {
-    const src = readFileSync(
-      join(process.cwd(), "components/embed/embed-code-block.tsx"),
-      "utf8",
-    );
-    // The caption anchor is the entire SEO payoff — it must point at the
+    // The credit anchor is the entire SEO payoff — it must point at the
     // indexed tool page, not the noindexed /embed route, and must not be
-    // nofollowed.
-    expect(src).toContain("buildEmbedAttributionHref");
-    expect(src).toContain("toolPath: `/tools/${slug}`");
-    expect(src).toContain("Calculator by <a");
-    expect(src).not.toMatch(/rel=\\?"nofollow/);
+    // nofollowed. Asserted on the generator's output for every embeddable
+    // tool, not on the source text of the file that builds it.
+    for (const entry of EMBED_LIST) {
+      const snippet = buildEmbedSnippet({
+        slug: entry.slug,
+        title: entry.title,
+        siteUrl: CANONICAL_SITE_URL,
+        defaultHeight: entry.defaultHeight,
+      });
+      expect(snippet).toContain(
+        `Powered by <a href="${CANONICAL_SITE_URL}/tools/${entry.slug}">TrueCap</a>`,
+      );
+      expect(snippet).not.toContain(`/embed/${entry.slug}">TrueCap`);
+      expect(snippet).not.toMatch(/rel=\\?"nofollow/);
+    }
   });
 });

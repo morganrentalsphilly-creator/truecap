@@ -4,8 +4,9 @@
  * What this is: a stripped-down, chrome-free version of any /tools/*
  * calculator widget designed to be embedded as an iframe on third-
  * party real estate blogs, agent websites, and BiggerPockets-style
- * forums. The footer reads "Powered by TrueCap →" with a UTM-tagged
- * link back to the full /tools page.
+ * forums. The footer carries a "Powered by TrueCap" brand link to the
+ * calculator's public /tools page (new tab) and the UTM-tagged
+ * "Underwrite a full property in TrueCap" call to action.
  *
  * Why this exists: every embed = a permanent backlink (SEO compounding)
  * + brand exposure on someone else's traffic + occasional conversion
@@ -30,6 +31,7 @@ import {
   EmbedAttributionLink,
   EmbedReferralTracker,
 } from "@/components/embed/embed-referral-tracker";
+import { EmbedPoweredByLink } from "@/components/embed/embed-powered-by-link";
 import { EMBED_LIST, getEmbedEntry } from "@/lib/embed-registry";
 import { getSiteUrl } from "@/lib/site-url";
 import { buildEmbedAttributionHref } from "@/lib/embed-attribution";
@@ -90,10 +92,13 @@ export default async function EmbedPage({
         <Widget />
 
         {/* Attribution footer — small, tasteful, but clearly clickable.
-            Tracks via UTM so we can measure embed-driven traffic in
-            Vercel Analytics + GA. */}
-        <footer className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-          <span>Free calculator</span>
+            "Powered by TrueCap" names the source and opens the public tool
+            page in a new tab; the call to action is UTM-tagged so we can
+            measure embed-driven traffic. The same credit sits under the
+            iframe in the snippet (lib/embed-snippet.ts), where it is the
+            crawlable link: this page is noindex, nofollow. */}
+        <footer className="mt-4 flex flex-wrap items-center justify-between gap-x-3 border-t border-border pt-3 text-xs text-muted-foreground">
+          <EmbedPoweredByLink slug={entry.slug} />
           <EmbedAttributionLink
             href={attributionHref}
             calculator={entry.slug}

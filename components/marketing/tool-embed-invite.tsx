@@ -4,7 +4,7 @@
  *
  * WHY THIS EXISTS
  * ---------------
- * `components/embed/embed-code-block.tsx` generates a snippet whose caption
+ * `lib/embed-snippet.ts` builds a snippet whose "Powered by TrueCap" credit
  * anchor lives in the PARTNER'S DOM on the partner's origin — a real,
  * crawlable, dofollow link to the indexed /tools page. That is the GIPHY /
  * Typeform pattern, and it is the only mechanism this site owns that produces
@@ -24,8 +24,9 @@
  * primary CTA — the day it does, it is costing more in conversion than any
  * backlink is worth.
  *
- * Renders NOTHING for a tool that is not embeddable (2 of the 21 /tools pages
- * have no widget), so it is safe to drop into every tool page unconditionally.
+ * Renders NOTHING for a tool that is not embeddable (no EMBED_REGISTRY entry,
+ * e.g. the rehab estimator and the spreadsheet), so it is safe to drop into
+ * every tool page unconditionally.
  */
 
 import { getEmbedEntry } from "@/lib/embed-registry";
@@ -77,9 +78,10 @@ export function ToolEmbedInvite({ slug }: { slug: string }) {
         </summary>
         <div className="mt-4">
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-            Paste this into any blog post, CMS or WordPress page. It resizes
-            itself, needs no script tag of yours, and costs nothing. A small
-            &ldquo;Calculator by TrueCap&rdquo; credit sits under it.
+            Paste this into a blog post, CMS or WordPress page that allows
+            embedded HTML. It resizes itself, needs no script tag of yours, and
+            costs nothing. A small &ldquo;Powered by TrueCap&rdquo; credit sits
+            under it.
           </p>
           <EmbedCodeBlock
             slug={entry.slug}
