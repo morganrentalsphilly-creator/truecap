@@ -145,14 +145,14 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 ## 3. Identity and first-touch attribution
 
 - **Two ways to create an account**, both Supabase Auth:
-  - email + password via `signUpAction` (`app/actions/auth.ts`). It passes no `options.data`.
+  - email + password via `signUpAction` (`app/actions/auth.ts`). It passes no `options.data`; it saves the first touch to app_metadata (below).
   - Google OAuth (`components/auth/google-auth-button.tsx`), which cannot carry user metadata.
-- **Callback:** both land on `app/auth/callback/route.ts`. It detects a genuinely new Google user and emits `signup_completed` with `referral_source: "google_oauth"`, which mislabels the sign-up method as the acquisition channel.
+- **Callback:** both land on `app/auth/callback/route.ts`. It detects a genuinely new Google user and emits `signup_completed`; its `referral_source` is the first-touch cookie's source (`direct` without one). It used to send `"google_oauth"`, the sign-up method mislabelled as the acquisition channel.
 - **Where user data lives:**
   - `auth.users` has `raw_user_meta_data` (user-editable) and `raw_app_meta_data` (service role only).
   - `public.profiles` has no jsonb column, and its update policy covers the whole row, so a new column would be user-writable.
   - `public.demo_accounts` lists accounts to exclude from counts.
-- **Today's attribution:**
+- **Attribution before F5:**
   - `components/analytics/posthog-provider.tsx` classifies the first page load into a fixed taxonomy (`direct, organic_search, organic_ai, organic_social, paid_search, paid_social, email, external_referral, campaign`). It stores it in **sessionStorage** only, with no consent check.
   - `docs/privacy-safe-passive-growth-funnel.md` forbids storing raw UTM values, referrer hosts or landing paths, a rule reinstated on 2026-08-30 (`f7183dd`) and guarded by `analytics-privacy-guards.test.ts`.
 - **Consent:** the banner (`components/marketing/cookie-consent-banner.tsx`) is one all-or-nothing choice stored in localStorage. It promises "only essential session cookies" on reject. Production sets no cookie for anonymous visitors.
@@ -161,6 +161,9 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
   - Written to `app_metadata.tc_first_touch` at sign-up: in `signUpAction`, and in the callback's new-Google-user branch via the service role.
   - Weekly organic counts are written to the private `seo_conversions_daily` table and shown only on `/admin/seo`, never in the public repo.
   - No migration is needed.
+- **Built (F5):**
+  - `lib/first-touch.ts` holds the taxonomy, the classifier (sign-in round trips record nothing; webmail is `email`, not search), the landing sections and the `tc_ft` cookie rules; `lib/first-touch-server.ts` validates the cookie with zod and writes app_metadata.
+  - `seo/scripts/signups.ts` runs daily in `seo-control-plane.yml` (`--days 35`, non-fatal) and prints no count on the public runner.
 
 ## 4. Can git supply honest last-modified dates?
 

@@ -185,7 +185,7 @@ For tax/law/lending, the monitor is an alert—not an autonomous interpreter. Pr
 
 ## Organic and embed attribution
 
-PostHog now receives privacy-minimized events for `organic_landing`, calculator start/completion, analyzer start/completion, signup start/completion, trial start, and paid conversion. Organic attribution stores only the landing path, referrer hostname, and search/AI medium in session storage and attaches them to subsequent funnel events. It does not retain search queries, property addresses, or full referrer URLs.
+PostHog now receives privacy-minimized events for `organic_landing`, calculator start/completion, analyzer start/completion, signup start/completion, trial start, and paid conversion. First-touch attribution (`lib/first-touch.ts`) stores only a fixed source category (`organic_search`, `organic_ai`, …) and a coarse landing section (`blog`, `tools`, `markets`, …) in session storage; only the category is attached to later funnel events. It does not retain landing paths, referrer hosts, UTM values, search queries, property addresses, or full referrer URLs. With cookie consent the two values also go into the first-party `tc_ft` cookie and, at sign-up, into `app_metadata.tc_first_touch`. `seo/scripts/signups.ts` (a step of `seo-control-plane.yml`) writes organic sign-ups by section to `seo_conversions_daily`, and `/admin/seo` shows the last four weeks. The counts are private: they never appear in the public digest, an issue, or a workflow log.
 
 Embeds record code copy, referring hostname, load, and attribution click. The visible, useful “Powered by TrueCap” attribution remains; the ineffective hidden iframe link was removed. No automated outreach or link scheme exists.
 

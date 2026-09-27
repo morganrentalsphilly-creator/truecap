@@ -35,10 +35,28 @@ events receive no caller-supplied properties.
   account UUID remains the authenticated `distinct_id`, never an event field.
 - Browser first-touch attribution stores only `referral_source`, using the
   fixed taxonomy `direct`, `organic_search`, `organic_ai`, `organic_social`,
-  `paid_search`, `paid_social`, `email`, `external_referral`, or `campaign`.
-  Raw UTM values, referrer hosts, landing paths, and queries are neither stored
-  nor merged into later events. An explicit in-product source such as
-  `opaque_share` or `embed` overrides first touch on that event only.
+  `paid_search`, `paid_social`, `email`, `external_referral`, or `campaign`,
+  plus a coarse landing section (`home`, `blog`, `tools`, `markets`, `states`,
+  `glossary`, `vs`, `pricing`, `analyze`, or `other`, from the landing path's
+  first segment). Raw UTM values, referrer hosts, landing paths, and queries
+  are neither stored nor merged into later events; only `referral_source` is
+  merged. An explicit in-product source such as `opaque_share` or `embed`
+  overrides first touch on that event only. Classification lives in
+  `lib/first-touch.ts`; a sign-in round trip (the Google account chooser or the
+  Supabase auth hop as referrer) records nothing, and webmail referrers
+  classify as `email`, not search.
+- Consent-gated first-touch cookie: only after the cookie decision is
+  `granted`, the two values above are copied into the first-party `tc_ft`
+  cookie as `<source>.<section>` (90 days, `SameSite=Lax`, `Secure` on https,
+  first touch wins). Any other decision deletes it. At sign-up the server
+  validates it against both enums and writes
+  `app_metadata.tc_first_touch = { source, section, v: 1 }` with the service
+  role (the email action and the new-Google-account branch of the OAuth
+  callback); no cookie means nothing is stored. The Google server events use
+  that source as `referral_source` (`direct` without a cookie), never the
+  sign-up method. Organic counts by section are written daily by
+  `seo/scripts/signups.ts` to the private `seo_conversions_daily` table and are
+  shown only on `/admin/seo`, never in a public digest, issue, PR, or log.
 - Browser events remain subject to the existing PostHog opt-in consent state.
   GTM/Google Consent Mode and Vercel route suppression remain separate.
 - Server-authoritative account/billing lifecycle events do not read browser

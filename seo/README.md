@@ -65,6 +65,7 @@ node seo/scripts/ledger.ts query        # the change ledger; score-outcomes, ver
 node seo/scripts/brakes.ts              # regression/brake decisions
 node seo/scripts/report.ts --dry-run    # print this week's digest
 node seo/scripts/verify-static.ts --working-tree --base origin/main   # fence your own branch
+node seo/scripts/signups.ts --dry-run   # organic sign-ups by section (needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY); prints counts locally, never on a runner
 node seo/scripts/<any>.ts --self-test   # offline checks
 ```
 
