@@ -53,8 +53,11 @@
  *   - regular-expression literals carrying markup (`/<!--/.source` is a string);
  *   - adding or changing robots metadata or a next/navigation redirect: both
  *     remove a page from the index outside content/seo/noindex.json and its cap.
- * Date consts (PUBLISHED_AT, MODIFIED_AT, …) may not change in an existing
- * page: dates are set by the publish job from what actually changed.
+ * Date consts (PUBLISHED_AT, MODIFIED_AT, …) and date fields (dateModified,
+ * modifiedTime, ARTICLE.modifiedAt, …) may not change in an existing page,
+ * whatever they hold (a literal, or F2's `lastmodFor(…) ?? PUBLISHED_AT`):
+ * dates are set by the publish job from what actually changed. A NEW post's
+ * MODIFIED_AT must be exactly that lastmod-map wiring.
  *
  * The brief's `jsonLdScript(...)` form is not accepted yet: no such helper
  * exists, so any import could be aliased to that name. When the F4 helper
@@ -111,6 +114,14 @@ const PUBLISH_OWNED_FILES = new Set(["content/seo/lastmod.json"]);
 const META_CONSTS = new Set(["TITLE", "SERP_TITLE", "TITLE_PLAIN", "DESCRIPTION", "META_DESCRIPTION", "OG_TITLE", "OG_DESCRIPTION"]);
 const DATE_CONST_RE = /^[A-Z0-9_]*(?:PUBLISHED|MODIFIED|UPDATED|REVIEWED|CHECKED)[A-Z0-9_]*$/;
 const DATE_PROPS = new Set(["datePublished", "dateModified", "dateCreated", "lastReviewed", "uploadDate"]);
+/**
+ * Date fields of a PAGE (app/…): the source-first `ARTICLE.publishedAt/modifiedAt`
+ * and the openGraph `publishedTime/modifiedTime`. Not in a registry
+ * (lib/blog-posts.ts): appending a row there legitimately adds a publishedAt.
+ */
+const PAGE_DATE_PROPS = new Set([...DATE_PROPS, "publishedAt", "modifiedAt", "publishedTime", "modifiedTime"]);
+/** Prints a date slot's initializer without comments or layout, so a reflow is not an edit and a comment is not a value. */
+const DATE_PRINTER = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed });
 
 /**
  * Identifiers a prose page never needs and a payload always does, rejected
@@ -1195,16 +1206,83 @@ function memberNameText(name: ts.PropertyName): string | null {
   return propertyNameText(name);
 }
 
-function dateValues(sf: ts.SourceFile): string[] {
-  const values: string[] = [];
+type DateSlot = { name: string; value: string };
+
+/**
+ * Every date slot of a module and what it holds, WHATEVER the initializer:
+ * PUBLISHED_AT/MODIFIED_AT-style consts and the date properties, as
+ * `name=<printed initializer>`. Since F2 a post's MODIFIED_AT is
+ * `lastmodFor("/blog/<slug>") ?? PUBLISHED_AT` and its JSON-LD holds the
+ * MODIFIED_AT identifier; recording only string literals (the pre-F2 rule)
+ * let `new Date()…` replace either one unseen.
+ */
+export function dateSlots(sf: ts.SourceFile, file: string): DateSlot[] {
+  const props = file.startsWith("app/") ? PAGE_DATE_PROPS : DATE_PROPS;
+  const print = (node: ts.Node): string => DATE_PRINTER.printNode(ts.EmitHint.Unspecified, node, sf).replace(/\s+/g, " ").trim();
+  const slots: DateSlot[] = [];
   walk(sf, (node) => {
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && DATE_CONST_RE.test(node.name.text) && node.initializer && isStringish(node.initializer)) {
-      values.push(`${node.name.text}=${node.initializer.getText(sf)}`);
-    } else if (ts.isPropertyAssignment(node) && DATE_PROPS.has(propertyNameText(node.name) ?? "") && isStringish(node.initializer)) {
-      values.push(`${propertyNameText(node.name)}=${node.initializer.getText(sf)}`);
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && (DATE_CONST_RE.test(node.name.text) || props.has(node.name.text))) {
+      slots.push({ name: node.name.text, value: node.initializer ? print(node.initializer) : "" });
+    } else if (ts.isPropertyAssignment(node) && props.has(propertyNameText(node.name) ?? "")) {
+      slots.push({ name: propertyNameText(node.name) as string, value: print(node.initializer) });
+    } else if (ts.isShorthandPropertyAssignment(node) && props.has(node.name.text)) {
+      slots.push({ name: node.name.text, value: "(shorthand)" });
     }
   });
-  return values.sort();
+  return slots;
+}
+
+/** The date slots as a sorted multiset: any change, addition or removal is a date edit. */
+function dateValues(sf: ts.SourceFile, file: string): string[] {
+  return dateSlots(sf, file)
+    .map((slot) => `${slot.name}=${slot.value}`)
+    .sort();
+}
+
+/** The one modified date a post may carry (lib/__tests__/lastmod-contract.test.ts pins the same wiring). */
+export function postModifiedWiring(slug: string): string {
+  return `lastmodFor("/blog/${slug}") ?? PUBLISHED_AT`;
+}
+
+const ISO_DATE_LITERAL_RE = /^"\d{4}-\d{2}-\d{2}"$/;
+
+/** newPostDateViolations for a file's source text (lib/__tests__/lastmod-contract.test.ts holds every post to it). */
+export function postDateWiringViolations(file: string, source: string): string[] {
+  return newPostDateViolations(parseTs(file, source), file);
+}
+
+/**
+ * A NEW post's dates (app/blog/<slug>/page.tsx): PUBLISHED_AT is a date
+ * literal (the run date, set once), MODIFIED_AT (or the source-first
+ * ARTICLE.modifiedAt) is exactly the lastmod-map wiring, the published and
+ * modified fields name those two, and any other date const (a history fact
+ * like FACT_CHECKED_AT) is a date literal. The publish job's `lastmod.ts
+ * bump` then owns every later date.
+ */
+export function newPostDateViolations(sf: ts.SourceFile, file: string): string[] {
+  const m = /^app\/blog\/([^/]+)\/page\.tsx$/.exec(file);
+  if (!m) return [];
+  const wiring = postModifiedWiring(m[1]);
+  const out: string[] = [];
+  const slots = dateSlots(sf, file);
+  if (!slots.some((slot) => slot.name === "MODIFIED_AT" || slot.name === "modifiedAt")) {
+    out.push(`a new post declares its modified date as \`const MODIFIED_AT = ${wiring}\` (import { lastmodFor } from "@/lib/seo/lastmod")`);
+  }
+  for (const { name, value } of slots) {
+    if (name === "PUBLISHED_AT") {
+      if (!ISO_DATE_LITERAL_RE.test(value)) out.push(`PUBLISHED_AT must be a "YYYY-MM-DD" literal (the run date), not ${preview(value)}`);
+    } else if (name === "MODIFIED_AT" || name === "modifiedAt") {
+      if (value !== wiring) out.push(`${name} must be exactly \`${wiring}\`, not ${preview(value)}: the lastmod map owns every modified date`);
+    } else if (name === "publishedAt" || name === "datePublished" || name === "publishedTime") {
+      if (value !== "PUBLISHED_AT") out.push(`${name} must be PUBLISHED_AT, not ${preview(value)}`);
+    } else if (name === "dateModified" || name === "modifiedTime") {
+      if (value !== "MODIFIED_AT") out.push(`${name} must be MODIFIED_AT, not ${preview(value)}`);
+    } else if (!ISO_DATE_LITERAL_RE.test(value)) {
+      // A history fact (`FACT_CHECKED_AT = "2026-08-15"`) is a fixed date, never a clock read or a lookup.
+      out.push(`${name} must be a "YYYY-MM-DD" literal, not ${preview(value)}`);
+    }
+  }
+  return out;
 }
 
 // -------------------------------------------------------------------- tiers
@@ -1981,9 +2059,10 @@ export function verify(input: VerifyInput): VerifyVerdict {
       const sf = parseTs(file.path, after);
       const preSf = before === null ? null : parseTs(file.path, before);
       violations.push(...wholeModuleViolations(sf, file.path, config));
-      if (preSf !== null && dateValues(preSf).join("\n") !== dateValues(sf).join("\n")) {
+      if (preSf !== null && dateValues(preSf, file.path).join("\n") !== dateValues(sf, file.path).join("\n")) {
         add("date-edit", file.path, "PUBLISHED_AT/MODIFIED_AT-style dates may not change: the publish job sets them from what changed");
       }
+      if (preSf === null) for (const detail of newPostDateViolations(sf, file.path)) add("date-wiring", file.path, detail);
       if ((preSf === null ? [] : robotsSignature(preSf)).join("\n") !== robotsSignature(sf).join("\n")) {
         add("robots", file.path, "robots/googleBot metadata may not be added or changed: a noindex goes through content/seo/noindex.json");
       }
@@ -2506,6 +2585,17 @@ function selfTest(): void {
   check(checkLiterals(file, "const a = { b: /<!--/.source };").length === 1, "a regex carrying markup is rejected");
   check(checkLinks(file, page('const L = "/" + "/evil.example";', "<a href={L}>x</a>"), { tier: 1, sitemap: new Set(), addedLines: null }, config).length === 1, "an href const assembled at runtime is rejected");
   check(embeddedUrls("url(//evil.example/x)").length === 1, "protocol-relative URL found mid-string");
+
+  // Dates: every slot counts whatever it holds (F2 wiring), and a new post must carry the map wiring.
+  const wired = (modified: string, ld = "MODIFIED_AT"): string =>
+    `const PUBLISHED_AT = "2026-07-01";\nconst MODIFIED_AT = ${modified};\nconst ld = { datePublished: PUBLISHED_AT, dateModified: ${ld} };\n`;
+  const slotsOf = (src: string): string => dateValues(parseTs(file, src), file).join("|");
+  const f2 = wired('lastmodFor("/blog/x") ?? PUBLISHED_AT');
+  check(slotsOf(f2) !== slotsOf(wired("new Date().toISOString().slice(0, 10)")), "a build-time MODIFIED_AT is a date edit");
+  check(slotsOf(f2) !== slotsOf(wired('lastmodFor("/blog/x") ?? PUBLISHED_AT', "new Date().toISOString()")), "a build-time JSON-LD dateModified is a date edit");
+  check(slotsOf(f2) === slotsOf(wired('lastmodFor("/blog/x") /* the map */ ??\n  PUBLISHED_AT')), "a reflow or a comment inside a date slot is not a date edit");
+  check(newPostDateViolations(parseTs(file, f2), file).length === 0, "a new post wired to the map passes");
+  check(newPostDateViolations(parseTs(file, wired('"2026-07-01"')), file).length === 1, "a new post's literal MODIFIED_AT is refused");
 }
 
 /** Every flag this script reads (lib/cli.ts rejects any other). */
