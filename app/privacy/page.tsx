@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "September 7, 2026";
+const LAST_UPDATED = "September 27, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -118,6 +118,9 @@ export default function PrivacyPage() {
               <strong>Cookies</strong> — session cookie for keeping you signed in (set by
               Supabase Auth), plus analytics and advertising storage only according to the
               choice you make in our cookie banner. You can reject nonessential analytics.
+              If you accept analytics cookies, a first-party cookie (kept up to 90 days)
+              records a broad traffic-source category and the site section you first landed
+              on, and these are stored with your account if you sign up.
             </li>
             <li>
               <strong>Diagnostics</strong> — error, performance, device, and request context

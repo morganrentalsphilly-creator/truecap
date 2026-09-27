@@ -2,6 +2,7 @@ import "server-only";
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSeoAutopilotConfig } from "./config";
+import { organicSignupWindowStart, summarizeOrganicSignups, type OrganicSignupSummary } from "./signups";
 
 type Row = Record<string, unknown>;
 
@@ -14,6 +15,8 @@ export type SeoDashboardData = {
   sources: Row[];
   jobs: Row[];
   health: { stalePages: number; failedSources: number; changedSources: number; openOpportunities: number };
+  /** Last four weeks of organic sign-ups by landing section; null = no rows (render nothing). */
+  organicSignups: OrganicSignupSummary | null;
 };
 
 const number = (value: unknown): number => (typeof value === "number" ? value : Number(value) || 0);
@@ -28,6 +31,7 @@ export async function loadSeoDashboard(): Promise<SeoDashboardData> {
     sources: [],
     jobs: [],
     health: { stalePages: 0, failedSources: 0, changedSources: 0, openOpportunities: 0 },
+    organicSignups: null,
   };
 
   try {
@@ -67,6 +71,18 @@ export async function loadSeoDashboard(): Promise<SeoDashboardData> {
       }),
       { clicks: 0, impressions: 0, weightedPosition: 0, nonbrandClicks: 0, analyzerStarts: 0, signups: 0, paidConversions: 0 },
     );
+    // Written daily by seo/scripts/signups.ts (organic first touch, by landing
+    // section). Private: this admin page is the only reader.
+    const nowMs = Date.now();
+    const signupResult = await db
+      .from("seo_conversions_daily")
+      .select("date,page_type,conversions")
+      .eq("event_name", "signup_completed")
+      .eq("topic_cluster", "organic")
+      .gte("date", organicSignupWindowStart(nowMs))
+      .gt("conversions", 0);
+    if (signupResult.error) throw signupResult.error;
+    const organicSignups = summarizeOrganicSignups((signupResult.data ?? []) as Row[], nowMs);
     const growth = {
       clicks: growthTotals.clicks,
       impressions: growthTotals.impressions,
@@ -74,7 +90,9 @@ export async function loadSeoDashboard(): Promise<SeoDashboardData> {
       averagePosition: growthTotals.impressions ? growthTotals.weightedPosition / growthTotals.impressions : null,
       nonbrandClicks: growthTotals.nonbrandClicks,
       analyzerStarts: growthTotals.analyzerStarts,
-      signups: growthTotals.signups,
+      // seo_page_metrics.signups has no writer; the organic count above is
+      // the real 28-day figure (4 weeks, today included).
+      signups: organicSignups?.total ?? 0,
       paidConversions: growthTotals.paidConversions,
     };
     const sources = (sourceResult.data ?? []) as Row[];
@@ -83,6 +101,7 @@ export async function loadSeoDashboard(): Promise<SeoDashboardData> {
       ...fallback,
       configured: true,
       growth,
+      organicSignups,
       opportunities,
       sources,
       jobs: (jobResult.data ?? []) as Row[],

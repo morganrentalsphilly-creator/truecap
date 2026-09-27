@@ -1,7 +1,15 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
+import { FIRST_TOUCH_COOKIE } from "@/lib/first-touch";
+import {
+  parseFirstTouchCookieValue,
+  persistFirstTouch,
+  reportFirstTouchFailure,
+} from "@/lib/first-touch-server";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -35,6 +43,34 @@ function mapAuthError(message: string): string {
     return `${message.replace(/\.$/, "")}. Choose a different password.`;
   }
   return message;
+}
+
+/**
+ * Save the consent-gated first-touch cookie (a source category and a landing
+ * section, lib/first-touch.ts) to the new account's app_metadata. Runs only
+ * after Supabase accepted the sign-up. Best-effort: no cookie means no consent
+ * or no first touch, and any failure is reported without PII and swallowed so
+ * attribution can never fail a sign-up. Not exported: every export of a
+ * "use server" module is a callable server action.
+ */
+async function saveSignUpFirstTouch(user: {
+  id: string;
+  app_metadata?: Record<string, unknown> | null;
+}): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    const firstTouch = parseFirstTouchCookieValue(
+      cookieStore.get(FIRST_TOUCH_COOKIE)?.value,
+    );
+    if (!firstTouch) return;
+    await persistFirstTouch({
+      admin: createAdminSupabaseClient(),
+      user,
+      firstTouch,
+    });
+  } catch (error) {
+    reportFirstTouchFailure("email_signup", error);
+  }
 }
 
 export async function signInAction(input: unknown): Promise<AuthActionResult> {
@@ -104,6 +140,8 @@ export async function signUpAction(
       message: "Unable to register with this email. Try signing in instead.",
     };
   }
+
+  if (data.user) await saveSignUpFirstTouch(data.user);
 
   const needsEmailConfirmation = !data.session;
   return { ok: true, needsEmailConfirmation };

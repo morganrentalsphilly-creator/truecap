@@ -29,7 +29,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
-import { setAnalyticsConsent } from "@/lib/analytics";
+import {
+  setAnalyticsConsent,
+  syncFirstTouchCookieWithConsent,
+} from "@/lib/analytics";
 import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
 
 /**
@@ -134,6 +137,9 @@ export function CookieConsentBanner() {
     // just gave consent. setAnalyticsConsent is a safe no-op if
     // PostHog isn't loaded (missing env var, ad-block, etc.).
     setAnalyticsConsent(true);
+    // Only now may the first-party first-touch cookie (source category +
+    // landing section, lib/first-touch.ts) be written.
+    syncFirstTouchCookieWithConsent("granted");
     setDecision("granted");
     notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
     restoreFocusAfterDismiss();
@@ -143,6 +149,8 @@ export function CookieConsentBanner() {
     writeStoredConsent("denied");
     pushGtagConsent("denied");
     setAnalyticsConsent(false);
+    // Deletes the first-touch cookie if an earlier grant had set it.
+    syncFirstTouchCookieWithConsent("denied");
     setDecision("denied");
     notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
     restoreFocusAfterDismiss();

@@ -101,6 +101,19 @@ jobs:
         if: always()
         run: node scripts/seo/control-plane.mjs --cadence "${{ steps.cadence.outputs.cadence }}"
 
+      # Organic sign-ups by landing section into the private
+      # seo_conversions_daily table (read only by /admin/seo). The script
+      # prints no count on this public runner. A failure leaves the dashboard
+      # stale but never fails the cycle.
+      - name: Count organic sign-ups (private, /admin/seo only)
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          NODE_OPTIONS: --disable-warning=ExperimentalWarning
+        run: |
+          node seo/scripts/signups.ts --days 35 || echo "::warning title=Organic sign-up count::seo/scripts/signups.ts failed; /admin/seo sign-up counts are stale. The cycle continues."
+
       - name: Run monthly performance templates
         if: steps.cadence.outputs.cadence == 'monthly' || steps.cadence.outputs.cadence == 'quarterly'
         run: node scripts/seo/pagespeed.mjs
