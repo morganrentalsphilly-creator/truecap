@@ -19,13 +19,17 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import { EMBED_LIST } from "@/lib/embed-registry";
-import { EMBEDDABLE_COUNT, CALCULATOR_COUNT } from "@/lib/calculator-registry";
+import {
+  CALCULATOR_COUNT,
+  CALCULATOR_REGISTRY,
+  EMBEDDABLE_COUNT,
+} from "@/lib/calculator-registry";
 import { CANONICAL_HOST, CANONICAL_SITE_URL, getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 
 export const metadata: Metadata = {
   title: "Embed TrueCap Calculators on Your Site (Free)",
-  description: `Embed any of TrueCap's ${EMBEDDABLE_COUNT} free real estate calculators on your blog, agent website, or course platform. Copy-paste iframe code. Auto-resizing. Free to use.`,
+  description: `Embed ${EMBEDDABLE_COUNT} of TrueCap's free real estate calculators on your blog, agent website, or course platform. Copy-paste iframe code. Auto-resizing. Free to use.`,
   alternates: { canonical: "/embed" },
   openGraph: {
     title: "Embed free real estate calculators — TrueCap",
@@ -43,6 +47,15 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
+
+/** Released calculators with no iframe widget, named from the registry so the
+ *  hub never claims a different split than the one it renders. */
+const PAGE_ONLY_CALCULATORS = CALCULATOR_REGISTRY.filter((c) => !c.embeddable);
+
+function joinTitles(titles: string[]): string {
+  if (titles.length <= 2) return titles.join(" and ");
+  return `${titles.slice(0, -1).join(", ")}, and ${titles[titles.length - 1]}`;
+}
 
 export default function EmbedHubPage() {
   const siteUrl = getSiteUrl();
@@ -68,13 +81,20 @@ export default function EmbedHubPage() {
           </h1>
           <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
             Real estate bloggers, agents, course creators, and finance writers:
-            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT}{" "}
-            embeddable calculators on your site — {EMBEDDABLE_COUNT} of our{" "}
-            {CALCULATOR_COUNT} free tools (the Rehab Cost Estimator runs on
-            TrueCap only). Currently free to use. No signup and no attribution
-            required beyond the small &quot;Powered by TrueCap&quot; footer
-            (which links back to us — so you get a free calculator, we get a
-            backlink).
+            grab the iframe code below and put any of our {EMBEDDABLE_COUNT}{" "}
+            embeddable calculators on your site
+            {PAGE_ONLY_CALCULATORS.length > 0 ? (
+              <>
+                {" "}— {EMBEDDABLE_COUNT} of our {CALCULATOR_COUNT} free
+                calculators (the{" "}
+                {joinTitles(PAGE_ONLY_CALCULATORS.map((c) => c.title))}{" "}
+                {PAGE_ONLY_CALCULATORS.length === 1 ? "runs" : "run"} on
+                TrueCap only)
+              </>
+            ) : null}
+            . Free to use, no signup. Each one shows a small &ldquo;Powered by
+            TrueCap&rdquo; credit that links to that calculator&apos;s page on
+            TrueCap, so you get a free calculator and we get a link back.
           </p>
 
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
@@ -95,7 +115,7 @@ export default function EmbedHubPage() {
             <div className="rounded-xl border border-border bg-card p-3">
               <p className="font-bold text-foreground">Mobile-friendly</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Responsive on every screen size
+                Fills your content column, up to 640px wide
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3">
@@ -126,13 +146,12 @@ export default function EmbedHubPage() {
           </ol>
           <p className="mt-3 text-xs text-muted-foreground">
             Want a calculator we don&apos;t have here?{" "}
-            <Link
-              href="/analyze?utm_source=embed-hub"
-              prefetch={false}
+            <a
+              href="mailto:hello@usetruecap.com?subject=Embed%20request"
               className="text-primary font-semibold hover:underline"
             >
               Send us a note
-            </Link>{" "}
+            </a>{" "}
             — we&apos;ll consider adding it.
           </p>
         </section>
@@ -205,11 +224,11 @@ export default function EmbedHubPage() {
             {[
               {
                 q: "Can I customize the calculator's look?",
-                a: "Not in v1 — the calculator inherits TrueCap's styling so it stays consistent across embeds. If there's demand for color/branding customization, we'll add it.",
+                a: "No. Inside the frame the calculator uses TrueCap's own styling, and the embed has no color, font, or branding settings. The snippet's style attribute sets only the frame's width and starting height on your page; the height then adjusts to the calculator.",
               },
               {
-                q: "Do I have to keep the 'Powered by TrueCap' footer?",
-                a: "Yes. The footer is the only ask in exchange for free, hosted, maintained calculators. It's small, tasteful, and doesn't compete with your content.",
+                q: "Do I have to keep the 'Powered by TrueCap' credit?",
+                a: "The credit inside the calculator's footer is part of the embedded page, so it always shows. The snippet also puts a one-line 'Powered by TrueCap' credit under the frame, linking to that calculator's page on TrueCap. Keeping that line is the one thing we ask in return for a free, hosted calculator.",
               },
               {
                 q: "How does the embed affect page loading?",
@@ -217,11 +236,11 @@ export default function EmbedHubPage() {
               },
               {
                 q: "Can I track conversions from my embed?",
-                a: "The attribution link uses utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign so TrueCap can report aggregate embed traffic. It does not accept partner identity or property data.",
+                a: "Not through TrueCap: there are no per-site reports. The frame loads with no referrer, so TrueCap does not learn which page embedded it. The 'Underwrite a full property in TrueCap' link inside the calculator carries utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign, so TrueCap can count embed traffic in aggregate. No link carries your site's identity or anything a visitor enters.",
               },
               {
                 q: "What if the calculator changes?",
-                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet. Keep the attribution intact and periodically verify the embed as part of your own site checks.",
+                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet, and snippets copied earlier keep working as they are. Keep the credit line intact and periodically verify the embed as part of your own site checks.",
               },
             ].map((f) => (
               <details key={f.q} className="group p-5">
@@ -241,9 +260,9 @@ export default function EmbedHubPage() {
             Have a real estate audience?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            Embed a calculator + write a 200-word post about it. Your readers
-            get a useful tool. You get an interactive page that ranks for
-            calculator queries. We get a backlink. Everyone wins.
+            Embed a calculator and write a short post around it. Your readers
+            get a working tool without leaving your page, and we get a credit
+            link back.
           </p>
           <Link
             href="/analyze?utm_source=embed-hub-cta"

@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { EMBEDDABLE_CALCULATORS } from "../lib/calculator-registry";
+import { CANONICAL_SITE_URL } from "../lib/site-url";
 
 const VIEWPORTS = [
   { width: 390, height: 844 },
@@ -77,6 +78,16 @@ test("every advertised embed and attribution destination is reachable", async ({
       "content",
       /noindex/,
     );
+
+    // The brand credit always names the public, canonical tool page and
+    // opens it in a new tab; it is the same link the snippet pastes.
+    const poweredBy = page.getByRole("link", { name: "Powered by TrueCap" });
+    await expect(poweredBy).toHaveAttribute(
+      "href",
+      `${CANONICAL_SITE_URL}/tools/${calculator.slug}`,
+    );
+    await expect(poweredBy).toHaveAttribute("target", "_blank");
+    await expect(poweredBy).toHaveAttribute("rel", "noopener");
 
     const cta = page.getByRole("link", {
       name: "Underwrite a full property in TrueCap",
