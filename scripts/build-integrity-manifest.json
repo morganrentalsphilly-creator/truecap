@@ -1,9 +1,9 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-09-27T20:29:13.746Z",
+  "generatedAt": "2026-09-27T20:34:46.514Z",
   "files": {
-    ".github/workflows/ci.yml": "2e0b88ef1a1ea69bca2b69cec8c50a70d7fb139a3e8563d213a45c2a7463a2bd",
+    ".github/workflows/ci.yml": "463a9798ca1260a833b440ac240961c8c93c21c1b322e062802798cfcc4c0db5",
     "eslint.config.mjs": "d9787e67d053e8478afb11f3b26f67eb6b48ac2c7dabcd8b6a0f6e58ff8f462f",
     "instrumentation-client.ts": "084de5f29ad0db12deacb580065348490fb8e409752a745f1a0b92c30ecaaf56",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
@@ -17,7 +17,7 @@
     "sentry.edge.config.ts": "6fea65851e009e85c239976483ff3e573845638d4dd076eccc9046ae720a44ed",
     "sentry.server.config.ts": "7921f307d051c821daa22d4576cc15e82dbc1fab136eed8a9e294d0028ddb2c6",
     "tsconfig.json": "930abb38505881c9cb68c1b51d75c528ec522353477b09c1bbf59b18cb809071",
-    "vercel.json": "f6be76ae267543e798c79e46de9a87906789f20b9a22d478c4bfafbe3235b938",
+    "vercel.json": "8b7f265d1262a73652923f77b5d8c2aee0c61478eef362f21c0089b35468ed88",
     "vitest.config.ts": "a0ea6e1b86b04e882be1bd84e9fae697028f0421623e2c9d38948e01cae1faaa"
   },
   "_contentScannedReadme": "Build-executed files the SEO agent is deliberately allowed to write, so they are NOT hash-pinned above — a pin would be red on every content PR and would turn `--update` into a reflex, which is the one habit that empties this control of meaning. Their control is gate 1b (scripts/check-agent-blog-content.mjs), a heuristic token scan, NOT a proof. Listed here so the registry of build-executed files is complete: verify-build-integrity.mjs fails if one of these disappears or if .github/workflows/ci.yml stops naming it, i.e. if it silently loses its coverage.",
