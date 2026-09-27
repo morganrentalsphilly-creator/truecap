@@ -11,7 +11,7 @@ import GlossaryTermPage from "@/app/glossary/[slug]/page";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { NOINDEX_PATHS } from "@/lib/seo/noindex";
 import { LASTMOD, lastmodFor, lastmodOrPublished } from "@/lib/seo/lastmod";
-import { postDateWiringViolations } from "../../seo/scripts/verify-static.ts";
+import { dateSlotsOf, postDateWiringViolations } from "../../seo/scripts/verify-static.ts";
 
 /**
  * F2: content/seo/lastmod.json is the ONE source of last-modified dates.
@@ -105,13 +105,22 @@ describe("lastmod map contract", () => {
     expect(unwired).toEqual([]);
   });
 
-  it("leaves no hand-typed dateModified in any page template", () => {
+  it("leaves no hand-typed or build-time modified date in any page template", () => {
+    // Every modified-date slot (dateModified, modifiedTime, modifiedAt,
+    // MODIFIED_AT-style consts), read from the syntax tree: no date literal
+    // anywhere in its value (`lastmodFor(x) ?? "2026-09-06"` is a floor) and
+    // no clock read. lastmod-invents-none.test.ts renders the unmapped case.
     const offenders: string[] = [];
     const walk = (dir: string): void => {
       for (const name of readdirSync(join(ROOT, dir), { withFileTypes: true })) {
-        const rel = join(dir, name.name);
+        const rel = `${dir}/${name.name}`;
         if (name.isDirectory()) walk(rel);
-        else if (/\.tsx?$/.test(name.name) && /dateModified:\s*["'`]\d{4}-\d{2}-\d{2}/.test(read(rel))) offenders.push(rel);
+        else if (/\.tsx?$/.test(name.name)) {
+          for (const slot of dateSlotsOf(rel, read(rel))) {
+            if (!/modified/i.test(slot.name)) continue;
+            if (/["'`]\d{4}-\d{2}-\d{2}|\bnew Date\(\s*\)|\bDate\.now\(/.test(slot.value)) offenders.push(`${rel}: ${slot.name}=${slot.value}`);
+          }
+        }
       }
     };
     walk("app");

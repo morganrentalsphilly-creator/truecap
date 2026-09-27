@@ -54,6 +54,14 @@ describe("noindex list and research registry wiring (D5, D6, D7)", () => {
     expect(research).toEqual(["/research/published"]);
   });
 
+  it("gives a page the lastmod map lacks no <lastmod> (never a floor or the build date)", () => {
+    // /research/published has no content/seo/lastmod.json entry yet: the
+    // publish job adds one when it ships the page.
+    const entry = sitemap().find((e) => new URL(e.url).pathname === "/research/published");
+    expect(entry).toBeDefined();
+    expect(entry?.lastModified).toBeUndefined();
+  });
+
   it("drops noindex-listed paths from llms.txt", async () => {
     const text = await (await getLlmsTxt()).text();
     expect(text).not.toContain(`${PRUNED_POST})`);
