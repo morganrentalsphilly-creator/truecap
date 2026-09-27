@@ -5,7 +5,8 @@
  * preview. Used on /embed (hub) and on each /tools/[slug] page's
  * "Embed this calculator" section.
  *
- * The embed snippet includes a tiny inline `<script>` that listens
+ * The embed snippet (built by lib/embed-snippet.ts) is the iframe, a small
+ * "Powered by TrueCap" credit line, and a tiny inline `<script>` that listens
  * for our `truecap:embed:resize` postMessage and auto-resizes the
  * iframe. That way the partner's page never gets nested scrollbars.
  * The script is intentionally tiny + dependency-free so it works
@@ -15,10 +16,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-import {
-  buildEmbedAttributionHref,
-  embedFrameTitle,
-} from "@/lib/embed-attribution";
+import { buildEmbedSnippet } from "@/lib/embed-snippet";
 
 type Props = {
   slug: string;
@@ -30,44 +28,14 @@ type Props = {
 export function EmbedCodeBlock({ slug, title, siteUrl, defaultHeight }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const embedSrc = `${siteUrl}/embed/${slug}`;
-  const embedOrigin = new URL(siteUrl).origin;
-  const embedId = `truecap-embed-${slug}`;
-  // The caption anchor below the iframe is the entire SEO payoff of the
-  // embed program: it lives in the PARTNER'S dom on the partner's origin,
-  // so it's a real, crawlable backlink (the GIPHY/Typeform pattern). A
-  // "powered by" link INSIDE the iframe would be a same-origin self-link
-  // on a noindexed embed page — zero link equity. It links to the public
-  // tool page (indexed), not the /embed route (noindexed).
-  const toolHref = buildEmbedAttributionHref({
-    siteUrl,
-    toolPath: `/tools/${slug}`,
-    calculatorSlug: slug,
-  });
-  const snippet = `<iframe
-  id="${embedId}"
-  src="${embedSrc}"
-  loading="lazy"
-  sandbox="allow-scripts allow-forms allow-same-origin allow-top-navigation-by-user-activation"
-  referrerpolicy="no-referrer"
-  style="width:100%; max-width:640px; border:0; height:${defaultHeight}px; display:block;"
-  title="${embedFrameTitle(title)}"
-></iframe>
-<p style="max-width:640px; margin:6px 0 0; font:12px/1.4 system-ui, sans-serif; color:#6b7280;">
-  Calculator by <a href="${toolHref}" style="color:#0070c4; text-decoration:none;">TrueCap</a> — underwrite a full property
-</p>
-<script>
-(function(){
-  var f=document.getElementById("${embedId}");
-  if(!f)return;
-  window.addEventListener("message",function(e){
-    var d=e.data;
-    if(e.origin!=="${embedOrigin}"||e.source!==f.contentWindow)return;
-    if(!d||d.type!=="truecap:embed:resize"||d.slug!=="${slug}"||typeof d.height!=="number"||!Number.isFinite(d.height))return;
-    f.style.height=Math.min(2400,Math.max(${defaultHeight},d.height))+"px";
-  });
-})();
-</script>`;
+  // The "Powered by TrueCap" line under the iframe is the SEO payoff of the
+  // embed program: it lives in the PARTNER'S dom on the partner's origin, so
+  // it's a real, crawlable backlink (the GIPHY/Typeform pattern). The same
+  // credit inside the iframe sits on a noindexed embed page and passes
+  // nothing. It links to the public tool page (indexed), not the /embed
+  // route (noindexed). The exact text is built in lib/embed-snippet.ts; the
+  // copy button copies the very string rendered below.
+  const snippet = buildEmbedSnippet({ slug, title, siteUrl, defaultHeight });
 
   async function handleCopy() {
     try {
