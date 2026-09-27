@@ -1,17 +1,31 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { GET as getLlmsTxt } from "@/app/llms.txt/route";
+import noindexRaw from "@/content/seo/noindex.json";
+import researchRaw from "@/content/seo/research.json";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { getIndexableMarketSlugs, isStateIndexable } from "@/lib/markets/indexability";
 import { STATES } from "@/lib/states";
 import { LASTMOD, lastmodFor, lastmodOrPublished, parseLastmodMap } from "@/lib/seo/lastmod";
-import { NOINDEX_PATHS, isNoindexPath, noindexRobotsHeader, parseNoindexList } from "@/lib/seo/noindex";
+import { NOINDEX_MAX_PATHS, NOINDEX_PATHS, isNoindexPath, noindexRobotsHeader, parseNoindexList } from "@/lib/seo/noindex";
 import { RESEARCH_PAGES, parseResearchRegistry, researchSitemapPaths } from "@/lib/seo/research";
 
 /**
  * F2 owner loaders for content/seo/*.json. Each validates at import and
  * throws on malformed data, so a bad dataset fails `next build` instead of
  * publishing a wrong date, deindexing the wrong page or listing a bad URL.
+ *
+ * The SEO loop adds to noindex.json (seo-prune) and research.json
+ * (seo-data-study), and lib/__tests__ is outside its allow-list. So these
+ * tests hold the COMMITTED files to their contract, never to their current
+ * contents: a legitimate prune or registration must stay green. The
+ * non-empty end-to-end cases live in seo-noindex-research-wiring.test.ts.
  */
+
+const SEO_CONFIG = JSON.parse(readFileSync(join(process.cwd(), "seo", "config.json"), "utf8")) as {
+  excludedFromOptimization: string[];
+};
 
 describe("lib/seo/lastmod: parseLastmodMap", () => {
   it("accepts the committed map and a well-formed one", () => {
@@ -69,10 +83,24 @@ describe("lib/seo/lastmod: parseLastmodMap", () => {
 });
 
 describe("lib/seo/noindex: parseNoindexList and the proxy header", () => {
-  it("loads the committed list", () => {
+  it("loads the committed list, whatever it holds, within its contract", () => {
     expect(Array.isArray(NOINDEX_PATHS)).toBe(true);
-    for (const path of NOINDEX_PATHS) expect(isNoindexPath(path)).toBe(true);
+    expect(NOINDEX_PATHS).toEqual(parseNoindexList(noindexRaw));
+    for (const path of NOINDEX_PATHS) expect(isNoindexPath(path), path).toBe(true);
+    // Sorted and unique: the shape verify-static requires of every loop edit.
+    expect([...NOINDEX_PATHS]).toEqual([...new Set(NOINDEX_PATHS)].sort());
+    // Legal, billing, analyzer and hub pages are never pruned, whoever edits the list.
+    expect(NOINDEX_PATHS.filter((path) => SEO_CONFIG.excludedFromOptimization.includes(path))).toEqual([]);
+    expect(NOINDEX_PATHS.length).toBeLessThanOrEqual(NOINDEX_MAX_PATHS);
     expect(parseNoindexList({ paths: ["/blog/a", "/glossary/b"] })).toEqual(["/blog/a", "/glossary/b"]);
+  });
+
+  it("refuses a list longer than the hard ceiling, however it was edited", () => {
+    const many = (n: number) => ({ paths: Array.from({ length: n }, (_, i) => `/glossary/term-${String(i).padStart(3, "0")}`) });
+    expect(parseNoindexList(many(NOINDEX_MAX_PATHS))).toHaveLength(NOINDEX_MAX_PATHS);
+    expect(() => parseNoindexList(many(NOINDEX_MAX_PATHS + 1))).toThrow(/at most 38 may be noindexed/);
+    // About a tenth of the 381-URL sitemap; raising it is a deliberate owner edit.
+    expect(NOINDEX_MAX_PATHS).toBeLessThanOrEqual(38);
   });
 
   it.each([
@@ -98,9 +126,11 @@ describe("lib/seo/noindex: parseNoindexList and the proxy header", () => {
   });
 
   it("matches exact paths only", () => {
-    // The committed list is empty today; nothing is noindexed by it.
-    expect(NOINDEX_PATHS).toEqual([]);
-    expect(isNoindexPath("/blog/what-is-a-good-dscr")).toBe(false);
+    expect(isNoindexPath("/no-such-page-on-the-site")).toBe(false);
+    for (const path of NOINDEX_PATHS) {
+      expect(isNoindexPath(`${path}/`), path).toBe(false);
+      expect(isNoindexPath(`${path}-2`), path).toBe(false);
+    }
     const listed = (path: string) => ["/blog/thin"].includes(path);
     expect(noindexRobotsHeader("/blog/thin", null, listed)).toBe("noindex");
     expect(noindexRobotsHeader("/blog/thin/", null, listed)).toBeNull();
@@ -124,9 +154,12 @@ describe("lib/seo/research: parseResearchRegistry and the sitemap filter", () =>
     ...over,
   });
 
-  it("loads the committed (empty) registry", () => {
-    expect(RESEARCH_PAGES).toEqual([]);
-    expect(researchSitemapPaths()).toEqual([]);
+  it("loads the committed registry, and lists only its published, indexable pages", () => {
+    expect(RESEARCH_PAGES).toEqual(parseResearchRegistry(researchRaw));
+    const expected = RESEARCH_PAGES.filter((p) => p.status === "published")
+      .map((p) => `/research/${p.slug}`)
+      .filter((path) => !isNoindexPath(path));
+    expect(researchSitemapPaths()).toEqual(expected);
   });
 
   it("accepts published pages and dated or undated drafts", () => {
@@ -166,13 +199,18 @@ describe("llms.txt uses the sitemap's indexability rules (D6)", () => {
   it("lists every indexable market page and no noindex strategy page", async () => {
     const text = await (await getLlmsTxt()).text();
     const marketLinks = [...text.matchAll(/\]\([^)]*\/markets\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
-    expect(marketLinks.sort()).toEqual([...getIndexableMarketSlugs()].sort());
-    expect(marketLinks.length).toBeGreaterThanOrEqual(150);
+    // Exactly the sitemap's market set: indexable, and not on the noindex list.
+    const expectedMarkets = getIndexableMarketSlugs().filter((slug) => !isNoindexPath(`/markets/${slug}`));
+    expect(expectedMarkets.length).toBeGreaterThan(0);
+    expect(marketLinks.sort()).toEqual([...expectedMarkets].sort());
     // Strategy pages are noindex (STRATEGY_PAGES_INDEXABLE = false): none may be advertised.
     expect(CITY_STRATEGY_COMBOS.length).toBeGreaterThan(0);
     expect(text).not.toMatch(/\/markets\/[a-z0-9-]+\/[a-z0-9-]+\)/);
-    // States: exactly the indexable ones.
+    // States: exactly the indexable ones the noindex list leaves in.
     const stateLinks = [...text.matchAll(/\]\([^)]*\/states\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
-    expect(stateLinks.sort()).toEqual(Object.values(STATES).map((s) => s.slug).filter(isStateIndexable).sort());
+    const expectedStates = Object.values(STATES)
+      .map((s) => s.slug)
+      .filter((slug) => isStateIndexable(slug) && !isNoindexPath(`/states/${slug}`));
+    expect(stateLinks.sort()).toEqual(expectedStates.sort());
   });
 });
