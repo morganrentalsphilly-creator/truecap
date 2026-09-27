@@ -77,9 +77,11 @@ describe("trust-language guards", () => {
       "../../app/blog/cap-rate-vs-cash-on-cash-vs-dscr/page.tsx",
     );
     const blogIndex = read("../../app/blog/page.tsx");
+    // The post titles and excerpts /blog renders live in the registry.
+    const blogRegistry = read("../blog-posts.ts");
     const tool = read("../../app/tools/dscr-calculator/page.tsx");
     const glossary = read("../glossary.ts");
-    const combined = `${explainer}\n${hardMoney}\n${dti}\n${metricGuide}\n${blogIndex}\n${tool}\n${glossary}`;
+    const combined = `${explainer}\n${hardMoney}\n${dti}\n${metricGuide}\n${blogIndex}\n${blogRegistry}\n${tool}\n${glossary}`;
 
     expect(combined).not.toMatch(/lender doesn(?:'|&apos;)t care about your/i);
     expect(combined).not.toMatch(/you don(?:'|&apos;)t provide tax returns/i);

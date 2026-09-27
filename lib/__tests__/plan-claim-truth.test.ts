@@ -107,6 +107,7 @@ describe("no surface repeats the corrected false claims", () => {
     "app/**/*.ts",
     "components/**/*.tsx",
     "emails/**/*.json",
+    "lib/blog-posts.ts", // the blog registry's rendered titles and excerpts
   ]).filter((f) => !EXCLUDE.test(f));
 
   it("scans a broad set of public files", () => {

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
@@ -154,7 +154,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntry(
       siteUrl,
       `/blog/${post.slug}`,
-      new Date(post.modifiedAt ?? post.publishedAt),
+      new Date(post.publishedAt),
     ),
   );
   const comparisonUrls = [

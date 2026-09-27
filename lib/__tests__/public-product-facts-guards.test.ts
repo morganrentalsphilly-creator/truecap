@@ -28,6 +28,9 @@ describe("public product-fact drift guards", () => {
       ...publicCopyFiles("components/marketing"),
       ...publicCopyFiles("emails"),
       ...publicCopyFiles("email-templates"),
+      // The blog registry's titles and excerpts render on /blog, the topic
+      // hubs, related posts, feed.xml and llms.txt.
+      "lib/blog-posts.ts",
     ];
     const positiveAutofill = [
       /(?:auto[- ]?(?:fill|pull)|pre[- ]?fill)(?:s|ed)?[^.;\n]{0,100}(?:state[- ](?:property[- ]?)?tax|property[- ]tax|taxes? from (?:a |your )?state)/gi,

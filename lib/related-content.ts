@@ -8,7 +8,7 @@
  *   blog  → one tool + the analyzer
  *   vs    → pricing + the sample deal
  */
-import { BLOG_POSTS, type BlogPost } from "@/app/blog/page";
+import { BLOG_POSTS, type BlogPost } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, type CalculatorEntry } from "@/lib/calculator-registry";
 import { GLOSSARY, type GlossaryEntry } from "@/lib/glossary";
 

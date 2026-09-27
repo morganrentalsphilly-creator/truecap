@@ -3,7 +3,7 @@ import { join } from "node:path";
 // 2026-09 audit: the product uses one focus vocabulary — the primitives'
 // 3px ring at 50% (focus-visible:ring-[3px] focus-visible:ring-ring/50).
 import { describe, expect, it } from "vitest";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import {
   groupBlogPostsByTopic,

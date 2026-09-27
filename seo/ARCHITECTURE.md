@@ -59,9 +59,10 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 - **Authoring shapes:**
   - 72 standalone posts. Module-level consts: `SLUG`, `TITLE`/`TITLE_PLAIN`, `SERP_TITLE`, `DESCRIPTION`, `PUBLISHED_AT`, `MODIFIED_AT`, `READING_TIME`. Each has an `export const metadata`, a `FAQS` array, three inline JSON-LD blocks, and prose as JSX.
   - 3 posts use `components/marketing/source-first-article.tsx` (an `ARTICLE` object). These three are thin, at 322–404 words live.
-- **Registry:** `BLOG_POSTS` in `app/blog/page.tsx` (`slug, title, excerpt, readingTimeMinutes, publishedAt, modifiedAt?, available`).
-  - Consumers: `/blog`, the sitemap (lastmod), `feed.xml`, `llms.txt`, related-post blocks and several tests.
-  - Importing it pulls in the page's React tree, which is why tests read `app/sitemap.ts` as text.
+- **Registry:** `BLOG_POSTS` in `lib/blog-posts.ts` (`slug, title, excerpt, readingTimeMinutes, publishedAt, available`), a pure data module.
+  - F2 lifted it out of `app/blog/page.tsx` and dropped `modifiedAt`: a post's last-modified date is not the registry's to hold.
+  - Consumers: `/blog`, the topic hubs, the sitemap, `feed.xml`, `llms.txt`, site search, related-post blocks and several tests.
+  - Before F2, importing it pulled in the `/blog` page's React tree, which is why `seo-guards.test.ts` still reads `app/sitemap.ts` as text.
   - **Drift:** 13 registry titles and some excerpts no longer match their pages (e.g. the rental-yield excerpt still quotes figures the page removed). 40 of 75 posts have a page `MODIFIED_AT` that disagrees with the registry date the sitemap uses.
 - **Topic hubs:** `lib/blog-topics.ts` holds 8 hubs (`slug, title, description, intro, postSlugs, calculatorSlugs`) rendered at `/blog/topics/<slug>`.
   - Tax hub: 7 posts. Financing hub: 12.

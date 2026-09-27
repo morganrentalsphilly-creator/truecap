@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, MapPin } from "lucide-react";
-import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
