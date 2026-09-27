@@ -792,11 +792,16 @@ jobs:
       # PATHS; this adds file shapes, the TypeScript import allow-list,
       # banned identifiers and directives, markup in literals and outbound
       # link domains. --structural: the per-run caps were enforced by the run.
+      # Exempt: seo-shepherd's revert branches in THIS repo (seo/revert-<pr>),
+      # which are `git revert` of an already-merged loop PR — they may delete
+      # a new article, which the fence (rightly) never allows the model to do.
       - name: SEO fence (non-owner PRs)
         if: >-
           github.event_name == 'pull_request' &&
           github.event.pull_request.user.login != github.repository_owner &&
-          github.event.pull_request.user.login != 'dependabot[bot]'
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          !(github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.head_ref, 'seo/revert-'))
         run: node seo/scripts/verify-static.ts --working-tree --base HEAD^1 --structural
 
       - name: Lint
