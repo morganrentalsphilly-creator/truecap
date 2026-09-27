@@ -3,13 +3,15 @@ import {
   SafeMarketPage,
 } from "@/components/marketing/safe-market-page";
 
+// HUD's Dallas, TX HUD Metro FMR Area (Collin, Dallas, Denton, Ellis, Hunt,
+// Kaufman and Rockwall counties) excludes Tarrant County, so this page is
+// Dallas; Fort Worth has its own page (/markets/fort-worth).
 const MARKET = {
-  city: "Dallas–Fort Worth",
+  city: "Dallas",
   stateCode: "TX",
   stateName: "Texas",
   stateSlug: "texas",
   slug: "dallas",
-  analyzerAddress: "Dallas, TX",
 } as const;
 
 export const metadata = buildSafeMarketMetadata(MARKET);

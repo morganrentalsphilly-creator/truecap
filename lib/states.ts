@@ -6,8 +6,14 @@
  * cities to invest in [state]". The rendered count is derived from this
  * registry; do not copy it into page prose.
  *
- * Data is illustrative + sourced from publicly available aggregates.
- * Numbers reflect mid-2026 typical conditions; refresh annually.
+ * UNSOURCED: every field below except slug, name and abbr is hand-authored
+ * with no per-field source or vintage, and NO public page renders it (F8,
+ * founder decision 2026-09-27: "state pitches become sourced facts"). The
+ * state pages, llms.txt and site search show only the sourced figures in
+ * content/seo/state-facts.json (lib/seo/state-facts.ts);
+ * lib/__tests__/public-stale-registry-render-guards.test.tsx keeps pitch,
+ * tier, landlord lean and propertyTaxRatePct off the HTML. The fields stay for
+ * scripts/build-market-intelligence-pack.ts; do not render them.
  */
 
 export type LandlordFriendliness = "Strong" | "Mixed" | "Tenant-leaning";

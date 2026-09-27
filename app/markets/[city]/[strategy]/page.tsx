@@ -30,6 +30,7 @@ import {
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { fmrLabel } from "@/lib/markets/data-copy";
 
 export const dynamicParams = false;
 
@@ -215,7 +216,7 @@ export default async function CityStrategyPage({
         </p>
         {hud ? (
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            HUD Fair Market Rent, FY{hud.year}, for the area that contains{" "}
+            {fmrLabel(hud.year)} for the area that contains{" "}
             {combo.cityName}: {usd(hud.rent2br)}/mo for 2 bedrooms,{" "}
             {usd(hud.rent3br)}/mo for 3 bedrooms. The{" "}
             <Link
