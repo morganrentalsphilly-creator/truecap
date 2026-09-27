@@ -8,11 +8,11 @@ Code cannot do them.
 | # | Step | Status |
 |---|------|--------|
 | 1 | Required checks and branch protection on `main` | ✅ **VERIFIED 2026-09-07:** `build-chain-guard`, `check`, and `browser-regressions` are required; strict/up-to-date checks and admin enforcement are enabled, and required review count is zero. The production-readiness branch uses a PR and squash auto-merge. **OWED:** add `lighthouse` without removing the existing checks or weakening enforcement. |
-| 2 | `SEO_AUTOMERGE` | ⛔️ **DECLINED — automerge stays ON by founder decision.** See §2, rewritten. |
+| 2 | `SEO_AUTOMERGE` | ♻️ **SUPERSEDED 2026-09-27.** `seo-content.yml` (the workflow it switched) is retired; the SEO loop starts in `SEO_MODE=review` and can auto-merge only after two owner-merged loop PRs (`seo/README.md`). The kill switch is `SEO_PAUSED=true` plus the **SEO pause** workflow. |
 | 3 | Review the `esaleci` account | ⏳ **OWED.** |
-| 4 | Narrow the agent's tool scope | ⏳ **OWED** (4a/4b/4c). The `.gitignore` re-include that makes 4b committable has shipped; the deny list itself is not yet created or tracked (`git ls-files .claude/` is empty — verified 2026-09-07). |
-| 5 | Vercel | ⏳ **OWED**, and the important part changed — see §5. The control that matters is **scoping secret env vars to Production only**, not the Ignored Build Step. |
-| 6 | Pin `claude-code-action` to a SHA | ⏳ **OWED.** |
+| 4 | Narrow the agent's tool scope | ✅ **DONE for the scheduled agent, 2026-09-27.** The loop's model job holds a read-only token (no App-token mint), an explicit `--allowedTools` list (no npm/npx/git-write/gh) and the deny list `.github/seo/model-settings.json`; its patch is fenced by `seo/scripts/verify-static.ts` before any PR exists and again in CI's `check` job. `seo-content.yml` and `seo-visibility.yml` (the subjects of 4a) are retired. A repo-wide `.claude/settings.json` for interactive sessions remains optional. |
+| 5 | Vercel | ⏳ **OWED**, and the important part changed — see §5. The control that matters is **scoping secret env vars to Production only**, not the Ignored Build Step. **Partly mitigated 2026-09-27:** `vercel.json` disables deployments of `seo/**` and `seo-state`, so the loop's model-authored branches never build a Preview; every other branch still does. |
+| 6 | Pin `claude-code-action` to a SHA | ✅ **DONE 2026-09-27** in every SEO-loop workflow (`756cc22e…`, v1 with Claude Code 2.1.283). Bump deliberately, reading the diff. |
 | — | **Rotate every secret** | 🚨 **OWED, still the top item.** Verified 2026-08-03: the old `SUPABASE_SERVICE_ROLE_KEY` still authenticates. |
 | — | Apply `docs/apply-pending-migrations-2026-08-03.sql` | 🚨 **OWED.** Verified 2026-08-03: anon can still LIST the `analysis-pdfs` bucket. (The bucket itself is private — downloads and signed URLs are denied.) |
 

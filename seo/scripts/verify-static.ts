@@ -68,7 +68,8 @@
  *   node seo/scripts/verify-static.ts --patch patch.diff --manifest run-manifest.json \
  *        --flags run-flags.json [--sitemap-file paths.json] [--holdout paths.json] \
  *        [--indexed N] [--calibrating] [--crawl-stalled] --out verdict.json
- *   node seo/scripts/verify-static.ts --working-tree [--base origin/main]   (owner PRs; diffs against the
+ *   node seo/scripts/verify-static.ts --working-tree [--base origin/main] [--structural]   (owner PRs, and CI's
+ *        server-side re-check of non-owner PRs with --structural: every rule but the per-run caps; diffs against the
  *        merge-base with --base, so a branch that is behind main is judged on its own change; ignores any manifest)
  *
  * Exit 0 when ok, 1 when there are violations (the verdict is written either way).
@@ -254,6 +255,12 @@ export type VerifyInput = {
    * one is tier 2; while any is set, every change must name a known type.
    */
   demotedChangeTypes?: Iterable<string>;
+  /**
+   * CI's server-side re-check of a PR (ci.yml `check` job): every fence rule
+   * applies, but the per-RUN caps do not — CI has no run flags, and the
+   * workflow already enforced the caps for the run that produced the PR.
+   */
+  structural?: boolean;
   config?: SeoConfig;
   /** null = pure mode (JS applier only, no git, no scanner). */
   sandbox?: Sandbox | null;
@@ -2032,11 +2039,13 @@ export function verify(input: VerifyInput): VerifyVerdict {
   const lines = parsed.files.reduce((sum, f) => sum + f.addedLines + f.removedLines, 0);
   const noindexCap = Math.floor(config.caps.noindexShareOfIndexedPerRun * Math.max(0, input.indexed ?? 0));
   verdict.caps = { files: parsed.files.length, lines, pages: declared.size, newArticles: newArticleDirs.size, noindex: noindexAdded.length };
-  if (parsed.files.length > config.caps.maxChangedFilesPerRun) add("cap-files", null, `${parsed.files.length} files > ${config.caps.maxChangedFilesPerRun}`);
-  if (lines > config.caps.maxChangedLinesPerRun) add("cap-lines", null, `${lines} changed lines > ${config.caps.maxChangedLinesPerRun}`);
-  if (declared.size > config.caps.pagesChangedPerRun) add("cap-pages", null, `${declared.size} pages > ${config.caps.pagesChangedPerRun}`);
-  if (newArticleDirs.size > newArticleCap) add("cap-new-articles", null, `${newArticleDirs.size} new articles > ${newArticleCap}${input.crawlStalled ? " (crawl stalled)" : ""}`);
-  if (noindexAdded.length > noindexCap) add("cap-noindex", null, `${noindexAdded.length} noindex additions > ${noindexCap} (${config.caps.noindexShareOfIndexedPerRun} of ${input.indexed ?? 0} indexed)`);
+  if (!input.structural) {
+    if (parsed.files.length > config.caps.maxChangedFilesPerRun) add("cap-files", null, `${parsed.files.length} files > ${config.caps.maxChangedFilesPerRun}`);
+    if (lines > config.caps.maxChangedLinesPerRun) add("cap-lines", null, `${lines} changed lines > ${config.caps.maxChangedLinesPerRun}`);
+    if (declared.size > config.caps.pagesChangedPerRun) add("cap-pages", null, `${declared.size} pages > ${config.caps.pagesChangedPerRun}`);
+    if (newArticleDirs.size > newArticleCap) add("cap-new-articles", null, `${newArticleDirs.size} new articles > ${newArticleCap}${input.crawlStalled ? " (crawl stalled)" : ""}`);
+    if (noindexAdded.length > noindexCap) add("cap-noindex", null, `${noindexAdded.length} noindex additions > ${noindexCap} (${config.caps.noindexShareOfIndexedPerRun} of ${input.indexed ?? 0} indexed)`);
+  }
 
   verdict.files = parsed.files.map((file) => {
     const reason = tierReasons.get(file.path);
@@ -2393,6 +2402,7 @@ export async function main(args: Args): Promise<number> {
       manifest: workingTree ? null : manifest,
       manifestError,
       mode: workingTree ? "working-tree" : "patch",
+      structural: hasFlag(args, "structural"),
       sitemap,
       holdout,
       calibrating: hasFlag(args, "calibrating") || flags?.calibrating === true,
@@ -2487,6 +2497,6 @@ function selfTest(): void {
 }
 
 /** Every flag this script reads (lib/cli.ts rejects any other). */
-export const CLI_FLAGS: readonly string[] = ["base", "calibrating", "crawl-stalled", "flags", "holdout", "indexed", "manifest", "out", "patch", "sitemap-file", "working-tree"];
+export const CLI_FLAGS: readonly string[] = ["base", "calibrating", "crawl-stalled", "flags", "holdout", "indexed", "manifest", "out", "patch", "sitemap-file", "structural", "working-tree"];
 
 runMain(import.meta.url, main, selfTest, { flags: CLI_FLAGS });

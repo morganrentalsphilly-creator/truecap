@@ -1001,6 +1001,10 @@ describe("content/seo datasets", () => {
     expect(fits.tier).toBe(1);
     expect(run(base, after, { manifest, indexed: 60, calibrating: true }).tier).toBe(2);
     expect(rules(run(base, after, { manifest }))).toContain("cap-noindex");
+    // CI's structural re-check has no run flags: caps are the run's, not CI's.
+    const structural = run(base, after, { manifest, structural: true });
+    expect(rules(structural)).not.toContain("cap-noindex");
+    expect(structural.caps.noindex).toBe(3);
   });
 });
 

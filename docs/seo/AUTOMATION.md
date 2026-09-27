@@ -1,5 +1,7 @@
 # SEO automation — what runs, when, and what it can't do
 
+> **Superseded 2026-09-27.** The SEO loop (`seo/README.md`, `.github/workflows/seo-weekly.yml`) replaced `seo-content.yml` and `seo-visibility.yml`, which are retired. Its switches are `SEO_MODE` and `SEO_PAUSED`; `SEO_AUTOMERGE` and the `SEO_AUTOPILOT_*` variables no longer control anything. This file is kept for history.
+
 > The continuous control plane added on 2026-08-15 is documented in
 > [`docs/seo/CONTROL-PLANE.md`](./CONTROL-PLANE.md). This file preserves the
 > original guard/content-agent operating detail; the control plane adds daily

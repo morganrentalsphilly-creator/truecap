@@ -1,0 +1,168 @@
+name: SEO shepherd
+
+# Daily upkeep so a loop PR never strands, and a regression gets reverted:
+#   1. re-runs a failed required check ONCE per head commit (flaky
+#      browser-regressions has stranded bot PRs before, e.g. a next/font blip);
+#   2. updates a BEHIND loop PR (strict up-to-date protection + auto-merge
+#      never updates a branch by itself) — through the Claude App, because a
+#      GITHUB_TOKEN push would not re-trigger the required checks;
+#   3. for each open `seo-regression` issue, builds a `git revert` of the
+#      loop PR's merge commit on seo/revert-<pr> and opens the revert PR.
+#      A revert is never itself reverted, and at most one revert per PR ever:
+#      deduped on PR HISTORY (any state), because step 4 deletes the branch of
+#      a merged or closed revert and the issue stays open until the founder
+#      closes it. A revert that does not apply is reported on the issue once;
+#   4. deletes branches of closed loop PRs (delete_branch_on_merge is off).
+#      It runs BEFORE the Claude steps: claude-code-action rewrites origin to
+#      an App token and revokes that token when its step ends, so any git
+#      push or ls-remote after a Claude step would fail quietly.
+# Does nothing while SEO_PAUSED=true.
+#
+# Runs on a schedule (actor = the workflow's owner), which is an event the
+# Claude App step accepts; deployment_status is not.
+
+on:
+  schedule:
+    - cron: "17 15 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: seo-shepherd
+  cancel-in-progress: false
+
+jobs:
+  shepherd:
+    if: vars.SEO_PAUSED != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+      issues: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # `bucket` groups every failing state (FAILURE, TIMED_OUT, CANCELLED,
+      # STARTUP_FAILURE, ACTION_REQUIRED), each of which strands a PR alike.
+      - name: Re-run a failed required check once
+        run: |
+          set -euo pipefail
+          for n in $(gh pr list --state open --limit 50 --json number,headRefName \
+                       --jq '.[] | select(.headRefName | test("^seo/([0-9]+|revert-[0-9]+)$")) | .number'); do
+            for id in $(gh pr checks "$n" --json bucket,link --jq '.[] | select(.bucket == "fail") | .link' \
+                          | sed -nE 's#.*/actions/runs/([0-9]+).*#\1#p' | sort -u); do
+              ATTEMPT="$(gh api "repos/$GH_REPO/actions/runs/$id" --jq .run_attempt)"
+              if [ "$ATTEMPT" -lt 2 ]; then gh run rerun "$id" --failed && echo "re-ran $id for #$n"; else echo "#$n: run $id already retried — leaving it for the founder"; fi
+            done
+          done
+
+      - name: Plan branch updates and reverts
+        id: plan
+        run: |
+          set -euo pipefail
+          BEHIND="$(gh pr list --state open --limit 50 --json number,headRefName,mergeStateStatus \
+                     --jq '[.[] | select(.headRefName | test("^seo/([0-9]+|revert-[0-9]+)$")) | select(.mergeStateStatus == "BEHIND") | .number][0] // empty')"
+          echo "update_pr=$BEHIND" >> "$GITHUB_OUTPUT"
+
+          REVERT_PR=""
+          for issue in $(gh issue list --label seo-regression --state open --limit 20 --json number --jq '.[].number'); do
+            MARK="$(gh issue view "$issue" --json body --jq .body | sed -nE 's/.*<!-- seo-regression (\{.*\}) -->.*/\1/p' | head -1)"
+            PR="$(node -e 'try{const m=JSON.parse(process.argv[1]);process.stdout.write(Number.isInteger(m.pr)?String(m.pr):"")}catch{}' "$MARK")"
+            [ -n "$PR" ] || continue
+            HEAD="$(gh pr view "$PR" --json headRefName --jq .headRefName)"
+            # Only loop PRs are reverted — never a revert, never a human PR.
+            [[ "$HEAD" =~ ^seo/[0-9]+$ ]] || { echo "#$PR is not a loop PR — skipping"; continue; }
+            # At most one revert PR per loop PR, EVER: a merged or closed one
+            # has had its branch deleted below, so the branch is no evidence.
+            SEEN="$(gh pr list --state all --head "seo/revert-$PR" --limit 5 --json number --jq length)"
+            if [ "$SEEN" != "0" ]; then echo "a revert PR for #$PR already exists (open, merged or closed) — not opening another"; continue; fi
+            printf 'Reverts loop PR %s after its post-deploy check failed (issue %s).\n\nOpened by seo-shepherd. The SEO loop stays halted until the regression issue is closed.\n' "$PR" "$issue" > "$RUNNER_TEMP/revert-body.md"
+            if git ls-remote --exit-code --heads origin "seo/revert-$PR" > /dev/null; then
+              # Pushed on an earlier day whose PR step failed: open the PR from it.
+              echo "seo/revert-$PR exists without a PR — opening it"
+              REVERT_PR="$PR"; break
+            fi
+            MERGE="$(gh pr view "$PR" --json mergeCommit --jq .mergeCommit.oid)"
+            [ -n "$MERGE" ] && [ "$MERGE" != "null" ] || continue
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git switch -c "seo/revert-$PR" origin/main
+            if ! bash seo/scripts/revert-commit.sh "$MERGE"; then
+              git switch main
+              git branch -D "seo/revert-$PR" || true
+              MARK="<!-- seo-shepherd revert-failed $PR -->"
+              SAID="$(gh issue view "$issue" --json comments --jq "[.comments[].body | select(contains(\"$MARK\"))] | length")"
+              if [ "$SAID" = "0" ]; then
+                gh issue comment "$issue" --body "Automatic revert of loop PR $PR does not apply cleanly on main. The loop stays halted; please revert by hand. $MARK"
+              else
+                echo "#$issue already says the revert of #$PR does not apply — not repeating it"
+              fi
+              continue
+            fi
+            git push origin "seo/revert-$PR"
+            REVERT_PR="$PR"
+            git switch main
+            break
+          done
+          echo "revert_pr=$REVERT_PR" >> "$GITHUB_OUTPUT"
+
+      # Before any Claude step: those revoke the token origin uses once they end.
+      - name: Delete branches of closed loop PRs
+        run: |
+          set -euo pipefail
+          for b in $(gh pr list --state all --limit 200 --json headRefName,state \
+                       --jq '.[] | select(.state != "OPEN") | select(.headRefName | test("^seo/([0-9]+|revert-[0-9]+)$")) | .headRefName' | sort -u); do
+            if git ls-remote --exit-code --heads origin "$b" > /dev/null; then git push origin --delete "$b" && echo "deleted $b"; fi
+          done
+
+      - name: Update the BEHIND loop PR (Claude App)
+        if: steps.plan.outputs.update_pr != ''
+        uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790
+        env:
+          PR_NUMBER: ${{ steps.plan.outputs.update_pr }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run exactly this one shell command, once, and then stop. Do not run anything else.
+            gh pr update-branch "$PR_NUMBER" --repo "$GH_REPO"
+          claude_args: |
+            --max-turns 6
+            --setting-sources user
+            --allowedTools "Bash(gh pr update-branch:*)"
+
+      - name: Open the revert PR (Claude App)
+        if: steps.plan.outputs.revert_pr != ''
+        uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790
+        env:
+          REVERT_BRANCH: seo/revert-${{ steps.plan.outputs.revert_pr }}
+          REVERT_TITLE: "seo-revert: loop PR ${{ steps.plan.outputs.revert_pr }}"
+          REVERT_BODY: ${{ runner.temp }}/revert-body.md
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run exactly this one shell command, once, and then stop. Do not run anything else.
+            gh pr create --repo "$GH_REPO" --base main --head "$REVERT_BRANCH" --title "$REVERT_TITLE" --body-file "$REVERT_BODY"
+          claude_args: |
+            --max-turns 6
+            --setting-sources user
+            --allowedTools "Bash(gh pr create:*)"
+
+      - name: Arm auto-merge on the revert (auto mode only)
+        if: steps.plan.outputs.revert_pr != '' && vars.SEO_MODE == 'auto'
+        env:
+          BRANCH: seo/revert-${{ steps.plan.outputs.revert_pr }}
+        run: |
+          set -euo pipefail
+          JSON="$(gh pr list --head "$BRANCH" --state open --json number,author,headRefOid --limit 2)"
+          [ "$(jq length <<< "$JSON")" = "1" ] || { echo "revert PR not found"; exit 0; }
+          case "$(jq -r '.[0].author.login' <<< "$JSON")" in app/claude|claude) ;; *) echo "unexpected author"; exit 1;; esac
+          gh pr merge "$(jq -r '.[0].number' <<< "$JSON")" --auto --squash --match-head-commit "$(jq -r '.[0].headRefOid' <<< "$JSON")"

@@ -133,6 +133,9 @@ config.bat
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/impeccable/
+# The SEO loop's skills (seo/README.md) are source: the seo-weekly workflow
+# loads them from the checkout. The critic lives under .claude/agents/.
+!.claude/skills/seo-*/
 .claude/skills/impeccable/scripts/bin/
 !.claude/agents/
 .impeccable/*

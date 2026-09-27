@@ -47,12 +47,14 @@ jobs:
   # because tsc/vitest/next build all pass fine on a malicious build config.
   # It was removed on 2026-07-14 in ab02311.
   #
-  # Since then the same write surface has been handed to an automated agent:
-  # .github/workflows/seo-content.yml runs Claude with Write/Edit and no path
-  # allowlist, plus Bash(git:*) and contents:write, and the prompt tells it to
-  # go read third-party web pages. Any page it fetches is untrusted input that
-  # reaches the same file. This job is the technical control that CLAUDE.md §8
-  # is not: §8 is a paragraph inside the same context window as the injection.
+  # Since then the same write surface has been handed to an automated agent.
+  # Since 2026-09-27 that is the SEO loop (.github/workflows/seo-weekly.yml,
+  # seo/README.md), which replaced seo-content.yml and seo-visibility.yml: its
+  # model reads third-party web pages, so any page it fetches is untrusted
+  # input that reaches the same files. The loop fences its own output
+  # (seo/scripts/verify-static.ts) before a PR exists; this job is the
+  # server-side control that holds even if that fence is bypassed. CLAUDE.md
+  # §8 is not a control: it is a paragraph inside the injected context window.
   #
   # Rule: touching a build-executed or security-sensitive path is allowed only
   # when the change comes from the repo owner. Everything else — blog posts,
@@ -162,6 +164,9 @@ jobs:
             'app/api/*'                 # webhooks, cron, auth callbacks
             '.gitmodules'               # a gitlink pulls in a whole other repo
             '.gitattributes'            # filters/diff drivers, and export-subst
+            'seo/*'                     # the SEO loop's toolkit, config and fences:
+                                        # it runs in CI with the GSC and Anthropic
+                                        # keys, so an agent may never edit it
             'scripts/*'                 # includes this control's own three files
                                         # (verify-build-integrity.mjs, its
                                         # manifest, check-agent-blog-content.mjs)
@@ -432,10 +437,29 @@ jobs:
           # matching more than intended fails the job (safe). Here, matching
           # more than intended ALLOWS a path (unsafe), so `nocasematch` must
           # stay off: `App/Blog/../proxy.tsx` must not be read as allowed.
+          #
+          # 2026-09-27 (SEO loop, seo/README.md): narrowed from `app/blog/*` +
+          # `docs/*` to the exact file shapes the loop writes, and widened to
+          # per-page /vs and /research pages and JSON datasets. Mirrors
+          # seo/config.json paths.agentAllow; seo/scripts/verify-static.ts
+          # enforces the same fence (plus imports, links and file shapes)
+          # before a loop PR exists, and again in the `check` job below.
           ALLOWED=(
-            'app/blog/*'                # the posts themselves, incl. their OG images
-            'lib/blog-topics.ts'        # the post registry the prompt tells it to update
-            'docs/*'                    # backlog, visibility snapshots, notes — not executed
+            'app/blog/*/page.tsx'            # one post's page module
+            'app/blog/*/opengraph-image.tsx' # its share card
+            'app/vs/*/page.tsx'              # one comparison page
+            'app/research/*/page.tsx'        # a data-study draft (always tier 2)
+            'lib/blog-posts.ts'              # the post registry (after F2)
+            'lib/blog-topics.ts'             # the topic hubs' post lists
+            'content/seo/*.json'             # sourced datasets, lastmod, noindex — data, not code
+            'public/research/*.csv'          # a data study's download
+            'docs/seo/guard-baseline.json'   # the link/title ratchet (tighten-only in verify-static)
+          )
+          # `*` crosses `/`, so the globs above would also admit shared
+          # templates and dynamic routes. These are never agent-writable.
+          ALLOWED_EXCEPT=(
+            'app/blog/topics/*'              # the topic-hub template
+            '*[*'                            # any dynamic segment: [slug], [...all]
           )
 
           if [ "$TRUSTED" != "1" ]; then
@@ -446,6 +470,11 @@ jobs:
                 # Unquoted $p on the right-hand side of == is a glob pattern.
                 if [[ "$f" == $p ]]; then ALLOW=1; break; fi
               done
+              if [ "$ALLOW" = "1" ]; then
+                for p in "${ALLOWED_EXCEPT[@]}"; do
+                  if [[ "$f" == $p ]]; then ALLOW=0; break; fi
+                done
+              fi
               [ "$ALLOW" = "1" ] || OUTSIDE+=("$f")
             done
 
@@ -745,6 +774,10 @@ jobs:
       CRON_SECRET: ci-placeholder-cron-secret
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The pull_request merge commit's first parent is the base; the SEO
+          # fence step diffs against it (HEAD^1).
+          fetch-depth: 2
 
       - uses: actions/setup-node@v7
         with:
@@ -753,6 +786,18 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
+
+      # Server-side re-check of the SEO loop's fence for PRs the owner did not
+      # open (the loop's claude[bot] PRs, forks). build-chain-guard fences
+      # PATHS; this adds file shapes, the TypeScript import allow-list,
+      # banned identifiers and directives, markup in literals and outbound
+      # link domains. --structural: the per-run caps were enforced by the run.
+      - name: SEO fence (non-owner PRs)
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.user.login != github.repository_owner &&
+          github.event.pull_request.user.login != 'dependabot[bot]'
+        run: node seo/scripts/verify-static.ts --working-tree --base HEAD^1 --structural
 
       - name: Lint
         run: npm run lint

@@ -1,5 +1,7 @@
 # TrueCap SEO control plane
 
+> **Note 2026-09-27.** This control plane still runs daily as a measurement job. Its `SEO_AUTOPILOT_*` and cap variables were only ever labels (nothing enforced them) and are not the SEO loop's switches: the loop (`seo/README.md`) uses `SEO_MODE` and `SEO_PAUSED`, with caps in `seo/config.json`. `seo-content.yml` and `seo-visibility.yml` are retired.
+
 The control plane is a deterministic measurement and decision system around the existing SEO assets. It inventories the canonical URL universe, ingests first-party search performance, watches authoritative sources, stores crawl/link health, scores work, and exposes the result at `/admin/seo`.
 
 It does **not** mass-publish content. Public code/content changes still require a traceable Git commit/PR and all existing CI gates. High-risk tax, legal, lending, regulatory, and competitor interpretation never auto-publishes.
