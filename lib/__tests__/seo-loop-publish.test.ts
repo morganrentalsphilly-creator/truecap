@@ -1,12 +1,12 @@
 import { afterAll, describe, expect, it } from "vitest";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 import { buildPlan, pageGroups, pagesOf, type CriticVerdict } from "../../seo/scripts/publish-plan.ts";
 import { bumpUrls } from "../../seo/scripts/lastmod.ts";
-import { changedPaths, pathForFile, urlsFromCommitMessages } from "../../seo/scripts/post-deploy.ts";
+import { changedPaths, datedChanges, lastmodChangedPaths, noindexChangedPaths, pathForFile, urlsFromCommitMessages } from "../../seo/scripts/post-deploy.ts";
 import { headerComment, parseArgs, requireFlag, unknownFlags } from "../../seo/scripts/lib/cli.ts";
 import type { VerifyFile, VerifyVerdict } from "../../seo/scripts/lib/types.ts";
 
@@ -173,6 +173,39 @@ describe("post-deploy", () => {
     expect(doc.failed).toEqual({ ok: false, error: "indexnow.ts exited 1" });
     expect(doc.passed).toEqual({ ok: true, error: null });
     expect(run.stderr).toContain("indexnow: batch rejected");
+  });
+});
+
+describe("post-deploy: IndexNow for pages whose date moved (F6)", () => {
+  it("takes the new and changed lastmod keys, and noindex additions and removals", () => {
+    expect(lastmodChangedPaths({ "/a": "2026-09-01", "/b": "2026-09-01" }, { "/a": "2026-09-01", "/b": "2026-10-05", "/c": "2026-10-05" })).toEqual(["/b", "/c"]);
+    expect(lastmodChangedPaths({ "/a": "2026-09-01" }, { "/a": "2026-09-01" })).toEqual([]);
+    // No map in the previous deploy (the first deploy after F2): every page.
+    expect(lastmodChangedPaths(null, { "/b": "2026-09-01", "/a": "2026-09-01" })).toEqual(["/a", "/b"]);
+    // Only plain site paths ever reach IndexNow.
+    expect(lastmodChangedPaths({}, { "//evil.test/x": "2026-10-05", "https://x.test/": "2026-10-05", "/ok": "2026-10-05" })).toEqual(["/ok"]);
+    expect(noindexChangedPaths(["/x", "/y"], ["/y", "/z"])).toEqual(["/x", "/z"]);
+    expect(noindexChangedPaths(null, [])).toEqual([]);
+  });
+
+  it("diffs the two JSON files between two real commits", () => {
+    const repo = tmp();
+    const git = (...args: string[]) => execFileSync("git", args, { cwd: repo, encoding: "utf8", env: { ...process.env, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t.invalid", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t.invalid" } }).trim();
+    git("init", "-q");
+    mkdirSync(path.join(repo, "content", "seo"), { recursive: true });
+    const write = (lastmod: Record<string, string>, noindex: string[]) => {
+      writeFileSync(path.join(repo, "content", "seo", "lastmod.json"), JSON.stringify(lastmod));
+      writeFileSync(path.join(repo, "content", "seo", "noindex.json"), JSON.stringify({ paths: noindex }));
+      git("add", "-A");
+      git("commit", "-q", "-m", "x");
+      return git("rev-parse", "HEAD");
+    };
+    const before = write({ "/a": "2026-09-01", "/b": "2026-09-01" }, ["/old"]);
+    const after = write({ "/a": "2026-09-01", "/b": "2026-10-05", "/new": "2026-10-05" }, ["/thin"]);
+    expect(datedChanges(before, after, repo)).toEqual(["/b", "/new", "/old", "/thin"]);
+    expect(datedChanges(after, after, repo)).toEqual([]);
+    // A commit from before F2, without the files: every page of the new map.
+    expect(datedChanges("0000000", after, repo)).toEqual(["/a", "/b", "/new", "/thin"]);
   });
 });
 

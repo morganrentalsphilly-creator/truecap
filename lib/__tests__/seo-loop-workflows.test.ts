@@ -382,6 +382,10 @@ describe("report job: a pushed run without its ledger fails loudly", () => {
 
 describe("seo-deployed check step", () => {
   const deployed = load("seo-deployed");
+
+  it("may read deployments (F6: the previous Production deploy is the diff base) and nothing more than it needs", () => {
+    expect(deployed.jobs.check.permissions).toEqual({ contents: "read", "pull-requests": "read", issues: "write", deployments: "read" });
+  });
   const check = deployed.jobs.check.steps.find((s) => s.id === "check") as Step;
   const file = deployed.jobs.check.steps.find((s) => s.name === "File the regression") as Step;
 

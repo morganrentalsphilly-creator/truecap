@@ -42,7 +42,7 @@ Everything else — pricing, terms, privacy, methodology, the analyzer, auth, bi
 | Workflow | When | What |
 |---|---|---|
 | `seo-weekly.yml` | Mon 09:41 UTC + manual | The loop: gate → data → model → verify-static → verify-build → critic → publish → open PR → merge (auto mode) → report |
-| `seo-deployed.yml` | each Production deploy | Checks the pages a merged loop PR changed (its page files plus the `SEO-URLs:` trailer the publish job writes, so dataset edits are checked too); pings IndexNow; files `seo-regression` on failure |
+| `seo-deployed.yml` | each Production deploy | Checks the pages a merged loop PR changed (its page files plus the `SEO-URLs:` trailer the publish job writes, so dataset edits are checked too) and files `seo-regression` on failure. On **every** deploy (yours too) it pings IndexNow for the pages whose `content/seo/lastmod.json` date or `noindex.json` entry moved since the previous Production deploy |
 | `seo-shepherd.yml` | daily | Re-runs a flaky check once, updates a behind PR, opens revert PRs, deletes old loop branches |
 | `seo-pause.yml` | manual | Disarms queued auto-merges now |
 
