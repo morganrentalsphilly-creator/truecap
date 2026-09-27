@@ -1046,3 +1046,13 @@ describe("runHealthcheckProcess", () => {
     expect(Object.keys(env).sort()).toEqual(["NODE_ENV", "PATH", "SEO_DATA_DIR"]);
   });
 });
+
+describe("market-data signal (F8)", () => {
+  it("reads data-market-data off <main> only", async () => {
+    const { marketDataOf } = await import("../../seo/scripts/crawl.ts");
+    expect(marketDataOf('<html><body><main id="main" data-market-data="thin" class="x"><p>x</p></main>')).toBe("thin");
+    expect(marketDataOf('<main data-market-data="enriched">')).toBe("enriched");
+    expect(marketDataOf('<div data-market-data="thin"></div><main id="main">')).toBeNull();
+    expect(marketDataOf("<main>")).toBeNull();
+  });
+});

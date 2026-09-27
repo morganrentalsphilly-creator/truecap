@@ -155,7 +155,15 @@ export type ScoreOutput = Candidates & { reportOnly: ReportOnlyEntry[] };
  * writes `externalHosts` and `fetchError` as local extensions (its
  * CrawlPageRecord); read them when present until lib/types.ts declares them.
  */
-export type CrawlPageWithHosts = CrawlPage & { externalHosts?: string[]; fetchError?: string | null };
+export type CrawlPageWithHosts = CrawlPage & { externalHosts?: string[]; fetchError?: string | null; marketData?: "thin" | "enriched" | null };
+
+/**
+ * Tag on a MARKET_ENRICH reason whose page crawled as market-data thin
+ * (crawl.ts `marketData`, lib/markets/thin.ts): no SAFMR ZIP rows and no
+ * market-facts entry. The seo-market-enrich skill takes tagged pages first.
+ * A signal only: nothing is noindexed on it.
+ */
+export const MARKET_DATA_THIN_TAG = "market-data-thin";
 
 /** The fields that say whether a crawl record describes a page that actually answered. */
 export type CrawlAnswer = Pick<CrawlPage, "status"> & { fetchError?: string | null };
@@ -979,7 +987,8 @@ function evaluatePage(ctx: Ctx, pagePath: string): PageResult {
     }
   }
   if (family === "market-city" && !ctx.marketFacts?.has(pagePath)) {
-    hits.push({ reason: "MARKET_ENRICH", detail: `no ${MARKET_FACTS_FILE} entry${ctx.marketFacts ? "" : " (file not created yet)"}`, opportunity: base, skill: "seo-market-enrich" });
+    const thinTag = page?.marketData === "thin" ? `; tag: ${MARKET_DATA_THIN_TAG} (no SAFMR ZIP rows, no market-facts entry)` : "";
+    hits.push({ reason: "MARKET_ENRICH", detail: `no ${MARKET_FACTS_FILE} entry${ctx.marketFacts ? "" : " (file not created yet)"}${thinTag}`, opportunity: base, skill: "seo-market-enrich" });
   }
 
   hits.sort((a, b) => REASON_PRIORITY.indexOf(a.reason) - REASON_PRIORITY.indexOf(b.reason));

@@ -147,8 +147,13 @@ const CORE_SOURCES: Record<string, SourceSpec[]> = {
 
 /** Fields app/glossary/[slug]/page.tsx renders (toolUrl/postUrl/also are not rendered). */
 const GLOSSARY_FIELDS = ["term", "slug", "category", "definition", "benchmark", "formula", "example", "howToCheck", "whyItMatters", "related"];
-/** Fields app/states/[slug]/page.tsx renders (directly and through buildStateFacts). */
-const STATE_FIELDS = ["slug", "name", "abbr", "pitch", "tier", "landlord", "propertyTaxRatePct"];
+/**
+ * Fields app/states/[slug]/page.tsx renders from lib/states.ts. Since F8 the
+ * pitch, tier, landlord lean and tax rate never render; the page's facts come
+ * from content/seo/state-facts.json, a JSON dataset the seed does not read
+ * (the publish step dates its changes by the rendered <main> hash).
+ */
+const STATE_FIELDS = ["slug", "name", "abbr"];
 /** Fields app/markets/[city]/page.tsx renders; blurb, ranges, angle and neighborhoods are not rendered. */
 const MARKET_CITY_FIELDS = ["slug", "name", "stateCode", "stateName", "relatedPosts"];
 
@@ -163,12 +168,17 @@ export function sourcesFor(urlPath: string, fileExists: (file: string) => boolea
   m = /^\/states\/([^/]+)$/.exec(urlPath);
   if (m) return [{ file: "lib/states.ts", kind: "entry", container: "STATES", slug: m[1], fields: STATE_FIELDS }];
   m = /^\/markets\/([^/]+)$/.exec(urlPath);
-  if (m && !fileExists(`app/markets/${m[1]}/page.tsx`)) {
-    return [
-      { file: "lib/markets/cities.ts", kind: "entry", container: "MARKET_CITIES", slug: m[1], fields: MARKET_CITY_FIELDS },
-      { file: "lib/markets/hud-rents.ts", kind: "entry", container: "HUD_RENTS", slug: m[1], omit: ["year"] },
+  if (m) {
+    // A market page is its HUD data (F8: the FMR area record too; the day a
+    // row was fetched is not content) plus its city entry, or, for a bespoke
+    // metro, its own page.tsx wrapper.
+    const hud: SourceSpec[] = [
+      { file: "lib/markets/hud-rents.ts", kind: "entry", container: "HUD_RENTS", slug: m[1], omit: ["year", "retrievedAt"] },
+      { file: "lib/markets/hud-fmr-areas.ts", kind: "entry", container: "HUD_FMR_AREAS", slug: m[1], omit: ["year"] },
       { file: "lib/markets/safmr-rents.ts", kind: "entry", container: "SAFMR_RENTS", slug: m[1], omit: ["year"] },
     ];
+    if (fileExists(`app/markets/${m[1]}/page.tsx`)) return [{ file: `app/markets/${m[1]}/page.tsx`, kind: "file" }, ...hud];
+    return [{ file: "lib/markets/cities.ts", kind: "entry", container: "MARKET_CITIES", slug: m[1], fields: MARKET_CITY_FIELDS }, ...hud];
   }
   const page = urlPath === "/" ? "app/page.tsx" : `app${urlPath}/page.tsx`;
   if (fileExists(page)) return [{ file: page, kind: "file" }];
@@ -670,7 +680,8 @@ async function selfTest(): Promise<void> {
   // Sources.
   const none = (): boolean => false;
   check(sourcesFor("/glossary/cap-rate", none)?.[0].kind === "entry", "glossary terms are data entries");
-  check(sourcesFor("/markets/erie", none)?.length === 3, "a market is its city, HUD and SAFMR entries");
+  check(sourcesFor("/markets/erie", none)?.length === 4, "a market is its city, HUD, FMR-area and SAFMR entries");
+  check(sourcesFor("/markets/dallas", (f) => f === "app/markets/dallas/page.tsx")?.[0].file === "app/markets/dallas/page.tsx", "a bespoke metro is its page plus its HUD entries");
   check(sourcesFor("/blog", none)?.some((s) => s.file === "lib/blog-posts.ts") === true, "/blog includes its registry");
   check(sourcesFor("/about", none)?.some((s) => s.file === "lib/author.ts") === true, "/about includes the author bio it renders");
   check(sourcesFor("/blog/x", (f) => f === "app/blog/x/page.tsx")?.length === 1, "a post is its own page.tsx: the bio it ends with is boilerplate");
