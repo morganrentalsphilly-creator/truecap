@@ -5,12 +5,15 @@
  * the calculator's public tool page in a new tab, so the partner's page stays
  * where it is.
  *
- * Snippets copied before 2026-09-27 sandbox the iframe WITHOUT allow-popups.
- * There the browser silently drops a target=_blank click (window.open returns
- * null), which would leave a dead link on every older embed. Those snippets
- * do allow top navigation on a user click, so the fallback opens the tool page
- * in the top window instead of doing nothing. Current snippets
+ * Snippets copied from 2026-08-30 until this credit shipped sandbox the
+ * iframe WITHOUT allow-popups. There the browser silently drops a
+ * target=_blank click (window.open returns null), which would leave a dead
+ * link on those embeds.
+ * Those snippets do allow top navigation on a user click, so the fallback
+ * opens the tool page in the top window instead of doing nothing. Snippets
+ * copied before 2026-08-30 have no sandbox, and current snippets
  * (lib/embed-snippet.ts) allow popups, so the new tab opens.
+ * lib/__tests__/embed-powered-by-click.test.ts pins the fallback.
  */
 
 import type { MouseEvent } from "react";

@@ -5,9 +5,19 @@
  * back to re-copy. So every change here only reaches future pastes, and the
  * parts an older paste depends on have to keep working on our side: the
  * `/embed/<slug>` iframe src and the `truecap:embed:resize` message
- * (components/embed/embed-resize-reporter.tsx). Snippets copied before
- * 2026-09-27 carry a "Calculator by TrueCap" caption and a sandbox without
- * allow-popups; they still load and resize.
+ * (components/embed/embed-resize-reporter.tsx).
+ *
+ * What older pastes look like (all carry a "Calculator by TrueCap" caption):
+ *   - copied before 2026-08-30: no sandbox and no referrerpolicy, so the frame
+ *     request carries the partner's origin as its referrer;
+ *   - copied from 2026-08-30 until the Powered-by credit shipped: a sandbox
+ *     WITHOUT allow-popups (components/embed/embed-powered-by-link.tsx has
+ *     the click fallback) and referrerpolicy="no-referrer".
+ * They load and resize only while their slug is still embeddable: the iframe
+ * route sets dynamicParams = false, so a withdrawn calculator (e.g. the
+ * UNRELEASED_UNDERWRITING_CALCULATORS, which the hub listed until 2026-08-28)
+ * loads the site's 404 page inside the partner's frame. The /embed hub FAQ
+ * says exactly this; keep the two in step.
  *
  * Rendered and copied by components/embed/embed-code-block.tsx (the /embed hub
  * and the "Embed this calculator" block on each /tools page).
