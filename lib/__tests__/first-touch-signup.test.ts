@@ -112,6 +112,10 @@ describe("parseFirstTouchCookieValue (zod)", () => {
 describe("signUpAction first-touch persistence", () => {
   it("writes app_metadata.tc_first_touch with the service role, keeping existing app_metadata", async () => {
     await expect(signUpAction(SIGN_UP, "/pricing")).resolves.toEqual({ ok: true, needsEmailConfirmation: true });
+    // Scheduled off the response (after()), like the OAuth callback's write.
+    expect(mocks.after).toHaveBeenCalledTimes(1);
+    expect(mocks.updateUserById).not.toHaveBeenCalled();
+    await runAfterTasks();
     expect(mocks.updateUserById).toHaveBeenCalledTimes(1);
     expect(mocks.updateUserById).toHaveBeenCalledWith(USER_ID, {
       app_metadata: {
@@ -127,6 +131,8 @@ describe("signUpAction first-touch persistence", () => {
     await expect(signUpAction(SIGN_UP)).resolves.toMatchObject({ ok: true });
     mocks.cookieGet.mockReturnValue({ name: "tc_ft", value: "organic_search./blog/private-slug" });
     await expect(signUpAction(SIGN_UP)).resolves.toMatchObject({ ok: true });
+    expect(mocks.after).not.toHaveBeenCalled();
+    await runAfterTasks();
     expect(mocks.updateUserById).not.toHaveBeenCalled();
     expect(mocks.createAdmin).not.toHaveBeenCalled();
   });
@@ -136,6 +142,7 @@ describe("signUpAction first-touch persistence", () => {
       signUpResult({ provider: "email", tc_first_touch: { source: "paid_search", section: "pricing", v: 1 } }),
     );
     await expect(signUpAction(SIGN_UP)).resolves.toMatchObject({ ok: true });
+    await runAfterTasks();
     expect(mocks.updateUserById).not.toHaveBeenCalled();
   });
 
@@ -143,9 +150,11 @@ describe("signUpAction first-touch persistence", () => {
     ["the admin write throws", () => mocks.updateUserById.mockRejectedValue(new Error(`boom for ${USER_ID} ${EMAIL}`))],
     ["the Auth API returns an error", () => mocks.updateUserById.mockResolvedValue({ data: null, error: { code: "user_not_found", status: 404, message: EMAIL } })],
     ["the service-role key is missing", () => mocks.createAdmin.mockImplementation(() => { throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"); })],
+    ["after() is unavailable", () => mocks.after.mockImplementation(() => { throw new Error(`after was called outside a request scope ${EMAIL}`); })],
   ])("still signs the user up when %s, and reports it without PII", async (_label, arrange) => {
     arrange();
     await expect(signUpAction(SIGN_UP)).resolves.toEqual({ ok: true, needsEmailConfirmation: true });
+    await runAfterTasks();
     expect(mocks.captureMessage).toHaveBeenCalledTimes(1);
     const [message, context] = mocks.captureMessage.mock.calls[0];
     expect(message).toBe("first-touch attribution write failed");
@@ -156,11 +165,30 @@ describe("signUpAction first-touch persistence", () => {
     expect(serialized).not.toContain("organic_search");
   });
 
+  it("answers the form without waiting for the attribution write (a hung Auth admin call never holds up sign-up)", async () => {
+    mocks.updateUserById.mockReturnValue(new Promise(() => undefined));
+    const outcome = await Promise.race([
+      signUpAction(SIGN_UP),
+      new Promise((resolve) => setTimeout(() => resolve("still pending after 500ms"), 500)),
+    ]);
+    expect(outcome).toEqual({ ok: true, needsEmailConfirmation: true });
+    // The write runs after the response, with the cookie read during the action.
+    expect(mocks.after).toHaveBeenCalledTimes(1);
+    expect(mocks.updateUserById).not.toHaveBeenCalled();
+    void pendingAfter[0]();
+    await Promise.resolve();
+    expect(mocks.updateUserById).toHaveBeenCalledWith(USER_ID, {
+      app_metadata: expect.objectContaining({ tc_first_touch: { source: "organic_search", section: "blog", v: 1 } }),
+    });
+  });
+
   it("writes nothing when Supabase rejects the sign-up or obfuscates an existing email", async () => {
     mocks.signUp.mockResolvedValue({ data: { user: null, session: null }, error: { message: "Password should be at least 12 characters" } });
     await expect(signUpAction(SIGN_UP)).resolves.toMatchObject({ ok: false });
     mocks.signUp.mockResolvedValue({ data: { user: { id: USER_ID, identities: [], app_metadata: {} }, session: null }, error: null });
     await expect(signUpAction(SIGN_UP)).resolves.toMatchObject({ ok: false });
+    expect(mocks.after).not.toHaveBeenCalled();
+    await runAfterTasks();
     expect(mocks.updateUserById).not.toHaveBeenCalled();
   });
 });
