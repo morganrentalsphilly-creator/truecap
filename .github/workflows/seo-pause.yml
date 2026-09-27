@@ -1,0 +1,31 @@
+name: SEO pause
+
+# The manual brake. Disarms auto-merge on every open SEO-loop PR right now.
+# To keep the loop stopped, ALSO set the repository variable SEO_PAUSED=true
+# (a workflow token cannot write repository variables); seo-weekly and
+# seo-shepherd both re-read it on every run and do nothing while it is set.
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  pause:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Disarm queued auto-merges
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+                       --jq '.[] | select(.headRefName | test("^seo/")) | .number'); do
+            gh pr merge "$n" --disable-auto && echo "disarmed #$n" || true
+          done
+          echo "Now set the repository variable SEO_PAUSED=true to keep the loop stopped."

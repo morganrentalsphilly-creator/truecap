@@ -1,0 +1,39 @@
+{
+  "_readme": "Claude Code settings for the seo-weekly MODEL job only (passed via claude-code-action `settings`). The model job holds a read-only GitHub token and ANTHROPIC_API_KEY, nothing else. These deny rules keep it from writing anything it could later cause to execute (tests, scripts, configs, the toolkit, workflows, git internals). Anything it may write is re-checked by seo/scripts/verify-static.ts before a PR exists. Deny beats allow in Claude Code, so the allow-list lives in --allowedTools. Read denies name secret locations only: the checkout itself lives under the runner's home directory (~/work/<repo>/<repo>), so a blanket Read(~/**) would deny every page the model must read (and Edit needs a prior Read). .git/** is denied because the action may write a token into the remote URL; RUNNER_TEMP (~/work/_temp) holds the step command files and the execution log.",
+  "permissions": {
+    "deny": [
+      "Edit(.git/**)", "Write(.git/**)",
+      "Edit(.github/**)", "Write(.github/**)",
+      "Edit(.claude/**)", "Write(.claude/**)",
+      "Edit(seo/scripts/**)", "Write(seo/scripts/**)",
+      "Edit(seo/*.json)", "Write(seo/*.json)",
+      "Edit(seo/*.md)", "Write(seo/*.md)",
+      "Edit(seo/ledger.jsonl)", "Write(seo/ledger.jsonl)",
+      "Edit(seo/reports/**)", "Write(seo/reports/**)",
+      "Edit(seo/data/index-status.json)", "Write(seo/data/index-status.json)",
+      "Edit(seo/data/halt.json)", "Write(seo/data/halt.json)",
+      "Edit(scripts/**)", "Write(scripts/**)",
+      "Edit(lib/__tests__/**)", "Write(lib/__tests__/**)",
+      "Edit(e2e/**)", "Write(e2e/**)",
+      "Edit(**/*.test.*)", "Write(**/*.test.*)",
+      "Edit(**/*.spec.*)", "Write(**/*.spec.*)",
+      "Edit(components/**)", "Write(components/**)",
+      "Edit(lib/supabase/**)", "Write(lib/supabase/**)",
+      "Edit(app/api/**)", "Write(app/api/**)",
+      "Edit(supabase/**)", "Write(supabase/**)",
+      "Edit(package.json)", "Write(package.json)",
+      "Edit(package-lock.json)", "Write(package-lock.json)",
+      "Edit(*.config.*)", "Write(*.config.*)",
+      "Edit(tsconfig*.json)", "Write(tsconfig*.json)",
+      "Edit(proxy.ts)", "Write(proxy.ts)",
+      "Edit(vercel.json)", "Write(vercel.json)",
+      "Edit(node_modules/**)", "Write(node_modules/**)",
+      "Read(//proc/**)", "Read(//etc/**)",
+      "Read(~/.claude/**)", "Read(~/.config/**)", "Read(~/.ssh/**)", "Read(~/.gnupg/**)", "Read(~/.docker/**)",
+      "Read(~/.gitconfig)", "Read(~/.git-credentials)", "Read(~/.npmrc)", "Read(~/runners/**)",
+      "Read(~/work/_temp/**)", "Read(.git/**)",
+      "Bash(git push:*)", "Bash(git config:*)", "Bash(git remote:*)", "Bash(git commit:*)", "Bash(gh:*)",
+      "Bash(npm:*)", "Bash(npx:*)", "Bash(curl:*)", "Bash(wget:*)"
+    ]
+  }
+}

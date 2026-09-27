@@ -1,0 +1,86 @@
+name: SEO deployed
+
+# After Vercel reports a successful PRODUCTION deployment, check the pages a
+# merged SEO-loop PR changed and ping IndexNow for them.
+#
+# Why deployment_status and not push: loop PRs are auto-merged by
+# GITHUB_TOKEN, and events GITHUB_TOKEN causes start no workflows — so a
+# push-triggered job would silently never run for exactly the merges it
+# exists for. Vercel's deployment objects are created by vercel[bot], a GitHub
+# App, and do trigger this.
+#
+# Model-free on purpose (claude-code-action does not support this event), and
+# it never writes run state (a second writer would race seo-weekly). A
+# regression is filed as a `seo-regression` issue; seo-weekly treats an open
+# one as a halt and seo-shepherd opens the revert PR.
+
+on:
+  deployment_status:
+
+permissions: {}
+
+jobs:
+  check:
+    # Production + success only: Preview deployments raise this event too.
+    if: github.event.deployment.environment == 'Production' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: write
+    concurrency:
+      group: seo-deployed
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # post-deploy writes its result to a file (--out), never through a stdout
+      # redirect: a child's output on the same stdout once made the file two
+      # JSON documents, the parse threw inside `echo "x=$(...)"` (echo exits 0),
+      # and every loop deploy either went red or lost its regressions.
+      - name: Check the changed pages and ping IndexNow
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.deployment.sha }}
+          NODE_OPTIONS: --disable-warning=ExperimentalWarning
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/post-deploy.json"
+          # Only commits that are on main (an ancestor of the default branch).
+          git fetch --no-tags origin main
+          if git merge-base --is-ancestor "$SHA" origin/main; then
+            node seo/scripts/post-deploy.ts --sha "$SHA" --out "$OUT"
+          else
+            echo "not on main — ignoring"
+            echo '{"loopPr":null,"regressions":[]}' > "$OUT"
+          fi
+          cat "$OUT"
+          node -e 'const r=require(process.argv[1]);if(r.indexnowError)console.log("::warning::IndexNow: "+String(r.indexnowError).replace(/[\r\n]+/g," "))' "$OUT"
+          # An assignment, so an unreadable result fails this step instead of writing an empty count.
+          N="$(node -e 'const r=require(process.argv[1]);if(!Array.isArray(r.regressions))throw new Error("no regressions list");process.stdout.write(String(r.regressions.length))' "$OUT")"
+          echo "regressions=$N" >> "$GITHUB_OUTPUT"
+
+      - name: File the regression
+        if: steps.check.outputs.regressions != '' && steps.check.outputs.regressions != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh label create seo-regression --color D93F0B --description "SEO loop post-deploy regression (halts the loop)" 2>/dev/null || true
+          node -e '
+            const r = require(process.argv[1]);
+            const lines = ["A merged SEO-loop change failed its post-deploy check. The weekly loop is halted until this issue is closed; seo-shepherd will open a revert PR.", "", "<!-- seo-regression " + JSON.stringify({ pr: r.loopPr, sha: r.sha }) + " -->", ""];
+            for (const x of r.regressions) lines.push("- `" + x.path + "`: " + x.problems.join("; "));
+            require("fs").writeFileSync(process.env.RUNNER_TEMP + "/regression.md", lines.join("\n"));
+          ' "$RUNNER_TEMP/post-deploy.json"
+          PR="$(node -e 'process.stdout.write(String(require(process.argv[1]).loopPr))' "$RUNNER_TEMP/post-deploy.json")"
+          gh issue create --title "SEO regression after loop PR #$PR" --label seo-regression --body-file "$RUNNER_TEMP/regression.md"

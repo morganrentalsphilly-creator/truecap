@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getSeoAutopilotConfig, mayAutopublish, mayExecuteRisk } from "@/lib/seo/control-plane/config";
@@ -200,13 +200,18 @@ describe("year rollover and factual consistency", () => {
     expect(migration).toContain("revoke all");
   });
 
-  it("requests owner review before any net-new content can be published", () => {
-    const workflow = readFileSync(join(ROOT, ".github/workflows/seo-content.yml"), "utf8");
-    const notificationStep = workflow.indexOf("name: Request owner review for net-new content");
-    const mergeStep = workflow.indexOf("name: Queue the PR to auto-merge once checks pass");
-    expect(notificationStep).toBeGreaterThan(-1);
-    expect(notificationStep).toBeLessThan(mergeStep);
-    expect(workflow).toContain('if [[ "$title" != "content: "* ]]');
-    expect(workflow).toContain('gh pr edit "$number" --add-reviewer "$GITHUB_REPOSITORY_OWNER"');
+  it("publishes nothing without the founder until review mode and calibration are both passed", () => {
+    // seo-content.yml (auto-merged blog edits on a PR-title prefix) was
+    // retired on 2026-09-27; the SEO loop replaced it (seo/README.md).
+    expect(existsSync(join(ROOT, ".github/workflows/seo-content.yml"))).toBe(false);
+    expect(existsSync(join(ROOT, ".github/workflows/seo-visibility.yml"))).toBe(false);
+    const workflow = readFileSync(join(ROOT, ".github/workflows/seo-weekly.yml"), "utf8");
+    const arm = workflow.indexOf("name: Arm auto-merge (auto mode only)");
+    expect(arm).toBeGreaterThan(-1);
+    const step = workflow.slice(arm, workflow.indexOf("\n  report:", arm));
+    expect(step).toContain('if [ "${SEO_MODE:-review}" != "auto" ]');
+    expect(step).toMatch(/CALIBRATION/);
+    expect(step).toMatch(/TIER" -gt 1/);
+    expect(step).toContain("--match-head-commit");
   });
 });

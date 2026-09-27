@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": {
+      "seo/**": false,
+      "seo-state": false
+    }
+  },
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "crons": [
