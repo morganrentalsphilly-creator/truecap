@@ -18,12 +18,15 @@ gh label create "$LABEL" --color 0E8A16 --description "SEO loop weekly digest" 2
 NUMBER="$(gh issue list --label "$LABEL" --state all --limit 20 --json number,title \
            --jq "[.[] | select(.title == \"$TITLE\")][0].number // empty")"
 if [ -z "$NUMBER" ]; then
-  gh issue create --title "$TITLE" --label "$LABEL" --body-file "$REPORT"
-  NUMBER="$(gh issue list --label "$LABEL" --state all --limit 20 --json number,title \
-             --jq "[.[] | select(.title == \"$TITLE\")][0].number")"
+  # The number comes from create's own output (the issue URL): a label search
+  # right after creating lags the index and came back empty on the first live
+  # run (2026-09-27), failing the comment and the job.
+  URL="$(gh issue create --title "$TITLE" --label "$LABEL" --body-file "$REPORT")"
+  NUMBER="${URL##*/}"
 else
   gh issue edit "$NUMBER" --body-file "$REPORT"
   gh issue reopen "$NUMBER" 2>/dev/null || true
 fi
+case "$NUMBER" in ''|*[!0-9]*) echo "::error::could not determine the digest issue number"; exit 1;; esac
 gh issue comment "$NUMBER" --body-file "$DIGEST"
 echo "Digest posted to #$NUMBER."

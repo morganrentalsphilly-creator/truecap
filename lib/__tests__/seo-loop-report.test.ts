@@ -1208,9 +1208,18 @@ describe("main (disk, no network)", () => {
     const lying = put("in/lying.json", manifestOf({ runId: "run-0" }));
     const body = path.join(dir, "body.md");
 
-    await main(parseArgs(["--pr-body", body, "--manifest", blank]));
-    expect(readFileSync(body, "utf8")).toContain("No run id was given, so no changes are attributed to this run.");
+    // Hermetic: seo-weekly.yml sets SEO_RUN_ID for the whole workflow, so the
+    // loop's own verify-build ran this test with the variable already set.
+    const inherited = process.env.SEO_RUN_ID;
+    delete process.env.SEO_RUN_ID;
+    try {
+      await main(parseArgs(["--pr-body", body, "--manifest", blank]));
+      expect(readFileSync(body, "utf8")).toContain("No run id was given, so no changes are attributed to this run.");
+    } finally {
+      if (inherited !== undefined) process.env.SEO_RUN_ID = inherited;
+    }
 
+    const outer = process.env.SEO_RUN_ID;
     process.env.SEO_RUN_ID = "555";
     try {
       await main(parseArgs(["--pr-body", body, "--manifest", lying]));
@@ -1219,7 +1228,8 @@ describe("main (disk, no network)", () => {
       expect(fromEnv).toContain("| `/blog/a` | T0 | title-meta |");
       expect(fromEnv).toContain("1 pages are withheld until 2026-11-23");
     } finally {
-      delete process.env.SEO_RUN_ID;
+      if (outer === undefined) delete process.env.SEO_RUN_ID;
+      else process.env.SEO_RUN_ID = outer;
     }
     await main(parseArgs(["--pr-body", body, "--manifest", lying, "--run-id", "555"]));
     expect(readFileSync(body, "utf8")).toContain("Run `555`");

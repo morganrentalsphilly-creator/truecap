@@ -143,8 +143,15 @@ export function computeFlags(input: {
   };
 }
 
+/**
+ * A bare `domain:` rule matches that exact host only, so `domain:irs.gov`
+ * refused https://www.irs.gov (first live run, 2026-09-27: IRS, HUD and
+ * HUD User were all "permission denied"). `*.domain` covers every subdomain
+ * (Claude Code ≥ 2.1.172) but not the apex, so each domain gets both — the
+ * same set verify-static's hostMatches accepts for links.
+ */
 function webFetchRules(domains: string[]): string[] {
-  return domains.map((domain) => `WebFetch(domain:${domain})`);
+  return domains.flatMap((domain) => [`WebFetch(domain:${domain})`, `WebFetch(domain:*.${domain})`]);
 }
 
 /**
@@ -286,6 +293,7 @@ function selfTest(): void {
   check(summary.turns === 12 && summary.costUsd === 1.23 && (summary.deniedTools as Record<string, number>).Bash === 2, "execution summary");
   const tools = modelTools(false);
   check(!tools.includes("WebSearch") && tools.includes("WebFetch(domain:irs.gov)") && !/Bash\(npm|Bash\(npx|gh /.test(tools), "model tools are fenced");
+  check(tools.includes("WebFetch(domain:*.irs.gov)") && tools.includes("WebFetch(domain:*.huduser.gov)"), "subdomains (www.irs.gov) are reachable too");
   check(demotedTypes(null).length === 0 && demotedTypes({ demotedChangeTypes: [{ changeType: "Title Meta", lossRate: 0.5, scored: 10 }] }).join() === "title-meta", "demoted types are cleaned slugs");
   let threw = false;
   try {
