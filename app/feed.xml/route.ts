@@ -16,6 +16,7 @@
  */
 
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { lastmodOrPublished } from "@/lib/seo/lastmod";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
@@ -35,7 +36,8 @@ export async function GET() {
   const siteUrl = getSiteUrl();
   const feedUrl = `${siteUrl}/feed.xml`;
 
-  const items = BLOG_POSTS.filter((p) => p.available)
+  const posts = BLOG_POSTS.filter((p) => p.available);
+  const items = posts
     // Sort newest first — readers expect that
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1))
     .map((post) => {
@@ -54,7 +56,16 @@ export async function GET() {
     })
     .join("\n");
 
-  const lastBuildDate = new Date().toUTCString();
+  // The channel last changed when its newest post content did
+  // (content/seo/lastmod.json, never earlier than a post's publication) —
+  // not when the site was last deployed.
+  const channelUpdatedAt = posts
+    .map((p) => lastmodOrPublished(`/blog/${p.slug}`, p.publishedAt))
+    .sort()
+    .at(-1);
+  const lastBuildDate = channelUpdatedAt
+    ? new Date(`${channelUpdatedAt}T00:00:00Z`).toUTCString()
+    : null;
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -64,8 +75,7 @@ export async function GET() {
     <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
     <description>Original long-form content on rental property analysis, real estate math, BRRRR strategy, DSCR loans, tax concepts, and underwriting from the team behind TrueCap.</description>
     <language>en-us</language>
-    <lastBuildDate>${lastBuildDate}</lastBuildDate>
-    <generator>TrueCap (Next.js)</generator>
+${lastBuildDate ? `    <lastBuildDate>${lastBuildDate}</lastBuildDate>\n` : ""}    <generator>TrueCap (Next.js)</generator>
 ${items}
   </channel>
 </rss>

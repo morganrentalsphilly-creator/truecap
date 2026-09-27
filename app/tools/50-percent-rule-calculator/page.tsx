@@ -26,6 +26,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "50% Rule Calculator | Free Rental Expense Triage",
   description:
@@ -100,7 +101,7 @@ export default function FiftyPercentRuleCalculatorPage() {
     name: "TrueCap 50% Rule Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/50-percent-rule-calculator"),
     url: `${siteUrl}/tools/50-percent-rule-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

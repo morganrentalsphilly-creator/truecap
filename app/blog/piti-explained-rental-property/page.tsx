@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "piti-explained-rental-property";
 const TITLE = "PITI explained: the real monthly payment on a rental (2026)";
@@ -27,7 +28,7 @@ const SERP_TITLE = "PITI explained: a rental's real payment (2026)";
 const DESCRIPTION =
   "PITI — principal, interest, taxes, insurance — is a rental's real monthly payment. How to estimate each part, handle escrow, and turn it into DSCR.";
 const PUBLISHED_AT = "2026-06-20";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/piti-explained-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

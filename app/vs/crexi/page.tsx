@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Crexi vs TrueCap (2026): Commercial vs Rental",
@@ -136,7 +137,7 @@ export default function VsCrexiPage() {
     url: `${siteUrl}/vs/crexi`,
     description:
       "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes — honest comparison.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/crexi"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

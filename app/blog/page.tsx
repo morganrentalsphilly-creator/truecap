@@ -20,6 +20,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { lastmodOrPublished } from "@/lib/seo/lastmod";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
 import { Header } from "@/components/investcalc/header";
@@ -55,6 +56,15 @@ function compactExcerpt(excerpt: string, maxCharacters = 190): string {
   return `${candidate.slice(0, lastWordBoundary > 0 ? lastWordBoundary : maxCharacters).trimEnd()}…`;
 }
 
+/**
+ * A post's last significant change (content/seo/lastmod.json), never earlier
+ * than its publication date. The card and the Blog JSON-LD both read it, so
+ * the visible "Updated" line and dateModified always agree with the sitemap.
+ */
+function postModifiedAt(post: { slug: string; publishedAt: string }): string {
+  return lastmodOrPublished(`/blog/${post.slug}`, post.publishedAt);
+}
+
 export default function BlogIndexPage() {
   const siteUrl = getSiteUrl();
   const availablePosts = BLOG_POSTS.filter((post) => post.available);
@@ -71,7 +81,7 @@ export default function BlogIndexPage() {
       headline: p.title,
       url: `${siteUrl}/blog/${p.slug}`,
       datePublished: p.publishedAt,
-      dateModified: p.publishedAt,
+      dateModified: postModifiedAt(p),
     })),
   };
 
@@ -175,7 +185,8 @@ export default function BlogIndexPage() {
                           {compactExcerpt(post.excerpt)}
                         </p>
                         <p className="mt-auto pt-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-                          {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                          {postModifiedAt(post) > post.publishedAt ? "Updated " : ""}
+                          {new Date(postModifiedAt(post)).toLocaleDateString("en-US", {
                             timeZone: "UTC",
                             year: "numeric",
                             month: "short",

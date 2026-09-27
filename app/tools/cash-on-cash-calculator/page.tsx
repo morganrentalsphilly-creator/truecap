@@ -13,6 +13,7 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -87,7 +88,7 @@ export default function CoCCalculatorPage() {
     name: "TrueCap Cash-on-Cash Return Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/cash-on-cash-calculator"),
     url: `${siteUrl}/tools/cash-on-cash-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

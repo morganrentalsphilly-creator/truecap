@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "PropStream vs TrueCap (2026): Find vs Underwrite",
@@ -164,7 +165,7 @@ export default function VsPropstreamPage() {
     url: `${siteUrl}/vs/propstream`,
     description:
       "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. An honest side-by-side of where each fits.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/propstream"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

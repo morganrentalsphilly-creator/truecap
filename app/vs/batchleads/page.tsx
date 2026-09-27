@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
@@ -151,7 +152,7 @@ export default function VsBatchleadsPage() {
     url: `${siteUrl}/vs/batchleads`,
     description:
       "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how active investors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/batchleads"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

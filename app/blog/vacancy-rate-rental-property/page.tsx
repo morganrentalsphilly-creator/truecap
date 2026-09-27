@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "vacancy-rate-rental-property";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "Vacancy rate for rentals: what to assume in 2026";
 const DESCRIPTION =
   "How to pick a vacancy assumption that matches reality: physical vs economic vacancy, the turnover math behind the number, and what 5 points does to DSCR.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/vacancy-rate-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

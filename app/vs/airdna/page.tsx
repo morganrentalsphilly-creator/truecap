@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
@@ -148,7 +149,7 @@ export default function VsAirdnaPage() {
     url: `${siteUrl}/vs/airdna`,
     description:
       "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Honest comparison for short-term rental investors plus how they fit together.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/airdna"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

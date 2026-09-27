@@ -28,6 +28,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Mashvisor vs TrueCap for STR Deals (2026)",
@@ -205,7 +206,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
     url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,
     description:
       "Mashvisor scores STR markets with Airbnb data. TrueCap underwrites the specific deal. Honest comparison for STR investors plus how they fit together.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/mashvisor-for-short-term-rentals"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

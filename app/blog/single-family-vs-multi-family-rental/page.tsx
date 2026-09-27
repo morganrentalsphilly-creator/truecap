@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "single-family-vs-multi-family-rental";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "Single-family vs multi-family rental: which wins?";
 const DESCRIPTION =
   "Single-family vs multi-family compared on cash flow, cap rate, financing, tenants, exit liquidity, and capex risk, so you know which fits your stage.";
 const PUBLISHED_AT = "2026-05-27";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/single-family-vs-multi-family-rental") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

@@ -32,6 +32,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const usd = (value: number) => `$${Math.round(value).toLocaleString("en-US")}`;
 
@@ -118,7 +119,7 @@ export default async function StatePage({
     name: `${state.name} rental property guide`,
     description,
     url: canonicalUrl,
-    dateModified: "2026-09-06",
+    dateModified: lastmodFor(`/states/${state.slug}`),
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };

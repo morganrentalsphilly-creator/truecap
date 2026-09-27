@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
-import { SITE_OVERHAUL_LAST_MODIFIED } from "@/app/sitemap";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { lastmodFor } from "@/lib/seo/lastmod";
 import { HISTORICAL_TOOL_PATHS } from "@/lib/historical-tool-redirects";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 
@@ -97,34 +97,14 @@ describe("sitemap URL uniqueness", () => {
     }
   });
 
-  it("uses only valid, reviewed last-modified dates", () => {
-    const availablePosts = new Map(
-      BLOG_POSTS.filter((post) => post.available).map((post) => [
-        `/blog/${post.slug}`,
-        new Date(post.publishedAt).toISOString(),
-      ]),
-    );
-
+  it("takes every lastmod from content/seo/lastmod.json and invents none", () => {
     for (const entry of sitemap()) {
-      if (!entry.lastModified) continue;
       const path = new URL(entry.url).pathname;
-      const actual = new Date(entry.lastModified).toISOString();
-      if (availablePosts.has(path)) {
-        expect(actual, path).toBe(availablePosts.get(path));
-      } else if (path === "/tools/rental-property-spreadsheet") {
-        expect(actual).toBe(new Date("2026-07-14").toISOString());
-      } else if (
-        path.startsWith("/vs/") &&
-        actual === new Date("2026-06-07").toISOString()
-      ) {
-        // The June 2026 comparison batch keeps its release date.
-      } else {
-        // Every other URL carries the 2026-09 site-overhaul date: the voice
-        // pass, the page templates, and the product shots changed on that
-        // day (docs/site-overhaul.md Phase 8.5). Never a deploy timestamp.
-        expect(actual, `Unreviewed lastmod on ${path}`).toBe(
-          SITE_OVERHAUL_LAST_MODIFIED.toISOString(),
-        );
+      // Exactly the map's date; a path the map lacks gets no <lastmod> at all
+      // (never the build date, never a hand-typed floor).
+      expect(entry.lastModified, path).toBe(lastmodFor(path));
+      if (entry.lastModified !== undefined) {
+        expect(entry.lastModified, path).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       }
     }
   });

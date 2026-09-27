@@ -20,6 +20,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -95,7 +96,7 @@ export default function DscrCalculatorPage() {
     name: "TrueCap DSCR Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-08-15",
+    dateModified: lastmodFor("/tools/dscr-calculator"),
     url: `${siteUrl}/tools/dscr-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

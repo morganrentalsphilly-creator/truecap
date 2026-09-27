@@ -17,6 +17,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free GRM Calculator — Gross Rent Multiplier Screen",
@@ -88,7 +89,7 @@ export default function GrmCalculatorPage() {
     name: "TrueCap GRM Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/gross-rent-multiplier-calculator"),
     url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

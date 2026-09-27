@@ -22,6 +22,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "1-percent-rule-rental-property";
 const TITLE = "The 1% rule for rental property: does it still work in 2026?";
@@ -32,7 +33,7 @@ const SERP_TITLE = "The 1% rule for rental property in 2026";
 const DESCRIPTION =
   "The 1% rule says a rental's monthly rent should be at least 1% of its price. How it works, why 2026 rates made it harder to pass, and what it hides.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-06-23";
+const MODIFIED_AT = lastmodFor("/blog/1-percent-rule-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

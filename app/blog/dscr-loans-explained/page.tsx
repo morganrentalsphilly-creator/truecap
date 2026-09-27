@@ -27,6 +27,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "dscr-loans-explained";
 const TITLE =
@@ -38,7 +39,7 @@ const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
   "DSCR loans underwrite mainly on a rental's coverage ratio, not your personal DTI. Learn the borrower checks, program variation, costs, and trade-offs.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-09-01";
+const MODIFIED_AT = lastmodFor("/blog/dscr-loans-explained") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

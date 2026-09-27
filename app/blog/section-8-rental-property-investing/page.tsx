@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "section-8-rental-property-investing";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "Section 8 rentals: how the math works in 2026";
 const DESCRIPTION =
   "How to verify voucher payment standards, approved rent, tenant share, inspections, timing, and property-level underwriting assumptions.";
 const PUBLISHED_AT = "2026-06-10";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/section-8-rental-property-investing") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

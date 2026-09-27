@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "schedule-e-rental-property";
 const TITLE = "Schedule E for rental property: a line-by-line walkthrough";
@@ -27,7 +28,7 @@ const SERP_TITLE = "Schedule E for rental property, line by line";
 const DESCRIPTION =
   "A Schedule E walkthrough with a hypothetical rental example, recordkeeping prompts, and questions to check against current IRS guidance and your return.";
 const PUBLISHED_AT = "2026-06-12";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/schedule-e-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

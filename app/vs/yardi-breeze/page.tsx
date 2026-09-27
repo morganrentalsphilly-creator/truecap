@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
@@ -157,7 +158,7 @@ export default function VsYardiBreezePage() {
     url: `${siteUrl}/vs/yardi-breeze`,
     description:
       "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. Honest comparison for small landlords.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/yardi-breeze"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

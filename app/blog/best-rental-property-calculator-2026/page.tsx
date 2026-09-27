@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "best-rental-property-calculator-2026";
 const TITLE = "Best rental property calculator 2026: 7 tools compared";
@@ -29,7 +30,7 @@ const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
   "2026 ranking of the 7 most popular rental property calculators (TrueCap, DealCheck, BiggerPockets and more) on free tier depth, pricing, mobile, and fit.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/best-rental-property-calculator-2026") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {

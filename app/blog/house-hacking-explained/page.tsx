@@ -14,6 +14,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "house-hacking-explained";
 const TITLE = "House hacking explained: how to (almost) live for free in a 2-4 unit";
@@ -24,7 +25,7 @@ const SERP_TITLE = "House hacking explained: live (almost) free (2026)";
 const DESCRIPTION =
   "The math behind house hacking: FHA 3.5% down, owner-occupant rules, year-2 transition planning, and the deal types that make the strategy work in 2026.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/house-hacking-explained") ?? PUBLISHED_AT;
 const READING_TIME = 9;
 
 export const metadata: Metadata = {

@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free Closing Cost Calculator — Every Line Item",
@@ -70,7 +71,7 @@ export default function ClosingCostCalculatorPage() {
     name: "Closing Cost Calculator — TrueCap",
     description: "Free rental property closing cost calculator.",
     url: `${siteUrl}/tools/closing-cost-calculator`,
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/closing-cost-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
   const faqLd = {

@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "exit-cap-rate-rental-property";
 const TITLE_PLAIN =
@@ -38,7 +39,7 @@ const SERP_TITLE = "Exit cap rate: how to pick the number (2026)";
 const DESCRIPTION =
   "Exit cap rate = exit-year NOI ÷ the cap rate a future buyer pays. Why it drives your sale price and IRR more than any input, plus a worked 2026 example.";
 const PUBLISHED_AT = "2026-07-08";
-const MODIFIED_AT = "2026-07-08";
+const MODIFIED_AT = lastmodFor("/blog/exit-cap-rate-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

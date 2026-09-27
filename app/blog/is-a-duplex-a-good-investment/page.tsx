@@ -34,6 +34,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "is-a-duplex-a-good-investment";
 const TITLE =
@@ -45,7 +46,7 @@ const SERP_TITLE = "Is a Duplex a Good Investment? (2026 Math)";
 const DESCRIPTION =
   "The same $400,000 duplex needs $138,140 of cash as a pure rental and loses $277 a month, or $44,990 owner-occupied. Both paths worked line by line.";
 const PUBLISHED_AT = "2026-08-05";
-const MODIFIED_AT = "2026-08-05";
+const MODIFIED_AT = lastmodFor("/blog/is-a-duplex-a-good-investment") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 13;
 
 export const metadata: Metadata = {

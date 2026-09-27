@@ -26,6 +26,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "cap-rate-vs-gross-yield";
 const TITLE =
@@ -37,7 +38,7 @@ const SERP_TITLE = "Cap Rate vs Gross Yield vs GRM: When to Use Each";
 const DESCRIPTION =
   "Gross yield, GRM, and cap rate measure the same rental income three ways. Formulas, a worked $250K duplex, a conversion table, and when each one misleads.";
 const PUBLISHED_AT = "2026-07-21";
-const MODIFIED_AT = "2026-07-21";
+const MODIFIED_AT = lastmodFor("/blog/cap-rate-vs-gross-yield") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

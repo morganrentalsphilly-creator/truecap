@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "roofstock-vs-mashvisor-vs-propstream";
 const TITLE =
@@ -30,7 +31,7 @@ const SERP_TITLE = "Roofstock vs Mashvisor vs PropStream (2026)";
 const DESCRIPTION =
   "Roofstock sells turnkey rentals, Mashvisor scores neighborhoods, PropStream finds motivated sellers. Compare all three and see where TrueCap fits after.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/roofstock-vs-mashvisor-vs-propstream") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

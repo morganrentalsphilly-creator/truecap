@@ -25,6 +25,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "dealcheck-vs-stessa-vs-truecap";
 const TITLE = "DealCheck vs Stessa vs TrueCap: which one do you actually need?";
@@ -35,7 +36,7 @@ const SERP_TITLE = "DealCheck vs Stessa vs TrueCap (2026)";
 const DESCRIPTION =
   "A dated comparison of DealCheck, Stessa, and TrueCap. All three analyze acquisitions; Stessa also covers listing discovery and owned-property operations.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT: string = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/dealcheck-vs-stessa-vs-truecap") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "cash-out-refinance-vs-heloc-rental";
 const TITLE =
@@ -30,7 +31,7 @@ const SERP_TITLE = "Cash-out refinance vs HELOC on a rental (2026)";
 const DESCRIPTION =
   "A cash-out refinance and a HELOC both tap rental equity, but eligibility and terms differ. Compare how each works through an illustrative example.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/cash-out-refinance-vs-heloc-rental") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
@@ -136,7 +137,7 @@ export default function VsPrivyPage() {
     url: `${siteUrl}/vs/privy`,
     description:
       "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how investors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/privy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

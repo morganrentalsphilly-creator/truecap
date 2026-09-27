@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "RentSpree vs TrueCap (2026): Screening vs Analysis",
@@ -152,7 +153,7 @@ export default function VsRentspreePage() {
     url: `${siteUrl}/vs/rentspree`,
     description:
       "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow — and how realtors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/rentspree"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

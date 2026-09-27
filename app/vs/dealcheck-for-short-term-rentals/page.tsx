@@ -17,6 +17,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "DealCheck vs TrueCap for STR Deals (2026)",
@@ -121,7 +122,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
     name: "DealCheck vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,
     description: "Compare TrueCap and DealCheck for STR screening: user-supplied revenue, occupancy assumptions, financing, and explicit tax-eligibility boundaries.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/dealcheck-for-short-term-rentals"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

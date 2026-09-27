@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
@@ -164,7 +165,7 @@ export default function VsDealmachinePage() {
     url: `${siteUrl}/vs/dealmachine`,
     description:
       "DealMachine finds the leads with mobile-first driving for dollars. TrueCap underwrites them. Honest comparison and how investors use both.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/dealmachine"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

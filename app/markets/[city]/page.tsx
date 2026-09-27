@@ -52,6 +52,7 @@ import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 // Candidates only. Anything not currently released is filtered out below, so
 // a market page can never link a reader to a gated tool.
@@ -211,8 +212,8 @@ export default async function MarketCityPage({
     name: `${data.name} rental property analysis`,
     description: buildMarketCityDescription(data.name, null),
     url: canonicalUrl,
-    // Real last-substantive-change date (HUD table + sample underwrite).
-    dateModified: "2026-09-06",
+    // The page's own last significant change (content/seo/lastmod.json); omitted when it has none.
+    dateModified: lastmodFor(`/markets/${data.slug}`),
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };

@@ -36,6 +36,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
@@ -179,7 +180,7 @@ export default function VsBrickedPage() {
     url: `${siteUrl}/vs/bricked`,
     description:
       "Bricked focuses on AI comps, ARV, and repair costs. TrueCap screens stabilized rental cash flow, cap rate, CoC, and DSCR.",
-    dateModified: "2026-06-12",
+    dateModified: lastmodFor("/vs/bricked"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

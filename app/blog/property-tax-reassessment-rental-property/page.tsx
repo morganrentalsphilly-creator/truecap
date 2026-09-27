@@ -26,6 +26,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "property-tax-reassessment-rental-property";
 const TITLE =
@@ -37,7 +38,7 @@ const SERP_TITLE = "Property tax reassessment for rentals (2026)";
 const DESCRIPTION =
   "Buying a rental usually resets property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real bill before you buy.";
 const PUBLISHED_AT = "2026-06-27";
-const MODIFIED_AT = "2026-06-27";
+const MODIFIED_AT = lastmodFor("/blog/property-tax-reassessment-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

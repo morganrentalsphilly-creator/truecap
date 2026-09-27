@@ -23,6 +23,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Free BiggerPockets Calculator Alternative (2026)",
@@ -104,7 +105,7 @@ export default function VsBiggerPocketsCalculatorPage() {
     url: `${siteUrl}/vs/biggerpockets-calculator`,
     description:
       "Side-by-side comparison of TrueCap and the BiggerPockets Rental Property Calculator for rental underwriting.",
-    dateModified: "2026-08-15",
+    dateModified: lastmodFor("/vs/biggerpockets-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

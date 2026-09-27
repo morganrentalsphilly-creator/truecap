@@ -22,6 +22,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "buying-rental-property-with-tenants";
 const TITLE_PLAIN =
@@ -33,7 +34,7 @@ const SERP_TITLE = "Buying a rental property with tenants";
 const DESCRIPTION =
   "A due-diligence framework for a tenant-occupied purchase: verify the lease, payment history, deposits, local successor obligations, and in-place rent math.";
 const PUBLISHED_AT = "2026-07-13";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/buying-rental-property-with-tenants") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

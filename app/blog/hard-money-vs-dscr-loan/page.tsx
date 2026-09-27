@@ -23,6 +23,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "hard-money-vs-dscr-loan";
 const TITLE =
@@ -34,7 +35,7 @@ const SERP_TITLE = "Hard money vs DSCR loan: which to use in 2026";
 const DESCRIPTION =
   "Hard money and DSCR loans solve different investor-financing problems. Compare how each is structured through an illustrative BRRRR sequence.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/hard-money-vs-dscr-loan") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

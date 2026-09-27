@@ -25,6 +25,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "investment-property-appraisal";
 const TITLE_PLAIN =
@@ -36,7 +37,7 @@ const SERP_TITLE = "How investment property appraisals work (2026)";
 const DESCRIPTION =
   "How investment property appraisals work: the forms, the 1007 rent schedule, the lower-of rule, worked low-appraisal gap math, and the rebuttal playbook.";
 const PUBLISHED_AT = "2026-07-11";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = lastmodFor("/blog/investment-property-appraisal") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

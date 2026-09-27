@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
@@ -157,7 +158,7 @@ export default function VsRentecDirectPage() {
     url: `${siteUrl}/vs/rentec-direct`,
     description:
       "Rentec Direct runs the rentals you own (5-100 units). TrueCap underwrites the ones you're considering. Honest side-by-side.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/rentec-direct"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

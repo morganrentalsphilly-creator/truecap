@@ -26,6 +26,7 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "cap-rate-vs-cash-on-cash-vs-dscr";
 const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
@@ -36,7 +37,7 @@ const SERP_TITLE = "Cap rate vs cash-on-cash vs DSCR: which matters?";
 const DESCRIPTION =
   "Three metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/cap-rate-vs-cash-on-cash-vs-dscr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 8;
 
 export const metadata: Metadata = {

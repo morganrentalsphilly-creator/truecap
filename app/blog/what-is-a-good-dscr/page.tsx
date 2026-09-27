@@ -30,6 +30,7 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "what-is-a-good-dscr";
 const TITLE =
@@ -41,7 +42,7 @@ const SERP_TITLE = "What is a good DSCR for a rental property? (2026)";
 const DESCRIPTION =
   "1.25 is a common lender screen, not an investor guarantee. DSCR bands explained, plus worked examples for loan size and an Offer Ceiling.";
 const PUBLISHED_AT = "2026-07-18";
-const MODIFIED_AT = "2026-08-25";
+const MODIFIED_AT = lastmodFor("/blog/what-is-a-good-dscr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

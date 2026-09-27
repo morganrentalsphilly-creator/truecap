@@ -31,6 +31,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
@@ -169,7 +170,7 @@ export default function VsZillowRentPage() {
     url: `${siteUrl}/vs/zillow-rent-estimate`,
     description:
       "Side-by-side comparison of TrueCap and Zillow's Rent Estimate.",
-    dateModified: "2026-08-16",
+    dateModified: lastmodFor("/vs/zillow-rent-estimate"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

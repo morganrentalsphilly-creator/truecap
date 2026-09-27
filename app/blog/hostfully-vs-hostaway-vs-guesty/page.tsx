@@ -18,6 +18,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "hostfully-vs-hostaway-vs-guesty";
 const TITLE = "Hostfully vs Hostaway vs Guesty: which STR PMS wins in 2026?";
@@ -28,7 +29,7 @@ const SERP_TITLE = "Hostfully vs Hostaway vs Guesty (2026)";
 const DESCRIPTION =
   "Honest 3-way comparison of Hostfully, Hostaway, and Guesty — channel managers, automation, pricing tiers, and which fits 1, 10, or 100 short-term rentals.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/hostfully-vs-hostaway-vs-guesty") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {

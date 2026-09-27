@@ -19,6 +19,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "stessa-vs-avail-vs-baselane";
 const TITLE = "Stessa vs Avail vs Baselane: 3-way landlord ops comparison";
@@ -29,7 +30,7 @@ const SERP_TITLE = "Stessa vs Avail vs Baselane (2026)";
 const DESCRIPTION =
   "Stessa spans acquisition, underwriting, accounting, and operations; Avail emphasizes leasing; Baselane combines banking and bookkeeping.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-27";
+const MODIFIED_AT = lastmodFor("/blog/stessa-vs-avail-vs-baselane") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

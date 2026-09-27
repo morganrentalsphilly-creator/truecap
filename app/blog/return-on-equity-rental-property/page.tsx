@@ -24,6 +24,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "return-on-equity-rental-property";
 const TITLE =
@@ -35,7 +36,7 @@ const SERP_TITLE = "Return on equity (ROE) on a rental property";
 const DESCRIPTION =
   "Return on equity is what the equity trapped in a rental earns today, not the cash you put in. The formula, a 10-year decay example, and the refi test.";
 const PUBLISHED_AT = "2026-07-01";
-const MODIFIED_AT = "2026-07-01";
+const MODIFIED_AT = lastmodFor("/blog/return-on-equity-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

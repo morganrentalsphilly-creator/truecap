@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-calculate-arv";
 const TITLE_PLAIN =
@@ -38,7 +39,7 @@ const SERP_TITLE = "How to calculate ARV (2026): the comps method";
 const DESCRIPTION =
   "How to calculate ARV: pull renovated comps, adjust, and apply price per square foot. A worked example, a 70%-rule price screen, and BRRRR refinance math.";
 const PUBLISHED_AT = "2026-07-10";
-const MODIFIED_AT = "2026-07-10";
+const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-arv") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

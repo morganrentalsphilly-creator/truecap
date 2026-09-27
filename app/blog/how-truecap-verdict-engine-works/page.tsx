@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-truecap-verdict-engine-works";
 const TITLE = "How TrueCap classifies Buy Box fit";
@@ -32,7 +33,7 @@ const SERP_TITLE = "How TrueCap classifies Buy Box fit";
 const DESCRIPTION =
   "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for Buy Box fit, with the rationale behind each band.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/how-truecap-verdict-engine-works") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {

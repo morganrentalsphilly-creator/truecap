@@ -14,6 +14,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "property-management-yes-or-no";
 const TITLE = "Should I use a property management company? The actual math.";
@@ -24,7 +25,7 @@ const SERP_TITLE = "Should I use a property management company?";
 const DESCRIPTION =
   "8-10% of rent, lease-up fees, and maintenance markup: does paying a PM still beat managing yourself? The break-even math, plus when to switch either way.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/property-management-yes-or-no") ?? PUBLISHED_AT;
 const READING_TIME = 8;
 
 export const metadata: Metadata = {

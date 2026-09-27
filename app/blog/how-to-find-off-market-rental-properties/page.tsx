@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-find-off-market-rental-properties";
 const TITLE = "How to find off-market rental properties — 8 sources that actually work";
@@ -26,7 +27,7 @@ const SERP_TITLE = "How to find off-market rental properties (2026)";
 const DESCRIPTION =
   "The 8 sources investors use to find off-market rental deals: driving for dollars, direct mail, wholesalers, networking, public records, and more.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-06-01";
+const MODIFIED_AT = lastmodFor("/blog/how-to-find-off-market-rental-properties") ?? PUBLISHED_AT;
 const READING_TIME = 10;
 
 export const metadata: Metadata = {

@@ -13,6 +13,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
   description:
@@ -85,7 +86,7 @@ export default function BrrrrCalculatorPage() {
     name: "TrueCap BRRRR Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/brrrr-calculator"),
     url: `${siteUrl}/tools/brrrr-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

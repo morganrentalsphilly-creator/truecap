@@ -12,6 +12,7 @@ import {
   isStateIndexable,
   isStrategyIndexable,
 } from "@/lib/markets/indexability";
+import { lastmodFor } from "@/lib/seo/lastmod";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -20,8 +21,10 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
  * Sitemap policy
  *
  * - Only indexable, canonical HTML pages belong here.
- * - A last-modified value is emitted only for a reviewed content date we can
- *   defend. Never stamp deployment time onto evergreen pages.
+ * - <lastmod> comes from ONE source, content/seo/lastmod.json (lib/seo/lastmod):
+ *   the last significant change to the page's own content, seeded from git
+ *   history and bumped by the SEO loop's publish job. A path with no entry gets
+ *   no <lastmod> — never an invented date, never deployment time.
  * - Search engines ignore priority/changefreq hints, so neither is emitted.
  * - Released registries drive generated families; gated and retired routes
  *   therefore cannot leak into discovery surfaces.
@@ -50,7 +53,7 @@ const CORE_PATHS = [
   "/vs",
 ] as const;
 
-/** Comparison pages without a defensible per-page review date. */
+/** The released /vs comparison pages (app/vs/<competitor>/page.tsx). */
 const COMPARISON_PATHS = [
   "/vs/dealcheck",
   "/vs/bricked",
@@ -60,10 +63,6 @@ const COMPARISON_PATHS = [
   "/vs/excel",
   "/vs/rentometer",
   "/vs/zillow-rent-estimate",
-] as const;
-
-/** Pages released/reviewed in the documented June 2026 comparison batches. */
-const JUNE_2026_COMPARISON_PATHS = [
   "/vs/roofstock",
   "/vs/rentredi",
   "/vs/avail",
@@ -96,22 +95,14 @@ const JUNE_2026_COMPARISON_PATHS = [
   "/vs/mashvisor-for-short-term-rentals",
 ] as const;
 
-/**
- * Every URL carries a lastmod (docs/site-overhaul.md Phase 8.5). Blog posts
- * keep their reviewed dates; comparison batches keep their release date;
- * everything else changed in the 2026-09 site overhaul (voice pass,
- * templates, product shots), so that date is the honest floor.
- */
-export const SITE_OVERHAUL_LAST_MODIFIED = new Date("2026-09-06");
-
 function sitemapEntry(
   siteUrl: string,
   path: string,
-  lastModified: Date = SITE_OVERHAUL_LAST_MODIFIED,
 ): MetadataRoute.Sitemap[number] {
+  const lastModified = lastmodFor(path);
   return {
     url: path === "/" ? `${siteUrl}/` : `${siteUrl}${path}`,
-    lastModified,
+    ...(lastModified ? { lastModified } : {}),
   };
 }
 
@@ -151,26 +142,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ),
   ];
   const blogUrls = BLOG_POSTS.filter((post) => post.available).map((post) =>
-    sitemapEntry(
-      siteUrl,
-      `/blog/${post.slug}`,
-      new Date(post.publishedAt),
-    ),
+    sitemapEntry(siteUrl, `/blog/${post.slug}`),
   );
-  const comparisonUrls = [
-    ...COMPARISON_PATHS.map((path) => sitemapEntry(siteUrl, path)),
-    ...JUNE_2026_COMPARISON_PATHS.map((path) =>
-      sitemapEntry(siteUrl, path, new Date("2026-06-07")),
-    ),
-  ];
+  const comparisonUrls = COMPARISON_PATHS.map((path) =>
+    sitemapEntry(siteUrl, path),
+  );
 
   return [
     ...CORE_PATHS.map((path) => sitemapEntry(siteUrl, path)),
-    sitemapEntry(
-      siteUrl,
-      "/tools/rental-property-spreadsheet",
-      new Date("2026-07-14"),
-    ),
+    sitemapEntry(siteUrl, "/tools/rental-property-spreadsheet"),
     ...toolUrls,
     ...glossaryUrls,
     ...stateUrls,

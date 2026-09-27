@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "short-term-rental-underwriting-playbook";
 const TITLE =
@@ -33,7 +34,7 @@ const SERP_TITLE = "Short-term rental underwriting playbook (2026)";
 const DESCRIPTION =
   "How to underwrite a short-term rental: ADR, occupancy, operating expenses, the hidden costs everyone forgets, and how to stress-test a bad off-season.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/short-term-rental-underwriting-playbook") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 14;
 
 export const metadata: Metadata = {

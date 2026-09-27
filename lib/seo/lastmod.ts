@@ -65,3 +65,13 @@ export const LASTMOD: LastmodMap = parseLastmodMap(raw);
 export function lastmodFor(path: string): string | undefined {
   return Object.prototype.hasOwnProperty.call(LASTMOD, path) ? LASTMOD[path] : undefined;
 }
+
+/**
+ * A dated page's last-modified date for display: its map entry, never earlier
+ * than its publication date (a page cannot change before it exists). The
+ * /blog cards, the Blog JSON-LD and the feed's lastBuildDate read this.
+ */
+export function lastmodOrPublished(path: string, publishedAt: string): string {
+  const modifiedAt = lastmodFor(path);
+  return modifiedAt && modifiedAt > publishedAt ? modifiedAt : publishedAt;
+}

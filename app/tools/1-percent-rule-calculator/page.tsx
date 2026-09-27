@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
   description:
@@ -78,7 +79,7 @@ export default function OnePercentRulePage() {
     name: "TrueCap 1% Rule Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor("/tools/1-percent-rule-calculator"),
     url: `${siteUrl}/tools/1-percent-rule-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };

@@ -22,6 +22,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "how-to-calculate-cash-on-cash-return";
 const TITLE =
@@ -33,7 +34,7 @@ const SERP_TITLE = "How to calculate cash-on-cash return (2026)";
 const DESCRIPTION =
   "Cash-on-cash return = annual cash flow ÷ total cash invested. The formula, three worked examples, and the trap most calculators fall into.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-cash-on-cash-return") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 7;
 
 export const metadata: Metadata = {

@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "closing-costs-investment-property";
 const TITLE =
@@ -28,7 +29,7 @@ const SERP_TITLE = "Investment-property closing costs";
 const DESCRIPTION =
   "Estimate investment-property cash to close from lender, title, government, insurer, tax, and contract documents, with a hypothetical $250k example.";
 const PUBLISHED_AT = "2026-06-09";
-const MODIFIED_AT = "2026-08-29";
+const MODIFIED_AT = lastmodFor("/blog/closing-costs-investment-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

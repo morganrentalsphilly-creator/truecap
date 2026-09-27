@@ -24,6 +24,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 export const metadata: Metadata = {
   title: "2% Rule Calculator | Free Cash-Flow Screener",
   description:
@@ -94,7 +95,7 @@ export default function TwoPercentRuleCalculatorPage() {
     name: "TrueCap 2% Rule Calculator",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    dateModified: "2026-07-14",
+    dateModified: lastmodFor("/tools/2-percent-rule-calculator"),
     url: `${siteUrl}/tools/2-percent-rule-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:

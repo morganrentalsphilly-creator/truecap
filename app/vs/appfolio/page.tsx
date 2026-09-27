@@ -30,6 +30,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "AppFolio vs TrueCap (2026): PM vs Underwriting",
@@ -166,7 +167,7 @@ export default function VsAppfolioPage() {
     url: `${siteUrl}/vs/appfolio`,
     description:
       "AppFolio is post-purchase property management software with quote-based plans. TrueCap is pre-purchase rental underwriting.",
-    dateModified: "2026-08-16",
+    dateModified: lastmodFor("/vs/appfolio"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

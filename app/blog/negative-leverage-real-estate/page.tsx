@@ -27,6 +27,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 const SLUG = "negative-leverage-real-estate";
 const TITLE =
@@ -38,7 +39,7 @@ const SERP_TITLE = "Negative leverage in real estate, explained (2026)";
 const DESCRIPTION =
   "Negative leverage is when a mortgage lowers your return. The loan constant vs cap rate rule, worked 2026 examples, and the deals it quietly traps.";
 const PUBLISHED_AT = "2026-06-28";
-const MODIFIED_AT = "2026-06-28";
+const MODIFIED_AT = lastmodFor("/blog/negative-leverage-real-estate") ?? PUBLISHED_AT;
 const READING_TIME = 11;
 
 export const metadata: Metadata = {

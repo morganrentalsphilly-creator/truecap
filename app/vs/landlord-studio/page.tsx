@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 export const metadata: Metadata = {
   title: "Landlord Studio vs TrueCap (2026): Which to Use",
@@ -151,7 +152,7 @@ export default function VsLandlordStudioPage() {
     url: `${siteUrl}/vs/landlord-studio`,
     description:
       "Landlord Studio is mobile-first accounting for properties you own. TrueCap underwrites the ones you're considering. Honest comparison and how they fit.",
-    dateModified: "2026-06-07",
+    dateModified: lastmodFor("/vs/landlord-studio"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 

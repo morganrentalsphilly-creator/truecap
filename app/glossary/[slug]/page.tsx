@@ -27,6 +27,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { RelatedContent } from "@/components/marketing/related-content";
 import type { GlossaryCategory } from "@/lib/glossary";
 import { truncateMetaDescription } from "@/lib/utils";
+import { lastmodFor } from "@/lib/seo/lastmod";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -137,7 +138,7 @@ export default async function GlossaryTermPage({
     name: entry.term,
     description: entry.definition,
     url: `${siteUrl}/glossary/${entry.slug}`,
-    dateModified: "2026-06-01",
+    dateModified: lastmodFor(`/glossary/${entry.slug}`),
     inDefinedTermSet: {
       "@type": "DefinedTermSet",
       name: "TrueCap Real Estate Investing Glossary",
