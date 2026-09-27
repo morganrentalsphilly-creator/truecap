@@ -277,6 +277,7 @@
       "@/lib/site-url",
       "@/lib/blog-topics",
       "@/lib/blog-posts",
+      "@/lib/seo/lastmod",
       "@/lib/og/*",
       "@/lib/utils",
       "@/lib/glossary",
