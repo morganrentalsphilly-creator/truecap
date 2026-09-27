@@ -34,6 +34,17 @@ import {
   sanitizeSensitiveUrl,
 } from "@/lib/sensitive-url";
 import { sanitizeAnalyticsEventProperties } from "@/lib/analytics-event-dictionary";
+import {
+  FIRST_TOUCH_REFERRAL_SOURCES,
+  browserCookieJar,
+  isFirstTouchReferralSource,
+  isLandingSection,
+  syncFirstTouchCookie,
+  type FirstTouch,
+  type FirstTouchCookieSync,
+  type FirstTouchReferralSource,
+  type LandingSection,
+} from "@/lib/first-touch";
 
 /**
  * Named events tracked client-side. Adding a new one? Add it here AND
@@ -352,44 +363,44 @@ function preparePostHogPersistence(projectKey: string): void {
   }
 }
 
-export const FIRST_TOUCH_REFERRAL_SOURCES = [
-  "direct",
-  "organic_search",
-  "organic_ai",
-  "organic_social",
-  "paid_search",
-  "paid_social",
-  "email",
-  "external_referral",
-  "campaign",
-] as const;
+// The taxonomy and its classifier live in lib/first-touch.ts, which the
+// server (sign-up persistence) shares; re-exported here for existing callers.
+export { FIRST_TOUCH_REFERRAL_SOURCES };
+export type { FirstTouchReferralSource };
 
-export type FirstTouchReferralSource =
-  (typeof FIRST_TOUCH_REFERRAL_SOURCES)[number];
-
+/** Merged into every browser event (see captureRaw). */
 export type FirstTouchAttribution = {
   referral_source: FirstTouchReferralSource;
 };
 
-const FIRST_TOUCH_REFERRAL_SOURCE_SET = new Set<string>(
-  FIRST_TOUCH_REFERRAL_SOURCES,
-);
+/** What the tab's sessionStorage holds: the category plus the landing section. */
+export type FirstTouchSessionRecord = FirstTouchAttribution & {
+  landing_section?: LandingSection;
+};
 
 /**
- * Store one coarse acquisition category for this browser session. Raw UTM
- * values, landing paths, and referrer hosts never enter persistence or an
- * event payload. The provider classifies those inputs before calling here.
+ * Store one coarse acquisition category and landing section for this browser
+ * session (first write wins). Raw UTM values, landing paths, and referrer hosts
+ * never enter persistence or an event payload: the provider classifies those
+ * inputs before calling here, and only the two enum values are stored.
  */
 export function setFirstTouchAttribution(
-  attribution: FirstTouchAttribution,
+  attribution: FirstTouchSessionRecord,
 ): void {
   if (typeof window === "undefined") return;
+  if (!isFirstTouchReferralSource(attribution.referral_source)) return;
+  const record: FirstTouchSessionRecord = {
+    referral_source: attribution.referral_source,
+    ...(isLandingSection(attribution.landing_section)
+      ? { landing_section: attribution.landing_section }
+      : {}),
+  };
   try {
     window.sessionStorage.removeItem(LEGACY_ORGANIC_ATTRIBUTION_KEY);
     if (!window.sessionStorage.getItem(FIRST_TOUCH_ATTRIBUTION_KEY)) {
       window.sessionStorage.setItem(
         FIRST_TOUCH_ATTRIBUTION_KEY,
-        JSON.stringify(attribution),
+        JSON.stringify(record),
       );
     }
   } catch {
@@ -397,22 +408,68 @@ export function setFirstTouchAttribution(
   }
 }
 
-function firstTouchAttribution(): FirstTouchAttribution | null {
+function readFirstTouchSessionRecord(): Record<string, unknown> | null {
   if (typeof window === "undefined") return null;
   try {
     window.sessionStorage.removeItem(LEGACY_ORGANIC_ATTRIBUTION_KEY);
     const raw = window.sessionStorage.getItem(FIRST_TOUCH_ATTRIBUTION_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return typeof parsed.referral_source === "string" &&
-      FIRST_TOUCH_REFERRAL_SOURCE_SET.has(parsed.referral_source)
-      ? {
-          referral_source: parsed.referral_source as FirstTouchReferralSource,
-        }
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>)
       : null;
   } catch {
     return null;
   }
+}
+
+function firstTouchAttribution(): FirstTouchAttribution | null {
+  const parsed = readFirstTouchSessionRecord();
+  return parsed && isFirstTouchReferralSource(parsed.referral_source)
+    ? { referral_source: parsed.referral_source }
+    : null;
+}
+
+/**
+ * This tab's first touch as the two enum values the `tc_ft` cookie holds, or
+ * null when either is missing or tampered with (a session started before the
+ * landing section was recorded has none, and yields no cookie).
+ */
+export function readFirstTouch(): FirstTouch | null {
+  const parsed = readFirstTouchSessionRecord();
+  if (!parsed) return null;
+  if (!isFirstTouchReferralSource(parsed.referral_source)) return null;
+  if (!isLandingSection(parsed.landing_section)) return null;
+  return { source: parsed.referral_source, section: parsed.landing_section };
+}
+
+/**
+ * Apply a cookie-consent decision to the first-touch cookie: `granted` copies
+ * this tab's first touch into `tc_ft` if it is absent; anything else deletes
+ * it. Called on every page load with the stored decision (PostHogProvider) and
+ * by the banner the moment the visitor decides. Never throws.
+ */
+export function syncFirstTouchCookieWithConsent(
+  consent: "granted" | "denied" | null,
+): FirstTouchCookieSync | null {
+  try {
+    const jar = browserCookieJar();
+    if (!jar) return null;
+    return syncFirstTouchCookie({
+      consent,
+      firstTouch: consent === "granted" ? readFirstTouch() : null,
+      jar,
+    });
+  } catch {
+    // Cookie access can throw in sandboxed documents. Attribution must never
+    // interfere with the consent banner or navigation.
+    return null;
+  }
+}
+
+/** The banner's stored decision, for callers outside this module. */
+export function readStoredCookieConsent(): "granted" | "denied" | null {
+  return readStoredConsent();
 }
 
 type QueuedCall =

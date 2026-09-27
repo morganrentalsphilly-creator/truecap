@@ -13,6 +13,12 @@ import {
   releaseCanonicalAnalyticsEventClaim,
 } from "@/lib/analytics/canonical-event-claim";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { FIRST_TOUCH_COOKIE, type FirstTouch } from "@/lib/first-touch";
+import {
+  parseFirstTouchCookieValue,
+  persistFirstTouch,
+  reportFirstTouchFailure,
+} from "@/lib/first-touch-server";
 
 const NEW_OAUTH_ACCOUNT_EVENTS = [
   { event: "account_created" as const },
@@ -39,13 +45,11 @@ function scheduleWelcome(
   );
 }
 
-/** OAuth sign-up bypasses the email form's client telemetry. Record only a
- * genuinely new Google identity, using the opaque auth UUID and no profile
- * data. Returning OAuth logins intentionally emit nothing. */
-function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
-  if (!user || user.app_metadata?.provider !== "google") return;
+/** A Google identity created by this very sign-in (not a returning login). */
+function isNewGoogleAccount(user: User | null | undefined): user is User {
+  if (!user || user.app_metadata?.provider !== "google") return false;
   const createdAt = Date.parse(user.created_at);
-  if (!Number.isFinite(createdAt)) return;
+  if (!Number.isFinite(createdAt)) return false;
   const lastSignInAt = Date.parse(user.last_sign_in_at ?? "");
   // These timestamps establish that this is a genuinely new Google identity;
   // they are not the dedupe mechanism. Durable (event, user.id) claims below
@@ -54,10 +58,45 @@ function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
     !Number.isFinite(lastSignInAt) ||
     Math.abs(lastSignInAt - createdAt) > 90_000
   ) {
-    return;
+    return false;
   }
   const ageMs = Date.now() - createdAt;
-  if (ageMs < 0 || ageMs > 10 * 60 * 1000) return;
+  return ageMs >= 0 && ageMs <= 10 * 60 * 1000;
+}
+
+/** Google sign-up cannot carry the first touch through OAuth, so the
+ * consent-gated `tc_ft` cookie is read here and saved to app_metadata once
+ * (the email path saves it in signUpAction). Best-effort, off the redirect. */
+function scheduleNewOAuthAccountFirstTouch(
+  user: User | null | undefined,
+  firstTouch: FirstTouch | null,
+) {
+  if (!firstTouch || !isNewGoogleAccount(user)) return;
+  after(async () => {
+    try {
+      await persistFirstTouch({
+        admin: createAdminSupabaseClient(),
+        user,
+        firstTouch,
+      });
+    } catch (error) {
+      reportFirstTouchFailure("google_callback", error);
+    }
+  });
+}
+
+/** OAuth sign-up bypasses the email form's client telemetry. Record only a
+ * genuinely new Google identity, using the opaque auth UUID and no profile
+ * data. Returning OAuth logins intentionally emit nothing. `referral_source`
+ * is the acquisition channel from the consent-gated first-touch cookie, never
+ * the sign-up method; with no cookie it is `direct`, the taxonomy's
+ * no-information bucket (as for a browser landing with no referrer). */
+function scheduleNewOAuthAccountAnalytics(
+  user: User | null | undefined,
+  firstTouch: FirstTouch | null,
+) {
+  if (!isNewGoogleAccount(user)) return;
+  const referralSource = firstTouch?.source ?? "direct";
   after(async () => {
     try {
       const admin = createAdminSupabaseClient();
@@ -87,7 +126,7 @@ function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
             claimInput.eventName,
             claimInput.dedupeKey,
           ),
-          properties: { referral_source: "google_oauth" },
+          properties: { referral_source: referralSource },
         });
         if (!captured && claimState === "claimed") {
           await releaseCanonicalAnalyticsEventClaim(admin, claimInput);
@@ -161,7 +200,12 @@ export async function GET(request: NextRequest) {
       // Signup confirmation comes through the PKCE code flow. Welcome is
       // deduped, so welcoming on any first successful exchange is safe.
       scheduleWelcome(data.user);
-      scheduleNewOAuthAccountAnalytics(data.user);
+      // Two enum tokens or nothing: anything else in the cookie is ignored.
+      const firstTouch = parseFirstTouchCookieValue(
+        request.cookies.get(FIRST_TOUCH_COOKIE)?.value,
+      );
+      scheduleNewOAuthAccountFirstTouch(data.user, firstTouch);
+      scheduleNewOAuthAccountAnalytics(data.user, firstTouch);
       return redirectResponse;
     }
     return NextResponse.redirect(

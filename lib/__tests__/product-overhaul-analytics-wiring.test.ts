@@ -62,7 +62,11 @@ describe("Product Overhaul analytics wiring", () => {
     expect(signup).toContain('trackEvent("account_created")');
     expect(signup).toContain('trackEvent("product_evaluation_started")');
     expect(callback).toContain('event: "account_created"');
-    expect(callback).toContain('referral_source: "google_oauth"');
+    // The acquisition channel comes from the consent-gated first-touch cookie;
+    // the sign-up METHOD ("google_oauth") is never an acquisition source.
+    expect(callback).toContain("referral_source: referralSource");
+    expect(callback).toContain('firstTouch?.source ?? "direct"');
+    expect(callback).not.toContain("google_oauth");
     expect(callback).toContain('event: "product_evaluation_started"');
     expect(provider).toContain('event: "retained_30d" as const');
     expect(provider).toContain('event: "retained_90d" as const');

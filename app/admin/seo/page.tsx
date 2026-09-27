@@ -14,6 +14,8 @@ export const dynamic = "force-dynamic";
 const fmt = (value: number) => new Intl.NumberFormat("en-US").format(value);
 const decimal = (value: number | null) => value === null ? "—" : value.toFixed(1);
 const percent = (value: number | null) => value === null ? "—" : `${(value * 100).toFixed(1)}%`;
+const shortDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const SECTION_LABELS: Record<string, string> = { home: "Homepage", blog: "Blog", tools: "Tools", markets: "Markets", states: "States", glossary: "Glossary", vs: "Comparisons", pricing: "Pricing", analyze: "Analyze", other: "Other" };
 
 function Card({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -68,10 +70,52 @@ export default async function SeoAdminPage() {
             <Card label="Average position" value={decimal(data.growth.averagePosition)} />
             <Card label="Non-brand clicks" value={fmt(data.growth.nonbrandClicks)} />
             <Card label="Analyzer starts" value={fmt(data.growth.analyzerStarts)} />
-            <Card label="Signups" value={fmt(data.growth.signups)} />
+            <Card label="Organic sign-ups" value={fmt(data.growth.signups)} note="With cookie consent" />
             <Card label="Paid conversions" value={fmt(data.growth.paidConversions)} />
           </div>
         </section>
+
+        {data.organicSignups ? (
+          <section aria-labelledby="organic-signups" className="mb-10">
+            <h2 id="organic-signups" className="mb-1 text-xl font-extrabold text-foreground">Organic sign-ups by landing section</h2>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Last 4 weeks (UTC). Counts only accounts whose first visit came from search or an AI assistant and whose visitor accepted cookies; private to this page.
+            </p>
+            <ScrollX label="Organic sign-ups by section" className="overflow-x-auto rounded-2xl border border-border bg-card">
+              <table className="w-full min-w-[480px] text-left text-xs">
+                <thead className="border-b border-border bg-muted/40">
+                  <tr>
+                    <th scope="col" className="p-3">Section</th>
+                    {data.organicSignups.weeks.map((week) => (
+                      <th key={week.start} scope="col" className="p-3 text-right tabular-nums">{shortDate(week.start)}–{shortDate(week.end)}</th>
+                    ))}
+                    <th scope="col" className="p-3 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.organicSignups.sections.map((row) => (
+                    <tr key={row.section} className="border-b border-border last:border-0">
+                      <th scope="row" className="p-3 font-semibold">{SECTION_LABELS[row.section] ?? row.section}</th>
+                      {row.counts.map((count, index) => (
+                        <td key={data.organicSignups?.weeks[index]?.start ?? index} className="p-3 text-right tabular-nums">{fmt(count)}</td>
+                      ))}
+                      <td className="p-3 text-right font-semibold tabular-nums">{fmt(row.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="border-t border-border bg-muted/40">
+                  <tr>
+                    <th scope="row" className="p-3">All sections</th>
+                    {data.organicSignups.weekTotals.map((count, index) => (
+                      <td key={data.organicSignups?.weeks[index]?.start ?? index} className="p-3 text-right font-semibold tabular-nums">{fmt(count)}</td>
+                    ))}
+                    <td className="p-3 text-right font-extrabold tabular-nums">{fmt(data.organicSignups.total)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </ScrollX>
+          </section>
+        ) : null}
 
         <section aria-labelledby="health" className="mb-10">
           <h2 id="health" className="mb-4 text-xl font-extrabold text-foreground">Health</h2>

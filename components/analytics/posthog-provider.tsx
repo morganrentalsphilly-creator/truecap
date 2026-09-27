@@ -35,48 +35,18 @@ import {
   identifyUser,
   initAnalytics,
   disableAnalyticsForDocument,
+  readStoredCookieConsent,
   resetAnalytics,
   setFirstTouchAttribution,
+  syncFirstTouchCookieWithConsent,
   trackEvent,
   trackPageview,
-  type FirstTouchReferralSource,
 } from "@/lib/analytics";
+import {
+  classifyFirstTouchReferralSource,
+  landingSection,
+} from "@/lib/first-touch";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
-
-const SEARCH_REFERRER_RE =
-  /(^|\.)(google|bing|yahoo|duckduckgo|ecosia|brave)\./;
-const AI_REFERRER_RE = /(^|\.)(perplexity|chatgpt|openai|copilot|claude)\./;
-const SOCIAL_REFERRER_RE =
-  /(^|\.)(facebook|instagram|linkedin|reddit|tiktok|x|twitter)\./;
-
-function classifyFirstTouchReferralSource(input: {
-  referrerHost: string;
-  currentHost: string;
-  campaignMedium: string;
-}): FirstTouchReferralSource {
-  const { referrerHost, currentHost, campaignMedium } = input;
-  if (["cpc", "ppc", "paid_search", "paidsearch"].includes(campaignMedium)) {
-    return "paid_search";
-  }
-  if (["paid_social", "paidsocial", "social_paid"].includes(campaignMedium)) {
-    return "paid_social";
-  }
-  if (["email", "newsletter"].includes(campaignMedium)) return "email";
-  if (campaignMedium === "organic") {
-    return AI_REFERRER_RE.test(referrerHost) ? "organic_ai" : "organic_search";
-  }
-  if (campaignMedium === "social") return "organic_social";
-  if (campaignMedium === "referral") return "external_referral";
-  // Never forward an unrecognized campaign value. Its presence is useful,
-  // but the taxonomy remains a fixed anonymous bucket.
-  if (campaignMedium) return "campaign";
-
-  if (!referrerHost || referrerHost === currentHost) return "direct";
-  if (AI_REFERRER_RE.test(referrerHost)) return "organic_ai";
-  if (SEARCH_REFERRER_RE.test(referrerHost)) return "organic_search";
-  if (SOCIAL_REFERRER_RE.test(referrerHost)) return "organic_social";
-  return "external_referral";
-}
 
 function routeCategory(pathname: string): string {
   if (pathname === "/") return "home";
@@ -216,7 +186,7 @@ function PostHogTracker() {
 
   // First-party attribution. The raw referrer host and UTM value are used only
   // for this synchronous classification; persistence and event payloads get a
-  // fixed referral taxonomy plus a coarse route category.
+  // fixed referral taxonomy plus a coarse landing section / route category.
   useEffect(() => {
     if (
       telemetryDisabledForDocument ||
@@ -238,10 +208,18 @@ function PostHogTracker() {
       currentHost: window.location.hostname.toLowerCase(),
       campaignMedium: searchParams?.get("utm_medium")?.toLowerCase() ?? "",
     });
-    const attribution = {
-      referral_source: referralSource,
-    };
-    setFirstTouchAttribution(attribution);
+    if (referralSource !== null) {
+      setFirstTouchAttribution({
+        referral_source: referralSource,
+        landing_section: landingSection(pathname),
+      });
+    }
+    // The consent-gated tc_ft cookie: written only after a `granted` decision
+    // and only if absent; any other stored decision deletes it. The banner
+    // applies a decision made on this page itself.
+    syncFirstTouchCookieWithConsent(readStoredCookieConsent());
+    // null = a sign-in round trip (e.g. the Google OAuth return), not a landing.
+    if (referralSource === null) return;
     if (
       referralSource === "organic_search" ||
       referralSource === "organic_ai" ||
