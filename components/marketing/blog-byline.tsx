@@ -1,21 +1,26 @@
 /**
- * Blog post byline — the visible E-E-A-T author credit.
+ * Article byline — the visible E-E-A-T author credit.
  *
  * Renders "By TrueCap · built by a Philadelphia rental investor" linking
- * to /about, styled to sit directly under the "date · N min read" meta
- * line in a post header. The founder's name is deliberately absent
- * everywhere on the site (their request, 2026-09-07); /about carries the
- * Organization node that post Article JSON-LD author nodes point at.
+ * to /about. The author is the TrueCap Organization and the founder is
+ * never named (their request, 2026-09-07; restated 2026-09-27); /about
+ * carries the Organization node that Article JSON-LD author nodes point
+ * at. The text after "By TrueCap · " is AUTHOR_BYLINE_SUFFIX in
+ * lib/author.ts, which must match seo/author.md's Byline.
  *
- * Blog posts are standalone pages (no shared post layout/header), so
- * this currently ships in 11 standalone article headers. Other articles
- * can receive their byline through a shared article component.
- * Add it to the header of every NEW post you write, right after the
- * date line, and point the post's Article `author` at the site
- * Organization `@id` at the same time.
+ * Rendered once per page, in the header:
+ *   · every blog post, directly under the date line (standalone posts in
+ *     their own header; the SourceFirstArticle posts through
+ *     components/marketing/source-first-article.tsx);
+ *   · every /vs/<slug> page, directly under the H1.
+ * Add it to the header of every NEW post, right after the date line, and
+ * point the post's Article `author` at the site Organization `@id`.
+ * lib/__tests__/author-byline-bio.test.tsx renders every post and /vs page
+ * and fails when one loses it.
  */
 
 import Link from "next/link";
+import { AUTHOR_BYLINE_SUFFIX } from "@/lib/author";
 
 export function BlogByline() {
   return (
@@ -27,7 +32,7 @@ export function BlogByline() {
       >
         TrueCap
       </Link>{" "}
-      · built by a Philadelphia rental investor
+      · {AUTHOR_BYLINE_SUFFIX}
     </p>
   );
 }

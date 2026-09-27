@@ -17,6 +17,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -175,6 +176,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               Published {PUBLISHED_AT}
               {MODIFIED_AT !== PUBLISHED_AT && ` · Updated ${MODIFIED_AT}`}
             </p>
+            <BlogByline />
             <p className="mt-2 text-xs font-semibold text-foreground/75">
               Competitor facts reviewed August 27, 2026 against the official
               sources linked below.

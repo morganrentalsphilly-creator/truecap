@@ -10,6 +10,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -93,6 +95,7 @@ export default function VsRentometerPage() {
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Rentometer: <span className="text-primary">different tools, different jobs</span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Rentometer is a rent estimator — it tells you what a property should rent for based on local comps. TrueCap models the broader first-year rental economics from editable assumptions. They&apos;re not the same product; here&apos;s where each one fits.
           </p>
@@ -199,6 +202,7 @@ export default function VsRentometerPage() {
         </section>
 
         <RelatedContent kind="vs" slug="rentometer" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

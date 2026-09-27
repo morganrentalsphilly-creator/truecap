@@ -3,14 +3,11 @@ import { extname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PRODUCT_SHOTS } from "@/lib/product-shots.generated";
 import { findProductShot } from "@/components/marketing/product-shot";
+// The prohibited identity, encoded so the guard does not publish it itself.
+import { forbiddenGivenName, forbiddenHandle, privateGivenName } from "./helpers/founder-identity";
 
 const ROOT = process.cwd();
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
-// Encode the prohibited identity so the guard does not publish it itself.
-const privateGivenName = String.fromCharCode(77, 111, 114, 103, 97, 110);
-const privateHandle = String.fromCharCode(109, 111, 114, 103, 97, 110, 114, 101, 110, 116, 97, 108, 115, 112, 104, 105, 108, 108, 121);
-const forbiddenGivenName = new RegExp(`\\b${privateGivenName}\\b`, "i");
-const forbiddenHandle = new RegExp(privateHandle, "i");
 
 /**
  * Phase 4 (docs/site-overhaul.md): every product image on the marketing site

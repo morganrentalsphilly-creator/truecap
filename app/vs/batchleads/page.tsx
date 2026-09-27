@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -183,6 +185,7 @@ export default function VsBatchleadsPage() {
               find motivated sellers vs underwrite the deals
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             BatchLeads is a lead-generation + skip-tracing + list-pulling
             platform — pull motivated-seller lists, get owner contact info, run
@@ -413,6 +416,7 @@ export default function VsBatchleadsPage() {
         </section>
 
         <RelatedContent kind="vs" slug="batchleads" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

@@ -7,6 +7,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -147,6 +149,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
             TrueCap vs DealCheck for Short-term rentals:{" "}
             <span className="text-primary">which supports the underwriting workflow better?</span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Both calculators were built for long-term rentals first. Both let you model short-term rentals with projected revenue inputs. This comparison covers seasonal ADR + occupancy, AirDNA-input workflow, and where tax-specific work must move to a CPA model.
           </p>
@@ -302,6 +305,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
         </section>
 
         <RelatedContent kind="vs" slug="dealcheck-for-short-term-rentals" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

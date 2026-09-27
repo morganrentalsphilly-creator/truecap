@@ -18,6 +18,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -189,6 +191,7 @@ export default function VsStessaPage() {
               two acquisition workflows, different depth.
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Stessa now spans acquisition through owned-property operations: its
             marketplace includes discovery, buy boxes, comps, and editable
@@ -490,6 +493,7 @@ export default function VsStessaPage() {
         </section>
 
         <RelatedContent kind="vs" slug="stessa" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

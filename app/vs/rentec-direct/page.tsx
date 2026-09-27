@@ -16,6 +16,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -189,6 +191,7 @@ export default function VsRentecDirectPage() {
               pre-purchase calculator vs landlord ops platform
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Rentec Direct is property management software targeted at small
             landlords running 5-100 units — tenant management, rent collection,
@@ -424,6 +427,7 @@ export default function VsRentecDirectPage() {
         </section>
 
         <RelatedContent kind="vs" slug="rentec-direct" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

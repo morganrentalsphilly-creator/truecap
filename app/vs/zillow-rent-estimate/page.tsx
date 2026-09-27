@@ -18,6 +18,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -200,6 +202,7 @@ export default function VsZillowRentPage() {
               why the &quot;Zestimate Rent&quot; isn&apos;t enough for investors
             </span>
           </h1>
+          <BlogByline />
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Zillow&apos;s Rent Zestimate is a fast, property-specific starting
             estimate. It is still only one input: acquisition underwriting also
@@ -437,6 +440,7 @@ export default function VsZillowRentPage() {
         </section>
 
         <RelatedContent kind="vs" slug="zillow-rent-estimate" className="mt-10" />
+        <AuthorBio className="mb-10" />
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}

@@ -22,6 +22,10 @@ const PUBLIC_FILES = [
   // The blog registry: titles and excerpts rendered on /blog, the topic hubs,
   // related posts, feed.xml and llms.txt.
   "lib/blog-posts.ts",
+  // The author byline and bio, rendered on /about, every post and every /vs page.
+  "lib/author.ts",
+  "components/marketing/blog-byline.tsx",
+  "components/marketing/author-bio.tsx",
 ] as const;
 const SOURCE_EXTENSIONS = new Set([".json", ".ts", ".tsx"]);
 
