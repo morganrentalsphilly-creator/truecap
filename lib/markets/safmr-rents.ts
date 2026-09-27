@@ -7,6 +7,9 @@
  * Refresh annually alongside hud-rents.ts.
  */
 
+/** YYYY-MM-DD these rows were fetched from HUD (git 71dbe8b). */
+export const SAFMR_RENTS_RETRIEVED_AT = "2026-07-14";
+
 export type SafmrZipRent = {
   zip: string;
   rent2br: number;

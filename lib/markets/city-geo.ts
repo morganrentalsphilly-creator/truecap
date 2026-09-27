@@ -6,8 +6,14 @@
  *
  * `county` is the HUD county/independent-city name WITHOUT the "County"
  * suffix (e.g. "Franklin", "Baltimore city"). If a name doesn't match,
- * the script skips that city and the page keeps its estimate range —
- * a wrong/missing county degrades gracefully, it never breaks the page.
+ * the script skips that city, the city has no HUD row, and its page stays
+ * `noindex, follow` (lib/markets/indexability.ts). HUD defines New England
+ * FMR areas by town, not county, so the scripts match CT, MA, ME, NH, RI
+ * and VT cities by their own town name first.
+ *
+ * Keys cover MARKET_CITIES and the 12 bespoke pages (BESPOKE_MARKETS), so
+ * scripts/build-market-rents.ts and scripts/build-market-fmr-areas.ts can
+ * resolve both.
  *
  * `hudZip` (optional) is a representative central ZIP; reserved for
  * future ZIP-level Small Area FMR precision (not required for the
@@ -167,4 +173,17 @@ export const CITY_GEO: Record<string, CityGeo> = {
   york: { county: "York" },
   erie: { county: "Erie" },
   anchorage: { county: "Anchorage" },
+  // Bespoke pages (app/markets/<slug>/page.tsx): the county of the city itself.
+  philadelphia: { county: "Philadelphia" },
+  atlanta: { county: "Fulton" },
+  charlotte: { county: "Mecklenburg" },
+  cleveland: { county: "Cuyahoga" },
+  dallas: { county: "Dallas" },
+  detroit: { county: "Wayne" },
+  houston: { county: "Harris" },
+  indianapolis: { county: "Marion" },
+  "kansas-city": { county: "Jackson" },
+  memphis: { county: "Shelby" },
+  phoenix: { county: "Maricopa" },
+  tampa: { county: "Hillsborough" },
 };

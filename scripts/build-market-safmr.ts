@@ -30,7 +30,7 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { MARKET_CITIES } from "../lib/markets/cities";
+import { BESPOKE_MARKETS, MARKET_CITIES } from "../lib/markets/cities";
 import { CITY_GEO } from "../lib/markets/city-geo";
 import { isSmallAreaEntity } from "../lib/property-enrichment/hud-safmr";
 
@@ -71,13 +71,27 @@ type HudArea = {
   smallarea_status?: string | number;
 } & Record<string, unknown>;
 
-type StateData = { counties: HudArea[]; metroareas: HudArea[]; year: number };
+type StateData = { counties: HudArea[]; metroareas: HudArea[] };
+
+const NEW_ENGLAND = new Set(["CT", "MA", "ME", "NH", "RI", "VT"]);
+
+/** "Worcester city" / "Hartford town" -> "worcester" / "hartford". */
+const normalizeTown = (name: string): string =>
+  name.toLowerCase().replace(/\b(?:city|town)\b/g, "").replace(/[^a-z0-9 ]+/g, "").trim();
 
 function matchArea(
   target: string,
   counties: HudArea[],
-  metros: HudArea[]
+  metros: HudArea[],
+  town: string | null = null
 ): HudArea | undefined {
+  // 0) New England: HUD's areas follow towns (same rule as build-market-rents.ts).
+  if (town) {
+    const t = counties.find(
+      (c) => c.town_name && normalizeTown(String(c.town_name)) === normalizeTown(town)
+    );
+    if (t) return t;
+  }
   // 1) exact county
   let m = counties.find(
     (c) => c.county_name && normalizeCounty(String(c.county_name)) === target
@@ -112,7 +126,6 @@ async function fetchState(key: string, state: string): Promise<StateData | null>
   return {
     counties: json?.data?.counties ?? [],
     metroareas: json?.data?.metroareas ?? [],
-    year: Number(json?.data?.year ?? new Date().getFullYear()),
   };
 }
 
@@ -164,9 +177,12 @@ async function fetchEntityZips(key: string, entityId: string): Promise<EntityDat
   }
   if (rows.length === 0) return null;
   const rawAreaName = json?.data?.area_name;
+  const year = Number(json?.data?.year);
+  // Never the calendar year: a response without HUD's vintage is not used.
+  if (!Number.isInteger(year) || year < 2000) return null;
   return {
     rows,
-    year: Number(json?.data?.year ?? new Date().getFullYear()),
+    year,
     areaName: typeof rawAreaName === "string" && rawAreaName.trim() ? normalizeAreaName(rawAreaName) : null,
   };
 }
@@ -189,13 +205,17 @@ function sampleRows(sorted: ZipRow[], max: number): ZipRow[] {
 async function main() {
   await loadEnv();
 
-  const planned = MARKET_CITIES.filter((c) => CITY_GEO[c.slug]);
+  const pages = [
+    ...MARKET_CITIES.map((c) => ({ slug: c.slug, name: c.name, stateCode: c.stateCode })),
+    ...BESPOKE_MARKETS.map((m) => ({ slug: m.slug, name: m.name, stateCode: m.stateCode })),
+  ];
+  const planned = pages.filter((c) => CITY_GEO[c.slug]);
   console.log(
-    `Market SAFMR · ${DRY ? "DRY RUN" : "LIVE"} · ${planned.length}/${MARKET_CITIES.length} cities have a county mapping`
+    `Market SAFMR · ${DRY ? "DRY RUN" : "LIVE"} · ${planned.length}/${pages.length} market pages have a county mapping`
   );
 
   if (DRY) {
-    const missing = MARKET_CITIES.filter((c) => !CITY_GEO[c.slug]).map((c) => c.slug);
+    const missing = pages.filter((c) => !CITY_GEO[c.slug]).map((c) => c.slug);
     if (missing.length) console.log(`  No county mapping: ${missing.join(", ")}`);
     console.log("Dry run — no API calls, no file written.");
     return;
@@ -233,7 +253,7 @@ async function main() {
         continue;
       }
       const target = normalizeCounty(CITY_GEO[c.slug]!.county);
-      const m = matchArea(target, sd.counties, sd.metroareas);
+      const m = matchArea(target, sd.counties, sd.metroareas, NEW_ENGLAND.has(c.stateCode) ? c.name : null);
       if (!m) {
         skippedOther.push(c.slug);
         continue;
@@ -289,6 +309,8 @@ async function main() {
     ` * figure is a real HUD number; zipCount is the entity's full ZIP count.\n` +
     ` * Refresh annually alongside hud-rents.ts.\n` +
     ` */\n\n` +
+    `/** YYYY-MM-DD these rows were fetched from HUD. */\n` +
+    `export const SAFMR_RENTS_RETRIEVED_AT = ${JSON.stringify(new Date().toISOString().slice(0, 10))};\n\n` +
     `export type SafmrZipRent = {\n  zip: string;\n  rent2br: number;\n  rent3br: number;\n};\n\n` +
     `export type CitySafmr = {\n  /** HUD entity name (county or metro FMR area). */\n  areaName: string;\n  /** SAFMR data year. */\n  year: number;\n  /** Total ZIPs in the entity (rows is a sample when larger). */\n  zipCount: number;\n  /** Sampled ZIP rows, sorted by 2BR rent descending. */\n  rows: SafmrZipRent[];\n};\n\n` +
     `export const SAFMR_RENTS: Record<string, CitySafmr> = ${JSON.stringify(out, null, 2)};\n`;

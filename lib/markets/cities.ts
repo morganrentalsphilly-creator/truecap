@@ -1,22 +1,20 @@
 /**
  * Programmatic city dataset for the dynamic /markets/[city] template.
  *
- * Each entry powers one data-driven local-SEO landing page targeting
- * queries like:
- *   - "philadelphia rental property analysis"
- *   - "columbus cap rate"
- *   - "is cincinnati good for rental property"
- *   - "average rent + property tax {city}"
+ * Each entry powers one data-first local page ("{City}, {ST} Rental Market
+ * Data ({HUD FY})") for queries like:
+ *   - "columbus rental market data"
+ *   - "cincinnati fair market rent"
+ *   - "{city} rent by zip code"
  *
  * Design notes:
- * - Cap-rate context and property-tax % are NOT stored here. They are
- *   looked up at render time from the single sources of truth:
- *     getCapRateBenchmark()  (lib/market-benchmarks.ts)
- *     getStatePropertyTaxPct() (lib/property-enrichment/state-property-tax.ts)
- *   so this file never drifts from the numbers the analyzer itself uses.
- * - typicalRent / typicalPrice are RANGES presented as estimates (same
- *   convention as lib/market-benchmarks.ts and city-strategy-combos.ts).
- *   The embedded analyzer is the authoritative, per-address number.
+ * - Only slug, name, stateCode, stateName and relatedPosts render. The
+ *   hand-authored blurb, ranges, angle and neighborhoods below are not
+ *   sourced and never reach a page (lib/__tests__/public-stale-registry-
+ *   render-guards.test.tsx). Every number a market page shows comes from
+ *   HUD (lib/markets/hud-rents.ts, safmr-rents.ts, hud-fmr-areas.ts), the
+ *   sourced facts in content/seo/market-facts.json, or the analyzer's own
+ *   sample underwrite.
  * - Slugs here MUST NOT collide with the bespoke static pages in
  *   app/markets/<city>/page.tsx (philadelphia, atlanta, charlotte,
  *   cleveland, dallas, detroit, houston, indianapolis, kansas-city,
@@ -26,18 +24,18 @@
 
 /** Static bespoke market pages that already exist under app/markets/<slug>/page.tsx. */
 export const BESPOKE_MARKETS = [
-  { slug: "philadelphia", name: "Philadelphia", stateName: "Pennsylvania" },
-  { slug: "atlanta", name: "Atlanta", stateName: "Georgia" },
-  { slug: "charlotte", name: "Charlotte", stateName: "North Carolina" },
-  { slug: "cleveland", name: "Cleveland", stateName: "Ohio" },
-  { slug: "dallas", name: "Dallas", stateName: "Texas" },
-  { slug: "detroit", name: "Detroit", stateName: "Michigan" },
-  { slug: "houston", name: "Houston", stateName: "Texas" },
-  { slug: "indianapolis", name: "Indianapolis", stateName: "Indiana" },
-  { slug: "kansas-city", name: "Kansas City", stateName: "Missouri" },
-  { slug: "memphis", name: "Memphis", stateName: "Tennessee" },
-  { slug: "phoenix", name: "Phoenix", stateName: "Arizona" },
-  { slug: "tampa", name: "Tampa", stateName: "Florida" },
+  { slug: "philadelphia", name: "Philadelphia", stateCode: "PA", stateName: "Pennsylvania" },
+  { slug: "atlanta", name: "Atlanta", stateCode: "GA", stateName: "Georgia" },
+  { slug: "charlotte", name: "Charlotte", stateCode: "NC", stateName: "North Carolina" },
+  { slug: "cleveland", name: "Cleveland", stateCode: "OH", stateName: "Ohio" },
+  { slug: "dallas", name: "Dallas", stateCode: "TX", stateName: "Texas" },
+  { slug: "detroit", name: "Detroit", stateCode: "MI", stateName: "Michigan" },
+  { slug: "houston", name: "Houston", stateCode: "TX", stateName: "Texas" },
+  { slug: "indianapolis", name: "Indianapolis", stateCode: "IN", stateName: "Indiana" },
+  { slug: "kansas-city", name: "Kansas City", stateCode: "MO", stateName: "Missouri" },
+  { slug: "memphis", name: "Memphis", stateCode: "TN", stateName: "Tennessee" },
+  { slug: "phoenix", name: "Phoenix", stateCode: "AZ", stateName: "Arizona" },
+  { slug: "tampa", name: "Tampa", stateCode: "FL", stateName: "Florida" },
 ] as const;
 
 export const BESPOKE_MARKET_SLUGS = new Set<string>(

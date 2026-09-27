@@ -1,6 +1,7 @@
 /**
  * build-market-rents — fetches real HUD Fair Market Rent for every market
- * city and writes lib/markets/hud-rents.ts.
+ * page (MARKET_CITIES and the 12 BESPOKE_MARKETS) and writes
+ * lib/markets/hud-rents.ts, each row stamped with the day it was fetched.
  *
  * Mirrors the production matcher in app/actions/enrich-property.ts:
  *   GET /fmr/statedata/{STATE} -> data.counties[] + data.metroareas[], with
@@ -12,8 +13,18 @@
  *   then read "Two-Bedroom" / "Three-Bedroom" off the matched record.
  *   (No second /fmr/data call — the county/metro figure is inline and is
  *   the right grain for a market-overview page.)
+ *   HUD defines New England FMR areas by TOWN: a CT, MA, ME, NH, RI or VT
+ *   city matches its own town_name first. (Matching the county picked a
+ *   neighbouring town's area for Worcester, Lowell and Manchester until
+ *   2026-09-27.)
  *
- * A city that doesn't resolve is skipped; its page keeps the estimate range.
+ * A city that doesn't resolve is skipped: it gets no row, and its page stays
+ * `noindex, follow` (lib/markets/indexability.ts). A response without HUD's
+ * fiscal `year` is refused rather than stamped with the calendar year.
+ *
+ * lib/markets/hud-fmr-areas.ts (scripts/build-market-fmr-areas.ts) must carry
+ * the same fiscal year and figures; lib/__tests__/markets-data-bar.test.ts
+ * fails until both are refreshed.
  *
  * Usage:
  *   npm run build-market-rents:dry   # plan only, no API calls
@@ -25,7 +36,7 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { MARKET_CITIES } from "../lib/markets/cities";
+import { BESPOKE_MARKETS, MARKET_CITIES } from "../lib/markets/cities";
 import { CITY_GEO } from "../lib/markets/city-geo";
 
 const DRY = process.argv.includes("--dry-run");
@@ -60,13 +71,27 @@ type HudArea = {
   town_name?: string;
 } & Record<string, unknown>;
 
-type StateData = { counties: HudArea[]; metroareas: HudArea[]; year: number };
+type StateData = { counties: HudArea[]; metroareas: HudArea[]; year: number | null };
+
+const NEW_ENGLAND = new Set(["CT", "MA", "ME", "NH", "RI", "VT"]);
+
+/** "Worcester city" / "Hartford town" -> "worcester" / "hartford". */
+const normalizeTown = (name: string): string =>
+  name.toLowerCase().replace(/\b(?:city|town)\b/g, "").replace(/[^a-z0-9 ]+/g, "").trim();
 
 function matchArea(
   target: string,
   counties: HudArea[],
-  metros: HudArea[]
+  metros: HudArea[],
+  town: string | null = null
 ): HudArea | undefined {
+  // 0) New England: HUD's areas follow towns, so the city's own town wins.
+  if (town) {
+    const t = counties.find(
+      (c) => c.town_name && normalizeTown(String(c.town_name)) === normalizeTown(town)
+    );
+    if (t) return t;
+  }
   // 1) exact county
   let m = counties.find(
     (c) => c.county_name && normalizeCounty(String(c.county_name)) === target
@@ -98,10 +123,12 @@ async function fetchState(key: string, state: string): Promise<StateData | null>
   const json = (await res.json().catch(() => null)) as {
     data?: { year?: string | number; counties?: HudArea[]; metroareas?: HudArea[] };
   } | null;
+  const year = Number(json?.data?.year);
   return {
     counties: json?.data?.counties ?? [],
     metroareas: json?.data?.metroareas ?? [],
-    year: Number(json?.data?.year ?? new Date().getFullYear()),
+    // Never the calendar year: a missing vintage must not be stamped as current.
+    year: Number.isInteger(year) && year > 2000 ? year : null,
   };
 }
 
@@ -110,13 +137,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function main() {
   await loadEnv();
 
-  const planned = MARKET_CITIES.filter((c) => CITY_GEO[c.slug]);
+  const pages = [
+    ...MARKET_CITIES.map((c) => ({ slug: c.slug, name: c.name, stateCode: c.stateCode })),
+    ...BESPOKE_MARKETS.map((m) => ({ slug: m.slug, name: m.name, stateCode: m.stateCode })),
+  ];
+  const planned = pages.filter((c) => CITY_GEO[c.slug]);
   console.log(
-    `Market rents · ${DRY ? "DRY RUN" : "LIVE"} · ${planned.length}/${MARKET_CITIES.length} cities have a county mapping`
+    `Market rents · ${DRY ? "DRY RUN" : "LIVE"} · ${planned.length}/${pages.length} market pages have a county mapping`
   );
 
   if (DRY) {
-    const missing = MARKET_CITIES.filter((c) => !CITY_GEO[c.slug]).map((c) => c.slug);
+    const missing = pages.filter((c) => !CITY_GEO[c.slug]).map((c) => c.slug);
     if (missing.length) console.log(`  No county mapping: ${missing.join(", ")}`);
     console.log("Dry run — no API calls, no file written.");
     return;
@@ -129,7 +160,8 @@ async function main() {
   }
 
   const stateCache = new Map<string, StateData | null>();
-  const rents: Record<string, { rent2br: number; rent3br: number; year: number }> = {};
+  const retrievedAt = new Date().toISOString().slice(0, 10);
+  const rents: Record<string, { rent2br: number; rent3br: number; year: number; retrievedAt: string }> = {};
   const missed: string[] = [];
 
   for (const c of planned) {
@@ -139,12 +171,13 @@ async function main() {
         await sleep(200);
       }
       const sd = stateCache.get(c.stateCode);
-      if (!sd) {
+      if (!sd || sd.year === null) {
+        if (sd) console.warn(`  - ${c.slug}: HUD statedata/${c.stateCode} has no fiscal year`);
         missed.push(c.slug);
         continue;
       }
       const target = normalizeCounty(CITY_GEO[c.slug]!.county);
-      const m = matchArea(target, sd.counties, sd.metroareas);
+      const m = matchArea(target, sd.counties, sd.metroareas, NEW_ENGLAND.has(c.stateCode) ? c.name : null);
       if (!m) {
         console.warn(`  - ${c.slug}: county "${CITY_GEO[c.slug]!.county}" not matched in ${c.stateCode}`);
         missed.push(c.slug);
@@ -161,6 +194,7 @@ async function main() {
         rent2br: r2,
         rent3br: Number.isFinite(r3) && r3 > 0 ? r3 : r2,
         year: sd.year,
+        retrievedAt,
       };
       console.log(`  + ${c.slug.padEnd(18)} 2BR $${r2}  3BR $${rents[c.slug]!.rent3br}  (${sd.year})`);
     } catch (err) {
@@ -172,16 +206,17 @@ async function main() {
   const body =
     `/**\n` +
     ` * GENERATED by scripts/build-market-rents.ts — do not edit by hand.\n` +
-    ` * Real HUD Fair Market Rent per market city. Refresh annually.\n` +
+    ` * Real HUD Fair Market Rent per market page (MARKET_CITIES and the bespoke\n` +
+    ` * metros). Refresh annually, together with lib/markets/hud-fmr-areas.ts.\n` +
     ` */\n\n` +
-    `export type HudRent = {\n  rent2br: number;\n  rent3br: number;\n  year: number;\n};\n\n` +
+    `export type HudRent = {\n  rent2br: number;\n  rent3br: number;\n  /** HUD fiscal year (FY) of the figures. */\n  year: number;\n  /** YYYY-MM-DD the row was fetched from HUD. */\n  retrievedAt: string;\n};\n\n` +
     `export const HUD_RENTS: Record<string, HudRent> = ${JSON.stringify(rents, null, 2)};\n`;
 
   await fs.writeFile(OUT_FILE, body, "utf8");
   console.log(
-    `\nWrote ${Object.keys(rents).length}/${planned.length} cities -> lib/markets/hud-rents.ts`
+    `\nWrote ${Object.keys(rents).length}/${planned.length} market pages -> lib/markets/hud-rents.ts`
   );
-  if (missed.length) console.log(`Unmatched (${missed.length}, kept estimates): ${missed.join(", ")}`);
+  if (missed.length) console.log(`Unmatched (${missed.length}, no row, page stays noindex): ${missed.join(", ")}`);
 }
 
 main().catch((e) => {
