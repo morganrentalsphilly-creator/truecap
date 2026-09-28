@@ -593,3 +593,57 @@ describe("fixes from the first live run", () => {
     }
   });
 });
+
+describe("jobs that install no packages only run scripts that need none", () => {
+  // Second live run (2026-09-28): publish ran `lastmod.ts bump`, which
+  // statically imported the `typescript` package through the seed's parser;
+  // publish installs nothing, so it died with ERR_MODULE_NOT_FOUND.
+  const scriptsOf = (text: string): string[] => [...text.matchAll(/node seo\/scripts\/([a-z-]+\.ts)/g)].map((m) => m[1]);
+
+  const noInstallScripts = (): string[] => {
+    const out = new Set<string>();
+    for (const name of LOOP_WORKFLOWS) {
+      for (const job of Object.values(load(name).jobs)) {
+        const runs = job.steps.map((s) => s.run ?? "");
+        if (runs.some((r) => /npm (ci|install)/.test(r))) continue;
+        for (const run of runs) {
+          for (const s of scriptsOf(run)) out.add(s);
+          for (const m of run.matchAll(/bash seo\/scripts\/([a-z-]+\.sh)/g)) {
+            for (const s of scriptsOf(readFileSync(path.join(SCRIPTS, m[1]), "utf8"))) out.add(s);
+          }
+        }
+      }
+    }
+    return [...out].sort();
+  };
+
+  it("finds the publish and report scripts", () => {
+    const list = noInstallScripts();
+    for (const s of ["lastmod.ts", "ledger.ts", "publish-plan.ts", "report.ts", "manifest-issues.ts"]) expect(list, s).toContain(s);
+  });
+
+  it("loads every one of them from a copy of seo/ with no node_modules anywhere above it", () => {
+    const dir = tmp();
+    // A copy of seo/ (scripts, config, package.json) outside the repo, so
+    // Node cannot resolve any package from this checkout's node_modules.
+    execFileSync("cp", ["-R", path.join(ROOT, "seo"), path.join(dir, "seo")]);
+    // Repo scripts the toolkit reuses (scripts/seo/*.mjs) are checked out in
+    // every job; only PACKAGES are missing there.
+    execFileSync("cp", ["-R", path.join(ROOT, "scripts"), path.join(dir, "scripts")]);
+    rmSync(path.join(dir, "seo", "data"), { recursive: true, force: true });
+    for (const script of noInstallScripts()) {
+      const run = spawnSync(process.execPath, [path.join(dir, "seo", "scripts", script), "--help"], { cwd: dir, encoding: "utf8" });
+      expect(`${run.stderr}`, script).not.toMatch(/ERR_MODULE_NOT_FOUND|Cannot find package/);
+      expect(run.status, `${script}: ${run.stderr}`).toBe(0);
+    }
+    // And the publish job's actual call: bump a real map from a real plan.
+    mkdirSync(path.join(dir, "content", "seo"), { recursive: true });
+    writeFileSync(path.join(dir, "content", "seo", "lastmod.json"), JSON.stringify({ "/blog/a": "2026-09-01" }));
+    const plan = path.join(dir, "plan.json");
+    writeFileSync(plan, JSON.stringify({ lastmodUrls: ["/blog/a"] }));
+    const bump = spawnSync(process.execPath, [path.join(dir, "seo", "scripts", "lastmod.ts"), "bump", "--plan", plan, "--date", "2026-10-05"], { cwd: dir, encoding: "utf8" });
+    expect(bump.status, bump.stderr).toBe(0);
+    expect(`${bump.stdout}${bump.stderr}`).toContain("lastmod bumped for 1 URL(s) to 2026-10-05");
+    expect(JSON.parse(readFileSync(path.join(dir, "content", "seo", "lastmod.json"), "utf8"))["/blog/a"]).toBe("2026-10-05");
+  });
+});

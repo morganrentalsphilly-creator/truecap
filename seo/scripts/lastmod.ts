@@ -49,8 +49,25 @@ import { flagString, requireFlag, runMain, check, log } from "./lib/cli.ts";
 import type { Args } from "./lib/cli.ts";
 import { loadConfig, matchesAny } from "./lib/config.ts";
 import { derivedPagesForFile } from "./lib/family.ts";
-import { entrySignatures, entryStringField, entryTokens, statementSignatures, statementTokens } from "./lib/content-signature.ts";
+import type * as ContentSignature from "./lib/content-signature.ts";
 import type { EntryFields } from "./lib/content-signature.ts";
+
+/**
+ * content-signature.ts parses TypeScript with the `typescript` package, which
+ * only `seed` (and the self-test) needs. The publish job installs no packages
+ * — it runs `bump`, which is pure — so a static import made every publish
+ * fail with ERR_MODULE_NOT_FOUND (second live run, 2026-09-28). Loaded on
+ * demand instead.
+ */
+let signatures: typeof ContentSignature | null = null;
+async function loadSignatures(): Promise<void> {
+  signatures ??= await import("./lib/content-signature.ts");
+}
+function signatureLib(): typeof ContentSignature {
+  if (!signatures) throw new Error("content signatures are not loaded (call loadSignatures first)");
+  return signatures;
+}
+
 import { readJson, writeJson, writeText } from "./lib/io.ts";
 import { REPO_ROOT, today } from "./lib/paths.ts";
 import { fetchSitemap, parseSitemap } from "./lib/sitemap.ts";
@@ -231,7 +248,7 @@ class History {
       const key = `${blobSha}|entry|${spec.container}|${(spec.fields ?? []).join(",")}|${(spec.omit ?? []).join(",")}`;
       let map = this.parts.get(key) as Map<string, string> | undefined;
       if (!map) {
-        map = entrySignatures(spec.file, this.blob(blobSha), spec.container, { fields: spec.fields, omit: spec.omit });
+        map = signatureLib().entrySignatures(spec.file, this.blob(blobSha), spec.container, { fields: spec.fields, omit: spec.omit });
         this.parts.set(key, map);
       }
       const sig = map.get(spec.slug);
@@ -240,7 +257,7 @@ class History {
     const key = `${blobSha}|${spec.kind}|${spec.kind === "decls" ? spec.names.join(",") : ""}`;
     let list = this.parts.get(key) as string[] | undefined;
     if (!list) {
-      list = statementSignatures(spec.file, this.blob(blobSha), spec.kind === "decls" ? spec.names : undefined);
+      list = signatureLib().statementSignatures(spec.file, this.blob(blobSha), spec.kind === "decls" ? spec.names : undefined);
       this.parts.set(key, list);
     }
     return list;
@@ -250,9 +267,9 @@ class History {
   tokensFor(spec: SourceSpec, blobSha: string | null): string[] {
     if (blobSha === null) return [];
     if (spec.kind === "entry") {
-      return entryTokens(spec.file, this.blob(blobSha), spec.container, { fields: spec.fields, omit: spec.omit }).get(spec.slug) ?? [];
+      return signatureLib().entryTokens(spec.file, this.blob(blobSha), spec.container, { fields: spec.fields, omit: spec.omit }).get(spec.slug) ?? [];
     }
-    return statementTokens(spec.file, this.blob(blobSha), spec.kind === "decls" ? spec.names : undefined).flat();
+    return signatureLib().statementTokens(spec.file, this.blob(blobSha), spec.kind === "decls" ? spec.names : undefined).flat();
   }
 
   /** Evidence for one change: the content tokens it removed and added. */
@@ -380,6 +397,7 @@ export function renderReport(rows: SeedRow[], map: LastmodMap, skip: readonly st
 }
 
 async function seed(args: Args): Promise<number> {
+  await loadSignatures();
   const sitemapFile = flagString(args, "sitemap");
   const urls = sitemapFile ? parseSitemap(readFileSync(sitemapFile, "utf8")) : await fetchSitemap();
   if (!urls.length) throw new Error("the sitemap has no URLs");
@@ -388,7 +406,7 @@ async function seed(args: Args): Promise<number> {
   const isSkipped = (sha: string): boolean => skip.some((s) => sha.startsWith(s));
   const exists = (file: string): boolean => existsSync(path.join(REPO_ROOT, file));
   const history = new History(REPO_ROOT);
-  const published = entryStringField("lib/blog-posts.ts", readFileSync(path.join(REPO_ROOT, "lib", "blog-posts.ts"), "utf8"), "BLOG_POSTS", "publishedAt");
+  const published = signatureLib().entryStringField("lib/blog-posts.ts", readFileSync(path.join(REPO_ROOT, "lib", "blog-posts.ts"), "utf8"), "BLOG_POSTS", "publishedAt");
 
   const map: LastmodMap = {};
   const rows: SeedRow[] = [];
@@ -453,10 +471,11 @@ async function main(args: Args): Promise<number> {
 }
 
 function significant(before: string, after: string, file = "app/blog/x/page.tsx"): boolean {
-  return digest(statementSignatures(file, before)) !== digest(statementSignatures(file, after));
+  return digest(signatureLib().statementSignatures(file, before)) !== digest(signatureLib().statementSignatures(file, after));
 }
 
-function selfTest(): void {
+async function selfTest(): Promise<void> {
+  await loadSignatures();
   const next = bumpMap({ "/blog/a": "2026-06-01", "/blog/z": "2026-10-09" }, ["/blog/a", "/blog/z", "/blog/new"], "2026-10-05");
   check(next["/blog/a"] === "2026-10-05", "bumps an older date");
   check(next["/blog/z"] === "2026-10-09", "never moves a date backwards");
@@ -511,28 +530,28 @@ function selfTest(): void {
 
   // Moving a declaration between files (the F2 registry lift) is not a change.
   const registry = `export const BLOG_POSTS = [{ slug: "a", title: "A", publishedAt: "2026-06-01", modifiedAt: "2026-07-01", available: true }];\n`;
-  const withRegistry = [...statementSignatures("app/blog/page.tsx", `${registry}export default function B() { return <h1>Blog</h1>; }\n`)].sort();
+  const withRegistry = [...signatureLib().statementSignatures("app/blog/page.tsx", `${registry}export default function B() { return <h1>Blog</h1>; }\n`)].sort();
   const lifted = [
-    ...statementSignatures("app/blog/page.tsx", `import { BLOG_POSTS } from "@/lib/blog-posts";\nexport default function B() { return <h1>Blog</h1>; }\n`),
-    ...statementSignatures("lib/blog-posts.ts", registry.replace(', modifiedAt: "2026-07-01"', "")),
+    ...signatureLib().statementSignatures("app/blog/page.tsx", `import { BLOG_POSTS } from "@/lib/blog-posts";\nexport default function B() { return <h1>Blog</h1>; }\n`),
+    ...signatureLib().statementSignatures("lib/blog-posts.ts", registry.replace(', modifiedAt: "2026-07-01"', "")),
   ].sort();
   check(digest(withRegistry) === digest(lifted), "lifting a declaration into another file keeps the signature");
 
   // Entries: located by slug, only the rendered fields count.
   const data = (blurb: string, name: string): string =>
     `export const MARKET_CITIES = [{ slug: "erie", name: "${name}", blurb: "${blurb}" }, { slug: "york", name: "York", blurb: "b" }];\n`;
-  const erie = (src: string): string | undefined => entrySignatures("lib/markets/cities.ts", src, "MARKET_CITIES", { fields: ["slug", "name"] }).get("erie");
+  const erie = (src: string): string | undefined => signatureLib().entrySignatures("lib/markets/cities.ts", src, "MARKET_CITIES", { fields: ["slug", "name"] }).get("erie");
   check(erie(data("one", "Erie")) === erie(data("two", "Erie")), "an unrendered field is not significant");
   check(erie(data("one", "Erie")) !== erie(data("one", "Erie, PA")), "a rendered field is significant");
   const rents = (year: number, rent: number): string => `export const HUD_RENTS = { "erie": { "rent2br": ${rent}, "year": ${year} } };\n`;
-  const hud = (src: string): string | undefined => entrySignatures("lib/markets/hud-rents.ts", src, "HUD_RENTS", { omit: ["year"] }).get("erie");
+  const hud = (src: string): string | undefined => signatureLib().entrySignatures("lib/markets/hud-rents.ts", src, "HUD_RENTS", { omit: ["year"] }).get("erie");
   check(hud(rents(2025, 900)) === hud(rents(2026, 900)), "a HUD vintage change alone is not lastmod");
   check(hud(rents(2026, 900)) !== hud(rents(2026, 950)), "a HUD rent change is");
 
   // Only the named declarations (and what they use) of a shared components file count.
   const sections = (faq: string, other: string): string =>
     `const Q = "${faq}";\nexport function HomepageFaq() { return <p>{Q}</p>; }\nexport function Personas() { return <p>${other}</p>; }\n`;
-  const faqOnly = (src: string): string => digest(statementSignatures(LANDING_SECTIONS, src, ["HomepageFaq"]));
+  const faqOnly = (src: string): string => digest(signatureLib().statementSignatures(LANDING_SECTIONS, src, ["HomepageFaq"]));
   check(faqOnly(sections("q1", "x")) === faqOnly(sections("q1", "y")), "an unrendered section is not significant");
   check(faqOnly(sections("q1", "x")) !== faqOnly(sections("q2", "x")), "a const a rendered section uses is significant");
 

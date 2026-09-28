@@ -19,7 +19,7 @@
  *      workflow flag the script ignores must not pass silently.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export type Args = {
@@ -113,7 +113,11 @@ export function isEntryPoint(importMetaUrl: string): boolean {
   const entry = process.argv[1];
   if (!entry) return false;
   try {
-    return pathToFileURL(entry).href === importMetaUrl;
+    if (pathToFileURL(entry).href === importMetaUrl) return true;
+    // Node resolves the module through symlinks (macOS /var → /private/var)
+    // but leaves argv[1] as typed, so compare real paths too; without this a
+    // script run through a symlinked path loaded, did nothing and exited 0.
+    return realpathSync(entry) === realpathSync(fileURLToPath(importMetaUrl));
   } catch {
     return false;
   }
