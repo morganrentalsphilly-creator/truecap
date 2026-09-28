@@ -14,6 +14,7 @@ import { HUD_RENTS } from "@/lib/markets/hud-rents";
 import { isMarketDataThin, marketDataSignals, marketDataStatus } from "@/lib/markets/thin";
 import { MARKET_FACTS, marketFactsFor, parseMarketFacts } from "@/lib/seo/market-facts";
 import { STATE_FACTS, STATE_FACT_KEYS, parseStateFacts, stateFactsFor } from "@/lib/seo/state-facts";
+import { latestRetrievalDay, retrievedAtProblem } from "@/lib/seo/fact-source";
 import { STATES } from "@/lib/states";
 
 const SOURCE = {
@@ -62,6 +63,8 @@ describe("lib/seo/market-facts: parseMarketFacts", () => {
     ["a userinfo URL", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, source: { ...SOURCE, url: "https://evil@www.huduser.gov/x" } } }), /userinfo/],
     ["a bad retrieval date", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, source: { ...SOURCE, retrievedAt: "2026-9-1" } } }), /YYYY-MM-DD/],
     ["an impossible retrieval date", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, sources: [{ ...REF, retrievedAt: "2026-02-30" }] }] }), /YYYY-MM-DD/],
+    ["a future retrieval date on a fact", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, source: { ...SOURCE, retrievedAt: "2099-12-31" } } }), /retrievedAt 2099-12-31 is in the future/],
+    ["a future retrieval date on an FAQ source", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, sources: [{ ...REF, retrievedAt: "2099-12-31" }] }] }), /retrievedAt 2099-12-31 is in the future/],
     ["a tax rate out of range", market({ ...goodEntry(), countyEffectiveTaxRate: { ...goodEntry().countyEffectiveTaxRate, value: 12 } }), /percent between 0 and 10/],
     ["a missing value", market({ ...goodEntry(), countyEffectiveTaxRate: { ...goodEntry().countyEffectiveTaxRate, value: "1.2" } }), /percent between 0 and 10/],
     ["a non-boolean licensing flag", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, required: "yes" } }), /true or false/],
@@ -92,6 +95,16 @@ const goodState = () => ({
   medianRealEstateTaxesPaid: censusFact(2937, "B25103"),
   occupiedHousingUnits: censusFact(4929322, "B25003"),
   renterOccupiedUnits: censusFact(1577508, "B25003"),
+});
+
+describe("lib/seo/fact-source: retrieval days", () => {
+  it("allows today and tomorrow in UTC (any time zone's today), never a later day", () => {
+    const now = Date.parse("2026-09-28T02:00:00Z");
+    expect(latestRetrievalDay(now)).toBe("2026-09-29");
+    expect(retrievedAtProblem("2026-09-27")).toBeNull();
+    expect(retrievedAtProblem("2026-9-27")).toMatch(/YYYY-MM-DD/);
+    expect(retrievedAtProblem("2099-12-31")).toMatch(/in the future/);
+  });
 });
 
 describe("lib/seo/state-facts: parseStateFacts", () => {
@@ -126,6 +139,7 @@ describe("lib/seo/state-facts: parseStateFacts", () => {
     ["a Tax Foundation source", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://taxfoundation.org/x" } } } } }, /not a primary-source domain/],
     ["an unlisted state host", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://tax.ohio.gov/x" } } } } }, /not a primary-source domain/],
     ["a verdict in a source title", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, title: "Why Ohio is a strong market" } } } } }, /forbidden phrase/],
+    ["a future retrieval date", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, retrievedAt: "2099-12-31" } } } } }, /is in the future/],
   ];
 
   it.each(bad)("rejects %s", (_label, value, message) => {

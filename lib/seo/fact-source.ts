@@ -101,18 +101,39 @@ export function asRecord(value: unknown, where: string): Record<string, unknown>
   return value as Record<string, unknown>;
 }
 
+/**
+ * The latest retrieval day a fact may carry: tomorrow in UTC, so a source
+ * fetched "today" in any time zone passes and a future day (a typo, or a
+ * model inventing a date) fails. Only ever grows, so data that passes once
+ * keeps passing: no time bomb. Not the lastmod map's newest date — the loop's
+ * verify-build runs before its publish job bumps the map, so a fact retrieved
+ * on the run's day would be refused.
+ */
+export function latestRetrievalDay(now: number = Date.now()): string {
+  return new Date(now + 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Null when `value` is a YYYY-MM-DD retrieval day that is not in the future, else the reason. */
+export function retrievedAtProblem(value: unknown): string | null {
+  if (!isIsoDate(value)) return "must be a YYYY-MM-DD date";
+  const latest = latestRetrievalDay();
+  if (value > latest) return `${value} is in the future (latest allowed ${latest})`;
+  return null;
+}
+
 /** A single `source` object: exactly url, title, publisher and retrievedAt. */
 export function parseFactSource(value: unknown, where: string, extraHosts: readonly string[] = []): FactSource {
   const record = asRecord(value, where);
   exactKeys(record, ["publisher", "retrievedAt", "title", "url"], where);
   const problem = sourceUrlProblem(record.url, extraHosts);
   if (problem) throw new Error(`${where}: ${problem}`);
-  if (!isIsoDate(record.retrievedAt)) throw new Error(`${where}.retrievedAt must be a YYYY-MM-DD date`);
+  const dateProblem = retrievedAtProblem(record.retrievedAt);
+  if (dateProblem) throw new Error(`${where}.retrievedAt ${dateProblem}`);
   return Object.freeze({
     url: record.url as string,
     title: plainText(record.title, `${where}.title`, 200),
     publisher: plainText(record.publisher, `${where}.publisher`, 120),
-    retrievedAt: record.retrievedAt,
+    retrievedAt: record.retrievedAt as string,
   });
 }
 
@@ -122,11 +143,12 @@ export function parseFactSourceRef(value: unknown, where: string, extraHosts: re
   exactKeys(record, ["retrievedAt", "title", "url"], where);
   const problem = sourceUrlProblem(record.url, extraHosts);
   if (problem) throw new Error(`${where}: ${problem}`);
-  if (!isIsoDate(record.retrievedAt)) throw new Error(`${where}.retrievedAt must be a YYYY-MM-DD date`);
+  const dateProblem = retrievedAtProblem(record.retrievedAt);
+  if (dateProblem) throw new Error(`${where}.retrievedAt ${dateProblem}`);
   return Object.freeze({
     url: record.url as string,
     title: plainText(record.title, `${where}.title`, 200),
-    retrievedAt: record.retrievedAt,
+    retrievedAt: record.retrievedAt as string,
   });
 }
 
