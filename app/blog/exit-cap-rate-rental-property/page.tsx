@@ -355,7 +355,13 @@ export default function ExitCapRatePost() {
               If the exit cap is that important, it&apos;s worth knowing what
               pushes it around. Three forces do most of the work. First and
               biggest, <strong>interest rates</strong>: cap rates loosely track
-              the cost of debt, so when the ten-year Treasury and mortgage rates
+              the cost of debt, so when the ten-year Treasury and{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                30-year mortgage rates
+              </a>{" "}
               rise, buyers demand higher yields and cap rates drift up. The 2022–26
               rate climb is exactly why so many deals underwritten on 2021
               compression assumptions disappointed. Second, the{" "}

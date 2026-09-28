@@ -743,8 +743,14 @@ export default function BlogPost() {
             $376,000 balance saves about $210 a month, and kills PMI only if the
             appraisal supports 80% LTV), aggressive principal paydown, living
             there longer than a year, or selling into the residential buyer pool
-            while you still qualify for the primary-residence capital-gains
-            exclusion on your half. What does not work is assuming the property
+            while you still qualify for the{" "}
+            <a
+              href="https://www.irs.gov/publications/p523"
+              className="text-primary font-semibold hover:underline"
+            >
+              primary-residence capital-gains exclusion
+            </a>{" "}
+            on your half. What does not work is assuming the property
             becomes a good rental because you stopped living in it.
           </p>
 

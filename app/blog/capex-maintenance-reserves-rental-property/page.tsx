@@ -180,7 +180,14 @@ export default function CapexReservesPost() {
             <strong>Capital expenditures</strong> replace or improve whole
             components: a roof, a furnace, a kitchen. They&apos;re rare,
             individually large, and depreciated over 27.5 years rather than
-            deducted immediately (the de minimis safe harbor lets you expense
+            deducted immediately (the{" "}
+            <a
+              href="https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations"
+              className="text-primary font-semibold hover:underline"
+            >
+              de minimis safe harbor
+            </a>{" "}
+            lets you expense
             items up to $2,500 per invoice, which catches appliances and
             water heaters for most small landlords). The distinction matters
             at tax time — the full breakdown is in{" "}
