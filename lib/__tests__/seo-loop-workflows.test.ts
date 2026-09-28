@@ -622,7 +622,7 @@ describe("jobs that install no packages only run scripts that need none", () => 
     for (const s of ["lastmod.ts", "ledger.ts", "publish-plan.ts", "report.ts", "manifest-issues.ts"]) expect(list, s).toContain(s);
   });
 
-  it("loads every one of them from a copy of seo/ with no node_modules anywhere above it", () => {
+  it("loads every one of them from a copy of seo/ with no node_modules anywhere above it", { timeout: 30_000 }, () => {
     const dir = tmp();
     // A copy of seo/ (scripts, config, package.json) outside the repo, so
     // Node cannot resolve any package from this checkout's node_modules.

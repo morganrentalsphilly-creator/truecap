@@ -137,13 +137,19 @@ describe("lib/seo/state-facts: parseStateFacts", () => {
     ["a non-integer value", { states: { ohio: { ...goodState(), medianHomeValue: censusFact(1.5) } } }, /positive integer/],
     ["more renters than homes", { states: { ohio: { ...goodState(), renterOccupiedUnits: censusFact(9_999_999, "B25003") } } }, /exceeds/],
     ["a Tax Foundation source", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://taxfoundation.org/x" } } } } }, /not a primary-source domain/],
-    ["an unlisted state host", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://tax.ohio.gov/x" } } } } }, /not a primary-source domain/],
+    ["a non-government host", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://ohio-tax-rates.example.org/x" } } } } }, /not a primary-source domain/],
+    ["a .gov look-alike", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://tax.ohio.gov.example.com/x" } } } } }, /not a primary-source domain/],
     ["a verdict in a source title", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, title: "Why Ohio is a strong market" } } } } }, /forbidden phrase/],
     ["a future retrieval date", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, retrievedAt: "2099-12-31" } } } } }, /is in the future/],
   ];
 
   it.each(bad)("rejects %s", (_label, value, message) => {
     expect(() => parseStateFacts(value)).toThrow(message);
+  });
+
+  it("accepts a state's own .gov site as a primary source (seo/config.json 'gov')", () => {
+    const value = { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://tax.ohio.gov/property" } } } } };
+    expect(() => parseStateFacts(value)).not.toThrow();
   });
 });
 
