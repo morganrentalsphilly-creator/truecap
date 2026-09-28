@@ -132,12 +132,11 @@ describe("public underwriting claims", () => {
 
     expect(page).toContain("How to screen a rental property in 60 seconds");
     expect(page).toContain("not a complete underwrite or a decision to buy");
-    expect(page).toContain(
-      "unknown unresolved instead of turning it into zero",
-    );
-    expect(page).toContain(
-      "not a substitute for property-specific rent evidence",
-    );
+    // These two were pinned on the post's HowTo step text, which the page
+    // never showed; the F4 review removed that markup. The page's own
+    // visible steps carry the same framing.
+    expect(page).toContain("turn missing costs into zero");
+    expect(page).toContain("not a floor or a property-specific rent comp");
     expect(page).not.toMatch(/use FMR instead/i);
     expect(page).not.toMatch(/quote-able in 60 seconds/i);
     expect(page).not.toMatch(/otherwise,\s*walk/i);
