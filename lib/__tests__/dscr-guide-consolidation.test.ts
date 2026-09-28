@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -17,6 +17,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { MARKET_CITIES } from "@/lib/markets/cities";
 import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 import { LASTMOD, lastmodFor } from "@/lib/seo/lastmod";
+import { isNoindexPath } from "@/lib/seo/noindex";
 
 /**
  * Founder decision Q5 (2026-09-28): the three DSCR guides are one canonical
@@ -127,12 +128,32 @@ describe("DSCR guide consolidation: nothing points at a merged post", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("has the two surviving DSCR posts link the canonical guide in their body", () => {
+  it("has the two surviving DSCR posts link the canonical guide once, in their body", () => {
+    const canonicalHref = /href="\/blog\/how-to-calculate-dscr(?:#[a-z-]+)?"/g;
     for (const slug of ["cap-rate-vs-cash-on-cash-vs-dscr", "hard-money-vs-dscr-loan"]) {
       const source = readFileSync(join(ROOT, "app/blog", slug, "page.tsx"), "utf8");
       const body = source.slice(source.indexOf("<article"), source.indexOf("</article>"));
-      expect(body, slug).toMatch(/href="\/blog\/how-to-calculate-dscr(?:#[a-z-]+)?"/);
+      expect(source.match(canonicalHref), slug).toHaveLength(1);
+      expect(body.match(canonicalHref), slug).toHaveLength(1);
     }
+    // hard-money links the word DSCR under "What DSCR actually is": it lands
+    // on the guide (formula first), not on its DSCR-loans section.
+    const hardMoney = readFileSync(join(ROOT, "app/blog/hard-money-vs-dscr-loan/page.tsx"), "utf8");
+    expect(hardMoney).toMatch(/What DSCR actually is<\/h2>\s*<p>\s*<Link\s+href="\/blog\/how-to-calculate-dscr"/);
+  });
+
+  it("keeps the glossary hub's DSCR card, which links the guide, to what the guide sources", () => {
+    const hub = readFileSync(join(ROOT, "app/glossary/page.tsx"), "utf8");
+    const start = hub.indexOf('slug: "dscr"');
+    const card = hub.slice(start, hub.indexOf("slug:", start + 1));
+    expect(card).toContain('postPath: "/blog/how-to-calculate-dscr"');
+    // The guide states no market-wide minimum, no rate tiers, and that
+    // conventional loans count rent as a net dollar figure, not a ratio.
+    expect(card).not.toMatch(/Every lender pulls it/);
+    expect(card).not.toMatch(/typical lender minimum/);
+    expect(card).not.toMatch(/conventional/i);
+    expect(card).not.toMatch(/rate tiers/);
+    expect(card).toContain("each lender sets its own");
   });
 });
 
@@ -192,11 +213,26 @@ describe("DSCR guide consolidation: the canonical page", () => {
     const pitia = base.monthlyPayment + base.propertyTaxMonthly + base.insuranceMonthly;
 
     expect(text).toContain(`Gross rent: ${usd(rent)} × 12 = ${usd(base.grossScheduledIncomeAnnual)}`);
-    expect(text).toContain(`Vacancy (5% of rent): −${usd(base.vacancyAllowanceAnnual)}`);
-    expect(text).toContain(`Property taxes (1.49% of price): −${usd(base.propertyTaxMonthly * 12)}`);
-    expect(text).toContain(`Insurance (0.5% of price): −${usd(base.insuranceMonthly * 12)}`);
-    expect(text).toContain(`Maintenance (5% of rent): −${usd(base.maintenance * 12)}`);
-    expect(text).toContain(`Management (8% of rent): −${usd(base.management * 12)}`);
+    // The calculator rounds each monthly expense to the dollar, so a line's
+    // annual figure is its monthly figure × 12, not its percentage of the
+    // annual base (5% of $36,600 is $1,830; $153 × 12 is $1,836). Each label
+    // shows the monthly figure, so the reader's arithmetic reaches the NOI.
+    expect(text).toContain("The calculator rounds each monthly expense to the dollar");
+    expect(base.vacancy * 12).toBe(base.vacancyAllowanceAnnual);
+    const line = (label: string, monthly: number) => `${label}, ${usd(monthly)} a month): −${usd(monthly * 12)}`;
+    const lines = [
+      line("Vacancy (5% of rent", base.vacancy),
+      line("Property taxes (1.49% of price", base.propertyTaxMonthly),
+      line("Insurance (0.5% of price", base.insuranceMonthly),
+      line("Maintenance (5% of rent", base.maintenance),
+      line("Management (8% of rent", base.management),
+    ];
+    for (const expected of lines) expect(text).toContain(expected);
+    // The listed lines add up to the NOI shown.
+    const listed = [base.vacancy, base.propertyTaxMonthly, base.insuranceMonthly, base.maintenance, base.management]
+      .map((monthly) => Math.round(monthly) * 12)
+      .reduce((sum, annual) => sum + annual, 0);
+    expect(base.grossScheduledIncomeAnnual - listed).toBe(base.noiAnnual);
     expect(text).toContain(`NOI: ${usd(base.noiAnnual)}`);
     expect(text).toContain(`Loan: ${usd(base.loanAmount)} at 6.6% for 30 years = ${usd(base.monthlyPayment)} a month`);
     expect(text).toContain(`Annual debt service: ${usd(base.annualDebtService)}`);
@@ -211,6 +247,45 @@ describe("DSCR guide consolidation: the canonical page", () => {
     const maxLoan = Math.round(((maxDebtService / 12) / (base.monthlyPayment / base.loanAmount)) / 1_000) * 1_000;
     expect(text).toContain(`${usd(maxDebtService)} a year (${usd(maxDebtService / 12)} a month)`);
     expect(text).toContain(`a loan of about ${usd(maxLoan)}, ${Math.round((maxLoan / SAMPLE_DEAL_VALUES.purchasePrice) * 100)}% of the price`);
+
+    // Where 1.25 binds: the "Both" stress case (rent 10% lower, rate a point
+    // higher), solved for the down payment and for the price that reach 1.25.
+    const price = SAMPLE_DEAL_VALUES.purchasePrice;
+    const stressed = {
+      ...SAMPLE_DEAL_VALUES,
+      monthlyRent: rent * 0.9,
+      interestRate: SAMPLE_DEAL_VALUES.interestRate + 1,
+    };
+    const stressedBase = calculateAnalysis(stressed);
+    expect(stressedBase.dscr).toBeLessThan(1.25);
+    expect(text).toContain(
+      `NOI falls to ${usd(stressedBase.noiAnnual)} against ${usd(stressedBase.annualDebtService)} of debt service, a DSCR of ${dscr(stressedBase.dscr)}`,
+    );
+    expect(text).toContain(
+      `${usd(stressedBase.noiAnnual)} ÷ 1.25 = ${usd(stressedBase.noiAnnual / 1.25)} a year`,
+    );
+    const solve = (dscrAt: (x: number) => number, low: number, high: number) => {
+      // DSCR is monotonic in both inputs over these ranges (at 100% down there
+      // is no loan and no DSCR); find where it crosses 1.25.
+      const rising = dscrAt(high) > dscrAt(low);
+      for (let i = 0; i < 80; i += 1) {
+        const mid = (low + high) / 2;
+        if ((dscrAt(mid) < 1.25) === rising) low = mid;
+        else high = mid;
+      }
+      return rising ? high : low;
+    };
+    const downPct = solve((pct) => calculateAnalysis({ ...stressed, downPaymentPct: pct }).dscr, 0, 50);
+    const stressedLoan = Math.round((price * (1 - downPct / 100)) / 1_000) * 1_000;
+    const stressedDown = price - stressedLoan;
+    expect(calculateAnalysis({ ...stressed, downPaymentPct: (stressedDown / price) * 100 }).dscr).toBeGreaterThanOrEqual(1.25);
+    expect(text).toContain(`a loan of about ${usd(stressedLoan)}. That takes about ${usd(stressedDown)} down (${Math.round((stressedDown / price) * 100)}%) instead of ${usd(price * 0.2)}`);
+    const maxPrice = Math.floor(solve((p) => calculateAnalysis({ ...stressed, purchasePrice: p }).dscr, price / 2, price) / 1_000) * 1_000;
+    expect(calculateAnalysis({ ...stressed, purchasePrice: maxPrice }).dscr).toBeGreaterThanOrEqual(1.25);
+    expect(calculateAnalysis({ ...stressed, purchasePrice: maxPrice + 1_000 }).dscr).toBeLessThan(1.25);
+    expect(text).toContain(
+      `the calculator reaches 1.25 at a price of about ${usd(maxPrice)}, ${usd(price - maxPrice)} under the ${usd(price)} in the example`,
+    );
 
     // The lender's versions of the ratio.
     expect(text).toContain(`Rent ÷ PITIA: ${usd(rent)} ÷ ${usd(pitia)} = ${dscr(rent / pitia)}`);
@@ -253,6 +328,49 @@ describe("DSCR guide consolidation: the canonical page", () => {
     expect(text).toContain(`to about ${usd(at100)} before NOI stops covering the payment`);
   });
 
+  it("states the 1.25 benchmark only as far as its sources go, and agrees with its own table", async () => {
+    const html = await renderCanonical();
+    const text = visibleText(html);
+    const faq = new Map(
+      [...html.matchAll(/<details[^>]*><summary[^>]*>([\s\S]*?)<\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g)].map(
+        (match) => [decode(match[1]), decode(match[2])] as const,
+      ),
+    );
+
+    // 12 CFR 244.17 sets 1.25 only for a multifamily loan (1.5 and 1.7 for
+    // commercial real estate); Freddie Mac's Optigo loans are multifamily;
+    // HUD's 221(d)(4) uses 1.15 and 1.11.
+    const good = faq.get("What is a good DSCR for a rental property?") ?? "";
+    expect(good).toContain("The 1.25 figure comes from multifamily lending standards");
+    expect(good).not.toMatch(/commercial/i);
+    expect(text).toContain("1.25 shows up in two published multifamily standards, and HUD goes lower:");
+    expect(text).not.toMatch(/several (?:published )?lending standards/);
+    // Fannie Mae's net-rent method is not why DSCR lenders set their own minimums.
+    expect(text).not.toMatch(/coverage ratio \(see below\), so/);
+
+    // The FAQ splits the ranges where the table does, at 1.15.
+    for (const band of ["1.00 – 1.15", "1.15 – 1.25"]) expect(text).toContain(band);
+    expect(good).toContain("From 1.15 to 1.25 there's some cushion");
+    expect(good).toContain("from 1.0 to 1.15 the property covers its debt with little room");
+    expect(good).not.toContain("Between 1.0 and 1.25");
+
+    // F3 research left "lenders require a bigger cushion in some markets"
+    // unconfirmed (Freddie Mac's SBL market tiers are legacy and run by
+    // market size), and the page cites nothing for it.
+    const tooHigh = faq.get("Can a DSCR be too high?") ?? "";
+    expect(tooHigh).not.toMatch(/cushion/i);
+  });
+
+  it("says once in the body that clearing the minimum is not an approval", async () => {
+    const html = await renderCanonical();
+    const body = visibleText(html.slice(0, html.indexOf('id="faq"')));
+    expect(body.match(/not an approval|does not guarantee approval|doesn't guarantee approval/g)).toEqual([
+      "does not guarantee approval",
+    ]);
+    const lendersCheck = body.slice(body.indexOf("What lenders check"), body.indexOf("What DSCR loans cost"));
+    expect(lendersCheck.match(/sets its own/g)).toHaveLength(1);
+  });
+
   it("links every lender threshold it states to its primary source", async () => {
     const html = await renderCanonical();
     for (const href of [
@@ -264,6 +382,8 @@ describe("DSCR guide consolidation: the canonical page", () => {
       "https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property",
       "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
       "https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/",
+      "https://selling-guide.fanniemae.com/sel/b3-5.1-01/general-requirements-credit-scores",
+      "https://www2.census.gov/govs/pubs/2010pubs/govsrr2010-06.pdf",
     ]) {
       expect(html, href).toContain(`href="${href}"`);
     }
@@ -276,15 +396,38 @@ describe("DSCR guide consolidation: sitemap", () => {
     vi.resetModules();
   });
 
-  it("drops exactly the two merged URLs and dates the canonical by its merge", async () => {
-    const pathsOf = (entries: { url: string }[]) => entries.map((entry) => new URL(entry.url).pathname);
-    const after = pathsOf(sitemap());
-    for (const path of REMOVED_PATHS) expect(after, path).not.toContain(path);
-    expect(after).toContain(CANONICAL);
+  const pathsOf = (entries: { url: string }[]) => entries.map((entry) => new URL(entry.url).pathname);
+
+  it("lists exactly the blog post pages on disk, plus the blog hubs, and dates the canonical by its merge", () => {
+    const listed = pathsOf(sitemap());
+    for (const path of REMOVED_PATHS) expect(listed, path).not.toContain(path);
+    expect(listed).toContain(CANONICAL);
     expect(lastmodFor(CANONICAL)).toBe("2026-09-28");
 
-    // The same sitemap with the two registry rows put back, as they were
-    // before the merge: it must differ by exactly those two URLs.
+    // A fixed baseline that needs no fixture: the post directories under
+    // app/blog. The merge deleted two of them, so the sitemap's /blog URLs
+    // must be every remaining post page and nothing else. A registry row
+    // dropped while its page still exists (a third URL lost) fails here, and
+    // so does a row whose page is gone.
+    const postDirs = readdirSync(join(ROOT, "app/blog"), { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          entry.name !== "topics" &&
+          !entry.name.startsWith("[") &&
+          existsSync(join(ROOT, "app/blog", entry.name, "page.tsx")),
+      )
+      .map((entry) => `/blog/${entry.name}`);
+    expect(postDirs.length).toBeGreaterThanOrEqual(73);
+    const hubs = ["/blog", "/blog/topics", ...BLOG_TOPICS.map((topic) => `/blog/topics/${topic.slug}`)];
+    const expected = [...hubs, ...postDirs].filter((path) => !isNoindexPath(path));
+    const listedBlog = listed.filter((path) => path === "/blog" || path.startsWith("/blog/"));
+    expect([...listedBlog].sort()).toEqual([...expected].sort());
+    expect(new Set(listedBlog).size).toBe(listedBlog.length);
+  });
+
+  it("owes the two merged URLs to their registry rows alone: putting the rows back adds exactly them", async () => {
+    const after = pathsOf(sitemap());
     const restored: BlogPost[] = REMOVED.map((slug) => ({
       slug,
       title: slug,

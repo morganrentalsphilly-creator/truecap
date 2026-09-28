@@ -58,10 +58,14 @@ const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-dscr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 14;
 
 /**
- * The worked example: calculateAnalysis(SAMPLE_DEAL_VALUES), rounded to whole
- * dollars. The stress cases change one input and rerun the calculator; the
- * break-even rents are the rents at which its DSCR reaches 1.25 and 1.00,
- * rounded to $10. dscr-guide-consolidation.test.ts recomputes every one.
+ * The worked example: calculateAnalysis(SAMPLE_DEAL_VALUES). The calculator
+ * rounds each monthly expense line to the whole dollar, so every annual
+ * expense line is its monthly figure × 12 (5% of $36,600 is $1,830; the
+ * calculator's $153 a month gives $1,836). The stress cases change one input
+ * and rerun the calculator; the break-even rents are the rents at which its
+ * DSCR reaches 1.25 and 1.00, rounded to $10; the stressed price is the
+ * highest price at which the "Both" stress case still reaches 1.25, rounded
+ * down to $1,000. dscr-guide-consolidation.test.ts recomputes every one.
  */
 const SAMPLE = {
   price: 265_000,
@@ -70,24 +74,23 @@ const SAMPLE = {
   termYears: 30,
   rentMonthly: 3_050,
   grossRentAnnual: 36_600,
-  vacancyAnnual: 1_836,
-  propertyTaxAnnual: 3_948,
-  insuranceAnnual: 1_320,
-  maintenanceAnnual: 1_836,
-  managementAnnual: 2_928,
+  vacancyMonthly: 153,
+  propertyTaxMonthly: 329,
+  insuranceMonthly: 110,
+  maintenanceMonthly: 153,
+  managementMonthly: 244,
   noiAnnual: 24_732,
   loanAmount: 212_000,
   principalInterestMonthly: 1_354,
   debtServiceAnnual: 16_247,
   capexReserveMonthly: 153,
   cashFlowMonthly: 554,
-  propertyTaxMonthly: 329,
-  insuranceMonthly: 110,
   pitiaMonthly: 1_793,
   lowRentMonthly: 2_745,
   lowRentNoiAnnual: 21_744,
   highRatePct: 7.6,
   highRateDebtServiceAnnual: 17_963,
+  stressedPriceAtDscr125: 258_000,
   rentAtDscr125: 2_600,
   rentAtDscr100: 2_190,
 } as const;
@@ -108,6 +111,18 @@ const MAX_LOAN_AT_125 =
       SAMPLE.loanAmount /
       1_000,
   ) * 1_000;
+// The same solve on the "Both" stress case (rent 10% lower, rate a point
+// higher), where 1.25 does bind: the loan its NOI supports at 1.25 and the
+// down payment that leaves.
+const STRESSED_DSCR = ratio(SAMPLE.lowRentNoiAnnual, SAMPLE.highRateDebtServiceAnnual);
+const STRESSED_MAX_DEBT_SERVICE_AT_125 = SAMPLE.lowRentNoiAnnual / 1.25;
+const STRESSED_MAX_LOAN_AT_125 =
+  Math.round(
+    (STRESSED_MAX_DEBT_SERVICE_AT_125 / SAMPLE.highRateDebtServiceAnnual) *
+      SAMPLE.loanAmount /
+      1_000,
+  ) * 1_000;
+const STRESSED_DOWN_AT_125 = SAMPLE.price - STRESSED_MAX_LOAN_AT_125;
 const FANNIE_NET_RENT = 0.75 * SAMPLE.rentMonthly - SAMPLE.pitiaMonthly;
 
 export const metadata: Metadata = {
@@ -151,7 +166,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is a good DSCR for a rental property?",
-    a: "1.25 or higher is a common lender benchmark — the property's net operating income covers its annual debt payments 1.25 times over, leaving a 25% cushion. Between 1.0 and 1.25 the property covers its debt with little margin; below 1.0 its NOI doesn't cover its own mortgage payments. The 1.25 figure comes from multifamily and commercial standards; a lender on a house or a duplex sets its own minimum.",
+    a: "1.25 or higher is a common lender benchmark — the property's net operating income covers its annual debt payments 1.25 times over, leaving a 25% cushion. From 1.15 to 1.25 there's some cushion, but less than that benchmark; from 1.0 to 1.15 the property covers its debt with little room; below 1.0 its NOI doesn't cover its own mortgage payments. The 1.25 figure comes from multifamily lending standards; a lender on a house or a duplex sets its own minimum.",
   },
   {
     q: "Is a DSCR of 1.0 good?",
@@ -179,7 +194,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can a DSCR be too high?",
-    a: "Not from a coverage standpoint: a 2.0 DSCR is very safe against the debt. But a high ratio produced by a large down payment means more of your cash sits in the property. Whether that lowers your cash-on-cash return depends on leverage: when the loan costs more each year than the property yields (negative leverage), more equity raises cash-on-cash; when it costs less, more equity lowers it. A high ratio can also reflect a market where lenders require a bigger cushion.",
+    a: "Not from a coverage standpoint: a 2.0 DSCR is very safe against the debt. But a high ratio produced by a large down payment means more of your cash sits in the property. Whether that lowers your cash-on-cash return depends on leverage: when the loan costs more each year than the property yields (negative leverage), more equity raises cash-on-cash; when it costs less, more equity lowers it.",
   },
   {
     q: "What is a DSCR loan?",
@@ -291,7 +306,7 @@ export default function BlogPost() {
       {
         "@type": "HowToStep",
         name: "Compare with the written program",
-        text: "Confirm the lender's current formula, minimum, rent evidence, leverage, and pricing; a DSCR above the minimum is one condition of the loan, not an approval.",
+        text: "Get the lender's formula, minimum ratio, accepted rent evidence and leverage limits in writing.",
       },
     ],
   };
@@ -451,8 +466,7 @@ export default function BlogPost() {
           <h3>Step 4: Compare with the written program</h3>
           <p>
             Get the lender&apos;s formula, minimum ratio, accepted rent evidence
-            and leverage limits in writing. A DSCR above a lender&apos;s minimum
-            is one condition of the loan, not an approval.
+            and leverage limits in writing.
           </p>
 
           <h2 id="worked-example" className="text-2xl sm:text-3xl">
@@ -469,20 +483,34 @@ export default function BlogPost() {
             {SAMPLE.downPaymentPct}% down and a {SAMPLE.termYears}-year loan at{" "}
             {SAMPLE.ratePct}%. The tax and insurance rates are the sample&apos;s
             assumptions; on a real deal, use the property&apos;s own tax bill
-            and quote.
+            and quote. The calculator rounds each monthly expense to the dollar,
+            so each annual line below is its monthly figure × 12.
           </p>
           <ul>
             <li>
               Gross rent: {usd(SAMPLE.rentMonthly)} × 12 ={" "}
               <strong>{usd(SAMPLE.grossRentAnnual)}</strong>
             </li>
-            <li>Vacancy (5% of rent): −{usd(SAMPLE.vacancyAnnual)}</li>
             <li>
-              Property taxes (1.49% of price): −{usd(SAMPLE.propertyTaxAnnual)}
+              Vacancy (5% of rent, {usd(SAMPLE.vacancyMonthly)} a month): −
+              {usd(SAMPLE.vacancyMonthly * 12)}
             </li>
-            <li>Insurance (0.5% of price): −{usd(SAMPLE.insuranceAnnual)}</li>
-            <li>Maintenance (5% of rent): −{usd(SAMPLE.maintenanceAnnual)}</li>
-            <li>Management (8% of rent): −{usd(SAMPLE.managementAnnual)}</li>
+            <li>
+              Property taxes (1.49% of price, {usd(SAMPLE.propertyTaxMonthly)} a
+              month): −{usd(SAMPLE.propertyTaxMonthly * 12)}
+            </li>
+            <li>
+              Insurance (0.5% of price, {usd(SAMPLE.insuranceMonthly)} a month):
+              −{usd(SAMPLE.insuranceMonthly * 12)}
+            </li>
+            <li>
+              Maintenance (5% of rent, {usd(SAMPLE.maintenanceMonthly)} a
+              month): −{usd(SAMPLE.maintenanceMonthly * 12)}
+            </li>
+            <li>
+              Management (8% of rent, {usd(SAMPLE.managementMonthly)} a month):
+              −{usd(SAMPLE.managementMonthly * 12)}
+            </li>
             <li>
               <strong>NOI: {usd(SAMPLE.noiAnnual)}</strong>
             </li>
@@ -535,10 +563,27 @@ export default function BlogPost() {
             .
           </p>
           <p>
-            On a thinner deal the same math tells you how much more down
-            payment, or how much lower a price, it takes to reach the target.
-            TrueCap Pro&apos;s Offer Ceiling runs the price version: the highest
-            price that still meets your targets, including a DSCR you set.
+            On a thinner deal the ratio binds. Take the harshest case from the
+            stress test below: rent 10% lower ({usd(SAMPLE.lowRentMonthly)}) and
+            a rate a point higher ({SAMPLE.highRatePct}%). NOI falls to{" "}
+            {usd(SAMPLE.lowRentNoiAnnual)} against{" "}
+            {usd(SAMPLE.highRateDebtServiceAnnual)} of debt service, a DSCR of{" "}
+            {STRESSED_DSCR}. At 1.25 the debt service can be at most{" "}
+            {usd(SAMPLE.lowRentNoiAnnual)} ÷ 1.25 ={" "}
+            {usd(STRESSED_MAX_DEBT_SERVICE_AT_125)} a year, a loan of about{" "}
+            {usd(STRESSED_MAX_LOAN_AT_125)}. That takes about{" "}
+            {usd(STRESSED_DOWN_AT_125)} down ({pct(STRESSED_DOWN_AT_125 / SAMPLE.price)}
+            ) instead of {usd((SAMPLE.price * SAMPLE.downPaymentPct) / 100)}. Or
+            keep {SAMPLE.downPaymentPct}% down and pay less: the calculator
+            reaches 1.25 at a price of about{" "}
+            {usd(SAMPLE.stressedPriceAtDscr125)},{" "}
+            {usd(SAMPLE.price - SAMPLE.stressedPriceAtDscr125)} under the{" "}
+            {usd(SAMPLE.price)} in the example.
+          </p>
+          <p>
+            TrueCap Pro&apos;s Offer Ceiling runs the price version for you: the
+            highest price that still meets your targets, including a DSCR you
+            set.
           </p>
 
           <h2 id="good-dscr" className="text-2xl sm:text-3xl">
@@ -547,8 +592,8 @@ export default function BlogPost() {
           <p>
             Above 1.00, NOI covers the debt under your formula. How far above is
             your cushion against a vacant month, a repair or a tax increase. As
-            a lender screen, 1.25 shows up in several published lending
-            standards:
+            a lender screen, 1.25 shows up in two published multifamily
+            standards, and HUD goes lower:
           </p>
           <ul>
             <li>
@@ -589,12 +634,12 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            All three are multifamily and commercial standards. On a house or a
-            duplex, Fannie Mae&apos;s Selling Guide counts the rent as a net
-            dollar figure rather than a coverage ratio (see below), so for a
-            DSCR loan each lender or program sets its own minimum coverage
-            threshold, and some programs allow lower coverage with different
-            leverage, reserves, pricing, or property restrictions.
+            All three are multifamily and commercial standards. For a house or
+            a duplex, Fannie Mae&apos;s Selling Guide counts the rent as a net
+            dollar figure rather than a coverage ratio (see below), and each
+            DSCR lender or program sets its own minimum coverage threshold.
+            Some programs allow lower coverage with different leverage,
+            reserves, pricing, or property restrictions.
           </p>
           <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full text-sm">
@@ -627,8 +672,8 @@ export default function BlogPost() {
                 <tr>
                   <td className="font-mono whitespace-nowrap">1.15 – 1.25</td>
                   <td className="text-muted-foreground">
-                    Some cushion, but under the 1.25 floor several lending
-                    standards use.
+                    Some cushion, but under the 1.25 floor of the multifamily
+                    standards above.
                   </td>
                 </tr>
                 <tr>
@@ -772,8 +817,9 @@ export default function BlogPost() {
               Single-Family Comparable Rent Schedule (Form 1007)
             </a>
             . Before you lock a rate or pay non-refundable fees, ask which rent
-            the lender will use and whether a signed lease or the
-            appraiser&apos;s figure wins.
+            the lender will use, whether a signed lease or the appraiser&apos;s
+            figure wins, and how it handles a request to reconsider the value if
+            the appraised rent comes in low.
           </p>
 
           <h2 id="dscr-loans" className="text-2xl sm:text-3xl">
@@ -815,6 +861,18 @@ export default function BlogPost() {
                 50% for loans run through Desktop Underwriter
               </a>
               , and lower for manual underwriting.
+            </li>
+            <li>
+              <strong>Credit.</strong> Fannie Mae sets{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-5.1-01/general-requirements-credit-scores"
+                className={LINK}
+              >
+                no minimum credit score for loans run through Desktop
+                Underwriter
+              </a>
+              ; a manually underwritten loan needs 620 for a fixed rate or 640
+              for an ARM.
             </li>
             <li>
               <strong>Borrower.</strong> Fannie Mae buys loans made to{" "}
@@ -896,18 +954,17 @@ export default function BlogPost() {
           <h3>What lenders check</h3>
           <p>
             Requirements vary by lender, program, state, borrower, and
-            property. Expect the written matrix or term sheet to cover:
+            property, and each lender sets its own in a written matrix or term
+            sheet. Expect it to cover:
           </p>
           <ul>
             <li>
-              <strong>Minimum DSCR and the formula behind it.</strong> Each
-              lender or program sets its own.
+              <strong>Minimum DSCR and the formula behind it.</strong>
             </li>
             <li>
               <strong>Down payment.</strong> Purchase programs require borrower
-              equity, and each lender&apos;s matrix sets its own maximum LTV; it
-              can be lower for a lower DSCR, lower credit, a cash-out or the
-              property type.
+              equity. The matrix&apos;s maximum LTV can drop for a lower DSCR,
+              lower credit, a cash-out or the property type.
             </li>
             <li>
               <strong>Credit and reserves.</strong> Score, credit history and
@@ -970,6 +1027,11 @@ export default function BlogPost() {
                   <td className="text-muted-foreground">Portfolio limit</td>
                   <td>No agency cap; lender exposure limits can apply</td>
                   <td>Up to 10 financed properties (Fannie Mae, Desktop Underwriter)</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Credit score</td>
+                  <td>Matrix-specific</td>
+                  <td>No minimum through Desktop Underwriter; 620 fixed-rate or 640 ARM if manually underwritten (Fannie Mae)</td>
                 </tr>
                 <tr>
                   <td className="text-muted-foreground">Maximum LTV</td>
@@ -1035,6 +1097,21 @@ export default function BlogPost() {
             with room left, you have a cushion. If only the base case does, a
             lower appraised rent or a higher rate at lock can push the ratio
             under the minimum.
+          </p>
+          <p>
+            Check the tax line too. In some states (California under
+            Proposition 13, for example), a sale{" "}
+            <a
+              href="https://www2.census.gov/govs/pubs/2010pubs/govsrr2010-06.pdf"
+              className={LINK}
+            >
+              resets the assessed value to the purchase price
+            </a>
+            , so underwrite the tax bill at your price, not the seller&apos;s.{" "}
+            <Link href="/blog/property-tax-reassessment-rental-property" className={LINK}>
+              Property tax reassessment
+            </Link>{" "}
+            covers how to estimate it.
           </p>
           <p>
             In the{" "}

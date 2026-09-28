@@ -116,9 +116,9 @@ const CURATED: Term[] = [
     term: "DSCR",
     also: ["Debt Service Coverage Ratio"],
     definition:
-      "Annual NOI divided by annual debt service (mortgage P&I). DSCR tells you whether the property can cover its own mortgage from operating income. Every lender pulls it, and each lender sets its own bar.",
+      "Annual NOI divided by annual debt service (mortgage P&I). DSCR tells you whether the property can cover its own mortgage from operating income. It's the main ratio a DSCR loan qualifies on.",
     benchmark:
-      "1.0-1.25 is the typical lender minimum. Most conventional and DSCR-loan products want ≥1.25; 1.5+ unlocks better rate tiers.",
+      "At 1.00, NOI exactly covers the debt service. Lender minimums vary by program: for a DSCR loan on a house or a small multifamily, each lender sets its own.",
     postPath: "/blog/how-to-calculate-dscr",
   },
   {
