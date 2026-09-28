@@ -4,11 +4,14 @@ import { JsonLd } from "@/components/seo/json-ld";
 /**
  * Generic schema.org BreadcrumbList (docs/site-overhaul.md Phase 8.3).
  * Items point at INDEXABLE pages only; pass the trail from the homepage to
- * the current page. Sibling of VsBreadcrumbSchema, which stays for /vs.
+ * the current page. The homepage crumb ("TrueCap") is added here.
  *
- *   <BreadcrumbSchema items={[{ name: "Free calculators", path: "/tools" }, { name: "Cap rate", path: "/tools/cap-rate-calculator" }]} />
+ *   <BreadcrumbSchema items={[{ name: "Free Tools", path: "/tools" }, { name: "Cap rate", path: "/tools/cap-rate-calculator" }]} />
+ *
+ * Used by the hubs (/blog, /tools, /vs, /markets, /states, /glossary: TrueCap ›
+ * Hub, F4) and by VsBreadcrumbSchema (TrueCap › Comparisons › page).
  */
-export function BreadcrumbSchema({ items }: { items: Array<{ name: string; path: string }> }) {
+export function BreadcrumbSchema({ items }: { items: ReadonlyArray<{ name: string; path: string }> }) {
   const siteUrl = getSiteUrl();
   const ld = {
     "@context": "https://schema.org",

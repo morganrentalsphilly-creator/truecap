@@ -21,6 +21,7 @@ import { STATES } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 import { groupMarketsByStateRange } from "@/lib/content-hub-groups";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 
 type Entry = { slug: string; name: string; stateName: string };
 
@@ -90,6 +91,7 @@ export default function MarketsIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={collectionLd} />
+      <BreadcrumbSchema items={[{ name: "Markets", path: "/markets" }]} />
       <Header />
 
       <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">

@@ -1,18 +1,21 @@
 /**
- * Schema.org BreadcrumbList JSON-LD for /vs/* comparison pages —
- * sibling of ToolBreadcrumbSchema (see that file for the why: friendly
- * SERP breadcrumb trails typically lift CTR 5-15%).
+ * Schema.org BreadcrumbList JSON-LD for /vs/* comparison pages — sibling of
+ * ToolBreadcrumbSchema (see that file for the why: friendly SERP breadcrumb
+ * trails instead of a flat URL).
  *
- * Deliberately TWO levels (TrueCap › TrueCap vs X), not three: the /vs
- * hub is noindex by design, and breadcrumb items should point at
- * indexable pages.
+ * Three levels: TrueCap › Comparisons (/vs) › TrueCap vs X. It used to stop at
+ * two because the /vs hub was noindex; the hub is indexable and in the sitemap
+ * now (lib/__tests__/public-metadata-contract.test.ts), so the trail names it
+ * (F4). The hub itself carries TrueCap › Comparisons (app/vs/page.tsx).
  *
  * Usage (inside an /vs/<slug>/page.tsx file):
  *   <VsBreadcrumbSchema vsPath="/vs/dealcheck" pageName="TrueCap vs DealCheck" />
  */
 
-import { getSiteUrl } from "@/lib/site-url";
-import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+
+/** The /vs hub's crumb, shared with the hub's own BreadcrumbList. */
+export const VS_HUB_CRUMB = { name: "Comparisons", path: "/vs" } as const;
 
 type Props = {
   /** Path starting with /vs/ (no trailing slash, no full URL). */
@@ -22,28 +25,5 @@ type Props = {
 };
 
 export function VsBreadcrumbSchema({ vsPath, pageName }: Props) {
-  const siteUrl = getSiteUrl();
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "TrueCap",
-        item: siteUrl,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: pageName,
-        item: `${siteUrl}${vsPath}`,
-      },
-    ],
-  };
-
-  return (
-    <JsonLd data={breadcrumbLd} />
-  );
+  return <BreadcrumbSchema items={[VS_HUB_CRUMB, { name: pageName, path: vsPath }]} />;
 }

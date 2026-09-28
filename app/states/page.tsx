@@ -13,6 +13,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, STATE_COUNT } from "@/lib/states";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Rental-property verification guides by state",
@@ -59,6 +60,7 @@ export default function StatesIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={itemListLd} />
+      <BreadcrumbSchema items={[{ name: "States", path: "/states" }]} />
       <Header />
 
       <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">

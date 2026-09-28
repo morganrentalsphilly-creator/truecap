@@ -24,6 +24,7 @@ import {
 } from "@/lib/calculator-registry";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators",
@@ -74,6 +75,7 @@ export default function ToolsLandingPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={collectionLd} />
+      <BreadcrumbSchema items={[{ name: "Free Tools", path: "/tools" }]} />
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
