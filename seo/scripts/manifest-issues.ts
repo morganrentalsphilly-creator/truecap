@@ -28,7 +28,29 @@ const MAX_BODY = 60_000;
 
 export type ProposedIssue = { title: string; body: string };
 
-export function prepareIssues(manifest: unknown): { issues: ProposedIssue[]; dropped: string[] } {
+const STOP = new Set(["the", "a", "an", "of", "on", "in", "for", "to", "and", "or", "is", "are", "not", "yet", "still", "no", "with", "this", "that", "run", "recurring"]);
+
+/** A title's topic words: lowercase alphanumeric words of 2+ letters, minus filler. */
+export function topicWords(title: string): Set<string> {
+  return new Set((title.toLowerCase().match(/[a-z0-9]{2,}/g) ?? []).filter((w) => !STOP.has(w)));
+}
+
+/**
+ * Same decision, reworded? The loop re-filed "Calculator demand on content
+ * pages" as "... (recurring)" and "seo-market-enrich: ... not yet created"
+ * as "... still blocked: ... not created" on its next run, because the old
+ * check compared exact titles. Jaccard similarity of topic words ≥ 0.6.
+ */
+export function sameTopic(a: string, b: string): boolean {
+  const x = topicWords(a);
+  const y = topicWords(b);
+  if (x.size === 0 || y.size === 0) return false;
+  let inter = 0;
+  for (const w of x) if (y.has(w)) inter += 1;
+  return inter / (x.size + y.size - inter) >= 0.6;
+}
+
+export function prepareIssues(manifest: unknown, openTitles: readonly string[] = []): { issues: ProposedIssue[]; dropped: string[] } {
   const record = manifest && typeof manifest === "object" ? (manifest as Record<string, unknown>) : {};
   const raw = Array.isArray(record.issues) ? record.issues : [];
   const issues: ProposedIssue[] = [];
@@ -48,8 +70,13 @@ export function prepareIssues(manifest: unknown): { issues: ProposedIssue[]; dro
       dropped.push(`"${title.slice(0, 60)}": ${(error as Error).message}`);
       continue;
     }
-    if (seen.has(title.toLowerCase())) continue;
+    if (seen.has(title.toLowerCase()) || issues.some((i) => sameTopic(i.title, title))) continue;
     seen.add(title.toLowerCase());
+    const open = openTitles.find((t) => sameTopic(t, title));
+    if (open !== undefined) {
+      dropped.push(`"${title.slice(0, 60)}": an open proposal already covers it ("${open.slice(0, 60)}")`);
+      continue;
+    }
     if (issues.length >= MAX_ISSUES) {
       dropped.push(`"${title.slice(0, 60)}": over the ${MAX_ISSUES}-issue cap for one run`);
       continue;
@@ -80,7 +107,17 @@ async function main(args: Args): Promise<number> {
     process.stdout.write("0\n");
     return 0;
   }
-  const { issues, dropped } = prepareIssues(manifest);
+  const openFile = flagString(args, "open-titles");
+  let openTitles: string[] = [];
+  if (openFile && existsSync(openFile)) {
+    try {
+      const raw = JSON.parse(readFileSync(openFile, "utf8")) as unknown;
+      if (Array.isArray(raw)) openTitles = raw.map((t) => (typeof t === "string" ? t : String((t as { title?: unknown })?.title ?? ""))).filter(Boolean);
+    } catch {
+      log("open-titles file is not valid JSON — de-duplicating against nothing");
+    }
+  }
+  const { issues, dropped } = prepareIssues(manifest, openTitles);
   issues.forEach((issue, i) => {
     const n = String(i + 1).padStart(2, "0");
     writeText(path.join(outDir, `${n}.title`), issue.title);
@@ -106,9 +143,14 @@ function selfTest(): void {
   const many = prepareIssues({ issues: Array.from({ length: 9 }, (_, i) => ({ title: `t${i}`, body: "b" })) });
   check(many.issues.length === MAX_ISSUES && many.dropped.length === 9 - MAX_ISSUES, "per-run cap");
   check(prepareIssues(null).issues.length === 0 && prepareIssues({ issues: "x" }).issues.length === 0, "malformed manifests");
+  check(sameTopic("Calculator demand on content pages", "Calculator demand on content pages (recurring)"), "a recurring rewording is the same topic");
+  check(sameTopic("seo-market-enrich: content/seo/market-facts.json (F8) not yet created", "seo-market-enrich still blocked: content/seo/market-facts.json not created (F8)"), "a reworded blocker is the same topic");
+  check(!sameTopic("Calculator demand on content pages", "seo-market-enrich: content/seo/market-facts.json (F8) not yet created"), "different decisions stay separate");
+  const reopen = prepareIssues({ issues: [{ title: "Calculator demand on content pages (recurring)", body: "b" }] }, ["Calculator demand on content pages"]);
+  check(reopen.issues.length === 0 && reopen.dropped.some((d) => d.includes("already covers")), "an open proposal on the same topic is not re-filed");
 }
 
 /** Every flag this script reads (lib/cli.ts rejects any other). */
-export const CLI_FLAGS: readonly string[] = ["manifest", "out-dir"];
+export const CLI_FLAGS: readonly string[] = ["manifest", "open-titles", "out-dir"];
 
 runMain(import.meta.url, main, selfTest, { flags: CLI_FLAGS });

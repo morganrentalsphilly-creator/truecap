@@ -36,7 +36,8 @@ import { flagNumber, flagString, hasFlag, log, runMain, check } from "./lib/cli.
 import type { Args } from "./lib/cli.ts";
 import { loadConfig } from "./lib/config.ts";
 import { readJsonIfExists, readJsonl, writeJson } from "./lib/io.ts";
-import { latestDataFile, statePaths, today } from "./lib/paths.ts";
+import path from "node:path";
+import { dataDir, latestDataFile, statePaths, today } from "./lib/paths.ts";
 import type { Brakes, Candidates, Crawl, IndexStatus, LedgerLine, VerifyVerdict } from "./lib/types.ts";
 
 export type RunFlags = {
@@ -52,6 +53,8 @@ export type RunFlags = {
   activeHoldout: string[];
   /** brakes.ts demotedChangeTypes as cleaned slugs: verify-static makes their files tier 2. */
   demotedChangeTypes: string[];
+  /** Titles of the open `seo-proposal` issues: the model must not re-propose them. */
+  openProposals: string[];
   caps: {
     pagesChangedPerRun: number;
     newArticlesPerRun: number;
@@ -100,6 +103,15 @@ export function demotedTypes(brakes: Partial<Brakes> | null): string[] {
   return [...out].sort();
 }
 
+/** Open proposal titles from the data job's gh issue list output (any other shape reads as none). */
+export function proposalTitles(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((x) => (typeof x === "string" ? x : typeof (x as { title?: unknown })?.title === "string" ? (x as { title: string }).title : ""))
+    .map((t) => t.replace(/[<>]/g, "").slice(0, 160))
+    .filter(Boolean);
+}
+
 export function computeFlags(input: {
   runId: string;
   date: string;
@@ -111,6 +123,8 @@ export function computeFlags(input: {
   ledger: LedgerLine[];
   /** The newest brakes-<date>.json, or null when none exists. */
   brakes?: Partial<Brakes> | null;
+  /** seo/data/open-proposals.json (the data job lists open seo-proposal issues). */
+  openProposals?: unknown;
 }): RunFlags {
   const config = loadConfig();
   const calibrating = input.calibration < config.calibration.requiredOwnerMergedLoopPrs;
@@ -132,6 +146,7 @@ export function computeFlags(input: {
     sitemapPaths: (input.crawl?.pages ?? []).map((page) => page.path).sort(),
     activeHoldout: activeHoldoutPaths(input.ledger, input.date),
     demotedChangeTypes: demotedTypes(input.brakes ?? null),
+    openProposals: proposalTitles(input.openProposals),
     caps: {
       pagesChangedPerRun: config.caps.pagesChangedPerRun,
       newArticlesPerRun: crawlStalled ? config.gates.gapArticlesWhileCrawlStalled : config.caps.newArticlesPerRun,
@@ -274,6 +289,7 @@ async function main(args: Args): Promise<number> {
     crawl: readJsonIfExists<Crawl>(latestDataFile("crawl")),
     ledger: readJsonl<LedgerLine>(statePaths.ledger()),
     brakes: readJsonIfExists<Partial<Brakes>>(latestDataFile("brakes")),
+    openProposals: readJsonIfExists<unknown>(path.join(dataDir(), "open-proposals.json")),
   });
   const out = statePaths.runManifest().replace(/run-manifest\.json$/, "run-flags.json");
   writeJson(out, flags);
@@ -294,6 +310,7 @@ function selfTest(): void {
   const tools = modelTools(false);
   check(!tools.includes("WebSearch") && tools.includes("WebFetch(domain:irs.gov)") && !/Bash\(npm|Bash\(npx|gh /.test(tools), "model tools are fenced");
   check(tools.includes("WebFetch(domain:*.irs.gov)") && tools.includes("WebFetch(domain:*.huduser.gov)"), "subdomains (www.irs.gov) are reachable too");
+  check(proposalTitles([{ number: 1, title: "A <b>" }, "B", 3]).join("|") === "A b|B" && proposalTitles(null).length === 0, "open proposal titles");
   check(demotedTypes(null).length === 0 && demotedTypes({ demotedChangeTypes: [{ changeType: "Title Meta", lossRate: 0.5, scored: 10 }] }).join() === "title-meta", "demoted types are cleaned slugs");
   let threw = false;
   try {

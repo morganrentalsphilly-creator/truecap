@@ -132,6 +132,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      issues: read
     # THIS run's brake decision. The gate read last week's halt.json before
     # the brakes ran, so the week the site-wide brake first fires, or a revert
     # is first requested, must be stopped here: model and merge both read it.
@@ -180,6 +181,14 @@ jobs:
         env:
           BING_WEBMASTER_API_KEY: ${{ secrets.BING_WEBMASTER_API_KEY }}
         run: node seo/scripts/bing-pull.ts
+
+      # The model sees what the founder already has open, so a recurring
+      # finding is not filed again under a new title (run-flags.openProposals).
+      - name: List open proposals
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh issue list --label seo-proposal --state open --limit 100 --json number,title > seo/data/open-proposals.json || echo '[]' > seo/data/open-proposals.json
 
       - name: Score, outcomes, brakes, holdout
         env:
