@@ -42,9 +42,9 @@
  *     and `style` on pages (a CSS url() loads a third-party resource);
  *   - route exports beyond default/metadata (OG: default/alt/size/contentType):
  *     `dynamic`, `revalidate`, `runtime` change how and when a module runs;
- *   - redeclaring or mutating globals (a local or reassigned `JSON.stringify`
- *     fakes the JSON-LD form), and JSX pragma comments (an `@jsxImportSource`
- *     is an import no declaration shows);
+ *   - redeclaring or mutating globals (`const JSON = …`, `JSON.stringify = …`),
+ *     and JSX pragma comments (an `@jsxImportSource` is an import no
+ *     declaration shows);
  *   - import specifiers with `..` segments: the allow-list globs let `*` cross
  *     `/`, so `@/components/ui/../../lib/supabase/admin` would match;
  *   - URLs embedded in prose strings or split across strings
@@ -59,9 +59,15 @@
  * dates are set by the publish job from what actually changed. A NEW post's
  * MODIFIED_AT must be exactly that lastmod-map wiring.
  *
- * The brief's `jsonLdScript(...)` form is not accepted yet: no such helper
- * exists, so any import could be aliased to that name. When the F4 helper
- * lands, accept it only as an un-aliased named import from its one module.
+ * JSON-LD (F4): the one accepted form is `<JsonLd data={x} />`, bound by
+ * exactly `import { JsonLd } from "@/components/seo/json-ld"`. That component
+ * serializes and escapes (< > & U+2028 U+2029), so no string in `x` can close
+ * the script. It must be an un-aliased named import from that one module: any
+ * allow-listed export could otherwise be imported AS `JsonLd`, and a local
+ * `function JsonLd` could render anything. A raw `<script>` (the form every
+ * page used before F4, `dangerouslySetInnerHTML={{ __html: JSON.stringify(x) }}`)
+ * is refused, and so is dangerouslySetInnerHTML anywhere: no content module
+ * needs either since F4 moved all 356 blocks onto the helper.
  *
  * What it cannot see: a string computed at runtime (`"<a".slice(0, 1)` +
  * `"/script>"`), or a style value assembled from pieces inside an OG image.
@@ -151,7 +157,7 @@ export const DENIED_FREE_IDENTIFIERS = new Set([
   "EventSource", "importScripts", "postMessage", "sendBeacon",
 ]);
 
-/** Globals a module may not redeclare: `const JSON = {stringify: …}` would fake the JSON-LD form. */
+/** Globals a module may not redeclare or import over (`const JSON = {stringify: …}`, `import { cn as Date }`). */
 const SHADOW_PROTECTED = new Set(["JSON", "Object", "Array", "String", "Number", "Boolean", "Math", "Date", "Symbol", "Promise", "RegExp", "Error", "Map", "Set", "Intl", "undefined", "NaN", "Infinity"]);
 
 /** Value exports an article module may have (measured: every page and OG image in the corpus). */
@@ -160,11 +166,11 @@ const ARTICLE_EXPORTS: Record<string, Set<string>> = {
   "opengraph-image.tsx": new Set(["default", "alt", "size", "contentType"]),
 };
 
-/** Intrinsic elements an article may render. <script> is allowed only as JSON-LD. */
+/** Intrinsic elements an article may render. No <script>: JSON-LD goes through <JsonLd> (JSON_LD_MODULE). */
 const ALLOWED_INTRINSIC = new Set([
   "a", "abbr", "article", "aside", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup", "dd", "del",
   "details", "dfn", "div", "dl", "dt", "em", "figcaption", "figure", "footer", "h1", "h2", "h3", "h4", "h5", "h6",
-  "header", "hr", "i", "ins", "kbd", "li", "main", "mark", "nav", "ol", "p", "pre", "q", "s", "samp", "script",
+  "header", "hr", "i", "ins", "kbd", "li", "main", "mark", "nav", "ol", "p", "pre", "q", "s", "samp",
   "section", "small", "span", "strong", "sub", "summary", "sup", "table", "tbody", "td", "tfoot", "th", "thead",
   "time", "tr", "u", "ul", "var", "wbr",
 ]);
@@ -191,21 +197,11 @@ const ROBOTS_NAME = /^(?:robots|googlebot)$/i;
 /** Its exports redirect, 404 or reroute a page (`permanentRedirect`, `notFound`, `useRouter`, …). */
 const NAVIGATION_MODULE = "next/navigation";
 
-/**
- * The only post-processing a JSON-LD `__html` value may carry: exact
- * one-character escapes (regex source text → replacement string value). Each
- * replacement is a JSON `\uXXXX` escape: it cannot delete, reorder or rebuild
- * characters, so a chain of them never turns checked literals into markup.
- * Built by concatenation so no escape sequence has to survive an editor.
- */
-const uEscape = (hex: string): string => "\\" + "u" + hex;
-const LD_ESCAPES: ReadonlyMap<string, string> = new Map([
-  ["/</g", uEscape("003c")],
-  ["/>/g", uEscape("003e")],
-  ["/&/g", uEscape("0026")],
-  [`/${uEscape("2028")}/g`, uEscape("2028")],
-  [`/${uEscape("2029")}/g`, uEscape("2029")],
-]);
+/** The one JSON-LD emitter (F4): `import { JsonLd } from "@/components/seo/json-ld"`, then `<JsonLd data={x} />`. */
+export const JSON_LD_MODULE = "@/components/seo/json-ld";
+export const JSON_LD_COMPONENT = "JsonLd";
+/** What `<JsonLd>` may carry: its data, and a key when it is rendered from a list. */
+const JSON_LD_ATTRIBUTES = new Set(["data", "key"]);
 
 // -------------------------------------------------------------------- types
 
@@ -809,66 +805,76 @@ function importViolations(sf: ts.SourceFile, file: string, config: SeoConfig): V
   return out;
 }
 
-/** `JSON.stringify(x)` or `JSON.stringify(x, null, <number>)`: never a replacer, never a spread argument. */
-function isJsonStringifyCall(expr: ts.Expression): boolean {
-  const call = unwrapExpression(expr);
-  if (!ts.isCallExpression(call)) return false;
-  const callee = call.expression;
-  if (!ts.isPropertyAccessExpression(callee) || !ts.isIdentifier(callee.expression) || callee.expression.text !== "JSON" || callee.name.text !== "stringify") return false;
-  const args = call.arguments;
-  // `JSON.stringify(...[x, replacer])` is one syntactic argument and a replacer at runtime.
-  if (args.some((arg) => ts.isSpreadElement(arg))) return false;
-  if (args.length === 1) return true;
-  return args.length === 3 && args[1].kind === ts.SyntaxKind.NullKeyword && ts.isNumericLiteral(args[2]);
-}
-
-/** `.replace(/</g, "\\u003c")`-shaped: exactly one LD_ESCAPES pair, compared as source text. */
-function isExactEscapeCall(call: ts.CallExpression): boolean {
-  const callee = call.expression;
-  if (!ts.isPropertyAccessExpression(callee) || (callee.name.text !== "replace" && callee.name.text !== "replaceAll")) return false;
-  if (call.arguments.length !== 2) return false;
-  const [pattern, replacement] = call.arguments;
-  return ts.isRegularExpressionLiteral(pattern) && ts.isStringLiteral(replacement) && LD_ESCAPES.get(pattern.text) === replacement.text;
-}
-
-/** JSON.stringify(...) under zero or more exact escape calls, and nothing else. */
-function isEscapedJsonStringify(expr: ts.Expression): boolean {
-  let current = unwrapExpression(expr);
-  while (ts.isCallExpression(current) && isExactEscapeCall(current)) current = unwrapExpression((current.expression as ts.PropertyAccessExpression).expression);
-  return isJsonStringifyCall(current);
-}
-
 /**
- * `{ __html: JSON.stringify(x) }`, optionally with exact escape calls on top.
- * Any other chain can delete or rebuild characters (`.replace(/"(<)Q/, '""}$1')`
- * turns a checked literal back into `</script>`), so none is accepted.
+ * The JSON-LD rule (F4). `JsonLd` may be bound ONLY by
+ * `import { JsonLd } from "@/components/seo/json-ld"` (named, un-aliased, not
+ * type-only, nothing else imported from that module), and `<JsonLd>` may carry
+ * only `data={…}` (plus `key`), no children. Anything else that could put a
+ * different component or string behind that name is refused: an alias
+ * (`import { cn as JsonLd }`), a default or namespace import, a local
+ * declaration, a re-export.
  */
-function isAllowedLdJsonValue(expr: ts.Expression): boolean {
-  const value = unwrapExpression(expr);
-  if (!ts.isObjectLiteralExpression(value) || value.properties.length !== 1) return false;
-  const prop = value.properties[0];
-  if (!ts.isPropertyAssignment(prop) || propertyNameText(prop.name) !== "__html") return false;
-  return isEscapedJsonStringify(prop.initializer);
+function jsonLdViolations(sf: ts.SourceFile, file: string): Violation[] {
+  const out: Violation[] = [];
+  const add = (node: ts.Node, detail: string): void => {
+    out.push({ rule: "jsonld", path: file, detail: `line ${lineOf(sf, node.getStart(sf))}: ${detail}` });
+  };
+  const exact = `import { ${JSON_LD_COMPONENT} } from "${JSON_LD_MODULE}"`;
+  let imported = false;
+  for (const statement of sf.statements) {
+    if (ts.isExportDeclaration(statement) && statement.moduleSpecifier && literalValue(statement.moduleSpecifier) === JSON_LD_MODULE) {
+      add(statement, `re-exporting from ${JSON_LD_MODULE} is not allowed`);
+    }
+    if (!ts.isImportDeclaration(statement)) continue;
+    const spec = literalValue(statement.moduleSpecifier);
+    const clause = statement.importClause;
+    const bindings = clause?.namedBindings;
+    if (spec === JSON_LD_MODULE) {
+      const onlyJsonLd =
+        !!clause &&
+        !clause.isTypeOnly &&
+        !clause.name &&
+        !!bindings &&
+        ts.isNamedImports(bindings) &&
+        bindings.elements.length > 0 &&
+        bindings.elements.every((el) => !el.isTypeOnly && !el.propertyName && el.name.text === JSON_LD_COMPONENT);
+      if (onlyJsonLd) imported = true;
+      else add(statement, `from ${JSON_LD_MODULE} import exactly \`${exact}\` (no alias, default, namespace, type-only or other name)`);
+      continue;
+    }
+    // Any other import that binds the name: `import JsonLd from …`, `import { x as JsonLd } from …`, `import * as JsonLd from …`.
+    const locals = [clause?.name, bindings && ts.isNamespaceImport(bindings) ? bindings.name : undefined, ...(bindings && ts.isNamedImports(bindings) ? bindings.elements.map((el) => el.name) : [])];
+    for (const local of locals) if (local?.text === JSON_LD_COMPONENT) add(local, `\`${JSON_LD_COMPONENT}\` may only be imported from ${JSON_LD_MODULE}`);
+  }
+  walk(sf, (node) => {
+    if (ts.isIdentifier(node) && node.text === JSON_LD_COMPONENT) {
+      const parent = node.parent;
+      const declares =
+        (ts.isVariableDeclaration(parent) || ts.isFunctionDeclaration(parent) || ts.isFunctionExpression(parent) || ts.isClassDeclaration(parent) || ts.isClassExpression(parent) || ts.isParameter(parent) || ts.isBindingElement(parent) || ts.isEnumDeclaration(parent) || ts.isModuleDeclaration(parent)) &&
+        parent.name === node;
+      if (declares) add(node, `declaring \`${JSON_LD_COMPONENT}\` shadows the JSON-LD helper (${exact})`);
+    }
+    if (!(ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) || !ts.isIdentifier(node.tagName) || node.tagName.text !== JSON_LD_COMPONENT) return;
+    if (!imported) add(node, `<${JSON_LD_COMPONENT}> needs \`${exact}\``);
+    let data = false;
+    for (const attr of node.attributes.properties) {
+      if (!ts.isJsxAttribute(attr)) continue; // spreads are reported by the AST rules
+      const name = jsxAttributeName(attr);
+      if (!JSON_LD_ATTRIBUTES.has(name)) add(attr, `<${JSON_LD_COMPONENT}> may not carry ${name}= (only data= and key=)`);
+      if (name === "data") data = !!attr.initializer && ts.isJsxExpression(attr.initializer) && !!attr.initializer.expression;
+    }
+    if (!data) add(node, `<${JSON_LD_COMPONENT}> must set data={<expression>}`);
+    if (ts.isJsxOpeningElement(node) && ts.isJsxElement(node.parent)) {
+      const hasChildren = node.parent.children.some((child) => !ts.isJsxText(child) || child.text.trim() !== "");
+      if (hasChildren) add(node, `<${JSON_LD_COMPONENT}> may not have children`);
+    }
+  });
+  return out;
 }
 
-function checkScriptElement(element: ts.JsxOpeningElement | ts.JsxSelfClosingElement, report: (detail: string) => void): void {
-  const attrs = element.attributes.properties;
-  let typeOk = false;
-  let htmlOk = false;
-  for (const attr of attrs) {
-    if (!ts.isJsxAttribute(attr)) continue; // spreads are reported separately
-    const name = jsxAttributeName(attr);
-    if (name === "type") typeOk = literalValue(attr.initializer) === "application/ld+json";
-    else if (name === "dangerouslySetInnerHTML") {
-      htmlOk = !!attr.initializer && ts.isJsxExpression(attr.initializer) && !!attr.initializer.expression && isAllowedLdJsonValue(attr.initializer.expression);
-    } else if (name !== "key" && name !== "id") report(`<script> may not carry ${name}=`);
-  }
-  if (!typeOk) report('<script> is allowed only as type="application/ld+json"');
-  if (!htmlOk) report('<script> must set dangerouslySetInnerHTML={{ __html: JSON.stringify(<expr>) }} (optionally + exact .replace(/</g, "\\u003c")-style escapes)');
-  if (ts.isJsxOpeningElement(element) && ts.isJsxElement(element.parent)) {
-    const hasChildren = element.parent.children.some((child) => !ts.isJsxText(child) || child.text.trim() !== "");
-    if (hasChildren) report("<script> may not have children");
-  }
+/** The JSON-LD rule for one module (exported for the tests). */
+export function checkJsonLd(file: string, source: string): Violation[] {
+  return jsonLdViolations(parseTs(file, source), file);
 }
 
 /** True when an identifier is a property/key/attribute NAME rather than a reference. */
@@ -1022,7 +1028,7 @@ function astViolations(sf: ts.SourceFile, file: string): Violation[] {
       // match on the cooked text, so a unicode-escaped spelling is caught and prose is not.
       if (DENIED_IDENTIFIERS.has(node.text)) add("identifier", node, `the string ${preview(node.text)} names a denied member (as a key it reaches the same thing)`);
       else if ((node.text === "dangerouslySetInnerHTML" || node.text === "__html") && !(ts.isPropertyAssignment(node.parent) && node.parent.name === node)) {
-        add("dangerous-html", node, `the string ${preview(node.text)} is only allowed as the JSON-LD <script> form's own key`);
+        add("dangerous-html", node, `the string ${preview(node.text)} names a raw-HTML sink (JSON-LD goes through <${JSON_LD_COMPONENT}>)`);
       }
     } else if (ts.isBinaryExpression(node) && node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) {
       // `JSON.stringify = …` or `({ a: JSON.stringify } = o)` rewrites what the fence checks, for every page in the build.
@@ -1051,43 +1057,24 @@ function astViolations(sf: ts.SourceFile, file: string): Violation[] {
       // OG images are styled inline by design; a page has no style= in the corpus, and a CSS url() there loads a third-party resource.
       if (name === "style" && !isOgImage) add("jsx-attribute", node, "style= is allowed only in opengraph-image.tsx (use className)");
       if (name === "dangerouslySetInnerHTML") {
-        const element = node.parent.parent;
-        const tag = element.tagName.getText(sf);
-        if (tag !== "script") add("dangerous-html", node, `dangerouslySetInnerHTML on <${tag}> (only JSON-LD <script> may use it)`);
+        const tag = node.parent.parent.tagName.getText(sf);
+        add("dangerous-html", node, `dangerouslySetInnerHTML on <${tag}> is not allowed (JSON-LD goes through <${JSON_LD_COMPONENT} data={…} />)`);
       }
     } else if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = node.tagName;
       const isIntrinsic = (ts.isIdentifier(tag) && /^[a-z]/.test(tag.text)) || ts.isJsxNamespacedName(tag);
       if (isIntrinsic) {
         const name = tag.getText(sf);
-        if (!ALLOWED_INTRINSIC.has(name)) add("jsx-element", node, `<${name}> is not an allowed article element`);
-        if (name === "script") checkScriptElement(node, (detail) => add("jsx-script", node, detail));
+        if (name === "script") add("jsx-script", node, `<script> is not allowed: emit JSON-LD with <${JSON_LD_COMPONENT} data={…} /> (import { ${JSON_LD_COMPONENT} } from "${JSON_LD_MODULE}")`);
+        else if (!ALLOWED_INTRINSIC.has(name)) add("jsx-element", node, `<${name}> is not an allowed article element`);
       }
     }
     if ((ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) && ["dangerouslySetInnerHTML", "__html"].includes(propertyNameText(node.name) ?? "")) {
-      // `__html` is fine inside the one allowed JSX form; anywhere else it is a spread-in sink.
-      const inAllowedAttr = (() => {
-        for (let p: ts.Node | undefined = node.parent; p; p = p.parent) {
-          if (ts.isJsxAttribute(p)) return jsxAttributeName(p) === "dangerouslySetInnerHTML";
-          if (ts.isSourceFile(p)) return false;
-        }
-        return false;
-      })();
-      if (!inAllowedAttr) add("dangerous-html", node, `a \`${propertyNameText(node.name)}\` property outside the JSON-LD <script> form`);
+      // A raw-HTML payload waiting for a sink (a spread, a helper): no content module needs one.
+      add("dangerous-html", node, `a \`${propertyNameText(node.name)}\` property is not allowed (JSON-LD goes through <${JSON_LD_COMPONENT}>)`);
     }
   });
   return out;
-}
-
-/**
- * The regex of an exact JSON-LD escape (`/</g` in `JSON.stringify(x).replace(/</g, "\\u003c")`)
- * contains `<` and nothing else can use it. Only there, only with its exact
- * replacement, and only on a JSON.stringify chain: a user-defined `o.replace`
- * could hand the regex (and its `.source`) straight back.
- */
-function isLdEscapePattern(node: ts.RegularExpressionLiteral): boolean {
-  const call = node.parent;
-  return !!call && ts.isCallExpression(call) && call.arguments[0] === node && isExactEscapeCall(call) && isEscapedJsonStringify(call);
 }
 
 /**
@@ -1109,7 +1096,7 @@ function literalViolations(sf: ts.SourceFile, file: string): Violation[] {
     if (ts.isRegularExpressionLiteral(node)) {
       // `/<!--/.source`, `String(/x</)` and `${/re/}` all put the regex text in a string.
       const pattern = node.text.slice(1, node.text.lastIndexOf("/"));
-      if (!isLdEscapePattern(node) && (MARKUP_BREAKERS.test(node.text) || pattern.endsWith("<"))) {
+      if (MARKUP_BREAKERS.test(node.text) || pattern.endsWith("<")) {
         out.push({ rule: "literal", path: file, detail: `line ${line}: a regular expression carries markup (${preview(node.text)}); its source becomes a string` });
       }
       return;
@@ -1155,7 +1142,7 @@ export function wholeFileViolations(file: string, source: string, config: SeoCon
 }
 
 function wholeModuleViolations(sf: ts.SourceFile, file: string, config: SeoConfig): Violation[] {
-  return [...importViolations(sf, file, config), ...astViolations(sf, file), ...literalViolations(sf, file)];
+  return [...importViolations(sf, file, config), ...astViolations(sf, file), ...jsonLdViolations(sf, file), ...literalViolations(sf, file)];
 }
 
 /**
@@ -2591,10 +2578,13 @@ function selfTest(): void {
   check(hrefViolation("/api/export.csv", file, "jsx-href", { tier: 1, sitemap: new Set(), publicFile: () => false }, config) !== null, "non-public asset path rejected");
 
   const page = (pre: string, jsx: string): string => `${pre}\nexport default function Page() { return <main>${jsx}</main>; }\n`;
-  const rebuild = `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ a: "<Q/script>" }).replace(/"(<)Q/, '""}$1') }} />`;
-  check(checkAst(file, page("", rebuild)).some((v) => v.rule === "jsx-script"), "a replace chain that rebuilds markup is rejected");
-  const escaped = `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({}).replace(/</g, ${JSON.stringify(LD_ESCAPES.get("/</g"))}) }} />`;
-  check(checkAst(file, page("", escaped)).length === 0 && checkLiterals(file, page("", escaped)).length === 0, "the exact < escape is accepted");
+  const ldImport = `import { ${JSON_LD_COMPONENT} } from "${JSON_LD_MODULE}";`;
+  const rawScript = `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ a: 1 }) }} />`;
+  check(checkAst(file, page("", rawScript)).some((v) => v.rule === "jsx-script"), "a raw JSON-LD <script> is rejected (F4: JsonLd only)");
+  const helper = page(`${ldImport}\nconst ld = { "@context": "https://schema.org" };`, "<JsonLd data={ld} />");
+  check(checkAst(file, helper).length === 0 && checkJsonLd(file, helper).length === 0 && checkLiterals(file, helper).length === 0, "<JsonLd data={x} /> from its module is accepted");
+  check(checkJsonLd(file, page('import { cn as JsonLd } from "@/lib/utils";', "<JsonLd data={{}} />")).length > 0, "an aliased JsonLd is rejected");
+  check(checkJsonLd(file, page("function JsonLd(p: { data: unknown }) { return <p />; }", "<JsonLd data={{}} />")).length > 0, "a local JsonLd is rejected");
   check(checkAst(file, page('const { "constructor": F } = () => 0;', "<p />")).some((v) => v.rule === "identifier"), "a denied member written as a string is rejected");
   check(checkLiterals(file, "const a = { b: /<!--/.source };").length === 1, "a regex carrying markup is rejected");
   check(checkLinks(file, page('const L = "/" + "/evil.example";', "<a href={L}>x</a>"), { tier: 1, sitemap: new Set(), addedLines: null }, config).length === 1, "an href const assembled at runtime is rejected");
