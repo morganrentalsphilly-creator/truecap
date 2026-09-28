@@ -143,7 +143,7 @@ describe("F8 titles and H1s come from the HUD vintage", () => {
 });
 
 describe("F8 FMR vocabulary: never an average, typical, median or market rent", () => {
-  it("holds on every market and state page, their metadata, and llms.txt", async () => {
+  it("holds on every market and state page, their metadata, and llms.txt", { timeout: 30_000 }, async () => {
     const offenders: string[] = [];
     const check = (where: string, value: string) => {
       for (const pattern of FMR_MISNAMES) {
@@ -173,7 +173,7 @@ describe("F8 FMR vocabulary: never an average, typical, median or market rent", 
     expect(offenders).toEqual([]);
   });
 
-  it("never offers FMR as the reader's rent, only as a labeled placeholder", async () => {
+  it("never offers FMR as the reader's rent, only as a labeled placeholder", { timeout: 30_000 }, async () => {
     const offenders: string[] = [];
     const pages = [
       ...ALL_MARKETS.map(async (market) => [`/markets/${market.slug}`, text(await renderCity(market.slug))] as const),

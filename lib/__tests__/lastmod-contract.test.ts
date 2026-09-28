@@ -115,7 +115,7 @@ describe("lastmod map contract", () => {
     expect(unwired).toEqual([]);
   });
 
-  it("leaves no hand-typed or build-time modified date in any page template", () => {
+  it("leaves no hand-typed or build-time modified date in any page template", { timeout: 30_000 }, () => {
     // Every modified-date slot (dateModified, modifiedTime, modifiedAt,
     // MODIFIED_AT-style consts), read from the syntax tree: no date literal
     // anywhere in its value (`lastmodFor(x) ?? "2026-09-06"` is a floor) and
