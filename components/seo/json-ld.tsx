@@ -25,26 +25,23 @@
 /** One JSON-LD object (usually with "@context"), or several in one block. */
 export type JsonLdData = Readonly<Record<string, unknown>> | ReadonlyArray<Readonly<Record<string, unknown>>>;
 
-/** Code units escaped in the serialized JSON: < > & and the two JS line terminators. */
-const ESCAPED_CODE_UNITS: ReadonlySet<number> = new Set([0x3c, 0x3e, 0x26, 0x2028, 0x2029]);
-
 /** Backslash + "u": built from pieces so no tool or editor ever reads it as an escape in this file. */
 const UNICODE_ESCAPE_PREFIX = "\\" + "u";
 
+/** < > & and the two JavaScript line terminators (U+2028, U+2029), built from code points for the same reason. */
+const UNSAFE_IN_SCRIPT = new RegExp(`[<>&${String.fromCharCode(0x2028, 0x2029)}]`, "g");
+
+const escapeCodeUnit = (ch: string): string => `${UNICODE_ESCAPE_PREFIX}${ch.charCodeAt(0).toString(16).padStart(4, "0")}`;
+
 /**
- * JSON.stringify(data) with <, >, & and U+2028/U+2029 written as \uXXXX.
- * JSON.parse of the result deep-equals `data` (after JSON's own rules:
- * undefined values dropped, and so on).
+ * JSON.stringify(data) with <, >, & and U+2028/U+2029 written as JSON unicode
+ * escapes. JSON.parse of the result deep-equals `data` (after JSON's own
+ * rules: undefined values dropped, and so on).
  */
 export function serializeJsonLd(data: JsonLdData): string {
   const json = JSON.stringify(data);
   if (typeof json !== "string") throw new TypeError("JSON-LD data must serialize to JSON");
-  let out = "";
-  for (let i = 0; i < json.length; i += 1) {
-    const code = json.charCodeAt(i);
-    out += ESCAPED_CODE_UNITS.has(code) ? `${UNICODE_ESCAPE_PREFIX}${code.toString(16).padStart(4, "0")}` : json[i];
-  }
-  return out;
+  return json.replace(UNSAFE_IN_SCRIPT, escapeCodeUnit);
 }
 
 export function JsonLd({ data }: { data: JsonLdData }) {
