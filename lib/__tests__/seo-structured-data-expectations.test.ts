@@ -123,7 +123,7 @@ describe("wiring", () => {
 
   it("the healthcheck and jsonld-validate both use the shared module (no private copy of the table)", () => {
     const healthcheck = readFileSync(join(process.cwd(), "scripts/seo/healthcheck.mjs"), "utf8");
-    expect(healthcheck).toContain('import { jsonLdNodes, missingSchema, structuredDataProblems } from "./structured-data-expectations.mjs";');
+    expect(healthcheck).toContain('import { jsonLdNodes, missingSchema, schemaTypes, structuredDataProblems } from "./structured-data-expectations.mjs";');
     expect(healthcheck).not.toMatch(/const REQUIRED_SCHEMA\s*=/);
     expect(healthcheck).toMatch(/structuredDataProblems\(path, ldNodes\)/);
     // jsonld-validate reports the same values as "page" findings.

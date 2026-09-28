@@ -116,6 +116,11 @@ export function jsonLdNodes(html) {
 }
 
 const typesOf = (node) => (Array.isArray(node["@type"]) ? node["@type"] : [node["@type"]]).filter((t) => typeof t === "string");
+
+/** Every @type the page declares, sorted and de-duplicated (the healthcheck's per-page schemaTypes). */
+export function schemaTypes(nodes) {
+  return [...new Set(nodes.flatMap(typesOf))].sort();
+}
 const isReference = (node) => "@id" in node && Object.keys(node).every((key) => key === "@id" || key === "@type" || key === "@context");
 
 /** "/tools/x#app" for "https://any.origin/tools/x#app"; null when it is not an absolute URL. */
