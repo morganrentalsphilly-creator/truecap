@@ -8,7 +8,7 @@ TrueCap is a tool a rental investor uses to decide what to offer. The copy shoul
 
 1. **Say the thing.** "The highest price that still clears your targets." Not "the modeled price threshold under explicit user targets."
 2. **Second person, active voice.** "You can edit every assumption." Not "Assumptions are editable by the user."
-3. **One disclaimer per page.** The `<Disclaimer />` component (`components/marketing/disclaimer.tsx`) says once that TrueCap is a model, not an appraisal, a lender decision, or investment advice, and links to the Methodology. Nothing else on the page repeats it. No per-element hedges.
+3. **One disclaimer per page.** The `<Disclaimer />` component (`components/marketing/disclaimer.tsx`) says once that TrueCap is a model, not an appraisal, a lender decision, or investment advice, that our articles and guides are general information, not tax, legal or investment advice, to be confirmed with a qualified professional, and links to the Methodology. Nothing else on the page repeats it. No per-element hedges, and no per-post "not tax or legal advice" line: the footer disclaimer renders on every blog post.
 4. **Label sources, don't apologize for them.** Inputs carry a two-or-three-word source label: `HUD FMR`, `FRED rate`, `TrueCap default`, `Your input`. A default reads "default — replace with your local number", not "preliminary fallback verify locally".
 5. **Numbers are facts, not tone.** Copy changes may change tone, never facts. Prices, percentages, thresholds, dates, and claims stay exactly what they are, and they come from their config or data source, never retyped into prose.
 6. **No internal vocabulary.** Words that describe how the codebase is organized are not for customers: released, unreleased, registry, hand-curated, checked-in, as-of dates, synthetic, deterministic screen, selected-rule.
@@ -37,7 +37,7 @@ TrueCap is a tool a rental investor uses to decide what to offer. The copy shoul
 
 ## The disclaimer (verbatim, one per page)
 
-> TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. The math is published in our Methodology.
+> TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. Our articles and guides are general information, not tax, legal or investment advice; confirm the specifics with a qualified professional. The math is published in our Methodology.
 
 ## Hero (homepage)
 
