@@ -11,6 +11,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { oneTimePdfReturnBootstrapScript } from "@/lib/one-time-pdf-return";
 import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
 import "./globals.css";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -198,50 +199,47 @@ export default function RootLayout({
             dangling — Google's Rich Results Test would flag them. The
             WebSite schema also wires the /search SearchAction so Google
             can render a sitelinks search box on brand SERPs. */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@graph": [
-                {
-                  "@type": "Organization",
-                  "@id": `${siteUrl}/#organization`,
-                  name: "TrueCap",
-                  url: siteUrl,
-                  logo: `${siteUrl}/icon-512x512.png`,
-                  description:
-                    "Rental acquisition decision engine — screen a property, review the assumptions, stress-test the downside, and solve the price that meets an investor's targets.",
-                  sameAs: [],
-                  // No Person/founder node by request (2026-09-07).
-                  // The /about page references this Organization as mainEntity.
-                  // Moved here from the homepage's (now removed)
-                  // duplicate Organization node so the single canonical
-                  // entity keeps the support-contact signal.
-                  contactPoint: {
-                    "@type": "ContactPoint",
-                    contactType: "customer support",
-                    email: "hello@usetruecap.com",
-                    availableLanguage: "English",
-                  },
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": `${siteUrl}/#organization`,
+                name: "TrueCap",
+                url: siteUrl,
+                logo: `${siteUrl}/icon-512x512.png`,
+                description:
+                  "Rental acquisition decision engine — screen a property, review the assumptions, stress-test the downside, and solve the price that meets an investor's targets.",
+                sameAs: [],
+                // No Person/founder node by request (2026-09-07).
+                // The /about page references this Organization as mainEntity.
+                // Moved here from the homepage's (now removed)
+                // duplicate Organization node so the single canonical
+                // entity keeps the support-contact signal.
+                contactPoint: {
+                  "@type": "ContactPoint",
+                  contactType: "customer support",
+                  email: "hello@usetruecap.com",
+                  availableLanguage: "English",
                 },
-                {
-                  "@type": "WebSite",
-                  "@id": `${siteUrl}/#website`,
-                  url: siteUrl,
-                  name: "TrueCap",
-                  publisher: { "@id": `${siteUrl}/#organization` },
-                  potentialAction: {
-                    "@type": "SearchAction",
-                    target: {
-                      "@type": "EntryPoint",
-                      urlTemplate: `${siteUrl}/search?q={search_term_string}`,
-                    },
-                    "query-input": "required name=search_term_string",
+              },
+              {
+                "@type": "WebSite",
+                "@id": `${siteUrl}/#website`,
+                url: siteUrl,
+                name: "TrueCap",
+                publisher: { "@id": `${siteUrl}/#organization` },
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate: `${siteUrl}/search?q={search_term_string}`,
                   },
+                  "query-input": "required name=search_term_string",
                 },
-              ],
-            }),
+              },
+            ],
           }}
         />
         {/* Skip-to-content link — invisible until focused, then jumps

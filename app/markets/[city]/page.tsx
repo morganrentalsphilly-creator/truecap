@@ -53,6 +53,7 @@ import { MARKET_DATA_ATTRIBUTE } from "@/lib/markets/thin";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 // Candidates only. Anything not currently released is filtered out below, so
 // a market page can never link a reader to a gated tool.
@@ -193,14 +194,8 @@ export default async function MarketCityPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
+      <JsonLd data={webPageLd} />
+      <JsonLd data={breadcrumbLd} />
       <Header />
 
       <main

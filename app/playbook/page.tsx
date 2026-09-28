@@ -28,6 +28,7 @@ import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "The First Offer Playbook",
@@ -233,10 +234,7 @@ export default function PlaybookPage() {
         </article>
       </main>
       <SiteFooter />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(playbookLd) }}
-      />
+      <JsonLd data={playbookLd} />
     </>
   );
 }

@@ -7,6 +7,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export type SourceFirstArticleIdentity = {
   slug: string;
@@ -108,18 +109,9 @@ export function SourceFirstArticle({
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
+      <JsonLd data={articleLd} />
+      <JsonLd data={breadcrumbLd} />
+      <JsonLd data={faqLd} />
       <main id="main" className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         <header className="mb-8 sm:mb-10">
           <Link

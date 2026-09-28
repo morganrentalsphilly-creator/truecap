@@ -1,4 +1,5 @@
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
 
 /**
  * Generic schema.org BreadcrumbList (docs/site-overhaul.md Phase 8.3).
@@ -22,5 +23,5 @@ export function BreadcrumbSchema({ items }: { items: Array<{ name: string; path:
       })),
     ],
   };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />;
+  return <JsonLd data={ld} />;
 }

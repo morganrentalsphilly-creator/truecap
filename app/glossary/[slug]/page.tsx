@@ -28,6 +28,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import type { GlossaryCategory } from "@/lib/glossary";
 import { truncateMetaDescription } from "@/lib/utils";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -211,18 +212,9 @@ export default async function GlossaryTermPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(definedTermLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
+      <JsonLd data={definedTermLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={breadcrumbLd} />
 
       <Header />
 

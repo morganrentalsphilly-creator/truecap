@@ -45,6 +45,7 @@ import { StickyConversionBar } from "@/components/marketing/sticky-conversion-ba
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
+import { JsonLd } from "@/components/seo/json-ld";
 
 // ISR: prerendered at build, regenerated in the background at most
 // hourly. Keeps content edits fresh without giving up edge caching.
@@ -140,10 +141,7 @@ export default function Home() {
     // bars keep working — unlike overflow on html/body, which is known to break
     // position:sticky and scrollTo on iOS Safari.
     <div className="relative overflow-x-clip">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <JsonLd data={structuredData} />
       {/* This static page only serves cold visitors — signed-in users are
           rewritten to /home-authed by the proxy. In the RARE case a signed-in
           user reaches this cached page (proxy cookie miss), they see the

@@ -35,6 +35,7 @@ import { lastmodFor } from "@/lib/seo/lastmod";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export type SafeMarketPageIdentity = {
   city: string;
@@ -691,14 +692,8 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webpageLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
+      <JsonLd data={webpageLd} />
+      <JsonLd data={breadcrumbLd} />
       <Header />
       <main
         id="main"

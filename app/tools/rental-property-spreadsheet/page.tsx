@@ -35,6 +35,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 
@@ -145,14 +146,8 @@ export default function RentalPropertySpreadsheetPage() {
         toolPath="/tools/rental-property-spreadsheet"
         toolName="Rental property spreadsheet"
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(spreadsheetLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
+      <JsonLd data={spreadsheetLd} />
+      <JsonLd data={faqLd} />
 
       <div className="min-h-screen bg-background">
         <main
