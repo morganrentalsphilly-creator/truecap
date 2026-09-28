@@ -72,7 +72,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "A property with $36,000 of NOI ($60k gross rent minus $24k expenses) and a $450,000 purchase price has a cap rate of $36,000 ÷ $450,000 = 8.0%.",
     whyItMatters:
       "Cap rate lets you compare properties on an apples-to-apples basis regardless of financing. It's also how commercial properties (5+ units) are valued — buyers price them on NOI ÷ market cap rate.",
-    related: ["noi", "coc", "dscr", "onePercentRule"],
+    related: ["noi", "coc", "dscr", "onePercentRule", "grm", "negativeLeverage"],
     postUrl: "/blog/what-is-a-good-cap-rate",
   },
   coc: {
@@ -180,7 +180,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Cash flow alone undersells a rental: a deal that's near break-even today can still build real wealth through equity paydown and appreciation. This number is the closest single figure to 'what will this actually earn me long-term.'",
     howToCheck:
       "Read the assumptions before the result. Change rent growth, expense growth, appreciation, and the sale cost one at a time and watch how far the ten-year figure moves. A return that survives flat rent and zero appreciation is a return you can plan around; one that depends on the growth inputs is a scenario, and you should say so when you share it.",
-    related: ["irr", "coc", "appreciation"],
+    related: ["irr", "coc", "appreciation", "equityMultiple"],
   },
   mao: {
     term: "Offer Ceiling",
@@ -542,7 +542,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "ARV is a high-sensitivity assumption in BRRRR and flip plans. Build it from relevant closed comps and test multiple downside values; there is no reliable market-wide appraisal haircut that substitutes for property-specific evidence.",
     howToCheck:
       "Build it from closed sales, not active listings. Use renovated properties of similar size, age, and layout within the same neighborhood that sold in the last six months, and adjust for differences you can point to. Ask an agent or appraiser who works that market to check your comparables. Then underwrite the case where the value comes in ten percent lower; if the plan fails there, the margin is the problem, not the estimate.",
-    related: ["brrrr", "ltv"],
+    related: ["brrrr", "ltv", "rehab"],
   },
   buildingValue: {
     term: "Building Value %",
@@ -657,7 +657,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Small assumed rates compound into large modeled exit differences. Build the base case from current local evidence and include flat and declining-value scenarios; no market tier guarantees appreciation.",
     howToCheck:
       "Look at the closed-sale history for similar properties in the same neighborhood over the last decade, including the years values fell, and ask what drove the changes: jobs, supply, and lending conditions, not the national headline. Then build the base case from that evidence and run flat and declining cases beside it. The projection should tell you what you are betting on, not confirm it.",
-    related: ["irr", "rentGrowth"],
+    related: ["irr", "rentGrowth", "principalPaydown"],
   },
   sellingCost: {
     term: "Selling Cost %",

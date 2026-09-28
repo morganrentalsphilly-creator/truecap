@@ -23,6 +23,7 @@ import { BLOG_POSTS } from "@/lib/blog-posts";
 import { lastmodOrPublished } from "@/lib/seo/lastmod";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
+import { linkablePosts } from "@/lib/seo/link-policy";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
@@ -69,7 +70,8 @@ function postModifiedAt(post: { slug: string; publishedAt: string }): string {
 
 export default function BlogIndexPage() {
   const siteUrl = getSiteUrl();
-  const availablePosts = BLOG_POSTS.filter((post) => post.available);
+  // Published posts a block may link: a noindexed post drops out (lib/seo/link-policy.ts).
+  const availablePosts = linkablePosts(BLOG_POSTS);
   const postGroups = groupBlogPostsByTopic(availablePosts, BLOG_TOPICS);
   const blogLd = {
     "@context": "https://schema.org",

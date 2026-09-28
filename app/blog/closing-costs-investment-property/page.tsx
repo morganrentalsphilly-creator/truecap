@@ -282,9 +282,16 @@ export default function ClosingCostsPost() {
               and reconcile its result with the lender&apos;s payment schedule.
             </p>
             <p>
-              <strong>Appraisal and reports.</strong> Ask which appraisal, rent,
-              flood, tax, credit, inspection, or other reports the program
-              requires, who selects the provider, and what each item costs. Do
+              <strong>Appraisal and reports.</strong> Ask which{" "}
+              <Link
+                href="/blog/investment-property-appraisal"
+                className="text-primary font-semibold hover:underline"
+              >
+                appraisal
+              </Link>
+              , rent, flood, tax, credit, inspection, or other reports the
+              program requires, who selects the provider, and what each item
+              costs. Do
               not assume a Form 1007 or any quoted amount applies to every loan
               or property type.
             </p>
@@ -375,7 +382,14 @@ export default function ClosingCostsPost() {
               settlement statement rather than optimizing one item in isolation.
             </p>
             <p>
-              Track these amounts in <em>cash to close</em>, then avoid counting
+              Track these amounts in{" "}
+              <Link
+                href="/blog/how-much-money-to-buy-a-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                <em>cash to close</em>
+              </Link>
+              , then avoid counting
               the same insurance or tax period twice in your{" "}
               <Link
                 href="/blog/rental-property-pro-forma-explained"

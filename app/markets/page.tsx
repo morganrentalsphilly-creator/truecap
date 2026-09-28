@@ -22,17 +22,20 @@ import { getSiteUrl } from "@/lib/site-url";
 import { groupMarketsByStateRange } from "@/lib/content-hub-groups";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { linkableMarkets, linkableStates } from "@/lib/seo/link-policy";
 
 type Entry = { slug: string; name: string; stateName: string };
 
-const ALL: Entry[] = [
+// Every market page a block may link: an unindexable or noindexed city drops
+// out (lib/seo/link-policy.ts); today that is none of the 162.
+const ALL: Entry[] = linkableMarkets([
   ...BESPOKE_MARKETS,
   ...MARKET_CITIES.map((c) => ({
     slug: c.slug,
     name: c.name,
     stateName: c.stateName,
   })),
-];
+]);
 
 export const metadata: Metadata = {
   title: "Rental Property Markets by City",
@@ -76,7 +79,7 @@ export default function MarketsIndexPage() {
   // internal-link gap (the hub previously rendered states as plain text).
   // States without a guide page stay as plain text — no broken links.
   const stateSlugByName = new Map(
-    Object.values(STATES).map((s) => [s.name, s.slug] as const),
+    linkableStates(Object.values(STATES)).map((s) => [s.name, s.slug] as const),
   );
 
   const collectionLd = {

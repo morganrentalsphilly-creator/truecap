@@ -48,7 +48,7 @@ score.ts does not check the next rules (the step 3 keep rules); this skill does.
 1. **Dataset preconditions.** Skip every prune candidate this run (same reason each) if one of these holds:
    - `content/seo/noindex.json` does not exist: "noindex list not ready (F2)".
    - The grep finds no reader in the sitemap code or in `proxy.ts`: "noindex list not wired (F2)". A list nothing reads removes nothing.
-   - The reader feeds the body of a page other than the listed path (a related-links block, hub list or state guide that drops listed paths): "noindex list renders on other pages". verify-build's render diff fails on undeclared page changes. Robots metadata on the listed page itself is fine: that page is declared.
+   - The reader feeds the body of a page other than the listed path (a related-links block, hub list or state guide that drops listed paths). Since F9 it does, on purpose: `lib/seo/link-policy.ts` (imported by `RelatedBlogPosts`, `RelatedContent`, the topic hubs, the /blog, /markets, /states and /glossary hubs, and the city pages' state-guide and nearby-market links via `lib/markets/nearby.ts`) drops every listed path, so a noindex addition re-renders each page that linked the path through one of those blocks, and verify-build's render diff fails a loop patch on those undeclared pages. So every prune is tier 2 ("noindex list renders on other pages"): run steps 2–5, then file the path in the prune issue (step 6) and edit nothing. Robots metadata on the listed page itself would be fine: that page is declared.
    - An existing entry is NOT expected in `run-flags.sitemapPaths`: `app/sitemap.ts` drops every listed path, and verify-static's `checkContentJson` checks sitemap membership only for the paths a run adds.
 
    **Guard pins by family.** The model job cannot run vitest, so check these by reading. A match sends that family's prunes to the tier-2 issue only:
@@ -97,7 +97,7 @@ Never edit the page, its robots metadata, a redirect, `lib/blog-posts.ts` (`avai
    - `lib/__tests__/seo-guards.test.ts` (sitemap coverage of indexable routes; step 1 pins);
    - `lib/__tests__/markets-indexability.test.ts` (every `MARKET_CITIES` slug indexable, ≥ 150 indexable slugs; step 1 pins);
    - `lib/__tests__/content-hub-readiness.test.ts`;
-   - `lib/__tests__/internal-links.test.ts`, `lib/__tests__/internal-glossary-links.test.ts`;
+   - `lib/__tests__/internal-links.test.ts`, `lib/__tests__/internal-glossary-links.test.ts`, `lib/__tests__/internal-link-graph.test.tsx` (no page may link a listed path);
    - the F2 loader's own test.
 
    If one pins a count or list that the new entry would change, restore the file and skip with "guard pins <test>", plus an issue.
@@ -122,5 +122,6 @@ Add one `changes[]` entry per pruned path, all naming the same file. ledger.ts r
   - `brakes.demotedChangeTypes` lists `prune-noindex`.
   - Thin only on `uniqueRatio` (`wordCount` ≥ 600): list it with its word count and ratio.
   - A family pinned by a guard (step 1), or a noindex.json fence or guard mismatch (step 1, gate 3).
+  - The noindex list renders on other pages (step 1; always true since F9). List, from `linkGraph.edges` whose `target` is the path, the pages that link it: the owner's PR removes every hand-written body link among them, because `lib/__tests__/internal-link-graph.test.tsx` fails on any internal link to a listed path; the registry-driven blocks drop it by themselves.
   - Any deletion, redirect or consolidation (a non-null `mergeInto`).
 - **Issue format:** file ONE prune issue per run, `{ "title": "seo-prune: <n> noindex proposals for owner review", "body": "…", "tier": 2 }`. The body lists each path, its step 8 evidence, why it is tier 2, and the line to add to `content/seo/noindex.json`. Consolidation and fence issues are filed separately. Write every issue as plain facts: no pasted query strings and no markup.

@@ -147,7 +147,14 @@ const CORE_SOURCES: Record<string, SourceSpec[]> = {
   ],
 };
 
-/** Fields app/glossary/[slug]/page.tsx renders (toolUrl/postUrl/also are not rendered). */
+/**
+ * Fields app/glossary/[slug]/page.tsx renders (postUrl/also are not rendered).
+ * Since F9 the page also renders `toolUrl` as a link, but only while that
+ * calculator is released; the field stays out on purpose, because b0509fb
+ * removed seven unreleased toolUrls when nothing rendered them and counting
+ * the field would re-date those pages to it. A toolUrl edit is a link change
+ * the publish step dates by the rendered <main> hash.
+ */
 const GLOSSARY_FIELDS = ["term", "slug", "category", "definition", "benchmark", "formula", "example", "howToCheck", "whyItMatters", "related"];
 /**
  * Fields app/states/[slug]/page.tsx renders from lib/states.ts. Since F8 the

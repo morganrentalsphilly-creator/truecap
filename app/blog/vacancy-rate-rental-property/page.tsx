@@ -381,8 +381,15 @@ export default function VacancyRatePost() {
             Where to find the real number before you buy
           </h2>
           <p>
-            For an occupied property, the truth is in the paperwork — ask for
-            it during due diligence and read it like an auditor:
+            For an{" "}
+            <Link
+              href="/blog/buying-rental-property-with-tenants"
+              className="text-primary font-semibold hover:underline"
+            >
+              occupied property
+            </Link>
+            , the truth is in the paperwork — ask for it during due diligence
+            and read it like an auditor:
           </p>
           <ul>
             <li>

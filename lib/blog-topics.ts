@@ -9,6 +9,13 @@
  * test. Post slugs are looked up in BLOG_POSTS at render time (a stale slug
  * simply doesn't render — no crash); calculator slugs resolve against
  * lib/calculator-registry.ts. A unit test guards the calculator slugs.
+ *
+ * Every published post sits in exactly one hub (content-hub-readiness and
+ * internal-link-graph tests): the hub's page lists it, and the post links
+ * back through its "Part of: <Hub>" line (components/marketing/
+ * blog-hub-link.tsx). The order of postSlugs is the order the hub lists its
+ * posts and the order a member's "Keep reading" block takes its hub-mates
+ * from, so a new post goes at the END of its hub's list.
  */
 
 export type BlogTopic = {
@@ -23,6 +30,12 @@ export type BlogTopic = {
   postSlugs: string[];
   /** Calculator slugs from lib/calculator-registry.ts. */
   calculatorSlugs: string[];
+  /**
+   * Optional glossary slugs (lib/glossary.ts) for the hub's "Terms these
+   * guides use" line: the few terms the hub's own topics turn on, never a
+   * padded list. Rendered with a link to the full glossary.
+   */
+  glossarySlugs?: string[];
 };
 
 export const BLOG_TOPICS: BlogTopic[] = [
@@ -50,6 +63,9 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "break-even-occupancy-rental-property",
       "operating-expense-ratio-rental-property",
       "return-on-equity-rental-property",
+      "2-percent-rule-vs-1-percent-rule",
+      "cap-rate-vs-gross-yield",
+      "what-is-a-good-rental-yield",
     ],
     calculatorSlugs: ["gross-rent-multiplier-calculator", "1-percent-rule-calculator"],
   },
@@ -90,10 +106,12 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "rental-property-llc",
       "bonus-depreciation-rental-property-2026",
       "property-tax-reassessment-rental-property",
+      "how-to-calculate-rental-property-depreciation",
     ],
     // Tax modeling is educational-only until a scenario-based engine is
     // released. Do not route readers into the retired calculator stub.
     calculatorSlugs: [],
+    glossarySlugs: ["depreciation-period", "1031-exchange"],
   },
   {
     slug: "strategy",
@@ -116,6 +134,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "70-percent-rule-house-flipping",
     ],
     calculatorSlugs: ["rehab-cost-estimator", "arv-calculator"],
+    glossarySlugs: ["brrrr", "house-hack", "fair-market-rent", "rehab"],
   },
   {
     slug: "markets",

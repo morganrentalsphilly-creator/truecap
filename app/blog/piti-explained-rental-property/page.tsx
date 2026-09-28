@@ -332,8 +332,14 @@ export default function PitiExplainedPost() {
                 <strong>Bigger down payment, usually no PMI.</strong> Investment
                 loans want 20–25% down (more on 2–4 units), which keeps you at
                 or below 80% LTV and sidesteps private mortgage insurance.
-                House-hackers on an owner-occupied loan are the exception — less
-                down, but PMI until they reach ~20% equity.
+                <Link
+                  href="/glossary/house-hack"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  House-hackers
+                </Link>{" "}
+                on an owner-occupied loan are the exception — less down, but PMI
+                until they reach ~20% equity.
               </li>
               <li>
                 <strong>Pricier insurance.</strong> A landlord DP-3 with

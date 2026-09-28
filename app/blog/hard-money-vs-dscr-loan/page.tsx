@@ -265,7 +265,14 @@ export default function BlogPost() {
             (Debt Service Coverage Ratio) loans are long-term,
             cash-flow-underwritten investment property mortgages. The
             property&apos;s rental coverage is the primary ratio under many
-            programs, rather than personal DTI. The lender still reviews credit,
+            programs, rather than{" "}
+            <Link
+              href="/glossary/debt-to-income"
+              className="text-primary font-semibold hover:underline"
+            >
+              personal DTI
+            </Link>
+            . The lender still reviews credit,
             reserves, borrower or guarantor documents, appraisal, insurance, and
             program eligibility; requirements vary.
           </p>

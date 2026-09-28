@@ -5,12 +5,16 @@
  * are the strongest token overlaps across the three registries. Pure and
  * deterministic, so the same page always links the same neighbours:
  *   tools ↔ glossary ↔ two blog posts
- *   blog  → one tool + the analyzer
+ *   blog  → one tool (the post's own hub's first calculator when no tool
+ *           shares a word with it) + one glossary term + the analyzer
  *   vs    → pricing + the sample deal
+ * Candidates pass lib/seo/link-policy.ts first (F9): never an unpublished or
+ * noindexed post, an unreleased or noindexed tool, or a noindexed term.
  */
 import { BLOG_POSTS, type BlogPost } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, type CalculatorEntry } from "@/lib/calculator-registry";
 import { GLOSSARY, type GlossaryEntry } from "@/lib/glossary";
+import { blogTopicForPost, isLinkablePath } from "@/lib/seo/link-policy";
 
 export type RelatedKind = "tool" | "glossary" | "blog" | "vs";
 
@@ -76,8 +80,9 @@ function rank<T>(items: T[], subject: Set<string>, key: (item: T) => Set<string>
     .map((x) => x.item);
 }
 
-const availablePosts = (): BlogPost[] => BLOG_POSTS.filter((p) => p.available);
-const glossaryEntries = (): GlossaryEntry[] => Object.values(GLOSSARY);
+const availablePosts = (): BlogPost[] => BLOG_POSTS.filter((p) => p.available && isLinkablePath(`/blog/${p.slug}`));
+const glossaryEntries = (): GlossaryEntry[] => Object.values(GLOSSARY).filter((g) => isLinkablePath(`/glossary/${g.slug}`));
+const linkableTools = (): CalculatorEntry[] => CALCULATOR_REGISTRY.filter((c) => isLinkablePath(`/tools/${c.slug}`));
 
 const toolLink = (c: CalculatorEntry): RelatedLink => ({ href: `/tools/${c.slug}`, label: c.shortTitle || c.title, kind: "tool" });
 const glossaryLink = (g: GlossaryEntry): RelatedLink => ({ href: `/glossary/${g.slug}`, label: g.term, kind: "glossary" });
@@ -88,7 +93,7 @@ const SAMPLE: RelatedLink = { href: "/analyze?sample=1", label: "See the sample 
 
 export function getRelatedContent(input: { kind: RelatedKind; slug: string; title?: string }): RelatedLink[] {
   const subject = tokensOf(input.slug, input.title);
-  const tools = CALCULATOR_REGISTRY;
+  const tools = linkableTools();
   const glossary = glossaryEntries();
   const posts = availablePosts();
 
@@ -106,7 +111,12 @@ export function getRelatedContent(input: { kind: RelatedKind; slug: string; titl
       return [...t, ...p, ...g, ANALYZER];
     }
     case "blog": {
-      const t = rank(tools, subject, (e) => tokensOf(e.slug, e.title), 1, () => false).map(toolLink);
+      const ranked = rank(tools, subject, (e) => tokensOf(e.slug, e.title), 1, () => false);
+      // No tool shares a word with the post: fall back to its hub's first calculator.
+      const hubTool = (blogTopicForPost(input.slug)?.calculatorSlugs ?? [])
+        .map((slug) => tools.find((c) => c.slug === slug))
+        .find((c): c is CalculatorEntry => c !== undefined);
+      const t = (ranked.length > 0 ? ranked : hubTool ? [hubTool] : []).map(toolLink);
       const g = rank(glossary, subject, (e) => tokensOf(e.slug, e.term), 1, () => false).map(glossaryLink);
       return [...t, ...g, ANALYZER];
     }

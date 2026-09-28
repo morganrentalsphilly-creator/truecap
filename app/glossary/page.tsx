@@ -23,6 +23,7 @@ import {
   type GlossaryEntry,
 } from "@/lib/glossary";
 import { getSiteUrl } from "@/lib/site-url";
+import { isLinkablePath, linkableGlossaryTerms } from "@/lib/seo/link-policy";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { GLOSSARY_TERM_SET_NAME, glossaryTermSetId } from "@/lib/seo/glossary-ld";
@@ -341,7 +342,8 @@ const TERMS: Term[] = (() => {
       .map(fromEntry),
   );
 
-  return [...curated, ...rest];
+  // Registry-driven list: a term on the noindex list drops out (lib/seo/link-policy.ts).
+  return linkableGlossaryTerms([...curated, ...rest]);
 })();
 
 export default function GlossaryPage() {
@@ -456,7 +458,7 @@ export default function GlossaryPage() {
                   Full definition, formula, example
                   <ArrowUpRight className="size-3.5" />
                 </Link>
-                {t.toolPath ? (
+                {t.toolPath && isLinkablePath(t.toolPath) ? (
                   <Link
                     href={t.toolPath}
                     className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -464,7 +466,7 @@ export default function GlossaryPage() {
                     Calculator
                   </Link>
                 ) : null}
-                {t.postPath ? (
+                {t.postPath && isLinkablePath(t.postPath) ? (
                   <Link
                     href={t.postPath}
                     className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"

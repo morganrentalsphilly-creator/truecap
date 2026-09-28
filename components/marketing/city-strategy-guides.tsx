@@ -15,10 +15,17 @@
  *
  * Renders nothing when a city has no combos, so it's safe to drop into
  * every city page unconditionally.
+ *
+ * F9: it links only combo pages a registry-driven block may link
+ * (lib/seo/link-policy.ts): indexable, not on the noindex list. While
+ * STRATEGY_PAGES_INDEXABLE is false (lib/markets/indexability.ts) every combo
+ * page is `noindex, follow`, so the block renders nothing; flipping that
+ * constant brings the links back on both city render paths.
  */
 
 import Link from "next/link";
 import { getCombosForCity } from "@/lib/city-strategy-combos";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 
 export function CityStrategyGuides({
   citySlug,
@@ -31,7 +38,9 @@ export function CityStrategyGuides({
 }) {
   // The registry helper filters unreleased specialist models before this
   // navigation block can create an internal crawl path to them.
-  const combos = getCombosForCity(citySlug);
+  const combos = getCombosForCity(citySlug).filter((c) =>
+    isLinkablePath(`/markets/${c.citySlug}/${c.strategy}`),
+  );
   if (combos.length === 0) return null;
 
   return (

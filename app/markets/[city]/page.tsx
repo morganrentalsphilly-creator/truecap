@@ -31,9 +31,11 @@ import {
   MarketFmrSection,
   MarketHero,
   MarketLocalData,
+  MarketNearby,
   MarketRelatedReading,
   MarketSampleUnderwrite,
   MarketSources,
+  MarketStateGuideLink,
   MarketVerifyLocally,
   marketKeywords,
 } from "@/components/marketing/safe-market-page";
@@ -41,19 +43,15 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
-import {
-  BESPOKE_MARKETS,
-  MARKET_CITIES,
-  getMarketCity,
-  getMarketCityParams,
-} from "@/lib/markets/cities";
+import { getMarketCity, getMarketCityParams } from "@/lib/markets/cities";
 import { NOINDEX_FOLLOW, isMarketIndexable } from "@/lib/markets/indexability";
 import { buildMarketPageData } from "@/lib/markets/market-page-data";
+import { stateGuideSlugFor } from "@/lib/markets/nearby";
 import { MARKET_DATA_ATTRIBUTE } from "@/lib/markets/thin";
 import { getSiteUrl } from "@/lib/site-url";
-import { STATES } from "@/lib/states";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 
 // Candidates only. Anything not currently released is filtered out below, so
 // a market page can never link a reader to a gated tool.
@@ -65,8 +63,9 @@ const RELATED_TOOL_CANDIDATES: { slug: string; label: string }[] = [
   { slug: "gross-rent-multiplier-calculator", label: "Gross rent multiplier" },
 ];
 
-const RELATED_TOOLS = RELATED_TOOL_CANDIDATES.filter((tool) =>
-  isCalculatorReleased(tool.slug),
+const RELATED_TOOLS = RELATED_TOOL_CANDIDATES.filter(
+  (tool) =>
+    isCalculatorReleased(tool.slug) && isLinkablePath(`/tools/${tool.slug}`),
 );
 
 export async function generateStaticParams() {
@@ -126,19 +125,10 @@ export default async function MarketCityPage({
     stateCode: data.stateCode,
   });
 
-  // State guide for this city's state (if one exists) — breadcrumb crumb plus
-  // a contextual link so city pages feed link equity up to /states.
-  const stateSlug =
-    Object.values(STATES).find((s) => s.name === data.stateName)?.slug ?? null;
-
-  // Cross-link to other programmatic markets + a few bespoke metros.
-  const otherMarkets = MARKET_CITIES.filter((c) => c.slug !== data.slug).slice(
-    0,
-    6,
-  );
-  const bespokeHighlights = BESPOKE_MARKETS.filter((m) =>
-    ["philadelphia", "cleveland", "atlanta", "tampa"].includes(m.slug),
-  );
+  // State guide for this city's state, when that guide is indexable —
+  // breadcrumb crumb plus a contextual link so city pages feed link equity up
+  // to /states (lib/markets/nearby.ts).
+  const stateSlug = stateGuideSlugFor(data.stateName);
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
@@ -228,18 +218,7 @@ export default async function MarketCityPage({
 
         <MarketVerifyLocally city={data.name} />
 
-        {stateSlug ? (
-          <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-            For {data.stateName} data, see the{" "}
-            <Link
-              href={`/states/${stateSlug}`}
-              className="font-semibold text-primary hover:underline"
-            >
-              {data.stateName} guide
-            </Link>
-            .
-          </p>
-        ) : null}
+        <MarketStateGuideLink stateName={data.stateName} stateSlug={stateSlug} />
 
         <div className="mt-10">
           <SeoAnalyzerCta
@@ -250,8 +229,9 @@ export default async function MarketCityPage({
           />
         </div>
 
-        {/* Long-tail strategy guides must be reachable from their city parent.
-            The helper filters unreleased specialist models. */}
+        {/* Long-tail strategy guides, reachable from their city parent once
+            they are indexable. The helper filters unreleased specialist
+            models and noindexed combo pages (lib/seo/link-policy.ts). */}
         <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
 
         {page.hud ? <MarketRelatedReading postSlugs={data.relatedPosts} /> : null}
@@ -276,23 +256,9 @@ export default async function MarketCityPage({
           </section>
         ) : null}
 
-        {/* Other markets */}
-        <section className="mt-12 border-t border-border pt-6">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
-            Explore other markets
-          </p>
-          <div className="flex flex-wrap gap-2 text-sm">
-            {[...otherMarkets, ...bespokeHighlights].map((c) => (
-              <Link
-                key={c.slug}
-                href={`/markets/${c.slug}`}
-                className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-              >
-                {c.name}
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Up to five nearby markets (same state first, then the county
+            bridge) — lib/markets/nearby.ts. */}
+        <MarketNearby slug={data.slug} />
       </main>
 
       <SiteFooter />

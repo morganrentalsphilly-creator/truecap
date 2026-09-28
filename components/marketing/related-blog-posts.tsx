@@ -2,10 +2,12 @@
  * Related blog posts footer — surfaces other posts at the end of each
  * blog article to keep engaged readers on-site instead of bouncing.
  *
- * Strategy: filter out the current post, then pick up to 3 others
- * (most-recent first). Uses the BLOG_POSTS array from lib/blog-posts.ts
- * as the single source of truth so adding new posts auto-updates the
- * related-posts surface on every existing post.
+ * Strategy (F9, topical): posts from the same topic hub first, in the hub's
+ * order, then the rest of the registry newest first; never the current post,
+ * an unpublished post or a path on the noindex list
+ * (lib/seo/link-policy.ts relatedBlogPosts). Before F9 every post showed the
+ * same three newest posts. The block opens with the post's "Part of: <Hub>"
+ * link (BlogHubLink), so every post links back to its hub once.
  *
  * It also opens with the end-of-article "About TrueCap" author bio
  * (components/marketing/author-bio.tsx): every post renders this block
@@ -18,8 +20,9 @@
 
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
-import { BLOG_POSTS } from "@/lib/blog-posts";
 import { AuthorBio } from "@/components/marketing/author-bio";
+import { BlogHubLink } from "@/components/marketing/blog-hub-link";
+import { relatedBlogPosts } from "@/lib/seo/link-policy";
 import {
   LeadMagnetInline,
   LeadMagnetExitIntent,
@@ -33,12 +36,15 @@ type Props = {
 };
 
 export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
-  // Filter out the current post + any unpublished posts, then take
-  // the first N. BLOG_POSTS is already ordered most-recent first so
-  // we don't need to re-sort.
-  const related = BLOG_POSTS.filter((p) => p.available && p.slug !== currentSlug).slice(0, limit);
+  const related = relatedBlogPosts(currentSlug, { limit });
 
-  if (related.length === 0) return <AuthorBio />;
+  if (related.length === 0)
+    return (
+      <>
+        <AuthorBio />
+        <BlogHubLink postSlug={currentSlug} />
+      </>
+    );
 
   return (
     <>
@@ -53,6 +59,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
             Keep reading
           </h2>
         </div>
+        <BlogHubLink postSlug={currentSlug} />
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
           {related.map((post) => (
             <li key={post.slug}>
