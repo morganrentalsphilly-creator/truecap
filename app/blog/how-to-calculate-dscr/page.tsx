@@ -282,35 +282,6 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to calculate DSCR on a rental property",
-    description:
-      "Four steps: compute NOI, compute annual debt service, divide, and compare the result with the lender's written program.",
-    step: [
-      {
-        "@type": "HowToStep",
-        name: "Compute NOI",
-        text: "Gross rent minus vacancy minus operating expenses (taxes, insurance, maintenance, management, utilities you pay, HOA dues). Leave the mortgage out.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Compute annual debt service",
-        text: "Monthly principal and interest × 12. Some DSCR programs use PITIA (principal, interest, taxes, insurance and association dues) instead.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Divide NOI by debt service",
-        text: "The result is DSCR. Round to two decimals, and ask how the lender rounds.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Compare with the written program",
-        text: "Get the lender's formula, minimum ratio, accepted rent evidence and leverage limits in writing.",
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -318,7 +289,6 @@ export default function BlogPost() {
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={howToLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">

@@ -22,7 +22,8 @@ import { describe, expect, it, vi } from "vitest";
  *     on every /vs page.
  *   · The glossary's DefinedTermSet has @id /glossary#terms and every
  *     DefinedTerm points at it.
- *   · Every sampled page passes the loop's own validator (jsonld-validate).
+ *   · Every sampled page passes the loop's own validator (jsonld-validate),
+ *     whose HowTo rule (F4 review) needs every step's text on the page.
  */
 
 // Pricing reads the session and Stripe display prices; the homepage's client
@@ -350,6 +351,16 @@ describe("unreleased calculators already carry the released structured data", ()
     expect(faqMirrorProblems(html), path).toEqual([]);
     expect(validateHtml(html, path), path).toEqual([]);
     expect(missingSchema(path, jsonLdNodes(html)), path).toEqual([]);
+  });
+});
+
+describe("HowTo only where its steps are visible", () => {
+  it("/playbook's HowTo steps are the playbook's visible steps (the one HowTo left)", async () => {
+    const html = await render((await import("@/app/playbook/page")).default());
+    const steps = ldNodes(html).filter((node) => typeOf(node).includes("HowToStep"));
+    expect(steps.length).toBeGreaterThanOrEqual(3);
+    // jsonld-validate's HowTo rule: each step's text (here its name) is in the main text.
+    expect(validateHtml(html, "/playbook")).toEqual([]);
   });
 });
 

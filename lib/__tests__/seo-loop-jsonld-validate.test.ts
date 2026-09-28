@@ -180,6 +180,26 @@ describe("validateBlocks", () => {
     ]);
   });
 
+  it("HowTo: every step's text (its name when it has none) is visible on the page", () => {
+    const howTo = {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: "How to calculate cap rate",
+      step: [
+        { "@type": "HowToStep", name: "Gather gross annual rent", text: "Multiply monthly market rent by 12." },
+        { "@type": "HowToStep", name: "Divide NOI by price" },
+        { "@type": "HowToStep" },
+      ],
+    };
+    // The paraphrase the five posts carried before the F4 review: the page says it differently.
+    expect(errors([howTo], "<p>Take the rent for a year.</p><h3>Divide NOI by price</h3>")).toEqual([
+      'HowTo: step[0].text not visible on the page: "Multiply monthly market rent by 12."',
+      "HowTo: step[2] has no text or name",
+    ]);
+    expect(errors([{ ...howTo, step: howTo.step.slice(0, 2) }], "<ol><li>Multiply monthly market rent by <b>12</b>.</li><li>Divide NOI by price</li></ol>")).toEqual([]);
+    expect(errors([{ ...howTo, step: [] }])).toEqual(["HowTo: missing step"]);
+  });
+
   it("SoftwareApplication (and Web/Mobile): name, applicationCategory, offers or aggregateRating", () => {
     expect(errors([{ "@context": "https://schema.org", "@type": "WebApplication", name: "Calc" }])).toEqual([
       "WebApplication: missing applicationCategory",

@@ -140,58 +140,6 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  // HowTo schema — Google can render step-by-step cards directly in
-  // SERPs for "how to underwrite a rental property" queries. Massive
-  // CTR boost when it wins the rich result.
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to screen a rental property in 60 seconds",
-    description:
-      "A 60-second preliminary screen that organizes rent, expenses, financing, and four return metrics so you can identify what needs deeper verification.",
-    totalTime: "PT1M",
-    estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
-    tool: [
-      { "@type": "HowToTool", name: "TrueCap rental property analyzer (free)" },
-    ],
-    step: [
-      {
-        "@type": "HowToStep",
-        position: 1,
-        name: "Get the gross monthly rent",
-        text: "Record current lease rent separately from market or pro forma rent. Use recent comparable rents and lease evidence for the property; treat HUD Fair Market Rent only as a labeled area benchmark, not a substitute for property-specific rent evidence.",
-        url: `${canonicalUrl}#step-1`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 2,
-        name: "Estimate operating expenses",
-        text: "Enter expected post-acquisition property tax, an insurance quote when available, HOA and owner-paid utilities, plus separate assumptions for vacancy, management, maintenance, and replacement reserve. Leave an unknown unresolved instead of turning it into zero.",
-        url: `${canonicalUrl}#step-2`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 3,
-        name: "Estimate the mortgage payment",
-        text: "Enter cash or financed acquisition, the expected down payment, rate, amortization term, and loan fees. A published rate is a benchmark; replace it with the lender's written quote and terms before relying on the result.",
-        url: `${canonicalUrl}#step-3`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 4,
-        name: "Compute the four return metrics",
-        text: "Cap rate = NOI ÷ purchase price. Cash-on-cash = annual cash flow ÷ total cash invested. DSCR = NOI ÷ annual debt service. Monthly cash flow = rent minus expenses and debt service. Compare each result with the market evidence, lender rules, and investment criteria you select.",
-        url: `${canonicalUrl}#step-4`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 5,
-        name: "Run the sanity checks",
-        text: "Record whether the property meets the 1% benchmark, compare the projected cap rate with relevant alternatives, and note which assumptions can change the result. Use that evidence to choose your own next verification step.",
-        url: `${canonicalUrl}#step-5`,
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,7 +147,6 @@ export default function BlogPost() {
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={howToLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
