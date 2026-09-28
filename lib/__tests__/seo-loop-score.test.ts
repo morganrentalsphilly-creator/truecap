@@ -1131,7 +1131,8 @@ describe("pre-existing fence failures", () => {
       expect(preexistingFenceFailure(source), `${file}: the stand-in and verify-static disagree`).toBe(sinks.length > 0);
     }
     expect([...fencedSourcesOnDisk(paths)]).toEqual([]);
-  });
+    // Parses ~115 modules with the TypeScript compiler: seconds on a busy runner.
+  }, 60_000);
 });
 
 describe("market-data thin tag (F8, lib/markets/thin.ts)", () => {
