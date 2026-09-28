@@ -730,3 +730,51 @@ describe("proposals are not re-filed under a new title (third live run)", () => 
     expect(order.indexOf("List open proposals")).toBeLessThan(order.indexOf("Score, outcomes, brakes, holdout"));
   });
 });
+
+describe("the model step's own status does not throw away finished work (fourth live run)", () => {
+  const model = weekly.jobs.model;
+  const claude = model.steps.find((s) => s.id === "claude") as Step & { "continue-on-error"?: boolean };
+  const pkg = model.steps.find((s) => s.id === "package") as Step;
+
+  const packageRun = (opts: { manifest?: unknown; edit: boolean; outcome?: string }) => {
+    const dir = tmp();
+    const git = (...a: string[]) => execFileSync("git", a, { cwd: dir, env: { ...process.env, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t.invalid", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t.invalid" } });
+    git("init", "-q");
+    writeFileSync(path.join(dir, "page.tsx"), "a\n");
+    // Like the repo: run state and the stand-in script are never part of the patch.
+    writeFileSync(path.join(dir, ".gitignore"), "seo/\ntemp/\nout\n");
+    git("add", "-A");
+    git("commit", "-q", "-m", "x");
+    if (opts.edit) writeFileSync(path.join(dir, "page.tsx"), "b\n");
+    mkdirSync(path.join(dir, "seo", "data"), { recursive: true });
+    mkdirSync(path.join(dir, "seo", "scripts"), { recursive: true });
+    // Stand-in for run-flags.ts --summarize-execution.
+    writeFileSync(path.join(dir, "seo", "scripts", "run-flags.ts"), 'console.log("{}");\n');
+    if (opts.manifest !== undefined) writeFileSync(path.join(dir, "seo", "data", "run-manifest.json"), JSON.stringify(opts.manifest));
+    const temp = path.join(dir, "temp");
+    mkdirSync(temp);
+    const out = path.join(dir, "out");
+    writeFileSync(out, "");
+    const script = (pkg.run as string).replace(/\$\{\{ steps\.claude\.outcome \}\}/g, opts.outcome ?? "failure");
+    const r = runStep(script, dir, { RUNNER_TEMP: temp, GITHUB_OUTPUT: out, SEO_RUN_ID: "555" });
+    return { ...r, output: readFileSync(out, "utf8") };
+  };
+
+  it("lets the job continue past the action's turn-count failure, with $4 as the binding limit", () => {
+    expect(claude["continue-on-error"]).toBe(true);
+    expect(claude.with?.claude_args).toContain("--max-turns 160");
+    expect(claude.with?.claude_args).toContain("--max-budget-usd 4");
+  });
+
+  it("proposes the edits when the model wrote this run's manifest", () => {
+    const r = packageRun({ manifest: { runId: "555", changes: [], skipped: [], issues: [] }, edit: true });
+    expect(r.code, r.out).toBe(0);
+    expect(r.output).toContain("proposed=true");
+  });
+
+  it("never proposes a run that was cut short (no manifest) or another run's manifest", () => {
+    expect(packageRun({ edit: true }).output).toContain("proposed=false");
+    expect(packageRun({ manifest: { runId: "554", changes: [] }, edit: true }).output).toContain("proposed=false");
+    expect(packageRun({ manifest: { runId: "555", changes: [] }, edit: false }).output).toContain("proposed=false");
+  });
+});
