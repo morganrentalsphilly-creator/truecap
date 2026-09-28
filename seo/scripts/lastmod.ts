@@ -198,6 +198,7 @@ class History {
   private readonly blobs = new Map<string, string>();
   private readonly parts = new Map<string, string[] | Map<string, string>>();
   private readonly subjects = new Map<string, string>();
+  private readonly trailers = new Map<string, boolean>();
   private order: Map<string, number> | null = null;
   private readonly root: string;
 
@@ -239,6 +240,16 @@ class History {
    * `sha` — the copy a rebase or cherry-pick landed — when `sha` itself still
    * exists in this clone (e.g. on its branch). Empty when it does not.
    */
+  /** True when the commit's message carries the `Lastmod-Sweep: true` trailer (see hasSweepTrailer). */
+  sweepTrailer(sha: string): boolean {
+    let cached = this.trailers.get(sha);
+    if (cached === undefined) {
+      cached = hasSweepTrailer(this.git(["log", "-1", "--format=%B", `${sha}^{commit}`]));
+      this.trailers.set(sha, cached);
+    }
+    return cached;
+  }
+
   landedCopies(sha: string): string[] {
     let identity: string;
     try {
@@ -360,6 +371,19 @@ function digest(parts: string[]): string {
 }
 
 export type SeedChoice = { change: Change; fallback: boolean };
+
+/**
+ * A presentation-only sweep can mark ITSELF: a `Lastmod-Sweep: true` trailer
+ * in the commit message. Unlike a SHA in seo/config.json it survives a
+ * rebase, a cherry-pick and GitHub's rebase-merge (all of which rewrite the
+ * SHA), so a sweep landed through a stacked PR is still skipped. Use it for
+ * every new corpus-wide presentation change; the SHA list holds the older
+ * sweeps that were already on main.
+ */
+export const SWEEP_TRAILER = "Lastmod-Sweep";
+export function hasSweepTrailer(message: string): boolean {
+  return message.split("\n").some((line) => /^Lastmod-Sweep:\s*true\s*$/i.test(line.trim()));
+}
 
 /** A sweepCommits entry: an abbreviated or full lowercase commit SHA. An empty prefix would skip every commit. */
 export const SWEEP_SHA_RE = /^[0-9a-f]{7,40}$/;
@@ -499,7 +523,8 @@ async function seed(args: Args): Promise<number> {
   if (!urls.length) throw new Error("the sitemap has no URLs");
   const config = loadConfig();
   const skip = config.sweepCommits.shas;
-  const isSkipped = (sha: string): boolean => skip.some((s) => sha.startsWith(s));
+  // The SHA list, or a sweep that marks itself with the trailer.
+  const isSkipped = (sha: string): boolean => skip.some((s) => sha.startsWith(s)) || history.sweepTrailer(sha);
   const exists = (file: string): boolean => existsSync(path.join(REPO_ROOT, file));
   const history = new History(REPO_ROOT);
   // Every date comes from history: a shallow clone would invent them, and a
@@ -674,6 +699,8 @@ async function selfTest(): Promise<void> {
   check(sweepProblems(["af6211"], reach).length === 1, "an entry shorter than 7 characters is an error");
   check(sweepProblems(["af6211a", "af6211"], ["af6211a1", "af6211a2"]).length === 2, "an ambiguous or short entry is an error");
   check(sweepProblems([""], reach).length === 1, "an empty entry (it would skip every commit) is an error");
+  check(hasSweepTrailer("feat: x\n\nbody\n\nLastmod-Sweep: true\nCo-Authored-By: a <b@c>"), "a trailer marks a sweep");
+  check(!hasSweepTrailer("feat: x\n\nLastmod-Sweep: false") && !hasSweepTrailer("feat: x mentions Lastmod-Sweep: true inline"), "only an exact trailer line counts");
   check(sweepProblems(["B9EBD44"], reach).length === 1, "an uppercase entry (it never matches git's lowercase SHAs) is an error");
   for (const s of loadConfig().sweepCommits.shas) check(SWEEP_SHA_RE.test(s), `seo/config.json sweepCommits entry "${s}" is a 7-40 character lowercase hex SHA`);
 
