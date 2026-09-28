@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "August 27, 2026";
+const LAST_UPDATED = "September 6, 2026";
 
 export default function TermsPage() {
   return (
