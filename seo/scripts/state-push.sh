@@ -2,11 +2,12 @@
 # state-push.sh <run-id> — publish the SEO loop's run state to `seo-state`.
 #
 # seo-state is an orphan branch holding ONLY run state (ledger, lessons,
-# reports, index cache, halt) plus a vercel.json that disables deployments of
-# it. It keeps history (no force-push), and the ledger is append-only: this
-# refuses to push a ledger whose previous bytes are not a prefix of the new
-# one, and re-verifies the hash chain first. Single writer: the report job of
-# seo-weekly (the workflow's concurrency group serializes runs).
+# reports, index cache, halt, and the baseline snapshots committed by hand)
+# plus a vercel.json that disables deployments of it. It keeps history (no
+# force-push), and the ledger is append-only: this refuses to push a ledger
+# whose previous bytes are not a prefix of the new one, and re-verifies the
+# hash chain first. Single writer: the report job of seo-weekly (the
+# workflow's concurrency group serializes runs).
 set -euo pipefail
 
 RUN_ID="${1:?run id required}"

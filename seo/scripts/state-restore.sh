@@ -6,6 +6,9 @@
 # file across that is not on the explicit list. Every entry on the branch must
 # be a regular file (mode 100644): a symlink or submodule there would let a
 # writer of that branch redirect a later write outside seo/.
+#
+# seo/data/baseline-<date>.json (baseline.ts's per-URL snapshots, which
+# lessons.md cites) may sit on the branch; they are published, never restored.
 set -euo pipefail
 
 STATE_FILES=(
@@ -26,7 +29,7 @@ if [ -n "$BAD" ]; then
   echo "$BAD"
   exit 1
 fi
-OUTSIDE="$(git ls-tree -r --name-only FETCH_HEAD | grep -Ev '^(seo/(ledger\.jsonl|lessons\.md|reports/[0-9]{4}-W[0-9]{2}\.md|data/(index-status|halt)\.json)|vercel\.json|README\.md)$' || true)"
+OUTSIDE="$(git ls-tree -r --name-only FETCH_HEAD | grep -Ev '^(seo/(ledger\.jsonl|lessons\.md|reports/[0-9]{4}-W[0-9]{2}\.md|data/(index-status|halt)\.json|data/baseline-[0-9]{4}-[0-9]{2}-[0-9]{2}\.json)|vercel\.json|README\.md)$' || true)"
 if [ -n "$OUTSIDE" ]; then
   echo "REFUSING TO RESTORE — seo-state carries unexpected paths:"
   echo "$OUTSIDE"
