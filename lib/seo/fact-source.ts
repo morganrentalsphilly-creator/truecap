@@ -6,8 +6,9 @@
  * A fact reaches a page only with its source: an https URL on a primary-source
  * domain (seo/config.json `primarySourceDomains`, owner-edited, never by the
  * model), a title, a publisher and the YYYY-MM-DD day it was retrieved. Text
- * is plain (no markup), carries no investment verdict, and never calls HUD's
- * Fair Market Rent an average, typical, median or market rent (docs/voice.md).
+ * is plain (no markup, single spaces only), carries no investment verdict, and
+ * never calls HUD's Fair Market Rent an average, typical, median or market
+ * rent (docs/voice.md).
  *
  * Pure data + validation: no React, no server-only.
  */
@@ -79,10 +80,19 @@ export function sourceUrlProblem(value: unknown, extraHosts: readonly string[] =
   return null;
 }
 
-/** A plain-text string of 1..max characters with no markup and no forbidden phrase; throws otherwise. */
+/**
+ * A plain-text string of 1..max characters with no markup, no forbidden phrase
+ * and single spaces only; throws otherwise. The page collapses whitespace and
+ * the FAQPage JSON-LD keeps the string as written, so a tab, line break,
+ * non-breaking space, doubled space or edge space would make the two differ.
+ */
 export function plainText(value: unknown, where: string, max: number): string {
   if (typeof value !== "string" || !value.trim()) throw new Error(`${where} must be a non-empty string`);
   if (value.length > max) throw new Error(`${where} is longer than ${max} characters`);
+  if (value !== value.trim()) throw new Error(`${where} starts or ends with whitespace`);
+  if (/[^\S ]| {2}/.test(value)) {
+    throw new Error(`${where} contains whitespace other than single spaces (a tab, line break, non-breaking space or doubled space)`);
+  }
   if (/[<>]/.test(value)) throw new Error(`${where} contains markup (< or >)`);
   const banned = FORBIDDEN_FACT_PHRASES.find((pattern) => pattern.test(value));
   if (banned) throw new Error(`${where} contains a forbidden phrase (${banned.source})`);

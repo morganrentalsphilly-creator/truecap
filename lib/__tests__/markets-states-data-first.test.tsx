@@ -11,6 +11,13 @@
  *     average, typical, median or market rent;
  *   - the FAQPage JSON-LD is exactly the visible Q&A, and the loop's own
  *     validator (seo/scripts/jsonld-validate.ts) finds no invisible question;
+ *   - a market FAQ is the HUD template first, then the page's
+ *     content/seo/market-facts.json items verbatim, none quoting a HUD figure
+ *     from another fiscal year, and the thin flag is its rule. The
+ *     seo-market-enrich skill writes that file, so these hold for whatever it
+ *     holds, and a synthetic dataset (vi.doMock) proves the fact-item and
+ *     thin branches, never today's file contents. Whether a fact answer must
+ *     carry a number is not tested (the critic checks it);
  *   - the 12 bespoke metros are indexable on HUD rows, listed in the sitemap
  *     and llms.txt, with the same framing, FAQ and sources block;
  *   - every state fact is sourced, and nothing unsourced renders;
@@ -21,7 +28,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
 import MarketCityPage, { generateMetadata as generateMarketMetadata } from "@/app/markets/[city]/page";
 import StatePage, { generateMetadata as generateStateMetadata } from "@/app/states/[slug]/page";
@@ -45,7 +52,8 @@ import { HUD_FMR_AREAS } from "@/lib/markets/hud-fmr-areas";
 import { HUD_RENTS } from "@/lib/markets/hud-rents";
 import { getStateHudCities } from "@/lib/markets/indexability";
 import { buildMarketFaq, buildMarketPageData } from "@/lib/markets/market-page-data";
-import { parseMarketFacts } from "@/lib/seo/market-facts";
+import { MARKET_FACTS_MAX_FAQ, marketFactsFor, parseMarketFacts, type MarketFaqFact } from "@/lib/seo/market-facts";
+import { sourceUrlProblem } from "@/lib/seo/fact-source";
 import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
 import { STATES } from "@/lib/states";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -120,6 +128,181 @@ const FMR_AS_THE_RENT = [/\bstarting rent\b/i, /\bFMR as rent\b/i];
 const CITY_SAMPLE = ["columbus", "worcester", "anchorage", "fort-myers", "philadelphia", "houston"];
 const STATE_SAMPLE = ["texas", "ohio", "iowa", "new-jersey"];
 const ALL_MARKETS = [...MARKET_CITIES.map((c) => ({ slug: c.slug, name: c.name, stateCode: c.stateCode })), ...BESPOKE_MARKETS];
+
+/**
+ * How many HUD template items open /markets/<slug>'s FAQ (buildMarketFaq): the
+ * FMR answer and the 12-month total always, the prior-year change when HUD's
+ * area page has a prior year, and the ZIP spread when the page has SAFMR rows
+ * and HUD's ZIP table. Read from the page's HUD inputs, never from its FAQ.
+ */
+function hudTemplateItems(slug: string): number {
+  const market = ALL_MARKETS.find((m) => m.slug === slug)!;
+  const { area, safmr } = buildMarketPageData({ slug, city: market.name, stateCode: market.stateCode });
+  return 2 + (area?.prior ? 1 : 0) + (safmr && area?.safmrSourceUrl ? 1 : 0);
+}
+
+/** A fact item that names HUD's Fair Market Rent (FMR, FMRs, SAFMR, "Small Area Fair Market Rents"). */
+const NAMES_FMR = /Fair Market Rents?\b|\b(?:SA)?FMRs?\b/i;
+/** Every fiscal-year token in a string: FY2026, FY 2026, fiscal year 2026. */
+const fiscalYears = (value: string) => [...value.matchAll(/\b(?:FY|fiscal\s+year)\s?(\d{4})\b/gi)].map((m) => Number(m[1]));
+
+/**
+ * The HUD vintage rule for content/seo/market-facts.json FAQ items
+ * (seo-market-enrich step 5: a HUD figure only when it matches
+ * HUD_RENTS[slug] for FY HUD_RENTS[slug].year, named with its vintage). An
+ * item whose question or answer names HUD's Fair Market Rent names
+ * FY{HUD_RENTS[slug].year} in its answer; an item that names FMR or HUD names
+ * no other fiscal year, so a prior-year HUD figure cannot sit beside the
+ * page's own. Items that name neither (a tax rate, a licensing rule, a Census
+ * share) are not held to it. Returns one message per breach.
+ */
+function hudVintageProblems(slug: string, facts: readonly Pick<MarketFaqFact, "q" | "a">[]): string[] {
+  const year = HUD_RENTS[slug]?.year;
+  const problems: string[] = [];
+  facts.forEach(({ q, a }, index) => {
+    const at = `markets.${slug}.faq[${index}]`;
+    const item = `${q} ${a}`;
+    const namesFmr = NAMES_FMR.test(item);
+    if (!namesFmr && !/\bHUD\b/.test(item)) return;
+    if (year === undefined) {
+      if (namesFmr) problems.push(`${at} names HUD's Fair Market Rent, but /markets/${slug} has no HUD_RENTS row`);
+      return;
+    }
+    if (namesFmr && !fiscalYears(a).includes(year)) problems.push(`${at}.a names HUD's Fair Market Rent without FY${year}`);
+    for (const other of new Set(fiscalYears(item).filter((fy) => fy !== year))) {
+      problems.push(`${at} names FY${other} beside HUD; the page's HUD data is FY${year}`);
+    }
+  });
+  return problems;
+}
+
+/**
+ * The market FAQ contract for any legal content/seo/market-facts.json: the HUD
+ * template first (every answer with a dollar figure and the HUD fiscal year,
+ * the first with this page's own 2BR and 3BR FMR, the ZIP question on a SAFMR
+ * page), then `facts` verbatim and in order and held to the HUD vintage rule
+ * (hudVintageProblems); the visible FAQ equals the FAQPage JSON-LD, and
+ * jsonld-validate finds nothing. A sourced tax-rate or licensing answer needs
+ * no dollar figure and no FY, so only the template items are held to them.
+ * No test requires a fact answer to carry a number (seo-market-enrich step 5,
+ * "Answer with numbers"): the critic checks that, and the incident's approved
+ * licensing answer carries none.
+ */
+function expectMarketFaq(html: string, slug: string, facts: readonly MarketFaqFact[]): void {
+  const ld = faqLd(html);
+  const template = hudTemplateItems(slug);
+  expect(template, slug).toBeGreaterThanOrEqual(3);
+  expect(facts.length, slug).toBeLessThanOrEqual(MARKET_FACTS_MAX_FAQ);
+  expect(ld, slug).toHaveLength(template + facts.length);
+  expect(visibleFaq(html)).toEqual(ld);
+  expect(validateHtml(html, `/markets/${slug}`).filter((f) => f.type === "FAQPage")).toEqual([]);
+  const hud = HUD_RENTS[slug]!;
+  for (const { a } of ld.slice(0, template)) {
+    expect(a).toMatch(/\$\d/);
+    expect(a).toMatch(new RegExp(`FY${hud.year}`));
+  }
+  // The first answer is this page's own HUD figures.
+  expect(ld[0]!.a).toContain(`$${hud.rent2br.toLocaleString("en-US")}`);
+  expect(ld[0]!.a).toContain(`$${hud.rent3br.toLocaleString("en-US")}`);
+  if (SAFMR_RENTS[slug]) expect(ld.slice(0, template).map((x) => x.q).join(" ")).toMatch(/vary by ZIP code/);
+  // Then the page's sourced facts, worded exactly as the dataset words them,
+  // with no HUD figure from another vintage.
+  expect(ld.slice(template)).toEqual(facts.map(({ q, a }) => ({ q, a })));
+  expect(hudVintageProblems(slug, ld.slice(template))).toEqual([]);
+}
+
+/**
+ * Each visible FAQ item's source links, entity-decoded and in order. Every
+ * item shows "Source:" with at least one link, and every link is one the fact
+ * loaders accept (https, a primary-source host, no userinfo, port or tracking
+ * parameter: lib/seo/fact-source.ts).
+ */
+function faqSourceHrefs(html: string): string[][] {
+  const items = [...html.matchAll(/<div data-faq-item=""[\s\S]*?<\/div>/g)].map((m) => m[0]);
+  expect(items.length).toBeGreaterThan(0);
+  return items.map((item) => {
+    expect(item).toMatch(/Source: /);
+    const hrefs = [...item.matchAll(/href="([^"]+)"/g)].map((m) => decodeEntities(m[1]!));
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) expect(sourceUrlProblem(href), href).toBeNull();
+    return hrefs;
+  });
+}
+
+const HUDUSER = /^https:\/\/www\.huduser\.gov\//;
+
+/**
+ * Synthetic content/seo/market-facts.json entries for Worcester (a template
+ * page with no SAFMR rows, so 3 HUD items), shaped as seo-market-enrich writes
+ * them and valid for the loader. The answers carry a percent, no dollar
+ * figure and no HUD fiscal year, sourced from a city .gov site and
+ * www.census.gov. Test data only: none of it is a published fact.
+ */
+const FIXTURE_DAY = "2026-09-27";
+const WORCESTER_CITY_GOV = "https://www.worcesterma.gov/finance/assessing";
+const WORCESTER_HOUSING_GOV = "https://www.worcesterma.gov/inspectional-services/housing";
+const WORCESTER_CENSUS = "https://www.census.gov/quickfacts/fact/table/worcestercitymassachusetts";
+const WORCESTER_FULL_ENTRY = {
+  countyEffectiveTaxRate: null,
+  rentalLicensing: null,
+  faq: [
+    {
+      q: "What is Worcester's residential property tax rate?",
+      a: "Test fixture: the city's residential rate is 1.1% of assessed value.",
+      sources: [{ url: WORCESTER_CITY_GOV, title: "Assessing", retrievedAt: FIXTURE_DAY }],
+    },
+    {
+      q: "Does Worcester inspect rental units?",
+      a: "Test fixture: the city inspects 100% of registered rental units.",
+      sources: [{ url: WORCESTER_HOUSING_GOV, title: "Housing inspections", retrievedAt: FIXTURE_DAY }],
+    },
+    {
+      q: "What share of Worcester homes are owner-occupied?",
+      a: "Test fixture: 43.9% of housing units are owner-occupied.",
+      sources: [{ url: WORCESTER_CENSUS, title: "QuickFacts: Worcester city, Massachusetts", retrievedAt: FIXTURE_DAY }],
+    },
+    {
+      q: "What share of Worcester households rent?",
+      a: "Test fixture: 56.1% of occupied units are renter-occupied.",
+      sources: [
+        { url: WORCESTER_CENSUS, title: "QuickFacts: Worcester city, Massachusetts", retrievedAt: FIXTURE_DAY },
+        { url: WORCESTER_CITY_GOV, title: "Assessing", retrievedAt: FIXTURE_DAY },
+      ],
+    },
+  ],
+};
+const WORCESTER_ONE_FACT_ENTRY = {
+  countyEffectiveTaxRate: null,
+  rentalLicensing: {
+    required: true,
+    summary: "Test fixture: the city registers every rental unit.",
+    source: { url: WORCESTER_HOUSING_GOV, title: "Housing inspections", publisher: "City of Worcester", retrievedAt: FIXTURE_DAY },
+  },
+  faq: [],
+};
+
+/**
+ * Both market templates, loaded fresh with `markets` in place of
+ * content/seo/market-facts.json. Each describe that calls it unmocks and
+ * resets the registry in afterEach (the pattern dscr-guide-consolidation
+ * uses for lib/blog-posts).
+ */
+async function loadMarketPagesWith(markets: Record<string, unknown>) {
+  vi.resetModules();
+  vi.doMock("@/content/seo/market-facts.json", () => ({ default: { markets } }));
+  const cityPage = await import("@/app/markets/[city]/page");
+  const philadelphiaPage = await import("@/app/markets/philadelphia/page");
+  return {
+    renderCity: async (slug: string) => renderToStaticMarkup(await cityPage.default({ params: Promise.resolve({ city: slug }) })),
+    renderPhiladelphia: () => renderToStaticMarkup(<philadelphiaPage.default />),
+    cityMetadata: (slug: string) => cityPage.generateMetadata({ params: Promise.resolve({ city: slug }) }),
+  };
+}
+
+const resetMarketFacts = () => {
+  vi.doUnmock("@/content/seo/market-facts.json");
+  vi.resetModules();
+};
 
 describe("F8 titles and H1s come from the HUD vintage", () => {
   it.each(CITY_SAMPLE)("/markets/%s: title and H1 are '{City}, {ST} Rental Market Data ({HUD FY})'", async (slug) => {
@@ -271,23 +454,55 @@ describe("F8 Small Area FMR areas: the page says when vouchers use ZIP-level fig
   });
 });
 
-describe("F8 FAQ: visible, data-only, and mirrored exactly by FAQPage JSON-LD", () => {
+describe("F8 FAQ: visible, sourced, and mirrored exactly by FAQPage JSON-LD", () => {
+  afterEach(resetMarketFacts);
+
+  // Whatever content/seo/market-facts.json holds for the slug today.
   it.each(CITY_SAMPLE)("/markets/%s", async (slug) => {
-    const html = await renderCity(slug);
-    const ld = faqLd(html);
-    expect(ld.length).toBeGreaterThanOrEqual(3);
-    expect(ld.length).toBeLessThanOrEqual(4);
-    expect(visibleFaq(html)).toEqual(ld);
-    expect(validateHtml(html, `/markets/${slug}`).filter((f) => f.type === "FAQPage")).toEqual([]);
-    const hud = HUD_RENTS[slug]!;
-    for (const { a } of ld) {
-      expect(a).toMatch(/\$\d/);
-      expect(a).toMatch(new RegExp(`FY${hud.year}`));
-    }
-    // The first answer is this page's own HUD figures.
-    expect(ld[0]!.a).toContain(`$${hud.rent2br.toLocaleString("en-US")}`);
-    expect(ld[0]!.a).toContain(`$${hud.rent3br.toLocaleString("en-US")}`);
-    if (SAFMR_RENTS[slug]) expect(ld.map((x) => x.q).join(" ")).toMatch(/vary by ZIP code/);
+    expectMarketFaq(await renderCity(slug), slug, marketFactsFor(slug)?.faq ?? []);
+  });
+
+  it("holds every market-facts FAQ item, sampled or not, to its page's HUD vintage", () => {
+    // Every slug the loop has enriched, not only CITY_SAMPLE.
+    for (const market of ALL_MARKETS) expect(hudVintageProblems(market.slug, marketFactsFor(market.slug)?.faq ?? []), market.slug).toEqual([]);
+  });
+
+  it("the HUD vintage rule fails a stale or unnamed HUD year and passes items that name no HUD figure", () => {
+    const year = HUD_RENTS.worcester!.year;
+    const stale = year - 1;
+    const fmr = (a: string, q = "What is HUD's Fair Market Rent for a 1-bedroom unit in Worcester?") => [{ q, a }];
+    // A prior-year HUD figure, in the answer or the question.
+    expect(hudVintageProblems("worcester", fmr(`HUD's FY${stale} Fair Market Rent for a 1-bedroom unit was $1,234 a month.`))).toEqual([
+      `markets.worcester.faq[0].a names HUD's Fair Market Rent without FY${year}`,
+      `markets.worcester.faq[0] names FY${stale} beside HUD; the page's HUD data is FY${year}`,
+    ]);
+    expect(hudVintageProblems("worcester", fmr(`HUD's FY${year} FMR for a 1-bedroom unit is $1,234; in FY${stale} it was $1,190.`))).toEqual([
+      `markets.worcester.faq[0] names FY${stale} beside HUD; the page's HUD data is FY${year}`,
+    ]);
+    expect(hudVintageProblems("worcester", fmr(`HUD's FY${year} figure is $1,234.`, `What was HUD's FY${stale} Fair Market Rent?`))).toHaveLength(1);
+    expect(hudVintageProblems("worcester", [{ q: "What did HUD publish for a 1-bedroom unit?", a: `HUD's fiscal year ${stale} figure was $1,234.` }])).toHaveLength(1);
+    // A Fair Market Rent with no vintage at all.
+    expect(hudVintageProblems("worcester", fmr("HUD's Fair Market Rent for a 1-bedroom unit is $1,234 a month."))).toHaveLength(1);
+    // The page's own vintage passes, and so do items that name no HUD figure
+    // (the synthetic entry below, and a city fiscal-year tax rate).
+    expect(hudVintageProblems("worcester", fmr(`HUD's FY${year} Fair Market Rent for a 1-bedroom unit is $1,234 a month.`))).toEqual([]);
+    expect(hudVintageProblems("worcester", WORCESTER_FULL_ENTRY.faq)).toEqual([]);
+    expect(hudVintageProblems("worcester", [{ q: "What is Worcester's residential tax rate?", a: `Test fixture: the FY${stale} residential rate is $14.87 per $1,000.` }])).toEqual([]);
+  });
+
+  it("/markets/worcester with a full synthetic entry: 3 HUD items, then 4 facts verbatim, each linking its own sources", { timeout: 30_000 }, async () => {
+    const pages = await loadMarketPagesWith({ worcester: WORCESTER_FULL_ENTRY });
+    const html = await pages.renderCity("worcester");
+    const facts = parseMarketFacts({ markets: { worcester: WORCESTER_FULL_ENTRY } }).worcester!.faq;
+    expect(facts).toHaveLength(MARKET_FACTS_MAX_FAQ);
+    expect(hudTemplateItems("worcester")).toBe(3);
+    expectMarketFaq(html, "worcester", facts);
+    expect(faqLd(html)).toHaveLength(7);
+    // The template cites HUD; each fact item cites exactly its entry's
+    // sources, in order, on a city .gov host or census.gov.
+    const hrefs = faqSourceHrefs(html);
+    for (const item of hrefs.slice(0, 3)) for (const href of item) expect(href).toMatch(HUDUSER);
+    expect(hrefs.slice(3)).toEqual(WORCESTER_FULL_ENTRY.faq.map((item) => item.sources.map((source) => source.url)));
   });
 
   it.each(STATE_SAMPLE)("/states/%s", async (slug) => {
@@ -319,10 +534,17 @@ describe("F8 FAQ: visible, data-only, and mirrored exactly by FAQPage JSON-LD", 
   );
 
   it("links a source under every visible answer", async () => {
-    for (const html of [await renderCity("columbus"), await renderState("ohio")]) {
-      const items = [...html.matchAll(/<div data-faq-item=""[\s\S]*?<\/div>/g)].map((m) => m[0]);
-      expect(items.length).toBeGreaterThan(0);
-      for (const item of items) expect(item).toMatch(/Source: (?:<span>)?<a href="https:\/\/(?:www\.huduser\.gov|data\.census\.gov)\//);
+    // City: each item links its own sources, in order. The HUD template items
+    // cite huduser.gov; a market-facts item cites whatever primary source its
+    // entry names (a county or city .gov site, census.gov).
+    const columbus = ALL_MARKETS.find((m) => m.slug === "columbus")!;
+    const city = faqSourceHrefs(await renderCity("columbus"));
+    const { faq } = buildMarketPageData({ slug: columbus.slug, city: columbus.name, stateCode: columbus.stateCode });
+    expect(city).toEqual(faq.map((item) => item.sources.map((source) => source.href)));
+    for (const item of city.slice(0, hudTemplateItems("columbus"))) for (const href of item) expect(href).toMatch(HUDUSER);
+    // State: facts come only from the owner's Census data, the HUD answer from HUD's area pages.
+    for (const item of faqSourceHrefs(await renderState("ohio"))) {
+      for (const href of item) expect(href).toMatch(/^https:\/\/(?:www\.huduser\.gov|data\.census\.gov)\//);
     }
   });
 });
@@ -336,7 +558,9 @@ describe("F8 FAQ questions stay unique when market facts join the template", () 
         columbus: {
           countyEffectiveTaxRate: null,
           rentalLicensing: null,
-          faq: [{ q: "what is HUD's Fair Market Rent for Columbus, OH in FY2026 ", a: "HUD says $1,430.", sources: [REF] }],
+          // Lower case and no question mark: still a repeat. (Edge and doubled
+          // spaces never reach the builder: the loader refuses them, naming the field.)
+          faq: [{ q: "what is HUD's Fair Market Rent for Columbus, OH in FY2026", a: "HUD says $1,430.", sources: [REF] }],
         },
       },
     }).columbus!;
@@ -441,11 +665,39 @@ describe("F8 verify-locally copy: instructions, not unsourced claims", () => {
 });
 
 describe("F8 thin flag: a signal on <main>, never an index rule", () => {
-  it("marks pages with no SAFMR rows and no market facts thin", async () => {
+  afterEach(resetMarketFacts);
+
+  const flagOf = (html: string) => html.match(/<main id="main" data-market-data="([a-z]+)"/)?.[1];
+  /** The rule from its raw inputs (lib/markets/thin.ts is what is under test): no SAFMR ZIP rows and no market-facts entry. */
+  const expectedFlag = (slug: string, hasMarketFacts: boolean) =>
+    (SAFMR_RENTS[slug]?.rows.length ?? 0) === 0 && !hasMarketFacts ? "thin" : "enriched";
+
+  it("marks pages with no SAFMR rows and no market facts thin, on both render paths", async () => {
+    // seo-market-enrich takes thin pages first, so whether a sampled page is
+    // thin today is the dataset's business; the flag must follow the rule.
+    for (const slug of CITY_SAMPLE) expect(flagOf(await renderCity(slug)), slug).toBe(expectedFlag(slug, marketFactsFor(slug) !== null));
+    // Columbus has SAFMR rows (generated from HUD, not loop-writable), so no dataset makes it thin.
     expect(await renderCity("columbus")).toMatch(/<main id="main" data-market-data="enriched"/);
-    expect(await renderCity("worcester")).toMatch(/<main id="main" data-market-data="thin"/);
-    expect(await renderCity("philadelphia")).toMatch(/<main id="main" data-market-data="thin"/);
-    const metadata = await generateMarketMetadata({ params: Promise.resolve({ city: "worcester" }) });
-    expect(metadata.robots).toBeUndefined();
+  });
+
+  it("renders the thin branch from an empty dataset and flips it with one fact, never adding robots", { timeout: 30_000 }, async () => {
+    // Worcester (the [city] template) and Philadelphia (a bespoke page) have no SAFMR rows.
+    expect(expectedFlag("worcester", false)).toBe("thin");
+    expect(expectedFlag("philadelphia", false)).toBe("thin");
+    const empty = await loadMarketPagesWith({});
+    expect(flagOf(await empty.renderCity("worcester"))).toBe("thin");
+    expect(flagOf(empty.renderPhiladelphia())).toBe("thin");
+    // Thin is never an index rule: every template page with a HUD row stays
+    // indexable, thin or not (bespoke robots: the bespoke metros test above).
+    let thin = 0;
+    for (const market of MARKET_CITIES.filter((c) => HUD_RENTS[c.slug])) {
+      if (expectedFlag(market.slug, false) === "thin") thin += 1;
+      expect((await empty.cityMetadata(market.slug)).robots, market.slug).toBeUndefined();
+    }
+    expect(thin).toBeGreaterThan(0);
+
+    const oneFact = await loadMarketPagesWith({ worcester: WORCESTER_ONE_FACT_ENTRY });
+    expect(flagOf(await oneFact.renderCity("worcester"))).toBe("enriched");
+    expect((await oneFact.cityMetadata("worcester")).robots).toBeUndefined();
   });
 });

@@ -136,10 +136,14 @@ describe("DSCR guide consolidation: nothing points at a merged post", () => {
       expect(source.match(canonicalHref), slug).toHaveLength(1);
       expect(body.match(canonicalHref), slug).toHaveLength(1);
     }
-    // hard-money links the word DSCR under "What DSCR actually is": it lands
-    // on the guide (formula first), not on its DSCR-loans section.
+    // hard-money's one link to the guide opens the first paragraph under an H2
+    // that names DSCR (today "What DSCR actually is"; seo-striking-distance
+    // may reword it, so which DSCR section holds it is not pinned). It has no
+    // fragment or query, so it lands on the guide (formula first), not on its
+    // DSCR-loans section.
     const hardMoney = readFileSync(join(ROOT, "app/blog/hard-money-vs-dscr-loan/page.tsx"), "utf8");
-    expect(hardMoney).toMatch(/What DSCR actually is<\/h2>\s*<p>\s*<Link\s+href="\/blog\/how-to-calculate-dscr"/);
+    expect(hardMoney).toMatch(/<h2[^>]*>[^<]*\bDSCR\b[^<]*<\/h2>\s*<p>\s*<Link\s+href="\/blog\/how-to-calculate-dscr"/);
+    expect(hardMoney.match(/href="\/blog\/how-to-calculate-dscr[^"]*"/g)).toEqual(['href="/blog/how-to-calculate-dscr"']);
   });
 
   it("keeps the glossary hub's DSCR card, which links the guide, to what the guide sources", () => {
@@ -367,15 +371,26 @@ describe("DSCR guide consolidation: the canonical page", () => {
     expect(body.match(/not an approval|does not guarantee approval|doesn't guarantee approval/g)).toEqual([
       "does not guarantee approval",
     ]);
-    const lendersCheck = body.slice(body.indexOf("What lenders check"), body.indexOf("What DSCR loans cost"));
-    expect(lendersCheck.match(/sets its own/g)).toHaveLength(1);
+    // The section that holds that hedge (today the "What lenders check" H3;
+    // seo-striking-distance step 3 may reword a heading, so the section is
+    // found by its hedge, not its heading text) says "sets its own" once.
+    const sections = html.slice(0, html.indexOf('id="faq"')).split(/(?=<h[23][\s>])/);
+    const lendersCheck = sections.filter((section) => visibleText(section).includes("does not guarantee approval"));
+    expect(lendersCheck).toHaveLength(1);
+    expect(visibleText(lendersCheck[0]!).match(/sets its own/g)).toHaveLength(1);
   });
 
   it("links every lender threshold it states to its primary source", async () => {
     const html = await renderCanonical();
+    // 12 CFR 244.17 in any annual CFR edition on govinfo.gov (seo-refresh
+    // replaces a superseded edition with the current one), or the eCFR
+    // section. The backreferences keep the URL's two year fields, and its two
+    // volume fields, in agreement.
+    expect(html).toMatch(
+      /href="(?:https:\/\/www\.govinfo\.gov\/content\/pkg\/CFR-(\d{4})-title12-vol(\d+)\/pdf\/CFR-\1-title12-vol\2-sec244-17\.pdf|https:\/\/www\.ecfr\.gov\/current\/title-12\/[^"]*section-244\.17)"/,
+    );
     for (const href of [
       "https://mf.freddiemac.com/docs/product/fixed_rate.pdf",
-      "https://www.govinfo.gov/content/pkg/CFR-2025-title12-vol4/pdf/CFR-2025-title12-vol4-sec244-17.pdf",
       "https://www.hud.gov/sites/dfiles/hudclips/documents/2026-01hsgml.pdf",
       "https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios",
       "https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower",
@@ -402,7 +417,12 @@ describe("DSCR guide consolidation: sitemap", () => {
     const listed = pathsOf(sitemap());
     for (const path of REMOVED_PATHS) expect(listed, path).not.toContain(path);
     expect(listed).toContain(CANONICAL);
-    expect(lastmodFor(CANONICAL)).toBe("2026-09-28");
+    // Dated no earlier than the merge. The publish job bumps the date on every
+    // later edit to the page (lastmod.ts bump), and lastmod-contract.test.ts
+    // holds the upper bound, so the floor is the rule, not today's date.
+    const canonicalLastmod = lastmodFor(CANONICAL);
+    expect(canonicalLastmod).toBeDefined();
+    expect((canonicalLastmod ?? "") >= "2026-09-28", canonicalLastmod).toBe(true);
 
     // A fixed baseline that needs no fixture: the post directories under
     // app/blog. The merge deleted two of them, so the sitemap's /blog URLs
