@@ -1292,6 +1292,34 @@ describe("working-tree mode and whole-file rules", () => {
     expect(() => workingTreePatch("main; rm -rf /", dir)).toThrow(/not a plain ref/);
   });
 
+  it("judges a pull request's merge commit with CI's own --base (HEAD^1), and still refuses anything but a plain ref", () => {
+    // The fifth live run's PR failed CI here: 'HEAD^1' was not a plain ref.
+    const dir = tmp();
+    git(dir, ["init", "-q", "-b", "main"]);
+    mkdirSync(path.join(dir, "app/blog/cap-rate-guide"), { recursive: true });
+    writeFileSync(path.join(dir, BLOG), BASE_PAGE);
+    git(dir, ["add", "-A"]);
+    git(dir, ["commit", "-q", "-m", "base"]);
+    git(dir, ["checkout", "-q", "-b", "seo/1"]);
+    writeFileSync(path.join(dir, BLOG), edit(BASE_PAGE, 'const TITLE = "Cap rate guide";', 'const TITLE = "Cap rate guide 2026";'));
+    git(dir, ["commit", "-q", "-am", "loop edit"]);
+    git(dir, ["checkout", "-q", "main"]);
+    writeFileSync(path.join(dir, "later.txt"), "main moved on\n");
+    git(dir, ["add", "-A"]);
+    git(dir, ["commit", "-q", "-m", "main moves on"]);
+    // What actions/checkout gives a pull_request job: the PR merged into main.
+    git(dir, ["merge", "-q", "--no-ff", "--no-edit", "seo/1"]);
+    const ciYml = readFileSync(path.join(__dirname, "../../.github/workflows/ci.yml"), "utf8");
+    const base = /verify-static\.ts --working-tree --base (\S+) --structural/.exec(ciYml)?.[1];
+    expect(base).toBe("HEAD^1");
+    const { patch } = workingTreePatch(base as string, dir);
+    expect(parsePatch(patch.toString("utf8")).files.map((f) => [f.path, f.status])).toEqual([[BLOG, "M"]]);
+    expect(() => workingTreePatch("main~2", dir)).not.toThrow(/not a plain ref/);
+    for (const bad of ["--output=/tmp/x", "-p", "HEAD^1 HEAD", "HEAD^^^^^", "a..b", "HEAD^1;id", "@{-1}"]) {
+      expect(() => workingTreePatch(bad, dir), bad).toThrow(/not a plain ref/);
+    }
+  });
+
   it("exports the whole-file rules so candidates whose source already fails can be skipped", () => {
     expect(wholeFileViolations(BLOG, BASE_PAGE, config)).toEqual([]);
     const legacy = edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p dangerouslySetInnerHTML={{ __html: "Read <b>this</b>" }} />');

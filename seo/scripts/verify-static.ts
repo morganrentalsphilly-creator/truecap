@@ -2379,7 +2379,11 @@ function gitBaseReader(ref: string, cwd: string = REPO_ROOT): BaseReader {
  * external diff driver would otherwise change what the parser reads.
  */
 export function workingTreePatch(baseRef: string, cwd: string = REPO_ROOT): { patch: Buffer; baseSha: string } {
-  if (!/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(baseRef)) throw new Error(`--base ${JSON.stringify(baseRef)} is not a plain ref`);
+  // A plain ref, optionally with ONE parent/ancestor suffix (HEAD^1, main~2):
+  // CI's fence runs `--base HEAD^1` on a pull request's merge commit, and git
+  // forbids '^' and '~' inside ref names, so the suffix cannot smuggle an
+  // option or a second ref. Nothing may start with '-'.
+  if (!/^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._/-]*(?:[~^][0-9]{0,3})?$/.test(baseRef)) throw new Error(`--base ${JSON.stringify(baseRef)} is not a plain ref`);
   const baseSha = execFileSync("git", ["merge-base", baseRef, "HEAD"], { cwd, stdio: ["ignore", "pipe", "pipe"] }).toString("utf8").trim();
   if (!/^[0-9a-f]{40}(?:[0-9a-f]{24})?$/.test(baseSha)) throw new Error(`git merge-base ${baseRef} HEAD did not return a commit`);
   const pinned = ["-c", "color.ui=never", "-c", "diff.noprefix=false", "-c", "diff.mnemonicPrefix=false", "-c", "core.quotePath=true"];
