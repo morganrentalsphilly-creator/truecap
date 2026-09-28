@@ -70,12 +70,27 @@ describe("tool application entities", () => {
   });
 });
 
-describe("/analyze and the glossary set", () => {
+describe("/analyze, the product entity and the glossary set", () => {
   it("/analyze must name /#software by @id and declare no app of its own", () => {
     const page = { "@type": "WebPage", name: "Analyze", mainEntity: { "@id": `${ORIGIN}/#software` } };
     expect(problems("/analyze", ld(page))).toEqual([]);
     expect(problems("/analyze", ld({ ...page, mainEntity: undefined }))).toHaveLength(1);
     expect(problems("/analyze", ld(page, { "@type": "SoftwareApplication", name: "TrueCap" }))).toEqual(["declares an application entity instead of referencing /#software"]);
+  });
+
+  it("outside the tools, an application entity must be the product (/#software), e.g. /pricing's Offers", () => {
+    const product = (over: Node = {}) => ({ "@type": "SoftwareApplication", "@id": `${ORIGIN}/#software`, name: "TrueCap", applicationCategory: "FinanceApplication", offers: [{ "@type": "Offer", price: 0 }], ...over });
+    expect(problems("/pricing", ld(product()))).toEqual([]);
+    expect(problems("/", ld({ "@graph": [product()] }))).toEqual([]);
+    // The pre-fix /pricing: a second "TrueCap" with no @id.
+    expect(problems("/pricing", ld(product({ "@id": undefined })))).toEqual([
+      'application entity "TrueCap" has @id null; outside /tools/<slug> the only application is the product, <origin>/#software',
+    ]);
+    expect(problems("/for-agents", ld(product({ "@id": `${ORIGIN}/for-agents#app` })))).toHaveLength(1);
+    // A reference is not a declaration, and the tool pages keep their own #app rule.
+    expect(problems("/blog/x", ld({ "@type": "WebPage", name: "x", mainEntity: { "@id": `${ORIGIN}/#software` } }))).toEqual([]);
+    expect(problems("/tools/x", ld({ "@type": "WebApplication", "@id": `${ORIGIN}/tools/x#app`, name: "X", applicationCategory: "FinanceApplication", offers: {}, publisher: ORG }))).toEqual([]);
+    expect(missingSchema("/pricing", jsonLdNodes(ld({ "@type": "FAQPage" })))).toEqual([{ label: "pricing", missing: ["SoftwareApplication"] }]);
   });
 
   it("the hub's set is /glossary#terms and every term points at it", () => {
@@ -103,7 +118,7 @@ describe("wiring", () => {
 
   it("covers the hubs, /analyze and the calculators in REQUIRED_SCHEMA", () => {
     const labels = REQUIRED_SCHEMA.map((rule: { label: string }) => rule.label);
-    for (const label of ["blog hub", "tools hub", "comparisons hub", "markets hub", "states hub", "glossary hub", "analyzer", "calculator"]) expect(labels).toContain(label);
+    for (const label of ["blog hub", "tools hub", "comparisons hub", "markets hub", "states hub", "glossary hub", "analyzer", "calculator", "pricing"]) expect(labels).toContain(label);
   });
 
   it("the healthcheck and jsonld-validate both use the shared module (no private copy of the table)", () => {

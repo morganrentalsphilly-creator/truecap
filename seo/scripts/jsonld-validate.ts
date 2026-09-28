@@ -14,7 +14,8 @@
  *   - the page's F4 values, by its path (scripts/seo/structured-data-
  *     expectations.mjs, shared with the production healthcheck): hub and /vs
  *     breadcrumb trails, one application entity per tool with @id
- *     <origin>/tools/<slug>#app, /analyze -> <origin>/#software, and the
+ *     <origin>/tools/<slug>#app, /analyze -> <origin>/#software, any other
+ *     application entity (the /pricing Offers) = <origin>/#software, and the
  *     glossary's one DefinedTermSet. Reported as type "page".
  *
  * Load-bearing constraints:

@@ -16,7 +16,8 @@ import { describe, expect, it, vi } from "vitest";
  *     and the hubs.
  *   · Every released tool emits ONE application entity, @id
  *     `${siteUrl}/tools/<slug>#app`; /analyze points at the homepage's
- *     SoftwareApplication (/#software) by @id.
+ *     SoftwareApplication (/#software) by @id, and /pricing declares its Offers
+ *     on that same entity (F4 review).
  *   · BreadcrumbList: Home › Hub on the six hubs, Home › Comparisons › page
  *     on every /vs page.
  *   · The glossary's DefinedTermSet has @id /glossary#terms and every
@@ -276,6 +277,18 @@ describe("tools: one application entity with a stable @id", () => {
     // A WebPage on the same page points at the app instead of standing beside it.
     for (const page of ldTopLevel(html).filter((node) => typeOf(node).includes("WebPage"))) expect(page.mainEntity, slug).toEqual({ "@id": appId });
   });
+
+  it("/pricing declares its Offers on the homepage's product entity (/#software), not on a second app", async () => {
+    const pricing = await render((await import("@/app/pricing/page")).default());
+    const apps = ldNodes(pricing).filter((node) => !isRef(node) && typeOf(node).some((t) => APP_TYPES.includes(t)));
+    expect(apps.map((app) => app["@id"])).toEqual([`${SITE}/#software`]);
+    const home = await render((await import("@/app/page")).default());
+    const [product] = ldNodes(home).filter((node) => node["@id"] === `${SITE}/#software` && !isRef(node));
+    // Same entity, same identity: type, name and url agree, so the two declarations merge.
+    for (const key of ["@type", "name", "url", "applicationCategory", "operatingSystem"]) expect(apps[0][key], key).toEqual(product[key]);
+    expect((apps[0].offers as Node[]).map((offer) => offer.name)).toContain("TrueCap Free");
+    expect(validateHtml(pricing, "/pricing")).toEqual([]);
+  }, MANY_PAGES_MS);
 
   it("/analyze points at the homepage's SoftwareApplication by @id and declares no second app", async () => {
     const { default: AnalyzePage } = await import("@/app/analyze/page");
