@@ -13,13 +13,17 @@ export const HUD_FMR_OVERVIEW_URL = "https://www.huduser.gov/portal/datasets/fmr
 export const HUD_FMR_OVERVIEW_RETRIEVED_AT = "2026-09-27";
 
 /**
- * One sentence on what Fair Market Rent is, paraphrasing HUD's FMR overview
- * (HUD_FMR_OVERVIEW_URL): "estimates of 40th percentile gross rents for
- * standard quality units", "used to determine payment standard amounts for the
- * Housing Choice Voucher program".
+ * One sentence on what Fair Market Rent is, in HUD's own terms from its FMR
+ * overview (HUD_FMR_OVERVIEW_URL): "estimates of 40th percentile gross rents
+ * for standard quality units", "used to determine payment standard amounts for
+ * the Housing Choice Voucher program". Passive, as HUD words it: the housing
+ * agency adopts the payment standards (24 CFR 982.503(a)(2)), and in a Small
+ * Area FMR area the ZIP-level figure applies instead (982.503(a)(1)(i)), which
+ * a market page states for its own area (voucherSmallAreaFmr in
+ * lib/markets/hud-fmr-areas.ts). Never "HUD uses it to set" the standards.
  */
 export const FMR_DEFINITION_CLAUSE =
-  "Fair Market Rent is HUD's estimate of the 40th-percentile gross rent for standard-quality rental units in an area, which HUD uses to set Housing Choice Voucher payment standards: a percentile, not an average of current asking rents";
+  "Fair Market Rent is HUD's estimate of the 40th-percentile gross rent for standard-quality rental units in an area, used to determine payment standard amounts for the Housing Choice Voucher program: a percentile, not an average of current asking rents";
 
 /** FMR_DEFINITION_CLAUSE as a sentence (templates that link HUD render the clause + "(HUD)."). */
 export const FMR_DEFINITION = `${FMR_DEFINITION_CLAUSE}.`;

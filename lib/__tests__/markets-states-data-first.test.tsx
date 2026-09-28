@@ -40,7 +40,12 @@ import PhiladelphiaPage, { metadata as philadelphiaMeta } from "@/app/markets/ph
 import PhoenixPage, { metadata as phoenixMeta } from "@/app/markets/phoenix/page";
 import TampaPage, { metadata as tampaMeta } from "@/app/markets/tampa/page";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
+import { FMR_DEFINITION_CLAUSE, HUD_FMR_OVERVIEW_URL } from "@/lib/markets/data-copy";
+import { HUD_FMR_AREAS } from "@/lib/markets/hud-fmr-areas";
 import { HUD_RENTS } from "@/lib/markets/hud-rents";
+import { getStateHudCities } from "@/lib/markets/indexability";
+import { buildMarketFaq, buildMarketPageData } from "@/lib/markets/market-page-data";
+import { parseMarketFacts } from "@/lib/seo/market-facts";
 import { SAFMR_RENTS } from "@/lib/markets/safmr-rents";
 import { STATES } from "@/lib/states";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -109,6 +114,9 @@ function visibleFaq(html: string): QA[] {
 /** HUD's Fair Market Rent called something it is not (docs/voice.md, FMR vocabulary). */
 const FMR_MISNAMES = [/\b(?:average|typical|median)\s+(?:monthly\s+)?rents?\b/i, /(?<!\bfair\s)\bmarket\s+rents?\b/i];
 
+/** FMR offered as the reader's rent rather than a labeled placeholder (docs/voice.md rule 10). */
+const FMR_AS_THE_RENT = [/\bstarting rent\b/i, /\bFMR as rent\b/i];
+
 const CITY_SAMPLE = ["columbus", "worcester", "anchorage", "fort-myers", "philadelphia", "houston"];
 const STATE_SAMPLE = ["texas", "ohio", "iowa", "new-jersey"];
 const ALL_MARKETS = [...MARKET_CITIES.map((c) => ({ slug: c.slug, name: c.name, stateCode: c.stateCode })), ...BESPOKE_MARKETS];
@@ -165,12 +173,101 @@ describe("F8 FMR vocabulary: never an average, typical, median or market rent", 
     expect(offenders).toEqual([]);
   });
 
+  it("never offers FMR as the reader's rent, only as a labeled placeholder", async () => {
+    const offenders: string[] = [];
+    const pages = [
+      ...ALL_MARKETS.map(async (market) => [`/markets/${market.slug}`, text(await renderCity(market.slug))] as const),
+      ...Object.keys(STATES).map(async (slug) => [`/states/${slug}`, text(await renderState(slug))] as const),
+    ];
+    for (const [where, value] of await Promise.all(pages)) {
+      for (const pattern of FMR_AS_THE_RENT) {
+        const hit = value.match(pattern);
+        if (hit) offenders.push(`${where}: "${hit[0]}"`);
+      }
+    }
+    expect(offenders).toEqual([]);
+    const columbus = text(await renderCity("columbus"));
+    expect(columbus).toContain("3-bedroom FMR as a placeholder rent");
+    expect(columbus).toContain("not what a specific unit rents for");
+  });
+
+  it("holds in the analyzer's customer-facing strings too (the pages' CTA lands there)", () => {
+    // String literals only (comments stripped): any string that names HUD's
+    // FMR must not call it an average, typical, median or market rent.
+    const source = readFileSync(join(ROOT, "components/investcalc/investcalc-page.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:"'`])\/\/.*$/gm, "$1");
+    const literals = [...source.matchAll(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g)].map((m) => m[0]);
+    const fmrStrings = literals.filter((literal) => /\bFMR\b|Fair Market Rent/.test(literal));
+    expect(fmrStrings.length).toBeGreaterThan(0);
+    const offenders = fmrStrings.filter((literal) => /\b(?:area|an?)\s+average\b|\b(?:average|typical|median)\s+rents?\b|(?<!\bfair\s)\bmarket\s+rents?\b/i.test(literal));
+    expect(offenders).toEqual([]);
+  });
+
   it("names it 'HUD Fair Market Rent (FY{YEAR})' and says what it is, citing HUD", async () => {
     const html = await renderCity("columbus");
     const year = HUD_RENTS.columbus!.year;
     expect(html).toContain(`HUD Fair Market Rent (FY${year})`);
     expect(decodeEntities(html)).toContain("40th-percentile gross rent for standard-quality rental units");
     expect(html).toContain('href="https://www.huduser.gov/portal/datasets/fmr.html"');
+  });
+
+  it("words FMR's voucher role as HUD does: used to determine payment standards, not set by HUD", async () => {
+    // HUD's overview: FMRs "are used to determine payment standard amounts for
+    // the Housing Choice Voucher program"; the housing agency adopts the
+    // standards (24 CFR 982.503(a)(2)).
+    expect(FMR_DEFINITION_CLAUSE).toContain("used to determine payment standard amounts for the Housing Choice Voucher program");
+    expect(FMR_DEFINITION_CLAUSE).not.toMatch(/HUD uses|uses to set/i);
+    expect(text(await renderState("ohio"))).toContain("used to determine payment standard amounts for the Housing Choice Voucher program");
+  });
+});
+
+describe("F8 Small Area FMR areas: the page says when vouchers use ZIP-level figures instead", () => {
+  const smallAreaUrl = (slug: string) => HUD_FMR_AREAS[slug]!.sourceUrl.replace("&dallas_sa_override=TRUE", "");
+
+  it("records HUD's own statement for every area, from HUD's page without the override switch", () => {
+    const required: string[] = [];
+    for (const [slug, area] of Object.entries(HUD_FMR_AREAS)) {
+      expect(["required", "majority-opted", null], slug).toContain(area.voucherSmallAreaFmr);
+      expect(area.voucherSmallAreaFmrUrl, slug).toBe(area.voucherSmallAreaFmr ? smallAreaUrl(slug) : null);
+      if (area.voucherSmallAreaFmr === "required") required.push(slug);
+    }
+    // HUD designates these areas (24 CFR 982.503(a)(1)(i)); the reviewer's
+    // re-fetch of 2026-09-27 found the statement on these pages.
+    for (const slug of ["columbus", "chicago", "fort-worth", "norfolk", "atlanta", "philadelphia", "dallas", "tampa", "st-louis"]) {
+      expect(HUD_FMR_AREAS[slug]!.voucherSmallAreaFmr, slug).toBe("required");
+    }
+    expect(HUD_FMR_AREAS.houston!.voucherSmallAreaFmr).toBe("majority-opted");
+    expect(required.length).toBeGreaterThanOrEqual(50);
+  });
+
+  it("builds the note for exactly the areas HUD's page names, on both render paths", () => {
+    for (const market of ALL_MARKETS) {
+      const data = buildMarketPageData({ slug: market.slug, city: market.name, stateCode: market.stateCode });
+      const statement = data.area?.voucherSmallAreaFmr ?? null;
+      expect(Boolean(data.voucherNote), market.slug).toBe(statement !== null);
+      if (data.voucherNote) {
+        expect(data.voucherNote.href, market.slug).toBe(smallAreaUrl(market.slug));
+        expect(data.sources.map((source) => source.href), market.slug).toContain(smallAreaUrl(market.slug));
+      }
+    }
+  });
+
+  it.each([
+    ["columbus", "all Housing Choice Voucher programs operated there will use ZIP-level Small Area FMRs instead of this area figure"],
+    ["atlanta", "all Housing Choice Voucher programs operated there will use ZIP-level Small Area FMRs instead of this area figure"],
+    ["houston", "a housing agency or agencies representing a majority of its Housing Choice Vouchers opted to use ZIP-level Small Area FMRs"],
+  ])("/markets/%s renders HUD's statement with a link to HUD's page", async (slug, sentence) => {
+    const html = await renderCity(slug);
+    expect(text(html)).toContain(`HUD's page for the ${HUD_FMR_AREAS[slug]!.areaName} says ${sentence}`);
+    expect(html).toContain(`data-market-voucher-note=""`);
+    expect(html).toContain(`href="${smallAreaUrl(slug).replace(/&/g, "&amp;")}"`);
+  });
+
+  it("renders no voucher note where HUD's page makes no Small Area FMR statement", async () => {
+    const slug = Object.keys(HUD_FMR_AREAS).find((key) => HUD_FMR_AREAS[key]!.voucherSmallAreaFmr === null && !BESPOKE[key])!;
+    expect(slug).toBeDefined();
+    expect(await renderCity(slug)).not.toContain("data-market-voucher-note");
   });
 });
 
@@ -205,11 +302,60 @@ describe("F8 FAQ: visible, data-only, and mirrored exactly by FAQPage JSON-LD", 
     }
   });
 
+  it.each(["connecticut", "texas", "ohio"])(
+    "/states/%s: the HUD FAQ answer cites each city's own HUD area page, which shows its figures",
+    async (slug) => {
+      const html = await renderState(slug);
+      const items = [...html.matchAll(/<div data-faq-item=""[\s\S]*?<\/div>/g)].map((m) => m[0]);
+      const hudItem = items.find((item) => /What is HUD&#x27;s Fair Market Rent in/.test(item));
+      expect(hudItem, slug).toBeDefined();
+      const hrefs = [...hudItem!.matchAll(/href="([^"]+)"/g)].map((m) => decodeEntities(m[1]!));
+      const cities = getStateHudCities(STATES[slug]!.name);
+      expect(cities.length).toBeGreaterThan(0);
+      for (const city of cities) expect(hrefs, city.slug).toContain(HUD_FMR_AREAS[city.slug]!.sourceUrl);
+      // The overview page defines FMR but shows no area figure.
+      expect(hrefs).not.toContain(HUD_FMR_OVERVIEW_URL);
+    },
+  );
+
   it("links a source under every visible answer", async () => {
     for (const html of [await renderCity("columbus"), await renderState("ohio")]) {
       const items = [...html.matchAll(/<div data-faq-item=""[\s\S]*?<\/div>/g)].map((m) => m[0]);
       expect(items.length).toBeGreaterThan(0);
       for (const item of items) expect(item).toMatch(/Source: (?:<span>)?<a href="https:\/\/(?:www\.huduser\.gov|data\.census\.gov)\//);
+    }
+  });
+});
+
+describe("F8 FAQ questions stay unique when market facts join the template", () => {
+  const REF = { url: "https://www.huduser.gov/portal/datasets/fmr.html", title: "Fair Market Rents", retrievedAt: "2026-09-27" };
+
+  it("refuses a market-facts question that repeats one of the page's HUD questions", () => {
+    const facts = parseMarketFacts({
+      markets: {
+        columbus: {
+          countyEffectiveTaxRate: null,
+          rentalLicensing: null,
+          faq: [{ q: "what is HUD's Fair Market Rent for Columbus, OH in FY2026 ", a: "HUD says $1,430.", sources: [REF] }],
+        },
+      },
+    }).columbus!;
+    const identity = { slug: "columbus", city: "Columbus", stateCode: "OH" };
+    expect(() => buildMarketFaq(identity, HUD_RENTS.columbus!, HUD_FMR_AREAS.columbus!, null, facts)).toThrow(
+      /markets\.columbus\.faq\[0\]\.q repeats a question/,
+    );
+    // A new question is fine.
+    const fresh = parseMarketFacts({
+      markets: { columbus: { countyEffectiveTaxRate: null, rentalLicensing: null, faq: [{ q: "What is Franklin County's tax rate?", a: "It is 1.2%.", sources: [REF] }] } },
+    }).columbus!;
+    expect(buildMarketFaq(identity, HUD_RENTS.columbus!, HUD_FMR_AREAS.columbus!, null, fresh).at(-1)?.question).toBe("What is Franklin County's tax rate?");
+  });
+
+  it("gives every market page a FAQ with no repeated question", () => {
+    for (const market of ALL_MARKETS) {
+      const { faq } = buildMarketPageData({ slug: market.slug, city: market.name, stateCode: market.stateCode });
+      const questions = faq.map((item) => item.question.toLowerCase());
+      expect(new Set(questions).size, market.slug).toBe(questions.length);
     }
   });
 });
@@ -281,6 +427,16 @@ describe("F8 byline, sources box and dating line", () => {
     const box = html.slice(html.indexOf('data-sources-box=""'));
     expect(box).toContain("Worcester, MA HUD Metro FMR Area");
     expect(box).toMatch(/href="https:\/\/www\.huduser\.gov\/portal\/datasets\/fmr\/fmrs\/FY2026_code\/2026summary\.odn\?fips=2502782000/);
+  });
+});
+
+describe("F8 verify-locally copy: instructions, not unsourced claims", () => {
+  it("asserts nothing about other cities, premiums or deals that no source on the page supports", async () => {
+    for (const html of [await renderCity("columbus"), await renderCity("philadelphia"), await renderState("texas")]) {
+      const body = text(html);
+      expect(body).not.toMatch(/Many cities require|Premiums vary|decide whether a thin deal|assessment resets/i);
+      expect(body).toMatch(/Check whether .* requires a rental license, registration, inspection, or certificate of occupancy/);
+    }
   });
 });
 

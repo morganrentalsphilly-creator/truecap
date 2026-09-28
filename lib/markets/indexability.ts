@@ -32,6 +32,7 @@ import {
   type DataFaqItem,
   type SourceLink,
 } from "@/lib/markets/data-copy";
+import { HUD_FMR_AREAS, HUD_FMR_AREAS_RETRIEVED_AT } from "@/lib/markets/hud-fmr-areas";
 import { HUD_RENTS, type HudRent } from "@/lib/markets/hud-rents";
 import { STATES, getStateBySlug } from "@/lib/states";
 import { stateFactsFor, type StateFacts } from "@/lib/seo/state-facts";
@@ -89,6 +90,29 @@ export function buildDataAsOfLine(year: number): string {
 }
 
 export type StateHudCity = { slug: string; name: string; hud: HudRent };
+
+/**
+ * HUD's documentation page for a city's FMR area — the page that shows the
+ * city's figures — or null when the area record is missing or shows other
+ * figures (same rule as lib/markets/market-page-data.ts).
+ */
+export function stateCityHudSource(city: StateHudCity): SourceLink | null {
+  if (!Object.prototype.hasOwnProperty.call(HUD_FMR_AREAS, city.slug)) return null;
+  const area = HUD_FMR_AREAS[city.slug]!;
+  if (area.year !== city.hud.year || area.rent2br !== city.hud.rent2br || area.rent3br !== city.hud.rent3br) return null;
+  return {
+    label: `HUD FY${area.year} Fair Market Rent documentation: ${city.name} (${area.areaName})`,
+    href: area.sourceUrl,
+    retrievedAt: HUD_FMR_AREAS_RETRIEVED_AT,
+  };
+}
+
+/** HUD's FMR overview page (definition and uses; it shows no area figures). */
+export const HUD_FMR_OVERVIEW_SOURCE: SourceLink = Object.freeze({
+  label: "HUD Fair Market Rents: definition and uses (huduser.gov)",
+  href: HUD_FMR_OVERVIEW_URL,
+  retrievedAt: HUD_FMR_OVERVIEW_RETRIEVED_AT,
+});
 
 /**
  * Market pages in a state (matched on the full state name), programmatic and
@@ -213,12 +237,21 @@ export function buildStateFaq(stateName: string, facts: StateFacts, cities: Stat
     },
   ];
   if (cities.length > 0) {
+    // Each figure cites the HUD page that shows it: the city's own FMR area
+    // page. The overview page (definition only, no area figures) stands in
+    // only for a city without an area record.
+    const cityPages = cities.map((city) => stateCityHudSource(city));
+    const seen = new Set<string>();
+    const sources = [
+      ...cityPages.flatMap((source) => (source ? [source] : [])),
+      ...(cityPages.some((source) => source === null) ? [HUD_FMR_OVERVIEW_SOURCE] : []),
+    ].filter((source) => (seen.has(source.href) ? false : (seen.add(source.href), true)));
     items.push({
       question: `What is HUD's Fair Market Rent in ${stateName} cities for FY${year}?`,
       answer: `${fmrLabel(year)}, 2-bedroom and 3-bedroom, for the HUD area that includes each city: ${cities
         .map((city) => `${city.name} ${usd(city.hud.rent2br)} and ${usd(city.hud.rent3br)}`)
         .join("; ")}.`,
-      sources: [{ label: "HUD Fair Market Rents (huduser.gov)", href: HUD_FMR_OVERVIEW_URL, retrievedAt: HUD_FMR_OVERVIEW_RETRIEVED_AT }],
+      sources,
     });
   }
   return items;
@@ -229,19 +262,19 @@ export const STATE_PAGE_GUIDANCE = {
   intro: (stateName: string) =>
     `This page collects ${stateName} data from two federal sources: the Census Bureau's American Community Survey for home values, real estate taxes paid and the share of homes that are rented, and HUD's Fair Market Rent for each ${stateName} city TrueCap covers. Use them to set your first assumptions, then verify the parcel before you offer.`,
   fmr: (stateName: string, year: number) =>
-    `${fmrLabel(year)} is set for the county or metro area that contains each city. ${FMR_DEFINITION} Use it as a starting rent for a 2-bedroom or 3-bedroom unit, then replace it with current leases for the address. When you enter a supported ${stateName} address, TrueCap starts from the HUD figure and labels it HUD FMR so you can see what you changed.`,
+    `${fmrLabel(year)} is set for the county or metro area that contains each city. ${FMR_DEFINITION} It is an area benchmark for a 2-bedroom or 3-bedroom unit, not what a specific unit rents for: compare it with current leases for the address. When you enter a supported ${stateName} address, TrueCap fills rent from the HUD figure as a placeholder labeled HUD FMR, so you can see it and replace it with the property's own leases.`,
   verify: [
     {
       title: "Property tax bill",
-      body: "Pull the current bill for the parcel from the county assessor or treasurer, then check how the assessment resets after a sale. The statewide Census median describes owner-occupied homes, not the bill you will pay.",
+      body: "Pull the current bill for the parcel from the county assessor or treasurer, then check whether a sale changes the assessment. The statewide Census median describes owner-occupied homes, not the bill you will pay.",
     },
     {
       title: "Rental licensing and permits",
-      body: "Many cities require a rental license, an inspection, or a certificate of occupancy before you can lease. Check the city and county rules for the address before you close, and budget the fees.",
+      body: "Check whether the city or county requires a rental license, registration, inspection, or certificate of occupancy for the address before you close, and budget any fees.",
     },
     {
       title: "Insurance quotes",
-      body: "Get a written landlord-policy quote for the specific property, including wind, hail, or flood coverage where it applies. Premiums vary by ZIP, building age, and roof, and they decide whether a thin deal still clears.",
+      body: "Get a written landlord-policy quote for the specific property, with wind, hail, or flood coverage where the property needs it, and enter that premium in place of a statewide or default figure.",
     },
   ],
   run: (stateName: string) =>

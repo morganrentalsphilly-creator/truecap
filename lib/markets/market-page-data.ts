@@ -55,10 +55,35 @@ export type MarketPageData = Readonly<{
   areaPhrase: string;
   faq: readonly DataFaqItem[];
   sources: readonly SourceLink[];
+  /**
+   * What HUD's page for this area says about vouchers and ZIP-level Small Area
+   * FMRs, as one sentence plus the page it cites; null when HUD's page says
+   * nothing (the FMR definition's "payment standard" clause then stands alone).
+   */
+  voucherNote: VoucherNote | null;
   /** "Data as of HUD FY2026 (retrieved July 13, 2026).", or null without a HUD row. */
   dataAsOf: string | null;
   status: MarketDataStatus;
 }>;
+
+/** A sentence the page renders as-is, followed by a link to `href` (the sentence carries no markup). */
+export type VoucherNote = Readonly<{ text: string; href: string; linkLabel: string }>;
+
+/**
+ * HUD's own statement for the area, reworded only as far as the page needs:
+ * designated Small Area FMR areas ("All Housing Choice Voucher programs
+ * operated in the <area> will use Small Area FMRs") and areas where agencies
+ * holding most vouchers opted in ("…has opted to use Small Area Fair Market
+ * Rents").
+ */
+export function buildVoucherNote(area: HudFmrArea | null): VoucherNote | null {
+  if (!area || !area.voucherSmallAreaFmr || !area.voucherSmallAreaFmrUrl) return null;
+  const text =
+    area.voucherSmallAreaFmr === "required"
+      ? `HUD's page for the ${area.areaName} says all Housing Choice Voucher programs operated there will use ZIP-level Small Area FMRs instead of this area figure`
+      : `HUD's page for the ${area.areaName} says a housing agency or agencies representing a majority of its Housing Choice Vouchers opted to use ZIP-level Small Area FMRs`;
+  return Object.freeze({ text, href: area.voucherSmallAreaFmrUrl, linkLabel: `HUD FY${area.year}` });
+}
 
 function areaFor(slug: string, hud: HudRent | null): HudFmrArea | null {
   if (!hud || !Object.prototype.hasOwnProperty.call(HUD_FMR_AREAS, slug)) return null;
@@ -77,6 +102,11 @@ function changeClause(label: string, from: number, to: number, fromYear: number,
   const delta = to - from;
   if (delta === 0) return `the ${label} figure stayed at ${usd(to)} from FY${fromYear} to FY${toYear}`;
   return `the ${label} figure went from ${usd(from)} in FY${fromYear} to ${usd(to)} in FY${toYear} (${signedUsd(delta)}, ${signedPct(delta, from)})`;
+}
+
+/** Case, spacing and trailing punctuation do not make a question new. */
+function normalizeQuestion(question: string): string {
+  return question.toLowerCase().replace(/\s+/g, " ").replace(/[\s?.!]+$/, "").trim();
 }
 
 /** The page's visible FAQ (the FAQPage JSON-LD mirrors it exactly). */
@@ -128,6 +158,21 @@ export function buildMarketFaq(
       sources: [hudSource],
     });
   }
+  // A sourced FAQ item may not repeat a question the page already answers:
+  // the visible FAQ would show it twice and FAQPage would carry a duplicate
+  // Question. Throwing fails `next build` (the loop's verify-build) instead
+  // of publishing it; the loader cannot check this, since the template's
+  // questions depend on the page's HUD data.
+  const asked = new Set(items.map((item) => normalizeQuestion(item.question)));
+  (facts?.faq ?? []).forEach((item, index) => {
+    const key = normalizeQuestion(item.q);
+    if (asked.has(key)) {
+      throw new Error(
+        `content/seo/market-facts.json markets.${identity.slug}.faq[${index}].q repeats a question the /markets/${identity.slug} page already answers: ${JSON.stringify(item.q)}`,
+      );
+    }
+    asked.add(key);
+  });
   for (const item of facts?.faq ?? []) {
     items.push({
       question: item.q,
@@ -145,6 +190,9 @@ function buildMarketSources(area: HudFmrArea | null, safmr: CitySafmr | null, fa
     list.push({ label: `HUD FY${area.year} Fair Market Rent documentation: ${area.areaName}`, href: area.sourceUrl, retrievedAt: HUD_FMR_AREAS_RETRIEVED_AT });
     if (safmr && area.safmrSourceUrl) {
       list.push({ label: `HUD FY${safmr.year} Small Area Fair Market Rents by ZIP code: ${area.areaName}`, href: area.safmrSourceUrl, retrievedAt: SAFMR_RENTS_RETRIEVED_AT });
+    }
+    if (area.voucherSmallAreaFmrUrl) {
+      list.push({ label: `HUD FY${area.year} Small Area FMR status for vouchers: ${area.areaName}`, href: area.voucherSmallAreaFmrUrl, retrievedAt: HUD_FMR_AREAS_RETRIEVED_AT });
     }
   }
   list.push({ label: "HUD Fair Market Rents: definition and uses (huduser.gov)", href: HUD_FMR_OVERVIEW_URL, retrievedAt: HUD_FMR_OVERVIEW_RETRIEVED_AT });
@@ -188,6 +236,7 @@ export function buildMarketPageData(identity: MarketPageIdentity): MarketPageDat
     areaPhrase,
     faq,
     sources: buildMarketSources(area, safmr, facts, faq),
+    voucherNote: buildVoucherNote(area),
     dataAsOf: hud ? buildHudDataAsOfLine(hud.year, [hud.retrievedAt]) : null,
     status: marketDataStatus(slug),
   });

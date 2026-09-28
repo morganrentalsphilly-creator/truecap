@@ -2573,7 +2573,7 @@ export function InvestCalcPage({
             ? `${filled.join("  ·  ")} - ${
                 rentIsStateAverage
                   ? "No local HUD match — this is a statewide average; local rents vary widely, so adjust to comps."
-                  : "HUD FMR is an area average; adjust to local comps."
+                  : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
               }`
             : filled.join("  ·  "),
         });
@@ -3288,7 +3288,7 @@ export function InvestCalcPage({
             description: `${filledLines.join("  ·  ")} - ${
               anyStateAverage
                 ? "No local HUD match — these are statewide averages; local rents vary widely, so adjust to comps."
-                : "HUD FMR is an area average; adjust to local comps."
+                : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
             }`,
           });
         }
