@@ -250,8 +250,11 @@ describe("internal link graph (every sitemap page, rendered)", () => {
   });
 
   it("files every published post except the one being merged away in exactly one hub", () => {
+    // what-is-a-good-dscr is being merged into another post by a sibling PR;
+    // once it leaves the registry this list is simply empty.
+    const MERGING_AWAY = new Set(["what-is-a-good-dscr"]);
     const unfiled = BLOG_POSTS.filter((p) => p.available && !BLOG_TOPICS.some((t) => t.postSlugs.includes(p.slug))).map((p) => p.slug);
-    expect(unfiled).toEqual(["what-is-a-good-dscr"]);
+    expect(unfiled.filter((slug) => !MERGING_AWAY.has(slug))).toEqual([]);
     for (const post of BLOG_POSTS) {
       const hubs = BLOG_TOPICS.filter((t) => t.postSlugs.includes(post.slug)).map((t) => t.slug);
       expect(hubs.length, `${post.slug} in ${hubs.join(", ")}`).toBeLessThanOrEqual(1);
