@@ -172,7 +172,7 @@ export default function HouseHackingPost() {
             Example scenario: a Philadelphia triplex at $400,000 with 5% down,
             two modeled rents of $1,400 in year 1, and a third modeled rent of
             $1,500 after a permitted move-out. If verified income and all modeled
-            costs produced $900 per month, the simple <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash calculation</Link>
+            costs produced $900 per month, the simple <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash calculation</Link>{" "}
             against only the $20,000 down payment would be 54%. That is not a
             forecast: include closing costs, reserves, vacancy, maintenance,
             capital work, taxes, insurance, utilities, management, loan terms,

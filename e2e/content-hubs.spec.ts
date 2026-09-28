@@ -1,11 +1,16 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
+import { linkableMarkets, linkablePosts } from "@/lib/seo/link-policy";
 
-const expectedBlogPaths = BLOG_POSTS.filter((post) => post.available)
+// The hubs list what the link policy lets a page link (lib/seo/link-policy.ts):
+// a post or market on content/seo/noindex.json drops out of both, so a prune
+// needs no edit here. lib/__tests__/internal-link-graph.test.tsx checks the
+// policy against the sitemap.
+const expectedBlogPaths = linkablePosts(BLOG_POSTS)
   .map((post) => `/blog/${post.slug}`)
   .sort();
-const expectedMarketPaths = [...BESPOKE_MARKETS, ...MARKET_CITIES]
+const expectedMarketPaths = linkableMarkets([...BESPOKE_MARKETS, ...MARKET_CITIES])
   .map((market) => `/markets/${market.slug}`)
   .sort();
 

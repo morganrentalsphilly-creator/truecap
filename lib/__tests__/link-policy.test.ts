@@ -4,10 +4,11 @@ import { describe, expect, it } from "vitest";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { BLOG_POSTS, type BlogPost } from "@/lib/blog-posts";
 import { BLOG_TOPICS, type BlogTopic } from "@/lib/blog-topics";
-import { getRelatedContent } from "@/lib/related-content";
+import { getRelatedContent, tokensOf } from "@/lib/related-content";
+import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { getCombosForCity } from "@/lib/city-strategy-combos";
 import { STRATEGY_PAGES_INDEXABLE } from "@/lib/markets/indexability";
-import { nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
+import { nearbyMarketGroups, nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
 import {
   blogTopicForPost,
   isLinkablePath,
@@ -111,15 +112,27 @@ describe("linkableToolFor (the glossary calculator line)", () => {
 });
 
 describe("getRelatedContent follows the policy", () => {
-  it("never offers an unreleased tool and falls back to the post's hub calculator", () => {
+  it("never offers an unreleased tool", () => {
     const released = (href: string) => !href.startsWith("/tools/") || isLinkablePath(href, none);
     for (const p of BLOG_POSTS) {
       for (const link of getRelatedContent({ kind: "blog", slug: p.slug, title: p.title })) expect(released(link.href), `${p.slug} → ${link.href}`).toBe(true);
     }
-    // No tool shares a word with this post's slug and title: its hub (financing) supplies one.
-    const links = getRelatedContent({ kind: "blog", slug: "seller-financing-subject-to", title: "Seller financing and subject-to deals" });
-    const tools = links.filter((l) => l.kind === "tool").map((l) => l.href);
-    expect(tools).toHaveLength(1);
+  });
+
+  it("offers a post a calculator only when the calculator shares a word with it", () => {
+    for (const p of BLOG_POSTS) {
+      const subject = tokensOf(p.slug, p.title);
+      for (const link of getRelatedContent({ kind: "blog", slug: p.slug, title: p.title }).filter((l) => l.kind === "tool")) {
+        const tool = CALCULATOR_REGISTRY.find((c) => `/tools/${c.slug}` === link.href)!;
+        const shared = [...tokensOf(tool.slug, tool.title)].filter((t) => subject.has(t));
+        expect(shared, `${p.slug} → ${link.href}`).not.toEqual([]);
+      }
+    }
+    // Nothing in these posts is about a calculator: they get none, not their hub's first one.
+    for (const slug of ["seller-financing-subject-to", "hostfully-vs-hostaway-vs-guesty", "stessa-vs-avail-vs-baselane", "property-management-yes-or-no"]) {
+      const p = BLOG_POSTS.find((row) => row.slug === slug)!;
+      expect(getRelatedContent({ kind: "blog", slug, title: p.title }).filter((l) => l.kind === "tool"), slug).toEqual([]);
+    }
   });
 });
 
@@ -130,7 +143,7 @@ describe("market cross-links", () => {
     expect(stateGuideSlugFor("Alaska", none)).toBeNull(); // no Alaska guide exists
   });
 
-  it("lists at most five nearby markets: same state (county or HUD area first), then a metro across the state line", () => {
+  it("lists at most five other markets: same state (county or HUD area first), then a metro across the state line", () => {
     // Mesa shares Phoenix's county and HUD FMR area, so it leads.
     expect(nearbyMarkets("phoenix", { isListed: none })[0]?.slug).toBe("mesa");
     // Vancouver, WA reaches Portland, OR through their shared HUD FMR area, after Washington's own markets.
@@ -144,6 +157,18 @@ describe("market cross-links", () => {
     }
     // Hamilton County, OH and Hamilton County, TN are not neighbours.
     expect(nearbyMarkets("cincinnati", { isListed: none }).map((m) => m.slug)).not.toContain("chattanooga");
+  });
+
+  it("labels the picks by the state and by a HUD FMR area across the state line, never as nearby", () => {
+    const vancouver = nearbyMarketGroups("vancouver", { isListed: none })!;
+    expect(vancouver.stateName).toBe("Washington");
+    expect(vancouver.acrossStateLine.map((m) => m.slug)).toEqual(["portland"]);
+    expect(vancouver.sameState.every((m) => m.stateName === "Washington")).toBe(true);
+    // Fort Worth's picks are the Texas markets after it alphabetically; Dallas is not among them.
+    const fortWorth = nearbyMarketGroups("fort-worth", { isListed: none })!;
+    expect(fortWorth.acrossStateLine).toEqual([]);
+    expect(fortWorth.sameState.map((m) => m.slug)).not.toContain("dallas");
+    expect(nearbyMarketGroups("not-a-market")).toBeNull();
   });
 
   it("drops a noindexed neighbour", () => {

@@ -1,11 +1,13 @@
 /**
  * Market-page cross-links (F9): the state guide a city page links to and the
- * up-to-five nearby markets it lists. Both render paths (app/markets/[city]
+ * up-to-five other markets it lists. Both render paths (app/markets/[city]
  * and the bespoke wrappers around components/marketing/safe-market-page.tsx)
  * read these, so they cannot drift.
  *
- * There are no coordinates in the repo, so "nearby" is built from what the
- * datasets do say, in this order:
+ * There are no coordinates in the repo, so the list cannot claim distance.
+ * The page labels it with what the data does say: "More {State} markets" for
+ * the same-state picks and "Across the state line" for a market in another
+ * state that shares the HUD FMR area (nearbyMarketGroups). The order:
  *   1. same state first: markets in the city's state that share its county
  *      (lib/markets/city-geo.ts) or its HUD FMR area
  *      (lib/markets/hud-fmr-areas.ts), then the state's other markets in
@@ -88,4 +90,32 @@ export function nearbyMarkets(
     if (!out.some((picked) => picked.slug === m.slug)) out.push(m);
   }
   return out;
+}
+
+export type NearbyMarketGroups = {
+  /** The page's own state, for the "More {State} markets" label. */
+  stateName: string;
+  /** Picks in the page's state, in nearbyMarkets order. */
+  sameState: MarketLink[];
+  /** Picks in another state that share the page's HUD FMR area. */
+  acrossStateLine: MarketLink[];
+};
+
+/**
+ * nearbyMarkets split the way the page labels it. Only the across-the-line
+ * picks share a metro by construction; most same-state picks are simply the
+ * state's next markets alphabetically, so neither label says "nearby".
+ */
+export function nearbyMarketGroups(
+  slug: string,
+  options: { limit?: number; isListed?: Listed } = {},
+): NearbyMarketGroups | null {
+  const self = allMarkets().find((m) => m.slug === slug);
+  if (!self) return null;
+  const picks = nearbyMarkets(slug, options);
+  return {
+    stateName: self.stateName,
+    sameState: picks.filter((m) => m.stateName === self.stateName),
+    acrossStateLine: picks.filter((m) => m.stateName !== self.stateName),
+  };
 }

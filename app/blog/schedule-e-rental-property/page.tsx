@@ -368,9 +368,16 @@ export default function ScheduleEPost() {
               <strong>+$1,665 for the year, about +$139/month</strong>, with a
               DSCR of 1.11. The modeled tax column shows a $3,703 loss before
               taxpayer-specific limitations. The arithmetic bridge is cash flow
-              ($1,665) plus principal paydown ($1,905, cash out but not
-              deductible) minus depreciation ($7,273, deductible but not cash)
-              equals the $3,703 modeled loss. Sanity-check the pre-tax operating
+              ($1,665) plus{" "}
+              <Link
+                href="/glossary/principal-paydown"
+                className="text-primary font-semibold hover:underline"
+              >
+                principal paydown
+              </Link>{" "}
+              ($1,905, cash out but not deductible) minus depreciation
+              ($7,273, deductible but not cash) equals the $3,703 modeled
+              loss. Sanity-check the pre-tax operating
               side in the{" "}
               <Link
                 href="/analyze" prefetch={false}

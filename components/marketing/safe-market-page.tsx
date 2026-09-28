@@ -29,7 +29,11 @@ import {
   buildMarketPageData,
   type MarketPageData,
 } from "@/lib/markets/market-page-data";
-import { nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
+import {
+  nearbyMarketGroups,
+  stateGuideSlugFor,
+  type MarketLink,
+} from "@/lib/markets/nearby";
 import { MARKET_DATA_ATTRIBUTE } from "@/lib/markets/thin";
 import { isLinkablePath } from "@/lib/seo/link-policy";
 import type { MarketFacts } from "@/lib/seo/market-facts";
@@ -671,30 +675,53 @@ export function MarketStateGuideLink({
 }
 
 /**
- * Up to five nearby markets: same state first (same county or HUD FMR area,
- * then the state's next markets alphabetically), then a metro that crosses
- * the state line (lib/markets/nearby.ts). Renders nothing when the city has
- * no linkable neighbour.
+ * Up to five other markets (lib/markets/nearby.ts), under labels the data
+ * supports. The repo has no coordinates, so the block does not say "nearby":
+ * "More {State} markets" lists the state's own picks (markets sharing the
+ * county or HUD FMR area first, then the state's next markets
+ * alphabetically), and "Across the state line" lists a market in another
+ * state that shares the HUD FMR area. Renders nothing when the city has no
+ * linkable neighbour.
  */
 export function MarketNearby({ slug }: { slug: string }) {
-  const markets = nearbyMarkets(slug);
-  if (markets.length === 0) return null;
+  const groups = nearbyMarketGroups(slug);
+  if (!groups) return null;
+  const { stateName, sameState, acrossStateLine } = groups;
+  if (sameState.length === 0 && acrossStateLine.length === 0) return null;
+  const chips = (markets: MarketLink[]) => (
+    <div className="flex flex-wrap gap-2 text-sm">
+      {markets.map((market) => (
+        <Link
+          key={market.slug}
+          href={`/markets/${market.slug}`}
+          className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          {market.name}, {market.stateCode}
+        </Link>
+      ))}
+    </div>
+  );
   return (
     <section data-market-nearby="" className="mt-12 border-t border-border pt-6">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        Nearby markets
-      </p>
-      <div className="flex flex-wrap gap-2 text-sm">
-        {markets.map((market) => (
-          <Link
-            key={market.slug}
-            href={`/markets/${market.slug}`}
-            className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            {market.name}, {market.stateCode}
-          </Link>
-        ))}
-      </div>
+      {sameState.length > 0 ? (
+        <div data-market-group="state">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            More {stateName} markets
+          </p>
+          {chips(sameState)}
+        </div>
+      ) : null}
+      {acrossStateLine.length > 0 ? (
+        <div
+          data-market-group="across-state-line"
+          className={sameState.length > 0 ? "mt-6" : undefined}
+        >
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Across the state line
+          </p>
+          {chips(acrossStateLine)}
+        </div>
+      ) : null}
     </section>
   );
 }

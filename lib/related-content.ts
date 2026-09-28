@@ -5,8 +5,9 @@
  * are the strongest token overlaps across the three registries. Pure and
  * deterministic, so the same page always links the same neighbours:
  *   tools ↔ glossary ↔ two blog posts
- *   blog  → one tool (the post's own hub's first calculator when no tool
- *           shares a word with it) + one glossary term + the analyzer
+ *   blog  → one tool (only when a tool shares a word with the post; a
+ *           post about software or insurance gets none rather than an
+ *           off-topic calculator) + one glossary term + the analyzer
  *   vs    → pricing + the sample deal
  * Candidates pass lib/seo/link-policy.ts first (F9): never an unpublished or
  * noindexed post, an unreleased or noindexed tool, or a noindexed term.
@@ -14,7 +15,7 @@
 import { BLOG_POSTS, type BlogPost } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, type CalculatorEntry } from "@/lib/calculator-registry";
 import { GLOSSARY, type GlossaryEntry } from "@/lib/glossary";
-import { blogTopicForPost, isLinkablePath } from "@/lib/seo/link-policy";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 
 export type RelatedKind = "tool" | "glossary" | "blog" | "vs";
 
@@ -111,12 +112,7 @@ export function getRelatedContent(input: { kind: RelatedKind; slug: string; titl
       return [...t, ...p, ...g, ANALYZER];
     }
     case "blog": {
-      const ranked = rank(tools, subject, (e) => tokensOf(e.slug, e.title), 1, () => false);
-      // No tool shares a word with the post: fall back to its hub's first calculator.
-      const hubTool = (blogTopicForPost(input.slug)?.calculatorSlugs ?? [])
-        .map((slug) => tools.find((c) => c.slug === slug))
-        .find((c): c is CalculatorEntry => c !== undefined);
-      const t = (ranked.length > 0 ? ranked : hubTool ? [hubTool] : []).map(toolLink);
+      const t = rank(tools, subject, (e) => tokensOf(e.slug, e.title), 1, () => false).map(toolLink);
       const g = rank(glossary, subject, (e) => tokensOf(e.slug, e.term), 1, () => false).map(glossaryLink);
       return [...t, ...g, ANALYZER];
     }

@@ -242,8 +242,14 @@ export default function BrrrrMethodPost() {
             $40,000 rehab in draws. Two points on the ~$163,000 total
             commitment is about $3,300 up front. Interest-only payments start
             around $1,080/month and climb toward $1,430 as draws fund — call
-            it $8,500-9,000 over a 7-month hold. Your actual cash into the
-            deal is the $21,750 down payment, purchase closing costs, points,
+            it $8,500-9,000 over a 7-month hold. Your{" "}
+            <Link
+              href="/blog/how-much-money-to-buy-a-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              actual cash into the deal
+            </Link>{" "}
+            is the $21,750 down payment, purchase closing costs, points,
             and the monthly carry: roughly <strong>$35,000-38,000</strong>{" "}
             instead of $195,000.
           </p>
