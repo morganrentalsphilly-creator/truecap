@@ -3,8 +3,10 @@
  * The HUD Fair Market Rent area behind each market page's HUD figures, read
  * from HUD's FY2026 Fair Market Rent Documentation System (huduser.gov).
  * Each record's sourceUrl opens HUD's page for the county (New England: the
- * town), which names the area and shows its FMRs; safmrSourceUrl shows HUD's
- * ZIP-level Small Area FMRs where lib/markets/safmr-rents.ts has rows.
+ * town), which names the area and shows its FMRs; voucherSmallAreaFmr records
+ * whether HUD's page says the area's vouchers use ZIP-level Small Area FMRs;
+ * safmrSourceUrl shows HUD's ZIP-level Small Area FMRs where
+ * lib/markets/safmr-rents.ts has rows.
  */
 
 export type HudFmrArea = {
@@ -20,12 +22,23 @@ export type HudFmrArea = {
   rent3br: number;
   /** The prior fiscal year's FMRs, from the same HUD page. */
   prior: { year: number; rent2br: number; rent3br: number } | null;
+  /**
+   * What HUD's own page for the area says about vouchers and ZIP-level Small
+   * Area FMRs: "required" ("All Housing Choice Voucher programs operated in
+   * the <area> will use Small Area FMRs"), "majority-opted" ("A Public Housing
+   * Agency (PHA) or agencies representing a majority of Housing Choice
+   * Vouchers in the <area> has opted to use Small Area Fair Market Rents"),
+   * or null when the page says neither.
+   */
+  voucherSmallAreaFmr: "required" | "majority-opted" | null;
+  /** HUD's page for the area (no override switch) that makes that statement; null with no statement. */
+  voucherSmallAreaFmrUrl: string | null;
   /** HUD's Small Area FMR (ZIP) table for the area, when safmr-rents.ts has rows that match it. */
   safmrSourceUrl: string | null;
 };
 
 /** The day this file's pages were read from huduser.gov. */
-export const HUD_FMR_AREAS_RETRIEVED_AT = "2026-09-27";
+export const HUD_FMR_AREAS_RETRIEVED_AT = "2026-09-28";
 
 export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
   "columbus": {
@@ -40,6 +53,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1445,
       "rent3br": 1741
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3904999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3904999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "cincinnati": {
@@ -54,6 +69,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1287,
       "rent3br": 1707
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3906199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3906199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "pittsburgh": {
@@ -68,6 +85,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1280,
       "rent3br": 1632
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4200399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4200399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "baltimore": {
@@ -82,6 +101,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1965,
       "rent3br": 2529
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "st-louis": {
@@ -96,6 +117,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1215,
       "rent3br": 1570
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2951099999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2951099999&year=2026&fmrtype=Final&selection_type=county"
   },
   "milwaukee": {
@@ -110,6 +133,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1257,
       "rent3br": 1558
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "san-antonio": {
@@ -124,6 +149,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1501,
       "rent3br": 1907
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4802999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4802999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "jacksonville": {
@@ -138,6 +165,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1730,
       "rent3br": 2163
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1203199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1203199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "birmingham": {
@@ -152,6 +181,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1267,
       "rent3br": 1583
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0107399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0107399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "louisville": {
@@ -166,6 +197,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1330,
       "rent3br": 1714
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2111199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2111199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "nashville": {
@@ -180,6 +213,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1827,
       "rent3br": 2308
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4703799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4703799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "raleigh": {
@@ -194,6 +229,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1763,
       "rent3br": 2192
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3718399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3718399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "richmond": {
@@ -208,6 +245,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1711,
       "rent3br": 2166
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "columbia": {
@@ -222,6 +261,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1298,
       "rent3br": 1656
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "greenville": {
@@ -236,6 +277,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1306,
       "rent3br": 1599
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "oklahoma-city": {
@@ -250,6 +293,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1180,
       "rent3br": 1575
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4010999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4010999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "tulsa": {
@@ -264,6 +309,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1179,
       "rent3br": 1555
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4014399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4014399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "omaha": {
@@ -278,6 +325,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1261,
       "rent3br": 1675
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3105599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3105599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "des-moines": {
@@ -292,6 +341,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1216,
       "rent3br": 1632
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1915399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1915399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "minneapolis": {
@@ -306,6 +357,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1685,
       "rent3br": 2244
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "buffalo": {
@@ -320,6 +373,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1176,
       "rent3br": 1438
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3602999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3602999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "rochester": {
@@ -334,6 +389,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1427,
       "rent3br": 1720
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "orlando": {
@@ -348,6 +405,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1958,
       "rent3br": 2486
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1209599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1209599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "tucson": {
@@ -362,6 +421,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1373,
       "rent3br": 1924
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0401999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0401999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "grand-rapids": {
@@ -376,6 +437,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1443,
       "rent3br": 1880
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "austin": {
@@ -390,6 +453,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1949,
       "rent3br": 2484
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fort-worth": {
@@ -404,6 +469,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1705,
       "rent3br": 2256
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4843999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4843999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "denver": {
@@ -418,6 +485,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2140,
       "rent3br": 2794
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "colorado-springs": {
@@ -432,6 +501,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1778,
       "rent3br": 2491
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0804199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0804199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "salt-lake-city": {
@@ -446,6 +517,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1748,
       "rent3br": 2348
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "boise": {
@@ -460,6 +533,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1838,
       "rent3br": 2575
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "albuquerque": {
@@ -474,6 +549,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1331,
       "rent3br": 1865
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "las-vegas": {
@@ -488,6 +565,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1750,
       "rent3br": 2452
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "sacramento": {
@@ -502,6 +581,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2206,
       "rent3br": 2992
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0606799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0606799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "portland": {
@@ -516,6 +597,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1997,
       "rent3br": 2739
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "chicago": {
@@ -530,6 +613,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1761,
       "rent3br": 2262
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1703199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1703199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "madison": {
@@ -544,6 +629,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1472,
       "rent3br": 1935
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "dayton": {
@@ -558,6 +645,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1077,
       "rent3br": 1390
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3911399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3911399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "akron": {
@@ -572,6 +661,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1131,
       "rent3br": 1398
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3915399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3915399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "toledo": {
@@ -586,6 +677,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1056,
       "rent3br": 1371
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lexington": {
@@ -600,6 +693,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1165,
       "rent3br": 1583
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "knoxville": {
@@ -614,6 +709,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1548,
       "rent3br": 1989
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4709399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4709399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "chattanooga": {
@@ -628,6 +725,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1426,
       "rent3br": 1796
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4706599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4706599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "huntsville": {
@@ -642,6 +741,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1248,
       "rent3br": 1609
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "little-rock": {
@@ -656,6 +757,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1032,
       "rent3br": 1376
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "new-orleans": {
@@ -670,6 +773,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1478,
       "rent3br": 1889
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "wichita": {
@@ -684,6 +789,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 995,
       "rent3br": 1305
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2017399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2017399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "greensboro": {
@@ -698,6 +805,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1150,
       "rent3br": 1463
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3708199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3708199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "winston-salem": {
@@ -712,6 +821,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1163,
       "rent3br": 1526
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3706799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3706799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "savannah": {
@@ -726,6 +837,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1584,
       "rent3br": 2131
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fort-wayne": {
@@ -740,6 +853,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1199,
       "rent3br": 1512
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1800399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1800399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "spokane": {
@@ -754,6 +869,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1444,
       "rent3br": 1997
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "reno": {
@@ -768,6 +885,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1722,
       "rent3br": 2384
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "el-paso": {
@@ -782,6 +901,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1192,
       "rent3br": 1647
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "corpus-christi": {
@@ -796,6 +917,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1390,
       "rent3br": 1816
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "baton-rouge": {
@@ -810,6 +933,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1222,
       "rent3br": 1528
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "shreveport": {
@@ -824,6 +949,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1017,
       "rent3br": 1317
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "jackson": {
@@ -838,6 +965,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1232,
       "rent3br": 1484
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2804999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2804999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "augusta": {
@@ -852,6 +981,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1175,
       "rent3br": 1545
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1324599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1324599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "macon": {
@@ -866,6 +997,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1252,
       "rent3br": 1508
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lansing": {
@@ -880,6 +1013,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1127,
       "rent3br": 1465
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fort-collins": {
@@ -894,6 +1029,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1695,
       "rent3br": 2375
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "provo": {
@@ -908,6 +1045,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1355,
       "rent3br": 1899
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "ogden": {
@@ -922,6 +1061,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1532,
       "rent3br": 2055
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lincoln": {
@@ -936,6 +1077,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1125,
       "rent3br": 1576
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "sioux-falls": {
@@ -950,6 +1093,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1030,
       "rent3br": 1412
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fargo": {
@@ -964,6 +1109,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1012,
       "rent3br": 1418
     },
+    "voucherSmallAreaFmr": "majority-opted",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3801799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3801799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "peoria": {
@@ -978,6 +1125,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1003,
       "rent3br": 1300
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "rockford": {
@@ -992,6 +1141,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1181,
       "rent3br": 1561
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "green-bay": {
@@ -1006,6 +1157,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1147,
       "rent3br": 1521
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fort-myers": {
@@ -1020,6 +1173,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1843,
       "rent3br": 2422
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lakeland": {
@@ -1034,6 +1189,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1337,
       "rent3br": 1797
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "tallahassee": {
@@ -1048,6 +1205,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1321,
       "rent3br": 1664
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "pensacola": {
@@ -1062,6 +1221,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1605,
       "rent3br": 2147
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "clarksville": {
@@ -1076,6 +1237,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1229,
       "rent3br": 1722
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "wilmington": {
@@ -1090,6 +1253,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1802,
       "rent3br": 2171
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1000399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1000399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "allentown": {
@@ -1104,6 +1269,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1507,
       "rent3br": 1924
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "harrisburg": {
@@ -1118,6 +1285,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1371,
       "rent3br": 1763
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4204399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4204399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "scranton": {
@@ -1132,6 +1301,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1123,
       "rent3br": 1462
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "worcester": {
@@ -1146,6 +1317,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1854,
       "rent3br": 2265
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "hartford": {
@@ -1160,6 +1333,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1653,
       "rent3br": 1992
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0911037070&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0911037070&year=2026&fmrtype=Final&selection_type=county"
   },
   "new-haven": {
@@ -1174,6 +1349,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1867,
       "rent3br": 2319
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "providence": {
@@ -1188,6 +1365,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1614,
       "rent3br": 1945
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "manchester": {
@@ -1202,6 +1381,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1948,
       "rent3br": 2347
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "syracuse": {
@@ -1216,6 +1397,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1321,
       "rent3br": 1616
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "albany": {
@@ -1230,6 +1413,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1487,
       "rent3br": 1792
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "youngstown": {
@@ -1244,6 +1429,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 884,
       "rent3br": 1159
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "canton": {
@@ -1258,6 +1445,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 978,
       "rent3br": 1229
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "evansville": {
@@ -1272,6 +1461,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1054,
       "rent3br": 1300
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "south-bend": {
@@ -1286,6 +1477,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1095,
       "rent3br": 1350
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "fresno": {
@@ -1300,6 +1493,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1505,
       "rent3br": 2109
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "bakersfield": {
@@ -1314,6 +1509,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1380,
       "rent3br": 1934
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "stockton": {
@@ -1328,6 +1525,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1736,
       "rent3br": 2433
     },
+    "voucherSmallAreaFmr": "majority-opted",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0607799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0607799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "modesto": {
@@ -1342,6 +1541,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1566,
       "rent3br": 2194
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "salem": {
@@ -1356,6 +1557,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1543,
       "rent3br": 2148
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "tacoma": {
@@ -1370,6 +1573,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2057,
       "rent3br": 2882
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "killeen": {
@@ -1384,6 +1589,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1172,
       "rent3br": 1631
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "waco": {
@@ -1398,6 +1605,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1377,
       "rent3br": 1776
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lubbock": {
@@ -1412,6 +1621,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1192,
       "rent3br": 1658
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "mobile": {
@@ -1426,6 +1637,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1094,
       "rent3br": 1441
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0109799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0109799999&year=2026&fmrtype=Final&selection_type=county"
   },
   "mcallen": {
@@ -1440,6 +1653,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 992,
       "rent3br": 1290
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "brownsville": {
@@ -1454,6 +1669,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 948,
       "rent3br": 1264
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "laredo": {
@@ -1468,6 +1685,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1173,
       "rent3br": 1493
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "amarillo": {
@@ -1482,6 +1701,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1158,
       "rent3br": 1592
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "beaumont": {
@@ -1496,6 +1717,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1113,
       "rent3br": 1460
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4824599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4824599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "denton": {
@@ -1510,6 +1733,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1884,
       "rent3br": 2361
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4812199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4812199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "mesa": {
@@ -1524,6 +1749,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1950,
       "rent3br": 2624
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0401399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0401399999&year=2026&fmrtype=Final&selection_type=county"
   },
   "fayetteville": {
@@ -1538,6 +1765,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1111,
       "rent3br": 1557
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "cedar-rapids": {
@@ -1552,6 +1781,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 993,
       "rent3br": 1391
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "davenport": {
@@ -1566,6 +1797,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1025,
       "rent3br": 1336
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "topeka": {
@@ -1580,6 +1813,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 985,
       "rent3br": 1280
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "olathe": {
@@ -1594,6 +1829,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1346,
       "rent3br": 1756
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2009199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2009199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "champaign": {
@@ -1608,6 +1845,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1080,
       "rent3br": 1405
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "flint": {
@@ -1622,6 +1861,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 986,
       "rent3br": 1215
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "ann-arbor": {
@@ -1636,6 +1877,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1607,
       "rent3br": 1936
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "kalamazoo": {
@@ -1650,6 +1893,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1181,
       "rent3br": 1564
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "athens": {
@@ -1664,6 +1909,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1225,
       "rent3br": 1627
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "tuscaloosa": {
@@ -1678,6 +1925,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1138,
       "rent3br": 1450
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "montgomery": {
@@ -1692,6 +1941,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1055,
       "rent3br": 1345
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0110199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0110199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "gulfport": {
@@ -1706,6 +1957,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1117,
       "rent3br": 1446
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lafayette": {
@@ -1720,6 +1973,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1052,
       "rent3br": 1322
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "durham": {
@@ -1734,6 +1989,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1872,
       "rent3br": 2334
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "asheville": {
@@ -1748,6 +2005,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1512,
       "rent3br": 1944
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "norfolk": {
@@ -1762,6 +2021,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1696,
       "rent3br": 2361
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=5171099999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=5171099999&year=2026&fmrtype=Final&selection_type=county"
   },
   "virginia-beach": {
@@ -1776,6 +2037,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1696,
       "rent3br": 2361
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=5181099999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=5181099999&year=2026&fmrtype=Final&selection_type=county"
   },
   "charleston": {
@@ -1790,6 +2053,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1820,
       "rent3br": 2255
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4501999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4501999999&year=2026&fmrtype=Final&selection_type=county"
   },
   "spartanburg": {
@@ -1804,6 +2069,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1211,
       "rent3br": 1493
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "myrtle-beach": {
@@ -1818,6 +2085,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1406,
       "rent3br": 1771
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "gainesville": {
@@ -1832,6 +2101,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1583,
       "rent3br": 2016
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "ocala": {
@@ -1846,6 +2117,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1323,
       "rent3br": 1691
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "daytona-beach": {
@@ -1860,6 +2133,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1718,
       "rent3br": 2260
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "sarasota": {
@@ -1874,6 +2149,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1846,
       "rent3br": 2425
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1211599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1211599999&year=2026&fmrtype=Final&selection_type=county"
   },
   "naples": {
@@ -1888,6 +2165,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1860,
       "rent3br": 2453
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "boulder": {
@@ -1902,6 +2181,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2059,
       "rent3br": 2704
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "pueblo": {
@@ -1916,6 +2197,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1258,
       "rent3br": 1626
     },
+    "voucherSmallAreaFmr": "majority-opted",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0810199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0810199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "greeley": {
@@ -1930,6 +2213,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1528,
       "rent3br": 2141
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "eugene": {
@@ -1944,6 +2229,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1495,
       "rent3br": 2095
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "vancouver": {
@@ -1958,6 +2245,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1997,
       "rent3br": 2739
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "bellingham": {
@@ -1972,6 +2261,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1642,
       "rent3br": 2301
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "nampa": {
@@ -1986,6 +2277,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1838,
       "rent3br": 2575
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "billings": {
@@ -2000,6 +2293,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1373,
       "rent3br": 1888
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lowell": {
@@ -2014,6 +2309,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2242,
       "rent3br": 2701
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "trenton": {
@@ -2028,6 +2325,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2028,
       "rent3br": 2443
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "newark": {
@@ -2042,6 +2341,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2140,
       "rent3br": 2695
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "paterson": {
@@ -2056,6 +2357,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 2072,
       "rent3br": 2550
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3403199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3403199999&year=2026&fmrtype=Final&selection_type=county"
   },
   "reading": {
@@ -2070,6 +2373,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1353,
       "rent3br": 1689
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "lancaster": {
@@ -2084,6 +2389,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1393,
       "rent3br": 1820
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "york": {
@@ -2098,6 +2405,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1342,
       "rent3br": 1818
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "erie": {
@@ -2112,6 +2421,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1118,
       "rent3br": 1392
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "anchorage": {
@@ -2126,6 +2437,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1563,
       "rent3br": 2190
     },
+    "voucherSmallAreaFmr": null,
+    "voucherSmallAreaFmrUrl": null,
     "safmrSourceUrl": null
   },
   "philadelphia": {
@@ -2140,6 +2453,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1802,
       "rent3br": 2171
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4210199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "atlanta": {
@@ -2154,6 +2469,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1830,
       "rent3br": 2205
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1312199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "charlotte": {
@@ -2168,6 +2485,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1824,
       "rent3br": 2250
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3711999999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "cleveland": {
@@ -2182,6 +2501,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1208,
       "rent3br": 1553
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=3903599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "dallas": {
@@ -2196,6 +2517,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1884,
       "rent3br": 2361
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4811399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "detroit": {
@@ -2210,6 +2533,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1378,
       "rent3br": 1688
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2616399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "houston": {
@@ -2224,6 +2549,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1529,
       "rent3br": 2038
     },
+    "voucherSmallAreaFmr": "majority-opted",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4820199999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "indianapolis": {
@@ -2238,6 +2565,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1283,
       "rent3br": 1669
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1809799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "kansas-city": {
@@ -2252,6 +2581,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1346,
       "rent3br": 1756
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=2909599999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "memphis": {
@@ -2266,6 +2597,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1355,
       "rent3br": 1781
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=4715799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "phoenix": {
@@ -2280,6 +2613,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1950,
       "rent3br": 2624
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=0401399999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   },
   "tampa": {
@@ -2294,6 +2629,8 @@ export const HUD_FMR_AREAS: Record<string, HudFmrArea> = {
       "rent2br": 1978,
       "rent3br": 2533
     },
+    "voucherSmallAreaFmr": "required",
+    "voucherSmallAreaFmrUrl": "https://www.huduser.gov/portal/datasets/fmr/fmrs/FY2026_code/2026summary.odn?fips=1205799999&year=2026&fmrtype=Final&selection_type=county",
     "safmrSourceUrl": null
   }
 };
