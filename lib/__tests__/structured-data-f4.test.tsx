@@ -48,6 +48,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 import { extractLdJsonBlocks, normalizeVisible, validateHtml } from "../../seo/scripts/jsonld-validate.ts";
 import { decodeEntities, mainHtml, mainTextOf } from "../../seo/scripts/lib/html.ts";
+import { jsonLdNodes, missingSchema } from "../../scripts/seo/structured-data-expectations.mjs";
 
 const ROOT = process.cwd();
 const SITE = getSiteUrl();
@@ -223,8 +224,11 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
     const html = await renderPage();
     expect(html.length, path).toBeGreaterThan(1000);
     expect(faqMirrorProblems(html), path).toEqual([]);
-    // The loop's own validator agrees: no invisible FAQ, no missing required property, no breakout.
+    // The loop's own validator agrees: no invisible FAQ, no missing required property, no breakout,
+    // and the page's F4 values (structured-data-expectations.mjs, shared with the healthcheck).
     expect(validateHtml(html, path), path).toEqual([]);
+    // …and the healthcheck's required @types for the route family.
+    expect(missingSchema(path, jsonLdNodes(html)), path).toEqual([]);
   });
 
   it("keeps FAQPage where the FAQ is visible (the check is not passing on empty pages)", async () => {

@@ -96,6 +96,7 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { jsonLdNodes, missingSchema, structuredDataProblems } from "./structured-data-expectations.mjs";
 
 const args = process.argv.slice(2);
 const flag = (name, fallback = null) => {
@@ -123,51 +124,15 @@ const CANONICAL_ORIGIN = "https://usetruecap.com";
 const FOREIGN_DEPLOYMENT = "https://truecap-iota.vercel.app/";
 
 /**
- * Route family -> JSON-LD @types that family must emit.
+ * Route family -> JSON-LD @types that family must emit, and the F4 values
+ * (breadcrumb trails, tool @ids, /analyze -> /#software, the glossary set):
+ * scripts/seo/structured-data-expectations.mjs, shared with the loop's
+ * rendered-page validator (seo/scripts/jsonld-validate.ts).
  *
  * Deliberately a small, high-confidence table. A missing BreadcrumbList on a
  * blog post is a real defect; inventing a requirement nobody agreed to just
  * produces noise the reader learns to ignore.
  */
-/**
- * A requirement is satisfied by ANY type in its group. The blog rule is a
- * group because `BlogPosting` is a SUBTYPE of `Article` in schema.org and
- * Google documents them as equivalent for article rich results — this repo's
- * posts emit `Article`, which is correct.
- *
- * Written as a one-element array first and caught on the first real run: it
- * reported all 37 blog posts as "missing JSON-LD @type: BlogPosting" when
- * every one of them carries valid `Article` markup. 37 medium findings that
- * are all wrong is worse than no check at all — it is exactly how a weekly
- * report becomes something nobody opens.
- */
-const REQUIRED_SCHEMA = [
-  {
-    pattern: /^\/blog\/topics$/,
-    types: [["CollectionPage"], ["BreadcrumbList"]],
-    label: "topic directory",
-  },
-  {
-    pattern: /^\/blog\/(?!topics$)[^/]+$/,
-    types: [["BlogPosting", "Article"], ["BreadcrumbList"]],
-    label: "blog post",
-  },
-  {
-    pattern: /^\/tools\/[^/]+$/,
-    types: [["BreadcrumbList"]],
-    label: "tool page",
-  },
-  {
-    pattern: /^\/vs\/[^/]+$/,
-    types: [["BreadcrumbList"]],
-    label: "comparison page",
-  },
-  {
-    pattern: /^\/glossary\/[^/]+$/,
-    types: [["DefinedTerm"], ["BreadcrumbList"]],
-    label: "glossary term",
-  },
-];
 
 /** Historical calculator paths redirect only while their release gates are closed. */
 const HISTORICAL_TOOL_REDIRECTS = {
@@ -292,16 +257,6 @@ async function mapLimit(items, limit, worker) {
 }
 
 const countMatches = (haystack, re) => (haystack.match(re) ?? []).length;
-
-function jsonLdTypes(html) {
-  const types = new Set();
-  for (const m of html.matchAll(
-    /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g,
-  )) {
-    for (const t of m[1].matchAll(/"@type"\s*:\s*"([^"]+)"/g)) types.add(t[1]);
-  }
-  return types;
-}
 
 function faqFingerprint(html) {
   for (const m of html.matchAll(
@@ -921,23 +876,18 @@ function checkPage(path, page) {
     );
   }
 
-  // required JSON-LD
-  const types = jsonLdTypes(html);
-  for (const rule of REQUIRED_SCHEMA) {
-    if (!rule.pattern.test(path)) continue;
-    // Each entry is a GROUP of acceptable types; the requirement is met if
-    // the page emits any one of them (BlogPosting and Article both satisfy
-    // the article requirement — see REQUIRED_SCHEMA).
-    const missing = rule.types
-      .filter((group) => !group.some((t) => types.has(t)))
-      .map((group) => group.join(" or "));
-    if (missing.length) {
-      add(
-        "medium",
-        "missing schema",
-        `${path} (${rule.label}) is missing JSON-LD @type: ${missing.join(", ")}`,
-      );
-    }
+  // required JSON-LD: the types each route family must emit, then the values
+  // F4 fixed (breadcrumb trails, tool @ids, /analyze, the glossary set).
+  const ldNodes = jsonLdNodes(html);
+  for (const { label, missing } of missingSchema(path, ldNodes)) {
+    add(
+      "medium",
+      "missing schema",
+      `${path} (${label}) is missing JSON-LD @type: ${missing.join(", ")}`,
+    );
+  }
+  for (const detail of structuredDataProblems(path, ldNodes)) {
+    add("medium", "structured data", `${path}: ${detail}`);
   }
 
   // duplicate FAQPage
