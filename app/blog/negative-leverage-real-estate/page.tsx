@@ -8,8 +8,8 @@
  *
  * Angle: leverage only boosts returns when the asset out-earns the debt.
  * The hinge is the loan constant (annual debt service / loan), not the
- * note rate. When the cap rate sits below the loan constant — the default
- * in 2026, with ~8% loan constants against 5.5–7% residential cap rates —
+ * note rate. When the cap rate sits below the loan constant — a live risk
+ * at 2026 rates, when 30-year loan constants run about 7.2% to 8% —
  * a mortgage drags cash-on-cash below the unlevered yield, and it does so
  * even on deals that still cash-flow and still pass a DSCR lender. The
  * "negative-leverage trap" is referenced across the catalog; this is the
@@ -30,6 +30,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "negative-leverage-real-estate";
 const TITLE =
@@ -85,7 +86,7 @@ const FAQS = [
   },
   {
     q: "What cap rate do I need to avoid negative leverage?",
-    a: "A cap rate above your loan constant. In 2026, with 30-year investor loans roughly 7% to 7.5%, the loan constant lands near 8% to 8.4%, so you generally need a cap rate of 8% or higher for leverage to add to your return. Below that line, the more you borrow, the lower your cash-on-cash falls relative to the unlevered yield.",
+    a: "A cap rate above your loan constant. In 2026, Freddie Mac's weekly 30-year average has ranged from 5.98% to 7.03% (through Sept. 24), and investment-property loans carry extra agency credit fees that can push investor quotes higher; at 6.5% to 7.5%, a 30-year loan constant runs about 7.6% to 8.4%, so you generally need a cap rate near 8% or higher for leverage to add to your return. Below that line, the more you borrow, the lower your cash-on-cash falls relative to the unlevered yield.",
   },
   {
     q: "Does a bigger down payment fix negative leverage?",
@@ -161,14 +162,17 @@ export default function NegativeLeveragePost() {
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               &quot;Use leverage and the returns go up&quot; is the first thing
-              most investors learn, and for a decade of cheap money it was true
-              by default. It is not a law. Leverage is a multiplier with a sign,
+              most investors learn, and for{" "}
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="text-primary font-semibold hover:underline">
+                a decade of cheap money
+              </a>{" "}
+              it was true by default. It is not a law. Leverage is a multiplier with a sign,
               and the sign flips the moment your borrowing costs more than the
               property earns. When that happens you have <em>negative leverage</em>
               : a mortgage that drags your return <em>below</em> what you would
-              have made paying cash. In 2026 it is not an exotic edge case — at
-              today&apos;s rates it is the starting condition for most
-              residential deals. Here is the one number that decides which way
+              have made paying cash. In 2026 it is not an exotic edge case; at
+              today&apos;s rates it is a condition to check on every leveraged
+              residential deal. Here is the one number that decides which way
               leverage cuts, the worked math, and the trap where a deal still
               cash-flows and still passes its lender while quietly destroying
               return.
@@ -192,12 +196,20 @@ export default function NegativeLeveragePost() {
             </p>
             <p>
               The reason it surprises people is that for years the question
-              never came up. With 30-year loans at 3.5% to 4%, debt was so cheap
-              that almost any property out-earned it, and &quot;more leverage,
-              more return&quot; hardened into a rule. That rule was really just a
-              description of a low-rate world — move the cost of debt up two or
-              three points, which is exactly what happened, and it starts handing
-              out the wrong answer.
+              never came up. With{" "}
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="text-primary font-semibold hover:underline">
+                30-year loans at 3.5% to 4%
+              </a>
+              , a year of payments on the loan came to only about 5.4% to 5.7%
+              of the balance, so any property with a cap rate above that
+              out-earned its debt, and &quot;more leverage, more return&quot;
+              hardened into a rule. That
+              rule was really just a description of a low-rate world — move the
+              cost of debt up two or three points,{" "}
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
+                which is exactly what happened
+              </a>
+              , and it starts handing out the wrong answer.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -293,6 +305,8 @@ export default function NegativeLeveragePost() {
               the spread is positive, more debt multiplies a good thing. When the
               spread is negative, more debt multiplies a bad thing. Leverage
               never has an opinion of its own; it just makes the spread louder.
+              The formula, and every table below, treats equity as the down
+              payment alone; closing costs and reserves are left out.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -322,7 +336,7 @@ export default function NegativeLeveragePost() {
                     <td className="text-right">5.0%</td>
                     <td className="text-right">−3.95%</td>
                     <td className="text-right">0.84</td>
-                    <td className="text-right">−$246</td>
+                    <td className="text-right">−$247</td>
                   </tr>
                   <tr>
                     <td>6.0% ($18,000)</td>
@@ -343,7 +357,7 @@ export default function NegativeLeveragePost() {
                     <td className="text-right">7.98%</td>
                     <td className="text-right">7.98%</td>
                     <td className="text-right">1.33</td>
-                    <td className="text-right">+$498</td>
+                    <td className="text-right">+$499</td>
                   </tr>
                   <tr>
                     <td>9.0% ($27,000)</td>
@@ -378,14 +392,15 @@ export default function NegativeLeveragePost() {
               Look at the 7% cap-rate row: the property throws off{" "}
               <strong>+$253 a month</strong> of cash flow and carries a{" "}
               <strong>1.17 DSCR</strong>. It is profitable. It is within shouting
-              distance of the 1.20 to 1.25{" "}
+              distance of the minimum{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
               </Link>{" "}
-              most lenders want. By the two checks investors lean on hardest —
+              a DSCR lender may set; confirm the actual threshold in the
+              lender&apos;s current program. By the two checks investors lean on hardest —
               &quot;does it cash-flow?&quot; and &quot;will it finance?&quot; —
               it looks like a deal. And yet its 4.05% cash-on-cash is nearly
               three full points below the 7% you would have earned in all cash.
@@ -472,12 +487,11 @@ export default function NegativeLeveragePost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why 2026 made negative leverage the default
+              Why 2026 rates make negative leverage a live risk
             </h2>
             <p>
               Plot the loan constant against the rate environment and you can see
-              why this went from a rare warning to the base case. The constant
-              moves with the rate, but it always sits above it because of
+              why. The constant moves with the rate, but it always sits above it because of
               amortization:
             </p>
 
@@ -487,43 +501,50 @@ export default function NegativeLeveragePost() {
                   <tr className="bg-muted">
                     <th className="text-left">30-yr rate</th>
                     <th className="text-right">Loan constant</th>
-                    <th className="text-left">Typical residential cap rate</th>
+                    <th className="text-left">Example cap rate (illustrative)</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>3.5%</td>
                     <td className="text-right">5.39%</td>
-                    <td>5.5%–7% → leverage usually positive</td>
+                    <td>5.5%–7% → leverage positive across the range</td>
                   </tr>
                   <tr>
                     <td>4.0%</td>
                     <td className="text-right">5.73%</td>
-                    <td>5.5%–7% → leverage usually positive</td>
+                    <td>5.5%–7% → positive above a 5.73% cap rate</td>
                   </tr>
                   <tr>
                     <td>7.0%</td>
                     <td className="text-right">7.98%</td>
-                    <td>5.5%–7% → leverage usually negative</td>
+                    <td>5.5%–7% → leverage negative across the range</td>
                   </tr>
                   <tr>
                     <td>7.5%</td>
                     <td className="text-right">8.39%</td>
-                    <td>5.5%–7% → leverage usually negative</td>
+                    <td>5.5%–7% → leverage negative across the range</td>
                   </tr>
                 </tbody>
               </table>
             </ScrollX>
 
             <p>
-              In the cheap-money era a 5.4% loan constant sat comfortably below
-              the 5.5% to 7% cap rates of ordinary rental markets, so leverage
-              added to returns almost everywhere and nobody had to think about
-              it. In 2026 the constant has climbed to roughly 8%, but cap rates
-              on bread-and-butter residential property have barely moved — they
-              are sticky, anchored to what owner-occupants and yield-starved
-              buyers will pay. The loan constant now sits <em>above</em> the cap
-              rate across most of the market. That single crossing is why so many
+              In the cheap-money era, 3.5% to 4% rates meant a 30-year loan
+              constant of about 5.4% to 5.7%, so leverage added to returns on any
+              property whose cap rate sat above that. In 2026 the constant on a
+              30-year loan has run about 7.2% to 8% at{" "}
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
+                Freddie Mac&apos;s weekly average rates (5.98% to 7.03% through
+                Sept. 24, 2026)
+              </a>
+              , and investment-property loans carry{" "}
+              <a href="https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf" className="text-primary font-semibold hover:underline">
+                extra agency credit fees
+              </a>{" "}
+              that can push investor quotes higher. Where cap rates have not
+              risen by as much, the loan constant now sits <em>above</em> the
+              cap rate, and leverage works against you. That single crossing is why so many
               deals that &quot;worked&quot; on a 2021 spreadsheet pencil
               negative today on identical rent and price. It is also why pre-2022
               cap-rate intuition is{" "}
@@ -548,9 +569,9 @@ export default function NegativeLeveragePost() {
               rate, shrinking the gap. Second, <strong>raise the NOI</strong> —
               higher rent, lower operating costs, a unit brought to market — which
               moves the cap rate up the same way. Third, <strong>lower the loan
-              constant</strong> by buying down the rate, taking a shorter focus
-              on points, or in some cases an interest-only period, which strips
-              the amortization back out of the constant. Fourth, and most
+              constant</strong> by buying down the rate with points or, in some
+              cases, taking an interest-only period, which strips the
+              amortization back out of the constant. Fourth, and most
               honestly, <strong>accept it on purpose.</strong>
             </p>
             <p>
@@ -607,8 +628,8 @@ export default function NegativeLeveragePost() {
               sign you have to check. Compare the cap rate to the loan constant —
               not the interest rate — and you know immediately which way it
               cuts. When the cap rate is higher, borrowing stretches a good
-              return into a better one. When it is lower, as it is across most of
-              the 2026 residential market, every dollar of debt earns less than
+              return into a better one. When it is lower, as it can be at 2026
+              rates, every dollar of debt earns less than
               it costs and your cash-on-cash sinks below the unlevered yield —
               even on deals that still show positive cash flow and still clear a
               DSCR lender. The fix is never &quot;more leverage&quot;; it is a
@@ -617,14 +638,33 @@ export default function NegativeLeveragePost() {
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              runs cap rate, loan constant, cash-on-cash, and DSCR off the same
-              inputs, so the moment a deal tips into negative leverage you see it
-              on screen — before you wire the down payment, not after. None of
-              this is investment advice; run your own numbers against your own
-              terms before you buy.
+              runs cap rate, cash-on-cash, and DSCR off the same inputs, so when
+              your cash-on-cash falls below the cap rate you can see the leverage
+              working against you on screen, before you wire the down payment,
+              not after. Run your own numbers against your own terms before you
+              buy.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac Primary Mortgage Market Survey, 30-year fixed rate, annual averages 2010–2023 (FRED series MORTGAGE30US, CSV)",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg",
+            },
+            {
+              title:
+                "Freddie Mac Primary Mortgage Market Survey, 30-year fixed rate, weekly (FRED series MORTGAGE30US, CSV)",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01",
+            },
+            {
+              title:
+                "Freddie Mac Single-Family Seller/Servicer Guide, Exhibit 19: Credit Fees",
+              url: "https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

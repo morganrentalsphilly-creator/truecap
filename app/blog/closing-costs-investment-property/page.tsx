@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -74,7 +75,7 @@ const FAQS = [
   },
   {
     q: "Are investment property closing costs tax deductible?",
-    a: "Tax classification and timing depend on the actual charge, taxpayer, property use, loan purpose, transaction, accounting method, and current law. Preserve the final settlement statement and invoices, then have a qualified tax professional classify each line instead of applying one treatment to every closing cost.",
+    a: "Tax classification and timing depend on the actual charge, taxpayer, property use, loan purpose, transaction, accounting method, and current law. IRS Publication 527, for example, adds settlement costs such as title insurance, recording fees, and transfer taxes to the property's basis, while points paid on a rental's loan are generally deducted over the term of the loan instead. Preserve the final settlement statement and invoices, then have a qualified tax professional classify each line instead of applying one treatment to every closing cost.",
   },
   {
     q: "Do you pay closing costs on a cash purchase?",
@@ -216,7 +217,7 @@ export default function ClosingCostsPost() {
                 $1,875
               </li>
               <li>
-                <strong>Appraisal + rent schedule (Form 1007):</strong> $650
+                <strong>Appraisal (2- to 4-unit property report):</strong> $650
               </li>
               <li>
                 <strong>Credit report, flood cert, tax service:</strong> $150
@@ -266,9 +267,17 @@ export default function ClosingCostsPost() {
             </p>
             <p>
               <strong>Discount points and credits.</strong> Confirm whether a
-              quoted point means 1% of the loan amount and whether it is a
-              discount point, origination charge, or another fee. The rate
-              change per point is not fixed. Compare the lender&apos;s written
+              quoted point is a discount point, origination charge, or another
+              fee. The rate change per point is not fixed: the{" "}
+              <a
+                href="https://www.consumerfinance.gov/ask-cfpb/what-are-discount-points-and-lender-credits-and-how-do-they-work-en-136/"
+                className="text-primary font-semibold hover:underline"
+              >
+                CFPB explains
+              </a>{" "}
+              that one point equals 1% of the loan amount and that the rate
+              reduction it buys depends on the lender, the kind of loan, and
+              the overall mortgage market. Compare the lender&apos;s written
               rate, APR, payment, fees, credits, lock terms, and cash to close
               at each option. A simple screen is point cost divided by monthly
               payment savings, but also model the expected loan duration and
@@ -291,9 +300,28 @@ export default function ClosingCostsPost() {
               </Link>
               , rent, flood, tax, credit, inspection, or other reports the
               program requires, who selects the provider, and what each item
-              costs. Do
-              not assume a Form 1007 or any quoted amount applies to every loan
-              or property type.
+              costs. Do not assume a particular rent schedule, report form, or
+              quoted amount applies to every loan or property type. Fannie
+              Mae&apos;s{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.2-01/appraisal-report-forms-and-exhibits"
+                className="text-primary font-semibold hover:underline"
+              >
+                appraisal report forms
+              </a>
+              , for example, use the single-family rent schedule (Form 1007)
+              for a one-unit investment property when rental income is used to
+              qualify, while a two- to four-unit property such as the duplex
+              above is appraised on a small residential income property report
+              (Form 1025). Fannie Mae and Freddie Mac&apos;s{" "}
+              <a
+                href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign"
+                className="text-primary font-semibold hover:underline"
+              >
+                redesigned appraisal report
+              </a>{" "}
+              is mandatory for new appraisal reports submitted on or after
+              November 2, 2026, and it replaces both of those forms.
             </p>
             <p>
               <strong>Processing and other charges.</strong> Review application,
@@ -339,11 +367,28 @@ export default function ClosingCostsPost() {
             <p>
               Transfer, deed, documentary, conveyance, mortgage, recording, and
               other government charges vary by jurisdiction, instrument, price,
-              financing, exemptions, and effective date. Verify the current
-              calculation with the appropriate government source and settlement
-              professional. The purchase contract and applicable law determine
-              allocation; local custom alone is not a substitute for the signed
-              terms or legal guidance.
+              financing, exemptions, and effective date. The CFPB&apos;s{" "}
+              <a
+                href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-37/"
+                className="text-primary font-semibold hover:underline"
+              >
+                official commentary on the Loan Estimate
+              </a>{" "}
+              describes recording fees as assessed by the type of document
+              recorded, and transfer taxes as state and local fees based on the
+              loan amount or sales price. Verify the current calculation with
+              the appropriate government source and settlement professional.
+              The purchase contract and applicable law determine allocation:
+              under the{" "}
+              <a
+                href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-38/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Closing Disclosure commentary
+              </a>
+              , transfer taxes are allocated as state or local law, the terms of
+              the loan, or the purchase contract provide. Local custom alone is
+              not a substitute for the signed terms or legal guidance.
             </p>
             <p>
               Also reconcile property-tax prorations, assessments, utilities,
@@ -372,7 +417,17 @@ export default function ClosingCostsPost() {
               written initial-escrow calculation and current tax information.
               The amount depends on due dates, closing date, jurisdiction,
               exemptions, assessments, and loan terms; it is not a fixed number
-              of months.
+              of months. Where the federal escrow rule in{" "}
+              <a
+                href="https://www.consumerfinance.gov/rules-policy/regulations/1024/17/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Regulation X
+              </a>{" "}
+              applies, the initial deposit is limited to what covers each
+              charge from the date it was last paid up to the first payment
+              date, plus a cushion of no more than one-sixth of the year&apos;s
+              estimated escrow payments.
             </p>
             <p>
               <strong>Prepaid or prorated interest.</strong> Verify the dates,
@@ -444,6 +499,19 @@ export default function ClosingCostsPost() {
               change debt service. Confirm the lender&apos;s own DSCR definition
               and include all relevant cash uses in the return analysis.
             </p>
+            <p>
+              Tax treatment is a separate question from these pre-tax figures.{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                IRS Publication 527
+              </a>{" "}
+              adds settlement costs such as title insurance, recording fees,
+              and transfer taxes to a rental property&apos;s basis, while points
+              paid on the rental&apos;s loan are generally deducted over the
+              term of the loan.
+            </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               How to compare the available options
@@ -460,7 +528,17 @@ export default function ClosingCostsPost() {
               seller-paid costs, ask the lender and closing professional to
               confirm the allowed amount, eligible charges, appraisal effects,
               and treatment of unused credit for the actual program and file.
-              Limits are not universal.
+              Limits are not universal. Fannie Mae&apos;s{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-4.1-02/interested-party-contributions-ipcs"
+                className="text-primary font-semibold hover:underline"
+              >
+                interested party contribution limits
+              </a>
+              , for example, cap contributions from interested parties such as
+              the seller at 2% on an investment property at any combined LTV,
+              against 3%, 6%, or 9% on a principal residence or second home
+              depending on the LTV and combined LTV.
             </p>
             <p>
               <strong>Model lender credits and points.</strong> A credit may be
@@ -477,9 +555,19 @@ export default function ClosingCostsPost() {
               economical.
             </p>
             <p>
-              <strong>Check which services are shoppable.</strong> The written
-              disclosures and local rules identify which providers the buyer may
-              select. Obtain comparable scopes and written quotes. If
+              <strong>Check which services are shoppable.</strong> For loans
+              covered by the{" "}
+              <a
+                href="https://www.consumerfinance.gov/rules-policy/regulations/1026/19/"
+                className="text-primary font-semibold hover:underline"
+              >
+                federal Loan Estimate rule
+              </a>
+              , the lender&apos;s written list identifies services the buyer
+              may shop for; many non-owner-occupied rental loans are
+              business-purpose credit outside that rule, so ask the lender and
+              settlement provider which providers you may select. Obtain
+              comparable scopes and written quotes. If
               considering a different closing date, ask for the full revised
               cash-to-close calculation rather than assuming one line is the
               only change.
@@ -531,11 +619,9 @@ export default function ClosingCostsPost() {
               .
             </p>
             <p>
-              This article provides general educational examples, not lending,
-              legal, tax, title, insurance, or investment advice. Verify current
-              requirements and amounts with the relevant lender, government
-              office, licensed local professionals, and final transaction
-              documents.
+              Verify current requirements and amounts with the relevant lender,
+              government office, licensed local professionals, and final
+              transaction documents.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -551,6 +637,46 @@ export default function ClosingCostsPost() {
             ))}
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "CFPB, What are (discount) points and lender credits and how do they work?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/what-are-discount-points-and-lender-credits-and-how-do-they-work-en-136/",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.2-01, Appraisal Report Forms and Exhibits",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.2-01/appraisal-report-forms-and-exhibits",
+            },
+            {
+              title: "Freddie Mac, UAD and Forms Redesign FAQs",
+              url: "https://sf.freddiemac.com/faqs/uad-and-forms-redesign",
+            },
+            {
+              title: "CFPB, Regulation Z Official Interpretation of § 1026.37 (Loan Estimate)",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-37/",
+            },
+            {
+              title: "CFPB, Regulation Z Official Interpretation of § 1026.38 (Closing Disclosure)",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-38/",
+            },
+            {
+              title: "CFPB, Regulation X § 1024.17, Escrow Accounts",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1024/17/",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-02, Interested Party Contributions (IPCs)",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-02/interested-party-contributions-ipcs",
+            },
+            {
+              title: "CFPB, Regulation Z § 1026.19, Certain Mortgage and Variable-Rate Transactions",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/19/",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

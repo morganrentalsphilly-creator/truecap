@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "piti-explained-rental-property";
 const TITLE = "PITI explained: the real monthly payment on a rental (2026)";
@@ -66,19 +67,19 @@ const FAQS = [
   },
   {
     q: "What is the difference between PITI and PITIA?",
-    a: "PITIA adds an 'A' for association dues (HOA or condo fees). Plain PITI is correct for a single-family house with no HOA. The moment there is an HOA, condo, or co-op fee, lenders fold it into the housing payment and call it PITIA. DSCR lenders almost always quote PITIA because the association fee is a mandatory carrying cost the rent has to cover. If your property has no HOA, PITI and PITIA are the same number.",
+    a: "PITIA adds an 'A' for association dues (HOA or condo fees). Plain PITI is correct for a single-family house with no HOA. The moment there is an HOA, condo, or co-op fee, lenders fold it into the housing payment and call it PITIA. If there is an association fee, ask a DSCR lender whether its ratio includes it; formulas differ by lender. If your property has no HOA, PITI and PITIA are the same number.",
   },
   {
     q: "Does an investment property require escrow or PMI?",
-    a: "PMI (private mortgage insurance) generally does not apply to investment-property loans, because you almost always put at least 20-25% down, keeping the loan-to-value at or below 80%. Escrow is a separate question: many conventional investment loans require it, while a lot of DSCR and portfolio loans let you waive escrow (sometimes for a small rate bump) and pay taxes and insurance yourself. Waiving escrow does not lower your cost — it just moves the timing onto you, so budget the same monthly amount into a reserve.",
+    a: "Mortgage insurance applies to a conventional investment loan only when you put less than 20% down. Fannie Mae and Freddie Mac allow as little as 15% down on a single-family rental, and loans above 80% LTV require mortgage insurance; at 20% or more down there is none. Escrow is a separate question: many lenders require it, and whether a particular loan lets you waive escrow (and at what cost) depends on the lender and program. Waiving escrow does not lower your cost — it just moves the timing onto you, so budget the same monthly amount into a reserve.",
   },
   {
     q: "Is PITI the same as my total monthly cost on a rental?",
-    a: "No — PITI is the floor, not the all-in. It captures the loan payment plus taxes and insurance, but leaves out vacancy, maintenance, capital reserves, and property management — roughly 25-40% of rent on a typical buy-and-hold. Underwriting a rental on PITI alone is the most common way investors talk themselves into a deal that loses money each month.",
+    a: "No — PITI is the floor, not the all-in. It captures the loan payment plus taxes and insurance, but leaves out vacancy, maintenance, capital reserves, and property management — in this article's example, 23% of rent. Underwriting a rental on PITI alone is how investors talk themselves into a deal that loses money each month.",
   },
   {
     q: "Why did my fixed-rate payment go up if PITI is fixed?",
-    a: "Only the principal-and-interest slice of PITI is fixed on a fixed-rate loan. Taxes and insurance drift — property taxes get reassessed and insurance premiums climb almost every year. Each year the servicer runs an escrow analysis; if taxes or insurance rose, your escrow comes up short and the monthly payment is raised to refill it (often plus a catch-up for the prior shortage). A 'fixed' mortgage payment is only fixed on two of its four letters.",
+    a: "Only the principal-and-interest slice of PITI is fixed on a fixed-rate loan. Taxes and insurance can change from year to year as properties are reassessed and policies renew. Each year the servicer runs an escrow analysis; if taxes or insurance rose, your escrow comes up short and the monthly payment is raised to refill it (often plus a catch-up for the prior shortage). A 'fixed' mortgage payment is only fixed on two of its four letters.",
   },
 ];
 
@@ -163,10 +164,11 @@ export default function PitiExplainedPost() {
               principal-and-interest number and calls it your payment. It
               isn&apos;t. The amount that actually leaves your account each
               month is PITI — principal, interest, taxes, and insurance — and on
-              a typical rental the two letters most calculators ignore add a
-              quarter to a third on top of the loan payment. Here&apos;s how
-              each piece works with 2026 numbers, and how PITI becomes the input
-              for DSCR, break-even, and cash flow.
+              the $250k example below, the two letters most calculators ignore
+              add about a third on top of the loan payment. Here&apos;s how
+              each piece works, with illustrative numbers you can swap for your
+              own, and how PITI becomes the input for DSCR, break-even, and cash
+              flow.
             </p>
           </header>
 
@@ -184,16 +186,29 @@ export default function PitiExplainedPost() {
               property taxes go to the county, and a hazard/landlord insurance
               premium protects the building. Lenders bundle all four because all
               four have to be paid for the loan to stay current — an unpaid tax
-              bill becomes a lien that outranks the mortgage, and a lapsed
-              policy leaves their collateral uninsured.
+              bill can become a lien on the property (in{" "}
+              <a
+                href="https://www.hud.gov/sites/documents/12-11ml.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                some states, one that takes priority over the first mortgage
+              </a>
+              ), and a lapsed policy leaves their collateral uninsured.
             </p>
             <p>
               You will also see <strong>PITIA</strong> — the same thing with an{" "}
               <strong>A</strong> for association dues (HOA, condo, or co-op
               fees). If the property has no HOA, PITI and PITIA are identical.
               The moment there is a mandatory association fee, it joins the
-              housing payment, and lenders — especially DSCR lenders — quote
-              PITIA because that fee is a carrying cost the rent must cover.
+              housing payment, because the fee is a carrying cost the rent must
+              cover. Fannie Mae, for example,{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+                className="text-primary font-semibold hover:underline"
+              >
+                measures reserves in months of PITIA
+              </a>
+              ; ask a DSCR lender whether its ratio includes association dues.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -202,8 +217,8 @@ export default function PitiExplainedPost() {
             <p>
               Take a $250,000 single-family rental bought as a
               non-owner-occupied investment with 25% down ($62,500), financing
-              $187,500 on a 30-year fixed at 7%. Here is the full PITI, built
-              one letter at a time.
+              $187,500 on a 30-year fixed at 7% (an illustrative rate, not a
+              quote). Here is the full PITI, built one letter at a time.
             </p>
             <p>
               <strong>Principal &amp; interest.</strong> $187,500 at 7% over 30
@@ -223,9 +238,53 @@ export default function PitiExplainedPost() {
             </p>
             <p>
               <strong>Taxes.</strong> Property tax varies wildly by state and
-              county — from under 0.5% of value a year (Hawaii, Alabama) to over
-              2% (New Jersey, Illinois, parts of Texas). At a 1.2% effective
-              rate on $250,000, that&apos;s $3,000/year, or{" "}
+              county. Take each state&apos;s Census Bureau{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000"
+                className="text-primary font-semibold hover:underline"
+              >
+                median tax bill
+              </a>{" "}
+              as a share of its{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000"
+                className="text-primary font-semibold hover:underline"
+              >
+                median home value
+              </a>
+              , and the result runs from under 0.5% of value a year in Hawaii
+              and Alabama to around 2% statewide in New Jersey and Illinois.
+              The same ratio tops 2% in many New Jersey and Illinois counties
+              (see the county tables of median tax bills for{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US34$0500000"
+                className="text-primary font-semibold hover:underline"
+              >
+                New Jersey
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US17$0500000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Illinois
+              </a>{" "}
+              and of median home values for{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US34$0500000"
+                className="text-primary font-semibold hover:underline"
+              >
+                New Jersey
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US17$0500000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Illinois
+              </a>
+              ). At an assumed 1.2% effective rate on
+              $250,000, that&apos;s $3,000/year, or{" "}
               <strong>$250/month</strong>. Verify the parcel&apos;s current
               assessment, exemptions, millage, and reassessment rules with the
               county assessor or treasurer before trusting the number on the
@@ -235,11 +294,11 @@ export default function PitiExplainedPost() {
               <strong>Insurance.</strong> A landlord policy (a DP-3 dwelling
               policy, not the homeowner&apos;s HO-3 you&apos;d buy for your own
               house) typically runs more than an owner-occupied quote because it
-              adds loss-of-rent coverage and liability for tenant claims. Call
-              it $1,800/year, or <strong>$150/month</strong>. In coastal or
-              wildfire-exposed markets it can be multiples of that, and rising
-              premiums are one of the biggest line-item surprises of the last
-              few years.
+              adds loss-of-rent coverage and liability for tenant claims. Assume
+              $1,800/year, or <strong>$150/month</strong>. In coastal or
+              wildfire-exposed markets it can be much higher, and premiums can
+              change sharply at renewal, so get a current quote for the
+              specific property.
             </p>
             <p>
               Add it up: $1,247 + $250 + $150 ={" "}
@@ -256,8 +315,14 @@ export default function PitiExplainedPost() {
             </h2>
             <p>
               You don&apos;t write the county a check once a year. With an
-              escrow (impound) account, the servicer collects one-twelfth of
-              your annual taxes and insurance every month alongside principal
+              escrow (impound) account, the servicer collects{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-B/section-1024.17"
+                className="text-primary font-semibold hover:underline"
+              >
+                one-twelfth
+              </a>{" "}
+              of your annual taxes and insurance every month alongside principal
               and interest, holds it, and pays the bills when they come due. On
               our deal that escrow portion is the $400/month — $250 toward the
               $3,000 tax bill, $150 toward the $1,800 premium.
@@ -265,7 +330,8 @@ export default function PitiExplainedPost() {
             <p>
               Two mechanics trip people up. First, the{" "}
               <strong>escrow cushion</strong>: federal rules (RESPA) let the
-              servicer keep up to two months of T&amp;I as a buffer, which is
+              servicer keep a buffer of up to one-sixth of a year&apos;s escrow
+              payments (two months of T&amp;I on a loan like this one), which is
               why you pre-fund several months of escrow at closing on top of
               your down payment — it shows up in prepaids on the settlement
               statement, covered in the{" "}
@@ -277,17 +343,23 @@ export default function PitiExplainedPost() {
               </Link>
               . Second, the <strong>annual escrow analysis</strong>: once a year
               the servicer reconciles what it collected against what it paid. If
-              taxes or insurance rose — they almost always do — your account is
-              short, and the servicer raises your monthly payment to refill it,
-              often adding a catch-up for the prior shortfall. That is how a
+              taxes or insurance rose, your account is short, and the servicer
+              raises your monthly payment to refill it, often adding a catch-up
+              for the prior shortfall. That is how a
               &quot;fixed-rate&quot; mortgage payment goes up: the P&amp;I never
               moved, but the T&amp;I did.
             </p>
             <p>
-              Many DSCR and portfolio loans let investors{" "}
+              <a
+                href="https://www.consumerfinance.gov/ask-cfpb/what-is-an-escrow-or-impound-account-en-140/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Many lenders require escrow
+              </a>
+              , but some lenders may let investors{" "}
               <strong>waive escrow</strong> and pay taxes and insurance
-              directly, sometimes for a small rate add-on. That doesn&apos;t
-              lower the cost — it just hands you the timing risk. Whether
+              directly; ask about any pricing or conditions. Waiving
+              doesn&apos;t lower the cost — it just hands you the timing risk. Whether
               escrowed or not, the $400 is part of your monthly carry.
             </p>
 
@@ -296,9 +368,10 @@ export default function PitiExplainedPost() {
             </h2>
             <p>
               The most expensive PITI mistake is copying the property-tax figure
-              straight off the listing or the seller&apos;s last bill. In many
-              jurisdictions the assessed value resets toward your{" "}
-              <em>purchase price</em> after a sale. If the current owner has
+              straight off the listing or the seller&apos;s last bill. In some
+              jurisdictions the assessed value can reset toward your{" "}
+              <em>purchase price</em> after a sale; check the county
+              assessor&apos;s rules. If the current owner has
               held the place for fifteen years, their assessment — and their tax
               bill — can be far below what yours will be the year after you buy.
             </p>
@@ -324,14 +397,36 @@ export default function PitiExplainedPost() {
             <ul>
               <li>
                 <strong>Higher interest rate.</strong> Non-owner-occupied loans
-                price roughly 0.5–0.75 percentage points above an owner-occupied
-                rate for the same borrower — that alone adds about $75–115/month
-                to the P&amp;I on a $187,500 loan.
+                price above an owner-occupied loan for the same borrower,
+                because Fannie Mae applies{" "}
+                <a
+                  href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  extra loan-level price adjustments to investment properties
+                </a>
+                . Each 0.25 point of rate adds about $32/month to the P&amp;I on
+                a $187,500 loan at 7%.
               </li>
               <li>
-                <strong>Bigger down payment, usually no PMI.</strong> Investment
-                loans want 20–25% down (more on 2–4 units), which keeps you at
-                or below 80% LTV and sidesteps private mortgage insurance.{" "}
+                <strong>Bigger down payment.</strong> Conventional investment
+                loans allow{" "}
+                <a
+                  href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  as little as 15% down on a single-family
+                </a>{" "}
+                (with{" "}
+                <a
+                  href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  mortgage insurance above 80% LTV
+                </a>
+                ) and require 25% on 2–4 units. Putting 20% or more down keeps
+                you at or below 80% LTV and sidesteps private mortgage
+                insurance.{" "}
                 <Link
                   href="/glossary/house-hack"
                   className="text-primary font-semibold hover:underline"
@@ -339,7 +434,14 @@ export default function PitiExplainedPost() {
                   House-hackers
                 </Link>{" "}
                 on an owner-occupied loan are the exception — less down, but PMI
-                until they reach ~20% equity.
+                until they reach{" "}
+                <a
+                  href="https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  ~20% equity
+                </a>
+                .
               </li>
               <li>
                 <strong>Pricier insurance.</strong> A landlord DP-3 with
@@ -347,12 +449,12 @@ export default function PitiExplainedPost() {
                 homeowner&apos;s policy.
               </li>
               <li>
-                <strong>Lenders quote PITIA and judge it against rent.</strong>{" "}
+                <strong>Lenders may judge PITIA against rent.</strong>{" "}
                 On a primary residence the lender checks PITI against your
                 income (the front-end ratio). On a rental — especially with a
-                DSCR loan — the lender checks PITIA against the property&apos;s
-                rent. That changes PITI from a number you simply pay into the
-                number that decides how much you can borrow.
+                DSCR loan — the lender may check PITIA against the
+                property&apos;s rent. That changes PITI from a number you simply pay into a
+                number that can decide how much you can borrow.
               </li>
             </ul>
 
@@ -366,13 +468,13 @@ export default function PitiExplainedPost() {
               is the same $1,647):
             </p>
             <p>
-              <strong>DSCR = $2,100 ÷ $1,647 = 1.27.</strong>
+              <strong>DSCR = $2,100 ÷ $1,647 = 1.28.</strong>
             </p>
             <p>
-              That produces 1.27 under this formula. It does not establish a
+              That produces 1.28 under this formula. It does not establish a
               lender threshold, approval, or pricing. If you used only the
               $1,247 P&amp;I, the ratio would be 1.68; adding the stated taxes
-              and insurance changes it to 1.27. Ask the lender for its exact
+              and insurance changes it to 1.28. Ask the lender for its exact
               formula and current requirements. Walk through the full mechanics
               in{" "}
               <Link
@@ -428,9 +530,9 @@ export default function PitiExplainedPost() {
               <strong>−$30/month</strong>. Self-managed, you drop the $168 PM
               fee and net roughly <strong>+$138/month</strong>. Same property,
               same PITI; the difference between a small loss and a thin profit
-              is entirely in the costs PITI never showed you. The lender was
-              happy at 1.27 DSCR — DSCR only looks at PITIA — which is exactly
-              why a loan approval is not the same thing as a good deal.
+              is entirely in the costs PITI never showed you. The DSCR still
+              read 1.28 — DSCR only looks at PITIA — which is exactly why a
+              ratio a lender accepts is not the same thing as a good deal.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -477,12 +579,27 @@ export default function PitiExplainedPost() {
               </li>
               <li>
                 <strong>Taxes:</strong> purchase price × local effective rate ÷
-                12. Use ~1.1–1.2% if you don&apos;t know it, then verify.
+                12. If you don&apos;t know it, the Census Bureau&apos;s 2024
+                American Community Survey puts the{" "}
+                <a
+                  href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  U.S. median tax bill
+                </a>{" "}
+                at about 0.9% of the{" "}
+                <a
+                  href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  U.S. median home value
+                </a>
+                , but use your county&apos;s actual rate.
               </li>
               <li>
-                <strong>Insurance:</strong> $1,500–2,400/year for an average
-                single-family landlord policy, divided by 12 — higher near
-                coasts and in wildfire zones.
+                <strong>Insurance:</strong> get a landlord (DP-3) quote for the
+                property and divide by 12; premiums can run higher near coasts
+                and in wildfire zones.
               </li>
               <li>
                 <strong>Association dues:</strong> add the monthly HOA/condo fee
@@ -526,7 +643,7 @@ export default function PitiExplainedPost() {
               it&apos;s the number your lender underwrites and the floor your
               rent has to clear. Estimate all four letters from your own
               purchase price (not the seller&apos;s old tax bill), remember
-              taxes and insurance drift upward, and never confuse PITI with the
+              taxes and insurance can change every year, and never confuse PITI with the
               all-in cost: vacancy, maintenance, reserves, and management still
               sit on top. Get PITI right and the rest of the underwrite —{" "}
               <Link
@@ -539,6 +656,74 @@ export default function PitiExplainedPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "HUD Mortgagee Letter 2012-11, Clarification Regarding Title Approval at Conveyance",
+              url: "https://www.hud.gov/sites/documents/12-11ml.pdf",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25077 Median Value (Dollars), by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2019-2023 5-year, B25103 Median Real Estate Taxes Paid, New Jersey counties",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US34$0500000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2019-2023 5-year, B25077 Median Value (Dollars), New Jersey counties",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US34$0500000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2019-2023 5-year, B25103 Median Real Estate Taxes Paid, Illinois counties",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US17$0500000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2019-2023 5-year, B25077 Median Value (Dollars), Illinois counties",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US17$0500000",
+            },
+            {
+              title: "12 CFR 1024.17 (Regulation X), Escrow accounts",
+              url: "https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-B/section-1024.17",
+            },
+            {
+              title: "CFPB, What is an escrow or impound account?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/what-is-an-escrow-or-impound-account-en-140/",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-1.1-01, Occupancy Types",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "Fannie Mae Selling Guide B7-1-01, Provision of Mortgage Insurance",
+              url: "https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance",
+            },
+            {
+              title: "CFPB, When can I remove private mortgage insurance (PMI) from my loan?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, United States",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25077 Median Value (Dollars), United States",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>
