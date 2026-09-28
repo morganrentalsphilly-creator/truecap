@@ -170,10 +170,9 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{
-                __html: `<strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.`,
-              }}
-            />
+            >
+              <strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
+            </p>
           </section>
 
           <p className="mb-10 text-sm text-muted-foreground">
@@ -218,74 +217,62 @@ export default function ThreeWayComparisonPost() {
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three calculators in one sentence each</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<ul>
-              <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
-              <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator whose results are currently presented as a BiggerPockets Pro membership feature alongside broader community and educational resources.</li>
-              <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
-            </ul>`,
-              }}
-            />
+            <div>
+              <ul>
+                <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
+                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator whose results are currently presented as a BiggerPockets Pro membership feature alongside broader community and educational resources.</li>
+                <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
+              </ul>
+            </div>
 
             <h2>Free tier comparison</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
-            <ul>
-              <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
-              <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
-              <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
-            </ul>
-            <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>`,
-              }}
-            />
+            <div>
+              <p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
+              <ul>
+                <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
+                <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
+                <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
+              </ul>
+              <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>
+            </div>
 
             <h2>Pricing (paid tier comparison)</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<ul>
-              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
-              <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
-              <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
-            </ul>
-            <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans primarily raise published limits, TrueCap Pro adds advanced analysis workflows, and BiggerPockets Pro combines calculator access with a broader membership.</p>`,
-              }}
-            />
+            <div>
+              <ul>
+                <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
+                <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
+                <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
+              </ul>
+              <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans primarily raise published limits, TrueCap Pro adds advanced analysis workflows, and BiggerPockets Pro combines calculator access with a broader membership.</p>
+            </div>
 
             <h2>Mobile + at the showing</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<p>TrueCap is a Progressive Web App that can be installed from the browser to a home screen. DealCheck offers native iOS and Android apps. BiggerPockets provides its calculator through the web.</p>
-            <p>Choose DealCheck if app-store distribution is important. Choose TrueCap if an installable browser app fits your workflow. Test the interface you plan to use at showings before committing to a paid plan.</p>`,
-              }}
-            />
+            <div>
+              <p>TrueCap is a Progressive Web App that can be installed from the browser to a home screen. DealCheck offers native iOS and Android apps. BiggerPockets provides its calculator through the web.</p>
+              <p>Choose DealCheck if app-store distribution is important. Choose TrueCap if an installable browser app fits your workflow. Test the interface you plan to use at showings before committing to a paid plan.</p>
+            </div>
 
             <h2>What each does better</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<ul>
-              <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
-              <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, and a longer product history.</li>
-              <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
-            </ul>`,
-              }}
-            />
+            <div>
+              <ul>
+                <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
+                <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, and a longer product history.</li>
+                <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
+              </ul>
+            </div>
 
             <h2>Quick decision matrix</h2>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `<ul>
-              <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap supports that flow.</li>
-              <li><strong>&quot;I want projections, sensitivity, Offer Ceiling, and saved-deal comparison.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
-              <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
-              <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
-              <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
-              <li><strong>&quot;I want full property detail imported from a Zillow / Redfin listing.&quot;</strong> DealCheck. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
-              <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
-            </ul>`,
-              }}
-            />
+            <div>
+              <ul>
+                <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap supports that flow.</li>
+                <li><strong>&quot;I want projections, sensitivity, Offer Ceiling, and saved-deal comparison.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
+                <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
+                <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
+                <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
+                <li><strong>&quot;I want full property detail imported from a Zillow / Redfin listing.&quot;</strong> DealCheck. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
+                <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
+              </ul>
+            </div>
 
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">

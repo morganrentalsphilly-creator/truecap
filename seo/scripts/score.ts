@@ -195,10 +195,14 @@ export type ScoreInputs = {
 
 /**
  * Cheap, dependency-free stand-in for verify-static's whole-file check, run in
- * the data job (which installs no packages). It flags the one pattern the
- * corpus actually carries: `dangerouslySetInnerHTML` used for prose rather
- * than for a JSON-LD <script>. Six legacy comparison posts inject HTML strings
- * that way; verify-static rejects any edit to them.
+ * the data job (which installs no packages). Since F4 verify-static refuses a
+ * raw-HTML sink anywhere in a content module: any `dangerouslySetInnerHTML=`
+ * and any `<script>` (JSON-LD goes through `<JsonLd data={…} />`), so either
+ * one in an editable source means every edit to it would be refused. F4
+ * converted the six legacy comparison posts that injected prose that way, and
+ * no editable source on disk trips this today
+ * (lib/__tests__/seo-loop-score.test.ts checks the corpus against
+ * verify-static's real rules); it stays as the guard for the next one.
  */
 export function fencedSourcesOnDisk(sitemapPaths: string[]): Set<string> {
   const fenced = new Set<string>();
@@ -212,13 +216,7 @@ export function fencedSourcesOnDisk(sitemapPaths: string[]): Set<string> {
 }
 
 export function preexistingFenceFailure(source: string): boolean {
-  for (const m of source.matchAll(/dangerouslySetInnerHTML/g)) {
-    // The JSX element carrying the prop: from its opening "<" to the prop.
-    const at = m.index ?? 0;
-    const tag = source.slice(source.lastIndexOf("<", at), at);
-    if (!/^<script\b/.test(tag) || !/application\/ld\+json/.test(tag)) return true;
-  }
-  return false;
+  return /\bdangerouslySetInnerHTML\s*=|<script\b/.test(source);
 }
 
 // --------------------------------------------------------------- helpers
@@ -1215,7 +1213,7 @@ export function buildCandidates(inputs: ScoreInputs, cfg: SeoConfig = loadConfig
       const why =
         result.veto ??
         (fenced
-          ? "its source injects HTML with dangerouslySetInnerHTML, which verify-static rejects on any edit; convert it to JSX in an owner PR first"
+          ? "its source injects HTML (dangerouslySetInnerHTML or a <script>), which verify-static rejects on any edit; convert it to JSX (JSON-LD: <JsonLd>) in an owner PR first"
           : isExcludedFromOptimization(pagePath)
             ? "excluded from optimization (owner-only surface)"
             : "no skill acts on these reasons; an owner decision");

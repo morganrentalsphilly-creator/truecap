@@ -251,10 +251,9 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{
-                __html: `For house hackers specifically: <strong>TrueCap</strong> wins on the explicit owner-occupant property type (auto-excludes your unit from rent income), effective-rent-saved metric, and FHA-friendly down-payment configuration. <strong>DealCheck</strong> and <strong>BiggerPockets</strong> both support house hacking but require manual adjustment of the multifamily math.`,
-              }}
-            />
+            >
+              For house hackers specifically: <strong>TrueCap</strong> wins on the explicit owner-occupant property type (auto-excludes your unit from rent income), effective-rent-saved metric, and FHA-friendly down-payment configuration. <strong>DealCheck</strong> and <strong>BiggerPockets</strong> both support house hacking but require manual adjustment of the multifamily math.
+            </p>
           </section>
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">

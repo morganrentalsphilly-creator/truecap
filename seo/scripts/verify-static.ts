@@ -1131,11 +1131,13 @@ function literalViolations(sf: ts.SourceFile, file: string): Violation[] {
 }
 
 /**
- * The whole-module rules (imports, AST, literals) for one post-image: what
- * ANY edit to this file must pass, whatever it changes. Exported so score.ts
- * can skip candidates whose editable source already fails here (six /blog
- * comparison pages use dangerouslySetInnerHTML on <p>/<div> today): every run
- * that proposes an edit to one of them would be refused.
+ * The whole-module rules (imports, AST, JSON-LD, literals) for one
+ * post-image: what ANY edit to this file must pass, whatever it changes.
+ * score.ts skips candidates whose editable source already fails here, through
+ * a dependency-free stand-in (preexistingFenceFailure; the data job installs
+ * no packages) that lib/__tests__/seo-loop-score.test.ts checks against this
+ * on every article on disk. None fails today: F4 converted the six /blog
+ * comparison posts that injected prose with dangerouslySetInnerHTML.
  */
 export function wholeFileViolations(file: string, source: string, config: SeoConfig = loadConfig()): Violation[] {
   return wholeModuleViolations(parseTs(file, source), file, config);
