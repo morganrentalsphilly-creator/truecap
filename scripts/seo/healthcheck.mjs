@@ -96,7 +96,7 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { jsonLdNodes, missingSchema, structuredDataProblems } from "./structured-data-expectations.mjs";
+import { jsonLdNodes, missingSchema, schemaTypes, structuredDataProblems } from "./structured-data-expectations.mjs";
 
 const args = process.argv.slice(2);
 const flag = (name, fallback = null) => {
@@ -958,7 +958,7 @@ function checkPage(path, page) {
       /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html),
     title,
     h1,
-    schemaTypes: [...types].sort(),
+    schemaTypes: schemaTypes(ldNodes),
   };
 }
 
