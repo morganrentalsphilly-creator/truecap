@@ -322,8 +322,6 @@ const ARRIVED_FAQ: FaqItem[] = [
         Not really — they&apos;re entirely different ownership models. Arrived sells fractional shares of single-family rentals (passive). TrueCap is the underwriting calculator for investors buying whole rental properties directly (active). The decision isn&apos;t which to use — it&apos;s which investing model fits you.
       </>
     ),
-    plainTextAnswer:
-      "Not really — entirely different ownership models. Arrived: fractional shares (passive). TrueCap: underwriting whole rentals you buy directly (active). The decision is which investing model fits.",
   },
   {
     question: "Arrived vs Fundrise — which one?",
@@ -332,8 +330,6 @@ const ARRIVED_FAQ: FaqItem[] = [
         Fundrise is more diversified (commercial + multifamily + residential) and has been around longer. Arrived is single-family-rental-focused and has the lowest minimums ($100). For SFR exposure specifically, Arrived is the more direct play. For diversified real-estate exposure, Fundrise.
       </>
     ),
-    plainTextAnswer:
-      "Fundrise is more diversified (commercial + multifamily + residential) and older. Arrived is SFR-focused with $100 minimums. SFR-specific: Arrived. Diversified RE: Fundrise.",
   },
   {
     question: "Why would I buy a rental directly when I could use Arrived?",
@@ -342,8 +338,6 @@ const ARRIVED_FAQ: FaqItem[] = [
         Three reasons: control (you pick the property + market), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: you do the underwriting + management work (or pay a PM).
       </>
     ),
-    plainTextAnswer:
-      "Three reasons: control over property and market, potentially different direct-ownership tax treatment, and cash-flow control. Depreciation, interest, and 1031 eligibility depend on the property, transaction, and taxpayer; verify them with licensed professionals. Tradeoff: you do the work or pay a PM.",
   },
   {
     question: "Why would I use Arrived instead of buying a rental directly?",
@@ -352,8 +346,6 @@ const ARRIVED_FAQ: FaqItem[] = [
         Three reasons: low minimum ($100 vs ~$20k+ for a direct down payment), zero work (no sourcing, no underwriting, no management), and diversification (split your capital across multiple properties without buying multiples). Tradeoff: you give up direct property control and receive the investment&apos;s own tax reporting rather than automatically receiving every tax treatment that may apply to direct ownership.
       </>
     ),
-    plainTextAnswer:
-      "Three reasons: low minimum ($100 vs ~$20k+ down), zero work (no sourcing/underwriting/management), and diversification. Tradeoff: less property control and the investment's own tax reporting rather than every treatment that may apply to direct ownership.",
   },
   {
     question: "Can I use TrueCap to evaluate an Arrived property?",
@@ -362,8 +354,6 @@ const ARRIVED_FAQ: FaqItem[] = [
         Not directly — Arrived shares aren&apos;t an underwriting problem in TrueCap&apos;s sense (you&apos;re not modeling cap rate, DSCR, or your own financing). TrueCap is for direct ownership where you control the inputs. For Arrived properties, evaluate them on Arrived&apos;s published projections (yield + appreciation forecast) and your own diversification goals.
       </>
     ),
-    plainTextAnswer:
-      "Not directly — Arrived shares aren&apos;t an underwriting problem in TrueCap&apos;s sense (no cap rate, DSCR, or your own financing). TrueCap is for direct ownership where you control inputs. Evaluate Arrived properties on their published yield + appreciation forecasts.",
   },
 ];
 

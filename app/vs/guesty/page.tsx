@@ -469,8 +469,6 @@ const GUESTY_FAQ: FaqItem[] = [
         at different stages.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. Guesty handles post-purchase STR operations across portfolio sizes, including a Lite plan for 1-3 listings. TrueCap handles pre-purchase underwriting. Some operators may use both.",
   },
   {
     question: "Is Guesty worth it for a small STR operator?",
@@ -482,8 +480,6 @@ const GUESTY_FAQ: FaqItem[] = [
         those operational features.
       </>
     ),
-    plainTextAnswer:
-      "It depends on the workflow. Guesty publishes Lite for 1-3 listings and offers a Lite trial. Compare its current features, rates, and terms with other STR operations tools before choosing.",
   },
   {
     question: "Guesty vs Hostaway — which one for a 50+ STR portfolio?",
@@ -495,8 +491,6 @@ const GUESTY_FAQ: FaqItem[] = [
         Hostaway&apos;s current fit directly with that vendor.
       </>
     ),
-    plainTextAnswer:
-      "Compare current quotes, channel coverage, accounting, owner-management, automation, API, support, and implementation terms. Guesty publishes Pro for 4-199 listings and Enterprise for 200+.",
   },
   {
     question: "Does Guesty underwrite deals?",
@@ -507,8 +501,6 @@ const GUESTY_FAQ: FaqItem[] = [
         Guesty post-closing.
       </>
     ),
-    plainTextAnswer:
-      "No — purely operational. Use TrueCap or a spreadsheet for pre-purchase underwriting, then ingest into Guesty post-closing.",
   },
   {
     question: "How do Guesty's published plans scale?",
@@ -519,8 +511,6 @@ const GUESTY_FAQ: FaqItem[] = [
         Guesty&apos;s live pricing page as the source of truth.
       </>
     ),
-    plainTextAnswer:
-      "Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Features and terms vary by plan; check Guesty's live pricing page.",
   },
 ];
 

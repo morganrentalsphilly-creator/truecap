@@ -528,8 +528,6 @@ const STESSA_FAQ: FaqItem[] = [
         decision workflow built around your targets.
       </>
     ),
-    plainTextAnswer:
-      "They overlap during acquisition. Stessa supports listing discovery, buy boxes, comps, and editable underwriting, then continues into accounting and landlord operations. TrueCap is a narrower, source-labeled acquisition decision workflow built around your targets.",
   },
   {
     question: "Should I use Stessa or TrueCap?",
@@ -543,8 +541,6 @@ const STESSA_FAQ: FaqItem[] = [
         split should be assumed.
       </>
     ),
-    plainTextAnswer:
-      "Choose based on workflow. TrueCap is focused on the acquisition decision against your targets. Stessa connects marketplace discovery and acquisition analysis to accounting and operations. Some investors may use both, but a strict before/after split is inaccurate.",
   },
   {
     question: "Is Stessa free?",
@@ -557,8 +553,6 @@ const STESSA_FAQ: FaqItem[] = [
         marketplace access, and plan terms.
       </>
     ),
-    plainTextAnswer:
-      "Stessa publishes a free Essentials tier plus paid Manage and Pro tiers. Current pricing places the Schedule E report on Manage and Pro, while Essentials includes basic financial reports. Check the live pricing page for current rates, marketplace access, and terms.",
   },
   {
     question: "Does TrueCap track expenses like Stessa?",
@@ -570,8 +564,6 @@ const STESSA_FAQ: FaqItem[] = [
         provides those accounting and operations workflows.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap models projected expenses for underwriting but does not connect to a bank or treat projections as actuals. Stessa provides accounting and operations workflows.",
   },
   {
     question: "Can I share a TrueCap analysis with my accountant?",
@@ -583,8 +575,6 @@ const STESSA_FAQ: FaqItem[] = [
         accountant&apos;s independent review; they are not tax advice.
       </>
     ),
-    plainTextAnswer:
-      "Yes — read-only share links are free. Pro adds co-branding and includes the multi-page PDF. Reports can support independent review but are not tax advice.",
   },
 ];
 

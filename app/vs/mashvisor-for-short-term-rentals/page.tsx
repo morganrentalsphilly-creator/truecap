@@ -139,8 +139,6 @@ const NICHE_FAQ: FaqItem[] = [
         rate / DSCR / cash flow. STR investors typically use both.
       </>
     ),
-    plainTextAnswer:
-      "Not really — different problems. Mashvisor is STR market discovery + revenue projection. TrueCap is the underwriting calculator. Mashvisor feeds inputs; TrueCap runs cap rate / DSCR / cash flow. STR investors use both.",
   },
   {
     question: "Mashvisor vs AirDNA — which one for STR data?",
@@ -153,8 +151,6 @@ const NICHE_FAQ: FaqItem[] = [
         STR on the same property, Mashvisor&apos;s broader scope wins.
       </>
     ),
-    plainTextAnswer:
-      "AirDNA is gold-standard for STR-specific data (ADR, occupancy, RevPAR). Mashvisor covers LTR + STR + broader market. STR-primary: AirDNA. LTR/STR toggle: Mashvisor.",
   },
   {
     question: "Does Mashvisor do underwriting?",
@@ -167,8 +163,6 @@ const NICHE_FAQ: FaqItem[] = [
         module.
       </>
     ),
-    plainTextAnswer:
-      "Mashvisor shows listing-level cap rate from assumed inputs. TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection, but no tax-specific module.",
   },
   {
     question: "Can I use TrueCap free with Mashvisor data?",
@@ -181,11 +175,9 @@ const NICHE_FAQ: FaqItem[] = [
         sensitivity.
       </>
     ),
-    plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, and cash flow. Replace the area benchmark with reviewed STR revenue and operating assumptions. Pro adds a 10-year cash-flow and equity projection plus sensitivity.",
   },
   {
-    question: "Is Mashvisor&apos;s $70-300/mo worth it?",
+    question: "Is Mashvisor's $70-300/mo worth it?",
     answer: (
       <>
         If you&apos;re actively scouting STR markets across multiple regions,
@@ -195,8 +187,6 @@ const NICHE_FAQ: FaqItem[] = [
         property) are cheaper and more deal-specific.
       </>
     ),
-    plainTextAnswer:
-      "If actively scouting STR markets across regions: yes — data + heatmaps save dozens of hours/mo. Hometown investor with 1-2 properties: overkill. TrueCap + AirDNA Rentalizer ($20-40 per property) is cheaper + more deal-specific.",
   },
 ];
 

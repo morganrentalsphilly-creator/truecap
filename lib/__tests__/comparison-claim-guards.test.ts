@@ -49,43 +49,48 @@ describe("comparison claim truth", () => {
   });
 
   it("retains source-backed competitor corrections", () => {
-    const zillow = read("app/vs/zillow-rent-estimate/page.tsx");
+    // Whitespace-normalized: since F4 the FAQ JSON-LD answer IS the visible answer, and the
+    // one-line plainTextAnswer copies these pins used to match are gone; the visible
+    // sentences wrap across JSX lines.
+    const readFlat = (file: string) => read(file).replace(/\s+/g, " ");
+    const zillow = readFlat("app/vs/zillow-rent-estimate/page.tsx");
     expect(zillow).toContain(
       "https://www.zillow.com/rent/what-is-a-rent-zestimate/",
     );
     expect(zillow).toContain(
       "https://www.huduser.gov/portal/datasets/fmr.html",
     );
-    expect(zillow).toContain("not a property-specific rent opinion");
+    // The visible answer's wording (the plainTextAnswer copy said "not a property-specific rent opinion").
+    expect(zillow).toContain("they are not property-specific rent opinions or lender approvals");
     expect(zillow).toContain("enter a local property-tax");
     expect(zillow).not.toContain("state effective-rate tax estimate");
 
-    const guesty = read("app/vs/guesty/page.tsx");
+    const guesty = readFlat("app/vs/guesty/page.tsx");
     expect(guesty).toContain(
       "Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+",
     );
     expect(guesty).toContain("https://www.guesty.com/pricing/");
 
-    const appfolio = read("app/vs/appfolio/page.tsx");
+    const appfolio = readFlat("app/vs/appfolio/page.tsx");
     expect(appfolio).toContain("50-unit minimum and minimum spend");
     expect(appfolio).toContain("https://www.appfolio.com/pricing");
 
-    const buildium = read("app/vs/buildium/page.tsx");
+    const buildium = readFlat("app/vs/buildium/page.tsx");
     expect(buildium).toContain("Essential, Growth, and Premium");
     expect(buildium).toContain("https://www.buildium.com/pricing/");
 
-    const stessa = read("app/vs/stessa/page.tsx");
+    const stessa = readFlat("app/vs/stessa/page.tsx");
     expect(stessa).toContain(
       "free Essentials tier plus paid Manage and Pro tiers",
     );
     expect(stessa).toContain("https://www.stessa.com/pricing/");
 
-    const rentredi = read("app/vs/rentredi/page.tsx");
+    const rentredi = readFlat("app/vs/rentredi/page.tsx");
     expect(rentredi).toContain("unlimited properties and units");
     expect(rentredi).toContain("money-back guarantee rather than a free trial");
     expect(rentredi).toContain("https://rentredi.com/pricing");
 
-    const lodgify = read("app/vs/lodgify/page.tsx");
+    const lodgify = readFlat("app/vs/lodgify/page.tsx");
     expect(lodgify).toContain("https://www.lodgify.com/pricing/");
     expect(lodgify).toContain("https://www.airbnb.com/help/article/1857");
     expect(lodgify).not.toMatch(/~?\$13/i);

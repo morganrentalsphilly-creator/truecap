@@ -464,8 +464,6 @@ const MASHVISOR_FAQ: FaqItem[] = [
         neighborhood, TrueCap to underwrite the specific listing.
       </>
     ),
-    plainTextAnswer:
-      "Yes, but they solve different problems. Mashvisor is built for market discovery (heatmaps, neighborhood scoring, Airbnb comps). TrueCap is built for per-property underwriting. Many investors use both: Mashvisor to find a neighborhood, TrueCap to underwrite the listing.",
   },
   {
     question: "How does TrueCap compare to Mashvisor for short-term rentals?",
@@ -478,8 +476,6 @@ const MASHVISOR_FAQ: FaqItem[] = [
         long-term buy and hold, TrueCap alone is enough.
       </>
     ),
-    plainTextAnswer:
-      "Mashvisor is stronger for short-term rental comp research (Airbnb occupancy + ADR data). TrueCap is stronger for the long-term underwrite. For STR-focused investors, use both. For long-term buy and hold, TrueCap alone is enough.",
   },
   {
     question: "Is Mashvisor or TrueCap cheaper?",
@@ -492,8 +488,6 @@ const MASHVISOR_FAQ: FaqItem[] = [
         you need.
       </>
     ),
-    plainTextAnswer:
-      "The products have different scopes and changing terms. TrueCap has a free core and paid Pro plans; Mashvisor publishes tiered market-data plans. Compare both official pricing pages for current rates and features.",
   },
   {
     question: "Does TrueCap have neighborhood heatmaps like Mashvisor?",
@@ -505,8 +499,6 @@ const MASHVISOR_FAQ: FaqItem[] = [
         you&apos;ve already chosen and underwrite the specific property.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap is not a market-discovery tool — no heatmaps, neighborhood scoring, or nationwide comparables. Use Mashvisor or AirDNA for that. TrueCap's job is to underwrite a specific property once you have the address.",
   },
   {
     question: "Can I use TrueCap to analyze deals in any US market?",
@@ -520,8 +512,6 @@ const MASHVISOR_FAQ: FaqItem[] = [
         The per-deal underwriting math itself is market-agnostic.
       </>
     ),
-    plainTextAnswer:
-      "Yes. TrueCap can prefill a HUD area-rent benchmark and FRED's national owner-occupied mortgage-rate benchmark. Property tax remains a manual local input with a disclosed generic fallback when blank. Replace all screening assumptions with property-, borrower-, and parcel-specific evidence.",
   },
 ];
 

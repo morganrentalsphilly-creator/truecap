@@ -447,8 +447,6 @@ const PRIVY_FAQ: FaqItem[] = [
         address. Many active MLS-sourcing investors use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different problems. Privy is investor MLS search + filtering. TrueCap is per-deal underwriting once you have an address. Active MLS investors use both.",
   },
   {
     question: "Privy vs PropStream — which one?",
@@ -460,8 +458,6 @@ const PRIVY_FAQ: FaqItem[] = [
         off-market via mail / cold call, PropStream. Some investors run both.
       </>
     ),
-    plainTextAnswer:
-      "Different focuses. Privy: on-market MLS with investor filters. PropStream: off-market lead gen (skip-trace, motivated lists, direct mail). MLS sourcing: Privy. Off-market: PropStream. Some run both.",
   },
   {
     question: "Why use Privy if I already have MLS access through an agent?",
@@ -474,8 +470,6 @@ const PRIVY_FAQ: FaqItem[] = [
         may not add enough.
       </>
     ),
-    plainTextAnswer:
-      "If you already have MLS access, Privy&apos;s value is more limited — its strength is investor-specific filtering on top, not the MLS data itself. If comfortable applying investor logic to Realtor / Zillow / agent MLS, Privy may not add enough.",
   },
   {
     question: "Does Privy underwrite deals?",
@@ -487,8 +481,6 @@ const PRIVY_FAQ: FaqItem[] = [
         not currently expose a tax-specific module.
       </>
     ),
-    plainTextAnswer:
-      "Privy provides listing-level cap-rate estimates and rehab flags. TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection, but does not currently expose a tax-specific module.",
   },
   {
     question: "Is Privy worth $99/month?",
@@ -501,8 +493,6 @@ const PRIVY_FAQ: FaqItem[] = [
         + your agent&apos;s MLS access cover the workflow.
       </>
     ),
-    plainTextAnswer:
-      "Depends on volume. Active MLS sourcing across markets without agent-grade access: filters pay off. Great agent + 1-3 deals/mo: overkill — TrueCap free + agent MLS access covers it.",
   },
 ];
 

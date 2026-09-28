@@ -495,8 +495,6 @@ const EXCEL_FAQ: FaqItem[] = [
         structures TrueCap does not support.
       </>
     ),
-    plainTextAnswer:
-      "It depends. TrueCap provides structured inputs, one documented calculation engine, read-only sharing, and a mobile-responsive interface. A reviewed spreadsheet can be more flexible for custom models TrueCap does not support.",
   },
   {
     question: "Why is a spreadsheet risky for underwriting rental deals?",
@@ -508,8 +506,6 @@ const EXCEL_FAQ: FaqItem[] = [
         depends on the workbook&apos;s complexity and layout.
       </>
     ),
-    plainTextAnswer:
-      "A spreadsheet requires controls: review formulas, protect calculation cells, document assumptions, manage versions, and test after changes. Mobile usability depends on workbook complexity and layout.",
   },
   {
     question: "Can I import my Excel rental template into TrueCap?",
@@ -522,8 +518,6 @@ const EXCEL_FAQ: FaqItem[] = [
         Replace them with property-specific evidence.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. TrueCap uses a structured form and supplies editable HUD rent and FRED rate screening benchmarks while keeping property tax manual. Replace all starting assumptions with property-specific evidence.",
   },
   {
     question:
@@ -537,8 +531,6 @@ const EXCEL_FAQ: FaqItem[] = [
         refinance or sale proceeds, and project-level returns.
       </>
     ),
-    plainTextAnswer:
-      "Not currently. TrueCap offers separate rehab, ARV, and stabilized-rental tools, but its integrated BRRRR and fix-and-flip lifecycle models are disabled. Use a reviewed spreadsheet or another released product for the complete project ledger.",
   },
   {
     question: "What if I still want to use Excel after trying TrueCap?",
@@ -551,8 +543,6 @@ const EXCEL_FAQ: FaqItem[] = [
         keeping the spreadsheet as the custom back-office model.
       </>
     ),
-    plainTextAnswer:
-      "That can be the right choice for edge cases such as partnership splits, syndication waterfalls, or custom debt. TrueCap includes PDFs with Pro for sharing a review snapshot.",
   },
 ];
 

@@ -450,8 +450,6 @@ const CREXI_FAQ: FaqItem[] = [
         overlap meaningfully.
       </>
     ),
-    plainTextAnswer:
-      "No — different asset classes. Crexi is commercial RE. TrueCap is residential (SFR, small multifamily, owner-occupant). The two don&apos;t overlap meaningfully.",
   },
   {
     question: "Crexi vs LoopNet — which one?",
@@ -464,8 +462,6 @@ const CREXI_FAQ: FaqItem[] = [
         institutional research, LoopNet + CoStar is the deeper data source.
       </>
     ),
-    plainTextAnswer:
-      "Both major CRE marketplaces. Crexi is newer with modern UX + broker-preferred. LoopNet (CoStar-owned) has deeper history + CoStar data integration. Active buyers: Crexi. Institutional research: LoopNet.",
   },
   {
     question: "Does TrueCap support commercial real estate?",
@@ -478,8 +474,6 @@ const CREXI_FAQ: FaqItem[] = [
         underwriting use Argus, RealNex, or a dedicated CRE spreadsheet.
       </>
     ),
-    plainTextAnswer:
-      "Not really — residential only (SFR, 2-4 unit, owner-occupant). CRE has different math, lease structures, metrics (NOI multiples, vacancy by tenant, TI/LC). For CRE underwriting use Argus, RealNex, or a CRE spreadsheet.",
   },
   {
     question: "Is Crexi free?",
@@ -490,8 +484,6 @@ const CREXI_FAQ: FaqItem[] = [
         analytics) — typically $100+ per month depending on tier.
       </>
     ),
-    plainTextAnswer:
-      "Free for buyers to browse + basic search. Paid for advanced intelligence (sale comps, lease data, broker tools, analytics) — typically $100+/mo.",
   },
   {
     question: "Can I use TrueCap for small multifamily commercial deals?",
@@ -505,8 +497,6 @@ const CREXI_FAQ: FaqItem[] = [
         calculator.
       </>
     ),
-    plainTextAnswer:
-      "Yes for 2-4 units (residential MF). The owner-occupant property type handles small MF. For 5+ unit commercial-financed MF, math differs (commercial loans + DSCR standards) — use a dedicated MF calculator.",
   },
 ];
 

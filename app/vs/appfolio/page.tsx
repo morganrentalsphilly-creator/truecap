@@ -474,8 +474,6 @@ const APPFOLIO_FAQ: FaqItem[] = [
         both at different stages.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. AppFolio handles post-purchase property management, while TrueCap handles pre-purchase acquisition underwriting. A manager may use both at different stages.",
   },
   {
     question: "Is AppFolio worth it for a small landlord?",
@@ -488,8 +486,6 @@ const APPFOLIO_FAQ: FaqItem[] = [
         per-unit rate.
       </>
     ),
-    plainTextAnswer:
-      "AppFolio's current Core pricing page states a 50-unit minimum and minimum spend, with quote-based pricing. Confirm eligibility, obtain a current quote, and compare the operational features with alternatives.",
   },
   {
     question: "Does AppFolio underwrite deals?",
@@ -500,8 +496,6 @@ const APPFOLIO_FAQ: FaqItem[] = [
         property into AppFolio post-closing.
       </>
     ),
-    plainTextAnswer:
-      "No. AppFolio is purely operational. Use TrueCap or DealCheck to underwrite, then ingest the property into AppFolio post-closing.",
   },
   {
     question:
@@ -514,8 +508,6 @@ const APPFOLIO_FAQ: FaqItem[] = [
         publishes tiered entry pricing on its own pricing page.
       </>
     ),
-    plainTextAnswer:
-      "Compare current minimums, quotes, accounting, resident, owner, maintenance, support, and implementation features. AppFolio Core currently states a 50-unit minimum; Buildium publishes tiered entry pricing.",
   },
   {
     question: "What does TrueCap not do that AppFolio does?",
@@ -527,8 +519,6 @@ const APPFOLIO_FAQ: FaqItem[] = [
         to pre-purchase underwriting.
       </>
     ),
-    plainTextAnswer:
-      "Everything operational — tenant management, lease workflows, accounting, vendor management, owner portals, resident services, smart-home. TrueCap is scope-limited to pre-purchase underwriting.",
   },
 ];
 

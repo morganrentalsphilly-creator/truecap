@@ -62,7 +62,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
    - No clickbait, and no number the page does not contain.
 5. **FAQ visible.**
    - FAQPage JSON-LD maps the same const or field the JSX renders (`FAQS`, `FAQ_ITEMS`, or `ARTICLE.faqs` rendered by `SourceFirstArticle`; `ComparisonFaq` items on /vs). A second, separate literal list is a REJECT. Every question is rendered visibly.
-   - Added FAQ answers and /vs `plainTextAnswer` strings carry no URL and no `<` or `>`. A /vs `plainTextAnswer` says the same thing as its visible `answer`.
+   - Added FAQ answers carry no URL and no `<` or `>`. A /vs `FaqItem` has only `question` and `answer`: `ComparisonFaq` writes the visible answer's own text into the FAQPage JSON-LD (F4), so there is no separate plain-text copy to keep in step.
    - A `faq` entry in `content/seo/market-facts.json` needs a template that reads the file and renders it. Since F8 the chain is `lib/seo/market-facts.ts` (`marketFactsFor`) → `lib/markets/market-page-data.ts` (`buildMarketFaq`) → `<DataFaq>` and `<MarketLocalData>` in `app/markets/[city]/page.tsx` and `components/marketing/safe-market-page.tsx` (Grep `marketFactsFor` and `<DataFaq`). If nothing renders it, REJECT with "dataset not rendered".
 6. **Authorship.** The author is the TrueCap Organization.
    - A new post renders `<BlogByline />` after its date line.

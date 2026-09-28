@@ -459,8 +459,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
         established analysis and import workflow.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap offers a no-signup first-pass screen. DealCheck also publishes a free plan; verify its current limits on the official pricing page and choose the workflow that fits.",
   },
   {
     question: "How much does TrueCap cost compared to DealCheck?",
@@ -483,8 +481,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
         because either company can change plans.
       </>
     ),
-    plainTextAnswer:
-      "See TrueCap's live pricing page and DealCheck's official pricing page for current prices and plan limits.",
   },
   {
     question: "Which tool is better for new investors?",
@@ -496,8 +492,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
         workflow. Neither tool replaces verification or due diligence.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and Buy Box fit; DealCheck can fit users who prefer its established guided tools and ecosystem.",
   },
   {
     question: "Does TrueCap have a mobile app like DealCheck?",
@@ -510,8 +504,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
         the difference is delivery mechanism.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap is a PWA — install from the browser to your home screen, works like a native app without the App Store. DealCheck has true native iOS and Android apps. Both work on phones; the difference is delivery mechanism.",
   },
   {
     question: "Can I import properties from Zillow or Redfin with TrueCap?",
@@ -527,8 +519,6 @@ const DEALCHECK_FAQ: FaqItem[] = [
         value so you can review and replace it.
       </>
     ),
-    plainTextAnswer:
-      "Partly. Paste a supported listing link and TrueCap extracts the address, then can pre-fill editable HUD area rent and the FRED owner-occupied 30-year rate. Property tax stays manual. It does not scrape listing price, taxes, or photos.",
   },
   {
     question: "When should I pick DealCheck over TrueCap?",
@@ -541,7 +531,5 @@ const DEALCHECK_FAQ: FaqItem[] = [
         analysis, and presentation tools.
       </>
     ),
-    plainTextAnswer:
-      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to Buy Box fit, an Offer Ceiling, downside, and presentation.",
   },
 ];

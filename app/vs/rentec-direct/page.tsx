@@ -467,8 +467,6 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
         5-100 units typically use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Rentec Direct operates rentals you own. TrueCap underwrites rentals you&apos;re considering. Landlords running 5-100 units use both.",
   },
   {
     question: "Rentec Direct vs Buildium — which one?",
@@ -481,8 +479,6 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
         Buildium.
       </>
     ),
-    plainTextAnswer:
-      "Rentec Direct is cheaper and better for self-managing landlords (5-100 units). Buildium leans to PM companies and scales further. Rentec is the step up from TurboTenant/Avail before Buildium.",
   },
   {
     question: "Does Rentec Direct have a free tier?",
@@ -494,8 +490,6 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
         Direct may be premature.
       </>
     ),
-    plainTextAnswer:
-      "No — paid only with a free trial. Starts ~$45/mo for landlords (2026) with per-unit fees. TrueCap is free for underwriting; if you&apos;re below 5 units, Rentec Direct may be premature.",
   },
   {
     question: "Can I use Rentec Direct for underwriting new deals?",
@@ -506,8 +500,6 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
         spreadsheet.
       </>
     ),
-    plainTextAnswer:
-      "No — Rentec Direct is operational only. For pre-purchase underwriting use TrueCap, DealCheck, or a spreadsheet.",
   },
   {
     question: "Should I use TurboTenant or Rentec Direct?",
@@ -518,8 +510,6 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
         accounting + owner reporting. Both pair with TrueCap upstream.
       </>
     ),
-    plainTextAnswer:
-      "TurboTenant: better for 1-5 units, strong free tier. Rentec Direct: better at 5-100 units with richer accounting + owner reporting. Both pair with TrueCap upstream.",
   },
 ];
 

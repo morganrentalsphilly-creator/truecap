@@ -167,8 +167,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         is just less manual setup for the house-hack workflow.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap for house-hacking specifically. The 'owner-occupant' property type auto-excludes your unit from the rent income side. BiggerPockets treats it as generic multifamily — you mentally adjust the math. Both work; TrueCap is less manual setup.",
   },
   {
     question: "Does TrueCap handle FHA 3.5%-down house hacks?",
@@ -183,8 +181,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         cash amount in closing costs.
       </>
     ),
-    plainTextAnswer:
-      "Yes — TrueCap's down payment field is configurable. Set 3.5% for FHA, enter the lender's annual premium in the dedicated PMI / MIP field, and select the loan-life option when it applies. Include any unfinanced upfront premium in closing costs.",
   },
   {
     question: "What's 'effective rent saved' and why does it matter?",
@@ -198,8 +194,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         calculator requires you to compute it from the cash-flow line yourself.
       </>
     ),
-    plainTextAnswer:
-      "House-hack monthly cost = PITI minus rent from rental units. That gap is your 'effective rent saved' vs a regular lease. TrueCap surfaces this explicitly so you can compare house-hack vs apartment rental apples-to-apples. BiggerPockets requires manual calculation.",
   },
   {
     question: "Does the cap rate apply differently to a house hack?",
@@ -211,8 +205,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         separate fully rented scenario to review the post-move-out case.
       </>
     ),
-    plainTextAnswer:
-      "Cap rate remains property-level NOI divided by purchase price. TrueCap has no full-property versus rental-only cap-rate toggle. Save a separate fully rented scenario to review the post-move-out case.",
   },
   {
     question: "Is BiggerPockets Pro worth it for the calculator alone?",
@@ -225,8 +217,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         live pricing pages and the features you actually need.
       </>
     ),
-    plainTextAnswer:
-      "It depends on which membership benefits you use. BiggerPockets currently presents calculator results as a Pro feature and includes benefits beyond the calculator. Compare both live pricing pages and the features you need.",
   },
   {
     question: "What changes when I model the post-move-out scenario?",
@@ -241,8 +231,6 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         10-year projections to each.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap has no dedicated move-out-year switch. Save a separate fully rented multi-family scenario and compare it with the current owner-occupied case; Pro adds side-by-side comparison and 10-year projections.",
   },
 ];
 

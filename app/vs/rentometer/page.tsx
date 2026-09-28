@@ -232,8 +232,6 @@ const RENTOMETER_FAQ: FaqItem[] = [
         the underwrite. Verify either source with property-specific evidence.
       </>
     ),
-    plainTextAnswer:
-      "They solve different problems. Rentometer specializes in rent estimates from rental-listing comps. TrueCap starts from an editable HUD Fair Market Rent area benchmark and adds downstream underwriting math. Verify either source with property-specific evidence.",
   },
   {
     question: "Does TrueCap give me a rent estimate like Rentometer?",
@@ -246,8 +244,6 @@ const RENTOMETER_FAQ: FaqItem[] = [
         provide a separate source to evaluate.
       </>
     ),
-    plainTextAnswer:
-      "Yes — TrueCap pre-fills an editable HUD Fair Market Rent area benchmark for the relevant bedroom count. It is not a property-specific rent opinion or lender approval input. Rentometer's listing-based comps provide a separate source to evaluate.",
   },
   {
     question: "What's the difference between HUD FMR and Rentometer?",
@@ -260,8 +256,6 @@ const RENTOMETER_FAQ: FaqItem[] = [
         neither replaces subject-property lease evidence or local diligence.
       </>
     ),
-    plainTextAnswer:
-      "HUD Fair Market Rent estimates 40th-percentile gross rent for standard-quality units within HUD-defined areas. Rentometer uses rental-listing comps. They answer different questions, and neither replaces subject-property lease evidence or local diligence.",
   },
   {
     question: "Can I use Rentometer's rent in TrueCap?",
@@ -274,8 +268,6 @@ const RENTOMETER_FAQ: FaqItem[] = [
         starting point, not a hard requirement.
       </>
     ),
-    plainTextAnswer:
-      "Yes — every input in TrueCap is editable. If you trust Rentometer's comp, type that number into the rent field and the analysis updates instantly. TrueCap pre-fills HUD FMR as a starting point, not a requirement.",
   },
   {
     question: "Do I need both Rentometer and TrueCap?",
@@ -288,8 +280,6 @@ const RENTOMETER_FAQ: FaqItem[] = [
         and sensitivity-test a reasonable rent range.
       </>
     ),
-    plainTextAnswer:
-      "It depends on the property. TrueCap provides the underwriting model and an editable HUD area benchmark; Rentometer can add listing-based comp context. Verify the sources independently and sensitivity-test a reasonable rent range.",
   },
 ];
 

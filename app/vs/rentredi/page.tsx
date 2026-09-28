@@ -501,8 +501,6 @@ const RENTREDI_FAQ: FaqItem[] = [
         points.
       </>
     ),
-    plainTextAnswer:
-      "No — different tools for different stages. RentRedi manages property you own (rent collection, screening, maintenance). TrueCap supports pre-purchase underwriting (cap rate, cash flow, and projections). The tools can be used together.",
   },
   {
     question: "Does TrueCap collect rent like RentRedi?",
@@ -515,8 +513,6 @@ const RENTREDI_FAQ: FaqItem[] = [
         layer.
       </>
     ),
-    plainTextAnswer:
-      "No, and not planned. Rent collection is a serious compliance + payments product (ACH, NACHA, late-fee automation, disputes). RentRedi specializes in it. TrueCap is intentionally scope-limited to underwriting.",
   },
   {
     question: "Is RentRedi cheaper than TrueCap?",
@@ -529,8 +525,6 @@ const RENTREDI_FAQ: FaqItem[] = [
         current rates and terms.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap has a free core underwriting tier and paid Pro options. RentRedi publishes flat-rate paid plans for unlimited properties and units, with a money-back guarantee rather than a free trial. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "What do I need before I use RentRedi?",
@@ -543,8 +537,6 @@ const RENTREDI_FAQ: FaqItem[] = [
         decision.
       </>
     ),
-    plainTextAnswer:
-      "You need to actually own (or be closing on) the property. RentRedi's value starts once you have a unit to fill or tenant to bill — exactly when TrueCap's job ends.",
   },
   {
     question: "Does TrueCap have a tenant screening or application feature?",
@@ -556,8 +548,6 @@ const RENTREDI_FAQ: FaqItem[] = [
         RentSpree, or TurboTenant are the right tools.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap doesn't pull credit reports or store applications — that's FCRA-regulated and we don't build there. For screening, use RentRedi, RentSpree, or TurboTenant.",
   },
 ];
 

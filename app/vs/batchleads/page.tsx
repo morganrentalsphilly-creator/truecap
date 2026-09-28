@@ -456,8 +456,6 @@ const BATCHLEADS_FAQ: FaqItem[] = [
         once you have the address. Most active off-market buyers use both.
       </>
     ),
-    plainTextAnswer:
-      "No. BatchLeads finds motivated-seller leads + owner contact info. TrueCap underwrites the property. Active off-market buyers use both.",
   },
   {
     question: "BatchLeads vs PropStream — which one?",
@@ -469,8 +467,6 @@ const BATCHLEADS_FAQ: FaqItem[] = [
         BatchLeads; data-heavy operators lean PropStream. Some run both.
       </>
     ),
-    plainTextAnswer:
-      "BatchLeads is cheaper with stronger stacked filters. PropStream has deeper public records + mature ecosystem. Wholesalers on tight margins lean BatchLeads; data-heavy operators lean PropStream.",
   },
   {
     question: "Does BatchLeads underwrite deals?",
@@ -481,12 +477,10 @@ const BATCHLEADS_FAQ: FaqItem[] = [
         spreadsheet for the underwriting layer.
       </>
     ),
-    plainTextAnswer:
-      "No — leads + contact data only. Use TrueCap, DealCheck, or a spreadsheet for underwriting.",
   },
   {
     question:
-      "How does TrueCap&apos;s address auto-fill compare to BatchLeads&apos; property data?",
+      "How does TrueCap's address auto-fill compare to BatchLeads' property data?",
     answer: (
       <>
         Different scope. BatchLeads has 150M+ properties with motivated-seller
@@ -496,8 +490,6 @@ const BATCHLEADS_FAQ: FaqItem[] = [
         products serve different, potentially complementary jobs.
       </>
     ),
-    plainTextAnswer:
-      "Different scope. BatchLeads supplies a large property and motivated-seller dataset. TrueCap supplies editable HUD rent and FRED rate benchmarks, with manual local property tax, for per-deal underwriting.",
   },
   {
     question: "Can I use BatchLeads + TrueCap together?",
@@ -509,8 +501,6 @@ const BATCHLEADS_FAQ: FaqItem[] = [
         targets.
       </>
     ),
-    plainTextAnswer:
-      "BatchLeads surfaces off-market leads; TrueCap screens the assumptions you enter. The Deal score helps you triage the list, and the Offer Ceiling shows the highest price that still meets your targets.",
   },
 ];
 

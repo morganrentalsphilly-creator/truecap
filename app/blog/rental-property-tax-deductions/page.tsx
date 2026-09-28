@@ -65,33 +65,6 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS = [
-  {
-    q: "What's the most valuable rental property tax deduction?",
-    a: "Depreciation is often one of the largest deductions, but there is no universal 'most valuable' deduction. For an illustrative $400,000 residential-rental building basis (excluding land), straight-line depreciation before first- and last-year conventions is roughly $14,500 per full year. That is a deduction, not a promised cash saving: passive-activity, basis, at-risk, personal-use, and other limits can defer or reduce the current tax effect, and depreciation affects the tax calculation when the property is sold.",
-  },
-  {
-    q: "Can I deduct my mortgage payment?",
-    a: "The interest allocable to rental use is generally a rental expense; principal is not. The allowable amount can depend on mixed personal use, business-interest limitations, prepaid interest, and other facts. Form 1098 is a useful record when one is issued, but it does not by itself decide how every amount is reported on Schedule E.",
-  },
-  {
-    q: "What about repairs vs improvements?",
-    a: "A qualifying repair may be currently deductible, while an improvement generally must be capitalized and recovered over time. The classification is based on the facts and applicable capitalization rules, including whether work improves a unit of property or qualifies for a safe harbor. Labels such as 'repair' on an invoice do not decide the result.",
-  },
-  {
-    q: "Can I deduct travel to my rental property?",
-    a: "Ordinary and necessary travel whose primary purpose is managing, conserving, or maintaining a rental may be deductible, subject to allocation and recordkeeping rules. Travel primarily for improvements is generally recovered through the improvement rather than deducted as current travel. Keep contemporaneous records and use the IRS standard-mileage page for the rate that applies to the trip date.",
-  },
-  {
-    q: "What's a 'real estate professional' status and why does it matter?",
-    a: "The IRS real-estate-professional tests generally require more than half of the taxpayer's personal services and more than 750 hours in qualifying real-property trades or businesses. Meeting those tests does not automatically make every rental loss currently deductible: material participation, activity grouping, basis, at-risk, passive-loss, and other limits can still apply. Review the facts with a qualified tax professional.",
-  },
-  {
-    q: "Should I use a CPA or do my own rental property taxes?",
-    a: "Complexity matters more than property count. Consider professional advice when you have mixed personal and rental use, multiple owners or entities, passive losses, a cost-segregation study, a like-kind exchange, a change in use, or a sale. Fees and results vary; no adviser can responsibly promise that their fee will produce a fixed multiple of tax savings.",
-  },
-];
-
 export default function TaxDeductionsPost() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${SLUG}`;
@@ -131,22 +104,12 @@ export default function TaxDeductionsPost() {
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
           <div className="mb-2">

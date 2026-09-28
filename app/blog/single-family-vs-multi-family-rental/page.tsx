@@ -59,29 +59,6 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS = [
-  {
-    q: "Is single-family or multi-family better for cash flow?",
-    a: "Multi-family typically produces 1-3 percentage points higher cap rate than comparable SFRs in the same market — because of economies of scale (one roof, one furnace, shared yard) and because multi-family is a less-competitive buyer pool (fewer owner-occupants bidding up prices). However, SFR cash flow has lower variance: when one of two duplex units is vacant, you lose 50% of income; an SFR is either 100% or 0%.",
-  },
-  {
-    q: "Which has better financing — single-family or multi-family?",
-    a: "Single-family wins on financing terms. 1-4 unit properties qualify for residential financing (conventional, FHA, VA) with 30-year fixed rates and 80-90% LTV. 5+ units are commercial loans with 70-75% LTV, 5/1 ARM structure, 25-year amortization, and rates 50-150bp higher. The cliff between 4-unit and 5-unit financing is significant — many investors stop at 4-unit specifically to keep residential financing.",
-  },
-  {
-    q: "Is multi-family riskier than single-family?",
-    a: "Different risk profile, not necessarily higher. Multi-family income is more diversified (one vacant unit ≠ 100% income loss) but also more concentrated geographically (one bad neighborhood decision affects every unit). SFRs are easier to liquidate individually but have higher single-event risk per property. The honest answer: risk is a function of underwriting + market + execution, not property type alone.",
-  },
-  {
-    q: "What about 5+ unit small multifamily?",
-    a: "5-20 unit properties live in a financing dead zone — too big for residential, too small for the institutional commercial market. The advantage: less buyer competition, sometimes meaningfully better cap rates. The disadvantage: commercial financing, larger capex events, harder to liquidate. This range is where experienced investors find returns the residential and institutional markets both miss.",
-  },
-  {
-    q: "Should beginners start with single-family or multi-family?",
-    a: "Most experienced investors recommend starting with single-family or house-hacking a 2-4 unit. Reasons: easier financing (FHA 3.5%), simpler tenant management (one unit at a time), lower capex variance, easier to liquidate if you need out. Move to larger multi-family after 2-3 SFRs once you understand the operational rhythm. There's no rule against starting with multi-family — but the learning curve is steeper and the cost of mistakes is higher.",
-  },
-];
-
 export default function SfrVsMfrPost() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${SLUG}`;
@@ -108,22 +85,12 @@ export default function SfrVsMfrPost() {
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>

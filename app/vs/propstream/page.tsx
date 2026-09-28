@@ -480,8 +480,6 @@ const PROPSTREAM_FAQ: FaqItem[] = [
         serious investors use both: PropStream to source, TrueCap to underwrite.
       </>
     ),
-    plainTextAnswer:
-      "Not really — different problems. PropStream finds motivated-seller leads with skip-tracing and public-records data. TrueCap underwrites a specific property. Investors use both: PropStream to source, TrueCap to underwrite.",
   },
   {
     question: "Can TrueCap do skip tracing or pull property lists?",
@@ -493,8 +491,6 @@ const PROPSTREAM_FAQ: FaqItem[] = [
         contact info, PropStream or DealMachine are the right tools.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap focuses on per-deal underwriting using editable HUD rent and FRED rate benchmarks plus manual local property tax. For lead gen, lists, and owner contact info, use PropStream or DealMachine.",
   },
   {
     question: "Is PropStream worth $99/month?",
@@ -508,11 +504,9 @@ const PROPSTREAM_FAQ: FaqItem[] = [
         your MLS access.
       </>
     ),
-    plainTextAnswer:
-      "Depends on volume. If you send 1,000+ direct mail pieces/month or wholesale, lists + skip-tracing pay for themselves. If you buy 1-3 properties/year via MLS or your network, PropStream is overkill.",
   },
   {
-    question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
+    question: "Does TrueCap have a free tier? PropStream doesn't.",
     answer: (
       <>
         Yes — TrueCap&apos;s free, no-account screen covers cap rate,
@@ -522,11 +516,9 @@ const PROPSTREAM_FAQ: FaqItem[] = [
         beyond its current trial terms.
       </>
     ),
-    plainTextAnswer:
-      "Yes. TrueCap provides free, no-account screens with cap rate, CoC, DSCR, cash flow, and labeled address starting assumptions. Complete-decision allowances and Pro terms are on the live pricing page. Verify PropStream's current trial and paid terms on its official site.",
   },
   {
-    question: "What&apos;s the best PropStream alternative for finding deals?",
+    question: "What's the best PropStream alternative for finding deals?",
     answer: (
       <>
         If you specifically want lead generation, look at DealMachine
@@ -536,8 +528,6 @@ const PROPSTREAM_FAQ: FaqItem[] = [
         you&apos;d use after any of those finds you a property.
       </>
     ),
-    plainTextAnswer:
-      "For lead gen: DealMachine (mobile-first), BatchLeads (similar to PropStream), or Reonomy (commercial). TrueCap is the underwriting layer you&apos;d use after any of those finds a property.",
   },
 ];
 
