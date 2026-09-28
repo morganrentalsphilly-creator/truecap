@@ -25,6 +25,7 @@ import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Rental Property Investing Blog",
@@ -83,6 +84,9 @@ export default function BlogIndexPage() {
       url: `${siteUrl}/blog/${p.slug}`,
       datePublished: p.publishedAt,
       dateModified: postModifiedAt(p),
+      // Every post's author and publisher is the Organization (F1), by @id.
+      author: { "@id": `${siteUrl}/#organization` },
+      publisher: { "@id": `${siteUrl}/#organization` },
     })),
   };
 
@@ -90,6 +94,7 @@ export default function BlogIndexPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={blogLd} />
+      <BreadcrumbSchema items={[{ name: "Blog", path: "/blog" }]} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">

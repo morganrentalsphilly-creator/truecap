@@ -24,6 +24,8 @@ import { ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { VS_HUB_CRUMB } from "@/components/marketing/vs-breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
@@ -394,6 +396,7 @@ export default function VsHubPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={structuredData} />
+      <BreadcrumbSchema items={[VS_HUB_CRUMB]} />
       <Header />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero */}
