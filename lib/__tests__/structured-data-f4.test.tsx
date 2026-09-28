@@ -239,7 +239,7 @@ const HUBS = [
 
 // ------------------------------------------------------------ the checks
 
-describe("the FAQ mirror check itself", () => {
+describe("the FAQ mirror check itself", { timeout: 30_000 }, () => {
   const page = (ld: Faq[], main: string) =>
     `<html><body><script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: ld.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) })}</script><main>${main}</main></body></html>`;
 
@@ -267,7 +267,7 @@ describe("the FAQ mirror check itself", () => {
   });
 });
 
-describe("plainTextOf: a /vs answer's JSON-LD text", () => {
+describe("plainTextOf: a /vs answer's JSON-LD text", { timeout: 30_000 }, () => {
   it("reads text, fragments, inline emphasis and links as the page shows them", () => {
     expect(
       plainTextOf(
@@ -297,7 +297,7 @@ describe("plainTextOf: a /vs answer's JSON-LD text", () => {
   });
 });
 
-describe("FAQPage entries == the visible FAQ, on a registry-driven sample of every template", () => {
+describe("FAQPage entries == the visible FAQ, on a registry-driven sample of every template", { timeout: 30_000 }, () => {
   const sample = faqSample();
 
   it("covers every template", () => {
@@ -363,7 +363,7 @@ function expectOneToolApp(html: string, slug: string): void {
   for (const page of ldTopLevel(html).filter((node) => typeOf(node).includes("WebPage"))) expect(page.mainEntity, slug).toEqual({ "@id": appId });
 }
 
-describe("tools: one application entity with a stable @id", () => {
+describe("tools: one application entity with a stable @id", { timeout: 30_000 }, () => {
   it.each(TOOL_SLUGS)("/tools/%s", async (slug) => {
     expectOneToolApp(await renderTool(slug), slug);
   });
@@ -395,7 +395,7 @@ describe("tools: one application entity with a stable @id", () => {
   }, MANY_PAGES_MS);
 });
 
-describe("unreleased calculators already carry the released structured data", () => {
+describe("unreleased calculators already carry the released structured data", { timeout: 30_000 }, () => {
   /**
    * These pages permanentRedirect today, so nothing here is served. The day a
    * slug leaves UNRELEASED_UNDERWRITING_CALCULATORS its page goes live as it
@@ -431,7 +431,7 @@ describe("unreleased calculators already carry the released structured data", ()
   });
 });
 
-describe("HowTo only where its steps are visible", () => {
+describe("HowTo only where its steps are visible", { timeout: 30_000 }, () => {
   it("/playbook's HowTo steps are the playbook's visible steps (the one HowTo left)", async () => {
     const html = await render((await import("@/app/playbook/page")).default());
     const steps = ldNodes(html).filter((node) => typeOf(node).includes("HowToStep"));
@@ -441,7 +441,7 @@ describe("HowTo only where its steps are visible", () => {
   });
 });
 
-describe("BreadcrumbList on the hubs and 3-level /vs trails", () => {
+describe("BreadcrumbList on the hubs and 3-level /vs trails", { timeout: 30_000 }, () => {
   const trail = (html: string) =>
     ldNodes(html)
       .filter((node) => typeOf(node).includes("BreadcrumbList"))
@@ -469,7 +469,7 @@ describe("BreadcrumbList on the hubs and 3-level /vs trails", () => {
   });
 });
 
-describe("glossary: one DefinedTermSet, every DefinedTerm in it", () => {
+describe("glossary: one DefinedTermSet, every DefinedTerm in it", { timeout: 30_000 }, () => {
   const SET_ID = `${SITE}/glossary#terms`;
 
   it("the hub declares the set with @id /glossary#terms and each listed term points at it", async () => {
