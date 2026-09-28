@@ -8,9 +8,10 @@
  * "TrueCap vs BiggerPockets" phrasing; this post targets the
  * "free alternatives" listicle pattern the SERP actually rewards.
  *
- * The premise is BiggerPockets' real, verified limitation: free
- * members get 5 calculator reports, then the calculators require Pro
- * ($39/mo or $390/yr, verified July 2026). Honesty rules baked in:
+ * The premise is BiggerPockets' published access terms: the calculators
+ * are a Pro feature after a 7-day free trial ($39/mo or $390/yr, checked
+ * September 2026; no current official page states a free-report count).
+ * Honesty rules baked in:
  * TrueCap listed first but disclosed as ours; the other five are real,
  * genuinely free options described fairly, and BP gets a "when Pro is
  * worth it" section.
@@ -19,6 +20,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -33,11 +35,12 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "free-biggerpockets-calculator-alternatives";
 const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
 const DESCRIPTION =
-  "BiggerPockets' calculators stop after 5 free reports, then Pro is $390/yr. Six genuinely free alternatives for 2026 — and what each free tier covers.";
+  "BiggerPockets' calculators are a Pro feature ($390/yr after a 7-day trial). Six genuinely free alternatives for 2026 — and what each free tier covers.";
 const PUBLISHED_AT = "2026-07-14";
 const MODIFIED_AT = lastmodFor("/blog/free-biggerpockets-calculator-alternatives") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
@@ -71,14 +74,17 @@ export const metadata: Metadata = {
   },
 };
 
+/** Inline source link inside the not-prose table and tool cards. */
+const SOURCE_LINK = "font-semibold text-primary hover:underline";
+
 type Tool = {
   rank: number;
   name: string;
   bestFor: string;
   url: string;
-  pricing: string;
-  freeCovers: string[];
-  freeGates: string[];
+  pricing: ReactNode;
+  freeCovers: ReactNode[];
+  freeGates: ReactNode[];
   pickIf: string;
   disclosure?: string;
 };
@@ -91,12 +97,20 @@ const TOOLS: Tool[] = [
     url: "/vs/biggerpockets-calculator",
     pricing: "Free core; paid Pro — see live pricing",
     disclosure:
-      "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — with no report count to run out of. The side-by-side comparison shows where BiggerPockets still wins.",
+      "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — without a paid membership. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
       "Editable HUD rent + FRED mortgage-rate benchmarks; manual local property tax",
       "Buy Box fit, with a Deal score",
-      "Every operating expense line the BP form collects",
+      <>
+        Every operating expense category{" "}
+        <a
+          href="https://www.biggerpockets.com/rental-property-calculator"
+          className={SOURCE_LINK}
+        >
+          the BP form collects
+        </a>
+      </>,
       "Save up to 5 deals + dashboard access",
     ],
     freeGates: [
@@ -105,14 +119,21 @@ const TOOLS: Tool[] = [
       "PDF export + co-branded share links (Pro)",
     ],
     pickIf:
-      "You want the BP rental-calculator workflow without the 5-report ceiling — and prefer the data filled in for you.",
+      "You want the BP rental-calculator workflow without a Pro subscription — and prefer rent and rate starting points filled in for you.",
   },
   {
     rank: 2,
     name: "DealCheck (free Starter plan)",
     bestFor: "Best free plan with saving built in",
     url: "/vs/dealcheck",
-    pricing: "Free Starter; Plus $10/mo, Pro $20/mo (billed annually)",
+    pricing: (
+      <>
+        Free Starter;{" "}
+        <a href="https://dealcheck.io/pricing/" className={SOURCE_LINK}>
+          Plus $10/mo, Pro $20/mo (billed annually)
+        </a>
+      </>
+    ),
     freeCovers: [
       "Full deal analysis on the free plan — signup required",
       "Save up to 15 properties at a time",
@@ -130,14 +151,21 @@ const TOOLS: Tool[] = [
     name: "Calculator.net rental property calculator",
     bestFor: "Best no-frills, no-signup one-pager",
     url: "https://www.calculator.net/rental-property-calculator.html",
-    pricing: "Free (ad-supported)",
+    pricing: (
+      <a
+        href="https://www.calculator.net/rental-property-calculator.html"
+        className={SOURCE_LINK}
+      >
+        Free (ad-supported)
+      </a>
+    ),
     freeCovers: [
       "IRR, cap rate, and cash flow from one long form",
       "No account, no report limit",
     ],
     freeGates: [
       "No DSCR, no verdict, no benchmarks — you interpret the raw output",
-      "Nothing is saved and nothing is pre-filled; every number is manual",
+      "Nothing is saved, and the form starts from generic sample values rather than data for your address",
       "Generic layout with ads, not built for repeat underwriting",
     ],
     pickIf:
@@ -148,9 +176,22 @@ const TOOLS: Tool[] = [
     name: "Stessa (Essentials plan)",
     bestFor: "Public acquisition calculator plus free accounting entry point",
     url: "/vs/stessa",
-    pricing: "Essentials free; paid Manage and Pro — verify live pricing",
+    pricing: (
+      <>
+        <a href="https://www.stessa.com/pricing/" className={SOURCE_LINK}>
+          Essentials free; paid Manage and Pro
+        </a>{" "}
+        — verify live pricing
+      </>
+    ),
     freeCovers: [
-      "Public rental returns and income-tax calculator",
+      <a
+        key="tax-calculator"
+        href="https://www.stessa.com/rental-returns-and-income-tax-calculator/"
+        className={SOURCE_LINK}
+      >
+        Public rental returns and income-tax calculator
+      </a>,
       "Accounting and basic financial reports under current Essentials terms",
     ],
     freeGates: [
@@ -166,7 +207,11 @@ const TOOLS: Tool[] = [
     name: "RentCast (free plan)",
     bestFor: "Best free rent number to feed any calculator",
     url: "/vs/rentcast",
-    pricing: "Free plan; Pro from $12/mo",
+    pricing: (
+      <a href="https://www.rentcast.io/pricing" className={SOURCE_LINK}>
+        Free plan; Pro from $12/mo
+      </a>
+    ),
     freeCovers: [
       "Nationwide rent estimates with nearby comps, free",
       "Track a handful of properties with market alerts",
@@ -185,7 +230,7 @@ const TOOLS: Tool[] = [
     url: "/vs/excel",
     pricing: "Free (or your existing Office / Google subscription)",
     freeCovers: [
-      "Total flexibility — BiggerPockets itself publishes free spreadsheet templates",
+      "Total flexibility — BiggerPockets' FilePlace hosts free, member-shared spreadsheet templates",
       "No report limits, ever; your assumptions visible in every cell",
     ],
     freeGates: [
@@ -201,7 +246,7 @@ const TOOLS: Tool[] = [
 const FAQ_ITEMS = [
   {
     q: "How many free reports does the BiggerPockets calculator give you?",
-    a: "Free BiggerPockets members get 5 calculator reports. After that, the calculators require BiggerPockets Pro, which is $39/month or $390/year (as of July 2026). Pro also bundles the forums perks, webinars, and partner software — the calculator is one piece of a membership, not a standalone product.",
+    a: "BiggerPockets' current calculator pages don't state a free-report allowance; they offer a 7-day free trial, and unlimited calculator use requires BiggerPockets Pro at $39/month or $390/year (as of September 2026). Pro also bundles forum perks, a BPCON ticket discount, partner software (RentRedi, Baselane) and lender/insurance discounts — the calculator is one piece of a membership, not a standalone product.",
   },
   {
     q: "Is there a truly free alternative to the BiggerPockets rental calculator?",
@@ -209,7 +254,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is BiggerPockets Pro worth $390 a year just for the calculators?",
-    a: "For the calculators alone, usually not — free tools now cover the same underwriting math. Pro is worth it when you'd use the rest of the bundle: the community for partner and lender introductions, bootcamps and courses, and the included partner software. If you're a Pro member who only opens the calculator, that's the sign to price out alternatives.",
+    a: "For the calculators alone, usually not — free tools now cover the same underwriting math. Pro is worth it when you'd use the rest of the bundle: the community for partner and lender introductions, the included partner software, and the lender, insurance and materials discounts. If you're a Pro member who only opens the calculator, that's the sign to price out alternatives.",
   },
   {
     q: "Can I keep using BiggerPockets for free without the calculators?",
@@ -303,13 +348,24 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               {TITLE_PLAIN}
             </h1>
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              The BiggerPockets calculators are good — the catch is the meter.
-              Free members get 5 calculator reports, and after that the
-              calculators sit behind BiggerPockets Pro at $39/month or $390/year
-              (as of July 2026). If you&apos;re analyzing deals every week, five
-              reports lasts an afternoon. Here are six genuinely free
-              alternatives — including one we make, clearly labeled — plus an
-              honest note on when Pro is actually the right buy.
+              The BiggerPockets calculators are good — the catch is that
+              they&apos;re a Pro feature. BiggerPockets offers a{" "}
+              <a
+                href="https://www.biggerpockets.com/investment-calculators"
+                className="font-semibold text-primary hover:underline"
+              >
+                7-day free trial
+              </a>
+              , and after that the calculators sit behind BiggerPockets Pro at{" "}
+              <a
+                href="https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY"
+                className="font-semibold text-primary hover:underline"
+              >
+                $39/month or $390/year
+              </a>{" "}
+              (as of September 2026). Here are six genuinely free alternatives —
+              including one we make, clearly labeled — plus an honest note on
+              when Pro is actually the right buy.
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
               Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
@@ -324,15 +380,33 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               <strong>TrueCap</strong> (that&apos;s us) is the closest free
               replacement — unlimited preliminary rental screens, no signup,
-              with labeled rent, rate, and tax starting points.{" "}
-              <strong>DealCheck&apos;s free Starter plan</strong> adds saving
-              (up to 15 properties) and native apps.{" "}
-              <strong>Calculator.net</strong> is the no-signup one-pager,{" "}
-              <strong>Stessa</strong> publishes a marketplace acquisition
-              workflow and a free accounting entry plan,{" "}
-              <strong>RentCast</strong> gives you a free rent number, and a{" "}
-              <strong>spreadsheet</strong> — including BiggerPockets&apos; own
-              free templates — remains the fully-manual fallback.
+              with labeled rent and rate starting points (you enter property
+              tax yourself).{" "}
+              <strong>DealCheck&apos;s free Starter plan</strong> adds saving (
+              <a
+                href="https://dealcheck.io/pricing/"
+                className="font-semibold text-primary hover:underline"
+              >
+                up to 15 properties
+              </a>
+              ) and native apps. <strong>Calculator.net</strong> is the
+              no-signup one-pager, <strong>Stessa</strong> publishes a{" "}
+              <a
+                href="https://www.stessa.com/investment-property-marketplace/"
+                className="font-semibold text-primary hover:underline"
+              >
+                marketplace acquisition workflow
+              </a>{" "}
+              and a free accounting entry plan, <strong>RentCast</strong> gives
+              you a free rent number, and a <strong>spreadsheet</strong> —
+              including BiggerPockets&apos;{" "}
+              <a
+                href="https://www.biggerpockets.com/files"
+                className="font-semibold text-primary hover:underline"
+              >
+                member-shared free templates
+              </a>{" "}
+              — remains the fully-manual fallback.
             </p>
           </section>
 
@@ -347,7 +421,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                       Tool
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Pricing (July 2026)
+                      Pricing (September 2026)
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                       Best for
@@ -426,8 +500,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                       Free tier covers
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.freeCovers.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.freeCovers.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
@@ -441,8 +515,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                       Where the gates kick in
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.freeGates.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.freeGates.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
@@ -464,9 +538,16 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               The fair version: BiggerPockets Pro isn&apos;t a calculator
               subscription, it&apos;s a membership that happens to include
               calculators. If you use the forums for partner, lender, or
-              contractor introductions, you&apos;re working through a bootcamp,
-              or you want the bundled partner software, $390/year can pay for
-              itself before you ever open the rental calculator. Buy it for the
+              contractor introductions, want the partner-lender and insurance
+              discounts, or want the{" "}
+              <a
+                href="https://www.biggerpockets.com/pro-membership"
+                className="font-semibold text-primary hover:underline"
+              >
+                bundled partner software
+              </a>
+              , $390/year can pay for itself before you ever open the rental
+              calculator. Buy it for the
               ecosystem. If the calculator is the only part you&apos;d use, the
               free tools above cover the same math — our{" "}
               <Link
@@ -539,6 +620,55 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "BiggerPockets, Real Estate Investment Calculators",
+                url: "https://www.biggerpockets.com/investment-calculators",
+              },
+              {
+                title: "BiggerPockets, Pro membership checkout (monthly and annual prices, 7-day free trial)",
+                url: "https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY",
+              },
+              {
+                title: "DealCheck, Plans & Pricing",
+                url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title: "Stessa, Investment Property Marketplace",
+                url: "https://www.stessa.com/investment-property-marketplace/",
+              },
+              {
+                title: "BiggerPockets, FilePlace (member-shared real estate files)",
+                url: "https://www.biggerpockets.com/files",
+              },
+              {
+                title: "Calculator.net, Rental Property Calculator",
+                url: "https://www.calculator.net/rental-property-calculator.html",
+              },
+              {
+                title: "Stessa, Pricing",
+                url: "https://www.stessa.com/pricing/",
+              },
+              {
+                title: "RentCast, Plans & Pricing",
+                url: "https://www.rentcast.io/pricing",
+              },
+              {
+                title: "BiggerPockets, Rental Property Calculator",
+                url: "https://www.biggerpockets.com/rental-property-calculator",
+              },
+              {
+                title: "Stessa, Rental Property Returns and Income Tax Calculator",
+                url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+              },
+              {
+                title: "BiggerPockets, Pro membership",
+                url: "https://www.biggerpockets.com/pro-membership",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

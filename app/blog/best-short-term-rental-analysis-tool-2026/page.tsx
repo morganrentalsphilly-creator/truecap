@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -17,6 +18,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-short-term-rental-analysis-tool-2026";
 const TITLE =
@@ -59,39 +61,77 @@ export const metadata: Metadata = {
   },
 };
 
-const TOOLS = [
+/** Inline source link inside the not-prose tool cards. */
+const SOURCE_LINK = "font-semibold text-primary hover:underline";
+
+type Tool = {
+  rank: number;
+  name: string;
+  bestFor: string;
+  url: string;
+  pricing: ReactNode;
+  /** Left-column heading; defaults to "Free tier covers". */
+  coversLabel?: string;
+  freeCovers: ReactNode[];
+  freeGates: ReactNode[];
+  pickIf: ReactNode;
+};
+
+const TOOLS: Tool[] = [
   {
     rank: 1,
     name: "AirDNA (revenue data)",
     bestFor: "Best STR revenue projection per property",
     url: "/vs/airdna",
-    pricing:
-      "Free MarketMinder; Rentalizer ~$20-40 per property; subs $50-200+/mo",
+    pricing: (
+      <>
+        Free plan; Market Research{" "}
+        <a href="https://www.airdna.co/pricing" className={SOURCE_LINK}>
+          $34/mo billed annually ($400/yr) or $125 month-to-month
+        </a>
+        ; Property Manager by quote (as of September 2026)
+      </>
+    ),
     freeCovers: [
-      "Free MarketMinder dashboard with limited data",
-      "Industry-standard ADR + occupancy + RevPAR by market",
+      "Free plan with a limited Rentalizer and limited market insights",
+      <>
+        Key metrics by market:{" "}
+        <a
+          href="https://help.airdna.co/en/articles/11954306-navigating-the-new-airdna-market-explorer-platform"
+          className={SOURCE_LINK}
+        >
+          ADR, occupancy and RevPAR
+        </a>
+      </>,
     ],
     freeGates: [
-      "Per-property Rentalizer reports cost $20-40 each",
-      "API + advanced market data on paid tiers",
+      "The customizable Rentalizer is on paid plans (Market Research includes 5 Rentalizer Agent Reports)",
+      "API access (by quote) plus historical market data, comp sets and future-demand data on paid tiers",
     ],
-    pickIf:
-      "You need address-level STR revenue projections derived from real Airbnb + Vrbo data.",
+    pickIf: (
+      <>
+        You need address-level STR revenue projections derived from real{" "}
+        <a href="https://www.airdna.co/" className={SOURCE_LINK}>
+          Airbnb + Vrbo data
+        </a>
+        .
+      </>
+    ),
   },
   {
     rank: 2,
     name: "TrueCap (underwriting)",
-    bestFor: "Best STR underwriting with LTR/STR scenario comparison",
+    bestFor: "Best STR underwriting (LTR/STR side-by-side in Pro)",
     url: "/vs/dealcheck-for-short-term-rentals",
     pricing: "Free core; paid Pro — see live pricing",
     freeCovers: [
-      "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
-      "Compare LTR vs STR scenarios on same property",
-      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment",
+      "Enter AirDNA's nightly rate and occupancy in TrueCap's Short-term Rental (beta) mode, then run the full cap rate / DSCR / cash flow",
+      "Run the same property as a long-term and a short-term scenario (side-by-side comparison is Pro)",
     ],
     freeGates: [
       "Sensitivity grid stress-tests STR revenue ±10% (first decision free, then Pro)",
       "Seasonal months require separate saved scenarios",
+      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment",
     ],
     pickIf:
       "You have AirDNA's revenue projection and need to turn it into a buy/no-buy decision.",
@@ -99,15 +139,25 @@ const TOOLS = [
   {
     rank: 3,
     name: "Mashvisor (market discovery)",
-    bestFor: "Best STR market scouting (heatmaps + neighborhood scores)",
+    bestFor: "Best STR market scouting (heatmaps + neighborhood analytics)",
     url: "/vs/mashvisor-for-short-term-rentals",
-    pricing: "~$70-300/mo",
+    pricing: (
+      <>
+        <a href="https://www.mashvisor.com/pricing" className={SOURCE_LINK}>
+          $49.99–$99.99/mo billed annually ($49.99–$119.99/mo billed
+          quarterly)
+        </a>
+        ; Enterprise custom (as of September 2026)
+      </>
+    ),
+    coversLabel: "Paid plans cover",
     freeCovers: [
-      "Free dashboard with limited data",
-      "STR + LTR neighborhood scores",
-      "Heatmaps for cap rate / Airbnb potential",
+      "Neighborhood analytics for traditional and Airbnb income and cash-on-cash (paid Standard plan)",
+      "Heatmaps of rental income, cash-on-cash return and Airbnb occupancy (paid Standard plan)",
     ],
-    freeGates: ["Full data + Airbnb-comp depth on paid tiers"],
+    freeGates: [
+      "No free tier on Mashvisor's pricing page; plans are billed quarterly or annually",
+    ],
     pickIf:
       "You're scouting which city or neighborhood to invest in next (not underwriting a specific address).",
   },
@@ -116,14 +166,25 @@ const TOOLS = [
     name: "DealCheck (alternative underwriting)",
     bestFor: "Mobile + listing import for STR-curious buyers",
     url: "/vs/dealcheck-for-short-term-rentals",
-    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
+    pricing: (
+      <>
+        Free Starter;{" "}
+        <a href="https://dealcheck.io/pricing/" className={SOURCE_LINK}>
+          Plus $10/mo and Pro $20/mo billed annually ($14 / $29 billed
+          monthly)
+        </a>
+        , as of September 2026
+      </>
+    ),
     freeCovers: [
       "Standard rental underwriting, override rent with STR projection",
-      "Listing import from Zillow / Redfin",
+      <a key="import" href="https://dealcheck.io/features/" className={SOURCE_LINK}>
+        Property data import from public records and online listings
+      </a>,
       "Native iOS + Android apps",
     ],
     freeGates: [
-      "No LTR vs STR scenario comparison view",
+      "No dedicated LTR-vs-STR toggle; you compare two versions of the property side by side",
       "No STR-specific tax loophole modeling",
     ],
     pickIf:
@@ -134,9 +195,23 @@ const TOOLS = [
     name: "Hostaway / Hostfully (PMS — post-purchase)",
     bestFor: "Best STR management AFTER closing",
     url: "/vs/hostaway",
-    pricing: "$10-15/listing/mo (Hostaway) or $109+/mo (Hostfully)",
+    pricing: (
+      <>
+        Hostaway: quote-based (no published price); Hostfully:{" "}
+        <a
+          href="https://www.hostfully.com/pricing/property-management-software/"
+          className={SOURCE_LINK}
+        >
+          from $15 per property per month plus a platform fee
+        </a>{" "}
+        (as of September 2026)
+      </>
+    ),
+    coversLabel: "What they cover",
     freeCovers: [
-      "Channel manager across Airbnb / Vrbo / Booking",
+      <a key="channels" href="https://www.hostaway.com/" className={SOURCE_LINK}>
+        Channel manager across Airbnb / Vrbo / Booking
+      </a>,
       "Guest messaging automation",
       "Dynamic pricing integrations",
     ],
@@ -165,7 +240,7 @@ const TOOLS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best all-in-one STR investment tool?",
-    a: "There isn't one. STR investing requires three different jobs: revenue projection (AirDNA), underwriting (TrueCap or DealCheck), and post-purchase ops (Hostaway / Hostfully / Lodgify). Tools that claim to do all three either do one well and the others poorly, or are enterprise-priced. Most successful STR investors use 2-3 tools in combination.",
+    a: "There isn't one. STR investing requires three different jobs: revenue projection (AirDNA), underwriting (TrueCap or DealCheck), and post-purchase ops (Hostaway / Hostfully / Lodgify). Tools that claim to do all three either do one well and the others poorly, or are enterprise-priced. Plan on pairing a revenue-data tool with an underwriting tool before you buy, then adding a PMS after closing.",
   },
   {
     q: "AirDNA vs Mashvisor for STR — which one?",
@@ -173,11 +248,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can TrueCap model short-term rental revenue?",
-    a: "Yes, indirectly — every input in TrueCap is editable. Plug AirDNA's projected monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning) into the rent field, run the full underwrite. TrueCap doesn't pull AirDNA data automatically; you copy the number across.",
+    a: "Yes, in beta. TrueCap's Short-term Rental mode models revenue as nightly rate × occupancy; it does not fully model platform fees, turnover, lodging tax, seasonality or local STR eligibility. TrueCap doesn't pull AirDNA data automatically; you copy the numbers across.",
   },
   {
     q: "What management rate should I use for STR underwriting?",
-    a: "Long-term rentals: 8-10%. Short-term rentals: 20-25% with a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, 0-5% (just covering software + cleaner coordination) but be honest about your time. TrueCap's management field is editable.",
+    a: "Management fees vary by market and service level, so get written quotes from local long-term and full-service STR managers. If you self-manage, still budget for software, cleaning coordination and your own time. TrueCap's management field is editable.",
   },
   {
     q: "Does TrueCap support the STR tax loophole?",
@@ -201,7 +276,7 @@ const DECISION_LINES: Array<{ q: string; a: string }> = [
   },
   {
     q: "You want a single all-in-one tool.",
-    a: "No single tool covers the full workflow — use 2-3 in combination",
+    a: "No single tool covers the full workflow — pair a revenue-data tool with an underwriting tool, then add a PMS after closing",
   },
 ];
 
@@ -288,7 +363,7 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
               {DESCRIPTION}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              Published {PUBLISHED_AT}
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
             <BlogByline />
           </header>
@@ -336,11 +411,11 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
-                      Free tier covers
+                      {t.coversLabel ?? "Free tier covers"}
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.freeCovers.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.freeCovers.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
@@ -354,8 +429,8 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                       Where the gates kick in
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.freeGates.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.freeGates.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
@@ -408,7 +483,7 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes 60 seconds, no signup required. Pressure-test
+              underwriting, with no signup required. Pressure-test
               the financing on a short-term rental and check the return on your
               cash — the free{" "}
               <Link
@@ -429,6 +504,43 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "AirDNA, Pricing (plans and what each includes)",
+                url: "https://www.airdna.co/pricing",
+              },
+              {
+                title: "AirDNA Help Center, Navigating the new AirDNA Market Explorer platform",
+                url: "https://help.airdna.co/en/articles/11954306-navigating-the-new-airdna-market-explorer-platform",
+              },
+              {
+                title: "AirDNA, Short-term rental data analytics (home page)",
+                url: "https://www.airdna.co/",
+              },
+              {
+                title: "Mashvisor, Pricing",
+                url: "https://www.mashvisor.com/pricing",
+              },
+              {
+                title: "DealCheck, Plans & Pricing",
+                url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title: "DealCheck, Property analysis software features",
+                url: "https://dealcheck.io/features/",
+              },
+              {
+                title: "Hostfully, Property management software pricing",
+                url: "https://www.hostfully.com/pricing/property-management-software/",
+              },
+              {
+                title: "Hostaway, Vacation rental software (home page)",
+                url: "https://www.hostaway.com/",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

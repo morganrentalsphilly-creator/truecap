@@ -90,7 +90,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "best-dealcheck-alternatives",
     title: "7 Best DealCheck Alternatives for Rental Analysis (2026)",
     excerpt:
-      "Seven real DealCheck alternatives with verified July 2026 pricing — TrueCap (that's us, disclosed), BiggerPockets' calculators, Stessa, Mashvisor, RentCast, Rentometer, and the spreadsheet option — plus an honest section on when sticking with DealCheck is the right call.",
+      "Seven DealCheck alternatives — TrueCap (that's us, disclosed), BiggerPockets' calculators, Stessa, Mashvisor, RentCast, Rentometer and a spreadsheet — with what each costs and covers, plus when sticking with DealCheck is the right call.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-14",
     available: true,
@@ -99,7 +99,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "free-biggerpockets-calculator-alternatives",
     title: "Free BiggerPockets Calculator Alternatives (2026)",
     excerpt:
-      "BiggerPockets' calculators stop after 5 free reports; the rest sits behind Pro at $390/yr. Six genuinely free alternatives ranked — TrueCap (that's us, disclosed), DealCheck's free Starter plan, Calculator.net, Stessa, RentCast, and spreadsheets — plus when Pro is actually worth it.",
+      "Six free alternatives to BiggerPockets' calculators — TrueCap (that's us, disclosed), DealCheck's free Starter plan, Calculator.net, Stessa, RentCast and spreadsheets — what each free tier covers, and when BiggerPockets Pro is worth paying for.",
     readingTimeMinutes: 10,
     publishedAt: "2026-07-14",
     available: true,
@@ -486,7 +486,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "best-rental-property-calculator-2026",
     title: "Best rental property calculator 2026: 7 tools compared",
     excerpt:
-      "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.",
+      "A 2026 comparison of 7 rental property calculators and tools — TrueCap (that's us, disclosed), DealCheck, BiggerPockets, Mashvisor, Stessa, Excel and Roofstock — on free-tier depth, pricing, mobile and audience fit.",
     readingTimeMinutes: 12,
     publishedAt: "2026-06-07",
     available: true,
@@ -496,7 +496,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Best free rental property calculator 2026: 5 tools that actually work for free",
     excerpt:
-      "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.",
+      "A 2026 ranking of five free rental-analysis tools — TrueCap (that's us, disclosed), DealCheck Starter, Stessa, spreadsheet templates and Zillow's mortgage calculator — what each free tier covers and where the paid gates start.",
     readingTimeMinutes: 9,
     publishedAt: "2026-06-07",
     available: true,
@@ -543,7 +543,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "dealcheck-vs-stessa-vs-truecap",
     title: "DealCheck vs Stessa vs TrueCap: which one do you actually need?",
     excerpt:
-      "A dated 3-way comparison of DealCheck, Stessa, and TrueCap. All three support acquisition analysis; Stessa also spans listing discovery and owned-property operations.",
+      "A dated 3-way comparison of DealCheck, Stessa and TrueCap. All three analyze acquisitions; Stessa also covers owned-property accounting and operations.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,
@@ -553,7 +553,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison",
     excerpt:
-      "Roofstock sells turnkey rentals. Mashvisor scores neighborhoods. PropStream finds motivated sellers. Honest 3-way comparison plus where TrueCap fits after they each find you a property.",
+      "Roofstock, Mashvisor and PropStream help you find rental deals in three different ways. How they compare, and where TrueCap fits once you have a property to underwrite.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -562,7 +562,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "stessa-vs-avail-vs-baselane",
     title: "Stessa vs Avail vs Baselane: 3-way landlord ops comparison",
     excerpt:
-      "Stessa spans acquisition through operations; Avail emphasizes leasing and rent collection; Baselane combines banking and bookkeeping. Updated with dated official sources.",
+      "Stessa spans acquisition through accounting and operations; Avail emphasizes leasing and rent collection; Baselane combines banking and bookkeeping. How the three compare for landlords.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,

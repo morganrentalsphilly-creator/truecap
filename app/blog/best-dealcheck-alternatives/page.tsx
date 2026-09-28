@@ -11,12 +11,13 @@
  * Honesty rules baked in: TrueCap is listed first but disclosed as
  * ours; the other six are real alternatives described fairly, and
  * DealCheck itself gets a "when to stick with it" section. Competitor
- * pricing verified against public pricing pages as of July 2026.
+ * pricing checked against each vendor's own pricing page in September 2026.
  *
  * Schema: Article + Breadcrumb + ItemList + FAQPage.
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -31,6 +32,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-dealcheck-alternatives";
 const TITLE_PLAIN = "7 Best DealCheck Alternatives for Rental Analysis (2026)";
@@ -73,14 +75,17 @@ export const metadata: Metadata = {
   },
 };
 
+/** Inline source link inside the not-prose table and tool cards. */
+const SOURCE_LINK = "font-semibold text-primary hover:underline";
+
 type Tool = {
   rank: number;
   name: string;
   bestFor: string;
   url: string;
-  pricing: string;
-  strengths: string[];
-  tradeoffs: string[];
+  pricing: ReactNode;
+  strengths: ReactNode[];
+  tradeoffs: ReactNode[];
   pickIf: string;
   disclosure?: string;
 };
@@ -95,7 +100,7 @@ const TOOLS: Tool[] = [
     disclosure:
       "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
-      "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
+      "Cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow — free, unlimited, no signup",
       "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
       "Buy Box fit with each metric benchmarked inline, plus a Deal score",
       "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
@@ -111,18 +116,51 @@ const TOOLS: Tool[] = [
   {
     rank: 2,
     name: "BiggerPockets Calculators",
-    bestFor: "Best if you want the community and courses bundled in",
+    bestFor: "Best if you want the community and member perks bundled in",
     url: "/vs/biggerpockets-calculator",
-    pricing: "Free (5 calculator reports); Pro $39/mo or $390/yr",
+    pricing: (
+      <>
+        Free account;{" "}
+        <a
+          href="https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY"
+          className={SOURCE_LINK}
+        >
+          Pro $39/mo or $390/yr (7-day free trial)
+        </a>
+      </>
+    ),
     strengths: [
-      "Rental, BRRRR, flip, and wholesaling calculators in one membership",
-      "The forums, podcasts, and bootcamps are the real product — the calculators come with them",
-      "Shareable report output that agents and lenders already recognize",
+      <>
+        <a
+          href="https://www.biggerpockets.com/investment-calculators"
+          className={SOURCE_LINK}
+        >
+          Rental, BRRRR, flip, and wholesaling calculators
+        </a>{" "}
+        in one membership
+      </>,
+      "The forums, podcasts, and member perks are the real product — the calculators come with them",
+      <a
+        key="reports"
+        href="https://www.biggerpockets.com/rental-property-calculator"
+        className={SOURCE_LINK}
+      >
+        Ready-to-share reports and PDF downloads for lenders and partners
+      </a>,
     ],
     tradeoffs: [
-      "Free members get 5 calculator reports, then Pro is required",
-      "Pro is priced for the whole ecosystem ($390/yr), not just the calculator",
-      "Manual data entry — no live rent, rate, or tax integrations",
+      "Unlimited calculator reports require Pro ($39/mo or $390/yr, after a 7-day free trial)",
+      <>
+        Pro is{" "}
+        <a
+          href="https://www.biggerpockets.com/pro-membership"
+          className={SOURCE_LINK}
+        >
+          priced for the whole ecosystem
+        </a>{" "}
+        ($390/yr), not just the calculator
+      </>,
+      "The rental calculator is manual entry; rent comps come from BiggerPockets' separate Rent Estimator",
     ],
     pickIf:
       "You'd pay for BiggerPockets Pro for the community anyway — then the unlimited calculators are effectively free.",
@@ -132,10 +170,30 @@ const TOOLS: Tool[] = [
     name: "Stessa",
     bestFor: "Best acquisition-to-operations breadth",
     url: "/vs/stessa",
-    pricing: "Essentials free; paid Manage and Pro — verify live pricing",
+    pricing: (
+      <>
+        <a href="https://www.stessa.com/pricing/" className={SOURCE_LINK}>
+          Essentials free; paid Manage and Pro
+        </a>{" "}
+        — verify live pricing
+      </>
+    ),
     strengths: [
-      "Investment-property marketplace, filters, watchlists, and buy-box alerts",
-      "Sale/rent comps plus editable offer, financing, rent, and operating-cost assumptions",
+      <a
+        key="marketplace"
+        href="https://www.stessa.com/investment-property-marketplace/"
+        className={SOURCE_LINK}
+      >
+        Investment-property marketplace, filters, watchlists, and buy-box alerts
+      </a>,
+      <a
+        key="comps"
+        href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties"
+        className={SOURCE_LINK}
+      >
+        Sale/rent comps plus editable offer, financing, rent, and
+        operating-cost assumptions
+      </a>,
       "Accounting and landlord operations after acquisition",
     ],
     tradeoffs: [
@@ -151,7 +209,11 @@ const TOOLS: Tool[] = [
     name: "Mashvisor",
     bestFor: "Best for market discovery and short-term rental data",
     url: "/vs/mashvisor",
-    pricing: "From $49.99/mo (Lite); Standard $74.99/mo (billed annually)",
+    pricing: (
+      <a href="https://www.mashvisor.com/pricing" className={SOURCE_LINK}>
+        From $49.99/mo (Lite); Standard $74.99/mo (billed annually)
+      </a>
+    ),
     strengths: [
       "Neighborhood-level heatmaps and comparative market data",
       "Airbnb revenue estimates alongside long-term rent — useful for rent-strategy comparisons",
@@ -170,7 +232,11 @@ const TOOLS: Tool[] = [
     name: "RentCast",
     bestFor: "Best free rent estimates and comps",
     url: "/vs/rentcast",
-    pricing: "Free plan; Pro from $12/mo",
+    pricing: (
+      <a href="https://www.rentcast.io/pricing" className={SOURCE_LINK}>
+        Free plan; Pro from $12/mo
+      </a>
+    ),
     strengths: [
       "Free nationwide rent lookups with nearby comparables",
       "Track a small portfolio with rent alerts on the free plan",
@@ -188,14 +254,27 @@ const TOOLS: Tool[] = [
     name: "Rentometer",
     bestFor: "Best-known rent comp tool",
     url: "/vs/rentometer",
-    pricing: "Essential $16/mo; Pro $29/mo (3-day trial, no free tier)",
+    pricing: (
+      <>
+        <a href="https://www.rentometer.com/pricing" className={SOURCE_LINK}>
+          Free account; Basic $59/yr; Essential $16/mo or $96/yr; Pro $29/mo
+          or $199/yr
+        </a>{" "}
+        (September 2026)
+      </>
+    ),
     strengths: [
-      "Fast rent-range answer for any address, backed by a large comp database",
+      <>
+        Fast rent-range answer for any address, backed by a{" "}
+        <a href="https://www.rentometer.com/" className={SOURCE_LINK}>
+          large comp database
+        </a>
+      </>,
       "QuickView reports are easy to drop into a lender or partner conversation",
     ],
     tradeoffs: [
-      "As of 2026 there's no free tier — monthly plans with a 3-day trial",
-      "Like RentCast, it answers the rent question only — no underwriting",
+      "There's a free account and a free QuickView estimate; paid plans start at $59/yr (Basic, annual only)",
+      "It's mainly a rent tool; only the Pro plan adds a Deal Analysis Worksheet (cash flow and cash-on-cash)",
     ],
     pickIf:
       "You run enough comps every month to justify a dedicated rent-data subscription.",
@@ -208,7 +287,13 @@ const TOOLS: Tool[] = [
     pricing: "Free (or your existing Office / Google subscription)",
     strengths: [
       "Total flexibility — model seller financing, splits, anything a form can't",
-      "Free templates abound (BiggerPockets and REI bloggers publish plenty)",
+      <>
+        Free templates abound (
+        <a href="https://www.biggerpockets.com/files" className={SOURCE_LINK}>
+          BiggerPockets&apos; FilePlace
+        </a>{" "}
+        hosts member-shared spreadsheets, and REI bloggers publish plenty)
+      </>,
       "Your assumptions, visible in every cell",
     ],
     tradeoffs: [
@@ -228,15 +313,15 @@ const FAQ_ITEMS = [
   },
   {
     q: "Does DealCheck have a free plan?",
-    a: "Yes. DealCheck's Starter plan is free and lets you analyze and save up to 15 properties at a time (signup required). Plus is $10/month and Pro is $20/month billed annually (as of July 2026), which mostly raise the saved-property, photo, comp, and template limits.",
+    a: "Yes. DealCheck's Starter plan is free and lets you analyze and save up to 15 properties at a time (signup required). Plus is $10/month and Pro is $20/month billed annually ($14/$29 billed monthly, as of September 2026). Both raise the saved-property, photo, comp and template limits and unlock the Purchase Offer Calculator, investment-potential insights and all purchase criteria; Pro also adds custom comps, property owner lookup and custom-branded reports.",
   },
   {
     q: "Which DealCheck alternative is best for rent estimates?",
-    a: "RentCast and Rentometer are the two dedicated rent-comp tools. RentCast has a free plan with nationwide rent lookups and a handful of comps; Rentometer dropped its free tier and now starts at $16/month with a 3-day trial (as of 2026). Neither does deal analysis — pair them with an underwriting tool.",
+    a: "RentCast and Rentometer are the two dedicated rent-comp tools. RentCast has a free plan with nationwide rent lookups and 5 comps. Rentometer has a free account with QuickView estimates, and paid plans start at $59/yr (Basic) or $16/month (Essential). Neither is built for full deal analysis (Rentometer's Pro plan adds a Deal Analysis Worksheet) — pair them with an underwriting tool.",
   },
   {
     q: "Is TrueCap better than DealCheck?",
-    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier offers unlimited preliminary rental screens with no signup and labeled rent, rate, and tax starting points from public data. DealCheck has native mobile apps, listing-site property import, and a longer track record. The honest side-by-side is on our TrueCap vs DealCheck page.",
+    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier offers unlimited preliminary rental screens with no signup, plus labeled HUD rent and FRED rate starting points from public data (you enter property tax yourself). DealCheck has native mobile apps, listing-site property import, and a longer track record. The honest side-by-side is on our TrueCap vs DealCheck page.",
   },
   {
     q: "When should I just stay with DealCheck?",
@@ -331,12 +416,19 @@ export default function BestDealCheckAlternativesPost() {
             </h1>
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
               DealCheck is a good product — that&apos;s why it&apos;s the tool
-              people search for alternatives <em>to</em>. Maybe the 15-property
-              cap on the free Starter plan is in your way, maybe you want rent
+              people search for alternatives <em>to</em>. Maybe the{" "}
+              <a
+                href="https://dealcheck.io/pricing/"
+                className="font-semibold text-primary hover:underline"
+              >
+                15-property cap
+              </a>{" "}
+              on the free Starter plan is in your way, maybe you want rent
               and rate data filled in for you, or maybe you only need one piece
               of what it does. Here are seven real alternatives — including one
-              we make, clearly labeled — with verified 2026 pricing and an
-              honest note on when sticking with DealCheck is the right call.
+              we make, clearly labeled — with pricing checked against each
+              vendor&apos;s own pricing page (September 2026) and an honest note
+              on when sticking with DealCheck is the right call.
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
               Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
@@ -374,7 +466,7 @@ export default function BestDealCheckAlternativesPost() {
                       Tool
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Pricing (July 2026)
+                      Pricing (September 2026)
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                       Best for
@@ -441,8 +533,8 @@ export default function BestDealCheckAlternativesPost() {
                       Where it wins
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.strengths.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.strengths.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
@@ -456,8 +548,8 @@ export default function BestDealCheckAlternativesPost() {
                       Trade-offs
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.tradeoffs.map((p) => (
-                        <li key={p} className="flex gap-2">
+                      {t.tradeoffs.map((p, i) => (
+                        <li key={i} className="flex gap-2">
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
@@ -482,10 +574,10 @@ export default function BestDealCheckAlternativesPost() {
               import is central to your workflow, none of the tools above will
               feel like an upgrade — they&apos;ll feel like a migration. Its
               paid tiers are also cheap for what they unlock ($10–$20/month
-              billed annually, as of July 2026). Switch when a specific
-              limitation bites — the free-tier property cap, manual data entry,
-              or paying for underwriting features when all you needed was a rent
-              comp. Our full{" "}
+              billed annually, as of September 2026). Switch when a specific
+              limitation bites — the free-tier property cap, or paying for
+              underwriting features when all you needed was a rent comp. Our
+              full{" "}
               <Link
                 href="/vs/dealcheck"
                 className="font-semibold text-primary hover:underline"
@@ -555,6 +647,63 @@ export default function BestDealCheckAlternativesPost() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "DealCheck, Plans & Pricing",
+                url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title: "BiggerPockets, Pro membership checkout (monthly and annual prices, 7-day free trial)",
+                url: "https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY",
+              },
+              {
+                title: "Stessa, Pricing",
+                url: "https://www.stessa.com/pricing/",
+              },
+              {
+                title: "Mashvisor, Pricing",
+                url: "https://www.mashvisor.com/pricing",
+              },
+              {
+                title: "RentCast, Plans & Pricing",
+                url: "https://www.rentcast.io/pricing",
+              },
+              {
+                title: "Rentometer, Plans & Pricing",
+                url: "https://www.rentometer.com/pricing",
+              },
+              {
+                title: "BiggerPockets, Real Estate Investment Calculators",
+                url: "https://www.biggerpockets.com/investment-calculators",
+              },
+              {
+                title: "BiggerPockets, Rental Property Calculator",
+                url: "https://www.biggerpockets.com/rental-property-calculator",
+              },
+              {
+                title: "BiggerPockets, Pro membership",
+                url: "https://www.biggerpockets.com/pro-membership",
+              },
+              {
+                title: "Stessa, Investment Property Marketplace",
+                url: "https://www.stessa.com/investment-property-marketplace/",
+              },
+              {
+                title: "Stessa Help Center, Stessa Investment Properties",
+                url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties",
+              },
+              {
+                title: "Rentometer, Rent estimates and comps (home page)",
+                url: "https://www.rentometer.com/",
+              },
+              {
+                title: "BiggerPockets, FilePlace (member-shared real estate files)",
+                url: "https://www.biggerpockets.com/files",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

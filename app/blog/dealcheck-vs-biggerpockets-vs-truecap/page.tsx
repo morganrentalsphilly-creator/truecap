@@ -22,6 +22,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "dealcheck-vs-biggerpockets-vs-truecap";
 const TITLE =
@@ -71,7 +72,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `Which has the best free tier?`,
-    a: `TrueCap is a strong fit when the priority is unlimited core analyses without signup: cap rate, cash-on-cash, DSCR, NCF, monthly cash flow, and editable starting assumptions are included. DealCheck Starter requires an account and includes its core calculators and professional reports, with up to 15 saved properties and other published limits. BiggerPockets currently presents calculator results as a Pro feature.`,
+    a: `TrueCap is a strong fit when the priority is unlimited core analyses without signup: cap rate, cash-on-cash, DSCR, NOI, monthly cash flow, and editable starting assumptions are included. DealCheck Starter requires an account and includes its core calculators and professional reports, with up to 15 saved properties and other published limits. BiggerPockets currently presents calculator results as a Pro feature.`,
   },
   {
     q: `Does TrueCap have native iOS and Android apps like DealCheck?`,
@@ -158,7 +159,7 @@ export default function ThreeWayComparisonPost() {
               {DESCRIPTION}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              Published {PUBLISHED_AT}
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
             <BlogByline />
           </header>
@@ -171,7 +172,21 @@ export default function ThreeWayComparisonPost() {
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
             >
-              <strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
+              <strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports;{" "}
+              <a
+                href="https://dealcheck.io/pricing/"
+                className="font-semibold text-primary hover:underline"
+              >
+                Starter includes professional interactive and PDF reports with published usage limits
+              </a>
+              . <strong>BiggerPockets Calculator</strong> currently presents its results as a{" "}
+              <a
+                href="https://www.biggerpockets.com/rental-property-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                BiggerPockets Pro feature
+              </a>
+              . <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
             </p>
           </section>
 
@@ -196,7 +211,7 @@ export default function ThreeWayComparisonPost() {
             </a>
             ,{" "}
             <a
-              href="https://www.biggerpockets.com/pro"
+              href="https://www.biggerpockets.com/pro-membership"
               target="_blank"
               rel="noreferrer"
               className="text-primary hover:underline"
@@ -243,7 +258,7 @@ export default function ThreeWayComparisonPost() {
                 <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
                 <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
               </ul>
-              <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans primarily raise published limits, TrueCap Pro adds advanced analysis workflows, and BiggerPockets Pro combines calculator access with a broader membership.</p>
+              <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans raise published limits and unlock features such as its Purchase Offer Calculator, investment-potential insights, owner lookup and branded reports; TrueCap Pro adds advanced analysis workflows; and BiggerPockets Pro combines calculator access with a broader membership.</p>
             </div>
 
             <h2>Mobile + at the showing</h2>
@@ -256,7 +271,7 @@ export default function ThreeWayComparisonPost() {
             <div>
               <ul>
                 <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
-                <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, and a longer product history.</li>
+                <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, a Purchase Offer Calculator on its paid plans, and a longer product history.</li>
                 <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
               </ul>
             </div>
@@ -269,7 +284,7 @@ export default function ThreeWayComparisonPost() {
                 <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
                 <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
                 <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
-                <li><strong>&quot;I want full property detail imported from a Zillow / Redfin listing.&quot;</strong> DealCheck. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
+                <li><strong>&quot;I want full property detail (list price, taxes, photos) imported automatically.&quot;</strong> DealCheck, which{" "}<a href="https://dealcheck.io/features/">imports property details from public records and online listings</a>. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
                 <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
               </ul>
             </div>
@@ -306,6 +321,27 @@ export default function ThreeWayComparisonPost() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "DealCheck, Plans & Pricing",
+                url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title: "BiggerPockets, Rental Property Calculator",
+                url: "https://www.biggerpockets.com/rental-property-calculator",
+              },
+              {
+                title: "BiggerPockets, Pro membership",
+                url: "https://www.biggerpockets.com/pro-membership",
+              },
+              {
+                title: "DealCheck, Property analysis software features",
+                url: "https://dealcheck.io/features/",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

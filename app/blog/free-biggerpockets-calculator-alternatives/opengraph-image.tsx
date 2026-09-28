@@ -20,6 +20,6 @@ export default function Image() {
     section: "Comparisons",
     tag: "Free tools",
     title: "Free BiggerPockets Calculator Alternatives (2026)",
-    subline: "6 free options · past the 5-report limit",
+    subline: "6 free options · no BiggerPockets Pro needed",
   });
 }

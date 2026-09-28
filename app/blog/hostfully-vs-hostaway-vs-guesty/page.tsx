@@ -21,6 +21,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "hostfully-vs-hostaway-vs-guesty";
 const TITLE = "Hostfully vs Hostaway vs Guesty: which STR PMS wins in 2026?";
@@ -66,19 +67,19 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "Which STR PMS is best for 1-3 short-term rentals?",
-    a: "None of the three, honestly. Hostfully, Hostaway, and Guesty all assume you're scaling beyond a handful of properties. For 1-3 STRs, look at Lodgify, Smoobu, or just direct Airbnb tools first. Once you're at 5+ STRs, Hostaway (3-100 sweet spot) and Hostfully (small-to-mid) start to earn their keep. Guesty is overkill until you're at 50+.",
+    a: "Guesty Lite is built for 1–3 listings, and Hostfully says it serves hosts from a single listing up; Hostaway steers single-listing hosts to a waitlist. Lodgify and Smoobu are also worth comparing at this size, and if you only list on Airbnb, its own tools may be enough. As you grow, Hostaway (priced in tiers from 2–14 listings up to 50+), Hostfully (Growth plan pitched at 1–50 listings) and Guesty Pro (4–199 listings) all become options.",
   },
   {
     q: "Hostfully vs Hostaway — which one?",
-    a: "Both serve the small-to-mid STR operator market (3-100 properties). Hostfully is generally easier to onboard with stronger guidebook + branding features. Hostaway has tighter channel management and dynamic pricing integrations. Try the demo of both — the UX preference often decides.",
+    a: "Both serve small-to-mid STR operators; Hostfully pitches its plans from 1 listing up, and Hostaway prices in tiers starting at 2–14 listings. Hostfully is generally easier to onboard with stronger guidebook + branding features. Hostaway has tighter channel management and dynamic pricing integrations. Try the demo of both — the UX preference often decides.",
   },
   {
     q: "Hostaway vs Guesty — which is more enterprise?",
-    a: "Guesty leans larger / enterprise (50+ properties, often professional STR managers running multiple owners). Hostaway is more mid-market (3-100). If you're a solo operator scaling into a business, Hostaway is the more practical step. If you're already managing STRs for other owners, Guesty's owner-portal + multi-tier permission features become valuable.",
+    a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway prices in tiers from 2–14 listings to 50+. If you're a solo operator scaling into a business, Hostaway is the more practical step. If you're already managing STRs for other owners, Guesty's owner-portal + custom-permission features become valuable.",
   },
   {
     q: "Do any of these underwrite STR deals?",
-    a: "No. All three are operational — they manage STRs you already own (channels, pricing, guest messaging, cleaning). For pre-purchase underwriting (cap rate, DSCR, cash flow on a property you're considering buying as an STR), use TrueCap, DealCheck, or a spreadsheet. AirDNA provides the STR revenue projection that feeds into TrueCap's rent field.",
+    a: "No. All three are operational — they manage STRs you already own (channels, pricing, guest messaging, cleaning). For pre-purchase underwriting (cap rate, DSCR, cash flow on a property you're considering buying as an STR), use TrueCap, DealCheck, or a spreadsheet. AirDNA's Rentalizer provides an STR revenue projection you can enter in TrueCap's rent field.",
   },
   {
     q: "Where does TrueCap fit in the STR workflow?",
@@ -171,12 +172,20 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               channel managers, automation, dynamic pricing, cleaning workflows.
               <strong> Hostfully</strong> favors small-to-mid operators with
               strong guidebook + branding features.
-              <strong> Hostaway</strong> sits mid-market (3-100 STRs) with
-              tighter channel management and pricing integrations.
-              <strong> Guesty</strong> leans enterprise (50+ properties, often
-              professional STR managers running multi-owner portfolios). For
-              solo STR investors with 1-3 properties, all three are typically
-              overkill — Lodgify or Smoobu are more practical starts.
+              <strong> Hostaway</strong> serves operators from a couple of
+              listings up (its{" "}
+              <a href="https://www.hostaway.com/pricing/">
+                pricing tiers start at 2–14
+              </a>
+              ) with tighter channel management and pricing integrations.
+              <strong> Guesty</strong> runs from{" "}
+              <a href="https://www.guesty.com/pricing/">
+                Lite (1–3 listings) through Pro and Enterprise (200+ listings
+              </a>
+              , often professional STR managers running multi-owner
+              portfolios). For solo STR investors with 1-3 properties, Guesty
+              Lite is aimed squarely at that size, and Lodgify or Smoobu are
+              other low-cost starts.
               <strong> TrueCap</strong> is upstream of all three: the
               underwriting calculator you&apos;d use BEFORE buying an STR.
             </p>
@@ -188,23 +197,41 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               <li>
                 <strong>Hostfully</strong> — STR property management with strong
                 guest-experience features (digital guidebooks, branded
-                direct-booking sites). Sweet spot: 3-50 properties. Pricing
-                starts around $109/month and scales with property count.
+                direct-booking sites).{" "}
+                <a href="https://www.hostfully.com/pricing/property-management-software/">
+                  Plans are pitched from 1 listing up (Growth: 1–50 listings).
+                  Pricing starts at $15 per property per month plus a platform
+                  fee
+                </a>
+                , and scales with property count.
               </li>
               <li>
                 <strong>Hostaway</strong> — STR property management with deep
-                channel integrations (Airbnb, Vrbo, Booking.com, Expedia) and
-                dynamic pricing partnerships (PriceLabs, Wheelhouse, Beyond
-                Pricing). Sweet spot: 3-100 properties. Per-listing pricing
-                typically starts around $10-15/listing/mo and varies by
+                channel integrations (
+                <a href="https://www.hostaway.com/">
+                  Airbnb, Vrbo, Booking.com, Expedia
+                </a>
+                ) and dynamic pricing partnerships (
+                <a href="https://www.hostaway.com/glossary/hostaway-marketplace/">
+                  PriceLabs, Wheelhouse, Beyond Pricing
+                </a>
+                ).{" "}
+                <a href="https://www.hostaway.com/pricing/">
+                  Priced in tiers from 2–14 listings to 50+
+                </a>
+                . Pricing is quote-based (not published) and varies by
                 features.
               </li>
               <li>
-                <strong>Guesty</strong> — STR property management built for
-                professional managers running multi-owner portfolios. Sweet
-                spot: 50+ properties. Two product lines: Guesty Lite (smaller
-                operators) and Guesty for Pros (large managers). Pricing is
-                custom and scales meaningfully with property count.
+                <strong>Guesty</strong> — STR property management that spans
+                solo hosts to professional managers running multi-owner
+                portfolios.{" "}
+                <a href="https://www.guesty.com/pricing/">
+                  Three plans: Guesty Lite (1–3 listings, from $9/month plus 1%
+                  per reservation), Guesty Pro (4–199 listings, quoted), and
+                  Guesty Enterprise (200+ listings, custom)
+                </a>
+                .
               </li>
             </ul>
 
@@ -212,33 +239,61 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <h3>Hostfully</h3>
             <ul>
               <li>
-                Best-in-class digital guidebooks — Airbnb-grade guest experience
-                without Airbnb-only constraints.
+                Digital guidebooks for guests —{" "}
+                <a href="https://www.hostfully.com/">
+                  Hostfully says your first guidebook is always free
+                </a>
+                .
               </li>
-              <li>Strong direct-booking website builder with branded URLs.</li>
+              <li>
+                <a href="https://www.hostfully.com/property-management-software/features/direct-booking-site/">
+                  Direct-booking website builder you can customize with your own
+                  logo, colors, and brand
+                </a>
+                .
+              </li>
               <li>
                 Easier onboarding for first-time STR managers; cleaner UX for
                 non-technical users.
               </li>
               <li>
                 Tradeoff: channel manager is solid but not as deep as
-                Hostaway&apos;s; pricing integrations are fewer.
+                Hostaway&apos;s;{" "}
+                <a href="https://www.hostfully.com/">
+                  Hostfully advertises 150+ integrations
+                </a>{" "}
+                and{" "}
+                <a href="https://www.hostaway.com/glossary/hostaway-marketplace/">
+                  Hostaway over 200
+                </a>
+                .
               </li>
             </ul>
 
             <h3>Hostaway</h3>
             <ul>
               <li>
-                Tightest channel manager — unified inbox across Airbnb / Vrbo /
-                Booking / Expedia / Google Travel.
+                <a href="https://www.hostaway.com/features/communication/">
+                  Unified inbox across Airbnb / Vrbo / Booking.com / Google,
+                  plus email, SMS, and WhatsApp
+                </a>
+                .
               </li>
               <li>
-                Largest set of pricing tool integrations (PriceLabs, Wheelhouse,
-                Beyond Pricing, RealHost, etc.).
+                A marketplace of 200+ integrations, including the
+                dynamic-pricing tools PriceLabs, Wheelhouse, and Beyond.
               </li>
               <li>
-                Strong automation suite — message templates, auto-reviews,
-                dynamic check-in instructions.
+                Automation —{" "}
+                <a href="https://www.hostaway.com/features/automation/">
+                  automated messages triggered at check-in, during the stay, or
+                  at checkout
+                </a>
+                , plus{" "}
+                <a href="https://www.hostaway.com/features/communication/">
+                  messaging templates and automated reviews
+                </a>
+                .
               </li>
               <li>
                 Tradeoff: guest-facing features (guidebooks, direct-booking
@@ -249,66 +304,93 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <h3>Guesty</h3>
             <ul>
               <li>
-                Enterprise-grade infrastructure — handles 1000+ listing
-                portfolios without breaking.
+                <a href="https://www.guesty.com/pricing/">
+                  Enterprise plan built for portfolios of 200+ listings, with
+                  enterprise-grade security
+                </a>
+                .
               </li>
               <li>
                 Multi-owner portal features for STR managers running properties
                 for other owners (statements, accounting splits).
               </li>
-              <li>Open API for custom integrations.</li>
+              <li>Open API for custom integrations (Pro and Enterprise).</li>
               <li>
-                Tradeoff: significant complexity; pricing is custom and not
-                transparent until you talk to sales. Overkill for solo
-                investors.
+                Tradeoff: significant complexity at the Pro and Enterprise
+                levels, where pricing is quote-only; only Lite has a published
+                price.
               </li>
             </ul>
 
             <h2>Pricing comparison (as of 2026)</h2>
             <ul>
               <li>
-                <strong>Hostfully</strong> — starts around $109/month, scales by
-                property count. No free tier, demo available.
+                <strong>Hostfully</strong> —{" "}
+                <a href="https://www.hostfully.com/pricing/property-management-software/">
+                  starts at $15 per property per month plus a platform fee
+                </a>
+                , scales by property count. No free tier, demo available.
               </li>
               <li>
-                <strong>Hostaway</strong> — per-listing pricing typically
-                starting around $10-15/listing/month with feature add-ons. No
-                free tier; expect $30-50/month minimum for a 2-3 listing
-                portfolio.
+                <strong>Hostaway</strong> —{" "}
+                <a href="https://www.hostaway.com/pricing/">
+                  pricing isn&apos;t published
+                </a>
+                ; you get a quote based on listing count (tiers from 2–14
+                listings). No free tier.
               </li>
               <li>
-                <strong>Guesty</strong> — custom pricing only (you talk to
-                sales). Expect $50-200+/month per listing depending on features
-                and listing count. Lite version is cheaper but still
-                meaningfully more than Hostaway/Hostfully.
+                <strong>Guesty</strong> —{" "}
+                <a href="https://www.guesty.com/pricing/">
+                  Lite starts at $9/month plus 1% per reservation
+                </a>
+                , shown as a limited-time offer (1–3 listings, 14-day free
+                trial); Pro and Enterprise are quote-only.
               </li>
             </ul>
             <p>
-              For solo STR operators, Hostaway is typically the cheapest entry
-              point. For mid-market operators (5-30 properties), all three are
-              in roughly the same monthly cost bracket. For 50+ properties,
-              Guesty&apos;s features start to justify its price.
+              For solo STR operators, Guesty Lite (from $9/month plus 1% per
+              reservation) and Hostfully (from $15 per property per month plus
+              a platform fee) publish entry prices;{" "}
+              <a href="https://www.hostaway.com/thank-you-waitlist/">
+                Hostaway sends single-listing hosts to a waitlist
+              </a>
+              . For mid-market and larger operators, compare quotes — Hostaway
+              and Guesty Pro don&apos;t publish prices, and Hostfully starts at
+              $15–$25 per property plus a platform fee.
             </p>
 
             <h2>What if you have only 1-3 STRs?</h2>
             <p>
-              Honest answer: none of these. All three assume you&apos;re running
-              an STR business at some scale. For 1-3 properties, look at:
+              Guesty Lite is built for 1–3 listings, and Hostfully says it
+              serves hosts with a single listing; Hostaway&apos;s lowest pricing
+              tier covers 2–14 listings, and it sends single-listing hosts to a
+              waitlist. Also look at:
             </p>
             <ul>
               <li>
-                <strong>Lodgify</strong> — popular with very small operators,
-                builds direct-booking website, channel manager. Cheaper entry
-                point.
+                <strong>Lodgify</strong> —{" "}
+                <a href="https://www.lodgify.com/pricing/">
+                  built for hosts with one property or more
+                </a>
+                , builds direct-booking website, channel manager.
               </li>
               <li>
-                <strong>Smoobu</strong> — even smaller-operator friendly,
-                single-property pricing.
+                <strong>Smoobu</strong> — even smaller-operator friendly,{" "}
+                <a href="https://www.smoobu.com/en/pricing/">
+                  single-property pricing
+                </a>
+                .
               </li>
               <li>
                 <strong>Direct Airbnb tools</strong> — if you only list on
                 Airbnb, the platform&apos;s native tools (messaging, calendar,
-                automated reviews) cover most workflows. Pay $0/month.
+                scheduled messages) cover most workflows.{" "}
+                <a href="https://www.airbnb.com/help/article/1857">
+                  No monthly subscription, though Airbnb deducts its service
+                  fee from each payout
+                </a>
+                .
               </li>
             </ul>
 
@@ -320,18 +402,30 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             </p>
             <ol>
               <li>
-                Pick a target market (Mashvisor or AirDNA for regional Airbnb
-                data).
+                Pick a target market (Mashvisor or{" "}
+                <a href="https://www.airdna.co/pricing">
+                  AirDNA for regional Airbnb data
+                </a>
+                ).
               </li>
-              <li>Find a specific property (MLS, off-market, Roofstock).</li>
+              <li>
+                Find a specific property (MLS, off-market, or an investor
+                marketplace).
+              </li>
               <li>
                 Pull an STR revenue projection for the address (AirDNA
-                Rentalizer report — $20-40).
+                Rentalizer —{" "}
+                <a href="https://www.airdna.co/pricing">
+                  limited on AirDNA&apos;s free plan; the customizable version
+                  comes with its paid Market Research plan
+                </a>
+                ).
               </li>
               <li>
                 Plug that monthly revenue into TrueCap&apos;s rent field.
-                Override the HUD long-term rent default. Run the full underwrite
-                (cap rate, DSCR, cash flow, 10-year projection).
+                Override the HUD long-term rent default. Run the underwrite
+                (cap rate, DSCR, cash flow; the 10-year projection is a paid
+                feature).
               </li>
               <li>
                 Review the model, verify local rules and property-specific
@@ -351,8 +445,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <ul>
               <li>
                 <strong>&quot;I have 1-3 STRs.&quot;</strong> Lodgify or Smoobu
-                (or direct Airbnb). All three of Hostfully/Hostaway/Guesty are
-                overkill.
+                (or direct Airbnb), or Guesty Lite, which is built for 1–3
+                listings.
               </li>
               <li>
                 <strong>
@@ -362,8 +456,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               </li>
               <li>
                 <strong>
-                  &quot;I have 5-50 STRs and want the deepest channel
-                  management.&quot;
+                  &quot;I have 5-50 STRs and want deep channel management plus
+                  a 200+ integration marketplace.&quot;
                 </strong>{" "}
                 Hostaway.
               </li>
@@ -372,12 +466,12 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                   &quot;I manage 50+ STRs as a business, possibly for other
                   owners.&quot;
                 </strong>{" "}
-                Guesty.
+                Guesty Pro or Enterprise.
               </li>
               <li>
                 <strong>&quot;I&apos;m about to BUY an STR.&quot;</strong>{" "}
-                TrueCap (free) + AirDNA (Rentalizer report). Underwrite first,
-                manage second.
+                TrueCap (free) + AirDNA (Rentalizer). Underwrite first, manage
+                second.
               </li>
             </ul>
 
@@ -406,14 +500,79 @@ export default function HostfullyVsHostawayVsGuestyPost() {
 
             <h2>Underwrite the STR before you pick the PMS</h2>
             <p>
-              The biggest mistake STR investors make is picking a PMS before
-              confirming the deal pencils. Hostfully / Hostaway / Guesty are all
-              great tools — but they manage STRs that exist. TrueCap (free) +
-              AirDNA tells you whether the property is worth becoming an STR in
-              the first place. Run that step first.
+              Don&apos;t pick a PMS before confirming the deal pencils. Hostfully
+              / Hostaway / Guesty are all great tools — but they manage STRs
+              that exist. TrueCap (free) + AirDNA let you model whether the
+              property pencils as an STR before you commit. Run that step
+              first.
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "Hostaway, Pricing",
+                url: "https://www.hostaway.com/pricing/",
+              },
+              {
+                title: "Guesty, Pricing",
+                url: "https://www.guesty.com/pricing/",
+              },
+              {
+                title: "Hostfully, Property Management Software Pricing",
+                url: "https://www.hostfully.com/pricing/property-management-software/",
+              },
+              {
+                title: "Hostaway, homepage",
+                url: "https://www.hostaway.com/",
+              },
+              {
+                title: "Hostaway, What is Hostaway Marketplace?",
+                url: "https://www.hostaway.com/glossary/hostaway-marketplace/",
+              },
+              {
+                title: "Hostfully, homepage",
+                url: "https://www.hostfully.com/",
+              },
+              {
+                title: "Hostfully, Direct Booking Site",
+                url: "https://www.hostfully.com/property-management-software/features/direct-booking-site/",
+              },
+              {
+                title: "Hostaway, Communication features",
+                url: "https://www.hostaway.com/features/communication/",
+              },
+              {
+                title: "Hostaway, Automation features",
+                url: "https://www.hostaway.com/features/automation/",
+              },
+              {
+                title: "Hostaway, waitlist page for single-listing hosts",
+                url: "https://www.hostaway.com/thank-you-waitlist/",
+              },
+              {
+                title: "Lodgify, Pricing",
+                url: "https://www.lodgify.com/pricing/",
+              },
+              {
+                title: "Smoobu, Pricing",
+                url: "https://www.smoobu.com/en/pricing/",
+              },
+              {
+                title: "Airbnb Help Center, Airbnb service fees",
+                url: "https://www.airbnb.com/help/article/1857",
+              },
+              {
+                title: "AirDNA, Pricing",
+                url: "https://www.airdna.co/pricing",
+              },
+              {
+                title: "Guesty, Homeowners Portal",
+                url: "https://www.guesty.com/features/homeowners-portal/",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

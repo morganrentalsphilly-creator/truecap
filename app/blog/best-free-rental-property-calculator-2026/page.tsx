@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -17,6 +18,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-free-rental-property-calculator-2026";
 const TITLE =
@@ -67,7 +69,7 @@ const TOOLS = [
     url: "/",
     pricing: "Free core analyzer; paid Pro plans on the live pricing page",
     freeCovers: [
-      "Cap rate, CoC, DSCR, NCF, monthly cash flow",
+      "Cap rate, CoC, DSCR, NOI, monthly cash flow",
       "Editable HUD rent + FRED owner-occupied rate benchmarks; manual local property tax",
       "Buy Box fit, with a Deal score",
       "Unlimited preliminary core screens without signup",
@@ -76,12 +78,11 @@ const TOOLS = [
       "Read-only share links (free sign-in to create; recipients do not sign in)",
     ],
     freeGates: [
-      "10-year projection (Pro)",
       "10-year cash-flow and equity projection (Pro); sensitivity is included in your first decision, then Pro",
       "Offer Ceiling included in your first decision, then Pro; saved-deal comparison (Pro)",
       "Editing, unlimited saves, and comparison of up to 4 deals (Pro)",
       "Additional comps lookups: Pro includes 50 per month",
-      "PDF export (Pro)",
+      "PDF export included in your first decision, then Pro",
     ],
     pickIf:
       "You want preliminary core rental metrics without paying or creating an account.",
@@ -132,7 +133,7 @@ const TOOLS = [
     pricing: "Free (or your existing Office / Google subscription)",
     freeCovers: [
       "Total flexibility — model anything",
-      "BiggerPockets and various REI bloggers offer free templates",
+      "BiggerPockets' free downloads include spreadsheets and worksheets you can adapt (for example, its Comparable Properties Spreadsheet and Deal Clarity Worksheet)",
     ],
     freeGates: [
       "Most templates require manual rent, rate, and tax lookups",
@@ -160,7 +161,7 @@ const TOOLS = [
 const FAQ_ITEMS = [
   {
     q: "Is TrueCap really free for core rental analysis?",
-    a: "Yes. TrueCap's no-account preliminary screen covers cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow. A free account adds up to 5 saved deals, one comps lookup, and the ability to create read-only share links; recipients can view a link without an account. The first complete decision, evaluation allowance, and paid terms are described on the live pricing page.",
+    a: "Yes. TrueCap's no-account preliminary screen covers cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow. A free account adds up to 5 saved deals, one comps lookup, and the ability to create read-only share links; recipients can view a link without an account. The first complete decision, the free trial, and paid terms are described on the live pricing page.",
   },
   {
     q: "Is BiggerPockets' rental property calculator free?",
@@ -168,7 +169,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the catch with TrueCap's free tier?",
-    a: "Preliminary core metrics are available without signup. Creating read-only share links, saving up to 5 deals, and using the included comps lookup require a free account; recipients can open a shared link without an account. The first complete decision and 21-day account evaluation are usage-limited; Pro adds the repeatable paid workflow described on the live pricing page.",
+    a: "Preliminary core metrics are available without signup. Creating read-only share links, saving up to 5 deals, and using the included comps lookup require a free account; recipients can open a shared link without an account. The first complete decision and the 21-day free trial are usage-limited; Pro adds the repeatable paid workflow described on the live pricing page.",
   },
   {
     q: "Can I underwrite a BRRRR or flip on a free calculator?",
@@ -192,6 +193,125 @@ const DECISION_LINES: Array<{ q: string; a: string }> = [
     a: "Stessa Essentials",
   },
   { q: "You only need PITI math.", a: "Zillow's mortgage calculator" },
+];
+
+/**
+ * Sourced phrases in the card and FAQ strings above, each linked (same tab)
+ * to the page that states it. The strings stay plain text, so the FAQ
+ * answers feed the FAQPage JSON-LD unchanged; <Cited> links a phrase where
+ * the string renders. Each phrase appears once on the page.
+ */
+const CITATIONS = [
+  { phrase: "FRED owner-occupied rate", url: "https://www.freddiemac.com/pmms/about-pmms" },
+  { phrase: "paid Plus and Pro plans raise usage limits", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Professional interactive and PDF reports", url: "https://dealcheck.io/features/" },
+  { phrase: "Up to 15 saved properties", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Published limits on photos, comps, and templates", url: "https://dealcheck.io/pricing/" },
+  {
+    phrase: "Account required",
+    url: "https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free",
+  },
+  { phrase: "Essentials is free; Manage and Pro are paid", url: "https://www.stessa.com/pricing/" },
+  { phrase: "basic financial reports", url: "https://www.stessa.com/pricing/" },
+  {
+    phrase: "Public rental returns and income-tax calculator",
+    url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+  },
+  { phrase: "Schedule E is listed on current Manage and Pro plans", url: "https://www.stessa.com/pricing/" },
+  { phrase: "official sources reviewed", url: "https://www.stessa.com/investment-property-marketplace/" },
+  {
+    phrase: "Free (or your existing Office / Google subscription)",
+    url: "https://workspace.google.com/products/sheets/",
+  },
+  { phrase: "BiggerPockets' free downloads", url: "https://www.biggerpockets.com/resources" },
+  { phrase: "Monthly mortgage payment (PITI)", url: "https://www.zillow.com/mortgage-calculator/" },
+  { phrase: "Affordability calculator", url: "https://www.zillow.com/mortgage-calculator/" },
+  {
+    phrase: "Doesn't calculate cap rate, CoC, DSCR, or cash flow",
+    url: "https://www.zillow.com/mortgage-calculator/",
+  },
+  {
+    phrase: "presents calculator results as a Pro feature",
+    url: "https://www.biggerpockets.com/rental-property-calculator",
+  },
+];
+
+type CitationLink = { phrase: string; link: ReactNode };
+
+const CITATION_LINKS: CitationLink[] = CITATIONS.map((citation) => ({
+  phrase: citation.phrase,
+  link: (
+    <a
+      key={citation.phrase}
+      href={citation.url}
+      className="font-semibold text-primary hover:underline"
+    >
+      {citation.phrase}
+    </a>
+  ),
+}));
+
+/**
+ * Renders `text` with each cited phrase linked to its source. Loops over the
+ * links by value (no index access), so the SEO fence's computed-access rule
+ * holds for the whole file.
+ */
+function Cited({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  let rest = text;
+  while (rest) {
+    let next: CitationLink | null = null;
+    let at = rest.length;
+    for (const candidate of CITATION_LINKS) {
+      const found = rest.indexOf(candidate.phrase);
+      if (found !== -1 && found < at) {
+        at = found;
+        next = candidate;
+      }
+    }
+    if (next === null) {
+      parts.push(rest);
+      break;
+    }
+    parts.push(rest.slice(0, at), next.link);
+    rest = rest.slice(at + next.phrase.length);
+  }
+  return <>{parts}</>;
+}
+
+/** Every source linked on the page, in order of first use. */
+const SOURCES = [
+  { title: "DealCheck, Plans & Pricing", url: "https://dealcheck.io/pricing/" },
+  {
+    title: "Stessa Help Center, Stessa Investment Properties Marketplace",
+    url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+  },
+  { title: "Stessa, Pricing", url: "https://www.stessa.com/pricing/" },
+  {
+    title: "Stessa, Investment Property Marketplace",
+    url: "https://www.stessa.com/investment-property-marketplace/",
+  },
+  {
+    title: "Stessa, Rental Returns and Income Tax Calculator",
+    url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+  },
+  {
+    title: "BiggerPockets, Rental Property Calculator",
+    url: "https://www.biggerpockets.com/rental-property-calculator",
+  },
+  { title: "BiggerPockets, Pro membership", url: "https://www.biggerpockets.com/pro-membership" },
+  {
+    title: "Freddie Mac, About the Primary Mortgage Market Survey (PMMS)",
+    url: "https://www.freddiemac.com/pmms/about-pmms",
+  },
+  { title: "DealCheck, Property Analysis Software (features)", url: "https://dealcheck.io/features/" },
+  {
+    title: "DealCheck Help Center, How much does DealCheck cost? Can I try it for free?",
+    url: "https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free",
+  },
+  { title: "Google Workspace, Google Sheets", url: "https://workspace.google.com/products/sheets/" },
+  { title: "BiggerPockets, Resources (free downloads)", url: "https://www.biggerpockets.com/resources" },
+  { title: "Zillow, Mortgage Calculator", url: "https://www.zillow.com/mortgage-calculator/" },
 ];
 
 export default function BestFreeRentalPropertyCalculator2026Post() {
@@ -289,7 +409,21 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
             >
-              <strong>TrueCap</strong> offers unlimited core rental analyses without signup. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. <strong>DealCheck Starter</strong> includes rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports, with published usage limits. <strong>Stessa</strong> combines an investment-property marketplace and editable acquisition analysis with accounting and operations. <strong>Spreadsheet templates</strong> offer flexibility but require formula and input review. <strong>Zillow&apos;s mortgage calculator</strong> covers payment math rather than a full rental underwrite.
+              <strong>TrueCap</strong> offers unlimited core rental analyses without signup. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. <strong>DealCheck Starter</strong> includes{" "}
+              <a
+                href="https://dealcheck.io/pricing/"
+                className="font-semibold text-primary hover:underline"
+              >
+                rental, BRRRR, Airbnb, and flip calculators
+              </a>{" "}
+              plus professional interactive and PDF reports, with published usage limits. <strong>Stessa</strong> combines an investment-property marketplace and{" "}
+              <a
+                href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace"
+                className="font-semibold text-primary hover:underline"
+              >
+                editable acquisition analysis
+              </a>{" "}
+              with accounting and operations. <strong>Spreadsheet templates</strong> offer flexibility but require formula and input review. <strong>Zillow&apos;s mortgage calculator</strong> covers payment math rather than a full rental underwrite.
             </p>
           </section>
 
@@ -342,7 +476,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             </a>
             ,{" "}
             <a
-              href="https://www.biggerpockets.com/pro"
+              href="https://www.biggerpockets.com/pro-membership"
               target="_blank"
               rel="noreferrer"
               className="text-primary underline underline-offset-4 hover:text-primary/80"
@@ -363,6 +497,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for free-only investors</h2>
+            <p>Full disclosure: TrueCap is our tool, and we list it first.</p>
 
             {TOOLS.map((t) => (
               <div
@@ -388,7 +523,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   <strong className="text-foreground">Pricing:</strong>{" "}
-                  {t.pricing}
+                  <Cited text={t.pricing} />
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -401,7 +536,9 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
-                          <span>{p}</span>
+                          <span>
+                            <Cited text={p} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -416,7 +553,9 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
-                          <span>{p}</span>
+                          <span>
+                            <Cited text={p} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -455,7 +594,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
                     </span>
                   </summary>
                   <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
+                    <Cited text={item.a} />
                   </div>
                 </details>
               ))}
@@ -465,7 +604,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes 60 seconds, no signup required. Browse the
+              underwriting and needs no signup. Browse the
               full set of{" "}
               <Link
                 href="/tools"
@@ -491,6 +630,8 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources sources={SOURCES} />
 
           <div className="mt-10">
             <NewsletterSignup />

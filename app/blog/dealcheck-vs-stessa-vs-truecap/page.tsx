@@ -28,6 +28,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "dealcheck-vs-stessa-vs-truecap";
 const TITLE = "DealCheck vs Stessa vs TrueCap: which one do you actually need?";
@@ -184,8 +185,11 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               All three now overlap during acquisition.{" "}
               <strong>DealCheck</strong> and <strong>TrueCap</strong> are
               focused per-deal analyzers.
-              <strong> Stessa</strong> adds a marketplace with investor filters,
-              buy-box alerts, comps, and editable underwriting, then continues
+              <strong> Stessa</strong> adds a{" "}
+              <a href="https://www.stessa.com/investment-property-marketplace/">
+                marketplace with investor filters, buy-box alerts
+              </a>
+              , comps, and editable underwriting, then continues
               into accounting and landlord operations. The useful question is
               how much discovery, decision depth, and post-close workflow you
               want in one product—not a simple before-versus-after split.
@@ -203,8 +207,15 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <li>
                 <strong>DealCheck</strong> is a per-deal rental underwriting
                 calculator. Inputs: purchase price, rent, financing, expenses.
-                Outputs: cap rate, cash-on-cash, DSCR, monthly cash flow,
-                10-year pro-forma.
+                Outputs:{" "}
+                <a href="https://dealcheck.io/pricing/">
+                  cap rate, cash-on-cash, DSCR, monthly cash flow
+                </a>
+                , and{" "}
+                <a href="https://dealcheck.io/features/rental-property-calculator/">
+                  long-term projections of up to 35 years
+                </a>
+                .
               </li>
               <li>
                 <strong>TrueCap</strong> is the same kind of tool — a per-deal
@@ -216,17 +227,28 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 <strong>Stessa</strong> is a property accounting and operations
                 platform with a current acquisition marketplace. Before closing
                 it offers listing filters, buy boxes, comps, projected returns,
-                and editable offer/financing/rent/expense inputs. After closing
-                it adds bank feeds, rent collection, documents, financial
-                reports, and plan-dependent Schedule E.
+                and{" "}
+                <a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace">
+                  editable offer/financing/rent/expense inputs
+                </a>
+                . After closing it adds{" "}
+                <a href="https://www.stessa.com/pricing/">
+                  bank feeds, rent collection, documents, financial reports,
+                  and plan-dependent Schedule E
+                </a>
+                .
               </li>
             </ul>
             <p>Compare the workflow in three questions:</p>
             <ol>
               <li>
                 <strong>Do you need listing discovery?</strong> Stessa includes
-                an investor marketplace; DealCheck and TrueCap primarily analyze
-                properties you bring.
+                an investor marketplace with investment filters and buy-box
+                alerts; DealCheck also offers a{" "}
+                <a href="https://help.dealcheck.io/en/articles/11471921-how-to-search-properties-listed-for-sale">
+                  map search of active listings
+                </a>
+                , while TrueCap analyzes properties you bring.
               </li>
               <li>
                 <strong>Which acquisition decision workflow fits?</strong>{" "}
@@ -264,9 +286,16 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p>
               <strong>DealCheck Starter</strong> includes its core rental,
               BRRRR, Airbnb, and flip calculators plus professional interactive
-              and PDF reports. Its free plan allows up to 15 saved properties
+              and PDF reports.{" "}
+              <a href="https://dealcheck.io/pricing/">
+                Its free plan allows up to 15 saved properties
+              </a>{" "}
               and applies published limits to items such as photos, comps, and
-              templates. An account is required.
+              templates.{" "}
+              <a href="https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free">
+                An account is required
+              </a>
+              .
             </p>
 
             <h3>Pricing</h3>
@@ -280,10 +309,15 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               rates and limits.
             </p>
             <p>
-              <strong>DealCheck</strong> currently offers Starter, Plus, and Pro
-              plans. Its core calculators and professional reports are included
-              on Starter; paid plans raise published limits for saved
-              properties, photos, comps, and templates.
+              <strong>DealCheck</strong> currently offers{" "}
+              <a href="https://dealcheck.io/pricing/">
+                Starter, Plus, and Pro plans
+              </a>
+              . Its core calculators and professional reports are included on
+              Starter; paid plans raise published limits for saved properties,
+              photos, comps, and templates, and add features such as a purchase
+              offer calculator, property owner lookup, and custom-branded
+              reports.
             </p>
             <p>
               Pricing and plan terms can change. Verify the current details on
@@ -326,10 +360,14 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 authoritative open data sources you can audit.
               </li>
               <li>
-                <strong>DealCheck</strong>: native iOS and Android apps (TrueCap
-                is a PWA), direct property-import from Zillow / Redfin / MLS
-                listings, longer track record in the BRRRR community, broader
-                brand recognition.
+                <strong>DealCheck</strong>:{" "}
+                <a href="https://dealcheck.io/">native iOS and Android apps</a>{" "}
+                (TrueCap is a PWA),{" "}
+                <a href="https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings">
+                  property-data import from public records and active listings
+                </a>
+                , longer track record in the BRRRR community, broader brand
+                recognition.
               </li>
             </ul>
 
@@ -347,20 +385,30 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p>
               Stessa&apos;s official marketplace now helps investors find,
               evaluate, and act on listings. It documents investor filters,
-              buy-box alerts, projected rent, rental and sale comps,
-              neighborhood metrics, and a calculator with editable offer price,
-              financing, rent, and operating costs. The calculator reports
-              projected cash flow, cap rate, and ROI; Stessa also publishes a
-              separate returns calculator with NOI, cash-on-cash, DSCR,
-              depreciation, and after-tax outputs.
+              buy-box alerts,{" "}
+              <a href="https://www.stessa.com/investment-property-marketplace/">
+                projected rent
+              </a>
+              ,{" "}
+              <a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace">
+                rental and sale comps, neighborhood metrics, and a calculator
+              </a>{" "}
+              with editable offer price, financing, rent, and operating costs.
+              The calculator reports projected cash flow, cap rate, and ROI;
+              Stessa also publishes a{" "}
+              <a href="https://www.stessa.com/rental-returns-and-income-tax-calculator/">
+                separate returns calculator
+              </a>{" "}
+              with NOI, cash-on-cash, DSCR, depreciation, and after-tax outputs.
             </p>
             <p>
               That is real acquisition underwriting, not a post-purchase-only
               product. Stessa&apos;s broader distinction is that the same brand
-              also serves owned-property accounting and landlord operations. Its
-              current pricing lists bank feeds, reports, document storage, rent
-              collection, maintenance, screening, and plan-dependent Schedule E
-              and eSignatures.
+              also serves owned-property accounting and landlord operations. Its{" "}
+              <a href="https://www.stessa.com/pricing/">current pricing</a>{" "}
+              lists bank feeds, reports, document storage, rent collection,
+              maintenance, screening, and plan-dependent Schedule E and
+              eSignatures.
             </p>
             <ul>
               <li>
@@ -440,9 +488,11 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 / CoC / DSCR / cash flow on every deal.
               </li>
               <li>
-                <strong>Stessa Essentials</strong>: the current free plan lists
-                unlimited properties, automatic bank feeds, and basic financial
-                reports. Current pricing places Schedule E on Manage and Pro.
+                <strong>Stessa Essentials</strong>: the{" "}
+                <a href="https://www.stessa.com/pricing/">current free plan</a>{" "}
+                lists unlimited properties, automatic bank feeds, and basic
+                financial reports. Current pricing places Schedule E on Manage
+                and Pro.
               </li>
             </ul>
             <p>
@@ -456,8 +506,11 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             </p>
             <p>
               DealCheck Starter includes the core calculators and professional
-              reports; its paid Plus and Pro plans mainly raise published usage
-              limits. You may still pair it with an accounting platform if you
+              reports; its{" "}
+              <a href="https://dealcheck.io/pricing/">paid Plus and Pro plans</a>{" "}
+              raise published usage limits and add features such as a purchase
+              offer calculator, property owner lookup, and custom-branded
+              reports. You may still pair it with an accounting platform if you
               want post-purchase bookkeeping.
             </p>
 
@@ -542,6 +595,56 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "Stessa, Investment Property Marketplace",
+                url: "https://www.stessa.com/investment-property-marketplace/",
+              },
+              {
+                title: "DealCheck, Plans & Pricing",
+                url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title:
+                  "DealCheck, Rental Property Calculator & Cash Flow Analysis",
+                url: "https://dealcheck.io/features/rental-property-calculator/",
+              },
+              {
+                title:
+                  "Stessa Help Center, Stessa Investment Properties Marketplace",
+                url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+              },
+              {
+                title: "Stessa, Pricing",
+                url: "https://www.stessa.com/pricing/",
+              },
+              {
+                title:
+                  "DealCheck Help Center, How to Search Properties Listed for Sale",
+                url: "https://help.dealcheck.io/en/articles/11471921-how-to-search-properties-listed-for-sale",
+              },
+              {
+                title:
+                  "DealCheck Help Center, How much does DealCheck cost? Can I try it for free?",
+                url: "https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free",
+              },
+              {
+                title: "DealCheck, homepage (iOS and Android app links)",
+                url: "https://dealcheck.io/",
+              },
+              {
+                title:
+                  "DealCheck Help Center, How to Import Property Data from Public Records & Listings",
+                url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+              },
+              {
+                title: "Stessa, Rental Returns and Income Tax Calculator",
+                url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

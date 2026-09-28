@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -17,6 +18,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-rental-property-calculator-for-brrrr";
 const TITLE = "Best rental property calculator for BRRRR investors (2026)";
@@ -61,40 +63,39 @@ export const metadata: Metadata = {
 const TOOLS = [
   {
     rank: 1,
-    name: "TrueCap (released tools)",
+    name: "TrueCap (free tools)",
     bestFor: "Separate input worksheets + a stabilized rental screen",
     url: "/blog/brrrr-method-explained",
     pricing:
-      "Free released tools; no integrated BRRRR lifecycle model currently",
+      "Free tools; no integrated BRRRR lifecycle model currently",
     freeCovers: [
       "Cap rate, CoC, DSCR and cash flow on a stabilized BRRRR candidate — from the main analyzer, no account needed",
-      "Released standalone worksheets for rehab cost, ARV, and the 70% rule price screen",
+      "Standalone worksheets for rehab cost, ARV, and the 70% rule price screen",
       "Mortgage payment and closing cost tools for the purchase and the refinanced loan",
       "Step-by-step guides to the DSCR and cap rate math a refinance lender will run",
     ],
     freeGates: [
-      "No released integrated ledger for acquisition, renovation, refinance proceeds, later contributions, and post-refinance returns",
+      "No integrated ledger for acquisition, renovation, refinance proceeds, later contributions, and post-refinance returns",
     ],
     pickIf:
       "You want transparent worksheets for the rehab and ARV inputs, an analyzer for the stabilized rental, and will maintain a separate, complete project cash-flow ledger.",
   },
   {
     rank: 2,
-    name: "DealCheck (Plus or Pro)",
-    bestFor: "Longest BRRRR track record + native mobile",
+    name: "DealCheck",
+    bestFor: "Dedicated BRRRR calculator + native mobile apps",
     url: "/vs/dealcheck",
     pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
     freeCovers: [
       "Solid BRRRR-friendly underwriting",
-      "Listing-import from Zillow / Redfin",
+      "Address search that imports public-record and listing data",
       "Native iOS + Android apps",
     ],
     freeGates: [
-      "BRRRR mode behind Plus tier",
-      "ARV sensitivity requires manual re-runs",
+      "Free Starter caps saved properties (15) and photos, comps and templates (5 each); Plus and Pro raise those limits",
     ],
     pickIf:
-      "You underwrite on mobile at showings all day and want native apps with listing-import.",
+      "You underwrite on mobile at showings all day and want native apps with address-based data import.",
   },
   {
     rank: 3,
@@ -104,12 +105,11 @@ const TOOLS = [
     pricing: "BP Pro ~$390/yr",
     freeCovers: [
       "Standard BRRRR-friendly underwriting",
-      "Output format recognized by BP-aware private lenders",
-      "Community + courses + forums on BRRRR strategy",
+      "Printable PDF reports for lenders or partners (Pro members only)",
+      "Community forums and content on BRRRR strategy",
     ],
     freeGates: [
       "Calculator UX is dated",
-      "No portfolio rollup across saved deals",
     ],
     pickIf:
       "You're already paying for BiggerPockets for the BRRRR community access.",
@@ -126,7 +126,7 @@ const TOOLS = [
     freeGates: [
       "Formula errors compound silently across deals",
       "ARV stress-testing requires manual scenarios",
-      "No mobile UX",
+      "Large spreadsheets can be cumbersome on mobile",
     ],
     pickIf:
       "You have a battle-tested BRRRR spreadsheet that handles unusual financing structures.",
@@ -136,7 +136,7 @@ const TOOLS = [
 const FAQ_ITEMS = [
   {
     q: "What makes a BRRRR calculator different from a standard rental calculator?",
-    a: "A BRRRR calculator models the cash-out refinance step — when you refinance after the rehab, what's your new mortgage balance (typically 75% of ARV), how much capital comes back to you, and what's the cash flow on the refinanced loan. Standard rental calculators stop at the initial purchase + financing; BRRRR calculators continue through the refi event.",
+    a: "A BRRRR calculator models the cash-out refinance step — when you refinance after the rehab, what's your new mortgage balance (a conforming cash-out refinance on a one-unit investment property is capped at 75% of appraised value, 70% for 2–4 units, and your lender may set a lower limit), how much capital comes back to you, and what's the cash flow on the refinanced loan. Standard rental calculators stop at the initial purchase + financing; BRRRR calculators continue through the refi event.",
   },
   {
     q: "What's 'capital recovered' and why does it matter?",
@@ -152,14 +152,14 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I underwrite BRRRR deals in TrueCap today?",
-    a: "In pieces, yes. The released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the main analyzer returns DSCR, cap rate, and cash flow for the stabilized rental once you enter the post-refinance rent and loan terms. There is no separate DSCR calculator page — for the coverage test a lender will run, the how-to-calculate-DSCR walkthrough shows the arithmetic. The integrated BRRRR lifecycle model is not currently released, so use a complete project ledger or another released product for the joined cash-flow analysis.",
+    a: "In pieces, yes. The standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the main analyzer returns DSCR, cap rate, and cash flow for the stabilized rental once you enter the post-refinance rent and loan terms. There is no separate DSCR calculator page — for the coverage test a lender will run, the how-to-calculate-DSCR walkthrough shows the arithmetic. TrueCap doesn't offer an integrated BRRRR lifecycle model right now, so use a complete project ledger or another product for the joined cash-flow analysis.",
   },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
   {
     q: "You want separate rehab, ARV, and 70%-rule worksheets plus a stabilized-rental screen.",
-    a: "TrueCap's released tools",
+    a: "TrueCap's free tools",
   },
   { q: "You underwrite mobile at every showing.", a: "DealCheck" },
   {
@@ -169,6 +169,107 @@ const DECISION_LINES: Array<{ q: string; a: string }> = [
   {
     q: "You have a custom BRRRR model that handles unusual debt structures.",
     a: "Excel",
+  },
+];
+
+/**
+ * Sourced phrases in the card and FAQ strings above, each linked (same tab)
+ * to the page that states it. The strings stay plain text, so the FAQ
+ * answers feed the FAQPage JSON-LD unchanged; <Cited> links a phrase where
+ * the string renders. Each phrase appears once on the page.
+ */
+const CITATIONS = [
+  { phrase: "Plus $10/mo, Pro $20/mo", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Solid BRRRR-friendly underwriting", url: "https://dealcheck.io/features/brrrr-calculator/" },
+  {
+    phrase: "Address search that imports public-record and listing data",
+    url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+  },
+  { phrase: "Native iOS + Android apps", url: "https://dealcheck.io/" },
+  {
+    phrase: "saved properties (15) and photos, comps and templates (5 each)",
+    url: "https://dealcheck.io/pricing/",
+  },
+  { phrase: "BP Pro ~$390/yr", url: "https://www.biggerpockets.com/pro-membership" },
+  { phrase: "Standard BRRRR-friendly underwriting", url: "https://www.biggerpockets.com/brrrr-calculator" },
+  { phrase: "Printable PDF reports", url: "https://www.biggerpockets.com/brrrr-calculator" },
+  { phrase: "Community forums and content", url: "https://www.biggerpockets.com/pro-membership" },
+  {
+    phrase: "Free (with your existing Office / Workspace)",
+    url: "https://workspace.google.com/products/sheets/",
+  },
+  {
+    phrase: "capped at 75% of appraised value, 70% for 2–4 units",
+    url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+  },
+  {
+    phrase: "seasoning rule",
+    url: "https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions",
+  },
+];
+
+type CitationLink = { phrase: string; link: ReactNode };
+
+const CITATION_LINKS: CitationLink[] = CITATIONS.map((citation) => ({
+  phrase: citation.phrase,
+  link: (
+    <a
+      key={citation.phrase}
+      href={citation.url}
+      className="font-semibold text-primary hover:underline"
+    >
+      {citation.phrase}
+    </a>
+  ),
+}));
+
+/**
+ * Renders `text` with each cited phrase linked to its source. Loops over the
+ * links by value (no index access), so the SEO fence's computed-access rule
+ * holds for the whole file.
+ */
+function Cited({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  let rest = text;
+  while (rest) {
+    let next: CitationLink | null = null;
+    let at = rest.length;
+    for (const candidate of CITATION_LINKS) {
+      const found = rest.indexOf(candidate.phrase);
+      if (found !== -1 && found < at) {
+        at = found;
+        next = candidate;
+      }
+    }
+    if (next === null) {
+      parts.push(rest);
+      break;
+    }
+    parts.push(rest.slice(0, at), next.link);
+    rest = rest.slice(at + next.phrase.length);
+  }
+  return <>{parts}</>;
+}
+
+/** Every source linked on the page, in order of first use. */
+const SOURCES = [
+  { title: "DealCheck, BRRRR Calculator", url: "https://dealcheck.io/features/brrrr-calculator/" },
+  { title: "DealCheck, Plans & Pricing", url: "https://dealcheck.io/pricing/" },
+  {
+    title: "DealCheck Help Center, How to import property data from public records & listings",
+    url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+  },
+  { title: "DealCheck, home page (iOS and Android apps)", url: "https://dealcheck.io/" },
+  { title: "BiggerPockets, Pro membership", url: "https://www.biggerpockets.com/pro-membership" },
+  { title: "BiggerPockets, BRRRR Calculator", url: "https://www.biggerpockets.com/brrrr-calculator" },
+  { title: "Google Workspace, Google Sheets", url: "https://workspace.google.com/products/sheets/" },
+  {
+    title: "Freddie Mac Single-Family, Maximum LTV/TLTV/HTLTV ratio requirements for conforming and super conforming mortgages",
+    url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+  },
+  {
+    title: "Fannie Mae Selling Guide B2-1.3-03, Cash-Out Refinance Transactions (Dec 10, 2025)",
+    url: "https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions",
   },
 ];
 
@@ -266,16 +367,23 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               For BRRRR investors specifically, TrueCap currently supplies
-              separate rehab, ARV, DSCR, and stabilized-rental tools—not an
-              integrated lifecycle model. Evaluate DealCheck or another released
-              product if you need a joined acquisition-to-refinance ledger, and
-              use a spreadsheet for financing structures that require custom
-              cash-flow timing.
+              separate rehab, ARV, and stabilized-rental tools plus a DSCR
+              walkthrough—not an integrated lifecycle model. Evaluate DealCheck
+              or another product if you need a{" "}
+              <a
+                href="https://dealcheck.io/features/brrrr-calculator/"
+                className="font-semibold text-primary hover:underline"
+              >
+                joined acquisition-to-refinance ledger
+              </a>
+              , and use a spreadsheet for financing structures that require
+              custom cash-flow timing.
             </p>
           </section>
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for BRRRR investors</h2>
+            <p>Full disclosure: TrueCap is our tool, and we list it first.</p>
 
             {TOOLS.map((t) => (
               <div
@@ -301,12 +409,12 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   <strong className="text-foreground">Pricing:</strong>{" "}
-                  {t.pricing}
+                  <Cited text={t.pricing} />
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
-                      Free tier covers
+                      What it covers
                     </p>
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeCovers.map((p) => (
@@ -314,7 +422,9 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
-                          <span>{p}</span>
+                          <span>
+                            <Cited text={p} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -329,7 +439,9 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
-                          <span>{p}</span>
+                          <span>
+                            <Cited text={p} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -368,7 +480,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                     </span>
                   </summary>
                   <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
+                    <Cited text={item.a} />
                   </div>
                 </details>
               ))}
@@ -378,7 +490,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes about a minute, no signup required. Start with
+              underwriting and needs no signup. Start with
               the{" "}
               <Link
                 href="/tools/rehab-cost-estimator"
@@ -401,11 +513,13 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
               >
                 the BRRRR method explained
               </Link>{" "}
-              before assembling a complete project ledger. The integrated
-              TrueCap BRRRR model is not currently released.
+              before assembling a complete project ledger. TrueCap doesn&apos;t
+              offer an integrated BRRRR model right now.
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources sources={SOURCES} />
 
           <div className="mt-10">
             <NewsletterSignup />
