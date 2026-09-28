@@ -341,8 +341,8 @@ describe("internal link graph (every sitemap page, rendered)", () => {
       const html = rendered.get(path)?.html;
       expect(html, path).toBeDefined();
       const topic = blogTopicForPost(post.slug);
-      if (!topic) continue; // what-is-a-good-dscr is being merged into another post
-      const hub = `/blog/topics/${topic.slug}`;
+      expect(topic, `${path} is filed in a hub`).not.toBeNull();
+      const hub = `/blog/topics/${topic!.slug}`;
       const blocks = html!.split('data-blog-hub-link=""').length - 1;
       expect(blocks, `${path}: one "Part of" line`).toBe(1);
       const line = html!.slice(html!.indexOf('data-blog-hub-link=""'), html!.indexOf("</p>", html!.indexOf('data-blog-hub-link=""')));
@@ -351,12 +351,11 @@ describe("internal link graph (every sitemap page, rendered)", () => {
     }
   });
 
-  it("files every published post except the one being merged away in exactly one hub", () => {
-    // what-is-a-good-dscr is being merged into another post by a sibling PR;
-    // once it leaves the registry this list is simply empty.
-    const MERGING_AWAY = new Set(["what-is-a-good-dscr"]);
+  it("files every published post in exactly one hub", () => {
+    // what-is-a-good-dscr, the one post F9 left unfiled, was merged into
+    // /blog/how-to-calculate-dscr by the DSCR consolidation: no exception is left.
     const unfiled = BLOG_POSTS.filter((p) => p.available && !BLOG_TOPICS.some((t) => t.postSlugs.includes(p.slug))).map((p) => p.slug);
-    expect(unfiled.filter((slug) => !MERGING_AWAY.has(slug))).toEqual([]);
+    expect(unfiled).toEqual([]);
     for (const post of BLOG_POSTS) {
       const hubs = BLOG_TOPICS.filter((t) => t.postSlugs.includes(post.slug)).map((t) => t.slug);
       expect(hubs.length, `${post.slug} in ${hubs.join(", ")}`).toBeLessThanOrEqual(1);

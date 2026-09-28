@@ -301,7 +301,8 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
   const sample = faqSample();
 
   it("covers every template", () => {
-    expect(POST_SLUGS.length).toBeGreaterThanOrEqual(75);
+    // 73 since the DSCR consolidation merged two posts into /blog/how-to-calculate-dscr.
+    expect(POST_SLUGS.length).toBeGreaterThanOrEqual(73);
     expect(VS_SLUGS.length).toBeGreaterThanOrEqual(38);
     expect(TERM_SLUGS.length).toBeGreaterThanOrEqual(44);
     expect(TOOL_SLUGS.length).toBeGreaterThanOrEqual(10);
@@ -324,13 +325,13 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
     for (const [path, renderPage] of [
       ["/", sample.find(([p]) => p === "/")![1]],
       ["/pricing", sample.find(([p]) => p === "/pricing")![1]],
-      ["/blog/what-is-a-good-dscr", () => renderPost("what-is-a-good-dscr")],
+      ["/blog/how-to-calculate-dscr", () => renderPost("how-to-calculate-dscr")],
       ["/vs/dealcheck", () => renderVs("dealcheck")],
       ["/tools/1-percent-rule-calculator", () => renderTool("1-percent-rule-calculator")],
     ] as Array<[string, () => Promise<string>]>) {
       if (faqsOf(await renderPage()).length > 0) withFaq.push(path);
     }
-    expect(withFaq).toEqual(["/", "/pricing", "/blog/what-is-a-good-dscr", "/vs/dealcheck", "/tools/1-percent-rule-calculator"]);
+    expect(withFaq).toEqual(["/", "/pricing", "/blog/how-to-calculate-dscr", "/vs/dealcheck", "/tools/1-percent-rule-calculator"]);
   }, MANY_PAGES_MS);
 
   it("/vs answers in the markup are the visible answers, word for word (no hand-kept paraphrase)", async () => {
