@@ -48,6 +48,8 @@ vi.mock("next/navigation", async (importOriginal) => {
 });
 
 // Imported after the mocks (vi.mock is hoisted above these).
+import Link from "next/link";
+import { plainTextOf } from "@/components/marketing/comparison-faq";
 import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { CALCULATOR_REGISTRY, UNRELEASED_UNDERWRITING_CALCULATORS } from "@/lib/calculator-registry";
@@ -127,11 +129,38 @@ function detailsQuestions(html: string): string[] {
     .filter((text) => text.endsWith("?"));
 }
 
+/**
+ * normalizeVisible with the whitespace kept as ONE space instead of dropped.
+ * normalizeVisible deletes every space, so an answer whose JSON-LD text runs
+ * two words together ("ab" for a visible "a<br />b") still matched (F4 review).
+ */
+function spacedNormalize(text: string): string {
+  return decodeEntities(text)
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Tags that do not break a line of text: removed without a space. Any other tag (block, <br>) is a word boundary. */
+const INLINE_TAG_RE = /<\/?(?:a|abbr|b|code|em|i|small|span|strong|sub|sup)\b[^>]*>/gi;
+
+/** The main text with a space wherever the page breaks the line, and none inside a run of inline text. */
+function spacedMainText(html: string): string {
+  const main = mainHtml(html)
+    .replace(/<(script|style|nav|header|footer|svg|noscript|template)\b[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, "");
+  return spacedNormalize(main.replace(INLINE_TAG_RE, "").replace(/<[^>]+>/g, " "));
+}
+
 /** Problems with a page's FAQPage markup against what the page shows. */
 function faqMirrorProblems(html: string): string[] {
   const faqs = faqsOf(html);
   if (faqs.length === 0) return [];
   const visible = normalizeVisible(mainTextOf(html));
+  const spaced = spacedMainText(html);
   const problems: string[] = [];
   for (const { q, a } of faqs) {
     const qAt = visible.indexOf(normalizeVisible(q));
@@ -139,7 +168,11 @@ function faqMirrorProblems(html: string): string[] {
       problems.push(`question not visible: ${q}`);
       continue;
     }
-    if (!a.trim() || visible.indexOf(normalizeVisible(a), qAt) === -1) problems.push(`answer not visible after its question: ${q}`);
+    if (!a.trim() || visible.indexOf(normalizeVisible(a), qAt) === -1) {
+      problems.push(`answer not visible after its question: ${q}`);
+      continue;
+    }
+    if (!spaced.includes(spacedNormalize(a))) problems.push(`answer's word breaks differ from the page's: ${q}`);
   }
   const marked = new Set(faqs.map((f) => normalizeVisible(f.q)));
   for (const question of detailsQuestions(html)) {
@@ -218,6 +251,49 @@ describe("the FAQ mirror check itself", () => {
     expect(faqMirrorProblems(page(qa, "<details><summary>What is NOI?</summary>Income minus operating expenses.</details><details><summary>What is DSCR?</summary>x</details>"))).toEqual([
       "visible FAQ question missing from FAQPage: What is DSCR?",
     ]);
+  });
+
+  it("catches an answer whose markup runs words together that the page shows apart (<br>, blocks)", () => {
+    const glued = [{ q: "What is NOI?", a: "Income minus operatingexpenses." }];
+    expect(faqMirrorProblems(page(glued, "<details><summary>What is NOI?</summary>Income minus operating<br/>expenses.</details>"))).toEqual([
+      "answer's word breaks differ from the page's: What is NOI?",
+    ]);
+    expect(faqMirrorProblems(page(glued, "<details><summary>What is NOI?</summary><p>Income minus operating</p><p>expenses.</p></details>"))).toEqual([
+      "answer's word breaks differ from the page's: What is NOI?",
+    ]);
+    // Inline markup and React's text separators are not word breaks.
+    const qa = [{ q: "What is NOI?", a: "Income minus operating expenses." }];
+    expect(faqMirrorProblems(page(qa, "<details><summary>What is NOI?</summary>Income minus <a href=\"/glossary/noi\">operating</a><!-- --> <strong>expenses</strong>.</details>"))).toEqual([]);
+  });
+});
+
+describe("plainTextOf: a /vs answer's JSON-LD text", () => {
+  it("reads text, fragments, inline emphasis and links as the page shows them", () => {
+    expect(
+      plainTextOf(
+        <>
+          Use <strong>both</strong>: see{" "}
+          <Link href="/glossary/noi">
+            the <em>NOI</em> guide
+          </Link>
+          {" and "}
+          <a href="https://www.huduser.gov/">HUD</a>.
+        </>,
+      ),
+    ).toBe("Use both: see the NOI guide and HUD.");
+  });
+
+  it("refuses a line break or a block, which the page shows as a break and the JSON-LD would glue together", () => {
+    expect(() => plainTextOf(<>operating<br />expenses</>)).toThrow(/<br>/);
+    expect(() => plainTextOf(<><p>One.</p><p>Two.</p></>)).toThrow(/<p>/);
+    expect(() => plainTextOf(<ul><li>x</li></ul>)).toThrow(/<ul>/);
+    expect(() => plainTextOf(<>a<div>b</div></>)).toThrow(/<div>/);
+  });
+
+  it("still refuses a component without children and a value it cannot read", () => {
+    const Icon = () => <span>icon</span>;
+    expect(() => plainTextOf(<>x <Icon /></>)).toThrow(/without children/);
+    expect(() => plainTextOf(Promise.resolve("x") as never)).toThrow(/only text/);
   });
 });
 
