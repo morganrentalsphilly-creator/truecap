@@ -11,6 +11,7 @@ import {
   baseFromRecord,
   checkAst,
   checkContentJson,
+  checkJsonLd,
   checkGuardBaseline,
   checkImports,
   checkLinks,
@@ -120,6 +121,7 @@ const pageFor = (slug: string): string => [
   'import type { Metadata } from "next";',
   'import Link from "next/link";',
   'import { lastmodFor } from "@/lib/seo/lastmod";',
+  'import { JsonLd } from "@/components/seo/json-ld";',
   "",
   'const TITLE = "Cap rate guide";',
   'const DESCRIPTION = "How to read a cap rate.";',
@@ -143,7 +145,7 @@ const pageFor = (slug: string): string => [
   "export default function Page() {",
   "  return (",
   "    <main>",
-  '      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />',
+  "      <JsonLd data={articleLd} />",
   "      <h1>{TITLE}</h1>",
   "      <p>Cap rate is net operating income divided by price.</p>",
   "      <p>Read the guide on DSCR next.</p>",
@@ -474,20 +476,22 @@ describe("checkAst", () => {
     expect(astRules(body("<p />", "let n = 0; n += 1; n++; for (const k of [1]) { n = k; }"))).toEqual([]);
   });
 
-  it("allows dangerouslySetInnerHTML only as a JSON-LD script", () => {
-    const ok = [
-      '<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />',
-      '<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld, null, 2) }} />',
-      `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "${U("003c")}") }} />`,
-      `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "${U("003c")}").replace(/>/g, "${U("003e")}").replaceAll(/&/g, "${U("0026")}") }} />`,
-    ];
-    for (const jsx of ok) expect(astRules(body(jsx, "const ld = {};")), jsx).toEqual([]);
+  it("emits JSON-LD only through <JsonLd>: no <script>, no dangerouslySetInnerHTML anywhere (F4)", () => {
+    const ldImport = 'import { JsonLd } from "@/components/seo/json-ld";';
+    const ok = ["<JsonLd data={ld} />", '<JsonLd data={{ "@context": "https://schema.org", "@type": "Thing" }} />', "{[ld].map((x, i) => <JsonLd key={i} data={x} />)}"];
+    for (const jsx of ok) {
+      const source = body(jsx, `${ldImport}\nconst ld = {};`);
+      expect(astRules(source), jsx).toEqual([]);
+      expect(checkJsonLd(BLOG, source), jsx).toEqual([]);
+    }
     const bad: Array<[string, string]> = [
-      ['<div dangerouslySetInnerHTML={{ __html: "<b>x</b>" }} />', "dangerous-html"],
+      // The pre-F4 form, even with exact escapes: the helper is the one emitter now.
+      ['<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />', "jsx-script"],
+      [`<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "${U("003c")}") }} />`, "jsx-script"],
+      ['<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />', "dangerous-html"],
       ['<script type="text/javascript" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />', "jsx-script"],
-      ['<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: raw }} />', "jsx-script"],
-      ['<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld, (k, v) => v) }} />', "jsx-script"],
       ['<script src="https://evil.example/x.js" />', "jsx-script"],
+      ['<div dangerouslySetInnerHTML={{ __html: "<b>x</b>" }} />', "dangerous-html"],
       ["<div {...{ dangerouslySetInnerHTML: { __html: raw } }} />", "jsx-spread"],
       ['<iframe src="https://evil.example" />', "jsx-element"],
       ["<form action={go}><p /></form>", "jsx-element"],
@@ -495,32 +499,37 @@ describe("checkAst", () => {
     ];
     for (const [jsx, rule] of bad) expect(astRules(body(jsx, 'const ld = {}; const raw = "x"; const go = "y";')), jsx).toContain(rule);
     expect(astRules(body("<p />", 'const opts = { __html: "x" };'))).toContain("dangerous-html");
+    expect(astRules(body("<p />", "const dangerouslySetInnerHTML = 1; const o = { dangerouslySetInnerHTML };"))).toContain("dangerous-html");
   });
 
-  it("accepts only EXACT one-character escapes on top of JSON.stringify (a replace chain can rebuild markup)", () => {
-    const ld = (html: string): string => `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ${html} }} />`;
-    const bad = [
-      // The reviewer's payload: `$1` puts the `<` back in front of `/script>` after the literal scan passed.
-      `JSON.stringify({ a: "<Q/script><img src=x onerror=alert(1)>" }).replace(/"(<)Q/, '""}$1')`,
-      // A chain that DELETES characters turns a checked literal into a breaker.
-      'JSON.stringify({ a: "<Z/script>" }).replace(/Z/g, "")',
-      `JSON.stringify(ld).replace(/</g, "${U("003e")}")`, // regex and replacement do not pair up
-      `JSON.stringify(ld).replace("<", "${U("003c")}")`, // string pattern: first occurrence only
-      `JSON.stringify(ld).replace(/</gi, "${U("003c")}")`, // flags differ
-      `JSON.stringify(ld).replace(/</g, "${U("003c")}", 1)`,
-      `JSON.stringify(ld).trim()`,
-      // One syntactic argument, but a replacer function at runtime.
-      "JSON.stringify(...[ld, (k: string, v: unknown) => v])",
+  it("binds <JsonLd> only to the un-aliased named import from @/components/seo/json-ld", () => {
+    const jsonLd = (pre: string, jsx = "<JsonLd data={ld} />"): string[] => checkJsonLd(BLOG, body(jsx, `${pre}\nconst ld = {};`)).map((v) => v.detail);
+    const bad: Array<[string, string]> = [
+      // Any allow-listed export could be imported under the trusted name.
+      ['import { cn as JsonLd } from "@/lib/utils";', "may only be imported from"],
+      ['import JsonLd from "@/components/marketing/breadcrumb-schema";', "may only be imported from"],
+      ['import * as JsonLd from "@/components/marketing/breadcrumb-schema";', "may only be imported from"],
+      ['import { serializeJsonLd as JsonLd } from "@/components/seo/json-ld";', "import exactly"],
+      ['import { JsonLd, serializeJsonLd } from "@/components/seo/json-ld";', "import exactly"],
+      ['import * as Ld from "@/components/seo/json-ld";', "import exactly"],
+      ['import type { JsonLd } from "@/components/seo/json-ld";', "import exactly"],
+      ["function JsonLd(p: { data: unknown }) { return <p />; }", "shadows the JSON-LD helper"],
+      ["const JsonLd = (p: { data: unknown }) => <p />;", "shadows the JSON-LD helper"],
+      ["", "needs `import { JsonLd }"],
+      ['export { JsonLd } from "@/components/seo/json-ld";', "re-exporting"],
     ];
-    for (const html of bad) expect(astRules(body(ld(html), "const ld = {};")), html).toContain("jsx-script");
+    for (const [pre, detail] of bad) expect(jsonLd(pre).join("\n"), pre).toContain(detail);
+    const ldImport = 'import { JsonLd } from "@/components/seo/json-ld";';
+    expect(jsonLd(ldImport, '<JsonLd data={ld} id="x" />').join("\n")).toContain("may not carry id=");
+    expect(jsonLd(ldImport, "<JsonLd />").join("\n")).toContain("must set data=");
+    expect(jsonLd(ldImport, "<JsonLd data={ld}>x</JsonLd>").join("\n")).toContain("may not have children");
+    expect(jsonLd(ldImport)).toEqual([]);
   });
 
-  it("refuses jsonLdScript(...) until a real helper exists, aliased or not", () => {
-    const script = '<script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript("x")} />';
-    // Any allow-listed export could be aliased to the trusted name.
-    expect(astRules(body(script, 'import { cn as jsonLdScript } from "@/lib/utils";'))).toContain("jsx-script");
-    expect(astRules(body(script, 'import { jsonLdScript } from "@/components/seo/json-ld";'))).toContain("jsx-script");
-    expect(astRules(body(script, "function jsonLdScript(x: unknown) { return x; }"))).toContain("jsx-script");
+  it("the whole-file rules include the JSON-LD rule (an edit to a page with an aliased JsonLd is refused)", () => {
+    const aliased = BASE_PAGE.replace('import { JsonLd } from "@/components/seo/json-ld";', 'import { cn as JsonLd } from "@/lib/utils";');
+    expect(wholeFileViolations(BLOG, BASE_PAGE)).toEqual([]);
+    expect(wholeFileViolations(BLOG, aliased).map((v) => v.rule)).toContain("jsonld");
   });
 
   it("reports TypeScript parse errors instead of trusting a recovered tree", () => {
@@ -654,8 +663,9 @@ describe("checkLiterals", () => {
     expect(lit("const ld = { a: /<!--<script>/.source };")).toHaveLength(1);
     expect(lit("const ld = { a: String(/<script/i) };")).toHaveLength(1);
     expect(lit('const ld = { a: /x</.source + "/script>" };')[0]).toMatch(/regular expression/);
-    // The exact JSON-LD escape keeps its `/</g`, but only on a JSON.stringify chain.
-    expect(lit(`const s = JSON.stringify(x).replace(/</g, "${U("003c")}");`)).toEqual([]);
+    // F4: no content module escapes JSON-LD itself any more (<JsonLd> does), so the old
+    // exemption for the exact `/</g` escape on a JSON.stringify chain is gone.
+    expect(lit(`const s = JSON.stringify(x).replace(/</g, "${U("003c")}");`)[0]).toMatch(/regular expression/);
     expect(lit(`const o = { replace: (r: RegExp, _t: string) => r.source };\nconst s = o.replace(/</g, "${U("003c")}") + "/script>";`)[0]).toMatch(/regular expression/);
     expect(lit("const re = /cap rate|noi/i;")).toEqual([]);
   });
@@ -1329,7 +1339,8 @@ describe("working-tree mode and whole-file rules", () => {
   it("exports the whole-file rules so candidates whose source already fails can be skipped", () => {
     expect(wholeFileViolations(BLOG, BASE_PAGE, config)).toEqual([]);
     const legacy = edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p dangerouslySetInnerHTML={{ __html: "Read <b>this</b>" }} />');
-    expect(wholeFileViolations(BLOG, legacy, config).map((v) => v.rule)).toEqual(["dangerous-html", "literal"]);
+    // The attribute and its `__html` payload are each refused (F4: no raw-HTML sink anywhere), plus the markup literal.
+    expect(wholeFileViolations(BLOG, legacy, config).map((v) => v.rule)).toEqual(["dangerous-html", "dangerous-html", "literal"]);
   });
 });
 
