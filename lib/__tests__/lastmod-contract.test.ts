@@ -32,9 +32,9 @@ const pathOf = (url: string) => new URL(url).pathname;
 const KNOWN_NON_SITEMAP = new Set<string>(["/for-agents", "/guarantee", ...NOINDEX_PATHS]);
 
 /** YYYY-MM-DD of a git log query, or null when git (or that history) is unavailable. */
-function gitDate(args: string[]): string | null {
+function gitDate(args: string[], env: NodeJS.ProcessEnv = process.env): string | null {
   try {
-    const out = execFileSync("git", args, { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8").trim();
+    const out = execFileSync("git", args, { cwd: ROOT, env, stdio: ["ignore", "pipe", "ignore"] }).toString("utf8").trim();
     return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
   } catch {
     return null;
@@ -75,8 +75,17 @@ describe("lastmod map contract", () => {
     // and that is at most the date of the commit that holds the map (HEAD in a
     // shallow CI clone, which is never earlier). No `new Date()`: no time bomb.
     for (const [key, date] of Object.entries(LASTMOD)) expect(date <= newest, `${key} ${date}`).toBe(true);
-    const committed =
-      gitDate(["log", "-1", "--format=%cs", "--", "content/seo/lastmod.json"]) ?? gitDate(["log", "-1", "--format=%cs"]);
+    // The commit's calendar day in its committer's own zone (%cs) or in UTC,
+    // whichever is later. Map dates are UTC days (the loop bumps with
+    // `date -u +%F`), and the same commit rebased or cherry-picked west of UTC
+    // after 00:00 UTC carries the previous day as %cs for the same instant.
+    const commitDay = (format: string[], env?: NodeJS.ProcessEnv) =>
+      gitDate(["log", "-1", ...format, "--", "content/seo/lastmod.json"], env) ?? gitDate(["log", "-1", ...format], env);
+    const days = [
+      commitDay(["--format=%cs"]),
+      commitDay(["--date=format-local:%Y-%m-%d", "--format=%cd"], { ...process.env, TZ: "UTC" }),
+    ].filter((day): day is string => day !== null);
+    const committed = days.sort().at(-1) ?? null;
     if (committed !== null) expect(newest <= committed, `newest map date ${newest} is after its commit ${committed}`).toBe(true);
   });
 
