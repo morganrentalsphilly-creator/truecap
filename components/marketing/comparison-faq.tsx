@@ -20,6 +20,8 @@
  *     React children. plainTextOf reads the text out of them; an element
  *     whose text does not come from its children makes it throw, so an
  *     answer can never lose words in the JSON-LD without failing the build.
+ *     So does a line break or a block (<br>, <p>, <li>…): the page shows a
+ *     break there and the joined JSON-LD text would glue the words together.
  *
  * Schema pattern follows schema.org/FAQPage with mainEntity = array of
  * Question, each with an acceptedAnswer of type Answer.
@@ -49,13 +51,21 @@ export type FaqItem = {
 };
 
 /**
+ * HTML elements an answer may use: inline text that renders with no break of
+ * its own, so their text joins its neighbours exactly as on the page.
+ */
+const INLINE_TEXT_TAGS: ReadonlySet<string> = new Set(["a", "abbr", "b", "code", "em", "i", "small", "span", "strong", "sub", "sup"]);
+
+/**
  * The text a node renders, whitespace collapsed: strings and numbers, arrays
- * and fragments, and elements whose text is their `children`. Throws on a
- * component element without children (its text, if any, comes from other
- * props) and on anything else it cannot read (a promise, an iterable), so
- * the JSON-LD never silently drops part of a visible answer.
- * lib/__tests__/structured-data-f4.test.tsx checks the result against the
- * rendered page on every /vs page.
+ * and fragments, inline HTML elements (INLINE_TEXT_TAGS) and components whose
+ * text is their `children` (Link). Throws on a component element without
+ * children (its text, if any, comes from other props), on any other HTML
+ * element (a <br> or a block is a visible break the joined text would lose:
+ * "a<br />b" would become "ab"), and on anything else it cannot read (a
+ * promise, an iterable), so the JSON-LD never silently drops or glues part of
+ * a visible answer. lib/__tests__/structured-data-f4.test.tsx checks the
+ * result against the rendered page on every /vs page, word breaks included.
  */
 export function plainTextOf(node: ReactNode): string {
   const parts: string[] = [];
@@ -70,6 +80,9 @@ export function plainTextOf(node: ReactNode): string {
       return;
     }
     if (isValidElement<{ children?: ReactNode }>(value)) {
+      if (typeof value.type === "string" && !INLINE_TEXT_TAGS.has(value.type)) {
+        throw new TypeError(`plainTextOf: <${value.type}> in an FAQ answer (a line break or block the JSON-LD text cannot show); keep answers to text, links and inline emphasis`);
+      }
       const isComponent = typeof value.type !== "string" && value.type !== Fragment;
       if (isComponent && value.props.children === undefined) {
         throw new TypeError("plainTextOf: a component without children in an FAQ answer (its text would be missing from the JSON-LD)");
