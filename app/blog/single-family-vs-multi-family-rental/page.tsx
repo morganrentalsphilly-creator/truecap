@@ -189,7 +189,7 @@ export default function SfrVsMfrPost() {
             <strong>Tenant tenure.</strong> SFRs may appeal to tenants looking for a longer stay; check actual lease lengths in your market rather than assuming by property type. Tenant turnover varies by market and property, so check the seller&apos;s rent roll and lease history before you set a turnover rate.
           </p>
           <p>
-            <strong>Capex predictability.</strong> One furnace, one roof, one water heater, one kitchen. Easier to budget capex. Multi-family means multiple of each system, and they fail on different schedules. The math averages out over a portfolio, but year-to-year variance is higher.
+            <strong>Capex predictability.</strong> One furnace, one roof, one water heater, one kitchen. Easier to <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">budget capex</Link>. Multi-family means multiple of each system, and they fail on different schedules. The math averages out over a portfolio, but year-to-year variance is higher.
           </p>
           <p>
             <strong>Exit optionality.</strong> Need to sell? An SFR can go to owner-occupant buyers as well as investors; a 5+ unit building needs a buyer who can get multifamily financing, so allow more time.

@@ -130,7 +130,7 @@ export default function HouseHackingPost() {
             The trap most first-timers fall into: they look at &quot;total rent collected vs. total mortgage&quot; and think they&apos;re living free. The honest math:
           </p>
           <p>
-            <strong>True monthly out-of-pocket =</strong> Mortgage + property tax + insurance + utilities (for your unit) + reserves for vacancy + reserves for maintenance + reserves for CapEx — <strong>rent from other units</strong>.
+            <strong>True monthly out-of-pocket =</strong> Mortgage + property tax + insurance + utilities (for your unit) + reserves for vacancy + reserves for maintenance + <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">reserves for CapEx</Link> — <strong>rent from other units</strong>.
           </p>
           <p>
             If you skip reserves, you&apos;ll get crushed the first year someone moves out or the roof needs work. Build them in: 5% vacancy on rented units, 10% maintenance, 5% CapEx (newer building) to 10% CapEx (older building).

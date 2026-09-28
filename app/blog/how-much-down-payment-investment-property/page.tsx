@@ -317,7 +317,7 @@ export default function DownPaymentPost() {
                 1% rule
               </Link>{" "}
               line. After honest operating expenses (5% vacancy, 8% management, 5%
-              maintenance, 5% capex reserves, $3,000 taxes, $1,450 insurance), the property
+              maintenance, 5% <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">capex reserves</Link>, $3,000 taxes, $1,450 insurance), the property
               throws off about <strong>$18,650 of net operating income</strong> — a 7.46% cap
               rate. Now watch what the down payment does:
             </p>

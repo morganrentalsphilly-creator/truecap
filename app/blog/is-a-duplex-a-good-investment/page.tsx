@@ -1179,7 +1179,7 @@ export default function BlogPost() {
             </li>
           </ol>
           <p>
-            More on the strategy fork — BRRRR, Section 8, house hacking, and how
+            More on the strategy fork — BRRRR, <Link href="/blog/section-8-rental-property-investing" className="text-primary font-semibold hover:underline">Section 8</Link>, house hacking, and how
             each one changes the same building — in the{" "}
             <Link
               href="/blog/topics/strategy"
