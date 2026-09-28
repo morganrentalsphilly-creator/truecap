@@ -21,6 +21,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-read-a-rent-roll";
 const TITLE =
@@ -183,7 +184,7 @@ export default function HowToReadARentRollPost() {
             That last detail matters: a one-column list of &quot;rents&quot; with
             no lease dates and no deposits is not a rent roll, it is marketing.
             Lease dates tell you when each rent can actually be reset; deposits are
-            a liability you inherit; the status column is where vacancy and
+            a liability you may inherit; the status column is where vacancy and
             delinquency hide. If a broker sends you a single number — &quot;grosses
             $5,300/month&quot; — your first job is to make them turn it into a real
             rent roll, line by line.
@@ -282,7 +283,7 @@ export default function HowToReadARentRollPost() {
             The bottom line is three numbers, not one
           </h2>
           <p>
-            The single most common rent-roll mistake is reading one total when
+            The easiest rent-roll mistake to make is reading one total when
             there are really three. Pull all three from the table above:
           </p>
           <ul>
@@ -388,12 +389,13 @@ export default function HowToReadARentRollPost() {
             and collected is the truest measure of management quality you will find.
           </p>
           <p>
-            <strong>5. Deposits you inherit as a liability.</strong> That $3,425 of
-            security deposits is not income — it is money you owe back to the
-            tenants. At closing it should be credited to you so you hold the funds
-            you are legally on the hook to return. If the seller cannot actually
-            transfer them, you have inherited a liability with no cash behind it.
-            Confirm the total moves to you on the settlement statement.
+            <strong>5. Deposits you may inherit as a liability.</strong> That
+            $3,425 of security deposits is not income — it is the tenants&apos;
+            money, held against their leases. At closing it should be credited to
+            you, because depending on your state&apos;s landlord-tenant law you
+            may become responsible for returning it. If the seller cannot actually
+            transfer the deposits, you could inherit that liability with no cash
+            behind it. Confirm the total moves to you on the settlement statement.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -447,10 +449,11 @@ export default function HowToReadARentRollPost() {
             >
               gross rent multiplier
             </Link>{" "}
-            on the seller&apos;s GPR is $520,000 ÷ $63,600 = <strong>8.2</strong> —
-            a number that looks like a healthy cash-flow deal. On rent actually
-            being collected, $520,000 ÷ $42,900 = <strong>12.1</strong>, which is
-            appreciation-market pricing. Same building, same page, two stories. The
+            on annual rent, using the seller&apos;s GPR, is $520,000 ÷ $63,600 ={" "}
+            <strong>8.2</strong> — a number that looks like a healthy cash-flow
+            deal. On rent actually being collected, $520,000 ÷ $42,900 ={" "}
+            <strong>12.1</strong>, which reads more like appreciation-market
+            pricing. Same building, same page, two stories. The
             verified rent roll is what tells you which one you are paying for.
           </p>
 
@@ -492,8 +495,14 @@ export default function HowToReadARentRollPost() {
               >
                 housing-voucher (Section 8) payments
               </Link>{" "}
-              against the housing authority&apos;s contract, since part of that rent
-              comes from the agency, not the tenant.
+              against the housing authority&apos;s contract, since{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-J/section-982.451"
+                className="text-primary font-semibold hover:underline"
+              >
+                part of that rent comes from the agency, not the tenant
+              </a>
+              .
             </li>
           </ul>
           <p>
@@ -599,6 +608,14 @@ export default function HowToReadARentRollPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "24 CFR 982.451, Housing assistance payments contract (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-J/section-982.451",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

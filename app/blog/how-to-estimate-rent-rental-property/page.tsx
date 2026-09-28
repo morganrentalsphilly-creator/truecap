@@ -23,6 +23,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-estimate-rent-rental-property";
 const TITLE = "How to estimate rent on a rental property (2026)";
@@ -73,10 +74,10 @@ const FAQS = [
   },
   {
     q: "How much does a wrong rent estimate actually cost?",
-    a: "More than almost any other input. Rent sits at the top of every metric, so an error compounds through all of them. On a $250,000 single-family rental, overstating rent by $150/month (about 8%) lifts the cap rate by roughly 0.6 points, swings monthly cash flow by about $128, and moves DSCR from 1.15 to 1.24 — enough to flip a deal from failing a lender's 1.20 floor to passing it. Get rent wrong and every downstream number is wrong with it.",
+    a: "More than almost any other input. Rent sits at the top of every metric, so an error compounds through all of them. On a $250,000 single-family rental, overstating rent by $150/month (about 8%) lifts the cap rate by roughly 0.6 points, swings monthly cash flow by about $128, and lifts DSCR (NOI ÷ debt service) from 0.97 to 1.08. Measured as rent ÷ PITIA (principal, interest, taxes, insurance and association dues), coverage moves from 1.15 to 1.24 — enough to flip a deal from failing a hypothetical 1.20 lender minimum on that basis to passing it. Get rent wrong and every downstream number is wrong with it.",
   },
   {
-    q: "Do online rent estimates (Zestimate, Rentometer) work?",
+    q: "Do online rent estimates (Rent Zestimate, Rentometer) work?",
     a: "They're a fine starting bracket and a terrible final answer. Automated estimates are built from broad data and can miss condition, exact location, layout, and recent concessions — the things that move rent most at the property level. Use them to frame a range in seconds, then confirm with real leased comps before you underwrite. Never type an automated estimate straight into your model as the rent.",
   },
 ];
@@ -148,8 +149,8 @@ export default function HowToEstimateRentPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Rent is the single most important number in a rental underwrite and
-              the one investors most often guess. Every metric you care about —
+              Rent is the single most important number in a rental underwrite,
+              and the easiest one to guess at. Every metric you care about —
               cap rate, cash-on-cash, DSCR, cash flow — is built on top of the
               rent figure, so a small error at the top compounds into a wrong
               answer at the bottom. Here&apos;s how to estimate market rent the way
@@ -175,12 +176,32 @@ export default function HowToEstimateRentPost() {
               haircut it down to effective for the cash-flow model.
             </p>
             <p>
-              Market context matters before you start. After the 2021–22 surge,
-              national asking-rent growth has cooled to roughly flat-to-low-single
-              digits — somewhere between about 0% and 3% year over year depending
-              on the data source, with advertised rents barely moving for well over
-              a year. The takeaway for underwriting: do not assume the rent number
-              keeps climbing. Estimate what the unit leases for{" "}
+              Market context matters before you start. After the surge, national
+              rent growth has cooled: the Census Bureau&apos;s{" "}
+              <a
+                href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
+                className="text-primary font-semibold hover:underline"
+              >
+                median asking rent was $1,531 in Q2 2026
+              </a>
+              , about 2.5% above a year earlier, and the{" "}
+              <a
+                href="https://www.bls.gov/news.release/archives/cpi_09112026.htm"
+                className="text-primary font-semibold hover:underline"
+              >
+                BLS consumer price index for rent of primary residence rose 2.7%
+              </a>{" "}
+              in the 12 months to August 2026. Advertised rents are up only
+              modestly since 2024, when the Census Bureau&apos;s median asking
+              rent was{" "}
+              <a
+                href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
+                className="text-primary font-semibold hover:underline"
+              >
+                $1,486 for the year
+              </a>
+              . The takeaway for underwriting: do
+              not assume the rent number keeps climbing. Estimate what the unit leases for{" "}
               <em>now</em>, and if your model needs aggressive rent growth to work,
               the deal probably doesn&apos;t.
             </p>
@@ -213,8 +234,9 @@ export default function HowToEstimateRentPost() {
             </p>
             <p>
               <strong>3. Adjust each comp toward your subject.</strong> Add or
-              subtract for concrete differences. Rough rules of thumb that you can
-              calibrate to your market: about $75–$150 per bedroom, ~$75 per
+              subtract for concrete differences. Adjustment values are
+              market-specific, so calibrate your own from local leases. For
+              illustration, this guide uses about $75–$150 per bedroom, ~$75 per
               half-bath, roughly $0.30–$0.50 per square foot of living area, a
               $100–$200 premium for a recent renovation, and line items for
               garage, in-unit laundry, or a finished basement. The point isn&apos;t
@@ -333,9 +355,25 @@ export default function HowToEstimateRentPost() {
                 1% rule
               </Link>
               : monthly rent as a share of price. $1,900 on $250,000 is{" "}
-              <strong>0.76%</strong> — below the classic 1% bar, which is entirely
-              normal in 2026 and exactly why higher financing costs have made cash
-              flow harder to find. The 1% rule won&apos;t price your rent, but if
+              <strong>0.76%</strong> — below the classic 1% bar, which is normal
+              in 2026. As a rough national comparison, the Census Bureau&apos;s
+              Q2 2026 median asking rent ($1,531) is{" "}
+              <a
+                href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 0.45% of its median asking sales price ($343,800)
+              </a>
+              . Sub-1% ratios are also why higher financing costs have made cash
+              flow harder to find: Freddie Mac&apos;s 30-year fixed average was{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                7.03% for the week of Sept. 24, 2026, against a 2021 average of
+                about 2.96%
+              </a>
+              . The 1% rule won&apos;t price your rent, but if
               your comp-derived rent implies something wild — 1.6% of price, say —
               that&apos;s a flag to recheck your comps before you celebrate.
             </p>
@@ -388,10 +426,18 @@ export default function HowToEstimateRentPost() {
               Here&apos;s the part that makes rent worth getting right. Because rent
               sits at the top of the stack, a small error ripples through every
               metric. Take the same $250,000 house — 25% down, $187,500 financed at
-              7% (about $1,247/month principal and interest), $250/month taxes,
-              $150/month insurance — and compare an honest $1,900 market rent
-              against a too-optimistic $2,050. That&apos;s a $150/month gap, only
-              about 8%:
+              7% (close to Freddie Mac&apos;s{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                30-year fixed average of 7.03% for the week of Sept. 24, 2026
+              </a>
+              ; about $1,247/month principal and interest), $250/month taxes,
+              $150/month insurance, 5% vacancy, and 10% of rent set aside for
+              maintenance and other operating costs — and compare an honest
+              $1,900 market rent against a too-optimistic $2,050. That&apos;s a
+              $150/month gap, only about 8%:
             </p>
 
             <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
@@ -420,7 +466,12 @@ export default function HowToEstimateRentPost() {
                     <td className="text-right">+$95</td>
                   </tr>
                   <tr>
-                    <td>DSCR</td>
+                    <td>DSCR (NOI ÷ debt service)</td>
+                    <td className="text-right">0.97</td>
+                    <td className="text-right">1.08</td>
+                  </tr>
+                  <tr>
+                    <td>Rent ÷ PITIA ($1,647/month)</td>
                     <td className="text-right">1.15</td>
                     <td className="text-right">1.24</td>
                   </tr>
@@ -438,8 +489,20 @@ export default function HowToEstimateRentPost() {
               >
                 DSCR
               </Link>{" "}
-              from 1.15 to 1.24. That last one matters beyond the spreadsheet: most
-              DSCR lenders set a floor at 1.20–1.25, so the honest rent{" "}
+              (NOI ÷ debt service, the measure TrueCap reports) from 0.97 to
+              1.08.{" "}
+              <Link
+                href="/blog/how-to-calculate-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                Some DSCR loan programs
+              </Link>{" "}
+              instead divide gross rent by PITIA (principal, interest, taxes,
+              insurance and association dues; $1,647 a month here, with no
+              association dues on this house), and on that basis the same $150 lifts
+              coverage from 1.15 to 1.24. That matters beyond the spreadsheet:
+              DSCR lenders set their own minimums, so get yours in writing. At a
+              1.20 minimum on a rent ÷ PITIA basis, the honest rent{" "}
               <em>fails</em> the loan and the optimistic rent <em>passes</em>.
               Inflating the rent doesn&apos;t just flatter your returns — it can
               manufacture a loan approval the property can&apos;t actually support.
@@ -457,11 +520,43 @@ export default function HowToEstimateRentPost() {
               Special cases worth a second look
             </h2>
             <p>
-              <strong>Section 8 and the FMR ceiling.</strong> If you&apos;re renting
-              to a voucher tenant, the housing authority caps the rent at a payment
-              standard tied to HUD&apos;s Fair Market Rent — which can sit above or
-              below open-market rent depending on the neighborhood. That makes FMR a
-              second rent estimate you have to run; the mechanics are in{" "}
+              <strong>Section 8: rent reasonableness and FMR.</strong> If
+              you&apos;re renting to a voucher tenant, the housing authority must
+              find your rent{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507"
+                className="text-primary font-semibold hover:underline"
+              >
+                reasonable against comparable unassisted units
+              </a>
+              . Its{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.503"
+                className="text-primary font-semibold hover:underline"
+              >
+                payment standard, generally 90% to 110% of HUD&apos;s Fair Market
+                Rent
+              </a>
+              , caps the subsidy, not your rent. The tenant covers any gap, but
+              at initial lease-up{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.508"
+                className="text-primary font-semibold hover:underline"
+              >
+                their share can&apos;t exceed 40% of adjusted monthly income
+              </a>
+              . HUD sets Fair Market Rent at the{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-VIII/part-888/subpart-A/section-888.113"
+                className="text-primary font-semibold hover:underline"
+              >
+                40th-percentile gross rent (rent plus utilities) for
+                standard-quality units across the area
+              </a>
+              , so it can sit above or below open-market rent depending on the
+              neighborhood; compare it with your rent plus any utilities the
+              tenant pays. That makes FMR a second benchmark you have to check;
+              the mechanics are in{" "}
               <Link
                 href="/blog/section-8-rental-property-investing"
                 className="text-primary font-semibold hover:underline"
@@ -503,11 +598,14 @@ export default function HowToEstimateRentPost() {
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              does the first pass for you: enter the address and it pulls a market
-              rent estimate, layers in vacancy and reserves, and returns cap rate,
-              cash flow, DSCR, and a Buy Box fit in one pass — so the comp
-              work becomes a confirmation step instead of a blank box you have to
-              guess at.
+              does the first pass for you: enter the address and, if the rent
+              field is blank, it fills in HUD&apos;s Fair Market Rent as a
+              labeled placeholder rent (a labeled statewide average where HUD
+              has no local match), layers in
+              vacancy and reserves, and returns cap rate, cash flow, DSCR, and a
+              Buy Box fit in one pass. Replace that placeholder with the rent
+              your comps support, and the comp work sets your number instead of
+              filling a blank box you have to guess at.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -532,13 +630,51 @@ export default function HowToEstimateRentPost() {
               GRM and the 1% rule, and step it down to effective rent before it hits
               the model. Then underwrite the conservative number — because as the
               $150 example shows, the gap between an honest rent and a hopeful one is
-              the gap between a deal that cash flows and clears the lender&apos;s
-              line and one that only looks like it does. Get rent right and the rest
+              the gap between a deal that cash flows and clears a lender&apos;s
+              minimum and one that only looks like it does. Get rent right and the rest
               of the underwrite — cap rate, DSCR, cash flow — finally tells you the
               truth.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "U.S. Census Bureau, Housing Vacancy Survey, Tables 11A and 11B: Median Asking Rent and Median Asking Sales Price (release of July 28, 2026)",
+              url: "https://www.census.gov/housing/hvs/data/histtab11.xlsx",
+            },
+            {
+              title:
+                "U.S. Bureau of Labor Statistics, Consumer Price Index – August 2026 news release (Sept. 11, 2026), Table 2",
+              url: "https://www.bls.gov/news.release/archives/cpi_09112026.htm",
+            },
+            {
+              title:
+                "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US), from Freddie Mac's Primary Mortgage Market Survey",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+            {
+              title: "24 CFR 982.507, Rent to owner: Reasonable rent (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507",
+            },
+            {
+              title:
+                "24 CFR 982.503, Payment standard areas, schedule, and amounts (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.503",
+            },
+            {
+              title:
+                "24 CFR 982.508, Maximum family share at initial occupancy (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.508",
+            },
+            {
+              title:
+                "24 CFR 888.113, Fair market rents for existing housing: Methodology (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-VIII/part-888/subpart-A/section-888.113",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

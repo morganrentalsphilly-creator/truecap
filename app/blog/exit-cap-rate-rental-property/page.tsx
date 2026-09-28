@@ -30,6 +30,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "exit-cap-rate-rental-property";
 const TITLE_PLAIN =
@@ -39,7 +40,7 @@ const TITLE_PLAIN =
 // window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
 const SERP_TITLE = "Exit cap rate: how to pick the number (2026)";
 const DESCRIPTION =
-  "Exit cap rate = exit-year NOI ÷ the cap rate a future buyer pays. Why it drives your sale price and IRR more than any input, plus a worked 2026 example.";
+  "Projected sale price = exit-year NOI ÷ the exit cap rate a future buyer pays. Why it drives your sale price and IRR more than any input, plus a worked 2026 example.";
 const PUBLISHED_AT = "2026-07-08";
 const MODIFIED_AT = lastmodFor("/blog/exit-cap-rate-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
@@ -77,15 +78,15 @@ const FAQS = [
   },
   {
     q: "Should the exit cap rate be higher than the going-in cap rate?",
-    a: "As a default, yes. The building is older and more depreciated on your exit date than the day you bought it, and you cannot forecast that interest rates will be lower when you sell — so assuming the market pays a lower cap rate (compression) is optimistic. A common, conservative convention is to add roughly 0.1 percentage point of exit cap for every year you hold: a 6.5% going-in cap over a five-year hold becomes about a 7.0% exit cap. If a deal only works when you assume the exit cap compresses below your entry cap, you're underwriting a bet on rates, not a rental.",
+    a: "As a default, yes. The building is older and more depreciated on your exit date than the day you bought it, and you cannot forecast that interest rates will be lower when you sell — so assuming the market pays a lower cap rate (compression) is optimistic. One conservative convention is to add roughly 0.1 percentage point of exit cap for every year you hold: a 6.5% going-in cap over a five-year hold becomes about a 7.0% exit cap. If a deal only works when you assume the exit cap compresses below your entry cap, you're underwriting a bet on rates, not a rental.",
   },
   {
     q: "What is a good exit cap rate assumption for 2026?",
-    a: "There's no universal number, because cap rates are local and move with interest rates. The defensible approach in 2026's higher-rate environment is to start from your going-in cap rate, add 0.5 point or so for a typical five-year hold, and then stress-test the deal at your entry cap, entry + 0.5, and entry + 1.0. If the return survives the middle case and doesn't turn into a loss at entry + 1.0, the deal stands on its own. Assuming compression to hit a target IRR is the most common way pro formas flatter a mediocre deal.",
+    a: "There's no universal number, because cap rates are local and move with interest rates. The defensible approach in 2026's higher-rate environment is to start from your going-in cap rate, add 0.5 point or so for a typical five-year hold, and then stress-test the deal at your entry cap, entry + 0.5, and entry + 1.0. If the return survives the middle case and doesn't turn into a loss at entry + 1.0, the deal stands on its own. Assuming compression to hit a target IRR is one of the easiest ways for a pro forma to flatter a mediocre deal.",
   },
   {
     q: "Does the exit cap rate matter for a single-family or small multifamily rental?",
-    a: "Less directly than for commercial property. A 2–4 unit or single-family home is usually resold to an owner-occupant or a small investor who prices it on comparable sales and price per square foot, not on a cap rate — cap-rate pricing is really a 5+ unit and commercial convention. Use the exit cap as one lens on resale value for small residential, and cross-check it against comp-based appreciation. For a 5+ unit building, the exit cap is the lens, because that's exactly how the next buyer's lender and appraiser will value it.",
+    a: "Less directly than for commercial property. A 2–4 unit or single-family home may resell to an owner-occupant or a small investor, and the buyer's lender values it on comparable sales (plus a gross-rent-multiplier check for 2–4 units), not on a cap rate — cap-rate pricing is really a 5+ unit and commercial convention. Use the exit cap as one lens on resale value for small residential, and cross-check it against comp-based appreciation. For a 5+ unit building, the exit cap is the main lens, because the next buyer's agency lender requires an appraisal whose income approach is built on a cap rate (reconciled against sales comps and cost).",
   },
 ];
 
@@ -158,8 +159,8 @@ export default function ExitCapRatePost() {
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Every projection of what a rental returns five or ten years out
-              rests on a number most investors pick in about four seconds and
-              never revisit: the exit cap rate. It&apos;s the cap rate you assume
+              rests on a number that often gets picked in seconds and never
+              revisited: the exit cap rate. It&apos;s the cap rate you assume
               a future buyer will pay when you sell, and because your projected
               sale price is exit-year net operating income divided by that rate,
               it quietly sets the biggest line in any multi-year return — the
@@ -233,9 +234,10 @@ export default function ExitCapRatePost() {
             <p>
               On a buy-and-hold deal, the money comes from two places: the cash
               flow you collect each year, and the lump sum you net when you sell.
-              For a typical five-to-ten-year hold, that sale — the reversion —
-              is usually <strong>60% to 80% of the entire return</strong>. And
-              the sale price runs entirely through the exit cap rate. So the one
+              For a typical five-to-ten-year hold, that sale (the reversion) can
+              dwarf the cash flow: in the worked example below it is about{" "}
+              <strong>88% of everything the deal pays back</strong>. And the
+              sale price runs entirely through the exit cap rate. So the one
               assumption you can&apos;t check against any real data is also the
               one that controls most of your profit.
             </p>
@@ -247,9 +249,10 @@ export default function ExitCapRatePost() {
               accelerates as caps fall. Going from a 7.0% to a 6.5% exit cap
               (half a point) lifts value about 7.7%; going from 6.5% to 6.0%
               lifts it about 8.3%. Compare that to the inputs investors actually
-              obsess over. A quarter-point on your mortgage rate or five points of
-              vacancy moves cash flow by a few dollars a month. The exit cap moves
-              the biggest check the deal will ever cut. It deserves the most
+              obsess over. A quarter-point on your mortgage rate moves the
+              payment on the duplex below by about $38 a month. That is real
+              money, but it is nothing next to the exit cap, which moves the
+              biggest check the deal will ever cut. It deserves the most
               scrutiny and usually gets the least.
             </p>
 
@@ -332,14 +335,14 @@ export default function ExitCapRatePost() {
               The equity multiple tells the same story in one figure: 1.69x of
               your cash back at a 6.0% exit, 1.38x at 6.5%, 1.11x at 7.0%, and
               0.88x — a loss — at 7.5%. If you want to feel how the going-in side
-              of this drives the exit, rebuild the NOI line in the{" "}
+              of this drives the exit, rebuild the year-one NOI line in the{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap analyzer
-              </Link>{" "}
-              and watch the exit-year number move.
+              </Link>
+              , then grow it to your exit year the way the example above does.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -350,9 +353,22 @@ export default function ExitCapRatePost() {
               pushes it around. Three forces do most of the work. First and
               biggest, <strong>interest rates</strong>: cap rates loosely track
               the cost of debt, so when the ten-year Treasury and mortgage rates
-              rise, buyers demand higher yields and cap rates drift up. The 2022–26
-              rate climb is exactly why so many deals underwritten on 2021
-              compression assumptions disappointed. Second, the{" "}
+              rise, buyers demand higher yields and cap rates drift up. The{" "}
+              <a
+                href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fas=avg&cosd=2019-01-01"
+                className="text-primary font-semibold hover:underline"
+              >
+                2022–23 rate climb
+              </a>{" "}
+              (
+              <a
+                href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-01-01"
+                className="text-primary font-semibold hover:underline"
+              >
+                30-year mortgage rates were still near 7% in September 2026
+              </a>
+              ) is exactly why so many deals underwritten on 2021 compression
+              assumptions disappointed. Second, the{" "}
               <strong>building ages</strong>: a property that&apos;s five years
               older at sale has five more years of wear and a shorter remaining
               life, which argues — all else equal — for a slightly higher exit
@@ -373,8 +389,8 @@ export default function ExitCapRatePost() {
             <p>
               Three rules keep you honest. <strong>One: exit cap ≥ going-in
               cap.</strong> Make your default assumption that the cap rate you
-              sell at is at least the one you bought at. A widely used convention
-              is to add about 0.1 percentage point of exit cap for each year of
+              sell at is at least the one you bought at. One conservative
+              convention is to add about 0.1 percentage point of exit cap for each year of
               the hold — a 6.5% entry over five years becomes a ~7.0% exit. That
               isn&apos;t pessimism; it&apos;s declining to assume a rally you have
               no way to predict. <strong>Two: never underwrite compression to make
@@ -418,11 +434,23 @@ export default function ExitCapRatePost() {
             </h2>
             <p>
               One honest wrinkle for TrueCap&apos;s core audience. Cap-rate pricing
-              is really a commercial and 5+ unit convention. When you sell a
-              single-family rental or a 2–4 unit, the buyer is usually an
-              owner-occupant or a small investor, and their lender appraises the
-              property on <strong>comparable sales and price per square foot</strong>,
-              not on a cap rate. So for small residential, treat the exit-cap
+              is really a commercial and 5+ unit convention. When you sell a single-family rental or a 2–4 unit, the buyer may
+              be an owner-occupant or a small investor, and their lender
+              appraises the property on{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>comparable sales</strong>
+              </a>{" "}
+              (plus a{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+                className="text-primary font-semibold hover:underline"
+              >
+                gross-rent-multiplier check on 2–4 units
+              </a>
+              ), not on a cap rate. So for small residential, treat the exit-cap
               reversion as one useful lens on resale value — and cross-check it
               against straightforward comp-based appreciation, the kind you can
               reason about in a{" "}
@@ -433,8 +461,15 @@ export default function ExitCapRatePost() {
                 cash-flow-versus-appreciation
               </Link>{" "}
               frame. For a 5+ unit building the exit cap isn&apos;t just a lens,
-              it&apos;s the lens: that&apos;s exactly how the next buyer&apos;s
-              appraiser and lender will set the price, so the discipline above
+              it&apos;s the main one: the next buyer&apos;s agency lender
+              requires an appraisal whose income approach is{" "}
+              <a
+                href="https://mf.freddiemac.com/docs/chapters/mf_guide_ch_60.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                built on a cap rate
+              </a>{" "}
+              (reconciled against sales comps and cost), so the discipline above
               applies with full force.
             </p>
 
@@ -455,14 +490,15 @@ export default function ExitCapRatePost() {
               </li>
               <li>
                 <strong>Forgetting the costs of selling.</strong> A projected sale
-                price isn&apos;t proceeds. Net out 6–8% for commissions and closing
-                plus your loan payoff before you call it a return.
+                price isn&apos;t proceeds. Net out commissions and closing costs
+                (the example above uses 7%) plus your loan payoff before you call
+                it a return.
               </li>
               <li>
                 <strong>Applying a commercial cap to small residential.</strong> A
                 duplex that will actually resell on comps doesn&apos;t take a
                 strict cap-rate reversion at face value. Sanity-check against
-                price per square foot.
+                recent comparable sales.
               </li>
               <li>
                 <strong>Letting a low exit cap paper over weak cash flow.</strong>{" "}
@@ -499,15 +535,39 @@ export default function ExitCapRatePost() {
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              carry your NOI, financing, and cap-rate assumptions straight through
-              to cash flow, DSCR, and the projected sale — so the exit you assume
-              and the modeled result always come from the same set of numbers.
-              None of this is investment advice; confirm the actual rents,
+              carry your NOI and financing assumptions through to cash flow, cap
+              rate, and DSCR, then run the exit-cap sale math above alongside it,
+              because TrueCap&apos;s longer-range return estimate grows value with
+              an appreciation rate, not an exit cap. Confirm the actual rents,
               expenses, and comparable sales on any specific property before you
               rely on a projected exit.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US), annual averages 2019–2025",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fas=avg&cosd=2019-01-01",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US), weekly readings, 2026",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-01-01",
+            },
+            {
+              title: "Freddie Mac Multifamily Seller/Servicer Guide, Chapter 60: Appraiser and Appraisal Requirements (updated 08/25/26)",
+              url: "https://mf.freddiemac.com/docs/chapters/mf_guide_ch_60.pdf",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-08, Comparable Sales (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

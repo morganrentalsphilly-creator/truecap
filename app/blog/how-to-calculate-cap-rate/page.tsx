@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-calculate-cap-rate";
 const TITLE = "How to calculate cap rate (with worked examples) — 2026 guide";
@@ -80,19 +81,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good cap rate in 2026?",
-    a: "Highly market-dependent. In Class A markets like Austin, Nashville, or Raleigh, 4-5% is competitive on stabilized properties. In Tier 2 / 3 markets like Cleveland, Memphis, or Birmingham, 7-9% is achievable but you take on more vacancy and rougher tenant pools. Above 10% usually means either heavy rehab risk, weak market fundamentals, or unrealistic NOI assumptions. Below 4% usually means you're paying for appreciation, not yield. There's no universal 'good' cap rate — it depends on what risk and market you're in.",
+    a: "Highly market-dependent. Cap rates vary by metro, neighborhood, property class and condition, so compare a deal against recent sales of similar stabilized rentals in the same market rather than a national rule. As a rule of thumb, a cap rate above 10% often means heavy rehab risk, weak market fundamentals, or unrealistic NOI assumptions, and one below 4% usually means you're paying for appreciation, not yield. There's no universal 'good' cap rate — it depends on what risk and market you're in.",
   },
   {
     q: "Should I use purchase price or market value in the denominator?",
-    a: "Both are used in different contexts. Cap rate at purchase uses purchase price — useful for analyzing a specific deal. Cap rate at current market value (sometimes called 'yield on cost' when using purchase price) is useful for comparing across properties or tracking your portfolio. When commercial appraisers talk about cap rate, they typically mean market-value cap rate. When investors talk about a deal they bought, they usually mean purchase-price cap rate.",
+    a: "Both are used in different contexts. Cap rate on purchase price is useful for analyzing a specific deal (NOI divided by total cost including rehab is usually called 'yield on cost'); cap rate on current market value is useful for comparing across properties or tracking your portfolio. When commercial appraisers talk about cap rate, they typically mean market-value cap rate. When investors talk about a deal they bought, they usually mean purchase-price cap rate.",
   },
   {
     q: "Is cap rate higher always better?",
-    a: "No. A 12% cap rate in a market where 7% is normal usually means something is wrong: deferred maintenance, vacancy risk you haven't priced in, neighborhood declining, or overstated rents. A 4% cap rate in a high-growth market where appreciation has averaged 7-9% annually can be a great deal. Cap rate is a starting filter, not a final answer.",
+    a: "No. A 12% cap rate in a market where 7% is normal usually means something is wrong: deferred maintenance, vacancy risk you haven't priced in, neighborhood declining, or overstated rents. A 4% cap rate in a high-growth market where appreciation has averaged 7-9% annually can still make sense if the appreciation you're underwriting is realistic. Cap rate is a starting filter, not a final answer.",
   },
   {
     q: "What's the difference between cap rate and cash-on-cash return?",
-    a: "Cap rate ignores financing entirely (NOI ÷ price). Cash-on-cash includes the mortgage payment ((NOI − annual debt service) ÷ cash invested). So cap rate tells you the property's intrinsic yield, cash-on-cash tells you the return on the dollars you actually put in. A property with 6% cap rate can produce 12-15% cash-on-cash with 75% leverage when rates are below the cap rate — that spread is the 'positive leverage' that makes real estate work.",
+    a: "Cap rate ignores financing entirely (NOI ÷ price). Cash-on-cash includes the mortgage payment ((NOI − annual debt service − CapEx reserve) ÷ cash invested). So cap rate tells you the property's intrinsic yield, cash-on-cash tells you the return on the dollars you actually put in. A property with a 6% cap rate bought with 75% leverage earns a higher cash-on-cash return than its cap rate only when the loan's annual payment divided by the loan amount (the loan constant) is below 6% — that spread is the 'positive leverage' that makes real estate work. On an amortizing loan the constant runs above the interest rate: a 30-year loan at 5% has a constant of about 6.44%, so at that rate leverage would lower cash-on-cash, not raise it.",
   },
 ];
 
@@ -171,10 +172,11 @@ export default function BlogPost() {
           </p>
           <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Cap rate = NOI ÷ purchase price. Sounds simple, but most investors
-            mix lender-style NOI with investor cash reserves or skip vacancy.
-            Here&apos;s the formula, three worked examples (good deal / bad deal
-            / cash purchase), and when cap rate is the wrong metric.
+            Cap rate = NOI ÷ purchase price. Sounds simple, but it&apos;s easy
+            to mix lender-style NOI with investor cash reserves or to skip
+            vacancy. Here&apos;s the formula, three worked examples (a full NOI
+            build-up / a broker&apos;s inflated cap / a cash purchase), and when
+            cap rate is the wrong metric.
           </p>
         </header>
 
@@ -197,7 +199,7 @@ export default function BlogPost() {
           <p>
             NOI is net operating income — what the property earns after
             operating expenses but <em>before</em> debt service. Skipping any of
-            the five steps below is the #1 reason cap rates look better on paper
+            the five steps below is a common reason cap rates look better on paper
             than they perform.
           </p>
 
@@ -209,26 +211,36 @@ export default function BlogPost() {
 
           <h3>Step 2: Subtract vacancy allowance</h3>
           <p>
-            Typical 5-8% of gross rents. Even in a hot market, factor in
-            turnover periods, the 30 days you might need to refresh between
-            tenants, and a lease that ends mid-month. A property with a 12-year
-            tenant is still going to turn over eventually.
+            Budget an allowance for your local market — for context, the{" "}
+            <a
+              href="https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              Census Bureau&apos;s national rental vacancy rate was 7.3% in the
+              second quarter of 2026
+            </a>
+            . Even in a hot market, factor in turnover periods, the 30 days you
+            might need to refresh between tenants, and a lease that ends
+            mid-month. A property with a 12-year tenant is still going to turn
+            over eventually.
           </p>
 
           <h3>Step 3: Subtract operating expenses</h3>
           <p>The full list — easy to skip half of these:</p>
           <ul>
             <li>
-              <strong>Property taxes</strong> (use the current assessment; some
-              markets reassess at sale).
+              <strong>Property taxes</strong> (use the current assessment, and
+              check with the local assessor whether a sale triggers a
+              reassessment).
             </li>
             <li>
               <strong>Insurance</strong> (landlord policy, not
               homeowner&apos;s).
             </li>
             <li>
-              <strong>Property management</strong> (8-10% of gross rent; include
-              even if self-managing — your time has a real cost).
+              <strong>Property management</strong> (a percentage of collected
+              rent — get quotes from local managers; include it even if
+              self-managing — your time has a real cost).
             </li>
             <li>
               <strong>Maintenance reserve</strong> (1-1.5% of property value
@@ -264,7 +276,7 @@ export default function BlogPost() {
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Worked example #1: a good deal
+            Worked example #1: the full NOI build-up
           </h2>
           <p>
             $300K single-family in Tier 2 city, asking $300K, rents at
@@ -278,7 +290,7 @@ export default function BlogPost() {
             <li>Effective gross income: $27,072</li>
             <li>Property tax: −$3,600</li>
             <li>Insurance: −$1,200</li>
-            <li>Management (8%): −$2,166</li>
+            <li>Management (8% of collected rent): −$2,166</li>
             <li>Maintenance (1.2%): −$3,600</li>
             <li>Utilities + HOA: −$600</li>
             <li>
@@ -294,16 +306,19 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            That cap rate is low for a Tier 2 city — the seller&apos;s ask is
-            rich for the rents. Maybe a great cash-on-cash deal with high
-            leverage, but the property itself isn&apos;t a yield machine.
+            Whether 5.3% is low depends on what similar rentals in this market
+            trade at — compare it with recent local sales before judging the
+            seller&apos;s ask. Leverage won&apos;t lift the yield either: at an
+            assumed 7% on a 30-year loan, the loan constant (about 7.98%) sits
+            above the 5.3% cap rate, so borrowing lowers the cash-on-cash
+            return instead of raising it.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            Worked example #2: the &ldquo;9% cap&rdquo; that isn&apos;t
+            Worked example #2: the &ldquo;8% cap&rdquo; that isn&apos;t
           </h2>
           <p>
-            Same property, but the broker tells you it&apos;s a &ldquo;9%
+            Same property, but the broker tells you it&apos;s an &ldquo;8%
             cap.&rdquo;
           </p>
           <ul>
@@ -319,7 +334,7 @@ export default function BlogPost() {
             The broker skipped vacancy, management, recurring maintenance, and
             utilities. The cap rate looks like 8% but the lender-style result is
             5.3%. The separate CapEx reserve then reduces pre-debt cash to
-            $12,906. This is the most common cap rate manipulation in broker{" "}
+            $12,906. This is a common gap in broker{" "}
             <Link
               href="/glossary/pro-forma"
               className="text-primary font-semibold hover:underline"
@@ -356,7 +371,7 @@ export default function BlogPost() {
             <li>
               <strong>Heavy rehab properties.</strong> A vacant gut-rehab has $0
               NOI today. Cap rate at purchase is 0% regardless of upside. Use
-              ARV cap rate (NOI after rehab ÷ all-in cost) instead.
+              yield on cost (stabilized NOI after rehab ÷ all-in cost) instead.
             </li>
             <li>
               <strong>Short-term rentals.</strong> STR &ldquo;cap rates&rdquo;
@@ -428,6 +443,15 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "U.S. Census Bureau, Quarterly Residential Vacancies and Homeownership, Second Quarter 2026 (CB26-116)",
+              url: "https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -438,8 +462,9 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Don&apos;t want to do the math by hand? TrueCap computes cap rate
-            alongside cash flow, CoC, DSCR, and a 10-year projection — and
-            surfaces the OpEx line items most calculators quietly skip.{" "}
+            alongside cash flow, CoC, DSCR, and a 10-year projection, and
+            itemizes the OpEx line items (vacancy, management, maintenance and
+            the CapEx reserve) so none are skipped.
           </p>
         </footer>
       </main>

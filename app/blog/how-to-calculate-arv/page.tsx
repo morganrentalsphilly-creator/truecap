@@ -30,6 +30,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-calculate-arv";
 const TITLE_PLAIN =
@@ -73,7 +74,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What does ARV mean in real estate?",
-    a: "ARV stands for after-repair value: the projected price a property could sell for—or appraise at—after the planned renovation. It is not purchase price plus rehab. It is a forecast based on renovated comparable sales, adjusted for the subject property. Flippers use ARV to calculate a 70%-rule price screen, and BRRRR investors use it to model a refinance appraisal. Neither is guaranteed.",
+    a: "ARV stands for after-repair value: the projected price a property could sell for—or appraise at—after the planned renovation. It is not purchase price plus rehab. It is a forecast based on renovated comparable sales, adjusted for the subject property. Flippers use ARV to calculate a 70%-rule price screen, and BRRRR investors use it to model a refinance appraisal. Neither outcome is certain.",
   },
   {
     q: "What is the formula for ARV?",
@@ -81,11 +82,11 @@ const FAQS = [
   },
   {
     q: "Can I use a Zestimate or online estimate as my ARV?",
-    a: "No. Automated estimates price the property in its current condition and blend renovated and unrenovated sales indiscriminately, which is exactly the distinction ARV exists to capture. A distressed house with dated finishes will carry an automated estimate far below its after-repair value, and in a hot market the estimate can also lag closed sales by months. Use online tools to find candidate comps quickly, then do the renovated-only, adjusted comp work yourself — or ask an investor-friendly agent to pull MLS comps.",
+    a: "No. ARV is a forecast for the renovated condition you plan to deliver, built from renovated comps, and an online estimate is not built for that question. Use online tools to find candidate comps quickly, then do the renovated-only, adjusted comp work yourself — or ask an investor-friendly agent to pull MLS comps.",
   },
   {
     q: "What's the difference between ARV and appraised value?",
-    a: "ARV is your forecast; the appraisal is the referee's call. On a BRRRR refinance, the lender orders an appraisal after the rehab, and the loan is sized as a percentage of that appraised value — typically 70–75% — regardless of what your spreadsheet said. If your ARV was $255,000 but the appraiser comes in at $235,000, your cash-out loan just shrank by roughly $15,000 and that money stays trapped in the deal. That's why disciplined investors underwrite ARV conservatively and stress-test the deal at 5–10% below their estimate.",
+    a: "ARV is your forecast; the appraisal is the referee's call. On a BRRRR refinance, the lender orders an appraisal after the rehab, and the loan is sized as a percentage of that appraised value — up to 70–75% under conforming cash-out limits for investment properties — regardless of what your spreadsheet said. If your ARV was $255,000 but the appraiser comes in at $235,000, your cash-out loan just shrank by roughly $15,000 and that money stays trapped in the deal. That's why disciplined investors underwrite ARV conservatively and stress-test the deal at 5–10% below their estimate.",
   },
 ];
 
@@ -164,9 +165,10 @@ export default function HowToCalculateArvPost() {
               flip profit is whatever&apos;s left of it after costs. And unlike
               rent or taxes, you can&apos;t look it up anywhere — you have to
               build it from comparable sales, which means it&apos;s also the
-              number investors most often get wrong. Overestimate ARV by 10% and
-              a profitable flip quietly becomes a break-even; on a BRRRR, the
-              same miss can double the cash trapped in the deal. Here&apos;s
+              number with the most room for error. Overestimate ARV by 10% and
+              this article&apos;s example flip keeps only about a quarter of its
+              profit; on a BRRRR, the same miss more than doubles the cash
+              trapped in the deal. Here&apos;s
               what ARV actually is, the comps method step by step with a worked
               example, where the number feeds your deal math, and how much an
               ARV miss really costs.
@@ -175,7 +177,7 @@ export default function HowToCalculateArvPost() {
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What ARV is — and the mistake baked into most estimates
+              What ARV is — and what it isn&apos;t
             </h2>
             <p>
               ARV is the market value of the property <em>after</em> your
@@ -224,15 +226,23 @@ export default function HowToCalculateArvPost() {
               >
                 BRRRR
               </Link>
-              , the refinance lender sizes your cash-out loan at typically
-              70–75% of the <em>appraised</em> value, so ARV determines how much
-              of your capital comes back out to fund the next deal. And on a
+              , the refinance lender sizes your cash-out loan as a percentage of
+              the <em>appraised</em> value — up to 75% for a one-unit investment
+              property (70% for two to four units) under{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac&apos;s conforming cash-out limits
+              </a>
+              ; other lenders set their own — so ARV determines how much of your
+              capital comes back out to fund the next deal. And on a
               straight flip, profit is ARV minus everything else — purchase,
               rehab, holding, and selling costs — so ARV error flows through to
-              the bottom line dollar for dollar. Rehab overruns get the blame
-              for most bad flips, but an optimistic ARV does at least as much
-              damage, because it inflates the top line that every other number
-              is subtracted from.
+              the bottom line dollar for dollar. Rehab overruns get much of the
+              blame for bad flips, but an optimistic ARV can do as much damage,
+              because it inflates the top line that every other number is
+              subtracted from.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -341,14 +351,23 @@ export default function HowToCalculateArvPost() {
             <p>
               Raw $/sq ft comparisons hide real differences, so appraisers — and
               you — adjust the comp&apos;s sale price before dividing. The
-              usual suspects: a bedroom or bathroom count difference (a second
-              full bath is commonly worth $5,000–$15,000 depending on the
-              market), garage versus no garage, finished basement space (worth
-              roughly half of above-grade $/sq ft in most markets), lot size,
-              and busy-road or backing-to-commercial locations. Adjust the{" "}
-              <em>comp</em> toward your subject: if Comp B has one fewer bath
-              than your finished product, add the bath value to B&apos;s price
-              before computing its $/sq ft. Two disciplines keep this honest.
+              usual suspects: a bedroom or bathroom count difference (value it
+              from local sales that differ mainly by that feature), garage
+              versus no garage, finished basement space (
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-05/improvements-section-appraisal-report"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae&apos;s appraisal guidelines
+              </a>{" "}
+              have below-grade area reported separately from above-grade square
+              footage and adjusted for separately, so don&apos;t price it at the
+              above-grade $/sq ft), lot size, and busy-road or
+              backing-to-commercial locations. Adjust the <em>comp</em> toward
+              your subject: if Comp B has a half bath where your finished
+              product will have a full one, add that difference to B&apos;s
+              price before computing its $/sq ft. Two disciplines keep this
+              honest.
               First, small square-footage differences are already handled by the
               $/sq ft math — don&apos;t double-adjust. Second, beware the
               smaller-house trap: $/sq ft rises as houses shrink, so a 1,100 sq
@@ -359,8 +378,9 @@ export default function HowToCalculateArvPost() {
             <p>
               Here&apos;s what an adjustment looks like in practice. Suppose Comp
               B — the $248,500 sale — has only one and a half baths, while your
-              finished product will have two full baths, and second full baths
-              in this market are worth about $7,500 at resale. Adjust B&apos;s
+              finished product will have two full baths, and turning a half bath
+              into a full bath in this market is worth about $7,500 at resale.
+              Adjust B&apos;s
               price up to $256,000 before dividing: $256,000 ÷ 1,350 = $189.63
               per square foot, and the four-comp average moves from $182.44 to
               about $183.83, nudging the ARV from $255,400 to roughly $257,400.
@@ -388,14 +408,30 @@ export default function HowToCalculateArvPost() {
               closed last quarter. If you&apos;re still reconciling from two
               comps and a prayer, say so in your underwriting: widen your
               margin of safety from the usual 5–10% ARV haircut to 15%, or pay
-              a few hundred dollars for a pre-purchase appraisal or a
-              broker&apos;s price opinion before you commit. One more BRRRR
-              wrinkle worth knowing while you&apos;re here: many refinance
-              lenders impose a <strong>seasoning period</strong> — commonly six
-              months of ownership — before they&apos;ll lend against the new
-              appraised value instead of your purchase price, so the ARV
-              you&apos;re projecting may not be usable until month six.
-              Budget holding costs accordingly.
+              for a pre-purchase appraisal (
+              <a
+                href="https://myhome.freddiemac.com/blog/homebuying/what-homebuyers-can-expect-appraisal-and-what-do-if-its-below-your-offer-price"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac puts the median appraisal cost at $450 to $700
+              </a>
+              ) or a broker&apos;s price opinion before you commit. One more
+              BRRRR wrinkle worth knowing while you&apos;re here: cash-out
+              refinances carry <strong>seasoning rules</strong>. Fannie Mae, for
+              example,{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
+                className="text-primary font-semibold hover:underline"
+              >
+                requires at least one borrower to have been on title for six
+                months
+              </a>{" "}
+              before a cash-out refinance and any existing first mortgage being
+              paid off to be at least 12 months old; its delayed-financing
+              exception for all-cash purchases caps the new loan at your
+              documented purchase investment plus financed closing costs. So
+              the ARV you&apos;re projecting may not be fully usable until
+              month six or later. Budget holding costs accordingly.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -503,14 +539,15 @@ export default function HowToCalculateArvPost() {
                 a softening market even 6-month-old closings can be stale.
               </li>
               <li>
-                <strong>Trusting an automated estimate.</strong> Online
-                estimates price the house as it sits today and blend conditions
-                indiscriminately. They&apos;re a comp-finding tool, not an ARV.
+                <strong>Trusting an automated estimate.</strong> ARV is a
+                forecast for the renovated condition you plan to deliver, and an
+                online estimate is not built for that question. Treat it as a
+                comp-finding tool, not an ARV.
               </li>
               <li>
                 <strong>Comping outside the neighborhood boundary.</strong> A
-                school-district line or a highway can move value 15% across one
-                street. Half a mile is a guideline; the boundary is the rule.
+                school-district line or a highway can move value sharply across
+                one street. Half a mile is a guideline; the boundary is the rule.
               </li>
               <li>
                 <strong>Letting the deal set the ARV.</strong> If you catch
@@ -551,12 +588,35 @@ export default function HowToCalculateArvPost() {
                 TrueCap analyzer
               </Link>{" "}
               so the ARV, the refinance, and the cash flow all come from one
-              consistent set of assumptions. None of this is investment advice;
-              verify comps, rehab scope, and lender terms on any specific deal
-              before you rely on an ARV.
+              consistent set of assumptions. Verify comps, rehab scope, and
+              lender terms on any specific deal before you rely on an ARV.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac Single-Family, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B4-1.3-05, Improvements Section of the Appraisal Report",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-05/improvements-section-appraisal-report",
+            },
+            {
+              title:
+                "Freddie Mac My Home, What Homebuyers Can Expect with an Appraisal",
+              url: "https://myhome.freddiemac.com/blog/homebuying/what-homebuyers-can-expect-appraisal-and-what-do-if-its-below-your-offer-price",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B2-1.3-03, Cash-Out Refinance Transactions",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

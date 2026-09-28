@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "buying-rental-property-with-tenants";
 const TITLE_PLAIN =
@@ -186,7 +187,24 @@ export default function BuyingRentalWithTenantsPost() {
               lease, tenancy type, notices, recording, foreclosure history,
               subsidy or rent restrictions, local successor-landlord law, and
               other facts can affect which terms bind a buyer and what changes
-              are permitted. Have qualified local counsel or a property
+              are permitted. Foreclosure shows how much one fact can change.
+              After a foreclosure, the federal{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section5220&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                Protecting Tenants at Foreclosure Act
+              </a>{" "}
+              requires the new owner to give bona fide tenants 90 days&apos;
+              notice to vacate. A tenancy counts as bona fide when the tenant
+              isn&apos;t the former owner or the owner&apos;s child, spouse or
+              parent, the lease was made at arm&apos;s length, and the rent
+              isn&apos;t far below market (subsidized rent aside). A tenant
+              whose lease was signed before the foreclosure notice can stay
+              until the lease ends. The exception is a sale to a buyer who will
+              live in the unit as a primary residence, and even then the tenant
+              still gets the 90 days&apos; notice. Have
+              qualified local counsel or a property
               professional identify those obligations before contingencies
               expire. If the financing or renovation plan requires lawful
               vacancy, state that requirement and the responsible party clearly
@@ -238,7 +256,16 @@ export default function BuyingRentalWithTenantsPost() {
               evidence; the other requires lawful notices or renewals, tenant
               decisions, property condition, and achievable rent. A lender may
               use the lease, appraisal rent, collection history, or another
-              program-specific method. Obtain the accepted rent and coverage
+              program-specific method: Fannie Mae&apos;s{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-3.1-08/rental-income"
+                className="text-primary font-semibold hover:underline"
+              >
+                rental-income rules
+              </a>
+              , for example, let the lender use an existing lease that will
+              transfer with a purchase, or the appraiser&apos;s comparable rent
+              schedule (Form 1007). Obtain the accepted rent and coverage
               worksheet in writing; a lower accepted rent can move the{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -255,13 +282,13 @@ export default function BuyingRentalWithTenantsPost() {
             <p>
               Suppose the supported rent scenario is $250 above the in-place
               rent. Compare only lawful options and use verified costs. This
-              hypothetical assumes one month vacant at the new rent (
-              <strong>$1,300</strong>), make-ready paint, cleaning, and repairs
-              (<strong>$2,500</strong> on a dated unit), and a leasing fee of
-              half a month (<strong>$650</strong>) — call it{" "}
-              <strong>$4,450</strong> all-in. The prize is $250 a month, or
+              hypothetical assumes one month vacant, which gives up the in-place
+              rent (<strong>$1,050</strong>), make-ready paint, cleaning, and
+              repairs (<strong>$2,500</strong> on a dated unit), and a leasing
+              fee of half a month at the new rent (<strong>$650</strong>) — call
+              it <strong>$4,200</strong> all-in. The prize is $250 a month, or
               $3,000 a year, producing an assumed payback near{" "}
-              <strong>18 months</strong>. Change the verified downtime,
+              <strong>17 months</strong>. Change the verified downtime,
               make-ready, leasing cost, lawful renewal amount, tenant response,
               or hold period and the result changes. Compare those scenarios
               without assuming turnover or a staged increase is the right
@@ -324,8 +351,15 @@ export default function BuyingRentalWithTenantsPost() {
               termination rules vary. Before communicating any option, have
               local counsel or a qualified manager confirm the lease, required
               notices, rent caps, just-cause, anti-retaliation,
-              anti-discrimination, subsidy, relocation-payment, and other
-              current requirements. Model permitted options with verified rent,
+              anti-discrimination (including the federal{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section3604&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fair Housing Act
+              </a>
+              ), subsidy, relocation-payment, and other current requirements.
+              Model permitted options with verified rent,
               timing, vacancy, make-ready, legal, and payment assumptions. If
               the inherited tenant uses a{" "}
               <Link
@@ -336,8 +370,31 @@ export default function BuyingRentalWithTenantsPost() {
               </Link>
               , obtain the administering housing authority&apos;s current
               written approval process, contract rent, tenant share, assistance
-              amount, notice rules, and timing. Treat an unapproved increase as
-              neither current income nor guaranteed upside.
+              amount, notice rules, and timing. Under HUD&apos;s{" "}
+              <a
+                href="https://www.hud.gov/sites/dfiles/OCHCO/documents/52641A.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                voucher tenancy addendum
+              </a>
+              , the owner may not raise the rent during the initial term of the
+              lease; any change in the rent to owner must be reported to the
+              housing authority{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-G/section-982.308"
+                className="text-primary font-semibold hover:underline"
+              >
+                at least 60 days before it takes effect
+              </a>
+              , and the new rent must still pass its{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507"
+                className="text-primary font-semibold hover:underline"
+              >
+                rent-reasonableness test
+              </a>
+              . Treat an unapproved increase as neither current income nor
+              certain upside.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -374,7 +431,15 @@ export default function BuyingRentalWithTenantsPost() {
                   Assuming an owner-occupant loan fits an occupied property.
                 </strong>{" "}
                 Occupancy intent, move-in timing, unit availability, lease
-                rights, and program exceptions are loan-specific. Have the
+                rights, and program exceptions are loan-specific. A VA loan, for
+                example, requires the veteran to certify an intent to{" "}
+                <a
+                  href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section3704&num=0&edition=prelim"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  move into the property personally within a reasonable time
+                </a>
+                . Have the
                 lender and local counsel reconcile the current written
                 requirements before the offer depends on them.
               </li>
@@ -411,12 +476,45 @@ export default function BuyingRentalWithTenantsPost() {
                 TrueCap analyzer
               </Link>{" "}
               and replace every placeholder with property-specific evidence.
-              This is general education, not legal or investment advice; tenancy
-              rights, deposit rules, notices, rent restrictions, subsidy rules,
-              and closing duties vary by jurisdiction and facts.
+              Tenancy rights, deposit rules, notices, rent restrictions, subsidy
+              rules, and closing duties vary by jurisdiction and facts.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Protecting Tenants at Foreclosure Act, Pub. L. 111-22, sec. 702 (12 U.S.C. 5220 note)",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section5220&num=0&edition=prelim",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-3.1-08, Rental Income",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.1-08/rental-income",
+            },
+            {
+              title: "42 U.S.C. 3604, Fair Housing Act: discrimination in the sale or rental of housing",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section3604&num=0&edition=prelim",
+            },
+            {
+              title:
+                "HUD Form HUD-52641-A (04/2023), Tenancy Addendum, Section 8 Tenant-Based Assistance, Housing Choice Voucher Program",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/52641A.pdf",
+            },
+            {
+              title: "24 CFR 982.308, Lease and tenancy (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-G/section-982.308",
+            },
+            {
+              title: "24 CFR 982.507, Rent to owner: Reasonable rent (eCFR)",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507",
+            },
+            {
+              title: "38 U.S.C. 3704, VA home loans: restrictions on loans (occupancy certification)",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section3704&num=0&edition=prelim",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>
