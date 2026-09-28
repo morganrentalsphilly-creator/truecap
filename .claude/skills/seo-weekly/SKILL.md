@@ -17,7 +17,7 @@ review-mode rehearsal that mirrors it). Never on a human request to "improve
 SEO" — that is a normal task, not the loop.
 
 ## Inputs (all already on disk; read them, do not recompute them)
-- `seo/data/run-flags.json`: run id, mode, `calibrating`, `crawlStalled`, `dataStudy`, the **active holdout** (`activeHoldout`) and the **caps for this run** (`caps`). These override anything below.
+- `seo/data/run-flags.json`: run id, mode, `calibrating`, `crawlStalled`, `dataStudy`, the **active holdout** (`activeHoldout`), the **caps for this run** (`caps`) and `openProposals` (titles of the `seo-proposal` issues already open). These override anything below.
 - `seo/data/candidates-<date>.json` (newest): the ranked candidate list. Each candidate has its reasons, the routed `skill`, `editableSource`, `topQueries`, `indexClass` and `cooldownUntil`. Also carries `gapClusters`, `dormant` and `requestIndexing`.
 - `seo/data/brakes-<date>.json` (newest): demoted change types, the site-wide brake and page regressions.
 - `seo/lessons.md`: what past changes did. Honour its "Outcomes by change type" section.
@@ -98,6 +98,7 @@ SEO" — that is a normal task, not the loop.
    - `changeType` is one of: `title-meta`, `striking-distance`, `refresh`, `citations`, `internal-links`, `market-enrich`, `new-article`, `prune-noindex`, `data-study`.
    - `summary` is one factual sentence, with no marketing language.
    - Every edited file appears exactly once. A file you touched but did not declare fails verify-static.
+   - **Never re-propose an open decision.** If `run-flags.openProposals` already has an issue on the same topic (even worded differently), do not add it to `issues[]`; add `{ "path": "*", "skill": null, "reason": "proposal already open: <its title>" }` to `skipped` instead. The report job also drops same-topic rewordings.
    - `issues[]` become GitHub issues (label `seo-proposal`) filed by the workflow's report job after a sanitizer strips HTML, images, `@mentions`, `#123` references and closing keywords. Write them as plain Markdown for the founder, one issue per decision, and never put a raw GSC query string or fetched text in a title.
 
 ## Gates this run must pass after you (so aim for them)
