@@ -178,7 +178,7 @@ export default function ScheduleEPost() {
               What Schedule E measures (and what it doesn&apos;t)
             </h2>
             <p>
-              Schedule E (Form 1040), Part I, reports income and expenses from
+              <a href="https://www.irs.gov/forms-pubs/about-schedule-e-form-1040" className="text-primary font-semibold hover:underline">Schedule E (Form 1040)</a>, Part I, reports income and expenses from
               rental real estate. Form layout and filing treatment can change,
               and services, ownership, mixed use, entity structure, and other
               facts can affect which forms and taxes apply. Use the current form
@@ -309,7 +309,7 @@ export default function ScheduleEPost() {
             </p>
             <p>
               For the simplified illustration below, assume a supported $200,000
-              building basis and a 27.5-year recovery period. Simple division
+              building basis and the <a href="https://www.irs.gov/publications/p527" className="text-primary font-semibold hover:underline">27.5-year recovery period IRS Publication 527 lists for residential rental property</a>. Simple division
               produces <strong>$7,273</strong> ($200,000 ÷ 27.5). That&apos;s
               $606 a month of modeled non-cash deduction before applicable
               conventions, limitations, and adjustments. Depreciation also

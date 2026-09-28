@@ -303,7 +303,7 @@ export default function BlogPost() {
 
           <h3>5. Tax shield</h3>
           <p>
-            The rental portion of the property gets Schedule E treatment. That
+            The rental portion of the property gets <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E treatment</Link>. That
             means depreciation, mortgage interest allocation, and operating
             expense deductions on the rented unit(s). Your occupied portion may
             receive different treatment. Allocation, deductibility, passive-loss
