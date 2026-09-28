@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import {
   APP_DIR,
@@ -166,6 +167,39 @@ describe("HARD GATE: no HTML entities in metadata strings", () => {
       }
     },
   );
+});
+
+describe("HARD GATE: no HTML entities in the blog registries", () => {
+  /**
+   * The same habit as above, one step removed. lib/blog-posts.ts and
+   * lib/blog-topics.ts are plain data, not JSX: /blog, the topic hubs, the
+   * related-post blocks, feed.xml and llms.txt print their strings as they
+   * are. Five excerpts held `&apos;`, `&quot;` and `&amp;`, so readers of
+   * /blog and four topic hubs saw the literal entities (F4 review). The SEO
+   * loop appends rows to lib/blog-posts.ts, so this stays a hard gate.
+   */
+  it("every post title/excerpt and topic title/description/intro holds real characters", () => {
+    const strings: Array<[string, string]> = [
+      ...BLOG_POSTS.flatMap((post): Array<[string, string]> => [
+        [`${post.slug} title`, post.title],
+        [`${post.slug} excerpt`, post.excerpt],
+      ]),
+      ...BLOG_TOPICS.flatMap((topic): Array<[string, string]> => [
+        [`topics/${topic.slug} title`, topic.title],
+        [`topics/${topic.slug} description`, topic.description],
+        [`topics/${topic.slug} intro`, topic.intro],
+      ]),
+    ];
+    expect(strings.length).toBeGreaterThan(BLOG_POSTS.length * 2);
+    const offenders = strings
+      .map(([label, value]) => [label, value.match(HTML_ENTITY_RE)?.[0]] as const)
+      .filter(([, entity]) => entity !== undefined)
+      .map(([label, entity]) => `${label}: ${entity}`);
+    expect(
+      offenders,
+      "A registry string is not JSX: write the real character (' \" & — “ ”), not its HTML entity.",
+    ).toEqual([]);
+  });
 });
 
 describe("HARD GATE: llms-full.txt covers every calculator", () => {

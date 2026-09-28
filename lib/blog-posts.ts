@@ -169,7 +169,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "The 70% rule for house flipping (and BRRRR): calculate an Offer Ceiling (2026)",
     excerpt:
-      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it&apos;s really doing under the hood. The Offer Ceiling formula worked on a $300K flip, a full P&amp;L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
+      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it's really doing under the hood. The Offer Ceiling formula worked on a $300K flip, a full P&L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-05",
     available: true,
@@ -179,7 +179,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Debt-to-income ratio for an investment property: how lenders count rental income (2026)",
     excerpt:
-      "Every investor assumes the rent &quot;covers itself&quot; on a loan application. It doesn&apos;t. Lenders credit 75% of gross rent, then subtract the property&apos;s full payment — so a rental pulling $446/month over its payment reads as a −$79 debt, not income. The net-rental mechanic worked on a $250K rental, why the 25% haircut swings DTI ~3 points, the house-hack version where the same rule adds $1,275 of income and turns a 54% ratio into 45%, the Schedule E add-backs that make a paper loss net to breakeven, and the DSCR escape hatch when your ratio finally hits the wall.",
+      "Every investor assumes the rent \"covers itself\" on a loan application. It doesn't. Lenders credit 75% of gross rent, then subtract the property's full payment — so a rental pulling $446/month over its payment reads as a −$79 debt, not income. The net-rental mechanic worked on a $250K rental, why the 25% haircut swings DTI ~3 points, the house-hack version where the same rule adds $1,275 of income and turns a 54% ratio into 45%, the Schedule E add-backs that make a paper loss net to breakeven, and the DSCR escape hatch when your ratio finally hits the wall.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-04",
     available: true,
@@ -189,7 +189,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Return on equity (ROE) on a rental property: the lazy-equity test (2026)",
     excerpt:
-      "Cash-on-cash tracks your original down payment forever; return on equity tracks what the equity you hold today is actually earning — and on a rental you&apos;ve owned a while, only the second one drives decisions. The formula, a 10-year example where the dollar return nearly doubles while ROE slips from 16.9% to 12%, why the decay is pure leverage, the cash-on-equity figure that lands at 3.7%, and the honest cost of the refinance ROE tempts you into.",
+      "Cash-on-cash tracks your original down payment forever; return on equity tracks what the equity you hold today is actually earning — and on a rental you've owned a while, only the second one drives decisions. The formula, a 10-year example where the dollar return nearly doubles while ROE slips from 16.9% to 12%, why the decay is pure leverage, the cash-on-equity figure that lands at 3.7%, and the honest cost of the refinance ROE tempts you into.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-01",
     available: true,
@@ -199,7 +199,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to read a rent roll: verify a rental's income before you buy (2026)",
     excerpt:
-      "A rent roll is where the seller&apos;s story meets the leases — and the gap is the deal. Why a fourplex that &quot;grosses $63,600&quot; is really collecting $42,900, how to split the $20,700 gap into curable vacancy ($16,800) and sticky loss-to-lease ($3,900), the five places rent rolls mislead, the GRM that reads 8.2 on potential rent and 12.1 on collected, and the estoppel-and-bank-deposit check that turns the seller&apos;s claim into proof before you wire a dime.",
+      "A rent roll is where the seller's story meets the leases — and the gap is the deal. Why a fourplex that \"grosses $63,600\" is really collecting $42,900, how to split the $20,700 gap into curable vacancy ($16,800) and sticky loss-to-lease ($3,900), the five places rent rolls mislead, the GRM that reads 8.2 on potential rent and 12.1 on collected, and the estoppel-and-bank-deposit check that turns the seller's claim into proof before you wire a dime.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-30",
     available: true,
@@ -218,7 +218,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Negative leverage in real estate: when borrowing lowers your return (2026)",
     excerpt:
-      "&quot;Use leverage, returns go up&quot; is only true when the asset out-earns the debt — and in 2026 it usually doesn't. The one number that sets the sign (the loan constant, not the rate), the cap-rate-vs-loan-constant rule, the leverage identity that makes it exact, a worked $300K property across five cap rates, and the trap where a deal still cash-flows and still clears a DSCR lender while quietly dragging cash-on-cash below the all-cash return.",
+      "\"Use leverage, returns go up\" is only true when the asset out-earns the debt — and in 2026 it usually doesn't. The one number that sets the sign (the loan constant, not the rate), the cap-rate-vs-loan-constant rule, the leverage identity that makes it exact, a worked $300K property across five cap rates, and the trap where a deal still cash-flows and still clears a DSCR lender while quietly dragging cash-on-cash below the all-cash return.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-28",
     available: true,
