@@ -14,8 +14,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free Mortgage Payment Calculator — Full PITI",
@@ -49,82 +49,20 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS: { q: string; a: string }[] = [
-  {
-    q: "What is PITI?",
-    a: "Principal + Interest + Tax + Insurance — the four components of a typical monthly mortgage payment. P&I is what the lender quotes you; tax and insurance are usually held in escrow and paid on your behalf, making PITI the actual cash that leaves your account each month.",
-  },
-  {
-    q: "How is the monthly P&I calculated?",
-    a: "Using the standard amortization formula: P&I = L × (r / (1 − (1 + r)^−n)), where L = loan amount, r = monthly rate (annual rate ÷ 12), n = total months. Modern mortgages are fully amortizing — early payments are mostly interest, later payments mostly principal.",
-  },
-  {
-    q: "How do investment property rates compare to primary residence rates?",
-    a: "Pricing varies by lender, market, occupancy, loan type, points, credit, leverage, property, and lock date. Use a current investment-property quote for the proposed file and stress a higher-rate case; a generic spread or today's range is not a quote.",
-  },
-  {
-    q: "What's a typical down payment for investment property?",
-    a: "Required equity varies by occupancy, borrower, units, property, lender, and program. Obtain written terms for the proposed file, including reserves, mortgage insurance, points, and closing costs. An all-cash purchase removes loan debt service but not property, liquidity, or market risk.",
-  },
-  {
-    q: "Should I pay off my mortgage early?",
-    a: "It depends on the note and prepayment terms, taxes, liquidity, reserves, risk tolerance, and the uncertain after-cost return of alternatives. Compare scenarios rather than using a current-rate threshold or assuming capital deployed elsewhere earns more.",
-  },
-  {
-    q: "How does this differ from a standard mortgage calculator?",
-    a: "Most consumer mortgage calculators don't include taxes and insurance — they show P&I only, which understates your actual monthly cost by 15-25%. PITI is what you actually pay. TrueCap shows both so you can see the breakdown.",
-  },
-];
-
 export default function MortgagePaymentPage() {
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap Mortgage Payment Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/mortgage-payment-calculator"),
-    url: `${siteUrl}/tools/mortgage-payment-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "mortgage-payment-calculator",
     name: "Mortgage Payment Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free mortgage payment calculator with P&I, tax, homeowner insurance, and estimated PMI below 20% down. No signup.",
-    url: `${siteUrl}/tools/mortgage-payment-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Monthly P&I from price, down payment, rate, term",
       "Include PMI + taxes + insurance",
       "Total interest + amortization breakdown",
     ],
-  };
+  });
 
   return (
     <>
@@ -133,9 +71,7 @@ export default function MortgagePaymentPage() {
         toolPath="/tools/mortgage-payment-calculator"
         toolName="Mortgage payment calculator"
       />
-      <JsonLd data={webAppLd} />
-      <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

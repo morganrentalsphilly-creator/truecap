@@ -10,8 +10,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
   description:
@@ -74,16 +74,6 @@ const FAQS = [
 
 export default function OnePercentRulePage() {
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap 1% Rule Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/1-percent-rule-calculator"),
-    url: `${siteUrl}/tools/1-percent-rule-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -94,33 +84,17 @@ export default function OnePercentRulePage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "1-percent-rule-calculator",
     name: "1% Rule Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free 1% rule calculator. Instantly screen any rental deal Pass / Fail. Plus when the rule applies, when it doesn't, and what to do on a fail.",
-    url: `${siteUrl}/tools/1-percent-rule-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Validate the 1% rule on any address",
       "Compare monthly rent to purchase price",
       "Instant Pass / Fail screening",
     ],
-  };
+  });
 
   return (
     <>
@@ -129,9 +103,8 @@ export default function OnePercentRulePage() {
         toolPath="/tools/1-percent-rule-calculator"
         toolName="1% rule calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

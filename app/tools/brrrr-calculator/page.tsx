@@ -13,8 +13,8 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
   description:
@@ -81,16 +81,6 @@ export default function BrrrrCalculatorPage() {
     permanentRedirect(HISTORICAL_TOOL_REDIRECTS["brrrr-calculator"]);
   }
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap BRRRR Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/brrrr-calculator"),
-    url: `${siteUrl}/tools/brrrr-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -101,33 +91,17 @@ export default function BrrrrCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "brrrr-calculator",
     name: "BRRRR Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free BRRRR calculator. Models purchase, rehab, ARV, refi LTV, and post-refi cash flow. Shows cash left in deal + infinite-return scenarios.",
-    url: `${siteUrl}/tools/brrrr-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Buy-Rehab-Rent-Refinance-Repeat math",
       "All-in cost vs ARV refi",
       "Cash-out + remaining capital",
     ],
-  };
+  });
 
   return (
     <>
@@ -136,9 +110,8 @@ export default function BrrrrCalculatorPage() {
         toolPath="/tools/brrrr-calculator"
         toolName="BRRRR calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

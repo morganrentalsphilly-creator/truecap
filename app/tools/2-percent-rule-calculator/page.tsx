@@ -24,8 +24,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "2% Rule Calculator | Free Cash-Flow Screener",
   description:
@@ -90,18 +90,6 @@ const FAQS: { q: string; a: string }[] = [
 export default function TwoPercentRuleCalculatorPage() {
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap 2% Rule Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/2-percent-rule-calculator"),
-    url: `${siteUrl}/tools/2-percent-rule-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online 2% rule calculator: rent-to-price ratio against the 2% and 1% screening bars, with honest context for 2026 markets.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -113,34 +101,18 @@ export default function TwoPercentRuleCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "2-percent-rule-calculator",
     name: "2% Rule Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free 2% rule calculator. Check any rental's rent-to-price ratio against the 2% and 1% bars in seconds.",
-    url: `${siteUrl}/tools/2-percent-rule-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Rent-to-price ratio computed live",
       "Judged against both the 2% and 1% bars",
       "Honest caution on what 2%+ ratios signal",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
@@ -149,9 +121,8 @@ export default function TwoPercentRuleCalculatorPage() {
         toolPath="/tools/2-percent-rule-calculator"
         toolName="2% rule calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

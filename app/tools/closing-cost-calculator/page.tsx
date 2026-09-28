@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free Closing Cost Calculator — Every Line Item",
@@ -74,6 +75,7 @@ export default function ClosingCostCalculatorPage() {
     url: `${siteUrl}/tools/closing-cost-calculator`,
     dateModified: lastmodFor("/tools/closing-cost-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
+    mainEntity: { "@id": toolAppId(siteUrl, "closing-cost-calculator") },
   };
   const faqLd = {
     "@context": "https://schema.org",
@@ -85,40 +87,24 @@ export default function ClosingCostCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "closing-cost-calculator",
     name: "Closing Cost Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free closing cost calculator for rental purchases with editable lender, title, tax, escrow, prepaid, and due-diligence inputs.",
-    url: `${siteUrl}/tools/closing-cost-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Line-item breakdown: origination, title, escrow",
       "Transfer tax + prepaid items included",
       "Total closing cost estimate as % of price",
     ],
-  };
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
       <ToolBreadcrumbSchema toolName="Closing Cost Calculator" toolPath="/tools/closing-cost-calculator" />
 
       <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
