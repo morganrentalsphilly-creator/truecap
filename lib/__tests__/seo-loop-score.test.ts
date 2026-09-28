@@ -11,7 +11,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -1101,13 +1101,36 @@ describe("score.ts CLI (no network: --sitemap-file, --no-probe)", () => {
 });
 
 describe("pre-existing fence failures", () => {
-  it("flags prose injected with dangerouslySetInnerHTML but not JSON-LD scripts", async () => {
+  it("flags any raw-HTML sink (dangerouslySetInnerHTML or <script>, the pre-F4 JSON-LD form included), not <JsonLd>", async () => {
     const { preexistingFenceFailure } = await import("../../seo/scripts/score.ts");
-    const jsonLd = `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />`;
+    const helper = `<JsonLd data={ld} />`;
+    const rawJsonLd = `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />`;
     const prose = `<p dangerouslySetInnerHTML={{ __html: "<strong>x</strong>" }} />`;
-    expect(preexistingFenceFailure(jsonLd)).toBe(false);
-    expect(preexistingFenceFailure(`${jsonLd}\n${prose}`)).toBe(true);
+    expect(preexistingFenceFailure(helper)).toBe(false);
+    expect(preexistingFenceFailure(rawJsonLd)).toBe(true);
+    expect(preexistingFenceFailure(`${helper}\n${prose}`)).toBe(true);
     expect(preexistingFenceFailure("no html injection here")).toBe(false);
+  });
+
+  it("agrees with verify-static on every editable source on disk, and none is fenced today (F4 converted the six prose posts)", async () => {
+    const { fencedSourcesOnDisk, preexistingFenceFailure } = await import("../../seo/scripts/score.ts");
+    const { wholeFileViolations } = await import("../../seo/scripts/verify-static.ts");
+    const root = path.resolve(__dirname, "../..");
+    const paths = ["blog", "vs", "research"].flatMap((dir) =>
+      existsSync(path.join(root, "app", dir))
+        ? readdirSync(path.join(root, "app", dir))
+            .filter((slug) => slug !== "topics" && existsSync(path.join(root, "app", dir, slug, "page.tsx")))
+            .map((slug) => `/${dir}/${slug}`)
+        : [],
+    );
+    expect(paths.length).toBeGreaterThanOrEqual(75 + 38);
+    for (const p of paths) {
+      const file = `app${p}/page.tsx`;
+      const source = readFileSync(path.join(root, file), "utf8");
+      const sinks = wholeFileViolations(file, source).filter((v) => v.rule === "dangerous-html" || v.rule === "jsx-script");
+      expect(preexistingFenceFailure(source), `${file}: the stand-in and verify-static disagree`).toBe(sinks.length > 0);
+    }
+    expect([...fencedSourcesOnDisk(paths)]).toEqual([]);
   });
 });
 

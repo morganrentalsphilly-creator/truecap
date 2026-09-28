@@ -48,7 +48,7 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
 
 0. **Build the source table once per run.** If an earlier invocation in this run built it, reuse it and rerun only (c). Otherwise send all six calls in one message. "Source scope" means Grep with path `.` and glob `app/{blog,vs}/*/page.tsx`.
    - a. Grep the source scope (files_with_matches) for `^import Link from "next/link";$`. A file not listed lacks the import, and adding one makes the file tier 1. Today the three `SourceFirstArticle` posts lack it.
-   - b. Grep the source scope (files_with_matches) for `__html: [^J]`. A hit is a prose HTML string, because every JSON-LD script uses `__html: JSON.stringify(`. These files are fenced: verify-static rejects any edit. This is the same set score.ts `fencedSourcesOnDisk` flags (6 today).
+   - b. Grep the source scope (files_with_matches) for `dangerouslySetInnerHTML|<script`. A hit is a raw-HTML sink: since F4 every page emits JSON-LD through `<JsonLd data={…} />` and verify-static refuses both, so these files are fenced (any edit is rejected). This is the same set score.ts `fencedSourcesOnDisk` flags (none today: F4 converted the six prose posts).
    - c. `git status --porcelain`: files already changed in this run.
    - d. `node seo/scripts/ledger.ts query --status live,proposed,reverted`. Do not pass `--since`: it filters on the proposal date, and a later go-live or revert still starts a cooldown.
    - e. Grep (content) `^      "(path|lastCrawlTime|indexClass)":` in `seo/data/index-status.json`. Six spaces select each entry's own fields; the deeper `history[]` copies drop out. Each entry prints `lastCrawlTime`, then `path`, then `indexClass`.

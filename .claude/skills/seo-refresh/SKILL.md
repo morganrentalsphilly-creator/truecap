@@ -20,7 +20,7 @@ A page that is losing clicks usually says something that is no longer current. F
   - the path is in `run-flags.activeHoldout`;
   - `cooldownUntil` is after `run-flags.date`;
   - `editableSource` is not an existing `app/blog/<slug>/page.tsx` or `app/vs/<slug>/page.tsx` ("no editable source");
-  - the file uses `dangerouslySetInnerHTML` outside its JSON-LD `<script>` blocks ("pre-existing fence failure").
+  - the file uses `dangerouslySetInnerHTML` or a `<script>` element ("pre-existing fence failure"; since F4 JSON-LD is `<JsonLd data={…} />` and verify-static refuses both, and no source on disk has either today).
 - A `/research/*` page belongs to seo-data-study: add an `issues` entry and do not edit it.
 - At today's traffic (about 24 clicks a month site-wide) this skill is usually listed in `candidates.dormant`. When it is, do nothing.
 
@@ -107,7 +107,7 @@ Read `git diff -- <editableSource>` and confirm each item before you hand back.
 - **verify-static fence.** It runs after you and you cannot run it. It rejects the whole patch for any of these:
   - a changed file other than `editableSource`, or an import outside `paths.importAllow` (add none);
   - `"use client"` or `"use server"`, a new export, or an element outside the prose set;
-  - `style`, `on*` or `srcSet` props, or `dangerouslySetInnerHTML` beyond the existing JSON-LD;
+  - `style`, `on*` or `srcSet` props, `dangerouslySetInnerHTML`, or a `<script>` (JSON-LD stays the existing `<JsonLd data={…} />`);
   - a string containing `</`, `<!--` or `<script`;
   - a denied identifier used as code (`process`, `fetch`, `globalThis`, `window`, `constructor`, …);
   - an href that is not a single literal or a top-level const;

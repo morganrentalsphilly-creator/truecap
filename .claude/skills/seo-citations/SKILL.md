@@ -15,7 +15,7 @@ description: Links every factual claim, number, rule or form on one blog post or
 Edit only when all of these hold. Otherwise hand the candidate back as `skipped` with the quoted reason:
 - `editableSource` is `app/blog/<slug>/page.tsx` or `app/vs/<slug>/page.tsx`. Glossary terms, topic hubs and persona pages arrive with `editableSource: null` (`lib/glossary.ts` ships in the analyzer's client bundle). Reason: "no agent-editable source".
 - The path is not in `run-flags.activeHoldout`, and `cooldownUntil` is null or earlier than `run-flags.date`.
-- The path is not in the candidates file's `reportOnly[]`, and the file has no `dangerouslySetInnerHTML` outside a JSON-LD `<script>`. verify-static rejects any edit to such a file. Reason: "fenced source: dangerouslySetInnerHTML".
+- The path is not in the candidates file's `reportOnly[]`, and the file has no `dangerouslySetInnerHTML` and no `<script>` (JSON-LD is `<JsonLd data={…} />` since F4). verify-static rejects any edit to such a file. Reason: "fenced source: dangerouslySetInnerHTML".
 - The page is not in a `similarity-<date>.json` pair scoring above `thresholds.similarity.mergeAbove` (0.8). Reason: "near-duplicate of <other path>; needs consolidation". Also add one tier-2 `issues` entry.
 
 ## Inputs
@@ -92,7 +92,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
     - No shortener, userinfo, port, IP host, backslash or redirector (`google.com/url`, `l.facebook.com`).
     - `utm_*`, `gclid`, `fbclid`, `mc_cid` and other tracking parameters are stripped.
     - No bare URL in prose or in a string. It is link-checked anyway; write link text instead.
-  - **Markup:** no new import, `style`, `on*` prop or `dangerouslySetInnerHTML`.
+  - **Markup:** no new import, `style`, `on*` prop, `<script>` or `dangerouslySetInnerHTML`.
     - Only prose elements (`a`, `p`, `ul`, `ol`, `li`, `strong`, `em`, `cite`, `h2`, `h3`).
     - No `</`, `<!--` or `<script` inside a string.
   - **Dates:** untouched. That covers `PUBLISHED_AT`, `MODIFIED_AT`, any const matching `PUBLISHED|MODIFIED|UPDATED|REVIEWED|CHECKED`, `datePublished`, `dateModified`, `ARTICLE.publishedAt/modifiedAt`, `ComparisonFaq`'s `reviewedDate` and any "last reviewed" text.
