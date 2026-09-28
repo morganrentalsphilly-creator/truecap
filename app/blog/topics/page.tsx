@@ -9,19 +9,24 @@ import { ArrowUpRight } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 
+/** How many hubs there are, in words; derived so the copy can't drift from lib/blog-topics.ts. */
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const HUB_COUNT_WORD = NUMBER_WORDS[BLOG_TOPICS.length] ?? String(BLOG_TOPICS.length);
+
 export const metadata: Metadata = {
   title: "Blog Topics",
   description:
-    "TrueCap's rental investing guides by topic: underwriting, financing, tax, strategy, and markets, each paired with the calculators that run the math.",
+    "TrueCap's rental investing guides by topic, from underwriting and financing to tax, strategy, markets, and due diligence.",
   alternates: { canonical: "/blog/topics" },
   openGraph: {
     title: "TrueCap Blog — browse by topic",
     description:
-      "Rental investing guides by topic: underwriting, financing, tax, strategy, and markets.",
+      "Rental investing guides by topic, from underwriting and financing to tax and due diligence.",
     url: "/blog/topics",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap blog topics" }],
@@ -72,8 +77,8 @@ export default function BlogTopicsIndexPage() {
             Browse by topic
           </h1>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Every TrueCap guide, grouped into the five things investors actually work through —
-            each hub pairs the reading with the calculators that run the numbers.
+            Every TrueCap guide, grouped into the {HUB_COUNT_WORD} things investors actually work
+            through. Most hubs pair the reading with the calculators that run the numbers.
           </p>
         </header>
 
@@ -90,7 +95,7 @@ export default function BlogTopicsIndexPage() {
               </div>
               <p className="text-sm text-muted-foreground">{topic.description}</p>
               <span className="mt-auto text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {topic.postSlugs.length} guides
+                {topic.postSlugs.filter((slug) => isLinkablePath(`/blog/${slug}`)).length} guides
               </span>
             </Link>
           ))}

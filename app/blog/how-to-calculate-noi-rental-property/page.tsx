@@ -390,7 +390,14 @@ export default function BlogPost() {
           </div>
           <p>
             That $14,300 is the building&apos;s pre-financing earning power.
-            Note the operating expense ratio: $14,200 ÷ $28,500 =
+            Note the{" "}
+            <Link
+              href="/glossary/operating-expense-ratio"
+              className="text-primary font-semibold hover:underline"
+            >
+              operating expense ratio
+            </Link>
+            : $14,200 ÷ $28,500 =
             <strong> 50%</strong>. That is right in the normal band for a small,
             owner-paid-utility multifamily — which is the quick sanity check
             that tells you no big line item got skipped. The old{" "}

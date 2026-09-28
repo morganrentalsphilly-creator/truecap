@@ -51,6 +51,7 @@ import {
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 import { stateFactsFor } from "@/lib/seo/state-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -118,7 +119,9 @@ export default async function StatePage({
   const stateFacts = stateFactsFor(state.slug);
   const facts = stateFacts ? buildStateFacts(stateFacts) : [];
   const hudCities = getStateHudCities(state.name);
-  const bespoke = getStateBespokeMarkets(state.name);
+  const bespoke = getStateBespokeMarkets(state.name).filter((market) =>
+    isLinkablePath(`/markets/${market.slug}`),
+  );
   const title = buildStateTitle(state.name);
   const description = buildStateDescription(state.slug, state.name);
   const faq = stateFacts ? buildStateFaq(state.name, stateFacts, hudCities, year) : [];
@@ -293,13 +296,17 @@ export default async function StatePage({
                       className="border-b border-border last:border-b-0"
                     >
                       <td className="px-4 py-2.5 font-semibold">
-                        <Link
-                          href={`/markets/${city.slug}`}
-                          className="inline-flex min-h-11 items-center text-primary hover:underline"
-                          aria-label={describeStateHudCity(city)}
-                        >
-                          {city.name}
-                        </Link>
+                        {isLinkablePath(`/markets/${city.slug}`) ? (
+                          <Link
+                            href={`/markets/${city.slug}`}
+                            className="inline-flex min-h-11 items-center text-primary hover:underline"
+                            aria-label={describeStateHudCity(city)}
+                          >
+                            {city.name}
+                          </Link>
+                        ) : (
+                          city.name
+                        )}
                       </td>
                       <td className="px-4 py-2.5 text-right text-foreground">
                         {usd(city.hud.rent2br)}
@@ -379,7 +386,11 @@ export default async function StatePage({
           </p>
           <div className="flex flex-wrap gap-2 text-sm">
             {Object.values(STATES)
-              .filter((candidate) => candidate.slug !== state.slug)
+              .filter(
+                (candidate) =>
+                  candidate.slug !== state.slug &&
+                  isLinkablePath(`/states/${candidate.slug}`),
+              )
               .map((candidate) => (
                 <Link
                   key={candidate.slug}

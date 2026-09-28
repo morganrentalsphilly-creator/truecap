@@ -1,8 +1,10 @@
 /**
  * /blog/topics/[topic] — topic hub (P2-4). Groups the long-form posts for one
- * investor journey (underwriting / financing / tax / strategy / markets) with
- * the matching free calculators, so a reader can go post → tool → analyzer.
- * Static — driven by lib/blog-topics.ts.
+ * investor journey (underwriting / financing / tax / strategy / markets …)
+ * with the matching free calculators, so a reader can go post → tool →
+ * analyzer. Static — driven by lib/blog-topics.ts. Every link it lists passes
+ * lib/seo/link-policy.ts (no unpublished or noindexed post, no unreleased
+ * calculator); each post links back here through its "Part of" line.
  */
 
 import type { Metadata } from "next";
@@ -15,6 +17,8 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_TOPICS, getBlogTopic } from "@/lib/blog-topics";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { getCalculator } from "@/lib/calculator-registry";
+import { getGlossaryEntryBySlug } from "@/lib/glossary";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 
@@ -60,10 +64,16 @@ export default async function BlogTopicHubPage({
 
   const posts = topic.postSlugs
     .map((s) => BLOG_POSTS.find((p) => p.slug === s && p.available))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .filter((p) => isLinkablePath(`/blog/${p.slug}`));
   const calculators = topic.calculatorSlugs
     .map((s) => getCalculator(s))
-    .filter((c): c is NonNullable<typeof c> => Boolean(c));
+    .filter((c): c is NonNullable<typeof c> => Boolean(c))
+    .filter((c) => isLinkablePath(`/tools/${c.slug}`));
+  const terms = (topic.glossarySlugs ?? [])
+    .map((s) => getGlossaryEntryBySlug(s))
+    .filter((e): e is NonNullable<typeof e> => Boolean(e))
+    .filter((e) => isLinkablePath(`/glossary/${e.slug}`));
   const otherTopics = BLOG_TOPICS.filter((t) => t.slug !== topic.slug);
 
   const collectionLd = {
@@ -130,6 +140,31 @@ export default async function BlogTopicHubPage({
             ))}
           </div>
         </section>
+
+        {/* Terms the hub's guides turn on (lib/blog-topics.ts glossarySlugs). */}
+        {terms.length > 0 ? (
+          <section className="mb-10" data-topic-glossary-terms="">
+            <h2 className="mb-3 text-base font-extrabold text-foreground">Terms these guides use</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {terms.map((entry, index) => (
+                <span key={entry.slug}>
+                  {index > 0 ? ", " : ""}
+                  <Link
+                    href={`/glossary/${entry.slug}`}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    {entry.term}
+                  </Link>
+                </span>
+              ))}
+              . Every other term is defined in the{" "}
+              <Link href="/glossary" className="font-semibold text-primary hover:underline">
+                glossary
+              </Link>
+              .
+            </p>
+          </section>
+        ) : null}
 
         {/* Calculators */}
         {calculators.length > 0 ? (

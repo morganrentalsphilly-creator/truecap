@@ -355,8 +355,11 @@ export default function VsAppfolioPage() {
             </li>
             <li>
               <strong>
-                Scale to 30+ doors and use TurboTenant / Buildium / Stessa for
-                ops.
+                Scale to 30+ doors and use TurboTenant / Buildium /{" "}
+                <Link href="/vs/stessa" className="underline hover:text-primary">
+                  Stessa
+                </Link>{" "}
+                for ops.
               </strong>{" "}
               Mid-market tools that fit 30-200 units.
             </li>

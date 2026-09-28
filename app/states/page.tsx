@@ -11,6 +11,7 @@ import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, STATE_COUNT } from "@/lib/states";
+import { linkableStates } from "@/lib/seo/link-policy";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
@@ -75,7 +76,7 @@ export default function StatesIndexPage() {
         </p>
 
         <div className="tc-reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Object.values(STATES)
+          {linkableStates(Object.values(STATES))
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((s) => (
               <Link

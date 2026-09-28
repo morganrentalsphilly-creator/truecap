@@ -319,9 +319,15 @@ export default function BlogPost() {
             The broker skipped vacancy, management, recurring maintenance, and
             utilities. The cap rate looks like 8% but the lender-style result is
             5.3%. The separate CapEx reserve then reduces pre-debt cash to
-            $12,906. This is the most common cap rate manipulation in broker pro
-            formas — be ruthless about adding back every expense before trusting
-            the number.
+            $12,906. This is the most common cap rate manipulation in broker{" "}
+            <Link
+              href="/glossary/pro-forma"
+              className="text-primary font-semibold hover:underline"
+            >
+              pro formas
+            </Link>{" "}
+            — be ruthless about adding back every expense before trusting the
+            number.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">

@@ -402,8 +402,14 @@ export default function BrrrrMethodPost() {
           </h2>
           <p>
             <strong>1. The appraisal misses.</strong> Under the example&apos;s assumed 75% LTV, every
-            $10,000 the appraisal comes in below your ARV estimate is $7,500
-            less cash out. A $230,000 appraisal instead of $245,000 doubles the
+            $10,000 the appraisal comes in below your{" "}
+            <Link
+              href="/blog/how-to-calculate-arv"
+              className="text-primary font-semibold hover:underline"
+            >
+              ARV estimate
+            </Link>{" "}
+            is $7,500 less cash out. A $230,000 appraisal instead of $245,000 doubles the
             capital left in our example deal. Use sold renovated comps, not
             list prices, and be honest about condition deltas.
           </p>

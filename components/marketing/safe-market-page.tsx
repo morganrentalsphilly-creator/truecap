@@ -29,7 +29,9 @@ import {
   buildMarketPageData,
   type MarketPageData,
 } from "@/lib/markets/market-page-data";
+import { nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
 import { MARKET_DATA_ATTRIBUTE } from "@/lib/markets/thin";
+import { isLinkablePath } from "@/lib/seo/link-policy";
 import type { MarketFacts } from "@/lib/seo/market-facts";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
@@ -41,6 +43,11 @@ export type SafeMarketPageIdentity = {
   city: string;
   stateCode: string;
   stateName: string;
+  /**
+   * The wrapper's state guide. The page resolves the link itself from
+   * stateName (lib/markets/nearby.ts stateGuideSlugFor), so it appears only
+   * while that guide is indexable.
+   */
   stateSlug: string;
   slug: string;
   /** Optional analyzer address when the display city names a wider metro. */
@@ -571,24 +578,25 @@ export function MarketRelatedReading({
 }) {
   const glossary = MARKET_GLOSSARY_SLUGS.flatMap((slug) => {
     const entry = getGlossaryEntryBySlug(slug);
-    return entry ? [{ href: `/glossary/${slug}`, label: entry.term }] : [];
+    return entry && isLinkablePath(`/glossary/${slug}`)
+      ? [{ href: `/glossary/${slug}`, label: entry.term }]
+      : [];
   });
-  const preferred = new Set<string>(MARKET_BLOG_SLUGS);
-  const posts = BLOG_POSTS.filter(
-    (post) => post.available && preferred.has(post.slug),
+  // Published, linkable posts only (lib/seo/link-policy.ts).
+  const readable = BLOG_POSTS.filter(
+    (post) => post.available && isLinkablePath(`/blog/${post.slug}`),
   );
-  const fallback = BLOG_POSTS.filter(
-    (post) =>
-      post.available &&
-      !preferred.has(post.slug) &&
-      /rent|cash-flow/.test(post.slug),
+  const preferred = new Set<string>(MARKET_BLOG_SLUGS);
+  const posts = readable.filter((post) => preferred.has(post.slug));
+  const fallback = readable.filter(
+    (post) => !preferred.has(post.slug) && /rent|cash-flow/.test(post.slug),
   );
   const shared = [...posts, ...fallback].slice(0, 2);
   const sharedSlugs = new Set(shared.map((post) => post.slug));
   const extra = postSlugs.flatMap((slug) => {
     if (sharedSlugs.has(slug)) return [];
-    const post = BLOG_POSTS.find((entry) => entry.slug === slug);
-    return post && post.available ? [post] : [];
+    const post = readable.find((entry) => entry.slug === slug);
+    return post ? [post] : [];
   });
   const blog = [...shared, ...extra].map((post) => ({
     href: `/blog/${post.slug}`,
@@ -635,12 +643,70 @@ export function MarketRelatedReading({
   );
 }
 
+/**
+ * "For {State} data, see the {State} guide." Rendered only when the state
+ * guide is indexable (lib/markets/nearby.ts stateGuideSlugFor), so a city
+ * page never points readers or crawlers at a noindexed state page.
+ */
+export function MarketStateGuideLink({
+  stateName,
+  stateSlug,
+}: {
+  stateName: string;
+  stateSlug: string | null;
+}) {
+  if (!stateSlug) return null;
+  return (
+    <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+      For {stateName} data, see the{" "}
+      <Link
+        href={`/states/${stateSlug}`}
+        className="font-semibold text-primary hover:underline"
+      >
+        {stateName} guide
+      </Link>
+      .
+    </p>
+  );
+}
+
+/**
+ * Up to five nearby markets: same state first (same county or HUD FMR area,
+ * then the state's next markets alphabetically), then a metro that crosses
+ * the state line (lib/markets/nearby.ts). Renders nothing when the city has
+ * no linkable neighbour.
+ */
+export function MarketNearby({ slug }: { slug: string }) {
+  const markets = nearbyMarkets(slug);
+  if (markets.length === 0) return null;
+  return (
+    <section data-market-nearby="" className="mt-12 border-t border-border pt-6">
+      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Nearby markets
+      </p>
+      <div className="flex flex-wrap gap-2 text-sm">
+        {markets.map((market) => (
+          <Link
+            key={market.slug}
+            href={`/markets/${market.slug}`}
+            className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            {market.name}, {market.stateCode}
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ------------------------------------------------------------------------ */
 /* Bespoke city page (app/markets/<city>/page.tsx wrappers).                 */
 /* ------------------------------------------------------------------------ */
 
 export function SafeMarketPage(identity: SafeMarketPageIdentity) {
-  const { city, stateCode, stateName, stateSlug, slug } = identity;
+  const { city, stateCode, stateName, slug } = identity;
+  // The wrapper names its state; link it only while that guide is indexable.
+  const stateSlug = stateGuideSlugFor(stateName);
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${slug}`;
   const address = identity.analyzerAddress ?? `${city}, ${stateCode}`;
@@ -679,13 +745,17 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
         name: "Markets",
         item: `${siteUrl}/markets`,
       },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: stateName,
-        item: `${siteUrl}/states/${stateSlug}`,
-      },
-      { "@type": "ListItem", position: 4, name: city, item: canonicalUrl },
+      ...(stateSlug
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: stateName,
+              item: `${siteUrl}/states/${stateSlug}`,
+            },
+            { "@type": "ListItem", position: 4, name: city, item: canonicalUrl },
+          ]
+        : [{ "@type": "ListItem", position: 3, name: city, item: canonicalUrl }]),
     ],
   };
   const mainData = { [MARKET_DATA_ATTRIBUTE]: data.status };
@@ -718,16 +788,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
 
         <MarketVerifyLocally city={city} />
 
-        <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-          For {stateName} data, see the{" "}
-          <Link
-            href={`/states/${stateSlug}`}
-            className="font-semibold text-primary hover:underline"
-          >
-            {stateName} guide
-          </Link>
-          .
-        </p>
+        <MarketStateGuideLink stateName={stateName} stateSlug={stateSlug} />
 
         <div className="mt-10">
           <SeoAnalyzerCta
@@ -741,6 +802,8 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
         <CityStrategyGuides citySlug={slug} cityName={city} />
 
         {data.hud ? <MarketRelatedReading /> : null}
+
+        <MarketNearby slug={slug} />
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

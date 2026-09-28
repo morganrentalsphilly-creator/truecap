@@ -31,6 +31,7 @@ import { truncateMetaDescription } from "@/lib/utils";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { glossaryTermSetRef } from "@/lib/seo/glossary-ld";
+import { isLinkablePath, linkableToolFor } from "@/lib/seo/link-policy";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -131,7 +132,11 @@ export default async function GlossaryTermPage({
   const siteUrl = getSiteUrl();
   const relatedEntries: GlossaryEntry[] = (entry.related ?? [])
     .map((key) => GLOSSARY[key])
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((r) => isLinkablePath(`/glossary/${r.slug}`));
+  // The entry's own calculator, only while it is released (F9): an
+  // unreleased tool's toolUrl stays in the data and renders nothing.
+  const tool = linkableToolFor(entry.toolUrl);
 
   // ── Schema.org markup ──
   // DefinedTerm: tells Google this is a glossary entry → "what is X" SERPs
@@ -239,6 +244,20 @@ export default async function GlossaryTermPage({
               </h2>
               <p className="text-foreground leading-relaxed">{entry.example}</p>
             </section>
+          ) : null}
+
+          {/* The entry's calculator (lib/glossary.ts toolUrl), released only. */}
+          {tool ? (
+            <p className="mt-6 text-base leading-relaxed text-foreground" data-glossary-tool-link="">
+              Run the numbers with the{" "}
+              <Link
+                href={`/tools/${tool.slug}`}
+                className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
+              >
+                {tool.title}
+              </Link>
+              .
+            </p>
           ) : null}
 
           {/* Why it matters */}
