@@ -272,7 +272,7 @@ export default function BlogPost() {
 
           <h3>1. Self-employed with paper losses</h3>
           <p>
-            You make real money, but your Schedule C / Schedule E shows
+            You make real money, but your Schedule C / <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E</Link> shows
             depreciation, business expenses, and other paper losses that reduce
             taxable income. Conventional programs apply their own
             income-calculation rules. A DSCR program may avoid using tax returns

@@ -497,7 +497,7 @@ export default function BrrrrMethodPost() {
             >
               rental property tax deductions guide
             </Link>{" "}
-            for the full Schedule E breakdown.
+            for the full <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E</Link> breakdown.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
