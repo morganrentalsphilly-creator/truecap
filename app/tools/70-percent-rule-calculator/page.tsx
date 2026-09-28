@@ -26,8 +26,8 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -84,18 +84,6 @@ const FAQS: { q: string; a: string }[] = [
 export default function SeventyPercentRuleCalculatorPage() {
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap 70% Rule Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/70-percent-rule-calculator"),
-    url: `${siteUrl}/tools/70-percent-rule-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online 70% rule calculator: 70%-rule price screen from ARV and repair costs, with the offer at 60/65/70/75% multipliers.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -107,42 +95,25 @@ export default function SeventyPercentRuleCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "70-percent-rule-calculator",
     name: "70% Rule Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free 70% rule calculator. 70%-rule price screen = 70% of ARV minus repairs, with the boundary shown at common multipliers.",
-    url: `${siteUrl}/tools/70-percent-rule-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "70%-rule price screen from ARV + repair costs",
       "Offer ladder at 60 / 65 / 70 / 75% multipliers",
       "Down-only $500 rounding — never quotes above the ceiling",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/70-percent-rule-calculator" toolName="70% rule calculator" />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

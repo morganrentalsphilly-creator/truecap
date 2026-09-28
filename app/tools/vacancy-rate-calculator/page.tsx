@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -82,6 +83,7 @@ export default function VacancyRateCalculatorPage() {
     url: `${siteUrl}/tools/vacancy-rate-calculator`,
     dateModified: lastmodFor("/tools/vacancy-rate-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
+    mainEntity: { "@id": toolAppId(siteUrl, "vacancy-rate-calculator") },
   };
   const faqLd = {
     "@context": "https://schema.org",
@@ -93,40 +95,24 @@ export default function VacancyRateCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "vacancy-rate-calculator",
     name: "Vacancy Rate Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free vacancy rate calculator for rental properties. Convert vacant days + turnover cost into a true effective vacancy rate. Plus what a realistic vacancy assumption looks like — most sellers under-quote it.",
-    url: `${siteUrl}/tools/vacancy-rate-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Convert vacant days into effective vacancy rate",
       "Include turnover costs in the calculation",
       "Benchmark against market vacancy data",
     ],
-  };
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
       <ToolBreadcrumbSchema
         toolName="Vacancy Rate Calculator"
         toolPath="/tools/vacancy-rate-calculator"

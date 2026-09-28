@@ -17,8 +17,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free GRM Calculator — Gross Rent Multiplier Screen",
@@ -55,82 +55,20 @@ export const metadata: Metadata = {
   },
 };
 
-const FAQS: { q: string; a: string }[] = [
-  {
-    q: "What is GRM (Gross Rent Multiplier)?",
-    a: "GRM is the simplest valuation ratio in real estate: Property Price ÷ Annual Gross Rent. It tells you how many years of gross rent it would take to pay for the property at the asking price. Lower GRM means the property is cheaper relative to its rental income. It's a fast back-of-the-envelope screen — it skips operating expenses on purpose so you can compare 20 listings in 5 minutes.",
-  },
-  {
-    q: "What's a good GRM?",
-    a: "There's no universal answer — it's market-dependent. As a rough guide: under 6 is very strong (deeply discounted or distressed). 6-10 is healthy and typical of cash-flow markets like the Midwest, Sun Belt, and older multifamily. 10-14 is balanced. 14-20 means you're in an appreciation market where the return assumption is price growth, not cash flow (coastal cities, Tier-1 metros). Above 20 is luxury / ultra-coastal territory where yield is minimal.",
-  },
-  {
-    q: "What's the difference between GRM and cap rate?",
-    a: "Cap rate uses NOI (rent minus operating expenses), GRM uses gross rent only. Cap rate is more accurate because it accounts for property tax, insurance, maintenance, and management. GRM is faster because you don't need an opex breakdown — useful when screening MLS listings where opex isn't disclosed. The two correlate: a 50% expense ratio means a 10 GRM ≈ a 5% cap rate. Use GRM to shortlist, cap rate to underwrite.",
-  },
-  {
-    q: "Why use GRM if cap rate is more accurate?",
-    a: "Because expenses are missing from most listings. When you're scrolling through 200 properties on Zillow or LoopNet, you have price and asking rent — that's it. GRM lets you sort and screen instantly. The bottom 20% by GRM are worth pulling expense data for; the rest you discard. It's a triage tool, not a decision tool. Always confirm with a full underwrite (cap rate, cash-on-cash, DSCR) before making an offer.",
-  },
-  {
-    q: "Does GRM use gross or net rent?",
-    a: "Gross rent — that's literally the 'G' in GRM. Don't subtract vacancy, opex, or anything else. If you want to account for vacancy, use Effective Gross Rent Multiplier (EGRM), which uses rent × (1 − vacancy). But standard GRM is gross-gross, which is why it's so quick to compute.",
-  },
-  {
-    q: "Can I use GRM for commercial properties?",
-    a: "Yes, GRM works for any income-producing real estate. Commercial brokers often use it for multifamily, mixed-use, and retail. For single-tenant net-lease deals (NNN) where the tenant pays all expenses, GRM ≈ cap rate inverse, so it becomes more meaningful. For complex commercial deals with percentage rent, CAM reimbursements, or stepped escalations, switch to cap rate or DCF — GRM is too simple to capture the nuance.",
-  },
-];
-
 export default function GrmCalculatorPage() {
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap GRM Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/gross-rent-multiplier-calculator"),
-    url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "gross-rent-multiplier-calculator",
     name: "Gross Rent Multiplier Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. And a good GRM range.",
-    url: `${siteUrl}/tools/gross-rent-multiplier-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "GRM from price ÷ annual gross rent",
       "Compare to market averages",
       "Fast deal screening without operating expenses",
     ],
-  };
+  });
 
   return (
     <>
@@ -139,9 +77,7 @@ export default function GrmCalculatorPage() {
         toolPath="/tools/gross-rent-multiplier-calculator"
         toolName="GRM calculator"
       />
-      <JsonLd data={webAppLd} />
-      <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

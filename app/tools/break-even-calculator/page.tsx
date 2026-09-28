@@ -17,6 +17,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free Break-Even Calculator — Months to Recoup Cash",
@@ -74,6 +75,7 @@ export default function BreakEvenCalculatorPage() {
     url: `${siteUrl}/tools/break-even-calculator`,
     dateModified: lastmodFor("/tools/break-even-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
+    mainEntity: { "@id": toolAppId(siteUrl, "break-even-calculator") },
   };
   const faqLd = {
     "@context": "https://schema.org",
@@ -85,40 +87,24 @@ export default function BreakEvenCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "break-even-calculator",
     name: "Rental Property Break-Even Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free rental break-even calculator estimating cash-flow recovery time from entered assumptions.",
-    url: `${siteUrl}/tools/break-even-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Months to recover initial cash investment",
       "Account for operating expenses + debt service",
       "Compare break-even periods across strategies",
     ],
-  };
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
       <ToolBreadcrumbSchema toolName="Break-Even Calculator" toolPath="/tools/break-even-calculator" />
 
       <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
