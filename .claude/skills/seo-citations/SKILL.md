@@ -70,7 +70,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
    - **Partly supported:** soften the claim to what the source supports, then link it.
    - **Unsupported after the fetch:** remove the claim, or reduce it to a general statement the source supports. Never leave a checked claim bare, and never swap it for a vaguer unsourced number.
    - **Weekly-moving numbers (mortgage rates):** link the FRED series instead of quoting a value. If the page already quotes one, restate it with its observation date.
-   - **Competitor claim on `/vs`:** link the vendor's own page on `config.vendorDomains` and add "(as of <Month YYYY>)" beside it, taking the month from `run-flags.date`. Never do this on a blog post: verify-static allows vendor hosts only in `app/vs/*/page.tsx`. Leave blog competitor claims unchanged.
+   - **Competitor claim on `/vs` or a comparisons-hub post (`config.paths.vendorLinkAllow`):** link the vendor's own page on `config.vendorDomains` and add "(as of <Month YYYY>)" beside it, taking the month from `run-flags.date`. Never do this on a blog post: verify-static allows vendor hosts only in `app/vs/*/page.tsx`. Leave blog competitor claims unchanged.
 7. **FAQ answers.** They are plain strings, rendered visibly and fed into FAQPage JSON-LD from the same array.
    - Never put a URL, `<` or `>` in an answer.
    - If an answer repeats a claim you changed, make it match the body's sourced wording. The link lives in the body.
@@ -88,7 +88,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
 ## Gate checks (all must pass before you hand the change back)
 - **verify-static fence.** The model job cannot run it. In a local rehearsal, run `node seo/scripts/verify-static.ts --working-tree --base origin/main`. Otherwise check by hand:
   - **Links:** every added `href` or `url` is one plain `https://` string literal: no template literal, no concatenation, no runtime-built const.
-    - Its host is on `primarySourceDomains`. Vendor hosts are allowed only in `app/vs/*/page.tsx`.
+    - Its host is on `primarySourceDomains`. Vendor hosts are allowed only in the files listed in `config.paths.vendorLinkAllow` (`/vs` pages and the comparisons hub's posts), and only for that vendor's own facts.
     - No shortener, userinfo, port, IP host, backslash or redirector (`google.com/url`, `l.facebook.com`).
     - `utm_*`, `gclid`, `fbclid`, `mc_cid` and other tracking parameters are stripped.
     - No bare URL in prose or in a string. It is link-checked anyway; write link text instead.

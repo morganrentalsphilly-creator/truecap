@@ -62,6 +62,8 @@ export type SeoConfig = {
   vendorDomains: string[];
   paths: {
     agentAllow: string[];
+    /** Files that may link config.vendorDomains (/vs pages and the comparisons hub's posts). */
+    vendorLinkAllow?: string[];
     agentDeny: string[];
     articleFileNames: string[];
     forbiddenFileNames: string[];

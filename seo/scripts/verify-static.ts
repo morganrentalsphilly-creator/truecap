@@ -352,6 +352,15 @@ function unwrapExpression(node: ts.Expression): ts.Expression {
   return current;
 }
 
+/**
+ * Files that may link a competitor's own site (config.vendorDomains): /vs
+ * pages and the comparisons hub's posts (config.paths.vendorLinkAllow).
+ */
+export function vendorLinkAllowed(file: string, config: SeoConfig): boolean {
+  const globs = config.paths.vendorLinkAllow ?? ["app/vs/*/page.tsx"];
+  return globs.some((g) => globMatch(g, file));
+}
+
 function hostMatches(host: string, domains: string[]): boolean {
   return domains.some((domain) => host === domain || host.endsWith(`.${domain}`));
 }
@@ -1637,7 +1646,7 @@ export function hrefViolation(href: string, file: string, kind: LinkRef["kind"],
   if (LINK_SHORTENERS.has(host)) return `link shortener ${host}`;
   if (ctx.tier === 0) return `tier-0 files may add internal links only (found ${host})`;
   if (hostMatches(host, config.primarySourceDomains)) return null;
-  if (globMatch("app/vs/*/page.tsx", file) && hostMatches(host, config.vendorDomains ?? [])) return null;
+  if (vendorLinkAllowed(file, config) && hostMatches(host, config.vendorDomains ?? [])) return null;
   return `external link to ${host} is not a primary-source domain`;
 }
 

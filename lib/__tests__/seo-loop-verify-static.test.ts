@@ -1,4 +1,6 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { newDisallowedHosts } from "../../seo/scripts/render-diff.ts";
+import { globMatch } from "../../seo/scripts/lib/config.ts";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
@@ -676,6 +678,34 @@ describe("checkLiterals", () => {
 describe("links", () => {
   const sitemap = new Set(SITEMAP);
   const hv = (href: string, file = BLOG, tier: 0 | 1 | 2 = 1, kind: "jsx-href" | "property" | "literal" = "jsx-href"): string | null => hrefViolation(href, file, kind, { tier, sitemap }, config);
+
+  it("allows a vendor's own site only on /vs pages and the comparisons hub's posts", () => {
+    // The F3 citation pass sourced each competitor's pricing to that
+    // competitor's own page on the 12 comparison posts; nothing else may.
+    expect(hv("https://www.dealcheck.io/pricing/", "app/vs/dealcheck/page.tsx")).toBeNull();
+    expect(hv("https://www.dealcheck.io/pricing/", "app/blog/best-dealcheck-alternatives/page.tsx")).toBeNull();
+    expect(hv("https://www.avail.com/pricing", "app/blog/stessa-vs-avail-vs-baselane/page.tsx")).toBeNull();
+    expect(hv("https://www.dealcheck.io/pricing/", BLOG)).toMatch(/not a primary-source domain/);
+    expect(hv("https://www.dealcheck.io/pricing/", "app/blog/brrrr-method-explained/page.tsx")).toMatch(/not a primary-source domain/);
+    // A vendor page is still refused as a source for anything outside its list.
+    expect(hv("https://www.not-a-vendor.example/", "app/blog/best-dealcheck-alternatives/page.tsx")).toMatch(/not a primary-source domain/);
+  });
+
+  it("render-diff allows a new vendor host on exactly the same pages", () => {
+    const page = (hosts: string[]) => ({ pages: { "/blog/best-dealcheck-alternatives": { externalHosts: hosts }, "/blog/brrrr-method-explained": { externalHosts: hosts } } }) as never;
+    const vendorPage = (p: string) => (config.paths.vendorLinkAllow ?? []).some((g) => globMatch(g, `app${p}/page.tsx`));
+    const out = newDisallowedHosts(page([]), page(["www.dealcheck.io"]), ["/blog/best-dealcheck-alternatives", "/blog/brrrr-method-explained"], config.primarySourceDomains, config.vendorDomains, vendorPage);
+    expect(out).toEqual(["/blog/brrrr-method-explained → www.dealcheck.io"]);
+  });
+
+  it("keeps config.paths.vendorLinkAllow equal to /vs plus the comparisons hub", () => {
+    const topics = readFileSync(path.join(__dirname, "../../lib/blog-topics.ts"), "utf8");
+    const at = topics.indexOf('slug: "comparisons"');
+    const list = topics.slice(at, topics.indexOf("]", topics.indexOf("postSlugs", at)));
+    const hub = [...list.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]).filter((x) => x !== "comparisons");
+    expect(hub.length).toBeGreaterThanOrEqual(10);
+    expect([...(config.paths.vendorLinkAllow ?? [])].sort()).toEqual(["app/vs/*/page.tsx", ...hub.map((s) => `app/blog/${s}/page.tsx`)].sort());
+  });
 
   it("checks internal links against the sitemap", () => {
     expect(hv("/blog/dscr")).toBeNull();
