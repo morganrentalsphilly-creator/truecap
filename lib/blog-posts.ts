@@ -117,9 +117,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "buying-rental-property-with-tenants",
     title:
-      "Buying a rental property with tenants in place: the lease, the estoppel, and the below-market rent math (2026)",
+      "Buying a rental property with tenants in place: documents, obligations, and below-market rent math",
     excerpt:
-      "Tenant-occupied listings look like day-one income — but the lease survives the sale in all fifty states, and the rent it carries is usually below market. What legally transfers with the deed, worked loss-to-lease math on a $250K duplex ($43 vs $313/mo cash flow on the same building), the 18-month turnover-payback test, the three documents that protect you (leases, ledger, estoppels), closing-day deposit mechanics, and the staged path to market rent.",
+      "A due-diligence framework for a tenant-occupied purchase: verify the leases, payment history, deposits and local successor obligations, then run the in-place rent math. A hypothetical duplex makes $43 a month at the in-place rent against about $313 in the market-rent scenario.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-13",
     available: true,
@@ -129,7 +129,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Investment property appraisals: how they work — and what to do when the value comes in low (2026)",
     excerpt:
-      "The one number in every financed deal the investor doesn't control. Which forms get ordered (1004, 1025, and the 1007 rent schedule), how the lower-of rule turns a $228K appraisal on a $240K contract into a $9,000 cash call, why a 1007 rent opinion can push a DSCR loan from 1.26 to 1.17 and across a pricing tier, and the five-step playbook when the value misses — renegotiate, gap, reconsideration of value, new lender, walk.",
+      "How investment-property appraisals work: the forms and the rent schedule, the lower-of rule that turns a $228K appraisal on a $240K contract into a $9,000 cash call, worked low-appraisal gap math, and the playbook when the value comes in short.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-11",
     available: true,
@@ -139,7 +139,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to calculate ARV (after-repair value): the comps method, step by step (2026)",
     excerpt:
-      "The number every flip and BRRRR model is built on—and one you cannot simply look up. Learn why ARV is a forecast, how renovated comps support it, how a 70%-rule Offer Ceiling and 75% LTV refinance line key off it, and how sensitive modeled outcomes are to an ARV miss.",
+      "The number every flip and BRRRR model is built on, and one you cannot simply look up. How to calculate ARV from renovated comps, adjustments and price per square foot, with a worked example, a 70%-rule price screen, BRRRR refinance math and what an ARV miss does to the result.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-10",
     available: true,
@@ -149,7 +149,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Exit cap rate: how to pick the number that sets your sale price (2026)",
     excerpt:
-      "The number most investors pick in four seconds and never revisit — the cap rate you assume a future buyer pays. Why exit-year NOI ÷ exit cap sets most of the return on a multi-year hold, a worked $300K duplex where a 1.5-point swing moves the sale price $73,000 and the 5-year IRR from +11.5% to −2.6%, the exit ≥ entry rule, the residential comps caveat, and why a compressing exit cap is a bet on rates, not a rental.",
+      "The cap rate you assume a future buyer pays sets your projected sale price: exit-year NOI ÷ exit cap rate. A worked $300K duplex where a 1.5-point swing moves the sale price $73,000 and the 5-year IRR from +11.5% to −2.6%, the exit-at-or-above-entry rule of thumb, and the residential comps caveat.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-08",
     available: true,
@@ -246,7 +246,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "how-to-estimate-rent-rental-property",
     title: "How to estimate rent on a rental property (2026)",
     excerpt:
-      "Rent is the input every metric leans on — and the one investors most often guess. The appraiser's comp-adjustment method with a worked grid, the GRM and 1% cross-checks that bound the number, the haircut from market to effective rent, and why an 8% ($150/month) rent miss moves the cap rate 0.6 points, swings cash flow ~$128/month, and pushes DSCR from 1.15 to 1.24 — across the lender's line.",
+      "Rent is the input every metric leans on. The appraiser's comp-adjustment method with a worked grid, the GRM and 1% cross-checks that bound the number, the haircut from market to effective rent, and what a $150-a-month rent miss does to cap rate, cash flow and DSCR.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-25",
     available: true,
@@ -418,7 +418,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to calculate cash-on-cash return on a rental property — 2026 guide",
     excerpt:
-      "Cash-on-cash return = annual cash flow ÷ total cash invested. It's the only metric that tells you the return on the dollars you actually put in. Here's the formula, what counts as 'total cash invested,' three worked examples, and the trap most calculators fall into.",
+      "Cash-on-cash return = annual cash flow ÷ total cash invested: the return on the dollars you actually put in. The formula, what counts as total cash invested, three worked examples, and the shortcuts that inflate the number.",
     readingTimeMinutes: 7,
     publishedAt: "2026-06-07",
     available: true,
@@ -428,16 +428,16 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to calculate DSCR: the formula, a worked example, what counts as good, and DSCR loans",
     excerpt:
-      "DSCR = NOI ÷ annual debt service. The four steps, one sample rental worked through TrueCap's calculator, where the 1.25 floor in lending standards comes from, why a lender's DSCR can come out higher or lower than yours, and how DSCR loans work.",
+      "DSCR = NOI ÷ annual debt service. The four steps, a sample rental worked through, what counts as a good ratio, why a lender's DSCR can come out higher or lower than yours, and how DSCR loans use it.",
     readingTimeMinutes: 14,
     publishedAt: "2026-06-07",
     available: true,
   },
   {
     slug: "how-truecap-verdict-engine-works",
-    title: "How TrueCap classifies Buy Box fit",
+    title: "How TrueCap's screening bands classify a deal",
     excerpt:
-      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's Buy Box fit bands, plus how to read them.",
+      "The cash flow, DSCR, cash-on-cash and (for all-cash deals) cap-rate thresholds behind TrueCap's five screening bands, and how to read them.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,

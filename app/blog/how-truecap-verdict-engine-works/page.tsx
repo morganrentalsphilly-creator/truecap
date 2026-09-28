@@ -27,13 +27,13 @@ import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 
 const SLUG = "how-truecap-verdict-engine-works";
-const TITLE = "How TrueCap classifies Buy Box fit";
+const TITLE = "How TrueCap's screening bands classify a deal";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "How TrueCap classifies Buy Box fit";
+const SERP_TITLE = "How TrueCap's screening bands classify a deal";
 const DESCRIPTION =
-  "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for Buy Box fit, with the rationale behind each band.";
+  "The explicit cash flow, DSCR, cash-on-cash and (for all-cash deals) cap-rate thresholds behind TrueCap's five screening bands, with the rationale for each.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/how-truecap-verdict-engine-works") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
 
 const FAQ_ITEMS = [
   {
-    q: "How does TrueCap classify Buy Box fit?",
-    a: "TrueCap compares modeled cash flow, DSCR, cap rate, and cash-on-cash return with explicit thresholds, producing Strong, Solid, Mixed, Marginal, or Negative bands. The label describes how your entered assumptions stack up against those thresholds.",
+    q: "How does TrueCap's screening classifier band a deal?",
+    a: "TrueCap's screening classifier compares modeled cash flow, DSCR, and cash-on-cash return (cap rate instead of DSCR on all-cash deals) with explicit thresholds, producing Strong, Solid, Mixed, Marginal, or Negative bands. The label describes how your entered assumptions stack up against those thresholds.",
   },
   {
     q: "What cash flow does TrueCap consider 'good'?",
@@ -79,11 +79,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What DSCR contributes to TrueCap's Strong band?",
-    a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed/Marginal, and below 1.0 means the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
+    a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed, 0.9-1.0 is Marginal, and below 0.9 is Negative. Below 1.0, the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
   },
   {
     q: "How does TrueCap handle all-cash purchases for DSCR?",
-    a: "DSCR doesn't apply to cash purchases because there is no debt service. The Buy Box classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash.",
+    a: "DSCR doesn't apply to cash purchases because there is no debt service. The screening classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash.",
   },
   {
     q: "What's the difference between Buy Box fit and the Deal score?",
@@ -174,7 +174,7 @@ export default function HowVerdictEngineWorksPost() {
               TL;DR
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              TrueCap&apos;s Buy Box classifier is a small set of explicit
+              TrueCap&apos;s screening classifier is a small set of explicit
               thresholds that groups modeled results into five bands:{" "}
               <strong>Strong, Solid, Mixed, Marginal, Negative</strong>. Strong
               needs{" "}
@@ -188,7 +188,7 @@ export default function HowVerdictEngineWorksPost() {
           </section>
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
-            <h2>Why we show Buy Box fit</h2>
+            <h2>Why we show screening bands</h2>
             <p>
               A rental analysis spits out numbers — cap rate, cash flow, DSCR,
               cash-on-cash, IRR — and a new investor stares at them wondering if
@@ -197,9 +197,11 @@ export default function HowVerdictEngineWorksPost() {
               needs the assumptions and target basis stated explicitly.
             </p>
             <p>
-              Buy Box fit groups the modeled outputs into one of five
-              bands and explains which thresholds were met or missed. The
-              Deal score (0–100) is a heuristic summary of the modeled numbers.
+              The screening classifier groups the modeled outputs into one of
+              five bands and explains which thresholds were met or missed. Buy
+              Box fit is a separate check of the modeled numbers against your
+              own targets, and the Deal score (0–100) is a heuristic summary of
+              the modeled numbers.
             </p>
             <p>
               The whole engine is open — the source code is at{" "}
@@ -235,8 +237,8 @@ export default function HowVerdictEngineWorksPost() {
             <h2>The exact thresholds (financed purchase)</h2>
             <p>
               Most rental purchases use financing, so this is the primary legacy
-              path. The classifier checks four metrics and assigns the first
-              matching screening band.
+              path. The classifier checks three metrics (cash flow, DSCR, and
+              cash-on-cash) and assigns the first matching screening band.
             </p>
 
             <h3>Strong</h3>
@@ -331,7 +333,7 @@ export default function HowVerdictEngineWorksPost() {
             <p>
               When the analysis says <code>monthlyPayment &lt;= 0</code> — i.e.,
               there&apos;s no financing — DSCR doesn&apos;t mean anything.
-              There&apos;s no debt service to cover. The Buy Box
+              There&apos;s no debt service to cover. The screening
               classifier detects this and switches to a simpler classifier:
             </p>
             <ul>
@@ -386,18 +388,19 @@ export default function HowVerdictEngineWorksPost() {
             <h3>DSCR sentences</h3>
             <ul>
               <li>
-                <strong>Cash purchase</strong> — &quot;DSCR isn&apos;t
-                applicable for an all-cash purchase.&quot;
+                <strong>Cash purchase</strong> — &quot;DSCR: N/A — no debt
+                service. An all-cash purchase has no lender debt service to
+                cover.&quot;
               </li>
               <li>
-                <strong>≥ 1.25</strong> — &quot;clears TrueCap&apos;s Strong
-                modeled-coverage band; this is not a lender calculation or
-                approval.&quot;
+                <strong>≥ 1.25</strong> — &quot;above the 1.25 screening
+                benchmark; actual lender definitions and requirements
+                vary.&quot;
               </li>
               <li>
-                <strong>1.0 - 1.25</strong> — &quot;modeled income covers
-                modeled debt service with less room; verify the proposed
-                lender&apos;s formula and complete requirements.&quot;
+                <strong>1.0 - 1.25</strong> — &quot;above modeled debt-service
+                breakeven but below the 1.25 screening benchmark; confirm the
+                lender&apos;s definition and requirements.&quot;
               </li>
               <li>
                 <strong>&lt; 1.0</strong> — &quot;below 1.0 — operating income
@@ -432,9 +435,9 @@ export default function HowVerdictEngineWorksPost() {
             <ul>
               <li>
                 <strong>No appreciation modeling.</strong> The classification is
-                operations-only and does not predict future value. The Pro
-                tier&apos;s 10-year projection and exit-scenarios modeling cover
-                the appreciation side.
+                operations-only and does not predict future value. The Deal
+                score&apos;s 10-year total-return factor is where TrueCap
+                accounts for modeled appreciation.
               </li>
               <li>
                 <strong>
@@ -445,9 +448,10 @@ export default function HowVerdictEngineWorksPost() {
                 the market, not what an algorithm tells you.
               </li>
               <li>
-                <strong>No partial credit.</strong> Strong requires
-                <em>all three</em> thresholds. Two-out-of-three knocks you to
-                Solid. We thought about a weighted score (that&apos;s what the
+                <strong>No partial credit.</strong> Strong requires{" "}
+                <em>all three</em> thresholds. Missing any one knocks you out of
+                Strong, into Solid only if all three Solid thresholds still
+                hold, otherwise lower. We thought about a weighted score (that&apos;s what the
                 Deal score does), while this classifier uses explicit
                 cutoffs.
               </li>
@@ -491,7 +495,7 @@ export default function HowVerdictEngineWorksPost() {
               entire site. Same engine drives the free analyzer, the saved-deal
               PDF, the share link, the dashboard, and the OG image. If
               you&apos;ve seen the number 6.4% as the cap rate in your TrueCap
-              analysis, that&apos;s the same 6.4% the Buy Box classifier
+              analysis, that&apos;s the same 6.4% the screening classifier
               reads.
             </p>
             <p>

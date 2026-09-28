@@ -11,15 +11,15 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const alt = "How TrueCap classifies Buy Box fit";
+export const alt = "How TrueCap's screening bands classify a deal";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function Image() {
   return renderBlogOgImage({
     section: "Product",
-    tag: "Buy Box fit",
-    title: "How TrueCap classifies Buy Box fit",
+    tag: "Screening bands",
+    title: "How TrueCap's screening bands classify a deal",
     subline: "Explicit screening thresholds, not a buy/pass decision",
   });
 }

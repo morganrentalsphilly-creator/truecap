@@ -28,6 +28,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "investment-property-appraisal";
 const TITLE_PLAIN =
@@ -71,19 +72,19 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How is an investment property appraisal different from a regular home appraisal?",
-    a: "The valuation method is mostly the same — recent comparable sales, adjusted to the subject — but investment appraisals add income documentation. On a single-family rental, most lenders order a 1007 comparable rent schedule alongside the standard 1004 appraisal, so the appraiser opines on market rent as well as value. On a 2–4 unit property, the appraisal itself moves to Form 1025, which includes rental comps and a gross rent multiplier analysis. Expect a somewhat higher fee than an owner-occupant appraisal, and expect the rent opinion to matter as much as the value if you're using a DSCR loan.",
+    a: "The valuation method is mostly the same — recent comparable sales, adjusted to the subject — but investment appraisals add income documentation. On a single-family rental where rental income is used to qualify, the lender has the appraiser give an opinion of market rent as well as value: traditionally on Form 1007 alongside the Form 1004, and, for appraisals submitted to Fannie Mae or Freddie Mac from November 2, 2026, usually in the redesigned URAR's Rental Information section. On a 2–4 unit property, Fannie Mae also requires the income approach — rental comps and a gross rent multiplier analysis — reported on Form 1025 (or, for appraisals submitted to Fannie Mae or Freddie Mac from November 2, 2026, the redesigned URAR). The lender may require you to pay for the appraisal. Expect the rent opinion to matter as much as the value if you're using a DSCR loan.",
   },
   {
     q: "What happens if the appraisal comes in lower than my offer?",
-    a: "The lender sizes the loan off the lower of the purchase price and the appraised value, so a low appraisal shrinks your loan, not your price. You have five levers, in roughly this order: renegotiate the price down to (or toward) the appraised value, bring extra cash to cover the gap, file a reconsideration of value with better comps, switch lenders to trigger a new appraisal, or walk if your contract has an appraisal contingency. The math on each option is in the worked example above — often a hybrid (seller drops part way, you cover the rest) is where deals actually land.",
+    a: "The lender sizes the loan off the lower of the purchase price and the appraised value, so a low appraisal shrinks your loan, not your price. You have five levers, in roughly this order: renegotiate the price down to (or toward) the appraised value, bring extra cash to cover the gap, file a reconsideration of value with better comps, switch lenders to trigger a new appraisal, or walk if your contract has an appraisal contingency. The math on each option is in the worked example above — and a hybrid (seller drops part way, you cover the rest) is a middle ground worth proposing.",
   },
   {
     q: "Can I challenge a low appraisal?",
-    a: "Yes — the process is called a reconsideration of value (ROV), and it goes through your lender, not directly to the appraiser. It works when you can point to specific, factual problems: a renovated comp the appraiser missed, an error in the subject's square footage or bed/bath count, or comps pulled from across a boundary that changes value. It does not work as a generic complaint that the number feels low. Send two or three better closed comps with a short factual note. Expect a modest adjustment when you win — a few percent, not a rewrite — and a response inside one to two weeks.",
+    a: "Yes — the process is called a reconsideration of value (ROV), and it goes through your lender, not directly to the appraiser. It works when you can point to specific, factual problems: a renovated comp the appraiser missed, an error in the subject's square footage or bed/bath count, or comps pulled from across a boundary that changes value. It does not work as a generic complaint that the number feels low. Send two or three better closed comps with a short factual note. Under Fannie Mae rules you get one borrower-initiated ROV per appraisal, it must be submitted before the loan closes, and you can include up to five alternative comparables.",
   },
   {
     q: "What is a 1007 rent schedule and why does my lender want one?",
-    a: "Form 1007 is the single-family comparable rent schedule: the appraiser pulls three or so nearby rental comps and gives an opinion of the subject's market rent. Conventional lenders use it to count rental income toward your qualification; DSCR lenders use it to compute the debt-service-coverage ratio itself, and most will underwrite to the lower of your actual lease and the 1007 market rent. A 1007 that comes in under your lease can push your DSCR below a pricing tier and cost you real basis points — which is why you should underwrite to a defensible market rent, not the most optimistic listing you found.",
+    a: "Form 1007 is the legacy single-family comparable rent schedule: the appraiser pulls three nearby rental comps and gives an opinion of the subject's market rent. For appraisals submitted to Fannie Mae or Freddie Mac from November 2, 2026, that opinion usually goes in the redesigned URAR's Rental Information section instead. Conventional lenders use it to count rental income toward your qualification; DSCR lenders may use the appraiser's rent opinion in the coverage ratio itself, and some underwrite to the lower of your actual lease and that market rent, so confirm the program's written method. A rent opinion that comes in under your lease can push your DSCR below a lender's pricing tier and raise your rate — which is why you should underwrite to a defensible market rent, not the most optimistic listing you found.",
   },
 ];
 
@@ -155,12 +156,12 @@ export default function InvestmentPropertyAppraisalPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Every financed rental deal has one number the investor
-              doesn&apos;t control: the appraisal. You can negotiate the price,
+              A financed rental deal usually comes with one number the
+              investor doesn&apos;t control: the appraisal. You can negotiate the price,
               shop the rate, and pad the rehab budget, but the appraised value
               — and on many loans, the appraiser&apos;s opinion of market rent
               — is handed down by a stranger a few weeks before closing, and
-              your loan is sized off it. Most investors learn how the process
+              your loan is sized off it. Many investors learn how the process
               works the expensive way, the first time a value comes in
               $12,000 light. Here&apos;s the whole machine: which forms get
               ordered and what&apos;s in them, how the lower-of rule turns a
@@ -181,23 +182,56 @@ export default function InvestmentPropertyAppraisalPost() {
               negotiated: come in low and the lender shrinks your loan, so you
               either renegotiate, bring cash, or walk. On a{" "}
               <strong>refinance</strong> — including the refi leg of a BRRRR —
-              the appraisal <em>is</em> the deal: the cash-out loan is a
-              straight percentage of appraised value, so every dollar the
-              appraiser shaves off costs you 70–75 cents of proceeds. (That
-              forecast-versus-referee dynamic is the core of the{" "}
+              the appraisal <em>is</em> the deal: the cash-out loan is a{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.2-01/loan-value-ltv-ratios"
+                className="text-primary font-semibold hover:underline"
+              >
+                straight percentage of appraised value
+              </a>
+              , so at the{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                conventional cash-out maximums (75% of value on one unit, 70% on two to four)
+              </a>{" "}
+              every dollar the appraiser shaves off costs you 70–75 cents of
+              proceeds. (That forecast-versus-referee dynamic is the core of
+              the{" "}
               <Link
                 href="/blog/how-to-calculate-arv"
                 className="text-primary font-semibold hover:underline"
               >
                 ARV guide
               </Link>
-              .) And on a <strong>DSCR loan</strong>, a second, quieter number
-              rides along with the value: the appraiser&apos;s opinion of
-              market rent, which can move your rate tier even when the value
-              comes in fine. Expect to pay roughly $500–$800 for a
-              single-family appraisal and $700–$1,200 for a 2–4 unit, ordered
-              by the lender through an appraisal management company — you pay
-              for it, but you don&apos;t pick the appraiser, by design.
+              .) The exception: Fannie Mae&apos;s{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.4-10/value-acceptance"
+                className="text-primary font-semibold hover:underline"
+              >
+                value acceptance
+              </a>{" "}
+              can waive the appraisal on some one-unit investment refinances,
+              though two-to-four unit properties are ineligible. And on a{" "}
+              <strong>DSCR loan</strong>, a second, quieter number rides along
+              with the value: the appraiser&apos;s opinion of market rent,
+              which can move your rate tier even when the value comes in fine.
+              The lender orders the appraisal,{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.1-03/appraiser-selection-criteria"
+                className="text-primary font-semibold hover:underline"
+              >
+                directly or through an appraisal management company
+              </a>
+              , and{" "}
+              <a
+                href="https://www.consumerfinance.gov/ask-cfpb/what-are-appraisals-and-why-do-i-need-to-look-at-them-en-167/"
+                className="text-primary font-semibold hover:underline"
+              >
+                may require you to pay for it
+              </a>
+              , but you don&apos;t pick the appraiser, by design.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -205,15 +239,45 @@ export default function InvestmentPropertyAppraisalPost() {
             </h2>
             <p>
               For a single-family rental, the appraisal itself is the same
-              form an owner-occupant gets — the URAR, Fannie Mae Form 1004 —
-              built almost entirely on the <strong>sales comparison
-              approach</strong>: three to six recent closed sales, adjusted
-              toward the subject for condition, size, and features, then
-              reconciled to a value. What makes it an investment appraisal is
-              the attachment: most lenders also order{" "}
+              form an owner-occupant gets: the Uniform Residential Appraisal
+              Report (URAR). Under the{" "}
+              <a
+                href="https://sf.freddiemac.com/docs/pdf/fact-sheet/uad-redesign-timeline.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae and Freddie Mac redesign timeline
+              </a>
+              , appraisals submitted to either agency through November 1, 2026
+              could use the legacy Fannie Mae Form 1004; from November 2, 2026
+              they must use the redesigned URAR. Either way, the
+              value is built almost entirely on the <strong>sales comparison
+              approach</strong>:{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
+                className="text-primary font-semibold hover:underline"
+              >
+                at least three recent closed sales
+              </a>
+              , adjusted toward the subject for condition, size, and features,
+              then reconciled to a value. What makes it an investment
+              appraisal is the rent opinion:{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                when rental income from the property is used to qualify for a Fannie Mae loan, the lender must obtain
+              </a>{" "}
               <strong>Form 1007</strong>, the single-family comparable rent
               schedule, in which the appraiser pulls nearby rental comps and
-              opines on the subject&apos;s market rent. If you&apos;ve built a
+              opines on the subject&apos;s market rent (for{" "}
+              <a
+                href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign"
+                className="text-primary font-semibold hover:underline"
+              >
+                appraisals submitted to Fannie Mae or Freddie Mac from November 2, 2026
+              </a>
+              , that rent opinion usually goes in the redesigned URAR&apos;s
+              Rental Information section). If you&apos;ve built a
               rent estimate the way the{" "}
               <Link
                 href="/blog/how-to-estimate-rent-rental-property"
@@ -225,10 +289,18 @@ export default function InvestmentPropertyAppraisalPost() {
               it should land near your number.
             </p>
             <p>
-              Two-to-four unit properties move to <strong>Form 1025</strong>,
-              the small residential income property report. It keeps the sales
-              comparison approach but adds an income section: rental comps for
-              each unit type and a{" "}
+              Two-to-four unit properties have used <strong>Form 1025</strong>,
+              the small residential income property report (appraisals
+              submitted to Fannie Mae or Freddie Mac from November 2, 2026 use
+              the redesigned URAR instead). Form 1025 keeps the sales
+              comparison approach but{" "}
+              <a
+                href="https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5"
+                className="text-primary font-semibold hover:underline"
+              >
+                adds an income section: rental comps for each unit type
+              </a>{" "}
+              and a{" "}
               <Link
                 href="/blog/gross-rent-multiplier-explained"
                 className="text-primary font-semibold hover:underline"
@@ -236,16 +308,30 @@ export default function InvestmentPropertyAppraisalPost() {
                 gross rent multiplier
               </Link>{" "}
               analysis, where the appraiser multiplies the property&apos;s
-              market rent by the GRM extracted from comparable sales as a
-              cross-check on the comps-based value. A duplex grossing $2,900 a
-              month in a market where small multifamily trades around an 8.2
-              GRM pencils to roughly $285,000 by the income approach — if the
-              sales comps say $260,000, the appraiser reconciles, usually
-              leaning on the sales side for 2–4 units. The third method, the
-              cost approach (land plus replacement cost minus depreciation),
-              rarely drives residential values; it exists mostly as a sanity
-              check and for new construction. The practical takeaway: on
-              small residential, <em>comps decide the value and rents decide
+              gross monthly market rent by the GRM extracted from comparable
+              sales as a cross-check on the comps-based value. A duplex
+              grossing $2,900 a month in a market where small multifamily
+              trades around 98 times monthly rent (about 8.2 times annual rent)
+              pencils to roughly $285,000 by the income approach — if the
+              sales comps say $260,000, the appraiser reconciles,{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-11/valuation-analysis-and-reconciliation"
+                className="text-primary font-semibold hover:underline"
+              >
+                reporting which approach got the most weight
+              </a>{" "}
+              (Fannie Mae{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+                className="text-primary font-semibold hover:underline"
+              >
+                won&apos;t accept an appraisal that relies solely on the income approach
+              </a>
+              ). The third method, the cost approach (land plus replacement
+              cost minus depreciation), rarely drives residential values:
+              Fannie Mae doesn&apos;t require it except for manufactured homes,
+              and it mostly shows up as a sanity check and on new
+              construction. The practical takeaway: on small residential, <em>comps decide the value and rents decide
               the loan</em> — your cap-rate math matters to you, not to the
               appraiser.
             </p>
@@ -275,11 +361,12 @@ export default function InvestmentPropertyAppraisalPost() {
               <strong>1.26</strong>. But if the 1007 pegs market rent at
               $1,850 — maybe your tenant is above market, maybe the rental
               comps skew small — the lender&apos;s DSCR is 1,850 ÷ 1,588 ={" "}
-              <strong>1.17</strong>. Many DSCR rate sheets break at 1.20:
-              cross it going down and the same deal prices 25–50 basis points
-              worse, or the lender trims leverage until the ratio clears.
-              Nothing about the property changed — one opinion of rent moved
-              your cost of capital. Check where your deal sits in the{" "}
+              <strong>1.17</strong>. Some DSCR lenders price in tiers by
+              coverage ratio: drop below a tier and the same deal can price
+              worse, or the lender may trim leverage until the ratio clears, so
+              ask your lender where its tiers break. Nothing about the property
+              changed — one opinion of rent can move your cost of capital.
+              Check where your deal sits in the{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="text-primary font-semibold hover:underline"
@@ -293,8 +380,13 @@ export default function InvestmentPropertyAppraisalPost() {
               The lower-of rule: worked gap math
             </h2>
             <p>
-              Purchase loans are sized against the <strong>lower</strong> of
-              the contract price and the appraised value. That asymmetry is
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.2-01/loan-value-ltv-ratios"
+                className="text-primary font-semibold hover:underline"
+              >
+                Purchase loans are sized against the <strong>lower</strong> of the contract price and the appraised value
+              </a>
+              . That asymmetry is
               worth staring at: an appraisal $15,000 <em>above</em> your price
               changes nothing (you don&apos;t get a bigger loan, though you do
               get free equity), while an appraisal $12,000 <em>below</em> is
@@ -327,26 +419,36 @@ export default function InvestmentPropertyAppraisalPost() {
               a documented, third-party opinion that the price is wrong, and
               the seller knows the next financed buyer will likely hit the
               same number. Ask for $228,000; settle anywhere above it and
-              you&apos;ve recovered real money. A common landing spot is the
-              split: seller comes down to $234,000, you cover the remaining
-              $6,000 gap — cash to close rises $4,500 instead of $9,000.{" "}
+              you&apos;ve recovered real money. One middle ground is the split:
+              seller comes down to $234,000, you cover the remaining $6,000 gap
+              — the loan stays at $171,000, so cash to close is $63,000, up
+              $3,000 instead of $9,000.{" "}
               <strong>Second, pay the gap</strong> — but only if your own
               comps genuinely support the contract price and the appraisal is
               the outlier, not your optimism. Be honest about which is more
               likely. <strong>Third, file a reconsideration of value.</strong>{" "}
-              An ROV goes through the lender and works only on facts: a
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-12/appraisal-quality-matters"
+                className="text-primary font-semibold hover:underline"
+              >
+                An ROV goes through the lender and works only on facts
+              </a>
+              : a
               renovated comp the appraiser missed, a square-footage or
               bed/bath error, comps pulled from across a school-district or
               highway boundary. Send two or three better closed sales and a
-              short note; expect an answer in one to two weeks and a modest
-              move when you win. <strong>Fourth, switch lenders.</strong> A
-              new lender means a new appraisal — a legitimate reset if the
-              first was sloppy, at the cost of a fresh fee and two to three
-              weeks. It&apos;s the standard move on refinances, where
-              there&apos;s no contract deadline forcing your hand.{" "}
+              short note. Under Fannie Mae rules you get one borrower-initiated
+              ROV per appraisal (with up to five alternative comps), and it has
+              to be submitted before the loan closes, so make it count.{" "}
+              <strong>Fourth, switch lenders.</strong> A new lender generally
+              orders its own appraisal — a legitimate reset if the first was
+              sloppy, at the cost of a fresh fee and more time. It&apos;s most
+              practical on refinances, where there&apos;s no contract deadline
+              forcing your hand.{" "}
               <strong>Fifth, walk.</strong> If your contract has an appraisal
-              contingency, a low value is a clean exit with your earnest money
-              back. On investment purchases, waiving that contingency is a
+              contingency, a low value can let you exit and recover your
+              earnest money, subject to the contingency&apos;s terms and
+              deadlines. On investment purchases, waiving that contingency is a
               real concession — waive it only when you&apos;d happily pay the
               gap, because you&apos;re promising exactly that.
             </p>
@@ -399,9 +501,9 @@ export default function InvestmentPropertyAppraisalPost() {
               </li>
               <li>
                 <strong>Ignoring the 1007 until closing week.</strong> On DSCR
-                loans the rent opinion moves pricing tiers. If your underwrite
-                needs above-market rent to clear 1.20, the appraisal is where
-                that assumption gets repriced.
+                loans the rent opinion can move pricing tiers. If your
+                underwrite needs above-market rent to clear your lender&apos;s
+                tier, the appraisal is where that assumption gets repriced.
               </li>
               <li>
                 <strong>Filing an emotional ROV.</strong> &quot;It should be
@@ -410,10 +512,18 @@ export default function InvestmentPropertyAppraisalPost() {
                 same street&quot; wins. Facts, comps, brevity.
               </li>
               <li>
-                <strong>Forgetting the appraisal expires.</strong> Most are
-                valid for about 120 days. Let a closing drift past the window
-                and you&apos;re paying for — and risking — a second opinion
-                in whatever the market has become since.
+                <strong>Forgetting the appraisal expires.</strong>{" "}
+                <a
+                  href="https://selling-guide.fanniemae.com/sel/b4-1.2-04/appraisal-age-and-use-requirements"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Under Fannie Mae rules an appraisal is good for four months
+                </a>
+                : after that the appraiser must update it (an exterior
+                inspection and a check of current market data), and past 12
+                months you need a new one. Let a closing drift past the window
+                and you&apos;re paying for — and risking — a fresh look at
+                whatever the market has become since.
               </li>
             </ul>
 
@@ -437,7 +547,14 @@ export default function InvestmentPropertyAppraisalPost() {
               plus, on rentals, an opinion of market rent that can quietly
               reprice your loan. The lower-of rule means a low value never
               costs the seller first; it costs you, in gap cash or lost
-              cash-out proceeds, at 70–75 cents per appraised dollar. So
+              cash-out proceeds, at{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                roughly 70–85 cents per appraised dollar, depending on your loan-to-value
+              </a>
+              . So
               underwrite like the appraiser is looking over your shoulder:
               comp-supported value, defensible market rent, and a deal that
               survives the value coming in 5% light. When one misses anyway,
@@ -449,12 +566,72 @@ export default function InvestmentPropertyAppraisalPost() {
                 TrueCap analyzer
               </Link>{" "}
               before the appraisal is ordered, so the referee&apos;s number is
-              a confirmation, not a surprise. None of this is investment or
-              lending advice; appraisal forms, LTV limits, and DSCR tiers vary
-              by lender and program — verify terms on your specific deal.
+              a confirmation, not a surprise. Appraisal forms, LTV limits, and
+              DSCR tiers vary by lender and program — verify terms on your
+              specific deal.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae Selling Guide B2-1.2-01, Loan-to-Value (LTV) Ratios (06/01/2022)",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.2-01/loan-value-ltv-ratios",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.4-10, Value Acceptance (06/03/2026)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.4-10/value-acceptance",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.1-03, Appraiser Selection Criteria (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.1-03/appraiser-selection-criteria",
+            },
+            {
+              title: "Consumer Financial Protection Bureau, What are appraisals and why do I need to look at them?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/what-are-appraisals-and-why-do-i-need-to-look-at-them-en-167/",
+            },
+            {
+              title: "Freddie Mac and Fannie Mae, UAD redesign timeline (fact sheet)",
+              url: "https://sf.freddiemac.com/docs/pdf/fact-sheet/uad-redesign-timeline.pdf",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-08, Comparable Sales (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-3.8-02, Rental Income from the Subject Property (09/02/2026)",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property",
+            },
+            {
+              title: "Freddie Mac, UAD and Forms Redesign FAQ (UAD 3.6)",
+              url: "https://sf.freddiemac.com/faqs/uad-and-forms-redesign",
+            },
+            {
+              title: "Freddie Mac Form 72 / Fannie Mae Form 1025 (March 2005), Small Residential Income Property Appraisal Report",
+              url: "https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-11, Valuation Analysis and Reconciliation (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-11/valuation-analysis-and-reconciliation",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-12, Appraisal Quality Matters (09/03/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-12/appraisal-quality-matters",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.2-04, Appraisal Age and Use Requirements (06/04/2025)",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.2-04/appraisal-age-and-use-requirements",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

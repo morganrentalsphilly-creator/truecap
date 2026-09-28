@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-calculate-cash-on-cash-return";
 const TITLE =
@@ -34,7 +35,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to calculate cash-on-cash return (2026)";
 const DESCRIPTION =
-  "Cash-on-cash return = annual cash flow ÷ total cash invested. The formula, three worked examples, and the trap most calculators fall into.";
+  "Cash-on-cash return = annual cash flow ÷ total cash invested. The formula, three worked examples, and the two traps that inflate the number.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/how-to-calculate-cash-on-cash-return") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 7;
@@ -73,19 +74,19 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What's the cash-on-cash return formula?",
-    a: "Cash-on-cash (CoC) return = annual pre-tax cash flow ÷ total cash invested. Annual cash flow = NOI − annual debt service (12 × monthly mortgage payment). Total cash invested = down payment + closing costs + upfront rehab + initial reserves. Express the result as a percentage. Year 1 CoC is the standard quoted number; it changes over time as rents grow but cash invested stays fixed.",
+    a: "Cash-on-cash (CoC) return = annual pre-tax cash flow ÷ total cash invested. Annual cash flow = NOI − annual debt service (12 × monthly mortgage payment) − the CapEx reserve, which sits below NOI but still reduces cash flow. Total cash invested = down payment + closing costs + upfront rehab + initial reserves. Express the result as a percentage. Year 1 CoC is the standard quoted number; it changes over time as rents grow but cash invested stays fixed.",
   },
   {
     q: "What counts as 'total cash invested'?",
-    a: "Everything you put into the deal before it stabilizes: (1) down payment, (2) closing costs (typically 2-4% of purchase price — title, lender fees, inspections, appraisal, transfer taxes), (3) any upfront rehab or make-ready costs to make it rentable, (4) any operating reserves you fund at closing. NOT included: the loan amount (that's the bank's money), or future repairs you'll pay out of cash flow.",
+    a: "Everything you put into the deal before it stabilizes: (1) down payment, (2) closing costs (Freddie Mac says buyers should typically be prepared for 2% to 5% of the purchase price — title, lender fees, inspections, appraisal, transfer taxes), (3) any upfront rehab or make-ready costs to make it rentable, (4) any operating reserves you fund at closing. NOT included: the loan amount (that's the bank's money), or future repairs you'll pay out of cash flow.",
   },
   {
     q: "What's a good cash-on-cash return?",
-    a: "Investor benchmarks vary, but rough guidance: under 4% suggests you're betting on appreciation; 4-8% is conservative buy-and-hold territory; 8-12% is solid in most markets; 12%+ usually means heavy leverage, secondary markets, or value-add. The 'right' CoC depends on what you're optimizing — a 6% CoC in Austin with strong appreciation often beats a 14% CoC in a declining Midwest market once you factor in vacancy risk and capital appreciation. Don't chase CoC for its own sake.",
+    a: "Investor benchmarks vary, but rough guidance: under 4% suggests you're betting on appreciation; 4-8% is conservative buy-and-hold territory; 8-12% is solid; 12%+ usually means heavy leverage, secondary markets, or value-add. The 'right' CoC depends on what you're optimizing — a lower CoC in a market with strong appreciation can beat a higher CoC in a declining market once you factor in vacancy risk and capital appreciation. Don't chase CoC for its own sake.",
   },
   {
     q: "How does cash-on-cash return differ from cap rate?",
-    a: "Cap rate is unlevered yield (NOI ÷ price) — it ignores financing entirely. Cash-on-cash is levered return (cash flow ÷ cash invested) — it bakes in your specific financing. When the mortgage rate is below the cap rate, leverage amplifies returns (positive leverage) and CoC exceeds cap rate. When the rate is above the cap rate, leverage hurts (negative leverage) and CoC drops below cap rate. In 2026 with rates at 6.5-7.5% and many markets trading at 5-6% cap rates, leverage is often negative — a sign that buyers are paying for expected appreciation, not yield.",
+    a: "Cap rate is unlevered yield (NOI ÷ price) — it ignores financing entirely. Cash-on-cash is levered return (cash flow ÷ cash invested) — it bakes in your specific financing. When the loan constant (annual debt service ÷ loan amount) is below the cap rate, leverage amplifies returns (positive leverage) and CoC exceeds cap rate; when it is above the cap rate, leverage hurts (negative leverage) and CoC drops below cap rate. On a 30-year loan the constant is higher than the interest rate — about 7.98% at 7%. In 2026, with the Freddie Mac 30-year fixed average between 5.98% and 7.03% (7.03% in the week of September 24, 2026), leverage is negative whenever a deal's cap rate sits below its loan constant — a sign that buyers are paying for expected appreciation, not yield.",
   },
   {
     q: "Should I include principal paydown in cash flow?",
@@ -172,11 +173,11 @@ export default function BlogPost() {
           </p>
           <BlogByline />
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Cash-on-cash return = annual cash flow ÷ total cash invested.
-            It&apos;s the only metric that tells you the return on the dollars
-            you actually put in. Here&apos;s the formula, what counts as
-            &ldquo;total cash invested,&rdquo; three worked examples, and the
-            trap most calculators fall into.
+            Cash-on-cash return = annual cash flow ÷ total cash invested. It
+            measures the cash return on the dollars you actually put in.
+            Here&apos;s the formula, what counts as &ldquo;total cash
+            invested,&rdquo; three worked examples, and the two traps that
+            inflate the number.
           </p>
         </header>
 
@@ -201,8 +202,10 @@ export default function BlogPost() {
           <h3>Step 1: Compute NOI</h3>
           <p>
             Net operating income = gross rent − vacancy − operating expenses
-            (taxes, insurance, management, maintenance reserve, CapEx reserve,
-            utilities, HOA). NOT including mortgage. Full walkthrough in{" "}
+            (taxes, insurance, management, maintenance reserve, utilities,
+            HOA). NOT including mortgage or the CapEx reserve, which TrueCap
+            treats as a below-NOI reserve that still reduces cash flow. Full
+            walkthrough in{" "}
             <Link
               href="/blog/how-to-calculate-cap-rate"
               className="text-primary font-semibold hover:underline"
@@ -221,8 +224,8 @@ export default function BlogPost() {
 
           <h3>Step 3: Calculate annual cash flow</h3>
           <p>
-            Annual cash flow = NOI − annual debt service. This is the pre-tax
-            cash that actually hits your bank account.
+            Annual cash flow = NOI − annual debt service − the CapEx reserve.
+            This is the pre-tax cash that actually hits your bank account.
           </p>
 
           <h3>Step 4: Tally total cash invested</h3>
@@ -234,7 +237,15 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Closing costs.</strong> Title, lender fees, inspection,
-              appraisal, transfer taxes — usually 2-4% of purchase price.
+              appraisal, transfer taxes —{" "}
+              <a
+                href="https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac says to typically be prepared for 2% to 5% of the
+                purchase price
+              </a>
+              .
             </li>
             <li>
               <strong>Upfront rehab / make-ready.</strong> Anything you had to
@@ -259,8 +270,9 @@ export default function BlogPost() {
             Worked example #1: leveraged single-family
           </h2>
           <p>
-            $300K property, 25% down at 7%, $2,400/mo rent, NOI from cap-rate
-            example $12,906.
+            $300K property, 25% down at 7%, $2,400/mo rent; from the cap-rate
+            example, cash after the CapEx reserve and before debt service is
+            $12,906.
           </p>
           <ul>
             <li>Loan amount: $225,000</li>
@@ -280,8 +292,16 @@ export default function BlogPost() {
             Negative CoC means you&apos;re writing a check every month to own
             this property. That can still make sense if you believe in strong
             appreciation, but in 2026 it&apos;s a hard sell — bidding for
-            negative cash flow on a 4.3% cap rate with 7% mortgage rate is
-            paying for hope.
+            negative cash flow on a 5.3% cap rate with a 7% mortgage rate is
+            paying for hope. (For reference, the{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+              className="text-primary font-semibold hover:underline"
+            >
+              Freddie Mac 30-year fixed average was 7.03% in the week of
+              September 24, 2026
+            </a>
+            .)
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -304,20 +324,23 @@ export default function BlogPost() {
           </ul>
           <p>
             More leverage made the deal worse, not better — because the mortgage
-            rate (7.5%) is higher than the cap rate (4.3%). This is negative
-            leverage in action. The cap rate / mortgage rate spread is the
-            single biggest driver of whether leverage helps or hurts.
+            rate (7.5%), and with it the loan constant (about 8.39% on a
+            30-year loan), is higher than the cap rate (5.3%). This is negative
+            leverage in action. The spread between the cap rate and the loan
+            constant decides whether leverage helps or hurts.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
             Worked example #3: a real deal in a higher-cap market
           </h2>
           <p>
-            $180K Tier 3 single-family, $1,800/mo rent, 25% down at 7%. Cap rate
-            is ~8% on the same expense methodology.
+            $180K Tier 3 single-family, $1,800/mo rent, 25% down at 7%. Assume
+            cash after the CapEx reserve and before debt service of ~$14,400
+            (about 8% of price), so the cap rate (NOI before the reserve) is
+            above 8%.
           </p>
           <ul>
-            <li>NOI (~8% cap): ~$14,400</li>
+            <li>Cash after CapEx, before debt (~8% of price): ~$14,400</li>
             <li>Loan: $135K at 7% / 30 = $898/mo P&amp;I</li>
             <li>Annual debt service: $10,776</li>
             <li>
@@ -332,29 +355,31 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            8% cap, 7% mortgage rate, 1 point of positive leverage on 75% LTV —
-            gets you a 6.8% CoC return. Not spectacular, but a real cash-flowing
-            deal. Tier 3 markets carry vacancy and tenant risk you don&apos;t
-            get in Tier 1, so a 6-8% CoC is often the realistic ceiling without
-            value-add.
+            A cap rate above 8%, a 7% mortgage rate on a 30-year loan (a 7.98%
+            loan constant), 75% LTV — gets you a 6.8% CoC return, below the cap
+            rate once the CapEx reserve, closing and make-ready costs are
+            counted. Not spectacular, but a real cash-flowing deal. Higher-cap
+            markets can carry more vacancy and tenant risk, so underwrite those
+            risks explicitly instead of assuming a higher CoC comes free.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            The trap most calculators fall into
+            The two traps that inflate CoC
           </h2>
-          <p>The two biggest CoC mistakes:</p>
+          <p>Two shortcuts make CoC look better than it is:</p>
           <ul>
             <li>
-              <strong>Forgetting closing costs in cash invested.</strong>A 25%
+              <strong>Forgetting closing costs in cash invested.</strong> A 25%
               down payment is the headline number, but the actual cash out of
               pocket is 27-30% once you add closing. Skipping closing inflates
-              CoC by 10-15%.
+              CoC by roughly 8-20%.
             </li>
             <li>
               <strong>Using gross rent in cash flow instead of NOI.</strong>
               Subtracting mortgage from <em>gross</em> rent — instead of from
               NOI — produces a cash flow number that ignores vacancy,
-              maintenance, and CapEx. The CoC looks 30-50% better than reality.
+              maintenance, and CapEx. In worked example #1, that shortcut turns
+              a −5.7% CoC into +12.2%.
             </li>
           </ul>
 
@@ -400,6 +425,20 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac My Home, What Are Closing Costs and How Much Will I Pay?",
+              url: "https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay",
+            },
+            {
+              title:
+                "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US), Freddie Mac PMMS",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -410,8 +449,8 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Want CoC computed alongside cap rate, DSCR, and a 10-year projection
-            — with the OpEx line items most calculators quietly skip? TrueCap
-            does all of it in one screen.{" "}
+            — with every OpEx line item itemized? TrueCap does all of it in one
+            screen.
           </p>
         </footer>
       </main>
