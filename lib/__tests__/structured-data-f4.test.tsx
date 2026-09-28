@@ -52,6 +52,8 @@ import { jsonLdNodes, missingSchema } from "../../scripts/seo/structured-data-ex
 
 const ROOT = process.cwd();
 const SITE = getSiteUrl();
+/** The tests that render many pages in one case; each page takes tens of ms, more on a busy runner. */
+const MANY_PAGES_MS = 60_000;
 
 type Node = Record<string, unknown>;
 type Faq = { q: string; a: string };
@@ -243,7 +245,7 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
       if (faqsOf(await renderPage()).length > 0) withFaq.push(path);
     }
     expect(withFaq).toEqual(["/", "/pricing", "/blog/what-is-a-good-dscr", "/vs/dealcheck", "/tools/1-percent-rule-calculator"]);
-  });
+  }, MANY_PAGES_MS);
 
   it("/vs answers in the markup are the visible answers, word for word (no hand-kept paraphrase)", async () => {
     const html = await renderVs("airdna");
@@ -256,7 +258,7 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
     for (const slug of VS_SLUGS) {
       for (const { q, a } of faqsOf(await renderVs(slug))) expect(`${q} ${a}`, slug).not.toMatch(/&[a-z]+;|&#x?[0-9a-f]+;/i);
     }
-  });
+  }, MANY_PAGES_MS);
 });
 
 describe("tools: one application entity with a stable @id", () => {
@@ -287,7 +289,7 @@ describe("tools: one application entity with a stable @id", () => {
     // …and the entity it names is the one the homepage declares.
     const home = await render((await import("@/app/page")).default());
     expect(ldNodes(home).filter((node) => node["@id"] === `${SITE}/#software` && !isRef(node)).map((node) => node["@type"])).toEqual(["SoftwareApplication"]);
-  });
+  }, MANY_PAGES_MS);
 });
 
 describe("BreadcrumbList on the hubs and 3-level /vs trails", () => {
