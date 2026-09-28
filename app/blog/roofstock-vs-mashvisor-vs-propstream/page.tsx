@@ -22,6 +22,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "roofstock-vs-mashvisor-vs-propstream";
 const TITLE =
@@ -31,7 +32,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Roofstock vs Mashvisor vs PropStream (2026)";
 const DESCRIPTION =
-  "Roofstock sells turnkey rentals, Mashvisor scores neighborhoods, PropStream finds motivated sellers. Compare all three and see where TrueCap fits after.";
+  "Roofstock now sends individual buyers to Stessa's marketplace, Mashvisor scores neighborhoods, PropStream finds motivated sellers. See where TrueCap fits after.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/roofstock-vs-mashvisor-vs-propstream") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
@@ -67,19 +68,19 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Roofstock, Mashvisor, or PropStream — which one for a beginner?`,
-    a: `Roofstock. It's the easiest path to ownership for a first-time investor — curated inventory, brokerage handles the transaction, PM partners are pre-vetted. Mashvisor and PropStream both assume you're going to find + close + operate yourself, which is more work.`,
+    a: `It depends on how much help you want. Roofstock's individual-investor listings now live on Stessa's marketplace, which shows MLS listings with investor metrics and connects you with a vetted, investor-friendly local agent who helps with negotiating, inspecting and closing and can connect you with property managers. Mashvisor and PropStream both assume you're going to find + close + operate yourself, which is more work.`,
   },
   {
     q: `Do any of these underwrite deals?`,
-    a: `Not really. Roofstock provides listing pro-formas (marketing material — optimistic on vacancy and capex). Mashvisor gives neighborhood-level cap rate + Airbnb scores (directional, not deal-specific). PropStream gives you a lead and contact info, no analysis. For per-deal underwriting use TrueCap, DealCheck, or a spreadsheet.`,
+    a: `Partly. Stessa's marketplace (which now hosts Roofstock's listings) shows projected rent and returns from its own default assumptions — check each one against the property. Mashvisor estimates property-level cap rate and cash-on-cash from neighborhood rental comps; its Standard and Professional plans let you customize expenses and recalculate them. PropStream gives you leads and contact info plus built-in rental ROI and fix-and-flip calculators. For per-deal underwriting on assumptions you've checked, use TrueCap, DealCheck, or a spreadsheet.`,
   },
   {
     q: `Mashvisor vs Rentometer — what's the difference?`,
-    a: `Rentometer is rent estimation only (comp-based, address-level). Mashvisor is broader market discovery — heatmaps, neighborhood scoring, Airbnb data, comparable sales. Use Rentometer when you need a tight rent estimate on a specific address; use Mashvisor when you're picking which market to invest in.`,
+    a: `Rentometer centers on address-level rent estimates from nearby rental comps, with reports, market insights and a deal worksheet built around that rent data. Mashvisor is broader market discovery — heatmaps, neighborhood scoring, Airbnb data, rental comps. Use Rentometer when you need a tight rent estimate on a specific address; use Mashvisor when you're picking which market to invest in.`,
   },
   {
     q: `Is PropStream worth \$99/month?`,
-    a: `Depends on volume. If you send 1,000+ direct mail pieces a month or run an active wholesaling operation, yes — lists and skip-tracing pay for themselves quickly. If you buy 1-3 properties a year through MLS or your network, PropStream is overkill. For most TrueCap users (solo buy-and-hold investors), PropStream is too much tool.`,
+    a: `Depends on volume. If you send 1,000+ direct mail pieces a month or run an active wholesaling operation, PropStream's lists and skip-tracing are built for that work. If you buy 1-3 properties a year through MLS or your network, PropStream is overkill. For solo buy-and-hold investors, PropStream is often too much tool.`,
   },
   {
     q: `How does TrueCap relate to these three?`,
@@ -171,7 +172,23 @@ export default function ThreeWayComparisonPost() {
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
             >
-              All three help you <em>find</em> rental property deals; none of them <em>underwrite</em> them. <strong>Roofstock</strong> is a marketplace selling curated turnkey single-family rentals (you bring the buyer, they bring the property). <strong>Mashvisor</strong> is market discovery — heatmaps, neighborhood Airbnb / LTR scores, comparable sales. <strong>PropStream</strong> is lead generation — skip-tracing, motivated-seller lists, pre-foreclosure data. Different ways to source. <strong>TrueCap</strong> isn&apos;t in this category — it&apos;s an underwriting calculator that models cash flow from user-reviewed assumptions after a property is found.
+              All three help you <em>find</em> rental property deals; each includes{" "}
+              <a href="https://www.mashvisor.com/pricing">some built-in analysis</a>{" "}
+              that starts from the vendor&apos;s own data and default estimates, so check every input before relying on it. <strong>Roofstock</strong>{" "}
+              <a href="https://www.roofstock.com/">now routes individual buyers</a>{" "}
+              to{" "}
+              <a href="https://www.stessa.com/investment-properties">
+                Stessa&apos;s investment-property marketplace
+              </a>
+              , which surfaces MLS listings with investor metrics. <strong>Mashvisor</strong> is market discovery —{" "}
+              <a href="https://www.mashvisor.com/pricing">
+                heatmaps, neighborhood Airbnb / LTR scores, rental comps
+              </a>
+              . <strong>PropStream</strong> is lead generation —{" "}
+              <a href="https://www.propstream.com/propstream-lead-list-definitions">
+                motivated-seller lists, pre-foreclosure data
+              </a>
+              , plus skip-tracing. Different ways to source. <strong>TrueCap</strong> isn&apos;t in this category — it&apos;s an underwriting calculator that models cash flow from user-reviewed assumptions after a property is found.
             </p>
           </section>
 
@@ -179,52 +196,52 @@ export default function ThreeWayComparisonPost() {
             <h2>The three in one sentence each</h2>
             <div>
               <ul>
-                <li><strong>Roofstock</strong> — turnkey SFR marketplace. Browse curated single-family rentals (often already tenanted), buy through Roofstock&apos;s brokerage, get matched with pre-vetted PM partners. Free to browse; 0.5% buyer marketplace fee at close (~$1-3k on a typical SFR).</li>
-                <li><strong>Mashvisor</strong> — market discovery + neighborhood scoring. Heatmaps for cap rate, cash-on-cash, and Airbnb potential by neighborhood. Comparable rental + sales data. Plans range from ~$70-$300/month (as of 2026) depending on data depth.</li>
-                <li><strong>PropStream</strong> — lead generation. Pull lists of motivated sellers (pre-foreclosure, probate, vacant, tax delinquent), skip-trace to find owner phone + email, run direct mail or cold call campaigns. ~$99/month (as of 2026).</li>
+                <li><strong>Roofstock</strong> — on-market listings through Stessa. <a href="https://www.stessa.com/investment-properties">Browse MLS-sourced listings with investor metrics on Stessa&apos;s marketplace</a>, and get connected with a vetted local agent when you want to make an offer. Listings are free to browse; confirm any transaction costs with the agent you&apos;re connected to.</li>
+                <li><strong>Mashvisor</strong> — market discovery + neighborhood scoring. Heatmaps for listing price, rental income, cash-on-cash, and Airbnb occupancy by neighborhood. Comparable traditional and Airbnb rental data. <a href="https://www.mashvisor.com/pricing">Published plans run $39.99–$99.99/month billed annually ($49.99–$119.99 billed quarterly)</a>, with Enterprise priced on request (as of 2026).</li>
+                <li><strong>PropStream</strong> — lead generation. Pull <a href="https://www.propstream.com/propstream-lead-list-definitions">lists of motivated sellers (pre-foreclosure, pre-probate, vacant, tax delinquent)</a>, skip-trace to find owner phone + email, run direct mail or cold call campaigns. <a href="https://www.propstream.com/pricing">$99/month on the Essentials plan, billed monthly</a> (as of 2026).</li>
               </ul>
             </div>
 
             <h2>How they differ — what each is actually good at</h2>
             <div>
               <ul>
-                <li><strong>Roofstock</strong> is the easiest path to owning a rental property if you don&apos;t want to find or operate it yourself. They handle inventory + brokerage + PM matching. Tradeoff: you&apos;re paying retail-plus (asking price + 0.5% buyer fee + the seller&apos;s margin since these are flipped or already cash-flowing properties).</li>
+                <li><strong>Roofstock</strong> (through Stessa&apos;s marketplace) suits investors who want to shop on-market rentals with investor metrics attached. The marketplace <a href="https://www.stessa.com/investment-property-marketplace/">connects you with vetted, investor-friendly agents who can also connect you with property managers</a>, and <a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace">Stessa&apos;s help center says the agent helps with negotiating, inspecting, and closing the deal</a>. Tradeoff: these are MLS listings shown with the marketplace&apos;s own projections and default estimates, so run your own numbers before relying on them.</li>
                 <li><strong>Mashvisor</strong> is great for the early &quot;where should I invest?&quot; phase. The heatmaps quickly answer questions like &quot;which Phoenix zip codes have the best Airbnb cash flow?&quot; or &quot;is Memphis or Cleveland better for cash flow?&quot;. Once you&apos;ve picked a market, the per-deal data is less differentiated.</li>
-                <li><strong>PropStream</strong> is the heavyweight for off-market deal sourcing. If you send direct mail or run cold-call campaigns, PropStream&apos;s lists + skip-tracing are the standard. Most wholesalers and serious off-market buy-and-hold investors run on PropStream.</li>
+                <li><strong>PropStream</strong> focuses on off-market deal sourcing. If you send direct mail or run cold-call campaigns, PropStream&apos;s lists + skip-tracing are built for exactly that. <a href="https://www.propstream.com/">PropStream is built for wholesalers and off-market buy-and-hold investors</a>.</li>
               </ul>
             </div>
 
             <h2>Pricing comparison</h2>
             <div>
               <ul>
-                <li><strong>Roofstock</strong> — free to browse the marketplace. 0.5% buyer marketplace fee charged at close (typically $1-3k on an SFR). No monthly subscription.</li>
-                <li><strong>Mashvisor</strong> — ~$70-300/month depending on plan. The cheaper plans have rate limits and limited geographic coverage; the higher plans unlock full Airbnb data + commercial data.</li>
-                <li><strong>PropStream</strong> — ~$99/month for the standard plan. Add-ons for skip tracing, list pull volume, and team seats can push it to $150+/mo. No real free tier (trial only).</li>
+                <li><strong>Roofstock</strong> (<a href="https://www.roofstock.com/">via Stessa&apos;s marketplace</a>) — <a href="https://www.stessa.com/investment-properties">no monthly subscription to browse</a>; confirm any transaction costs with your agent.</li>
+                <li><strong>Mashvisor</strong> — <a href="https://www.mashvisor.com/pricing">published plans run $39.99–$99.99/month billed annually ($49.99–$119.99 billed quarterly), with Enterprise priced on request</a>. Lite covers individual-property analysis with long- and short-term rental estimates; Standard adds heatmaps, neighborhood analytics, rental comps, and editable expenses; Professional adds multifamily listings and more exports.</li>
+                <li><strong>PropStream</strong> — <a href="https://www.propstream.com/pricing">$99/month for the Essentials plan</a>. Add-ons for skip tracing, list pull volume, and team seats can push it to $150+/mo. No real free tier (trial only).</li>
               </ul>
-              <p>If you&apos;re buying one or two properties a year through Roofstock, the 0.5% fee is the cheapest of the three. If you&apos;re actively sourcing 5-10+ deals a year off-market, PropStream pays for itself in one closed deal. Mashvisor&apos;s subscription pays off if you&apos;re market-shopping across regions; if you&apos;re a hometown investor, it&apos;s often overkill.</p>
+              <p>If you&apos;re buying one or two on-market properties a year, browsing Stessa&apos;s marketplace (where Roofstock now sends buyers) costs nothing to start. If you&apos;re actively sourcing 5-10+ deals a year off-market, PropStream&apos;s subscription is easier to justify. Mashvisor&apos;s subscription makes the most sense if you&apos;re market-shopping across regions; if you&apos;re a hometown investor, it&apos;s often overkill.</p>
             </div>
 
             <h2>Which combo to use?</h2>
             <div>
               <ul>
-                <li><strong>Just Roofstock</strong> — for passive out-of-state SFR investors who want curated inventory + done-for-you PM matching. Simplest path to ownership.</li>
+                <li><strong>Just Roofstock (via Stessa&apos;s marketplace)</strong> — for out-of-state SFR investors who want investor-filtered listings and a connection to a vetted local agent, who can also connect you with property managers.</li>
                 <li><strong>Mashvisor + your MLS access</strong> — for investors who want to pick the right market first, then source on-market deals through a local agent.</li>
                 <li><strong>PropStream + your closing team</strong> — for active off-market buyers / wholesalers / fix-and-flippers. You source the deal, negotiate, close with a title company.</li>
-                <li><strong>Mashvisor + Roofstock</strong> — Mashvisor picks the markets, Roofstock has the inventory in those markets. Common combo for first-time out-of-state SFR investors.</li>
+                <li><strong>Mashvisor + Roofstock</strong> — Mashvisor picks the markets, and Stessa&apos;s marketplace (where Roofstock now sends buyers) shows listings in those markets.</li>
               </ul>
             </div>
 
             <h2>Where TrueCap fits — after the deal is found</h2>
             <div>
-              <p>None of the three calculates whether a specific property actually cash flows under your assumptions. They surface deals; you still have to underwrite them.</p>
+              <p><a href="https://www.propstream.com/">Each has some built-in analysis</a>, but it starts from their data and defaults; you still have to underwrite the deal on assumptions you&apos;ve checked.</p>
               <p>That&apos;s the TrueCap job: paste the address, review editable HUD rent and FRED rate benchmarks, enter local property tax manually, replace every value where you have better evidence, then run cap rate / CoC / DSCR / cash flow and sensitize the inputs.</p>
-              <p>Roofstock&apos;s listing pro-formas are marketing material — they assume optimistic vacancy + light capex. Mashvisor&apos;s neighborhood scores are directional, not deal-specific. PropStream gives you a lead, not an analysis. TrueCap turns reviewed inputs into a modeled underwrite; the user makes the decision.</p>
+              <p><a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace">Marketplace projections</a>, Mashvisor&apos;s property estimates and <a href="https://www.propstream.com/">PropStream&apos;s calculators</a> all start from each vendor&apos;s own data and defaults. TrueCap turns inputs you&apos;ve reviewed into a modeled underwrite; you make the decision.</p>
             </div>
 
             <h2>Honest quick decision</h2>
             <div>
               <ul>
-                <li><strong>&quot;I want to own a rental without managing the sourcing or operations.&quot;</strong> Roofstock + a property management partner.</li>
+                <li><strong>&quot;I want to own a rental without managing the sourcing or operations.&quot;</strong> Stessa&apos;s marketplace (where Roofstock now sends buyers) plus a property manager — Stessa&apos;s vetted agents can connect you with one.</li>
                 <li><strong>&quot;I want to figure out which city / neighborhood to invest in.&quot;</strong> Mashvisor (then go local).</li>
                 <li><strong>&quot;I want to find off-market deals + send direct mail.&quot;</strong> PropStream.</li>
                 <li><strong>&quot;I have a deal in hand and want to know if it pencils.&quot;</strong> TrueCap (free).</li>
@@ -256,13 +273,55 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Try TrueCap free</h2>
             <p>
-              However you source deals — turnkey marketplace, market heatmap, or
-              off-market list — run them through TrueCap before you offer. 60
-              seconds, free, no signup. The deal you didn&apos;t buy because the
+              However you source deals — on-market marketplace, market heatmap,
+              or off-market list — run them through TrueCap before you offer.
+              Free, no signup. The deal you didn&apos;t buy because the
               numbers didn&apos;t work is the trade that made you money.
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources
+            sources={[
+              {
+                title: "Mashvisor, Pricing",
+                url: "https://www.mashvisor.com/pricing",
+              },
+              {
+                title: "Roofstock, homepage",
+                url: "https://www.roofstock.com/",
+              },
+              {
+                title: "Stessa, Investment Properties Powered by Roofstock",
+                url: "https://www.stessa.com/investment-properties",
+              },
+              {
+                title: "PropStream, Real Estate Lead List Definitions",
+                url: "https://www.propstream.com/propstream-lead-list-definitions",
+              },
+              {
+                title: "PropStream, Pricing",
+                url: "https://www.propstream.com/pricing",
+              },
+              {
+                title: "Stessa, Investment Property Marketplace",
+                url: "https://www.stessa.com/investment-property-marketplace/",
+              },
+              {
+                title: "PropStream, homepage",
+                url: "https://www.propstream.com/",
+              },
+              {
+                title:
+                  "Stessa Help Center, Stessa Investment Properties Marketplace",
+                url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+              },
+              {
+                title: "Rentometer, homepage",
+                url: "https://www.rentometer.com/",
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <NewsletterSignup />

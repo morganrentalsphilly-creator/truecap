@@ -9,6 +9,7 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -22,6 +23,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-rental-property-calculator-2026";
 const TITLE = "Best rental property calculator 2026: 7 tools compared";
@@ -30,7 +32,7 @@ const TITLE = "Best rental property calculator 2026: 7 tools compared";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
-  "2026 ranking of the 7 most popular rental property calculators (TrueCap, DealCheck, BiggerPockets and more) on free tier depth, pricing, mobile, and fit.";
+  "A 2026 comparison of 7 rental property calculators and tools (TrueCap, DealCheck, BiggerPockets and more) on free tier depth, pricing, mobile, and fit.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/best-rental-property-calculator-2026") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 12;
@@ -92,15 +94,15 @@ const RANKED_CALCULATORS = [
     url: "/vs/dealcheck",
     pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
     pros: [
-      "Native iOS and Android apps with offline support",
-      "Listing-import-from-Zillow workflow — paste a URL and the property details auto-fill",
-      "10+ year track record in the BRRRR + buy-and-hold communities",
-      "Strong 10-year projection + tax-impact view in higher tiers",
+      "Native iOS and Android apps",
+      "Address search that imports property details, value and rent estimates, taxes and photos from public records and listings",
+      "Established tool (site copyright 2015–2026) with dedicated rental and BRRRR calculators",
+      "Long-term cash-flow projections and optional after-tax cash-flow calculations (projections are listed on every plan, including free Starter)",
     ],
     cons: [
       "Free tier caps saved properties (15 at a time) and requires signup",
       "Paid tiers mostly raise caps rather than add analysis depth",
-      "No address-based auto-fill (HUD / FRED / state tax) — you bring the data",
+      "Address import pulls property tax amounts and value/rent estimates, but not labeled HUD or FRED benchmarks; refreshed records and listings need Plus or Pro",
     ],
     pickIf:
       "You underwrite on mobile at showings all day and want native apps.",
@@ -112,14 +114,13 @@ const RANKED_CALCULATORS = [
     url: "/vs/biggerpockets-calculator",
     pricing: "Bundled with BiggerPockets Pro ~$390/year (~$32.50/mo)",
     pros: [
-      "Bundled with the largest real-estate community on the internet (forums, courses, books, podcasts)",
-      "Output format is recognized by private-money lenders and BP-aware partners",
+      "Bundled with the BiggerPockets community (forums, courses, books, podcasts)",
+      "Printable PDF reports built for sharing with lenders or partners (Pro members only)",
       "Solid BRRRR + flip + buy-and-hold support",
     ],
     cons: [
       "Calculator alone isn't the value — you're really paying for the community",
       "UX hasn't evolved much in years; mobile is desktop-leaning",
-      "No portfolio rollup across saved deals",
       "Free tier is more limited than TrueCap's",
     ],
     pickIf:
@@ -130,16 +131,17 @@ const RANKED_CALCULATORS = [
     name: "Mashvisor",
     bestFor: "Best for market discovery (heatmaps + neighborhood scoring)",
     url: "/vs/mashvisor",
-    pricing: "~$70-300/month depending on data depth (as of 2026)",
+    pricing:
+      "$49.99–$99.99/month billed annually (Lite, Standard, Professional); Enterprise is custom-priced (as of 2026)",
     pros: [
-      "Best-in-class neighborhood heatmaps and city-level investibility scores",
+      "Neighborhood heatmaps and investment opportunity scores (heatmaps start on the Standard plan)",
       "Strong Airbnb / short-term-rental occupancy + ADR data",
-      "Comparable rental + sales data baked in",
+      "Rental comps built in",
+      "The top published plan (Professional, $99.99/month billed annually) adds multifamily cities, more exports and CRM tools",
     ],
     cons: [
-      "Not really a per-deal calculator — more a market discovery tool",
-      "Listing-level cap rate uses assumed inputs (not your specific assumptions)",
-      "Expensive for solo investors (the $300/mo tier is built for active multi-market scouting)",
+      "Built mainly for market discovery and rental-revenue projection",
+      "Listing-level cap rate starts from Mashvisor's estimates; customizing expenses and ROI estimates requires the Standard plan or higher",
     ],
     pickIf:
       "You're picking which city or neighborhood to invest in next, not underwriting a specific property.",
@@ -177,7 +179,7 @@ const RANKED_CALCULATORS = [
     ],
     cons: [
       "Formula errors compound silently across every deal",
-      "Mobile UX is broken at the property showing",
+      "Large spreadsheets can be cumbersome on mobile",
       "No address auto-fill, no live data, no shareable read-only link",
       "Version drift kills collaboration with partners and lenders",
       "Maintenance cost over time is real — every market change requires manual updates",
@@ -188,22 +190,20 @@ const RANKED_CALCULATORS = [
   {
     rank: 7,
     name: "Roofstock",
-    bestFor: "Best if you don't want to find or operate the property",
+    bestFor: "Best for browsing listings with built-in projections",
     url: "/vs/roofstock",
-    pricing: "Free to browse; 0.5% buyer fee at close (~$1-3k typical)",
+    pricing:
+      "Roofstock's retail property listings now route to Stessa's investment-property marketplace; check Stessa's live pages for current buyer terms",
     pros: [
-      "Curated turnkey SFR inventory — pre-vetted properties + property management partners",
-      "Easiest path to ownership if you don't want to source deals yourself",
-      "Listing-level pro-formas give you a starting financial picture",
+      "Listings for individual investors now appear in Stessa's marketplace, powered by Roofstock",
+      "Listings include built-in rent projections and comps, with projected cash flow, cap rate and ROI that recalculate from your own inputs",
     ],
     cons: [
-      "Not a calculator — it's a marketplace with listing pro-formas",
-      "Pro-formas are marketing material (optimistic vacancy + light capex)",
-      "Limited to Roofstock's inventory, not any property",
-      "You're paying retail-plus once the buyer fee + seller's margin are factored in",
+      "Treat any listing projection as a starting point and verify vacancy and capital-expense assumptions yourself",
+      "Limited to properties listed in the marketplace, not any address",
     ],
     pickIf:
-      "You want a passive turnkey rental and don't have time to source or operate. Pair with TrueCap to pressure-test the listing pro-forma before offering.",
+      "You want to browse marketplace listings with projections built in. Pair with TrueCap to pressure-test the listing projection before offering.",
   },
 ];
 
@@ -222,16 +222,162 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is Mashvisor a rental property calculator?",
-    a: "Sort of — Mashvisor shows listing-level cap rate estimates but is really a market discovery + revenue projection tool, not a per-deal calculator. It's strong for picking which neighborhood to invest in; weaker for underwriting a specific address. Most active investors pair Mashvisor (market discovery) with TrueCap or DealCheck (deal underwriting).",
+    a: "Partly — Mashvisor shows listing-level cap rate and cash-on-cash estimates (with customizable expenses on Standard and above, and listing upload-and-analyze on Professional), but its focus is market discovery and rental-revenue projection. It's strong for picking which neighborhood to invest in; weaker for underwriting a specific address. Mashvisor can be paired with a per-deal underwriting tool such as TrueCap or DealCheck.",
   },
   {
     q: "Why are spreadsheets risky for rental analysis?",
-    a: "Three reasons: formula errors compound silently across every deal you analyze with that sheet; version drift kills partner / lender collaboration; mobile is unusable at showings. Spreadsheets work for one-off custom modeling (syndication waterfalls, unusual debt structures) but they're fragile for standard buy-and-hold underwriting.",
+    a: "Three reasons: formula errors compound silently across every deal you analyze with that sheet; version drift kills partner / lender collaboration; large spreadsheets can be cumbersome on mobile. Spreadsheets work for one-off custom modeling (syndication waterfalls, unusual debt structures) but they're fragile for standard buy-and-hold underwriting.",
   },
   {
     q: "What about Stessa, RentRedi, or Avail — are those calculators?",
-    a: "Their scopes differ. Stessa now includes an investment-property marketplace, buy boxes, comps, and editable acquisition underwriting before continuing into accounting and operations. RentRedi and Avail are more operations-led. Compare each provider's current official feature and pricing pages rather than treating all three as one category.",
+    a: "Their scopes differ. Stessa now includes an investment-property marketplace, buy boxes, comps, and editable acquisition underwriting before continuing into accounting and operations. RentRedi is more operations-led (rent collection, tenant screening and maintenance); check Avail's current feature page directly. Compare each provider's current official feature and pricing pages rather than treating all three as one category.",
   },
+];
+
+/**
+ * Sourced phrases in the card and FAQ strings above, each linked (same tab)
+ * to the page that states it. The strings stay plain text, so the FAQ
+ * answers feed the FAQPage JSON-LD unchanged; <Cited> links a phrase where
+ * the string renders. Each phrase appears once on the page.
+ */
+const CITATIONS = [
+  { phrase: "FRED owner-occupied rate", url: "https://www.freddiemac.com/pmms/about-pmms" },
+  { phrase: "Plus $10/mo, Pro $20/mo", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Native iOS and Android apps", url: "https://dealcheck.io/" },
+  {
+    phrase: "Address search that imports property details",
+    url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+  },
+  { phrase: "site copyright 2015–2026", url: "https://dealcheck.io/features/" },
+  { phrase: "projections are listed on every plan", url: "https://dealcheck.io/pricing/" },
+  { phrase: "15 at a time", url: "https://dealcheck.io/pricing/" },
+  { phrase: "mostly raise caps", url: "https://dealcheck.io/pricing/" },
+  {
+    phrase: "refreshed records and listings need Plus or Pro",
+    url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+  },
+  { phrase: "~$390/year (~$32.50/mo)", url: "https://www.biggerpockets.com/pro-membership" },
+  { phrase: "forums, courses, books, podcasts", url: "https://www.biggerpockets.com/" },
+  { phrase: "Printable PDF reports", url: "https://www.biggerpockets.com/rental-property-calculator" },
+  { phrase: "BRRRR + flip + buy-and-hold support", url: "https://www.biggerpockets.com/rental-property-calculator" },
+  { phrase: "Free tier is more limited", url: "https://www.biggerpockets.com/rental-property-calculator" },
+  { phrase: "$49.99–$99.99/month billed annually", url: "https://www.mashvisor.com/pricing" },
+  { phrase: "heatmaps start on the Standard plan", url: "https://www.mashvisor.com/pricing" },
+  { phrase: "occupancy + ADR data", url: "https://www.mashvisor.com/airbnb-data" },
+  { phrase: "Rental comps built in", url: "https://www.mashvisor.com/pricing" },
+  {
+    phrase: "customizing expenses and ROI estimates requires the Standard plan or higher",
+    url: "https://www.mashvisor.com/pricing",
+  },
+  { phrase: "Professional, $99.99/month billed annually", url: "https://www.mashvisor.com/pricing" },
+  { phrase: "Free Essentials plus paid Manage and Pro", url: "https://www.stessa.com/pricing/" },
+  {
+    phrase: "map layers, watchlists, and buy-box alerts",
+    url: "https://www.stessa.com/investment-property-marketplace/",
+  },
+  {
+    phrase: "sale/rent comps",
+    url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+  },
+  { phrase: "bank feeds", url: "https://www.stessa.com/pricing/" },
+  { phrase: "official sources reviewed", url: "https://www.stessa.com/investment-property-marketplace/" },
+  {
+    phrase: "Free (or your existing Office / Google Workspace subscription)",
+    url: "https://workspace.google.com/products/sheets/",
+  },
+  {
+    phrase: "now route to Stessa's investment-property marketplace",
+    url: "https://www.roofstock.com/how-it-works",
+  },
+  {
+    phrase: "recalculate from your own inputs",
+    url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+  },
+  {
+    phrase: "properties listed in the marketplace",
+    url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+  },
+  { phrase: "native mobile apps and listing-import features", url: "https://dealcheck.io/" },
+  { phrase: "listing upload-and-analyze on Professional", url: "https://www.mashvisor.com/pricing" },
+  { phrase: "rent collection, tenant screening and maintenance", url: "https://www.rentredi.com/" },
+];
+
+type CitationLink = { phrase: string; link: ReactNode };
+
+const CITATION_LINKS: CitationLink[] = CITATIONS.map((citation) => ({
+  phrase: citation.phrase,
+  link: (
+    <a
+      key={citation.phrase}
+      href={citation.url}
+      className="font-semibold text-primary hover:underline"
+    >
+      {citation.phrase}
+    </a>
+  ),
+}));
+
+/**
+ * Renders `text` with each cited phrase linked to its source. Loops over the
+ * links by value (no index access), so the SEO fence's computed-access rule
+ * holds for the whole file.
+ */
+function Cited({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  let rest = text;
+  while (rest) {
+    let next: CitationLink | null = null;
+    let at = rest.length;
+    for (const candidate of CITATION_LINKS) {
+      const found = rest.indexOf(candidate.phrase);
+      if (found !== -1 && found < at) {
+        at = found;
+        next = candidate;
+      }
+    }
+    if (next === null) {
+      parts.push(rest);
+      break;
+    }
+    parts.push(rest.slice(0, at), next.link);
+    rest = rest.slice(at + next.phrase.length);
+  }
+  return <>{parts}</>;
+}
+
+/** Every source linked on the page, in order of first use. */
+const SOURCES = [
+  {
+    title: "Freddie Mac, About the Primary Mortgage Market Survey (PMMS)",
+    url: "https://www.freddiemac.com/pmms/about-pmms",
+  },
+  { title: "DealCheck, Plans & Pricing", url: "https://dealcheck.io/pricing/" },
+  { title: "DealCheck, home page (iOS and Android apps)", url: "https://dealcheck.io/" },
+  {
+    title: "DealCheck Help Center, How to import property data from public records & listings",
+    url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+  },
+  { title: "DealCheck, Property Analysis Software (features)", url: "https://dealcheck.io/features/" },
+  { title: "BiggerPockets, Pro membership", url: "https://www.biggerpockets.com/pro-membership" },
+  { title: "BiggerPockets, home page", url: "https://www.biggerpockets.com/" },
+  {
+    title: "BiggerPockets, Rental Property Calculator",
+    url: "https://www.biggerpockets.com/rental-property-calculator",
+  },
+  { title: "Mashvisor, Plans & Pricing", url: "https://www.mashvisor.com/pricing" },
+  { title: "Mashvisor, Airbnb Data & Analytics", url: "https://www.mashvisor.com/airbnb-data" },
+  { title: "Stessa, Pricing", url: "https://www.stessa.com/pricing/" },
+  {
+    title: "Stessa, Investment Property Marketplace",
+    url: "https://www.stessa.com/investment-property-marketplace/",
+  },
+  {
+    title: "Stessa Help Center, Stessa Investment Properties Marketplace",
+    url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+  },
+  { title: "Google Workspace, Google Sheets", url: "https://workspace.google.com/products/sheets/" },
+  { title: "Roofstock, How it works", url: "https://www.roofstock.com/how-it-works" },
+  { title: "RentRedi, home page", url: "https://www.rentredi.com/" },
 ];
 
 export default function BestRentalPropertyCalculator2026Post() {
@@ -333,21 +479,23 @@ export default function BestRentalPropertyCalculator2026Post() {
               property tax). <strong>DealCheck</strong> if you live on mobile at
               showings. <strong>BiggerPockets</strong> if you already pay for
               the community. <strong>Mashvisor</strong> for market discovery
-              (not per-deal underwriting). <strong>Stessa</strong> for a
+              rather than per-deal underwriting. <strong>Stessa</strong> for a
               marketplace and editable acquisition analysis that continue into
               accounting and landlord operations.
               <strong> Excel</strong> only if you have a battle-tested model
-              already. <strong>Roofstock</strong> if you want passive turnkey
-              ownership with someone else doing the sourcing.
+              already. <strong>Roofstock</strong> if you want to browse
+              investment listings with built-in rent projections (now in
+              Stessa&apos;s marketplace).
             </p>
           </section>
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>How we ranked these</h2>
             <p>
-              The 7 calculators below are the ones rental investors most often
-              evaluate when they search &quot;best rental property
-              calculator&quot; or &quot;rental analysis tool&quot;. If you just
+              The 7 tools below are ones we compared for searches like
+              &quot;best rental property calculator&quot; or &quot;rental
+              analysis tool&quot;. Full disclosure: TrueCap is our tool, and we
+              rank it first. If you just
               want a single metric fast, our free{" "}
               <Link
                 href="/tools/1-percent-rule-calculator"
@@ -382,9 +530,9 @@ export default function BestRentalPropertyCalculator2026Post() {
                 not bundled with community or other services.
               </li>
               <li>
-                <strong>Address auto-fill</strong> — does it pre-fill rent,
-                rate, and tax from your address, or does it leave you to look
-                everything up?
+                <strong>Address auto-fill</strong> — does it pre-fill inputs
+                like rent, rate, or tax from your address, or does it leave you
+                to look everything up?
               </li>
               <li>
                 <strong>Mobile UX</strong> — can you underwrite at a showing on
@@ -427,7 +575,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   <strong className="text-foreground">Pricing:</strong>{" "}
-                  {c.pricing}
+                  <Cited text={c.pricing} />
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -440,7 +588,9 @@ export default function BestRentalPropertyCalculator2026Post() {
                           <span className="text-[var(--brand-green)] shrink-0">
                             +
                           </span>
-                          <span>{pro}</span>
+                          <span>
+                            <Cited text={pro} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -455,7 +605,9 @@ export default function BestRentalPropertyCalculator2026Post() {
                           <span className="text-muted-foreground/60 shrink-0">
                             −
                           </span>
-                          <span>{con}</span>
+                          <span>
+                            <Cited text={con} />
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -490,7 +642,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                 <strong>
                   &quot;I underwrite on my phone at every showing.&quot;
                 </strong>{" "}
-                DealCheck — only one with true native iOS / Android apps.
+                DealCheck — native iOS / Android apps built for deal analysis.
               </li>
               <li>
                 <strong>&quot;I already pay for BiggerPockets.&quot;</strong>{" "}
@@ -512,11 +664,12 @@ export default function BestRentalPropertyCalculator2026Post() {
               </li>
               <li>
                 <strong>
-                  &quot;I want a turnkey rental I don&apos;t have to source or
-                  manage.&quot;
+                  &quot;I want to browse listings with projections already
+                  built in.&quot;
                 </strong>{" "}
-                Roofstock — but pressure-test the listing pro-forma in TrueCap
-                before offering.
+                Roofstock (its listings now appear in Stessa&apos;s
+                marketplace) — but pressure-test the listing projection in
+                TrueCap before offering.
               </li>
               <li>
                 <strong>
@@ -545,7 +698,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                     </span>
                   </summary>
                   <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
+                    <Cited text={item.a} />
                   </div>
                 </details>
               ))}
@@ -554,13 +707,15 @@ export default function BestRentalPropertyCalculator2026Post() {
             <h2>Try TrueCap free</h2>
             <p>
               The fastest way to know which calculator fits your workflow is to
-              run one of your real deals through it. TrueCap is free, takes 60
-              seconds, no signup required. Paste an address, review the editable
+              run one of your real deals through it. TrueCap is free and needs
+              no signup. Paste an address, review the editable
               rent/rate benchmarks, enter local property tax, and type purchase
               price.
             </p>
             <p className="not-prose"></p>
           </div>
+
+          <PostSources sources={SOURCES} />
 
           <div className="mt-10">
             <NewsletterSignup />
