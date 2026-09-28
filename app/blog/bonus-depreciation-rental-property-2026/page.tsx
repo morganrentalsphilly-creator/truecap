@@ -26,6 +26,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "bonus-depreciation-rental-property-2026";
 const TITLE =
@@ -46,6 +47,10 @@ const IRS_BONUS_GUIDANCE =
 const IRS_PUBLICATION_946 = "https://www.irs.gov/publications/p946";
 const IRS_PUBLICATION_925 = "https://www.irs.gov/publications/p925";
 const IRS_PUBLICATION_544 = "https://www.irs.gov/publications/p544";
+const IRS_PUBLICATION_527 = "https://www.irs.gov/publications/p527";
+const IRS_NOTICE_2026_11 = "https://www.irs.gov/pub/irs-drop/n-26-11.pdf";
+const USC_26_469 =
+  "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim";
 
 export const metadata: Metadata = {
   title: SERP_TITLE,
@@ -194,8 +199,15 @@ export default function BlogPost() {
             IRS sources verified {FACT_CHECKED_AT}
           </p>
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Current IRS guidance restored 100% bonus depreciation for eligible
-            property acquired and placed in service after January 19, 2025. The
+            Current IRS guidance{" "}
+            <a
+              href={IRS_BONUS_GUIDANCE}
+              className="text-primary font-semibold hover:underline"
+            >
+              restored 100% bonus depreciation
+            </a>{" "}
+            for eligible property acquired and placed in service after January
+            19, 2025. The
             building itself usually does not qualify; certain shorter-life
             components can. Dates, classification, and loss limitations all
             matter.
@@ -204,9 +216,15 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            The 2026 federal bonus-depreciation rate is <strong>100%</strong>
-            for eligible property acquired and placed in service after January
-            19, 2025. That is a material change from the prior phase-down
+            The 2026 federal bonus-depreciation rate is{" "}
+            <a
+              href={IRS_PUBLICATION_946}
+              className="text-primary font-semibold hover:underline"
+            >
+              <strong>100%</strong> for eligible property acquired and placed in
+              service after January 19, 2025
+            </a>
+            . That is a material change from the prior phase-down
             schedule. It does not mean an investor can deduct the full purchase
             price of a rental building.
           </p>
@@ -257,7 +275,15 @@ export default function BlogPost() {
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
                 <tr>
                   <td>Acquired before Jan. 20, 2025</td>
-                  <td>Prior phase-down rules can still apply</td>
+                  <td>
+                    <a
+                      href={IRS_PUBLICATION_946}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Prior phase-down rules
+                    </a>{" "}
+                    can still apply
+                  </td>
                 </tr>
                 <tr>
                   <td className="font-bold text-foreground">
@@ -271,9 +297,21 @@ export default function BlogPost() {
             </table>
           </ScrollX>
           <p>
-            Acquisition can involve binding-contract and related rules, and
-            &ldquo;placed in service&rdquo; generally means ready and available
-            for its assigned use—not simply purchased. Have a qualified tax
+            Acquisition can involve{" "}
+            <a
+              href={IRS_NOTICE_2026_11}
+              className="text-primary font-semibold hover:underline"
+            >
+              binding-contract and related rules
+            </a>
+            , and &ldquo;placed in service&rdquo; generally means{" "}
+            <a
+              href={IRS_PUBLICATION_946}
+              className="text-primary font-semibold hover:underline"
+            >
+              ready and available for its assigned use
+            </a>
+            —not simply purchased. Have a qualified tax
             adviser resolve borderline dates.
           </p>
 
@@ -281,12 +319,24 @@ export default function BlogPost() {
             How depreciation works (and why bonus matters)
           </h2>
           <p>
-            Residential rental buildings depreciate straight-line over
-            <strong> 27.5 years</strong>. A full straight-line year on a $400K
+            Residential rental buildings{" "}
+            <a
+              href={IRS_PUBLICATION_527}
+              className="text-primary font-semibold hover:underline"
+            >
+              depreciate straight-line over <strong>27.5 years</strong>
+            </a>
+            . A full straight-line year on a $400K
             residential-building basis is about $14,545 before placed-in-service
             conventions; the first-year amount and the amount left in the
-            building class can differ. Bonus depreciation does not apply to the
-            27.5-year building shell itself.
+            building class can differ. Bonus depreciation{" "}
+            <a
+              href={IRS_PUBLICATION_946}
+              className="text-primary font-semibold hover:underline"
+            >
+              does not apply to the 27.5-year building shell itself
+            </a>
+            .
           </p>
           <p>
             What it changes is the treatment of shorter-life property embedded
@@ -301,12 +351,24 @@ export default function BlogPost() {
               roof, plumbing).
             </li>
             <li>
-              <strong>$60K</strong> — 15-year land improvements (driveway,
-              landscaping, fencing).
+              <strong>$60K</strong> —{" "}
+              <a
+                href={IRS_PUBLICATION_527}
+                className="text-primary font-semibold hover:underline"
+              >
+                15-year land improvements
+              </a>{" "}
+              (driveway, fencing, depreciable shrubbery).
             </li>
             <li>
-              <strong>$60K</strong> — 5-year personal property (appliances,
-              carpet, decorative lighting, blinds).
+              <strong>$60K</strong> —{" "}
+              <a
+                href={IRS_PUBLICATION_527}
+                className="text-primary font-semibold hover:underline"
+              >
+                5-year personal property
+              </a>{" "}
+              (appliances, carpeting, furniture).
             </li>
           </ul>
           <p>
@@ -362,7 +424,14 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Professional cost:</strong> study, return preparation, and
-              possible Form 3115 work for property already in service.
+              possible{" "}
+              <a
+                href={IRS_PUBLICATION_946}
+                className="text-primary font-semibold hover:underline"
+              >
+                Form 3115
+              </a>{" "}
+              work for property already in service.
             </li>
           </ul>
           <p>
@@ -375,8 +444,14 @@ export default function BlogPost() {
             Strategy 2: Short-term-rental activity rules
           </h2>
           <p>
-            Most rental real estate is &ldquo;passive activity&rdquo; under IRC
-            §469. Passive losses can only offset passive income unless an
+            Most rental real estate is{" "}
+            <a
+              href={IRS_PUBLICATION_925}
+              className="text-primary font-semibold hover:underline"
+            >
+              &ldquo;passive activity&rdquo; under IRC §469
+            </a>
+            . Passive losses can only offset passive income unless an
             exception and the other applicable rules are satisfied. An unused
             loss may be suspended rather than produce a current cash benefit.
           </p>
@@ -395,10 +470,25 @@ export default function BlogPost() {
             satisfy a material-participation test for non-passive treatment.
           </p>
           <ul>
-            <li>One test is more than 500 hours of participation.</li>
             <li>
-              Another is more than 100 hours and at least as much participation
-              as any other individual.
+              One test is{" "}
+              <a
+                href={IRS_PUBLICATION_925}
+                className="text-primary font-semibold hover:underline"
+              >
+                more than 500 hours
+              </a>{" "}
+              of participation.
+            </li>
+            <li>
+              Another is{" "}
+              <a
+                href={IRS_PUBLICATION_925}
+                className="text-primary font-semibold hover:underline"
+              >
+                more than 100 hours
+              </a>{" "}
+              and at least as much participation as any other individual.
             </li>
             <li>Other tests and aggregation rules may apply to the facts.</li>
           </ul>
@@ -422,13 +512,25 @@ export default function BlogPost() {
           </p>
           <ul>
             <li>
-              <strong>50% test:</strong> more than half your total personal
-              services in trades or businesses during the year are performed in
-              real property trades or businesses you materially participate in.
+              <strong>50% test:</strong>{" "}
+              <a
+                href={IRS_PUBLICATION_925}
+                className="text-primary font-semibold hover:underline"
+              >
+                more than half your total personal services
+              </a>{" "}
+              in trades or businesses during the year are performed in real
+              property trades or businesses you materially participate in.
             </li>
             <li>
-              <strong>750-hour test:</strong> more than 750 hours/year in those
-              real property trades or businesses.
+              <strong>750-hour test:</strong>{" "}
+              <a
+                href={IRS_PUBLICATION_925}
+                className="text-primary font-semibold hover:underline"
+              >
+                more than 750 hours/year
+              </a>{" "}
+              in those real property trades or businesses.
             </li>
           </ul>
           <p>
@@ -447,8 +549,14 @@ export default function BlogPost() {
               material participation required.
             </li>
             <li>
-              Married filing jointly — only ONE spouse needs to meet the test,
-              but that spouse must individually meet both 50% and 750-hour
+              Married filing jointly —{" "}
+              <a
+                href={USC_26_469}
+                className="text-primary font-semibold hover:underline"
+              >
+                only ONE spouse needs to meet the test
+              </a>
+              , but that spouse must individually meet both 50% and 750-hour
               real-estate-professional tests. Spousal participation can be
               treated differently when applying the separate
               material-participation rules.
@@ -480,8 +588,14 @@ export default function BlogPost() {
           <p>Plan the exit before claiming the deduction:</p>
           <ul>
             <li>
-              <strong>1031 exchange.</strong> Roll the gain into a qualifying
-              like-kind replacement property. Eligibility, timing, boot, and
+              <strong>1031 exchange.</strong> Roll the gain into a qualifying{" "}
+              <a
+                href={IRS_PUBLICATION_544}
+                className="text-primary font-semibold hover:underline"
+              >
+                like-kind replacement property
+              </a>
+              . Eligibility, timing, boot, and
               reclassified assets require transaction-specific review.{" "}
               <Link
                 href="/blog/1031-exchange-basics"
@@ -569,6 +683,38 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS news release IR-2026-06 (Jan. 14, 2026), guidance on the additional first-year depreciation deduction",
+              url: "https://www.irs.gov/newsroom/treasury-irs-issue-guidance-on-the-additional-first-year-depreciation-deduction-amended-as-part-of-the-one-big-beautiful-bill",
+            },
+            {
+              title: "IRS Publication 946 (2025), How To Depreciate Property",
+              url: "https://www.irs.gov/publications/p946",
+            },
+            {
+              title: "IRS Notice 2026-11, additional first-year depreciation deduction",
+              url: "https://www.irs.gov/pub/irs-drop/n-26-11.pdf",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+            {
+              title: "IRS Publication 925 (2025), Passive Activity and At-Risk Rules",
+              url: "https://www.irs.gov/publications/p925",
+            },
+            {
+              title: "26 U.S.C. 469, Passive activity losses and credits limited",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim",
+            },
+            {
+              title: "IRS Publication 544 (2025), Sales and Other Dispositions of Assets",
+              url: "https://www.irs.gov/publications/p544",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

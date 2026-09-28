@@ -109,7 +109,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to calculate depreciation on a rental property: the 27.5-year math, step by step (2026)",
     excerpt:
-      "The largest deduction on Schedule E — and the only one that costs no cash. The three-step calculation worked on a $250K duplex: depreciable basis with closing costs ($256,000), the assessor's land split (25% → $192,000 building), and the 27.5-year schedule with the mid-month convention ($6,982/yr, $5,528 in a March year one). Plus the paper-loss bridge where +$200/mo of cash flow reports a $2,682 loss, the 20%-vs-30% land ratio that swings $931 a year, and the allowed-or-allowable trap that bills you at sale for deductions you never claimed.",
+      "Rental property depreciation worked end to end on a $250K duplex: depreciable basis with closing costs ($256,000), the land-vs-building split (25% land leaves a $192,000 building), and the 27.5-year schedule with the mid-month convention ($6,982 a full year, $5,528 in a March first year). Plus the allowed-or-allowable rule that reduces your basis at sale even for depreciation you never claimed.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-14",
     available: true,
@@ -228,7 +228,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Property tax reassessment: don't underwrite the seller's tax bill (2026)",
     excerpt:
-      "The most expensive shortcut in underwriting is copying the property-tax line straight off the listing. Why the seller's bill reflects a capped, years-old assessment and an owner-occupant exemption you'll never get, how a sale resets taxes toward your purchase price (Prop 13 and the cyclical-reassessment states), the supplemental bill that lands after closing, and a worked $400K duplex where a $3,400-vs-$6,000 tax line drops the cap rate 0.65 points, pushes DSCR from 1.00 to 0.90, and swings cash flow from +$9 to −$208 a month.",
+      "Copying the property-tax line off the listing can understate your bill: the seller's figure may reflect a capped assessment or an owner-occupant exemption you won't get, and some states reset the assessment when a property sells. The supplemental bill after closing, and a worked $400K duplex where a $3,400-vs-$6,000 tax line pushes DSCR from 1.00 to 0.90 and cash flow from +$9 to −$208 a month.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-27",
     available: true,
@@ -274,7 +274,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "rental-property-llc",
     title: "Should you put your rental property in an LLC? (2026)",
     excerpt:
-      "An honest answer to the most-asked entity question. What an LLC does (liability) and doesn't (cut your taxes), the Garn-St. Germain due-on-sale trap when you transfer a mortgaged rental, why a conventional loan won't follow you into an LLC, the 2026 Corporate Transparency Act reversal that exempted domestic LLCs from BOI filing, and when it's actually worth the cost.",
+      "What an LLC does for a rental (liability protection) and doesn't do (cut your taxes), the due-on-sale risk when you transfer a mortgaged rental, how financing changes when an LLC owns the property, FinCEN's removal of beneficial-ownership reporting for domestic LLCs, and when the cost is worth it.",
     readingTimeMinutes: 12,
     publishedAt: "2026-06-23",
     available: true,
@@ -339,18 +339,18 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "depreciation-recapture-rental-property",
     title:
-      "Depreciation recapture on rental property: how the tax works when you sell (2026)",
+      "Depreciation recapture on rental property: what to review before a sale",
     excerpt:
-      "Depreciation lowers your basis every year — and recapture taxes the gain that creates when you sell, at up to 25%. A full worked example on a $250K rental sold for $360K, why the real bill is 2.4x the naive estimate, the §1245 cost-seg trap, and five ways to defer or erase it.",
+      "Depreciation lowers your basis every year, and that shapes the tax when you sell. A hypothetical rental sale shows how adjusted basis, gain character, transaction structure and taxpayer facts can change depreciation-related tax, and what to review with a tax professional first.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-14",
     available: true,
   },
   {
     slug: "schedule-e-rental-property",
-    title: "Schedule E for rental property: a line-by-line walkthrough (2026)",
+    title: "Schedule E for rental property: a line-by-line walkthrough",
     excerpt:
-      "Every Schedule E line that matters, a full worked example on a $250K rental, and the exact bridge between +$139/month of cash flow and a $3,703 paper loss — plus the $25K passive loss allowance, its MAGI phase-out, and the four mistakes that cost real money.",
+      "A line-by-line Schedule E walkthrough with a hypothetical rental: how positive monthly cash flow can still show a loss on paper, recordkeeping prompts for each line, and the questions to check against current IRS guidance and your own return.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-12",
     available: true,
@@ -630,7 +630,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "rental-property-tax-deductions",
     title: "Rental property tax deductions — the 14 every investor should know",
     excerpt:
-      "Every deductible expense on a rental property, organized by Schedule E line. Worked examples, common-mistake callouts, and the depreciation move that often saves more than all other deductions combined.",
+      "A Schedule E checklist for rental-property expenses, organized by form line, with worked deduction examples, eligibility limits and links to current IRS guidance.",
     readingTimeMinutes: 11,
     publishedAt: "2026-05-26",
     available: true,
@@ -648,7 +648,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "1031-exchange-basics",
     title: "1031 exchange basics for individual rental investors",
     excerpt:
-      "How a 1031 exchange actually works in 2026 — the 45-day and 180-day windows, qualified intermediary requirement, like-kind rules, boot, reverse exchanges, and when it's worth the complexity.",
+      "How a 1031 exchange works: the 45-day identification and 180-day exchange periods, the qualified-intermediary safe harbor, like-kind rules, boot, reverse exchanges, and when it's worth the complexity.",
     readingTimeMinutes: 11,
     publishedAt: "2026-05-25",
     available: true,

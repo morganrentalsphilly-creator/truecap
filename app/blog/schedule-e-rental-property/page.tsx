@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources, type PostSource } from "@/components/blog/post-sources";
 
 const SLUG = "schedule-e-rental-property";
 const TITLE = "Schedule E for rental property: a line-by-line walkthrough";
@@ -32,6 +33,43 @@ const DESCRIPTION =
 const PUBLISHED_AT = "2026-06-12";
 const MODIFIED_AT = lastmodFor("/blog/schedule-e-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
+
+// Every source the body links, in order of first use (F3 founder rule:
+// every number and rule links to a primary source).
+const SOURCES: PostSource[] = [
+  {
+    title: "Schedule E (Form 1040) 2025, Supplemental Income and Loss",
+    url: "https://www.irs.gov/pub/irs-pdf/f1040se.pdf",
+  },
+  {
+    title: "IRS Publication 527 (2025), Residential Rental Property",
+    url: "https://www.irs.gov/publications/p527",
+  },
+  {
+    title: "IRS, 2025 Instructions for Schedule E (Form 1040)",
+    url: "https://www.irs.gov/instructions/i1040se",
+  },
+  {
+    title: "26 U.S.C. 164, Taxes (164(b)(6))",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section164&num=0&edition=prelim",
+  },
+  {
+    title: "IRS Publication 946 (2025), How To Depreciate Property",
+    url: "https://www.irs.gov/publications/p946",
+  },
+  {
+    title: "26 U.S.C. 1031, Exchange of real property held for productive use or investment",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim",
+  },
+  {
+    title: "IRS Publication 925 (2025), Passive Activity and At-Risk Rules",
+    url: "https://www.irs.gov/publications/p925",
+  },
+  {
+    title: "26 U.S.C. 469, Passive activity losses and credits limited (469(g))",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim",
+  },
+];
 
 export const metadata: Metadata = {
   title: SERP_TITLE,
@@ -170,8 +208,15 @@ export default function ScheduleEPost() {
               What Schedule E measures (and what it doesn&apos;t)
             </h2>
             <p>
-              <a href="https://www.irs.gov/forms-pubs/about-schedule-e-form-1040" className="text-primary font-semibold hover:underline">Schedule E (Form 1040)</a>, Part I, reports income and expenses from
-              rental real estate. Form layout and filing treatment can change,
+              <a
+                href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                Schedule E (Form 1040)
+              </a>
+              , Part I, reports income and expenses from rental real estate. The
+              line numbers in this walkthrough follow the 2025 form. Form layout
+              and filing treatment can change,
               and services, ownership, mixed use, entity structure, and other
               facts can affect which forms and taxes apply. Use the current form
               and instructions for the tax year instead of treating this page as
@@ -180,8 +225,14 @@ export default function ScheduleEPost() {
             <p>
               The critical mental shift: Schedule E measures{" "}
               <strong>taxable income</strong>, which is neither your cash flow
-              nor your NOI. Depreciation may create a non-cash deduction; loan
-              principal is generally not a current expense; and capitalized work
+              nor your NOI. Depreciation may create a non-cash deduction;{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                loan principal is generally not a current expense
+              </a>
+              ; and capitalized work
               is recovered under the applicable schedule rather than simply when
               paid. Financing reviews can also use tax-return information, but
               the documents and calculations depend on the loan program;{" "}
@@ -199,14 +250,21 @@ export default function ScheduleEPost() {
               The top of the form: property type and fair rental days
             </h2>
             <p>
-              Before the money lines, the form version underlying this example
-              asks for the property address, a property-type code, and two day
+              Before the money lines, the 2025 form asks for the property
+              address, a property-type code, and two day
               counts: <strong>fair rental days</strong> and{" "}
               <strong>personal use days</strong>. Acquisition date, availability
               for rent, below-market use, personal use, and owner occupancy can
               all affect the reported day counts and expense allocation.
               House-hack and mixed-use allocations are fact-specific; confirm
-              the current thresholds and allocation method before filing.
+              the{" "}
+              <a
+                href="https://www.irs.gov/instructions/i1040se"
+                className="text-primary font-semibold hover:underline"
+              >
+                current personal-use thresholds and allocation method
+              </a>{" "}
+              before filing.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -225,7 +283,7 @@ export default function ScheduleEPost() {
               Lines 5–19: the expense lines that do the work
             </h2>
             <p>
-              The current form separates expenses into multiple categories.
+              The 2025 form separates expenses into multiple categories.
               Common entries to reconcile include:
             </p>
             <ul>
@@ -239,7 +297,8 @@ export default function ScheduleEPost() {
               </li>
               <li>
                 <strong>Line 11 — management fees:</strong> the property
-                manager&apos;s percentage plus leasing and renewal fees.
+                manager&apos;s fees for managing the property (a leasing
+                commission may instead belong on line 8, commissions).
               </li>
               <li>
                 <strong>Line 12 — mortgage interest:</strong> supported interest
@@ -249,15 +308,34 @@ export default function ScheduleEPost() {
               </li>
               <li>
                 <strong>Line 14 — repairs:</strong> fixes that keep the property
-                in its current condition, subject to the capitalization rules
+                in an{" "}
+                <a
+                  href="https://www.irs.gov/instructions/i1040se"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  ordinarily efficient operating condition
+                </a>
+                , subject to the{" "}
+                <a
+                  href="https://www.irs.gov/publications/p527"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  capitalization rules
+                </a>{" "}
                 and the actual scope of work.
               </li>
               <li>
                 <strong>Line 16 — taxes:</strong> property taxes. Note these are
                 generally reported as rental expenses when allocable to the
                 rental activity. Personal-use allocation and other limitations
-                can apply; do not treat the personal-itemized SALT cap as the
-                rule that decides Schedule E treatment.
+                can apply; do not treat the{" "}
+                <a
+                  href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section164&num=0&edition=prelim"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  personal-itemized SALT cap
+                </a>{" "}
+                as the rule that decides Schedule E treatment.
               </li>
               <li>
                 <strong>Line 18 — depreciation:</strong> the line that changes
@@ -284,8 +362,14 @@ export default function ScheduleEPost() {
               Line 18: depreciation, the non-cash line that drives the result
             </h2>
             <p>
-              Residential rental buildings are generally recovered under MACRS,
-              while land is not depreciable. Supported basis, land allocation,
+              Residential rental buildings are generally recovered under{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                MACRS, while land is not depreciable
+              </a>
+              . Supported basis, land allocation,
               capitalized transaction costs, improvements, property class,
               placed-in-service timing, and conventions all affect the schedule;
               see the general closing-cost discussion in{" "}
@@ -301,7 +385,14 @@ export default function ScheduleEPost() {
             </p>
             <p>
               For the simplified illustration below, assume a supported $200,000
-              building basis and the <a href="https://www.irs.gov/publications/p527" className="text-primary font-semibold hover:underline">27.5-year recovery period IRS Publication 527 lists for residential rental property</a>. Simple division
+              building basis and the{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                27.5-year recovery period IRS Publication 946 gives residential rental property
+              </a>
+              . Simple division
               produces <strong>$7,273</strong> ($200,000 ÷ 27.5). That&apos;s
               $606 a month of modeled non-cash deduction before applicable
               conventions, limitations, and adjustments. Depreciation also
@@ -313,8 +404,14 @@ export default function ScheduleEPost() {
               >
                 1031 exchange
               </Link>{" "}
-              may postpone recognition in some circumstances, but does not
-              guarantee full deferral or eliminate the need to model the exit.
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                may postpone recognition in some circumstances
+              </a>
+              , but does not ensure full deferral or eliminate the need to model
+              the exit.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -401,8 +498,14 @@ export default function ScheduleEPost() {
             </h2>
             <p>
               A loss on line 21 doesn&apos;t automatically reduce your taxes.
-              Rental activities are commonly subject to passive-activity rules,
-              and any active-participation allowance depends on the applicable
+              Rental activities are commonly{" "}
+              <a
+                href="https://www.irs.gov/publications/p925"
+                className="text-primary font-semibold hover:underline"
+              >
+                subject to passive-activity rules
+              </a>
+              , and any active-participation allowance depends on the applicable
               tax-year thresholds, ownership, participation, filing status,
               modified income, and other limitations. Material participation,
               basis, at-risk rules, personal use, and grouping can require
@@ -411,8 +514,14 @@ export default function ScheduleEPost() {
             <p>
               In one taxpayer&apos;s return the hypothetical loss might be
               usable currently; in another it might be limited or carried
-              forward. Real-estate-professional status does not by itself make
-              every rental loss non-passive: the applicable qualification,
+              forward. Real-estate-professional status{" "}
+              <a
+                href="https://www.irs.gov/publications/p925"
+                className="text-primary font-semibold hover:underline"
+              >
+                does not by itself make every rental loss non-passive
+              </a>
+              : the applicable qualification,
               material-participation, grouping, basis, at-risk, and other tests
               still matter. A later disposition can affect carryforwards, but
               full release is not automatic for every transfer or sale.
@@ -424,8 +533,14 @@ export default function ScheduleEPost() {
             <p>
               The allowed amount flows through the current return under the
               applicable instructions. Services, entity structure, activity
-              classification, and other facts can also change employment-tax and
-              reporting treatment, so do not assume every rental dollar receives
+              classification, and other facts can also{" "}
+              <a
+                href="https://www.irs.gov/instructions/i1040se"
+                className="text-primary font-semibold hover:underline"
+              >
+                change employment-tax and reporting treatment
+              </a>
+              , so do not assume every rental dollar receives
               the same treatment. Keep the depreciation schedule, carryforward
               records, and support for income and expenses; those records are
               needed to review later-year deductions and disposition treatment.
@@ -460,14 +575,24 @@ export default function ScheduleEPost() {
             </p>
             <p>
               <strong>Ignoring missed depreciation.</strong>{" "}
-              Allowed-or-allowable amounts can affect adjusted basis even when a
-              deduction was not claimed. A qualified professional should
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                Allowed-or-allowable amounts
+              </a>{" "}
+              can affect adjusted basis even when a deduction was not claimed. A qualified professional should
               determine the correction procedure and model the disposition; do
               not assume one form or result fits every history.
             </p>
             <p>
-              <strong>Losing track of carryforwards.</strong> A qualifying fully
-              taxable disposition of an entire interest to an unrelated party
+              <strong>Losing track of carryforwards.</strong> A qualifying{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                fully taxable disposition of an entire interest to an unrelated party
+              </a>{" "}
               can have different consequences from a partial, related-party,
               installment, gifted, or deferred transaction. Preserve the records
               and have the specific disposition reviewed before treating a
@@ -490,7 +615,6 @@ export default function ScheduleEPost() {
               Read the form before you buy the property
             </h2>
             <p>
-              This is general education, not a filing position or tax advice.
               Professional review is particularly important around the
               repair-vs-improvement boundary, passive losses, and dispositions.
               The structure of Schedule E is exactly why after-tax return and
@@ -529,6 +653,7 @@ export default function ScheduleEPost() {
             </p>
           </div>
         </article>
+        <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

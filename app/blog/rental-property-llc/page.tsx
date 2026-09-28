@@ -5,7 +5,8 @@
  * put my rental in an LLC", "LLC for rental property", "transfer rental
  * to LLC due on sale". Accuracy anchors: Garn-St Germain does NOT exempt
  * LLC transfers (due-on-sale risk), and domestic LLCs are currently
- * exempt from CTA/BOI reporting after FinCEN's Mar-2025 interim rule.
+ * exempt from CTA/BOI reporting after FinCEN's Mar-2025 interim rule,
+ * made final effective Aug 14, 2026 (91 FR 52508).
  * Educational only — attorney/CPA caveats throughout.
  */
 
@@ -23,6 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "rental-property-llc";
 const TITLE = "Should you put your rental property in an LLC? (2026)";
@@ -73,11 +75,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Will my lender call the loan if I move the property into an LLC?",
-    a: "It is a real contractual risk. Federal law lists protected transfers but does not list an ordinary transfer to an LLC; the loan documents and facts control whether a due-on-sale option exists and can be exercised. Payment status does not waive it. Obtain lender consent and transaction-specific legal, title, tax, and insurance advice before transferring or selecting a purchase structure.",
+    a: "It is a real contractual risk. Federal law lists protected transfers but does not list an ordinary transfer to an LLC; the loan documents and facts control whether a due-on-sale option exists and can be exercised. Don't treat on-time payments as protection. Obtain lender consent and transaction-specific legal, title, tax, and insurance advice before transferring or selecting a purchase structure.",
   },
   {
     q: "Do I have to file a BOI report for my rental LLC in 2026?",
-    a: "As of 2026, no — for a domestic LLC. FinCEN's March 2025 interim final rule removed the beneficial-ownership (BOI) reporting requirement under the Corporate Transparency Act for U.S.-formed companies and U.S. persons; only foreign-formed entities registered to do business here still report. This area has changed repeatedly, and some states (e.g. New York) have their own rules — confirm current FinCEN and state guidance before relying on it.",
+    a: "As of 2026, no — for a domestic LLC. FinCEN's March 2025 interim final rule, made final effective August 14, 2026, removed the beneficial-ownership (BOI) reporting requirement under the Corporate Transparency Act for U.S.-formed companies and U.S. persons; only foreign-formed entities registered to do business here still report. This area has changed repeatedly, and some states have their own rules (New York's currently applies only to LLCs formed under a foreign country's law) — confirm current FinCEN and state guidance before relying on it.",
   },
   {
     q: "Can I get a conventional mortgage in an LLC?",
@@ -191,8 +193,14 @@ export default function BlogPost() {
           </p>
           <p>
             What an LLC is <strong>not</strong> is a tax strategy. A
-            single-member LLC is a &quot;disregarded entity&quot; for federal
-            taxes — your rental income and expenses land on{" "}
+            single-member LLC is, by default, a{" "}
+            <a
+              href="https://www.irs.gov/businesses/small-businesses-self-employed/single-member-limited-liability-companies"
+              className="text-primary font-semibold hover:underline"
+            >
+              &quot;disregarded entity&quot;
+            </a>{" "}
+            for federal taxes — your rental income and expenses land on{" "}
             <Link
               href="/blog/schedule-e-rental-property"
               className="text-primary font-semibold hover:underline"
@@ -200,9 +208,15 @@ export default function BlogPost() {
               Schedule E
             </Link>{" "}
             exactly as they would if you owned it in your own name. A
-            multi-member LLC files a partnership return and passes income
-            through via K-1. Either way, there&apos;s no LLC-specific tax cut —
-            the{" "}
+            multi-member LLC, by default,{" "}
+            <a
+              href="https://www.irs.gov/businesses/small-businesses-self-employed/llc-filing-as-a-corporation-or-partnership"
+              className="text-primary font-semibold hover:underline"
+            >
+              files a partnership return
+            </a>{" "}
+            and passes income through via K-1. Either way, there&apos;s no
+            LLC-specific tax cut — the{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
               className="text-primary font-semibold hover:underline"
@@ -226,17 +240,32 @@ export default function BlogPost() {
             the property changes hands.
           </p>
           <p>
-            The federal <strong>Garn-St. Germain Act</strong> protects a list of
-            transfers from due-on-sale enforcement — most usefully, moving a
-            property into a <em>revocable living trust</em> where you remain a
-            beneficiary. But that list{" "}
+            The federal <strong>Garn-St. Germain Act</strong>{" "}
+            <a
+              href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim"
+              className="text-primary font-semibold hover:underline"
+            >
+              protects a list of transfers
+            </a>{" "}
+            from due-on-sale enforcement, including moving a home you live in
+            into a living trust. But{" "}
+            <a
+              href="https://www.ecfr.gov/current/title-12/chapter-I/part-191/section-191.5"
+              className="text-primary font-semibold hover:underline"
+            >
+              the federal regulation
+            </a>{" "}
+            limits those protections to a home the borrower occupies: for the
+            trust exemption, you must remain both the beneficiary and an
+            occupant. So they generally don&apos;t cover a rental you don&apos;t
+            live in. The list also{" "}
             <strong>does not include transfers to an LLC</strong>. A move from
             you to your own single-member LLC is, on paper, a transfer the
             lender can act on.
           </p>
           <p>
             Whether and when a lender enforces the clause is lender- and
-            fact-specific; payment status does not waive the contractual option.
+            fact-specific, so don&apos;t treat on-time payments as protection.
             Safer review steps include:
           </p>
           <ul>
@@ -249,9 +278,9 @@ export default function BlogPost() {
               transferring an existing mortgaged property.
             </li>
             <li>
-              <strong>Understand the trust route</strong> and its limits with an
-              attorney if your goal is estate planning rather than liability
-              isolation.
+              <strong>Understand the trust route</strong> and its occupancy
+              limit with an attorney if your goal is estate planning rather than
+              liability isolation.
             </li>
           </ul>
 
@@ -259,18 +288,25 @@ export default function BlogPost() {
             Financing changes inside an LLC
           </h2>
           <p>
-            Standard owner-occupant conventional loans (Fannie/Freddie) go to
-            individuals, not LLCs. To hold title in an LLC you generally use a{" "}
+            Conventional loans sold to Fannie Mae{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b2-2-01/general-borrower-eligibility-requirements"
+              className="text-primary font-semibold hover:underline"
+            >
+              go to individuals, not LLCs
+            </a>
+            . To hold title in an LLC you generally use a{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loan
             </Link>
-            , a commercial/portfolio loan, or a small-bank product — usually at
-            a slightly higher rate, often with a personal guarantee. That
-            premium is part of the cost of the structure, and it&apos;s another
-            reason buying in the entity from the start beats transferring later.
+            , a commercial/portfolio loan, or a small-bank product, whose rate,
+            fees and guarantee requirements can differ from a conforming
+            loan&apos;s. Any premium is part of the cost of the structure, and
+            it&apos;s another reason buying in the entity from the start beats
+            transferring later.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -280,9 +316,21 @@ export default function BlogPost() {
             If you researched LLCs in 2024, you probably read that every small
             LLC had to file a{" "}
             <strong>beneficial ownership information (BOI)</strong> report with
-            FinCEN. That changed. A FinCEN interim final rule issued in
-            <strong> March 2025</strong> removed the BOI reporting requirement
-            for
+            FinCEN. That changed. A FinCEN{" "}
+            <a
+              href="https://www.federalregister.gov/documents/2025/03/26/2025-05199/beneficial-ownership-information-reporting-requirement-revision-and-deadline-extension"
+              className="text-primary font-semibold hover:underline"
+            >
+              interim final rule issued in <strong>March 2025</strong>
+            </a>
+            ,{" "}
+            <a
+              href="https://www.federalregister.gov/documents/2026/08/14/2026-16576/beneficial-ownership-information-reporting-requirement-revision"
+              className="text-primary font-semibold hover:underline"
+            >
+              made final in a rule effective August 14, 2026
+            </a>
+            , removed the BOI reporting requirement for
             <strong> U.S.-formed companies and U.S. persons</strong> under the
             Corporate Transparency Act — only foreign-formed entities registered
             to do business in the U.S. still report. So a domestic rental LLC,
@@ -291,17 +339,38 @@ export default function BlogPost() {
           <p>
             Two caveats: this area has whipsawed through courts and rulemaking,
             so confirm current FinCEN guidance before you rely on it; and some
-            states (New York, for one) have passed their own transparency rules.
-            It&apos;s a &quot;check the date&quot; topic — which is exactly why
-            most older articles on it are now wrong.
+            states have their own rules.{" "}
+            <a
+              href="https://dos.ny.gov/beneficial-owner-disclosure"
+              className="text-primary font-semibold hover:underline"
+            >
+              New York&apos;s LLC disclosure law
+            </a>
+            , for example, applies from January 1, 2026 only to LLCs formed
+            under a foreign country&apos;s law that are authorized to do
+            business in New York. It&apos;s a &quot;check the date&quot; topic
+            — which is exactly why most older articles on it are now wrong.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Anonymity and structure</h2>
           <p>
-            A few states — Wyoming, New Mexico, Delaware — allow LLCs that
-            don&apos;t publicly list members, which investors use for privacy (a
-            tenant or litigant can&apos;t pull your name off the deed as
-            easily). Some build a holding-company structure: anonymous parent
+            A few states,{" "}
+            <a
+              href="https://sos.wyo.gov/Forms/WyoBiz/Wyoming_Limited_Liability_Company_Act_and_Close_LLC_Supplement.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              Wyoming
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://delcode.delaware.gov/title6/c018/sc02/index.html"
+              className="text-primary font-semibold hover:underline"
+            >
+              Delaware
+            </a>{" "}
+            among them, don&apos;t require an LLC&apos;s formation filing to
+            list its members, which investors use for privacy (a tenant or litigant can&apos;t
+            pull your name off the deed as easily). Some build a holding-company structure: anonymous parent
             LLC owning property-level LLCs. This is real, but it adds cost and
             complexity, and registering a foreign LLC back into your operating
             state can undo some of the privacy. Worthwhile for larger
@@ -311,8 +380,14 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">The cost and the discipline</h2>
           <p>
             An LLC isn&apos;t free or zero-maintenance: formation fees, annual
-            report/franchise fees (California&apos;s $800/yr minimum is the
-            famous one), a registered agent, and — most importantly — the
+            report/franchise fees (California&apos;s{" "}
+            <a
+              href="https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html"
+              className="text-primary font-semibold hover:underline"
+            >
+              $800/yr minimum
+            </a>{" "}
+            is the famous one), a registered agent, and — most importantly — the
             discipline to keep it legitimate. A separate bank account, no
             commingling of personal and rental money, the property actually
             titled in the LLC, and proper leases in the LLC&apos;s name. Skip
@@ -361,7 +436,7 @@ export default function BlogPost() {
             >
               TrueCap
             </Link>{" "}
-            with the loan you&apos;d actually use so the rate premium of an
+            with the loan you&apos;d actually use so any rate premium of an
             LLC-held property shows up in your cash flow and{" "}
             <Link
               href="/glossary/dscr"
@@ -395,6 +470,54 @@ export default function BlogPost() {
             situation.
           </p>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS, Single Member Limited Liability Companies",
+              url: "https://www.irs.gov/businesses/small-businesses-self-employed/single-member-limited-liability-companies",
+            },
+            {
+              title: "IRS, LLC Filing as a Corporation or Partnership",
+              url: "https://www.irs.gov/businesses/small-businesses-self-employed/llc-filing-as-a-corporation-or-partnership",
+            },
+            {
+              title: "12 U.S.C. 1701j-3, Preemption of due-on-sale prohibitions (Garn-St Germain Act)",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim",
+            },
+            {
+              title: "12 CFR 191.5, Limitation on exercise of due-on-sale clauses",
+              url: "https://www.ecfr.gov/current/title-12/chapter-I/part-191/section-191.5",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-2-01, General Borrower Eligibility Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b2-2-01/general-borrower-eligibility-requirements",
+            },
+            {
+              title: "FinCEN interim final rule, Beneficial Ownership Information Reporting Requirement Revision and Deadline Extension, 90 FR 13688 (Mar. 26, 2025)",
+              url: "https://www.federalregister.gov/documents/2025/03/26/2025-05199/beneficial-ownership-information-reporting-requirement-revision-and-deadline-extension",
+            },
+            {
+              title: "FinCEN final rule, Beneficial Ownership Information Reporting Requirement Revision, 91 FR 52508 (Aug. 14, 2026)",
+              url: "https://www.federalregister.gov/documents/2026/08/14/2026-16576/beneficial-ownership-information-reporting-requirement-revision",
+            },
+            {
+              title: "New York Department of State, Beneficial Owner Disclosure",
+              url: "https://dos.ny.gov/beneficial-owner-disclosure",
+            },
+            {
+              title: "Wyoming Secretary of State, Wyoming Limited Liability Company Act (W.S. 17-29-201, Articles of organization)",
+              url: "https://sos.wyo.gov/Forms/WyoBiz/Wyoming_Limited_Liability_Company_Act_and_Close_LLC_Supplement.pdf",
+            },
+            {
+              title: "Delaware Code, Title 6, Chapter 18, Subchapter II (§ 18-201, Certificate of formation)",
+              url: "https://delcode.delaware.gov/title6/c018/sc02/index.html",
+            },
+            {
+              title: "California Franchise Tax Board, Limited Liability Company",
+              url: "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

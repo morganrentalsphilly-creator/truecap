@@ -6,7 +6,7 @@
  * property depreciation example", "land value depreciation split",
  * "mid-month convention rental property", "depreciable basis rental".
  *
- * Angle: the biggest deduction on Schedule E is the one investors most
+ * Angle: one of the largest deductions on Schedule E is one investors
  * often compute wrong — or not at all. The three-step calculation
  * (basis → land split → 27.5-year schedule with the mid-month
  * convention), a full worked $250K duplex example, the cash-flow-vs-
@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-calculate-rental-property-depreciation";
 const TITLE_PLAIN =
@@ -76,11 +77,11 @@ const FAQS = [
   },
   {
     q: "How do I figure out how much of the purchase price is land?",
-    a: "The most common defensible method is the tax assessor's ratio: your county assessment splits the property into land and improvement values, and you apply that same percentage split to your actual purchase basis. If the assessor says the land is $50,000 of a $200,000 total assessment (25%), you treat 25% of your basis as non-depreciable land. Alternatives that also hold up: a line-item land value in your purchase appraisal, or a qualified appraisal done for this purpose. What doesn't hold up is picking a conveniently tiny land percentage with no support — land ratios vary from under 10% in rural markets to 40%+ in expensive coastal metros, and the ratio you use directly scales your deduction.",
+    a: "Start from the fair market values of the land and the building: a line-item land value in your purchase appraisal, or a qualified appraisal done for this purpose, gives you those. If you aren't certain of the land and building values, IRS Publication 527 lets you use the tax assessor's ratio: your county assessment splits the property into land and improvement values, and you apply that same percentage split to your actual purchase basis. If the assessor says the land is $50,000 of a $200,000 total assessment (25%), you treat 25% of your basis as non-depreciable land. What doesn't hold up is picking a conveniently tiny land percentage with no support — in FHFA appraisal data, county land shares vary from under 10% in rural counties to 40%+ in the most expensive ones, and the ratio you use directly scales your deduction.",
   },
   {
     q: "Which closing costs get added to my depreciable basis?",
-    a: "Costs of acquiring the property are capitalized into basis: title insurance and title search, transfer taxes and recording fees, legal fees, surveys, and most seller-paid items you reimburse. Costs of obtaining the loan are not basis — points, origination fees, and lender fees are amortized separately over the life of the loan. Prepaids and escrows (property tax, insurance) are neither; they're either currently deductible operating expenses or simply deposits. On a typical purchase, capitalizable closing costs add 1.5–3% to your basis, which is real money over 27.5 years — don't leave them out.",
+    a: "Costs of acquiring the property are capitalized into basis: title insurance and title search, transfer taxes and recording fees, legal fees, surveys, and amounts the seller owes that you agree to pay (such as back taxes). Most costs of obtaining the loan are not basis — points and origination fees are amortized separately over the life of the loan. Prepaids and escrows (property tax, insurance) are neither; they're either currently deductible operating expenses or simply deposits. Capitalizable closing costs add to your basis, which is real money over 27.5 years — don't leave them out.",
   },
   {
     q: "What happens to all this depreciation when I sell?",
@@ -171,18 +172,18 @@ export default function RentalPropertyDepreciationPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Depreciation is usually the largest single deduction a rental
-              investor gets — bigger than repairs, insurance, and property
-              management combined — and it&apos;s the only one that costs no
-              cash. It&apos;s also the deduction investors most often compute
+              Depreciation is often one of the largest deductions a rental
+              investor gets, and it requires no cash outlay in the year you
+              claim it. It&apos;s also a deduction investors often compute
               wrong: the land split guessed at, the closing costs left out of
               basis, the first-year convention ignored. The calculation is three
               steps — build the depreciable basis, carve out the land, divide by
               27.5 years with a mid-month adjustment in year one — and this
               guide works all three on a $250,000 duplex, then follows the
               number through your tax return: how a property that puts $200 a
-              month in your pocket shows a loss to the IRS, what the deduction
-              is worth in your bracket, and the allowed-or-allowable trap that
+              month in your pocket shows a loss to the IRS, why a bracket times
+              the deduction is not a tax saving you can bank, and the
+              allowed-or-allowable trap that
               bills you at sale for deductions you never claimed.
             </p>
           </header>
@@ -196,10 +197,22 @@ export default function RentalPropertyDepreciationPost() {
               you bought an income-producing asset with a finite life, so you
               deduct its cost gradually over that life instead of all at once.
               For residential rental property, Congress set that life at{" "}
-              <strong>27.5 years</strong>, recovered on a straight line —
-              roughly{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>27.5 years</strong>, recovered on a straight line
+              </a>{" "}
+              — roughly{" "}
               <strong>3.636% of the building&apos;s cost every year</strong>.
-              Two things in the purchase never depreciate: the{" "}
+              Two things in the purchase{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                never depreciate
+              </a>
+              : the{" "}
               <strong>land</strong> (dirt doesn&apos;t wear out, in the
               IRS&apos;s view) and your own labor. Everything else about the
               deduction follows from one number, the{" "}
@@ -212,13 +225,19 @@ export default function RentalPropertyDepreciationPost() {
               Step 1 — build the depreciable basis
             </h2>
             <p>
-              Basis starts with the purchase price and adds the costs of{" "}
-              <em>acquiring</em> the property: title insurance, transfer taxes,
-              recording and legal fees, survey costs. It does{" "}
-              <strong>not</strong> include the costs of obtaining the loan —
-              points, origination, and lender fees amortize separately over the
-              loan term — and it doesn&apos;t include prepaid taxes or insurance
-              escrows, which are operating items. (The{" "}
+              Basis starts with the purchase price and{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                adds the costs of <em>acquiring</em> the property
+              </a>
+              : title insurance, transfer taxes, recording and legal fees,
+              survey costs. It does <strong>not</strong> include most costs of
+              obtaining the loan — points and origination fees amortize
+              separately over the loan term — and it doesn&apos;t include
+              prepaid taxes or insurance escrows, which are operating items.
+              (The{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
                 className="text-primary font-semibold hover:underline"
@@ -239,16 +258,25 @@ export default function RentalPropertyDepreciationPost() {
             </h2>
             <p>
               Only the building depreciates, so you need a defensible split
-              between land and improvements. The standard method is the{" "}
-              <strong>tax assessor&apos;s ratio</strong>: your county already
+              between land and improvements. The IRS starts from the fair
+              market values of land and building; if you aren&apos;t certain of
+              those,{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                Publication 527
+              </a>{" "}
+              lets you use the <strong>tax assessor&apos;s ratio</strong>: your
+              county already
               splits its assessment into land and improvement values, and you
               apply that percentage to your actual basis. Say the assessment
               shows land at $50,000 of a $200,000 total —{" "}
               <strong>25% land</strong>. Applied to the $256,000 basis: $64,000
               of land, and a depreciable building basis of{" "}
               <strong>$192,000</strong>. An appraisal with a line-item land
-              value works too; picking a flattering number with no support does
-              not.
+              value gives you the fair market values directly; picking a
+              flattering number with no support does not.
             </p>
             <p>
               The ratio matters more than most investors realize, because it
@@ -258,11 +286,19 @@ export default function RentalPropertyDepreciationPost() {
               <strong>$6,982</strong>; at 30%, $179,200 and{" "}
               <strong>$6,516</strong>. That&apos;s a{" "}
               <strong>$931-a-year swing</strong> between the 20% and 30%
-              assumptions — roughly $220 of real tax annually in a 24% bracket,
-              compounding over the life of the hold. In dense coastal metros the
-              assessor may put land at 40% or more; in much of the Midwest
-              it&apos;s 10–15%. Use your parcel&apos;s actual ratio, not a rule
-              of thumb.
+              assumptions — roughly $220 a year at an assumed 24% rate, before
+              the loss limits covered below, for every year of the hold. In
+              expensive markets the assessor may put land at a large share of
+              value;{" "}
+              <a
+                href="https://www.fhfa.gov/sites/default/files/documents/wp1901-1028.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                an FHFA staff working paper
+              </a>{" "}
+              using 2012–2019 appraisals found county land shares from about 8%
+              at the 1st percentile to about 54% at the 99th. Use your
+              parcel&apos;s actual ratio, not a rule of thumb.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -273,15 +309,27 @@ export default function RentalPropertyDepreciationPost() {
               <strong>$192,000 ÷ 27.5 = $6,982 a year</strong> — $582 a month of
               deduction for owning the same building. Year one is smaller,
               because residential rental uses the{" "}
-              <strong>mid-month convention</strong>: the property is treated as
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>mid-month convention</strong>
+              </a>
+              : the property is treated as
               placed in service at the midpoint of the month it was ready and
               available to rent, no matter the actual day. Place the duplex in
               service in <strong>March</strong> and year one counts 9.5 months:
               $192,000 × 3.636% × 9.5/12 ≈ <strong>$5,528</strong>. A January
               start yields about $6,691; a December closing gets half a month,
               about <strong>$291</strong>. Note the trigger is{" "}
-              <em>ready and available</em> — the day the unit is habitable and
-              listed, not the day a lease starts. If you close in October and
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                <em>ready and available</em>
+              </a>{" "}
+              for rent — for example, the day the unit is habitable and listed, not
+              the day a lease starts. If you close in October and
               advertise in November, depreciation starts in November even if the
               tenant moves in come January.
             </p>
@@ -303,8 +351,10 @@ export default function RentalPropertyDepreciationPost() {
               </Link>
               ). Taxable income is a different animal: start from cash flow, add
               back the ~<strong>$1,900</strong> of year-one principal paydown
-              (cash out the door, but not deductible), then subtract{" "}
-              <strong>$6,982</strong> of depreciation. Result: $2,400 + $1,900 −
+              (cash out the door, but not deductible), then subtract a full
+              year&apos;s <strong>$6,982</strong> of depreciation (year one&apos;s
+              is smaller under the mid-month convention; a full year keeps the
+              arithmetic simple). Result: $2,400 + $1,900 −
               $6,982 = <strong>−$2,682</strong>. The property pays you $2,400 in
               cash and reports a $2,682 modeled loss before applying
               taxpayer-level limitations. Multiplying the $6,982 deduction by an
@@ -328,25 +378,57 @@ export default function RentalPropertyDepreciationPost() {
             <p>
               The 27.5-year clock covers what you bought. What you spend
               afterward splits three ways. <strong>Repairs</strong> — fixing
-              what broke, at comparable quality — deduct in full the year you
-              pay them. <strong>Improvements</strong> — a new roof, an addition,
-              a full kitchen renovation — are capitalized and start their{" "}
+              what broke, at comparable quality —{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                deduct in full the year you pay them
+              </a>
+              . <strong>Improvements</strong> — a new roof, an addition, a full
+              kitchen renovation —{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                are capitalized
+              </a>{" "}
+              and start their{" "}
               <em>own</em> 27.5-year schedules from their in-service dates: a
               $12,000 roof in year three adds $436 a year, on its own clock,
               alongside the building&apos;s. And some components aren&apos;t
               27.5-year property at all:{" "}
-              <strong>
-                appliances, carpet, and furniture recover over 5 years; fences,
-                driveways, and landscaping over 15
-              </strong>
-              . Two practical escape hatches keep small items out of the
-              capitalization maze: the <strong>de minimis safe harbor</strong>{" "}
-              lets you expense items up to $2,500 per invoice line (a $1,800
-              fridge is a same-year deduction, not a 5-year schedule), and those
-              shorter-life components are exactly what a cost segregation study
-              accelerates — the strategy, and what&apos;s restored 100% bonus
-              deduction for qualifying property acquired and placed in service
-              after January 19, 2025, is covered in the{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>
+                  appliances, carpet, and furniture recover over 5 years; fences,
+                  driveways, and depreciable shrubbery over 15
+                </strong>
+              </a>{" "}
+              (general landscaping is usually part of the land&apos;s
+              nondepreciable cost). Two practical escape hatches keep small
+              items out of the capitalization maze: the{" "}
+              <strong>de minimis safe harbor</strong>, if you elect it,{" "}
+              <a
+                href="https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations"
+                className="text-primary font-semibold hover:underline"
+              >
+                lets you expense items up to $2,500 per invoice or item
+              </a>{" "}
+              (a $1,800 fridge is a same-year deduction, not a 5-year schedule),
+              and those shorter-life components are exactly what a cost
+              segregation study accelerates — the strategy, and what&apos;s
+              restored{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                100% bonus deduction for qualifying property acquired and placed
+                in service after January 19, 2025
+              </a>
+              , is covered in the{" "}
               <Link
                 href="/blog/bonus-depreciation-rental-property-2026"
                 className="text-primary font-semibold hover:underline"
@@ -362,7 +444,14 @@ export default function RentalPropertyDepreciationPost() {
             <p>
               Here&apos;s the part that makes depreciation mandatory in
               everything but name: when you sell, the IRS reduces your basis by
-              the depreciation that was <strong>allowed or allowable</strong> —
+              the depreciation that was{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>allowed or allowable</strong>
+              </a>{" "}
+              —
               the deductions you were <em>entitled</em> to, whether or not you
               claimed them. Skip depreciation for ten years on the duplex and
               you still owe{" "}
@@ -372,18 +461,39 @@ export default function RentalPropertyDepreciationPost() {
               >
                 depreciation recapture
               </Link>{" "}
-              — at up to 25% — on roughly $70,000 of deductions you never took.
+              — at{" "}
+              <a
+                href="https://www.irs.gov/taxtopics/tc409"
+                className="text-primary font-semibold hover:underline"
+              >
+                up to 25%
+              </a>{" "}
+              — on roughly $70,000 of deductions you never took.
               Worst of both worlds: no annual benefit, full exit bill. If
               you&apos;ve been under-claiming, the repair is{" "}
-              <strong>Form 3115</strong>, a change in accounting method that
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>Form 3115</strong>
+              </a>{" "}
+              (if the under-claiming spans two or more consecutive returns; a
+              single year is fixed on an amended return), a change in accounting
+              method that
               catches up all missed depreciation as a single deduction in the
               current year — one of the few genuinely retroactive fixes in the
               tax code, and well worth a CPA&apos;s fee. The same logic means
               depreciation belongs in your underwriting from day one: it&apos;s
               a real return stream while you hold and a real liability when you
               exit, and deals should be compared with both sides priced in.
-              (Depreciation is also just one of the fourteen deductions on the
-              schedule — the{" "}
+              (Depreciation is also just one of the{" "}
+              <a
+                href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                fourteen deductions on the schedule
+              </a>{" "}
+              — the{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
                 className="text-primary font-semibold hover:underline"
@@ -407,14 +517,16 @@ export default function RentalPropertyDepreciationPost() {
               </li>
               <li>
                 <strong>Guessing the land ratio.</strong> A 20%-vs-30% land
-                assumption moves the deduction $931 a year on this duplex. Pull
-                the assessor&apos;s actual split for your parcel — it takes five
-                minutes and it&apos;s the number that survives scrutiny.
+                assumption moves the deduction $931 a year on this duplex. Use
+                an appraisal&apos;s land value, or the assessor&apos;s actual
+                split for your parcel if you don&apos;t have one — either gives
+                you a number you can support.
               </li>
               <li>
                 <strong>Starting the clock at lease signing.</strong> The
-                in-service date is when the unit is ready and advertised, not
-                when rent starts flowing. A November listing with a January
+                in-service date is when the unit is ready and available for rent
+                (listing it for rent is one way to show that), not when rent starts
+                flowing. A November listing with a January
                 move-in is two extra months of deduction.
               </li>
               <li>
@@ -430,8 +542,14 @@ export default function RentalPropertyDepreciationPost() {
                 <strong>
                   Skipping depreciation to &quot;avoid recapture later.&quot;
                 </strong>{" "}
-                Recapture is computed on allowed <em>or allowable</em>{" "}
-                depreciation — you pay it either way. Not claiming the deduction
+                Recapture is{" "}
+                <a
+                  href="https://www.irs.gov/publications/p544"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  computed on allowed <em>or allowable</em> depreciation
+                </a>{" "}
+                — you pay it either way. Not claiming the deduction
                 is pure loss.
               </li>
             </ul>
@@ -454,7 +572,7 @@ export default function RentalPropertyDepreciationPost() {
             <p>
               Depreciation is three steps of arithmetic sitting on one carefully
               built number: purchase price plus acquisition costs, minus the
-              assessor&apos;s land share, divided by 27.5 — with a mid-month
+              land share, divided by 27.5 — with a mid-month
               convention in year one. On the worked duplex, simple full-year
               arithmetic produces $6,982 before conventions and limitations.
               That is a deduction input, not cash flow, a promised return, or a
@@ -472,6 +590,46 @@ export default function RentalPropertyDepreciationPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+            {
+              title: "FHFA Working Paper 19-01, The Price of Residential Land for Counties, ZIP Codes, and Census Tracts",
+              url: "https://www.fhfa.gov/sites/default/files/documents/wp1901-1028.pdf",
+            },
+            {
+              title: "IRS, Tangible Property Final Regulations (de minimis safe harbor FAQ)",
+              url: "https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations",
+            },
+            {
+              title: "IRS Publication 946 (2025), How To Depreciate Property",
+              url: "https://www.irs.gov/publications/p946",
+            },
+            {
+              title: "IRS Topic 409, Capital gains and losses",
+              url: "https://www.irs.gov/taxtopics/tc409",
+            },
+            {
+              title: "IRS Schedule E (Form 1040) 2025, Supplemental Income and Loss",
+              url: "https://www.irs.gov/pub/irs-pdf/f1040se.pdf",
+            },
+            {
+              title: "IRS Publication 544 (2025), Sales and Other Dispositions of Assets",
+              url: "https://www.irs.gov/publications/p544",
+            },
+            {
+              title: "26 U.S.C. 1(h)(1)(E), 25% rate on unrecaptured section 1250 gain",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1&num=0&edition=prelim",
+            },
+            {
+              title: "IRS Publication 551 (12/2025), Basis of Assets",
+              url: "https://www.irs.gov/publications/p551",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>
