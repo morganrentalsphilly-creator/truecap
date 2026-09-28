@@ -10,10 +10,18 @@
  *      that area's FY<year> and FY<year-1> FMRs by bedroom count. The URL
  *      carries HUD's `dallas_sa_override=TRUE` switch, which shows the area
  *      figures even where vouchers use ZIP-level Small Area FMRs;
- *   3. for a slug with ZIP rows in lib/markets/safmr-rents.ts, the same page
- *      without the switch shows HUD's "Small Area FMRs By Unit Bedrooms" table.
- *      Every sampled ZIP row must match it exactly before the SAFMR URL is
- *      recorded.
+ *   3. the same page without the switch is HUD's own view of the area. It
+ *      says whether Housing Choice Vouchers there use ZIP-level Small Area
+ *      FMRs instead of the area figure: "All Housing Choice Voucher programs
+ *      operated in the <area> will use Small Area FMRs" (a designated area,
+ *      24 CFR 982.503(a)(1)(i)) or "A Public Housing Agency (PHA) or agencies
+ *      representing a majority of Housing Choice Vouchers in the <area> has
+ *      opted to use Small Area Fair Market Rents". The record keeps which one
+ *      (voucherSmallAreaFmr) and that page's URL, so a market page that
+ *      explains FMR's voucher use can say so for its own area;
+ *   4. for a slug with ZIP rows in lib/markets/safmr-rents.ts, that page also
+ *      shows HUD's "Small Area FMRs By Unit Bedrooms" table. Every sampled ZIP
+ *      row must match it exactly before the SAFMR URL is recorded.
  *
  * HUD defines New England FMR areas by town, so CT, MA, ME, NH, RI and VT
  * cities are matched on their own town name, never on their county.
@@ -137,8 +145,24 @@ type AreaRecord = {
   rent2br: number;
   rent3br: number;
   prior: { year: number; rent2br: number; rent3br: number } | null;
+  voucherSmallAreaFmr: VoucherSmallAreaFmr;
+  voucherSmallAreaFmrUrl: string | null;
   safmrSourceUrl: string | null;
 };
+
+type VoucherSmallAreaFmr = "required" | "majority-opted" | null;
+
+/** Which of HUD's two Small Area FMR statements the area page makes, if any, for this area. */
+function voucherStatement(text: string, areaName: string): VoucherSmallAreaFmr {
+  const required = /All Housing Choice Voucher programs operated in the (.+?) will use Small Area FMRs/.exec(text);
+  const opted = /agencies representing a majority of Housing Choice Vouchers in the (.+?) has opted to use Small Area Fair Market Rents/.exec(text);
+  if (required && opted) throw new Error("HUD's page makes both Small Area FMR statements");
+  const hit = required ?? opted;
+  if (!hit) return null;
+  // The statement must name this record's own area, or it is about another one.
+  if (hit[1]!.trim() !== areaName) throw new Error(`HUD's Small Area FMR statement names "${hit[1]}", not "${areaName}"`);
+  return required ? "required" : "majority-opted";
+}
 
 async function main() {
   const year = fiscalYear();
@@ -175,12 +199,13 @@ async function main() {
       const current = fmrRow(text, year);
       if (!areaName || !current) throw new Error("page has no area name or FY row");
       const priorRow = fmrRow(text, year - 1);
+      const zipUrl = sourceUrl.replace("&dallas_sa_override=TRUE", "");
+      const zipText = textOf(await fetchText(zipUrl));
+      await sleep(400);
+      const voucherSmallAreaFmr = voucherStatement(zipText, areaName);
       let safmrSourceUrl: string | null = null;
       const safmr = SAFMR_RENTS[c.slug];
       if (safmr && safmr.year === year) {
-        const zipUrl = sourceUrl.replace("&dallas_sa_override=TRUE", "");
-        const zipText = textOf(await fetchText(zipUrl));
-        await sleep(400);
         const matches = safmr.rows.every((row) => {
           const m = new RegExp(`\\b${row.zip} \\$([\\d,]+) \\$([\\d,]+) \\$([\\d,]+) \\$([\\d,]+) \\$([\\d,]+)`).exec(zipText);
           return m !== null && Number(m[3]!.replace(/,/g, "")) === row.rent2br && Number(m[4]!.replace(/,/g, "")) === row.rent3br;
@@ -196,9 +221,13 @@ async function main() {
         rent2br: current.rent2br,
         rent3br: current.rent3br,
         prior: priorRow ? { year: year - 1, ...priorRow } : null,
+        voucherSmallAreaFmr,
+        voucherSmallAreaFmrUrl: voucherSmallAreaFmr ? zipUrl : null,
         safmrSourceUrl,
       };
-      console.log(`  + ${c.slug.padEnd(18)} ${areaName} · 2BR $${current.rent2br} 3BR $${current.rent3br}`);
+      console.log(
+        `  + ${c.slug.padEnd(18)} ${areaName} · 2BR $${current.rent2br} 3BR $${current.rent3br}${voucherSmallAreaFmr ? ` · vouchers: Small Area FMRs (${voucherSmallAreaFmr})` : ""}`,
+      );
     } catch (err) {
       console.warn(`  - ${c.slug}: ${(err as Error).message}`);
       missed.push(c.slug);
@@ -212,8 +241,10 @@ async function main() {
     ` * The HUD Fair Market Rent area behind each market page's HUD figures, read\n` +
     ` * from HUD's FY${year} Fair Market Rent Documentation System (huduser.gov).\n` +
     ` * Each record's sourceUrl opens HUD's page for the county (New England: the\n` +
-    ` * town), which names the area and shows its FMRs; safmrSourceUrl shows HUD's\n` +
-    ` * ZIP-level Small Area FMRs where lib/markets/safmr-rents.ts has rows.\n` +
+    ` * town), which names the area and shows its FMRs; voucherSmallAreaFmr records\n` +
+    ` * whether HUD's page says the area's vouchers use ZIP-level Small Area FMRs;\n` +
+    ` * safmrSourceUrl shows HUD's ZIP-level Small Area FMRs where\n` +
+    ` * lib/markets/safmr-rents.ts has rows.\n` +
     ` */\n\n` +
     `export type HudFmrArea = {\n` +
     `  /** HUD's name for the FMR area, e.g. "Columbus, OH HUD Metro FMR Area". */\n` +
@@ -228,6 +259,17 @@ async function main() {
     `  rent3br: number;\n` +
     `  /** The prior fiscal year's FMRs, from the same HUD page. */\n` +
     `  prior: { year: number; rent2br: number; rent3br: number } | null;\n` +
+    `  /**\n` +
+    `   * What HUD's own page for the area says about vouchers and ZIP-level Small\n` +
+    `   * Area FMRs: "required" ("All Housing Choice Voucher programs operated in\n` +
+    `   * the <area> will use Small Area FMRs"), "majority-opted" ("A Public Housing\n` +
+    `   * Agency (PHA) or agencies representing a majority of Housing Choice\n` +
+    `   * Vouchers in the <area> has opted to use Small Area Fair Market Rents"),\n` +
+    `   * or null when the page says neither.\n` +
+    `   */\n` +
+    `  voucherSmallAreaFmr: "required" | "majority-opted" | null;\n` +
+    `  /** HUD's page for the area (no override switch) that makes that statement; null with no statement. */\n` +
+    `  voucherSmallAreaFmrUrl: string | null;\n` +
     `  /** HUD's Small Area FMR (ZIP) table for the area, when safmr-rents.ts has rows that match it. */\n` +
     `  safmrSourceUrl: string | null;\n` +
     `};\n\n` +
