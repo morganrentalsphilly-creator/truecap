@@ -320,8 +320,6 @@ const FUNDRISE_FAQ: FaqItem[] = [
         Not really — completely different investing models. Fundrise sells shares in diversified non-traded REITs (passive). TrueCap is the underwriting calculator for investors buying rentals directly (active). The decision isn&apos;t which to use — it&apos;s which investing model fits you.
       </>
     ),
-    plainTextAnswer:
-      "Not really — different investing models. Fundrise sells REIT shares (passive). TrueCap underwrites whole rentals you buy directly (active). The decision is which model fits you.",
   },
   {
     question: "Fundrise vs Arrived — which one?",
@@ -330,8 +328,6 @@ const FUNDRISE_FAQ: FaqItem[] = [
         Both are passive real estate platforms but with different scopes. Arrived focuses on single-family rentals at the property level (you buy shares of specific houses, $100 minimum). Fundrise is more diversified across commercial + multifamily + residential at the fund level ($10 minimum). For SFR exposure: Arrived. For diversified RE exposure: Fundrise.
       </>
     ),
-    plainTextAnswer:
-      "Both passive RE. Arrived: SFR at property level, $100 min, you pick houses. Fundrise: diversified across CRE/multifamily/residential at fund level, $10 min. SFR: Arrived. Diversified: Fundrise.",
   },
   {
     question: "Is Fundrise really passive?",
@@ -340,8 +336,6 @@ const FUNDRISE_FAQ: FaqItem[] = [
         Yes — Fundrise handles everything (acquisition, financing, management, distributions). You contribute capital + collect quarterly distributions. The tradeoff is you give up control over individual property decisions and pay ~1% in fees plus underlying expense ratios.
       </>
     ),
-    plainTextAnswer:
-      "Yes — Fundrise handles acquisition, financing, management, distributions. You contribute capital + collect quarterly distributions. Tradeoff: no control over property decisions + ~1% fees + expense ratios.",
   },
   {
     question: "Why would I buy a rental directly when I could just put money in Fundrise?",
@@ -350,18 +344,14 @@ const FUNDRISE_FAQ: FaqItem[] = [
         Three reasons: control (you pick the property + financing), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: real work or paying a PM.
       </>
     ),
-    plainTextAnswer:
-      "Three reasons: control over property and financing, potentially different direct-ownership tax treatment, and cash-flow control. Depreciation, interest, and 1031 eligibility depend on the property, transaction, and taxpayer; verify them with licensed professionals. Tradeoff: work or PM.",
   },
   {
-    question: "Can I use Fundrise&apos;s projected returns in TrueCap?",
+    question: "Can I use Fundrise's projected returns in TrueCap?",
     answer: (
       <>
         Not directly — TrueCap models per-property metrics (cap rate, DSCR, cash flow), not REIT fund returns. Fundrise&apos;s historical 8-12% blended returns aren&apos;t comparable to a direct rental&apos;s cash-on-cash because the leverage, tax treatment, and cash-flow timing are different. Evaluate each on its own terms.
       </>
     ),
-    plainTextAnswer:
-      "Not directly — TrueCap models per-property metrics; Fundrise gives fund returns. Their 8-12% blended isn&apos;t comparable to direct CoC because leverage, taxes, and cash-flow timing differ. Evaluate each on its own terms.",
   },
 ];
 

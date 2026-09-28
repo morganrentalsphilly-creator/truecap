@@ -474,12 +474,10 @@ const RENTCAST_FAQ: FaqItem[] = [
         evidence source and TrueCap for the downstream model.
       </>
     ),
-    plainTextAnswer:
-      "Not directly — they overlap on rent estimates but TrueCap is full underwriting. RentCast provides listings-based rent comps and AVM estimates. TrueCap starts with an editable HUD area benchmark and runs the downstream model.",
   },
   {
     question:
-      "How accurate is RentCast vs TrueCap&apos;s HUD-based rent estimate?",
+      "How accurate is RentCast vs TrueCap's HUD-based rent estimate?",
     answer: (
       <>
         There is no universal accuracy winner. RentCast uses listings-based
@@ -488,8 +486,6 @@ const RENTCAST_FAQ: FaqItem[] = [
         subject-property comps or lease evidence and test a reasonable range.
       </>
     ),
-    plainTextAnswer:
-      "There is no universal accuracy winner. RentCast uses listings-based data, while HUD FMR is an area-level housing-program benchmark. Compare both with subject-property comps or lease evidence and test a reasonable range.",
   },
   {
     question: "Does RentCast do cap rate or DSCR calculations?",
@@ -501,8 +497,6 @@ const RENTCAST_FAQ: FaqItem[] = [
         spreadsheet) to compute cap rate, DSCR, cash flow, etc.
       </>
     ),
-    plainTextAnswer:
-      "No — RentCast is data + estimation, not a financial calculator. Use its rent + AVM values as inputs to TrueCap, DealCheck, or your spreadsheet for cap rate, DSCR, cash flow.",
   },
   {
     question: "Which has a better free tier?",
@@ -515,11 +509,9 @@ const RENTCAST_FAQ: FaqItem[] = [
         test the deal.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap provides no-account preliminary screens with core rental metrics. RentCast's free tier caps property lookups and excludes its API. Compare them as underwriting workflow versus rent-data evidence, and verify current limits on both official sites.",
   },
   {
-    question: "Can I use RentCast&apos;s data in TrueCap?",
+    question: "Can I use RentCast's data in TrueCap?",
     answer: (
       <>
         Yes — every input in TrueCap is editable. Pull rent from RentCast, type
@@ -528,8 +520,6 @@ const RENTCAST_FAQ: FaqItem[] = [
         common combined workflow.
       </>
     ),
-    plainTextAnswer:
-      "Yes — every input in TrueCap is editable. Pull rent from RentCast, type it into TrueCap&apos;s rent field, and the entire downstream analysis updates instantly.",
   },
 ];
 

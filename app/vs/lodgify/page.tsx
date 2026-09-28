@@ -442,8 +442,6 @@ const LODGIFY_FAQ: FaqItem[] = [
         Solo STR hosts use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Lodgify manages STRs you own. TrueCap underwrites whether to buy. Solo STR hosts use both.",
   },
   {
     question: "Lodgify vs Hostaway — which one?",
@@ -455,8 +453,6 @@ const LODGIFY_FAQ: FaqItem[] = [
         workflow; neither has a universal size cutoff.
       </>
     ),
-    plainTextAnswer:
-      "Compare current quotes, listing requirements, channel coverage, direct-booking tools, automation, integrations, support, and implementation terms. The better fit depends on the portfolio and workflow; neither has a universal size cutoff.",
   },
   {
     question: "Does Lodgify have a free tier?",
@@ -468,8 +464,6 @@ const LODGIFY_FAQ: FaqItem[] = [
         property-count rules, and included features.
       </>
     ),
-    plainTextAnswer:
-      "Lodgify does not currently publish a permanent free tier. It publishes a time-limited trial and paid Basic, Starter, Professional, and Ultimate plans. Check its official pricing page for current terms.",
   },
   {
     question: "Can TrueCap model STR revenue?",
@@ -482,8 +476,6 @@ const LODGIFY_FAQ: FaqItem[] = [
         alongside.
       </>
     ),
-    plainTextAnswer:
-      "Yes — every input editable. Plug a conservative monthly STR revenue (gross ÷ 12, discounted for vacancy + cleaning + STR opex) into the rent field. Doesn&apos;t auto-pull AirDNA or Mashvisor data.",
   },
   {
     question: "Should I get a Lodgify direct-booking site?",
@@ -505,8 +497,6 @@ const LODGIFY_FAQ: FaqItem[] = [
         percentage or guaranteed payback.
       </>
     ),
-    plainTextAnswer:
-      "A direct-booking site can be useful when you can generate demand and its net economics work for your portfolio. Compare current subscription, payment, marketing, support, and operating costs with your actual channel terms; do not assume one fee percentage or guaranteed payback.",
   },
 ];
 

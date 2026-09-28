@@ -57,29 +57,6 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS = [
-  {
-    q: "When does it make sense to refinance a rental property?",
-    a: "There is no universal rate-drop or break-even threshold. A refinance may be considered to change rate or term, seek cash out, remove a borrower, or restructure debt. Compare the current payoff and complete written loan estimate — including points, lender fees, third-party costs, prepayment terms, and expected holding period — with the projected savings and risks.",
-  },
-  {
-    q: "What's the difference between rate-and-term and cash-out refi?",
-    a: "A rate-and-term refinance primarily changes the existing debt's rate, term, or structure; a cash-out refinance seeks a larger new balance and returns eligible net proceeds after payoff and costs. Programs can treat pricing, leverage, and financed costs differently. Available cash depends on appraisal and full underwriting, so verify the current written terms rather than assuming a fixed premium or LTV.",
-  },
-  {
-    q: "What's the maximum LTV on an investment property refi?",
-    a: "There is no universal maximum. LTV varies by program, units, occupancy, property type, loan purpose, seasoning and value basis, credit, coverage or DTI, and lender overlays. Ask each lender to confirm the current cap and eligible appraised-value basis for your file; an LTV calculation alone is not an approval.",
-  },
-  {
-    q: "Do I need to season the property before refinancing?",
-    a: "Seasoning and the eligible value basis vary by loan program, transaction history, property type, and lender. Conventional, delayed-financing, portfolio, and DSCR rules are not interchangeable. Before relying on a refinance timeline, ask the lender to confirm in writing the required ownership period, value basis, documentation, and maximum leverage for this property.",
-  },
-  {
-    q: "Are DSCR refis a good option?",
-    a: "It depends on your situation and current quotes. DSCR programs primarily use property coverage rather than personal DTI, but still apply borrower, credit, reserve, entity, appraisal, insurance, and program requirements. Compare DSCR, conventional, and portfolio options on total cost, leverage, recourse, prepayment terms, documentation, and exit plan; no fixed rate premium applies to every file.",
-  },
-];
-
 export default function RefinancePost() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${SLUG}`;
@@ -106,22 +83,12 @@ export default function RefinancePost() {
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
         <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>

@@ -460,8 +460,6 @@ const RENTSPREE_FAQ: FaqItem[] = [
         with both ends of the workflow often use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different jobs. RentSpree screens tenants for properties you own/manage. TrueCap underwrites properties you&apos;re considering. Agents working both ends use both.",
   },
   {
     question: "Does TrueCap screen tenants?",
@@ -473,8 +471,6 @@ const RENTSPREE_FAQ: FaqItem[] = [
         right tools.
       </>
     ),
-    plainTextAnswer:
-      "No — we don&apos;t pull credit, criminal, or eviction reports (FCRA-regulated, outside scope). For screening, use RentSpree, TurboTenant, Avail, RentRedi, or TransUnion direct.",
   },
   {
     question: "Is RentSpree really free?",
@@ -486,8 +482,6 @@ const RENTSPREE_FAQ: FaqItem[] = [
         starting around $20/month.
       </>
     ),
-    plainTextAnswer:
-      "Free for the landlord/agent — tenant pays $30-40 per screening package. RentSpree has premium agent tiers (e-signature, listing syndication, etc.) starting ~$20/mo.",
   },
   {
     question: "RentSpree vs TurboTenant — which one?",
@@ -500,8 +494,6 @@ const RENTSPREE_FAQ: FaqItem[] = [
         lean RentSpree.
       </>
     ),
-    plainTextAnswer:
-      "TurboTenant bundles screening into broader landlord ops (listings, leases, rent collection). RentSpree focuses on screening + applications, popular with realtors managing for clients. Agents lean RentSpree.",
   },
   {
     question: "Can a realtor use both TrueCap + RentSpree?",
@@ -513,8 +505,6 @@ const RENTSPREE_FAQ: FaqItem[] = [
         unit. Both are agent-friendly.
       </>
     ),
-    plainTextAnswer:
-      "Yes — common combo. TrueCap for the buyer-side analysis at the showing; RentSpree for tenant screening once the property is owned and ready to fill.",
   },
 ];
 

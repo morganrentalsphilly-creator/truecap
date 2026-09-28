@@ -458,8 +458,6 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
         considering buying. Most small landlords use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Landlord Studio is mobile-first accounting. TrueCap is pre-purchase underwriting. Most small landlords use both.",
   },
   {
     question: "Landlord Studio vs Stessa — which one?",
@@ -473,8 +471,6 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
         tiers — try both.
       </>
     ),
-    plainTextAnswer:
-      "Landlord Studio is mobile-first with stronger receipt scanning. Stessa is bank-feed driven with automatic transaction categorization. On-the-go receipts: Landlord Studio. Hands-off bank pull: Stessa. Both have free tiers.",
   },
   {
     question: "Does Landlord Studio collect rent?",
@@ -485,8 +481,6 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
         TurboTenant, RentRedi, Avail, or Baselane.
       </>
     ),
-    plainTextAnswer:
-      "Not directly — they log rent payments but don&apos;t process them. For online rent collection, pair with TurboTenant, RentRedi, Avail, or Baselane.",
   },
   {
     question: "Does TrueCap track actual expenses?",
@@ -498,8 +492,6 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
         Baselane handle that.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap models projected expenses for underwriting. It doesn&apos;t connect to your bank or accept receipts. Landlord Studio, Stessa, or Baselane handle that.",
   },
   {
     question: "Is Landlord Studio free?",
@@ -511,8 +503,6 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
         reconciliation.
       </>
     ),
-    plainTextAnswer:
-      "Yes — free tier for limited properties. Paid tiers (Starter ~$12/mo, Premium ~$30/mo, 2026) lift the cap and add custom reports + bank reconciliation.",
   },
 ];
 

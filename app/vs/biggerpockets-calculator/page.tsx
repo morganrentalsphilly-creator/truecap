@@ -493,8 +493,6 @@ const BP_FAQ: FaqItem[] = [
         signup or a monthly analysis limit.
       </>
     ),
-    plainTextAnswer:
-      "Check BiggerPockets' official calculator page for current access and membership terms. TrueCap's core screen is available without signup or a monthly analysis limit.",
   },
   {
     question:
@@ -509,8 +507,6 @@ const BP_FAQ: FaqItem[] = [
         ecosystem.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap is an address-first alternative that labels editable HUD rent and FRED mortgage-rate benchmarks, keeps property tax manual, and shows standard metrics and Buy Box fit.",
   },
   {
     question: "How much is TrueCap vs BiggerPockets Pro?",
@@ -525,8 +521,6 @@ const BP_FAQ: FaqItem[] = [
         ecosystem, so price alone is not an apples-to-apples comparison.
       </>
     ),
-    plainTextAnswer:
-      "See TrueCap's live pricing page and BiggerPockets' official membership and calculator pages for current prices and access.",
   },
   {
     question: "Does TrueCap have a 10-year projection like BiggerPockets?",
@@ -538,8 +532,6 @@ const BP_FAQ: FaqItem[] = [
         guarantees, and they can be included in a report.
       </>
     ),
-    plainTextAnswer:
-      "Yes. TrueCap Pro models editable rent growth, expense growth, appreciation, and amortization into annual cash-flow and equity scenarios that can be included in a report.",
   },
   {
     question:
@@ -552,8 +544,6 @@ const BP_FAQ: FaqItem[] = [
         company name.
       </>
     ),
-    plainTextAnswer:
-      "Yes — a free signed-in account can create a read-only share link (no Pro needed), and the recipient does not need an account. Pro adds co-branding with your logo/color/company name.",
   },
   {
     question: "When should I stick with BiggerPockets?",
@@ -566,7 +556,5 @@ const BP_FAQ: FaqItem[] = [
         presentation in one sequence.
       </>
     ),
-    plainTextAnswer:
-      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-underwrite sequence with labeled assumptions, Buy Box fit, an Offer Ceiling, downside, and presentation.",
   },
 ];

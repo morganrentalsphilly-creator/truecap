@@ -482,8 +482,6 @@ const ZILLOW_FAQ: FaqItem[] = [
         reasonable range.
       </>
     ),
-    plainTextAnswer:
-      "Zillow describes its Rent Zestimate as a starting point based on public data and similar local listings. Accuracy depends on the available data, property, and market. Verify it with current comps or lease evidence and stress-test a reasonable range.",
   },
   {
     question: "What rent data does TrueCap use instead of Zillow?",
@@ -497,8 +495,6 @@ const ZILLOW_FAQ: FaqItem[] = [
         local evidence.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap starts from an editable HUD Fair Market Rent area benchmark for the relevant bedroom count, using ZIP-level Small Area FMR where available and a broader-area fallback. It is not a property-specific rent opinion or lender approval; replace it when you have stronger local evidence.",
   },
   {
     question: "Can I check rent on a specific Zillow listing in TrueCap?",
@@ -511,8 +507,6 @@ const ZILLOW_FAQ: FaqItem[] = [
         time.
       </>
     ),
-    plainTextAnswer:
-      "Yes — paste the address into TrueCap and you get an editable HUD area benchmark for that location and bedroom count. Replace it with a Zillow estimate, current comps, or lease evidence when those better fit the property.",
   },
   {
     question: "Does TrueCap give a more accurate rent estimate than Zillow?",
@@ -525,8 +519,6 @@ const ZILLOW_FAQ: FaqItem[] = [
         before deciding.
       </>
     ),
-    plainTextAnswer:
-      "Neither source is guaranteed to be more accurate for every property. Zillow offers a property-specific starting estimate; TrueCap places an editable HUD area benchmark inside a full underwrite. Compare both with current local evidence and test a range.",
   },
   {
     question: "How does TrueCap turn a rent estimate into an underwrite?",
@@ -540,8 +532,6 @@ const ZILLOW_FAQ: FaqItem[] = [
         by hand.
       </>
     ),
-    plainTextAnswer:
-      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows Buy Box fit plus a free 0–100 Deal score. Zillow stops at the rent number.",
   },
 ];
 

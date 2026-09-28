@@ -57,29 +57,6 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS = [
-  {
-    q: "What's the difference between pro forma and actual?",
-    a: "A pro forma is a forward-looking projection; actuals show historical operations. Neither should be accepted without reconciliation. Request the rent roll, leases, collections, invoices, tax bills, insurance information, utility records, and a trailing operating statement, then adjust for ownership and post-sale changes.",
-  },
-  {
-    q: "Why can a pro forma be optimistic?",
-    a: "A seller may use projected rent, normalized vacancy, incomplete expenses, or no capital reserve. Compare every input with source documents and run current, downside, and delayed-rent scenarios. The gap from the seller's cap rate is property-specific; there is no universal haircut that predicts performance.",
-  },
-  {
-    q: "What's a T-12 and why does it matter?",
-    a: "T-12 = trailing twelve months of actual income and expenses. It's the most important document in commercial real estate underwriting (5+ unit properties). For SFR purchases, ask for at least the last 12 months of bank statements showing actual rent collected and the actual property tax bill. The T-12 cuts through pro forma optimism and shows you what the property actually produces. If the seller won't provide it, that's a red flag.",
-  },
-  {
-    q: "Can I trust a pro forma's vacancy assumption?",
-    a: "Treat vacancy as an assumption to verify. Derive it from the property's collections and turnover history, comparable properties, lease expirations, current concessions, manager records, and a downside case. Property class alone does not establish a defensible vacancy percentage.",
-  },
-  {
-    q: "What expenses does the pro forma typically understate?",
-    a: "Common omissions include maintenance, component replacements, vacancy and concessions, management, current buyer insurance, post-sale taxes, owner-paid utilities, legal costs, and bad debt. Support each line with property records, current quotes or bids, applicable tax information, and explicit downside scenarios rather than universal percentages.",
-  },
-];
-
 export default function ProFormaPost() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${SLUG}`;
@@ -106,22 +83,12 @@ export default function ProFormaPost() {
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
         <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>

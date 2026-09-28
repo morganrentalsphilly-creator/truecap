@@ -492,8 +492,6 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         projection). Most DIY landlords end up using both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. TurboTenant operates rentals you own (listing, screening, leases, rent collection). TrueCap underwrites rentals you&apos;re buying. Most DIY landlords use both.",
   },
   {
     question: "Is TurboTenant really free?",
@@ -507,8 +505,6 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         the free tier is usable.
       </>
     ),
-    plainTextAnswer:
-      "Yes — TurboTenant&apos;s core features (listings, applications, ACH rent collection, basic lease) are free. Premium add-ons are ~$8-12/unit/month. Tenants pay screening + card fees. Most small landlords stay on free.",
   },
   {
     question: "Does TrueCap have rent collection or tenant screening?",
@@ -520,8 +516,6 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         Avail all specialize in those workflows.
       </>
     ),
-    plainTextAnswer:
-      "No, not planned. Rent collection is regulated payments (NACHA), tenant screening is FCRA-regulated. We don&apos;t build there. TurboTenant, RentRedi, and Avail specialize in those.",
   },
   {
     question: "Is TurboTenant or Avail better?",
@@ -534,8 +528,6 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         regardless.
       </>
     ),
-    plainTextAnswer:
-      "Close call. TurboTenant has stronger free tier; Avail has tighter listing distribution. Try both free tiers. TrueCap is upstream of both regardless.",
   },
   {
     question: "Can I afford TrueCap + TurboTenant?",
@@ -546,8 +538,6 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         and add the current rates for the units and features you actually need.
       </>
     ),
-    plainTextAnswer:
-      "The free tiers can cover portions of underwriting and operations. If you need paid features, compare both live pricing pages and add the current rates for the units and features you need.",
   },
 ];
 

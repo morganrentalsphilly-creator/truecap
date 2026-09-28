@@ -465,8 +465,6 @@ const AIRDNA_FAQ: FaqItem[] = [
         typically use both.
       </>
     ),
-    plainTextAnswer:
-      "No — AirDNA is STR market + revenue data. TrueCap is the underwriting calculator. AirDNA feeds revenue inputs; TrueCap runs cap rate / DSCR / cash flow on top. STR investors use both.",
   },
   {
     question: "AirDNA vs Mashvisor — which one for STR data?",
@@ -479,8 +477,6 @@ const AIRDNA_FAQ: FaqItem[] = [
         Mashvisor&apos;s broader scope wins.
       </>
     ),
-    plainTextAnswer:
-      "AirDNA is gold-standard for STR-specific data (ADR, occupancy, RevPAR). Mashvisor covers STR + LTR + broader market. STR-primary: AirDNA. LTR/STR toggle: Mashvisor.",
   },
   {
     question: "Does AirDNA do cap rate or DSCR calculations?",
@@ -491,11 +487,9 @@ const AIRDNA_FAQ: FaqItem[] = [
         spreadsheet) to compute cap rate, DSCR, and cash flow.
       </>
     ),
-    plainTextAnswer:
-      "No — AirDNA gives projected STR revenue. Plug that into TrueCap, DealCheck, or your spreadsheet to compute cap rate, DSCR, cash flow.",
   },
   {
-    question: "How accurate are AirDNA&apos;s revenue projections?",
+    question: "How accurate are AirDNA's revenue projections?",
     answer: (
       <>
         They&apos;re the industry standard but not perfect. AirDNA&apos;s
@@ -506,8 +500,6 @@ const AIRDNA_FAQ: FaqItem[] = [
         AirDNA&apos;s projection is 20% high?
       </>
     ),
-    plainTextAnswer:
-      "Industry standard but not perfect. Derived from real Airbnb + Vrbo data, but depends on comp match. Always run sensitivity (TrueCap Pro&apos;s grid stress-tests AirDNA&apos;s projection at -20% etc.).",
   },
   {
     question: "Can I use TrueCap free with AirDNA?",
@@ -519,8 +511,6 @@ const AIRDNA_FAQ: FaqItem[] = [
         don&apos;t need TrueCap Pro for that basic combined workflow.
       </>
     ),
-    plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow. Pull AirDNA&apos;s monthly revenue, override TrueCap&apos;s HUD rent field, run the analysis. Pro not required for the basic workflow.",
   },
 ];
 

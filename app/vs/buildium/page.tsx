@@ -474,8 +474,6 @@ const BUILDIUM_FAQ: FaqItem[] = [
         manager may use both at different stages.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. Buildium manages rentals after purchase; TrueCap underwrites potential acquisitions before purchase. A landlord or manager may use both.",
   },
   {
     question: "Is Buildium worth it for a small landlord?",
@@ -487,8 +485,6 @@ const BUILDIUM_FAQ: FaqItem[] = [
         with the alternatives that fit your portfolio.
       </>
     ),
-    plainTextAnswer:
-      "It depends on the operational workflow. Buildium publishes Essential, Growth, and Premium paid tiers plus a 14-day trial. Compare current pricing and included features with alternatives that fit your portfolio.",
   },
   {
     question: "Does Buildium underwrite deals?",
@@ -500,8 +496,6 @@ const BUILDIUM_FAQ: FaqItem[] = [
         or a spreadsheet.
       </>
     ),
-    plainTextAnswer:
-      "No. Buildium is purely operational — units, tenants, leases, accounting, vendors. No cap rate, DSCR, or cash flow modeling on acquisitions. Use TrueCap, DealCheck, or a spreadsheet for that.",
   },
   {
     question: "When should I upgrade from solo tools to Buildium?",
@@ -513,8 +507,6 @@ const BUILDIUM_FAQ: FaqItem[] = [
         compare current plans against your actual workflow.
       </>
     ),
-    plainTextAnswer:
-      "Consider a dedicated platform when tenant, lease, accounting, maintenance, payment, or owner-reporting work justifies its cost and implementation effort. There is no universal unit-count threshold.",
   },
   {
     question: "Buildium vs AppFolio — which one?",
@@ -526,8 +518,6 @@ const BUILDIUM_FAQ: FaqItem[] = [
         publishes tiered entry pricing without that comparison-page assumption.
       </>
     ),
-    plainTextAnswer:
-      "Compare current pricing, minimums, accounting, resident, owner, maintenance, support, and implementation features. AppFolio Core currently states a 50-unit minimum; Buildium publishes tiered entry pricing.",
   },
 ];
 

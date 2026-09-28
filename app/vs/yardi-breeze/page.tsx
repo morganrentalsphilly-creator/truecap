@@ -459,8 +459,6 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
         units typically use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Yardi Breeze operates rentals you own. TrueCap underwrites rentals you&apos;re considering. Landlords with 5-100 units use both.",
   },
   {
     question: "Yardi Breeze vs Buildium — which one?",
@@ -472,8 +470,6 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
         Pricing structures differ; demo both before committing.
       </>
     ),
-    plainTextAnswer:
-      "Close call. Yardi Breeze inherits Yardi&apos;s enterprise data quality at small-business pricing. Buildium has cleaner UX + larger ecosystem. Both serve 5-100 units. Demo both.",
   },
   {
     question: "Does Yardi Breeze have a free tier?",
@@ -485,8 +481,6 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
         (both free) are often more practical entry points.
       </>
     ),
-    plainTextAnswer:
-      "No — paid only with demo. ~$1-2/unit/month with $100 minimum (2026) means even 1 unit = $100/mo. For solo landlords &lt;50 units, TurboTenant or Avail (free) are more practical.",
   },
   {
     question: "Can Yardi Breeze underwrite new deals?",
@@ -497,8 +491,6 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
         DealCheck, or your spreadsheet.
       </>
     ),
-    plainTextAnswer:
-      "No — operational only. For pre-purchase underwriting use TrueCap, DealCheck, or a spreadsheet.",
   },
   {
     question: "When should I upgrade from TurboTenant to Yardi Breeze?",
@@ -509,8 +501,6 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
         that threshold, the $100/mo minimum at Yardi Breeze isn&apos;t worth it.
       </>
     ),
-    plainTextAnswer:
-      "Typical signal: 10+ units, owner reports needed for partners/LPs, outgrown TurboTenant&apos;s accounting. Below that, Yardi Breeze&apos;s $100/mo minimum isn&apos;t worth it.",
   },
 ];
 

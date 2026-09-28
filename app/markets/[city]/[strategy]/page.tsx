@@ -135,29 +135,6 @@ export default async function CityStrategyPage({
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `Does this page recommend ${combo.strategyLabel} in ${combo.cityName}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `No. This page gives you a strategy-specific verification checklist. It does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `What should I verify for a ${combo.cityName} ${combo.strategyLabel} scenario?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Verify the supported address, asking price, comparable rent evidence, parcel tax, insurance, condition, operating costs, legal eligibility, timeline, exit or refinance assumptions when applicable, and written financing terms.`,
-        },
-      },
-    ],
-  };
-
   const analyzerStrategy =
     combo.strategy === "brrrr" || combo.strategy === "house-hack"
       ? combo.strategy
@@ -167,7 +144,6 @@ export default async function CityStrategyPage({
     <div className="min-h-screen bg-background">
       <JsonLd data={webPageLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
       <Header />
 
       <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">

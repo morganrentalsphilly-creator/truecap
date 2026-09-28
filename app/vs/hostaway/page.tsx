@@ -464,8 +464,6 @@ const HOSTAWAY_FAQ: FaqItem[] = [
         purchase; the investor makes the decision. STR investors may use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Hostaway manages STRs you own. TrueCap underwrites whether to buy. STR investors use both.",
   },
   {
     question: "Hostaway vs Hostfully vs Guesty — which one?",
@@ -478,8 +476,6 @@ const HOSTAWAY_FAQ: FaqItem[] = [
         layer.
       </>
     ),
-    plainTextAnswer:
-      "Compare Hostaway, Hostfully, and Guesty on current operations features and pricing. Guesty publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Does TrueCap have STR-specific data?",
@@ -492,8 +488,6 @@ const HOSTAWAY_FAQ: FaqItem[] = [
         from there.
       </>
     ),
-    plainTextAnswer:
-      "Not natively — pre-fills HUD long-term rent. For STR-specific data (ADR, occupancy, RevPAR), use AirDNA or Mashvisor. Plug their projected monthly revenue into TrueCap&apos;s rent field and run the underwrite.",
   },
   {
     question: "Does Hostaway have a free tier?",
@@ -505,8 +499,6 @@ const HOSTAWAY_FAQ: FaqItem[] = [
         overkill — consider Lodgify or Smoobu first.
       </>
     ),
-    plainTextAnswer:
-      "No — paid only with demo. ~$10-15 per listing/mo + feature add-ons. For 1-2 STRs, often overkill — consider Lodgify or Smoobu first.",
   },
   {
     question: "Can TrueCap model both LTR and STR for the same property?",
@@ -518,8 +510,6 @@ const HOSTAWAY_FAQ: FaqItem[] = [
         / DSCR side-by-side and pick the strategy that fits.
       </>
     ),
-    plainTextAnswer:
-      "Yes — two separate analyses, different rent inputs. One with HUD FMR (LTR), one with STR projected revenue. Compare cap rate / cash flow / DSCR and pick the strategy.",
   },
 ];
 

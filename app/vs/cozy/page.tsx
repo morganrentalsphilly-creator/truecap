@@ -447,8 +447,6 @@ const COZY_FAQ: FaqItem[] = [
         ex-Cozy users found the migration painful and went elsewhere.
       </>
     ),
-    plainTextAnswer:
-      "Cozy.co was acquired by Apartments.com in 2018 and shut down June 2022. Users migrated to Apartments.com Rental Manager. Many found the migration painful and switched to TurboTenant, Avail, or RentRedi.",
   },
   {
     question: "Is TrueCap a Cozy alternative?",
@@ -460,11 +458,9 @@ const COZY_FAQ: FaqItem[] = [
         you&apos;ll want TurboTenant, Avail, or RentRedi.
       </>
     ),
-    plainTextAnswer:
-      "Only for the underwriting part. TrueCap calculates cap rate, DSCR, cash flow on prospective properties. Cozy never did that. For Cozy&apos;s actual core (listings, applications, rent collection), use TurboTenant, Avail, or RentRedi.",
   },
   {
-    question: "What&apos;s the best free Cozy alternative for rent collection?",
+    question: "What's the best free Cozy alternative for rent collection?",
     answer: (
       <>
         TurboTenant and Avail publish free operational features, while RentRedi
@@ -474,8 +470,6 @@ const COZY_FAQ: FaqItem[] = [
         replacement.
       </>
     ),
-    plainTextAnswer:
-      "TurboTenant and Avail publish free operational features, while RentRedi publishes flat-rate paid plans for unlimited properties and units. Compare current features and payment terms on each official pricing page before choosing a Cozy replacement.",
   },
   {
     question: "Did Apartments.com replace Cozy?",
@@ -488,8 +482,6 @@ const COZY_FAQ: FaqItem[] = [
         Avail are typically the next stops.
       </>
     ),
-    plainTextAnswer:
-      "Technically yes — Apartments.com Rental Manager kept the workflow. Many ex-Cozy users felt the UX was worse and the free tier more limited. Next stops: TurboTenant or Avail.",
   },
   {
     question: "Can I use TrueCap + a Cozy replacement together?",
@@ -501,8 +493,6 @@ const COZY_FAQ: FaqItem[] = [
         coverage and add an underwriting layer.
       </>
     ),
-    plainTextAnswer:
-      "Yes — one possible stack is TrueCap (free) for pre-purchase underwriting plus TurboTenant or Avail (free) for post-purchase operations. Together they cover much of Cozy's old free scope and add underwriting.",
   },
 ];
 

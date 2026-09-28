@@ -484,8 +484,6 @@ const BASELANE_FAQ: FaqItem[] = [
         both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Baselane is post-purchase banking + bookkeeping. TrueCap is pre-purchase underwriting. Most landlords use both.",
   },
   {
     question: "Is Baselane FDIC-insured?",
@@ -497,8 +495,6 @@ const BASELANE_FAQ: FaqItem[] = [
         themselves — they&apos;re a fintech with bank partners.
       </>
     ),
-    plainTextAnswer:
-      "Yes. Baselane partners with FDIC-insured banks (Thread Bank, Blue Ridge Bank as of 2026) for deposit insurance up to standard FDIC limits ($250k/depositor/bank).",
   },
   {
     question: "Should I use Baselane or Stessa?",
@@ -512,8 +508,6 @@ const BASELANE_FAQ: FaqItem[] = [
         Stessa works. Both have free tiers — try both.
       </>
     ),
-    plainTextAnswer:
-      "Baselane bundles banking + bookkeeping + rent collection. Stessa is bookkeeping + reporting (connect your own bank). Want dedicated business checking per property? Baselane. Already have banking? Stessa. Both have free tiers.",
   },
   {
     question: "Does TrueCap track actual expenses like Baselane?",
@@ -526,8 +520,6 @@ const BASELANE_FAQ: FaqItem[] = [
         underwriting focus.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap models projected expenses for underwriting (taxes, insurance, vacancy, mgmt, maintenance, capex). It doesn&apos;t connect to your bank for actuals. That&apos;s Baselane or Stessa territory.",
   },
   {
     question: "Can I share a TrueCap analysis with my CPA via Baselane?",
@@ -539,8 +531,6 @@ const BASELANE_FAQ: FaqItem[] = [
         your CPA&apos;s requested documentation.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. TrueCap generates a free read-only share link and includes PDFs with Pro. Provide it alongside Baselane's historical reports when your CPA requests that documentation.",
   },
 ];
 

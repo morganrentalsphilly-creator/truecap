@@ -57,29 +57,6 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const FAQS = [
-  {
-    q: "Why are off-market deals better than MLS listings?",
-    a: "Two reasons. (1) No bidding war — you're often the only buyer in the conversation, so you can negotiate price and terms without competing offers driving everything up. (2) Motivated seller psychology — investors who reach an off-market seller typically find someone dealing with tax problems, inheritance, divorce, relocation, or burnout, all of which create flexibility on price. The trade-off: off-market deal flow takes work to source, where MLS deals are handed to you.",
-  },
-  {
-    q: "How long does it take to find your first off-market deal?",
-    a: "If you start direct mail today, expect 3-6 months before your first solid lead and 6-12 months before your first closed deal. Driving for dollars + cold-calling can produce a deal in 2-3 months for an aggressive caller. Networking with wholesalers can produce a deal within 30 days if you're well-positioned. The slowest-but-most-reliable channel is direct mail; the fastest-but-noisiest is wholesaler relationships.",
-  },
-  {
-    q: "Are wholesale deals actually good?",
-    a: "Some are, most aren't. Wholesalers source distressed properties and assign the contract to an investor for a markup of $5-15k. The math: you're paying the wholesaler's fee on top of what they're paying the seller. Good wholesalers source genuinely distressed properties at 60-65% ARV; their markup leaves you with a 70-75% ARV entry — enough margin for a profitable BRRRR. Bad wholesalers source properties at 80% ARV, mark up 10%, and pitch you a 90% ARV 'deal' that doesn't pencil. Always run the math yourself; never trust the wholesaler's numbers.",
-  },
-  {
-    q: "Is direct mail still worth doing in 2026?",
-    a: "Yes, with caveats. Direct mail to absentee owners (out-of-state landlords) and tax-delinquent owners still produces solid response rates (0.5-2% typical). The competition is real — large investor funds also mail these lists — but consistent monthly campaigns over 6+ months still produce results. Costs: $0.45-0.90 per piece all-in. Budget $2-5k/month to source 1-3 deals per year.",
-  },
-  {
-    q: "What's the highest-ROI off-market source?",
-    a: "Networking with property managers. PMs know which of their owners are tired, behind on rent, dealing with capex headaches, or thinking about selling. Building 5-10 PM relationships in your target market produces a steady drip of pre-listing deal flow that competitors don't see. It's slow to build (3-6 months) but lasts for years and costs nothing.",
-  },
-];
-
 export default function OffMarketPost() {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${SLUG}`;
@@ -108,22 +85,12 @@ export default function OffMarketPost() {
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <JsonLd data={faqLd} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>
         <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>

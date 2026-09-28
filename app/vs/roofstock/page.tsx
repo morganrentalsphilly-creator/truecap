@@ -538,8 +538,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         property-specific diligence.
       </>
     ),
-    plainTextAnswer:
-      "Not directly. Roofstock's current individual-investor services vary by offering. TrueCap is a separate calculator for supported properties and manually entered assumptions. Neither replaces property-specific diligence.",
   },
   {
     question: "Are Roofstock listings actually good deals?",
@@ -552,8 +550,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         certify a property as a good or bad investment.
       </>
     ),
-    plainTextAnswer:
-      "That cannot be determined from the platform name. Verify property-specific rent, expenses, financing, title, inspection, and local rules, then sensitivity-test a range. TrueCap does not certify an investment.",
   },
   {
     question: "What is Roofstock's fee compared to using TrueCap?",
@@ -565,8 +561,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         temporarily unavailable. Its live pricing page is the source of truth.
       </>
     ),
-    plainTextAnswer:
-      "Roofstock's offering and transaction terms can change; confirm current fees in the relevant agreement and official site. TrueCap has a free core and paid Pro plans; see live pricing.",
   },
   {
     question: "Can TrueCap analyze any Roofstock listing?",
@@ -578,8 +572,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         local input. Replace them with property-specific evidence.
       </>
     ),
-    plainTextAnswer:
-      "For supported U.S. addresses, paste the address into TrueCap; otherwise enter inputs manually. HUD rent and FRED rate are editable screening benchmarks, while property tax is a manual local input. Replace each with property-specific evidence.",
   },
   {
     question: "Should I trust the Roofstock pro-forma cap rate?",
@@ -592,8 +584,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         entered.
       </>
     ),
-    plainTextAnswer:
-      "Recalculate the cap rate from documented inputs. Confirm how every income and expense line is defined, replace assumptions with current evidence, and test a range. TrueCap is also only as reliable as its inputs.",
   },
   {
     question: "When should I skip Roofstock and find deals elsewhere?",
@@ -606,8 +596,6 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
         physical diligence.
       </>
     ),
-    plainTextAnswer:
-      "Compare Roofstock's current service, availability, agreements, fees, diligence materials, providers, and support with direct sourcing and alternatives. Decide based on the specific transaction and your diligence capacity.",
   },
 ];
 

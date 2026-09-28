@@ -458,8 +458,6 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
         underwriting (does this property cash flow?). They don&apos;t compete.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages + jobs. QuickBooks is general accounting (books, bills, transactions). TrueCap is pre-purchase underwriting (does this property cash flow?). They don&apos;t compete.",
   },
   {
     question: "Should I use QuickBooks for my rentals?",
@@ -473,8 +471,6 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
         property, custom Schedule E mapping).
       </>
     ),
-    plainTextAnswer:
-      "Probably not — unless already using QuickBooks for other businesses or CPA insists. Rental tools (Stessa, Baselane, Landlord Studio) are less work to set up, have rental-categorized expense buckets out of the box, and auto-generate Schedule E.",
   },
   {
     question: "QuickBooks Self-Employed vs Online for rentals?",
@@ -486,8 +482,6 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
         again, rental-specific tools usually require less ongoing maintenance.
       </>
     ),
-    plainTextAnswer:
-      "Self-Employed is too thin (designed for freelancers, no multi-property tracking). Online works with manual class setup per property + custom Schedule E mapping, but rental-specific tools usually require less maintenance.",
   },
   {
     question: "Does TrueCap connect to QuickBooks?",
@@ -500,11 +494,9 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
         the annual review.
       </>
     ),
-    plainTextAnswer:
-      "No — TrueCap is forward-looking (underwriting projections). No accounting sync. For actuals tracking after closing, use Stessa or Baselane (connect to bank feeds), then re-run TrueCap with actual numbers for the annual review.",
   },
   {
-    question: "What&apos;s the cheapest rental accounting setup?",
+    question: "What's the cheapest rental accounting setup?",
     answer: (
       <>
         Stessa publishes a free Essentials plan with paid Manage and Pro tiers;
@@ -514,8 +506,6 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
         still fit landlords with non-rental businesses.
       </>
     ),
-    plainTextAnswer:
-      "Stessa publishes free Essentials plus paid Manage and Pro, with Schedule E on the current paid tiers. Baselane also publishes a free entry point with banking and rent collection. Compare live limits and fees with QuickBooks.",
   },
 ];
 

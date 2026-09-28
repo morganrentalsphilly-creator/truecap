@@ -460,8 +460,6 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         the decision. STR investors may use both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Hostfully manages an STR you own. TrueCap underwrites whether to buy. STR investors use both.",
   },
   {
     question: "Can TrueCap model short-term rental revenue?",
@@ -474,8 +472,6 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         data — for that you&apos;d use those tools alongside.
       </>
     ),
-    plainTextAnswer:
-      "Yes — every input is editable. Plug in expected monthly STR revenue (gross ÷ 12, discounted for vacancy/cleaning) as the rent value, then run the full underwrite. TrueCap doesn&apos;t auto-pull AirDNA or Mashvisor STR data.",
   },
   {
     question: "Hostfully vs Guesty — which one?",
@@ -487,8 +483,6 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         for the portfolio; TrueCap remains the pre-purchase underwriting layer.
       </>
     ),
-    plainTextAnswer:
-      "Both are STR property-management platforms. Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Compare current features, quotes, and terms; TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Does TrueCap support the STR tax loophole?",
@@ -500,8 +494,6 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         taxpayer-specific model for those decisions.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap does not currently expose a tax-specific module or determine STR eligibility, material participation, REPS, cost segregation, or bonus depreciation. Use a qualified tax professional.",
   },
   {
     question: "How much does Hostfully cost?",
@@ -514,8 +506,6 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         Smoobu, or just direct Airbnb tools until they scale.
       </>
     ),
-    plainTextAnswer:
-      "Hostfully starts ~$109/mo (2026), scaling with property count. No free tier, just a trial. For 1-2 STRs, heavy cost; solo hosts often use Lodgify, Smoobu, or direct Airbnb tools until scaling.",
   },
 ];
 

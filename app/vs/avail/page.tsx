@@ -501,8 +501,6 @@ const AVAIL_FAQ: FaqItem[] = [
         Deal score. Most independent landlords end up using both.
       </>
     ),
-    plainTextAnswer:
-      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Deal score). Most independent landlords use both.",
   },
   {
     question: "Can TrueCap do what Avail's listing or screening does?",
@@ -514,8 +512,6 @@ const AVAIL_FAQ: FaqItem[] = [
         that. TrueCap is explicitly the pre-purchase underwriting layer.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap doesn't distribute listings, pull credit reports, or store applications. Those are FCRA-regulated workflows. Avail is the right tool for that. TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Is Avail free? Is TrueCap?",
@@ -530,8 +526,6 @@ const AVAIL_FAQ: FaqItem[] = [
         see TrueCap&apos;s live pricing page for current terms.
       </>
     ),
-    plainTextAnswer:
-      "Avail publishes free and paid operations plans. TrueCap free covers core underwriting, while Pro adds advanced analysis and included PDFs. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Does Avail's calculator replace TrueCap?",
@@ -545,8 +539,6 @@ const AVAIL_FAQ: FaqItem[] = [
         considering.
       </>
     ),
-    plainTextAnswer:
-      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Deal score. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
   },
   {
     question: "Avail is owned by Realtor.com — does that matter?",
@@ -560,8 +552,6 @@ const AVAIL_FAQ: FaqItem[] = [
         giving you a good number on it).
       </>
     ),
-    plainTextAnswer:
-      "Realtor.com acquired Avail in 2020 — product has continued. Listings distribute well through Realtor.com's reach. TrueCap is independent — no listing-side incentive, we don't benefit from any deal happening, only from giving you a good number on it.",
   },
 ];
 

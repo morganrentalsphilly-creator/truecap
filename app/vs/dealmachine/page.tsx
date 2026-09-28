@@ -478,8 +478,6 @@ const DEALMACHINE_FAQ: FaqItem[] = [
         active off-market buyers use both.
       </>
     ),
-    plainTextAnswer:
-      "Not really. DealMachine finds leads via mobile driving for dollars + skip-tracing. TrueCap underwrites a specific property. Active off-market buyers use both.",
   },
   {
     question: "DealMachine vs PropStream — which one?",
@@ -492,8 +490,6 @@ const DEALMACHINE_FAQ: FaqItem[] = [
         PropStream. Some wholesalers run both.
       </>
     ),
-    plainTextAnswer:
-      "DealMachine is mobile-first and best for driving for dollars. PropStream is data-heavy with deeper public records and richer list filters. Road-warriors lean DealMachine; large mail campaigns lean PropStream.",
   },
   {
     question: "Is DealMachine worth $59-99/month?",
@@ -506,8 +502,6 @@ const DEALMACHINE_FAQ: FaqItem[] = [
         listed on its live pricing page.
       </>
     ),
-    plainTextAnswer:
-      "It depends on volume. DealMachine may fit frequent driving-for-dollars and direct-mail campaigns. For occasional listed acquisitions, compare the workflow against your actual needs. TrueCap's current underwriting options are on its live pricing page.",
   },
   {
     question: "Does DealMachine do underwriting?",
@@ -519,8 +513,6 @@ const DEALMACHINE_FAQ: FaqItem[] = [
         after DealMachine finds you a deal.
       </>
     ),
-    plainTextAnswer:
-      "No — leads + contact only, no cap rate / DSCR / cash flow modeling. Use TrueCap, DealCheck, or a spreadsheet after DealMachine finds a deal.",
   },
   {
     question: "Can I use DealMachine + TrueCap on the same property?",
@@ -532,8 +524,6 @@ const DEALMACHINE_FAQ: FaqItem[] = [
         record your own decision before any transaction step.
       </>
     ),
-    plainTextAnswer:
-      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under your targets; verify the material inputs and record your own decision.",
   },
 ];
 

@@ -440,8 +440,6 @@ const REONOMY_FAQ: FaqItem[] = [
         don&apos;t overlap meaningfully.
       </>
     ),
-    plainTextAnswer:
-      "No — different asset classes. Reonomy is commercial RE intelligence. TrueCap is residential rental underwriting. They don&apos;t overlap meaningfully.",
   },
   {
     question: "Reonomy vs PropStream — which one?",
@@ -454,8 +452,6 @@ const REONOMY_FAQ: FaqItem[] = [
         off-market deals, PropStream.
       </>
     ),
-    plainTextAnswer:
-      "Different asset classes. Reonomy: commercial RE. PropStream: residential (SFR, small MF, distressed sellers). CRE deals: Reonomy. Residential off-market: PropStream.",
   },
   {
     question: "Is Reonomy enterprise-only?",
@@ -468,8 +464,6 @@ const REONOMY_FAQ: FaqItem[] = [
         isn&apos;t justified.
       </>
     ),
-    plainTextAnswer:
-      "Effectively yes. Custom enterprise pricing typically $300+/mo+ depending on tier + team. Serves CRE brokers, lenders, institutional investors. For solo residential investors, irrelevant + overpriced.",
   },
   {
     question: "Does Reonomy do underwriting?",
@@ -481,8 +475,6 @@ const REONOMY_FAQ: FaqItem[] = [
         underwrite, or a custom institutional process).
       </>
     ),
-    plainTextAnswer:
-      "No — data intelligence only. Pull property data + owner contact + debt history, then use as input to your own underwriting (Argus, Excel CRE, or custom institutional process).",
   },
   {
     question: "Should solo investors care about Reonomy?",
@@ -495,8 +487,6 @@ const REONOMY_FAQ: FaqItem[] = [
         budgets.
       </>
     ),
-    plainTextAnswer:
-      "Only if moving into CRE. For residential investing, Reonomy isn&apos;t relevant — data doesn&apos;t cover SFR ownership like PropStream / BatchLeads, and price is enterprise-built.",
   },
 ];
 

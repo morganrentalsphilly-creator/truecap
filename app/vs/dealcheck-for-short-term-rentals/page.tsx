@@ -69,8 +69,6 @@ const NICHE_FAQ: FaqItem[] = [
         Both work. TrueCap models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow for Airbnbs calculator and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
       </>
     ),
-    plainTextAnswer:
-      "Both work. TrueCap uses blended ADR and occupancy inputs; seasonal cases require separate saved scenarios and Pro for side-by-side comparison. DealCheck Starter includes its Airbnb rental calculator and professional reports, subject to caps. Neither determines STR-loophole eligibility.",
   },
   {
     question: "Can TrueCap model AirDNA revenue projections?",
@@ -79,8 +77,6 @@ const NICHE_FAQ: FaqItem[] = [
         Yes — every input in TrueCap is editable. Pull AirDNA&apos;s projected monthly revenue (annual ÷ 12, discounted for vacancy + cleaning + STR opex), plug it into the rent field, run the full cap rate / DSCR / cash flow analysis. Same approach works in DealCheck.
       </>
     ),
-    plainTextAnswer:
-      "Yes — every input editable. Pull AirDNA&apos;s projected monthly revenue (annual ÷ 12, discounted for vacancy + cleaning + STR opex), plug into rent field. Same approach in DealCheck.",
   },
   {
     question: "Does TrueCap support the STR tax loophole?",
@@ -92,8 +88,6 @@ const NICHE_FAQ: FaqItem[] = [
         qualified tax professional&apos;s taxpayer-specific model for those items.
       </>
     ),
-    plainTextAnswer:
-      "No. TrueCap does not currently expose a tax-specific module, determine STR eligibility, or model cost-segregation components and bonus depreciation. Use a qualified tax professional for taxpayer-specific modeling.",
   },
   {
     question: "What management rate should I use for STR analysis?",
@@ -102,8 +96,6 @@ const NICHE_FAQ: FaqItem[] = [
         Use a current quote for the property and service scope. STR management fees vary by market, channel coverage, guest communication, cleaning coordination, and included services. If you self-manage, still model software, labor, and coordination costs. TrueCap&apos;s management field is editable.
       </>
     ),
-    plainTextAnswer:
-      "Use a current property-specific quote. STR management fees vary by market and service scope. If self-managing, still model software, labor, and coordination costs. TrueCap's management field is editable.",
   },
   {
     question: "Can I run LTR and STR scenarios on the same property?",
@@ -112,8 +104,6 @@ const NICHE_FAQ: FaqItem[] = [
         Yes. Save one scenario with the editable HUD long-term-rent benchmark and another with your independently verified STR revenue assumption. Pro can compare saved deals side-by-side. Review cap rate, cash flow, DSCR, expenses, and sensitivity together rather than treating one metric as the answer.
       </>
     ),
-    plainTextAnswer:
-      "Yes. Save separate LTR and STR scenarios using independently verified inputs. Pro can compare saved deals side-by-side. Review returns, expenses, financing, and sensitivity together.",
   },
 ];
 

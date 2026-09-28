@@ -134,7 +134,10 @@ describe("trust-language guards", () => {
     expect(brrrr).toContain(
       "meeting one threshold does not guarantee approval",
     );
-    expect(refinance).toContain("Seasoning and the eligible value basis vary");
+    // F4 removed this post's FAQPage JSON-LD (no visible FAQ carried it), and
+    // with it the only copy of "Seasoning and the eligible value basis vary".
+    // The visible hedge says the same thing:
+    expect(refinance.replace(/\s+/g, " ")).toContain("Verify current written pricing, leverage, seasoning, value basis, appraisal");
     expect(cashOutHeloc).toContain("There is no universal maximum");
     expect(hardMoney).toContain("not a loan quote or approval");
     expect(dti).toContain("one illustration, not a universal lender rule");
@@ -259,8 +262,11 @@ describe("trust-language guards", () => {
     expect(cityStrategies).not.toMatch(
       /Cincinnati appraisals modestly under-comp/i,
     );
+    // F4 removed the strategy pages' FAQPage JSON-LD, which carried "does not
+    // publish an investment recommendation…" in markup no visitor saw. The
+    // page's own description says it instead:
     expect(cityStrategyPage).toContain(
-      "does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome",
+      "TrueCap doesn't publish a market range or neighborhood recommendation for this city.",
     );
     expect(cityStrategyPage).toContain(
       "TrueCap does not publish a market range or neighborhood pick for this city",

@@ -494,8 +494,6 @@ const BRICKED_FAQ: FaqItem[] = [
         returns, TrueCap supports that workflow — and it&apos;s free to start.
       </>
     ),
-    plainTextAnswer:
-      "For rental investors yes; for wholesalers not really. Bricked is AI valuation (comps, ARV, repairs) for volume cash offers. TrueCap screens stabilized rental assumptions with cash flow, DSCR, sensitivity, and projections. Free to start.",
   },
   {
     question: "Does Bricked calculate cash flow or DSCR?",
@@ -508,8 +506,6 @@ const BRICKED_FAQ: FaqItem[] = [
         its scope. That&apos;s the half TrueCap covers.
       </>
     ),
-    plainTextAnswer:
-      "No. Bricked produces comps, ARV, repair estimates, and an offer price. It doesn't model rental income, expenses, financing, DSCR, cap rate, taxes, or projections — that's the half TrueCap covers.",
   },
   {
     question: "How does Bricked's pricing compare to TrueCap's?",
@@ -524,8 +520,6 @@ const BRICKED_FAQ: FaqItem[] = [
         See TrueCap&apos;s live pricing page for current rates and terms.
       </>
     ),
-    plainTextAnswer:
-      "Bricked publishes metered comp plans and a trial. TrueCap has unlimited free core analyses and paid Pro with published limits. Check both live pricing pages for current rates and terms.",
   },
   {
     question:
@@ -542,8 +536,6 @@ const BRICKED_FAQ: FaqItem[] = [
         the rehab.
       </>
     ),
-    plainTextAnswer:
-      "For precision, likely yes — Bricked uses ZIP-localized material + labor costs; TrueCap's rehab estimator uses sq-ft defaults for quick budgeting inside a hold analysis. Use Bricked's number in TrueCap to see what the deal earns after rehab.",
   },
   {
     question: "I'm a fix-and-flipper — which should I use?",
@@ -558,8 +550,6 @@ const BRICKED_FAQ: FaqItem[] = [
         decision you need.
       </>
     ),
-    plainTextAnswer:
-      "Bricked focuses on acquisition and comp workflows. TrueCap currently supports the stabilized rental screen but not an integrated flip or BRRRR lifecycle model. Use a complete project ledger for the project cash flows.",
   },
 ];
 

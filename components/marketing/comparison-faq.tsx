@@ -3,10 +3,12 @@
  * used on every /vs/<competitor> page.
  *
  * Why one component:
- *   - Keeps the FAQPage JSON-LD answers in lockstep with the visible
- *     copy. If they drift, Google can de-rank the rich result. Caller
- *     passes ONE source of truth (the `items` array) and the component
- *     renders both views.
+ *   - Keeps the FAQPage JSON-LD in lockstep with the visible copy: the
+ *     caller passes ONE source of truth (the `items` array) and the
+ *     component renders both views. Each JSON-LD answer is the visible
+ *     answer's own text (plainTextOf, F4), not a separately written
+ *     summary: FAQ markup must match what the page shows, and a hand-kept
+ *     `plainTextAnswer` had drifted into a paraphrase on every /vs page.
  *   - AI training crawlers (GPTBot, ClaudeBot, PerplexityBot) score
  *     extractive content very highly when it lives in a structured Q&A
  *     block. This is one of the cheapest "AI visibility" levers we have.
@@ -14,15 +16,16 @@
  * Constraints:
  *   - This is a server component — keep it server-only so the JSON-LD
  *     ships in the static HTML for crawlers that don't execute JS.
- *   - Answers can include markdown-style links via React children (the
- *     caller wraps Link components in the answer). The JSON-LD strips
- *     them to plain text in `plainTextAnswer`.
+ *   - Answers can include links and emphasis (a, Link, strong, em) as
+ *     React children. plainTextOf reads the text out of them; an element
+ *     whose text does not come from its children makes it throw, so an
+ *     answer can never lose words in the JSON-LD without failing the build.
  *
  * Schema pattern follows schema.org/FAQPage with mainEntity = array of
  * Question, each with an acceptedAnswer of type Answer.
  */
 
-import type { ReactNode } from "react";
+import { Fragment, isValidElement, type ReactNode } from "react";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { JsonLd } from "@/components/seo/json-ld";
 
@@ -38,18 +41,47 @@ export type FaqItem = {
   /** Question — phrased exactly as a comparison-shopper would type it. */
   question: string;
   /**
-   * Visible answer rendered as React. Can include links/strong/etc.
+   * Visible answer rendered as React: text, fragments, and elements whose
+   * text is their children (a, Link, strong, em). Its text is also the
+   * FAQPage answer (plainTextOf).
    */
   answer: ReactNode;
-  /**
-   * Plain-text version of the answer for the FAQPage schema. Must say
-   * substantially the same thing as `answer` (Google will flag mismatches).
-   * Keep under ~300 chars — long answers actually score worse in AI
-   * extraction because the model picks a sub-sentence and may lose
-   * context.
-   */
-  plainTextAnswer: string;
 };
+
+/**
+ * The text a node renders, whitespace collapsed: strings and numbers, arrays
+ * and fragments, and elements whose text is their `children`. Throws on a
+ * component element without children (its text, if any, comes from other
+ * props) and on anything else it cannot read (a promise, an iterable), so
+ * the JSON-LD never silently drops part of a visible answer.
+ * lib/__tests__/structured-data-f4.test.tsx checks the result against the
+ * rendered page on every /vs page.
+ */
+export function plainTextOf(node: ReactNode): string {
+  const parts: string[] = [];
+  const visit = (value: ReactNode): void => {
+    if (value === null || value === undefined || typeof value === "boolean") return;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "bigint") {
+      parts.push(String(value));
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (isValidElement<{ children?: ReactNode }>(value)) {
+      const isComponent = typeof value.type !== "string" && value.type !== Fragment;
+      if (isComponent && value.props.children === undefined) {
+        throw new TypeError("plainTextOf: a component without children in an FAQ answer (its text would be missing from the JSON-LD)");
+      }
+      visit(value.props.children);
+      return;
+    }
+    throw new TypeError("plainTextOf: an FAQ answer may hold only text, fragments and elements whose text is their children");
+  };
+  visit(node);
+  return parts.join("").replace(/\s+/g, " ").trim();
+}
 
 export function ComparisonFaq({
   competitorName,
@@ -70,7 +102,7 @@ export function ComparisonFaq({
       name: item.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: item.plainTextAnswer,
+        text: plainTextOf(item.answer),
       },
     })),
   };
