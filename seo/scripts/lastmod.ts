@@ -111,7 +111,9 @@ export function bumpUrls(plan: { urls?: unknown; lastmodUrls?: unknown }): strin
 export type SourceSpec =
   | { file: string; kind: "file" }
   | { file: string; kind: "decls"; names: readonly string[] }
-  | ({ file: string; kind: "entry"; container: string; slug: string } & EntryFields);
+  | ({ file: string; kind: "entry"; container: string; slug: string } & EntryFields)
+  /** One entry of a JSON dataset (F8's content/seo/*-facts.json): the value at `path`, minus `omit` keys at any depth. */
+  | { file: string; kind: "json"; path: readonly string[]; omit?: readonly string[] };
 
 const LANDING_SECTIONS = "components/marketing/landing-sections.tsx";
 
@@ -166,7 +168,13 @@ export function sourcesFor(urlPath: string, fileExists: (file: string) => boolea
   m = /^\/glossary\/([^/]+)$/.exec(urlPath);
   if (m) return [{ file: "lib/glossary.ts", kind: "entry", container: "GLOSSARY", slug: m[1], fields: GLOSSARY_FIELDS }];
   m = /^\/states\/([^/]+)$/.exec(urlPath);
-  if (m) return [{ file: "lib/states.ts", kind: "entry", container: "STATES", slug: m[1], fields: STATE_FIELDS }];
+  // F8: a state page renders its sourced facts from content/seo/state-facts.json.
+  if (m) {
+    return [
+      { file: "lib/states.ts", kind: "entry", container: "STATES", slug: m[1], fields: STATE_FIELDS },
+      { file: "content/seo/state-facts.json", kind: "json", path: ["states", m[1]], omit: ["retrievedAt"] },
+    ];
+  }
   m = /^\/markets\/([^/]+)$/.exec(urlPath);
   if (m) {
     // A market page is its HUD data (F8: the FMR area record too; the day a
@@ -176,6 +184,8 @@ export function sourcesFor(urlPath: string, fileExists: (file: string) => boolea
       { file: "lib/markets/hud-rents.ts", kind: "entry", container: "HUD_RENTS", slug: m[1], omit: ["year", "retrievedAt"] },
       { file: "lib/markets/hud-fmr-areas.ts", kind: "entry", container: "HUD_FMR_AREAS", slug: m[1], omit: ["year"] },
       { file: "lib/markets/safmr-rents.ts", kind: "entry", container: "SAFMR_RENTS", slug: m[1], omit: ["year"] },
+      // The loop's seo-market-enrich facts for this city (F8).
+      { file: "content/seo/market-facts.json", kind: "json", path: ["markets", m[1]], omit: ["retrievedAt"] },
     ];
     if (fileExists(`app/markets/${m[1]}/page.tsx`)) return [{ file: `app/markets/${m[1]}/page.tsx`, kind: "file" }, ...hud];
     return [{ file: "lib/markets/cities.ts", kind: "entry", container: "MARKET_CITIES", slug: m[1], fields: MARKET_CITY_FIELDS }, ...hud];
@@ -308,6 +318,7 @@ class History {
   /** The signature parts one source contributes at one blob. */
   partsFor(spec: SourceSpec, blobSha: string | null): string[] {
     if (blobSha === null) return [];
+    if (spec.kind === "json") return jsonEntryParts(this.blob(blobSha), spec.path, spec.omit);
     if (spec.kind === "entry") {
       const key = `${blobSha}|entry|${spec.container}|${(spec.fields ?? []).join(",")}|${(spec.omit ?? []).join(",")}`;
       let map = this.parts.get(key) as Map<string, string> | undefined;
@@ -330,6 +341,7 @@ class History {
   /** Readable content tokens one source contributes at one blob (evidence only; not cached). */
   tokensFor(spec: SourceSpec, blobSha: string | null): string[] {
     if (blobSha === null) return [];
+    if (spec.kind === "json") return jsonEntryParts(this.blob(blobSha), spec.path, spec.omit);
     if (spec.kind === "entry") {
       return signatureLib().entryTokens(spec.file, this.blob(blobSha), spec.container, { fields: spec.fields, omit: spec.omit }).get(spec.slug) ?? [];
     }
@@ -364,6 +376,36 @@ class History {
     }
     return out;
   }
+}
+
+/**
+ * A JSON dataset entry as signature parts: the value at `path`, keys sorted,
+ * `omit` keys dropped at any depth (a retrieval day is not content). Empty
+ * when the file does not parse or the entry is absent.
+ */
+export function jsonEntryParts(text: string, path: readonly string[], omit: readonly string[] = []): string[] {
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    return [];
+  }
+  for (const key of path) value = value !== null && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined;
+  if (value === undefined) return [];
+  const drop = new Set(omit);
+  const canonical = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(canonical);
+    if (v !== null && typeof v === "object") {
+      return Object.fromEntries(
+        Object.keys(v as Record<string, unknown>)
+          .filter((k) => !drop.has(k))
+          .sort()
+          .map((k) => [k, canonical((v as Record<string, unknown>)[k])]),
+      );
+    }
+    return v;
+  };
+  return [`json:${JSON.stringify(canonical(value))}`];
 }
 
 function digest(parts: string[]): string {
@@ -700,6 +742,10 @@ async function selfTest(): Promise<void> {
   check(sweepProblems(["af6211a", "af6211"], ["af6211a1", "af6211a2"]).length === 2, "an ambiguous or short entry is an error");
   check(sweepProblems([""], reach).length === 1, "an empty entry (it would skip every commit) is an error");
   check(hasSweepTrailer("feat: x\n\nbody\n\nLastmod-Sweep: true\nCo-Authored-By: a <b@c>"), "a trailer marks a sweep");
+  const facts = (v: number, day: string) => JSON.stringify({ states: { ohio: { tax: { value: v, source: { url: "https://x.gov", retrievedAt: day } } } } });
+  check(jsonEntryParts(facts(1, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join() === jsonEntryParts(facts(1, "2026-09-27"), ["states", "ohio"], ["retrievedAt"]).join(), "a re-fetch day alone is not content");
+  check(jsonEntryParts(facts(1, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join() !== jsonEntryParts(facts(2, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join(), "a changed value is content");
+  check(jsonEntryParts(facts(1, "x"), ["states", "iowa"]).length === 0 && jsonEntryParts("{", ["states"]).length === 0, "absent entry or bad JSON contributes nothing");
   check(!hasSweepTrailer("feat: x\n\nLastmod-Sweep: false") && !hasSweepTrailer("feat: x mentions Lastmod-Sweep: true inline"), "only an exact trailer line counts");
   check(sweepProblems(["B9EBD44"], reach).length === 1, "an uppercase entry (it never matches git's lowercase SHAs) is an error");
   for (const s of loadConfig().sweepCommits.shas) check(SWEEP_SHA_RE.test(s), `seo/config.json sweepCommits entry "${s}" is a 7-40 character lowercase hex SHA`);
@@ -707,7 +753,8 @@ async function selfTest(): Promise<void> {
   // Sources.
   const none = (): boolean => false;
   check(sourcesFor("/glossary/cap-rate", none)?.[0].kind === "entry", "glossary terms are data entries");
-  check(sourcesFor("/markets/erie", none)?.length === 4, "a market is its city, HUD, FMR-area and SAFMR entries");
+  check(sourcesFor("/markets/erie", none)?.length === 5, "a market is its city, HUD, FMR-area, SAFMR and market-facts entries");
+  check(sourcesFor("/states/ohio", none)?.some((x) => x.file === "content/seo/state-facts.json") === true, "a state page includes its sourced facts");
   check(sourcesFor("/markets/dallas", (f) => f === "app/markets/dallas/page.tsx")?.[0].file === "app/markets/dallas/page.tsx", "a bespoke metro is its page plus its HUD entries");
   check(sourcesFor("/blog", none)?.some((s) => s.file === "lib/blog-posts.ts") === true, "/blog includes its registry");
   check(sourcesFor("/about", none)?.some((s) => s.file === "lib/author.ts") === true, "/about includes the author bio it renders");
