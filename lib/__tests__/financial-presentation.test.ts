@@ -10,7 +10,9 @@ import {
 
 const CASH_DSCR_SURFACES = [
   "app/blog/cap-rate-vs-cash-on-cash-vs-dscr/page.tsx",
-  "app/blog/what-is-a-good-dscr/page.tsx",
+  // The canonical DSCR guide absorbed /blog/what-is-a-good-dscr (2026-09-28)
+  // and carries its cash-purchase FAQ.
+  "app/blog/how-to-calculate-dscr/page.tsx",
   "app/changelog/page.tsx",
   "app/dashboard/saved-analyses/[id]/page.tsx",
   "app/methodology/page.tsx",

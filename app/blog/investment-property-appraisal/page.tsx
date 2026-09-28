@@ -264,7 +264,7 @@ export default function InvestmentPropertyAppraisalPost() {
             <p>
               On a{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR loan

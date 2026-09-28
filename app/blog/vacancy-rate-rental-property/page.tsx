@@ -317,7 +317,7 @@ export default function VacancyRatePost() {
           <p>
             Here&apos;s the part that surprises investors using{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loans

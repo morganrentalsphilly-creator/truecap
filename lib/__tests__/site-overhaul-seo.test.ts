@@ -37,7 +37,7 @@ describe("SEO contract", () => {
     expect(tool.at(-1)).toEqual({ href: "/analyze", label: "Analyze a deal free", kind: "analyzer" });
     const vs = getRelatedContent({ kind: "vs", slug: "dealcheck" });
     expect(vs.map((l) => l.href)).toEqual(["/pricing", "/analyze?sample=1", "/analyze"]);
-    const blog = getRelatedContent({ kind: "blog", slug: "what-is-a-good-dscr", title: "What is a good DSCR?" });
+    const blog = getRelatedContent({ kind: "blog", slug: "how-to-calculate-dscr", title: "How to calculate DSCR" });
     expect(blog.filter((l) => l.kind === "tool").length).toBeLessThanOrEqual(1);
     expect(blog.some((l) => l.kind === "analyzer")).toBe(true);
   });

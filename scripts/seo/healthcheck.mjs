@@ -185,15 +185,29 @@ const HISTORICAL_TOOL_REDIRECTS = {
   "/tools/50-percent-rule-calculator": "/blog/50-percent-rule-rentals",
 };
 
+/**
+ * Blog posts merged into a canonical post (next.config.mjs redirects()). They
+ * must always answer a single-hop 308 to a live 200; a 404 means the redirect
+ * was lost and the old URL's links went with it.
+ */
+const CONSOLIDATED_POST_REDIRECTS = {
+  "/blog/what-is-a-good-dscr": "/blog/how-to-calculate-dscr",
+  "/blog/dscr-loans-explained": "/blog/how-to-calculate-dscr",
+};
+
 /** Legacy routes that must answer a single-hop 308, not a temporary redirect. */
 const PERMANENT_REDIRECTS = {
   "/compare": "/dashboard/compare",
   "/saved-analyses": "/dashboard/saved-analyses",
   "/templates": "/dashboard/templates",
   ...HISTORICAL_TOOL_REDIRECTS,
+  ...CONSOLIDATED_POST_REDIRECTS,
 };
 const HISTORICAL_REDIRECT_PATHS = new Set(
   Object.keys(HISTORICAL_TOOL_REDIRECTS),
+);
+const CONSOLIDATED_POST_PATHS = new Set(
+  Object.keys(CONSOLIDATED_POST_REDIRECTS),
 );
 const REDIRECT_SOURCE_PATHS = new Set(Object.keys(PERMANENT_REDIRECTS));
 
@@ -742,16 +756,18 @@ for (const [route, expectedDestination] of Object.entries(
   try {
     const response = await fetch(`${BASE}${route}`, { redirect: "manual" });
     const historicalTool = HISTORICAL_REDIRECT_PATHS.has(route);
+    const consolidatedPost = CONSOLIDATED_POST_PATHS.has(route);
 
     // A historical tool returning 200 has passed its release gate and is now
     // intentionally live. While unreleased, its fallback must be the exact
-    // single-hop 308 below. Removed legacy dashboard aliases may return 404.
+    // single-hop 308 below. Removed legacy dashboard aliases may return 404;
+    // a consolidated post may not.
     if (historicalTool && response.status === 200) continue;
-    if (!historicalTool && response.status === 404) continue;
+    if (!historicalTool && !consolidatedPost && response.status === 404) continue;
 
     if (response.status !== 308) {
       add(
-        historicalTool ? "high" : "medium",
+        historicalTool || consolidatedPost ? "high" : "medium",
         "redirect permanence",
         `${route} returned ${response.status}; expected a permanent 308 to ${expectedDestination}.`,
       );
@@ -776,7 +792,7 @@ for (const [route, expectedDestination] of Object.entries(
       continue;
     }
 
-    if (historicalTool) {
+    if (historicalTool || consolidatedPost) {
       const destination = await fetch(`${BASE}${expectedDestination}`, {
         redirect: "manual",
       });

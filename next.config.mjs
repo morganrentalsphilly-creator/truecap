@@ -123,6 +123,21 @@ const nextConfig = {
       // guarantee is configured — the page fails closed). Send that traffic
       // to the pricing page, which carries the actual terms of the offer.
       { source: "/guarantee", destination: "/pricing", permanent: true },
+      // DSCR consolidation (founder decision Q5, 2026-09-28): the three DSCR
+      // guides became one canonical page. The two merged posts' URLs (their
+      // pages and OG image routes were deleted) hand their links and index
+      // history straight to it in one 308 hop. /tools/dscr-calculator already
+      // lands there (lib/historical-tool-redirects.ts).
+      {
+        source: "/blog/what-is-a-good-dscr",
+        destination: "/blog/how-to-calculate-dscr",
+        permanent: true,
+      },
+      {
+        source: "/blog/dscr-loans-explained",
+        destination: "/blog/how-to-calculate-dscr",
+        permanent: true,
+      },
       {
         source: "/deals",
         destination: "/dashboard/saved-analyses",

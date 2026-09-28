@@ -263,7 +263,8 @@ describe("the shared components carry the byline and the bio", () => {
 
 describe("every blog post in the registry renders the byline and the bio", () => {
   it("covers every post folder: the registry and app/blog/<slug>/ agree", () => {
-    expect(POSTS.length).toBeGreaterThanOrEqual(75);
+    // 73 since the DSCR consolidation (2026-09-28) merged two posts.
+    expect(POSTS.length).toBeGreaterThanOrEqual(73);
     expect([...POSTS].sort()).toEqual([...postDirs].sort());
   });
 

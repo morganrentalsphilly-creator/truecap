@@ -13,11 +13,6 @@
       "note": "Authored before lib/__tests__/seo-guards.test.ts existed; recorded as pre-existing debt rather than held to the new-post standard retroactively."
     },
     {
-      "slug": "what-is-a-good-dscr",
-      "adoptedOn": "2026-08-02",
-      "note": "Authored before lib/__tests__/seo-guards.test.ts existed; recorded as pre-existing debt rather than held to the new-post standard retroactively."
-    },
-    {
       "slug": "what-is-a-good-rental-yield",
       "adoptedOn": "2026-08-02",
       "note": "Authored before lib/__tests__/seo-guards.test.ts existed; recorded as pre-existing debt rather than held to the new-post standard retroactively."
@@ -52,7 +47,6 @@
     "/blog/cash-on-cash-vs-irr": 179,
     "/blog/cash-out-refinance-vs-heloc-rental": 192,
     "/blog/closing-costs-investment-property": 177,
-    "/blog/dscr-loans-explained": 178,
     "/blog/hard-money-vs-dscr-loan": 191,
     "/blog/house-hack-underwriting-guide": 249,
     "/blog/how-much-down-payment-investment-property": 170,
@@ -185,7 +179,7 @@
       "glossary": 4,
       "markets": 0,
       "tools": 0,
-      "blog": 0
+      "blog": 1
     },
     "cap-rate-vs-gross-yield": {
       "glossary": 0,
@@ -246,12 +240,6 @@
       "markets": 0,
       "tools": 0,
       "blog": 5
-    },
-    "dscr-loans-explained": {
-      "glossary": 3,
-      "markets": 1,
-      "tools": 0,
-      "blog": 2
     },
     "exit-cap-rate-rental-property": {
       "glossary": 0,
@@ -326,10 +314,10 @@
       "blog": 3
     },
     "how-to-calculate-dscr": {
-      "glossary": 0,
-      "markets": 0,
-      "tools": 0,
-      "blog": 4
+      "glossary": 6,
+      "markets": 2,
+      "tools": 1,
+      "blog": 8
     },
     "how-to-calculate-noi-rental-property": {
       "glossary": 1,
@@ -521,12 +509,6 @@
       "glossary": 3,
       "markets": 1,
       "tools": 0,
-      "blog": 3
-    },
-    "what-is-a-good-dscr": {
-      "glossary": 3,
-      "markets": 1,
-      "tools": 1,
       "blog": 3
     },
     "what-is-a-good-rental-yield": {

@@ -111,7 +111,8 @@ describe("lastmod map contract", () => {
       posts += 1;
       for (const problem of postDateWiringViolations(file, read(file))) unwired.push(`${slug}: ${problem}`);
     }
-    expect(posts).toBeGreaterThanOrEqual(75);
+    // 73 since the DSCR consolidation (2026-09-28) merged two posts.
+    expect(posts).toBeGreaterThanOrEqual(73);
     expect(unwired).toEqual([]);
   });
 

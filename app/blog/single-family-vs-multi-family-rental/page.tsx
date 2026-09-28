@@ -290,7 +290,7 @@ export default function SfrVsMfrPost() {
             Stage 2: Properties 5-9
           </h3>
           <p>
-            Mostly small multi-family (2-4 unit) plus occasional SFR for diversification. Conventional financing slots running out (Fannie/Freddie cap individual borrowers at 10 financed). Time to start thinking about <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans</Link> for the next 5 properties or commercial financing for a step-up.
+            Mostly small multi-family (2-4 unit) plus occasional SFR for diversification. Conventional financing slots running out (Fannie/Freddie cap individual borrowers at 10 financed). Time to start thinking about <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans</Link> for the next 5 properties or commercial financing for a step-up.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
@@ -323,7 +323,7 @@ export default function SfrVsMfrPost() {
             </Link>
             ,{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loans explained

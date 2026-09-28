@@ -357,7 +357,13 @@ export default function BlogPost() {
             </div>
           </div>
           <p>
-            DSCR (Debt Service Coverage Ratio) measures whether the property can
+            <Link
+              href="/blog/how-to-calculate-dscr"
+              className="text-primary font-semibold hover:underline"
+            >
+              DSCR (Debt Service Coverage Ratio)
+            </Link>{" "}
+            measures whether the property can
             cover its own mortgage payments from operating income alone. A DSCR
             of 1.25 means the property earns $1.25 of NOI for every $1.00 of
             mortgage payment.

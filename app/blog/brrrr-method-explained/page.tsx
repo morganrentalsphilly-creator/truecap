@@ -277,7 +277,7 @@ export default function BrrrrMethodPost() {
             value basis vary by program, transaction history, property, and
             lender. Conventional, delayed-financing, portfolio, and{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR
@@ -562,7 +562,7 @@ export default function BrrrrMethodPost() {
             </Link>
             ,{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loans explained

@@ -57,6 +57,7 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 Everything the loop can edit is **git-tracked source**. There is no CMS, and no content lives only in a database. Supabase holds user data and the SEO control plane's measurement tables, never page content. The loop's properties the brief asks for (a diff, a revert path and an audit trail) therefore come from pull requests with no migration.
 
 ### Blog — 75 posts, 8 topic hubs
+- **DSCR consolidation (founder decision Q5, 2026-09-28): 73 posts since.** `/blog/what-is-a-good-dscr` and `/blog/dscr-loans-explained` were merged into `/blog/how-to-calculate-dscr` (formula → worked example → what counts as good → DSCR loans → FAQ) and deleted with their OG images. Both 308 there from `next.config.mjs` `redirects()`, `scripts/seo/healthcheck.mjs` asserts the single hop, and `lib/__tests__/dscr-guide-consolidation.test.ts` pins the redirects, the registries, the merged FAQ and the worked example against the calculator. The counts below are the 2026-09-27 snapshot.
 - **Files:** `app/blog/<slug>/page.tsx` (a hand-written TSX server component) plus a sibling `opengraph-image.tsx`.
 - **Authoring shapes:**
   - 72 standalone posts. Module-level consts: `SLUG`, `TITLE`/`TITLE_PLAIN`, `SERP_TITLE`, `DESCRIPTION`, `PUBLISHED_AT`, `MODIFIED_AT`, `READING_TIME`. Each has an `export const metadata`, a `FAQS` array, three inline JSON-LD blocks, and prose as JSX.
@@ -86,7 +87,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
   - `RelatedBlogPosts` links every post to the first 3 other available rows of the registry, the 3 newest posts, inside `<main>` (see Authorship).
 - **Pinned by tests:**
   - title ≤50 characters as a plain const, with og:title equal to title (`blog-title-length.test.ts`);
-  - ≥75 available posts (`content-hub-readiness.test.ts`, so deleting a post fails CI);
+  - ≥73 available posts (`content-hub-readiness.test.ts`, so deleting a post fails CI; lowered from 75 by the DSCR consolidation);
   - vocabulary bans (`customer-facing-decision-vocabulary.test.ts`, `public-underwriting-claims-guard.test.ts`);
   - per-post must-contain strings (see `lib/__tests__/trust-language-guards.test.ts`, `comparison-claim-guards.test.ts`, `public-funnel-trust-guards.test.ts`).
 
@@ -127,7 +128,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 ### Tools — 10 released calculators + the spreadsheet
 - **Registry:** `lib/calculator-registry.ts` (`ALL_CALCULATORS`, `UNRELEASED_UNDERWRITING_CALCULATORS`, `CALCULATOR_REGISTRY`, `EMBEDDABLE_CALCULATORS`). Releasing a slug requires a reviewed code change and parity tests.
 - **Pages:** `app/tools/<slug>/page.tsx` mixes SEO copy with release-gate lines (`permanentRedirect`). This is why `app/tools/**` is outside the loop's allow-list.
-- **Redirects:** `/tools/dscr-calculator` 308-redirects to `/blog/how-to-calculate-dscr`, yet DSCR-calculator queries carry about 36% of query-level impressions.
+- **Redirects:** `/tools/dscr-calculator` 308-redirects to `/blog/how-to-calculate-dscr`, yet DSCR-calculator queries carry about 36% of query-level impressions. Since the DSCR consolidation (2026-09-28) that page is the one DSCR guide, so the redirect, the two merged posts' 308s and the internal links all land on it.
 
 ### Embeds
 - `/embed/[slug]` hosts 9 released embeddable widgets. They are noindex/nofollow and framed with `frame-ancestors *` (`next.config.mjs`).

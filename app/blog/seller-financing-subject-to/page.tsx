@@ -410,7 +410,7 @@ export default function BlogPost() {
             </Link>{" "}
             ·{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="font-bold text-foreground hover:underline"
             >
               DSCR loans explained →

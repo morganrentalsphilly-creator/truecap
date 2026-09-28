@@ -65,7 +65,6 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "how-much-money-to-buy-a-rental-property",
       "how-much-down-payment-investment-property",
       "mortgage-points-investment-property",
-      "dscr-loans-explained",
       "how-to-refinance-a-rental-property",
       "closing-costs-investment-property",
       "cash-out-refinance-vs-heloc-rental",

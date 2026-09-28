@@ -68,7 +68,9 @@ describe("trust-language guards", () => {
   });
 
   it("does not turn common DSCR program features into universal approval rules", () => {
-    const explainer = read("../../app/blog/dscr-loans-explained/page.tsx");
+    // The DSCR-loan explainer is now a section of the canonical DSCR guide
+    // (founder decision Q5, 2026-09-28: /blog/dscr-loans-explained 308s there).
+    const explainer = read("../../app/blog/how-to-calculate-dscr/page.tsx");
     const hardMoney = read("../../app/blog/hard-money-vs-dscr-loan/page.tsx");
     const dti = read(
       "../../app/blog/debt-to-income-ratio-investment-property/page.tsx",
@@ -242,11 +244,11 @@ describe("trust-language guards", () => {
       "../../app/blog/how-to-underwrite-a-rental-property-in-60-seconds/page.tsx",
     );
     const calculateDscr = read("../../app/blog/how-to-calculate-dscr/page.tsx");
-    const goodDscr = read("../../app/blog/what-is-a-good-dscr/page.tsx");
     const vacancy = read(
       "../../app/blog/vacancy-rate-rental-property/page.tsx",
     );
-    const lenderCopy = `${hardMoney}\n${quickUnderwrite}\n${calculateDscr}\n${goodDscr}\n${vacancy}`;
+    // calculateDscr now carries the merged /blog/what-is-a-good-dscr copy too.
+    const lenderCopy = `${hardMoney}\n${quickUnderwrite}\n${calculateDscr}\n${vacancy}`;
 
     expect(cityStrategies).not.toMatch(/FMR runs 10-18% above market rent/i);
     expect(cityStrategies).not.toMatch(/HUD-paid guaranteed portion of rent/i);

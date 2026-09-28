@@ -11,7 +11,7 @@
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const alt = "How to calculate DSCR (debt service coverage ratio) — 2026 guide — TrueCap";
+export const alt = "How to calculate DSCR (and what counts as good) — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "How-to",
     tag: "DSCR",
-    title: "How to calculate DSCR (debt service coverage ratio) — 2026 guide",
-    subline: "Formula · lender thresholds · worked examples",
+    title: "How to calculate DSCR (and what counts as good)",
+    subline: "Formula · worked example · good ratio · DSCR loans",
   });
 }

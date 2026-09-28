@@ -22,7 +22,9 @@ describe("server-rendered content hub directories", () => {
     );
     const expectedPaths = posts.map((post) => `/blog/${post.slug}`);
 
-    expect(posts.length).toBeGreaterThanOrEqual(75);
+    // 73 since the DSCR consolidation (founder decision Q5, 2026-09-28)
+    // merged two posts into /blog/how-to-calculate-dscr.
+    expect(posts.length).toBeGreaterThanOrEqual(73);
     expect(renderedPaths).toHaveLength(expectedPaths.length);
     expect(new Set(renderedPaths).size).toBe(renderedPaths.length);
     expect([...renderedPaths].sort()).toEqual([...expectedPaths].sort());

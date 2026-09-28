@@ -87,16 +87,6 @@ export const BLOG_POSTS: BlogPost[] = [
     available: true,
   },
   {
-    slug: "what-is-a-good-dscr",
-    title:
-      "What is a good DSCR for a rental property? (And what 1.25 means for your offer)",
-    excerpt:
-      "Every lender's answer is 1.25 — but that's the lender's bar, not the investor's. What a good DSCR actually is band by band, a worked $250K duplex that scores a marginal 1.12 on real NOI yet sails past the lender at 1.54, and the negotiating math a 1.25 target really gives you: about $168K of max loan, ~33% down, or a $224,500 ceiling on a $250K asking price.",
-    readingTimeMinutes: 10,
-    publishedAt: "2026-07-18",
-    available: true,
-  },
-  {
     slug: "best-dealcheck-alternatives",
     title: "7 Best DealCheck Alternatives for Rental Analysis (2026)",
     excerpt:
@@ -435,10 +425,11 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-to-calculate-dscr",
-    title: "How to calculate DSCR (debt service coverage ratio) — 2026 guide",
+    title:
+      "How to calculate DSCR: the formula, a worked example, what counts as good, and DSCR loans",
     excerpt:
-      "DSCR = NOI ÷ annual debt service. It's the metric DSCR lenders use to qualify your loan. Here's the formula, what lenders include and exclude, three worked examples, and the difference between your DSCR and the lender's DSCR (which is usually lower).",
-    readingTimeMinutes: 8,
+      "DSCR = NOI ÷ annual debt service. The four steps, one sample rental worked through TrueCap's calculator, where the 1.25 floor in lending standards comes from, why a lender's DSCR can come out higher or lower than yours, and how DSCR loans work.",
+    readingTimeMinutes: 14,
     publishedAt: "2026-06-07",
     available: true,
   },
@@ -724,16 +715,6 @@ export const BLOG_POSTS: BlogPost[] = [
     excerpt:
       "Benchmarks by market type, the framework professionals actually use to evaluate cap rate, and why pre-2022 intuition is silently buying investors into negative leverage.",
     readingTimeMinutes: 9,
-    publishedAt: "2026-05-24",
-    available: true,
-  },
-  {
-    slug: "dscr-loans-explained",
-    title:
-      "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
-    excerpt:
-      "DSCR programs primarily use property coverage instead of personal DTI as the main ratio, while borrower and property checks still apply. Learn the costs and trade-offs.",
-    readingTimeMinutes: 10,
     publishedAt: "2026-05-24",
     available: true,
   },

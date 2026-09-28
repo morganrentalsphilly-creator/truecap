@@ -265,7 +265,7 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">What DSCR actually is</h2>
           <p>
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR
@@ -516,7 +516,7 @@ export default function BlogPost() {
           <p className="text-sm text-muted-foreground mt-6">
             Related reading:{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loans explained

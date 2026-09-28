@@ -505,7 +505,7 @@ export default function BlogPost() {
             <strong>0.96</strong> — under 1.0, meaning the building does not
             quite cover its own mortgage once you fund real reserves. Yet a{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR lender

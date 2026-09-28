@@ -280,7 +280,7 @@ export default function SpotBadRentalPost() {
               calculate it differently and apply additional requirements. (See
               the{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR loans guide

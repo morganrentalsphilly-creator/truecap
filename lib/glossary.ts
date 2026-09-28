@@ -122,7 +122,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "DSCR shows the modeled relationship between NOI and debt service under the stated convention. It can prompt questions for a lender, but TrueCap does not reproduce every lender's calculation or predict approval.",
     related: ["noi", "capRate", "ltv"],
-    postUrl: "/blog/dscr-loans-explained",
+    postUrl: "/blog/how-to-calculate-dscr",
   },
   noi: {
     term: "NOI (Net Operating Income)",
