@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { PostSources, type PostSource } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -53,9 +54,12 @@ export function buildSourceFirstArticleMetadata(
 export function SourceFirstArticle({
   article,
   children,
+  sources = [],
 }: {
   article: SourceFirstArticleIdentity;
   children: ReactNode;
+  /** The post's primary sources, listed after the FAQ and above the author bio. */
+  sources?: readonly PostSource[];
 }) {
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/blog/${article.slug}`;
@@ -150,6 +154,7 @@ export function SourceFirstArticle({
           </section>
         </article>
 
+        <PostSources sources={sources} />
         <RelatedBlogPosts currentSlug={article.slug} />
       </main>
       <SiteFooter />
