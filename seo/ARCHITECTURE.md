@@ -17,7 +17,7 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 - **Metadata:** there is no central helper. Each `page.tsx` exports `metadata` or `generateMetadata` with a relative `alternates.canonical`, resolved against `metadataBase` in `app/layout.tsx`.
   - Two shared builders exist: `buildSourceFirstArticleMetadata` (3 posts) and `buildSafeMarketMetadata` (12 bespoke market pages).
   - A page that forgets `alternates` inherits the homepage canonical. `lib/__tests__/seo-guards.test.ts` catches this for indexable pages.
-- **JSON-LD:** hand-written inline `<script type="application/ld+json">` in about 156 files. There is no central emitter.
+- **JSON-LD (F4):** one emitter, `<JsonLd data={x} />` (`components/seo/json-ld.tsx`). It serializes with `JSON.stringify` and escapes `<`, `>`, `&` and U+2028/U+2029, so no string can close the script. All 356 former inline `<script type="application/ld+json">` blocks (157 files) go through it; `lib/__tests__/json-ld-helper.test.tsx` fails on a new raw one, and verify-static accepts JSON-LD only as `<JsonLd>` imported un-aliased from that module (it refuses `<script>` and `dangerouslySetInnerHTML` in content modules).
   - `app/layout.tsx` emits the site-wide `Organization` (`/#organization`) and `WebSite` (`/#website`, SearchAction).
   - There is deliberately no Person node (founder decision, 2026-09-07; `CLAUDE.md` §1).
   - Per template:
@@ -25,15 +25,15 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 | Template | Types beyond Organization + WebSite |
 |---|---|
 | `/` | SoftwareApplication `/#software` + Offer, FAQPage |
-| `/analyze` | none |
-| blog post (75) | Article/BlogPosting (author = Organization `@id`), BreadcrumbList, FAQPage on 68 |
+| `/analyze` | WebPage whose `mainEntity` is `/#software` (by @id, F4) |
+| blog post (75) | Article/BlogPosting (author = Organization `@id`), BreadcrumbList, FAQPage on the 63 posts that show a FAQ (F4 removed it from 5 whose FAQ was never rendered) |
 | market city (150) | WebPage (dateModified from the lastmod map, F2; author = Organization `@id`), BreadcrumbList, FAQPage built from the same list as the visible FAQ (F8, `components/marketing/data-faq.tsx`) |
 | bespoke market (12, indexable since F8) | WebPage + Place (author = Organization), 4-level BreadcrumbList, FAQPage (visible, F8) |
 | state (33) | Place, WebPage (author = Organization), BreadcrumbList, FAQPage (visible, F8) |
-| vs (38) | WebPage, 2-level BreadcrumbList, FAQPage (visible, via `ComparisonFaq`) |
-| glossary term (44) | DefinedTerm (dateModified from the lastmod map, F2), FAQPage, BreadcrumbList |
-| released tool (10) | WebApplication or WebPage **plus** a second SoftwareApplication with an inline publisher (two app entities, no `@id`), FAQPage, 3-level BreadcrumbList |
-| hubs `/blog /tools /vs /markets /states /glossary` | CollectionPage / ItemList / DefinedTermSet, **no BreadcrumbList** |
+| vs (38) | WebPage, 3-level BreadcrumbList (TrueCap › Comparisons › page, F4), FAQPage whose answers are the visible answers' own text (`ComparisonFaq` + `plainTextOf`, F4) |
+| glossary term (44) | DefinedTerm (dateModified from the lastmod map, F2; `inDefinedTermSet` = `/glossary#terms`, F4), BreadcrumbList. No FAQPage (F4: its questions were never shown) |
+| released tool (10) | ONE WebApplication, @id `/tools/<slug>#app`, publisher = Organization @id (`lib/seo/tool-app-ld.ts`, F4; a WebPage on the page points at it), FAQPage where the page shows it, 3-level BreadcrumbList |
+| hubs `/blog /tools /vs /markets /states /glossary` | Blog / CollectionPage / ItemList / DefinedTermSet (`/glossary#terms`), plus BreadcrumbList TrueCap › Hub (F4) |
 | `/about` | AboutPage (mainEntity = Organization) |
 | `/methodology` | TechArticle |
 
@@ -60,7 +60,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 - **DSCR consolidation (founder decision Q5, 2026-09-28): 73 posts since.** `/blog/what-is-a-good-dscr` and `/blog/dscr-loans-explained` were merged into `/blog/how-to-calculate-dscr` (formula → worked example → what counts as good → DSCR loans → FAQ) and deleted with their OG images. Both 308 there from `next.config.mjs` `redirects()`, `scripts/seo/healthcheck.mjs` asserts the single hop, and `lib/__tests__/dscr-guide-consolidation.test.ts` pins the redirects, the registries, the merged FAQ and the worked example against the calculator. The counts below are the 2026-09-27 snapshot.
 - **Files:** `app/blog/<slug>/page.tsx` (a hand-written TSX server component) plus a sibling `opengraph-image.tsx`.
 - **Authoring shapes:**
-  - 72 standalone posts. Module-level consts: `SLUG`, `TITLE`/`TITLE_PLAIN`, `SERP_TITLE`, `DESCRIPTION`, `PUBLISHED_AT`, `MODIFIED_AT`, `READING_TIME`. Each has an `export const metadata`, a `FAQS` array, three inline JSON-LD blocks, and prose as JSX.
+  - 72 standalone posts. Module-level consts: `SLUG`, `TITLE`/`TITLE_PLAIN`, `SERP_TITLE`, `DESCRIPTION`, `PUBLISHED_AT`, `MODIFIED_AT`, `READING_TIME`. Each has an `export const metadata`, Article and BreadcrumbList JSON-LD through `<JsonLd>`, a `FAQS` array feeding both the visible FAQ and FAQPage where the post has a FAQ, and prose as JSX (F4 converted the last six posts that injected HTML strings).
   - 3 posts use `components/marketing/source-first-article.tsx` (an `ARTICLE` object). These three are thin, at 322–404 words live.
 - **Registry:** `BLOG_POSTS` in `lib/blog-posts.ts` (`slug, title, excerpt, readingTimeMinutes, publishedAt, available`), a pure data module.
   - F2 lifted it out of `app/blog/page.tsx` and dropped `modifiedAt`: a post's last-modified date is not the registry's to hold.
@@ -185,6 +185,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
 **The honest source (F2, built):** `content/seo/lastmod.json`, loaded and validated by `lib/seo/lastmod.ts`.
 - **Seed:** `node seo/scripts/lastmod.ts seed` takes, for each sitemap URL, the committer date of the newest commit that changed that URL's *content signature*, skipping the listed sweep commits (`config.json` → `sweepCommits`). The signature (`seo/scripts/lib/content-signature.ts`) is the page's visible text and data from the TypeScript AST — never classNames, imports, whitespace, social/robots metadata or the dates themselves — so a corpus-wide sweep only counts where it changed content. Sources: a post's, `/vs` page's or tool's own `page.tsx`; core pages add their content components (and /about its `AUTHOR_BIO`); glossary terms, states, markets and topic hubs use their one data entry (rendered fields only). Re-running the seed reproduces the committed map exactly (checked 2026-09-27 over its 381 keys).
   - **F1 is a listed sweep.** It moved /about's bio into `lib/author.ts` and turned the bonus-depreciation post's hand-rolled "By TrueCap" line into `BlogByline`. Both pages' signatures changed, but neither page's main content did: /about renders the same paragraph, and the bonus post only gained the boilerplate byline every post now carries. Without the listing, a re-seed dates `/about` and `/blog/bonus-depreciation-rental-property-2026` to the F1 commit.
+  - **F4 is five listed sweeps** (`73f195f` hubs' breadcrumbs, `aaf07d2` tool entities and /analyze, `9ce0c6b` glossary set, `7920616` FAQPage only where visible, `100fc84` the six prose posts as JSX). Each changed the content signature of pages whose main content did not change (structured data, a JSX rewrite of identical prose), which the F4 brief ruled not a date move.
   - **Sweeps are listed by the SHA they have in the seeded history.** F1 is listed as `033d63c`, its branch SHA. The F-series lands on main rebased (F6's `185be48` landed as `af6211a`), so when F1 lands, replace `033d63c` with its landed SHA.
   - **Enforced, not remembered:** `seed` refuses to run in a shallow clone or while a listed sweep is not in HEAD's history, and names the landed copy (same author date and subject) when it finds one. `lastmod-contract.test.ts` reports the same in any full clone; CI's unit job is shallow and skips it.
 - **Afterwards:** the loop's publish step bumps a URL's date only when the hash of its rendered `<main>` text changed. Header and footer chrome don't count, and the model never writes dates: verify-static refuses any change to a page's date slots (whatever they hold, the map wiring included), a new post's `MODIFIED_AT` must be exactly `lastmodFor("/blog/<slug>") ?? PUBLISHED_AT`, and a `lib/blog-posts.ts` edit declares `/blog` so its date moves as a re-seed would.
