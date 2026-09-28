@@ -647,3 +647,42 @@ describe("jobs that install no packages only run scripts that need none", () => 
     expect(JSON.parse(readFileSync(path.join(dir, "content", "seo", "lastmod.json"), "utf8"))["/blog/a"]).toBe("2026-10-05");
   });
 });
+
+describe("open-pr writes a literal command (third live run)", () => {
+  const job = weekly.jobs["open-pr"];
+  const step = job.steps.find((s) => s.id === "cmd") as Step;
+  const run = (env: Record<string, string>) => {
+    const dir = tmp();
+    const out = path.join(dir, "out");
+    writeFileSync(out, "");
+    const body = path.join(dir, "pr-body.md");
+    writeFileSync(body, "body\n");
+    const result = runStep(step.run as string, dir, { GITHUB_OUTPUT: out, REPO: "o/r", LOOP_BRANCH: "seo/36362603496", TITLE: "seo-weekly: run 36362603496, 2 pages, tier 1", BODY: body, ...env });
+    return { ...result, output: readFileSync(out, "utf8"), body };
+  };
+
+  it("hands the model a command with no shell variables in it", () => {
+    const ok = run({});
+    expect(ok.code, ok.out).toBe(0);
+    expect(ok.output).toBe(`command=gh pr create --repo o/r --base main --head seo/36362603496 --title 'seo-weekly: run 36362603496, 2 pages, tier 1' --body-file ${ok.body}\n`);
+    expect(ok.output).not.toContain("$");
+    const prompt = (job.steps.find((s) => s.name === "Open the pull request") as Step).with?.prompt as string;
+    expect(prompt).toContain("${{ steps.cmd.outputs.command }}");
+    expect(prompt).not.toMatch(/"\$(GH_REPO|LOOP_BRANCH|PR_TITLE|PR_BODY_FILE)"/);
+  });
+
+  it("refuses a title, branch or repo the publish job would never produce", () => {
+    expect(run({ TITLE: "seo-weekly: run 1, 2 pages, tier 1'; rm -rf ~ #" }).code).not.toBe(0);
+    expect(run({ TITLE: "anything else" }).code).not.toBe(0);
+    expect(run({ LOOP_BRANCH: "main" }).code).not.toBe(0);
+    expect(run({ LOOP_BRANCH: "seo/1;echo" }).code).not.toBe(0);
+    expect(run({ REPO: "o/r --web" }).code).not.toBe(0);
+  });
+
+  it("fails the job when no pull request exists after the model step", () => {
+    const check = job.steps.find((s) => s.name === "The pull request exists") as Step;
+    expect(check.run).toContain('gh pr list --head "$LOOP_BRANCH" --state open');
+    expect(check.run).toMatch(/exit 1\s*$/);
+    expect(job.permissions).toMatchObject({ "pull-requests": "read" });
+  });
+});
