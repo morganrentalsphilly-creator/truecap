@@ -74,7 +74,9 @@ const ALL_CALCULATORS: CalculatorEntry[] = [
  * toggle: switching one back on before it delegates to the canonical engine
  * would reintroduce model drift. Keep the authored pages/widgets as migration
  * material, but require a reviewed code change (and parity tests) to release
- * any slug from this list.
+ * any slug from this list. Their JSON-LD already has the released shape (one
+ * WebApplication by @id, no FAQPage for questions the page does not show):
+ * lib/__tests__/structured-data-f4.test.tsx renders them past the redirect.
  */
 export const UNRELEASED_UNDERWRITING_CALCULATORS = [
   "50-percent-rule-calculator",

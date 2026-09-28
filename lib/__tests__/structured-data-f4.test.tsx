@@ -31,17 +31,25 @@ vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: async () => ({ auth: { getUser: async () => ({ data: { user: null } }) } }),
 }));
 vi.mock("@/lib/stripe/display-prices", () => ({ loadStripeDisplayPrice: async () => null }));
-vi.mock("next/navigation", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("next/navigation")>()),
-  useRouter: () => ({ push() {}, replace() {}, prefetch() {}, back() {}, forward() {}, refresh() {} }),
-  usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
-}));
+// The unreleased calculators call permanentRedirect before they render; the
+// release-readiness check below renders them past it (and only there).
+const navigation = vi.hoisted(() => ({ renderPastRedirects: false }));
+vi.mock("next/navigation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/navigation")>();
+  return {
+    ...actual,
+    useRouter: () => ({ push() {}, replace() {}, prefetch() {}, back() {}, forward() {}, refresh() {} }),
+    usePathname: () => "/",
+    useSearchParams: () => new URLSearchParams(),
+    permanentRedirect: ((...args: Parameters<typeof actual.permanentRedirect>) =>
+      navigation.renderPastRedirects ? (undefined as never) : actual.permanentRedirect(...args)) as typeof actual.permanentRedirect,
+  };
+});
 
 // Imported after the mocks (vi.mock is hoisted above these).
 import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { BLOG_POSTS } from "@/lib/blog-posts";
-import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
+import { CALCULATOR_REGISTRY, UNRELEASED_UNDERWRITING_CALCULATORS } from "@/lib/calculator-registry";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { GLOSSARY } from "@/lib/glossary";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
@@ -262,20 +270,24 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
   }, MANY_PAGES_MS);
 });
 
-describe("tools: one application entity with a stable @id", () => {
-  const APP_TYPES = ["SoftwareApplication", "WebApplication", "MobileApplication"];
+const APP_TYPES = ["SoftwareApplication", "WebApplication", "MobileApplication"];
 
+/** A tool page's one application entity: stable @id, its url, the Organization by @id, the free Offer. */
+function expectOneToolApp(html: string, slug: string): void {
+  const apps = ldNodes(html).filter((node) => !isRef(node) && typeOf(node).some((t) => APP_TYPES.includes(t)));
+  const appId = `${SITE}/tools/${slug}#app`;
+  expect(apps.map((app) => app["@id"]), slug).toEqual([appId]);
+  const [app] = apps;
+  expect(app.url).toBe(`${SITE}/tools/${slug}`);
+  expect(app.publisher).toEqual({ "@id": `${SITE}/#organization` });
+  expect(app.offers).toMatchObject({ "@type": "Offer", price: "0", priceCurrency: "USD" });
+  // A WebPage on the same page points at the app instead of standing beside it.
+  for (const page of ldTopLevel(html).filter((node) => typeOf(node).includes("WebPage"))) expect(page.mainEntity, slug).toEqual({ "@id": appId });
+}
+
+describe("tools: one application entity with a stable @id", () => {
   it.each(TOOL_SLUGS)("/tools/%s", async (slug) => {
-    const html = await renderTool(slug);
-    const apps = ldNodes(html).filter((node) => !isRef(node) && typeOf(node).some((t) => APP_TYPES.includes(t)));
-    const appId = `${SITE}/tools/${slug}#app`;
-    expect(apps.map((app) => app["@id"]), slug).toEqual([appId]);
-    const [app] = apps;
-    expect(app.url).toBe(`${SITE}/tools/${slug}`);
-    expect(app.publisher).toEqual({ "@id": `${SITE}/#organization` });
-    expect(app.offers).toMatchObject({ "@type": "Offer", price: "0", priceCurrency: "USD" });
-    // A WebPage on the same page points at the app instead of standing beside it.
-    for (const page of ldTopLevel(html).filter((node) => typeOf(node).includes("WebPage"))) expect(page.mainEntity, slug).toEqual({ "@id": appId });
+    expectOneToolApp(await renderTool(slug), slug);
   });
 
   it("/pricing declares its Offers on the homepage's product entity (/#software), not on a second app", async () => {
@@ -303,6 +315,42 @@ describe("tools: one application entity with a stable @id", () => {
     const home = await render((await import("@/app/page")).default());
     expect(ldNodes(home).filter((node) => node["@id"] === `${SITE}/#software` && !isRef(node)).map((node) => node["@type"])).toEqual(["SoftwareApplication"]);
   }, MANY_PAGES_MS);
+});
+
+describe("unreleased calculators already carry the released structured data", () => {
+  /**
+   * These pages permanentRedirect today, so nothing here is served. The day a
+   * slug leaves UNRELEASED_UNDERWRITING_CALCULATORS its page goes live as it
+   * is: before the F4 review they still emitted two app entities without @id,
+   * and dscr/noi an FAQPage for questions they never show. Rendered past the
+   * redirect, each must already pass the released tools' checks.
+   */
+  const renderUnreleased = async (slug: string) => {
+    navigation.renderPastRedirects = true;
+    try {
+      return await renderTool(slug);
+    } finally {
+      navigation.renderPastRedirects = false;
+    }
+  };
+
+  it("they are still unreleased and still redirect (the bypass is test-only)", async () => {
+    expect(UNRELEASED_UNDERWRITING_CALCULATORS.length).toBeGreaterThanOrEqual(8);
+    for (const slug of UNRELEASED_UNDERWRITING_CALCULATORS) {
+      expect(TOOL_SLUGS, slug).not.toContain(slug);
+      await expect(renderTool(slug), slug).rejects.toMatchObject({ digest: expect.stringMatching(/^NEXT_REDIRECT/) });
+    }
+  }, MANY_PAGES_MS);
+
+  it.each(UNRELEASED_UNDERWRITING_CALCULATORS)("/tools/%s", async (slug) => {
+    const path = `/tools/${slug}`;
+    const html = await renderUnreleased(slug);
+    expect(html.length, path).toBeGreaterThan(1000);
+    expectOneToolApp(html, slug);
+    expect(faqMirrorProblems(html), path).toEqual([]);
+    expect(validateHtml(html, path), path).toEqual([]);
+    expect(missingSchema(path, jsonLdNodes(html)), path).toEqual([]);
+  });
 });
 
 describe("BreadcrumbList on the hubs and 3-level /vs trails", () => {

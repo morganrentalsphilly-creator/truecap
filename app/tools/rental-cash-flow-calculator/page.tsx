@@ -31,8 +31,8 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -106,18 +106,6 @@ export default function RentalCashFlowCalculatorPage() {
 
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap Rental Property Cash Flow Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/rental-cash-flow-calculator"),
-    url: `${siteUrl}/tools/rental-cash-flow-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online calculator for rental property monthly cash flow, with the full operating-expense set and the NOI / debt-service split.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -129,34 +117,18 @@ export default function RentalCashFlowCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "rental-cash-flow-calculator",
     name: "Rental Property Cash Flow Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free rental property cash flow calculator. Get monthly cash flow after every operating expense and the mortgage — with the NOI and debt-service split lenders look at.",
-    url: `${siteUrl}/tools/rental-cash-flow-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Monthly cash flow from price, rent, financing + full expense set",
       "NOI and debt-service split with live DSCR",
       "Vacancy, management, maintenance, CapEx reserves built in",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
@@ -165,9 +137,8 @@ export default function RentalCashFlowCalculatorPage() {
         toolPath="/tools/rental-cash-flow-calculator"
         toolName="Rental cash flow calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

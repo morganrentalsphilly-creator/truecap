@@ -19,8 +19,8 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free NOI Calculator — Net Operating Income + OpEx",
@@ -57,86 +57,23 @@ export const metadata: Metadata = {
   },
 };
 
-const FAQS: { q: string; a: string }[] = [
-  {
-    q: "What is NOI?",
-    a: "Net Operating Income is gross rental income minus vacancy and all operating expenses, before debt service and income tax. NOI is the property's operating performance as if you owned it free and clear — it isolates the asset from how you financed it.",
-  },
-  {
-    q: "What's a good NOI margin?",
-    a: "Operating-expense ratio (the inverse) is the more standard way to look at it. Residential rentals typically run 35-50% operating-expense ratio, leaving 50-65% as NOI. Older properties, smaller buildings, and self-managed deals trend toward the higher OER (lower NOI). Newer / professionally-managed / multifamily trends toward lower OER (higher NOI).",
-  },
-  {
-    q: "Does NOI include mortgage payments?",
-    a: "No. NOI is calculated before mortgage P&I, by design. The whole point is to measure the property's standalone earning power. Mortgage P&I is debt service, which you subtract from NOI to get cash flow.",
-  },
-  {
-    q: "Does NOI include CapEx?",
-    a: "Under the lender/appraiser-style convention used by TrueCap, no. CapEx is a below-NOI reserve because replacements are capital items rather than recurring operating expenses. TrueCap still subtracts the reserve from cash flow and cash-on-cash return, so the economic cost is never ignored.",
-  },
-  {
-    q: "What's the difference between NOI and EBITDA?",
-    a: "NOI is the real estate version of EBITDA (Earnings Before Interest, Taxes, Depreciation, Amortization). Same concept — the asset's standalone earning power, before financing structure and tax position. You'll sometimes see commercial brokers use 'NOI' and underwriters use 'EBITDA' for the same number on a deal.",
-  },
-  {
-    q: "How is NOI used to value a property?",
-    a: "Cap rate equation: Value = NOI ÷ Cap rate. A property with $28,000 NOI in a 7% cap rate market is worth ≈$400,000. This is why NOI matters so much — it directly determines what an institutional buyer will pay. Improving NOI by $1,000/yr in a 7% cap market increases the property's value by roughly $14,000.",
-  },
-];
-
 export default function NoiCalculatorPage() {
   if (!isCalculatorReleased("noi-calculator")) {
     permanentRedirect(HISTORICAL_TOOL_REDIRECTS["noi-calculator"]);
   }
 
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap NOI Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/noi-calculator"),
-    url: `${siteUrl}/tools/noi-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "noi-calculator",
     name: "NOI Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free NOI (Net Operating Income) calculator. Includes vacancy, common operating expenses, and the operating-expense ratio. Plus a good NOI margin benchmark.",
-    url: `${siteUrl}/tools/noi-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Net Operating Income from gross income - expenses",
       "Standard 4-category expense model",
       "Vacancy + management included",
     ],
-  };
+  });
 
   return (
     <>
@@ -145,9 +82,7 @@ export default function NoiCalculatorPage() {
         toolPath="/tools/noi-calculator"
         toolName="NOI calculator"
       />
-      <JsonLd data={webAppLd} />
-      <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

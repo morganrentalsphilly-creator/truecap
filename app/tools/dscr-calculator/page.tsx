@@ -20,8 +20,8 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -58,86 +58,23 @@ export const metadata: Metadata = {
   },
 };
 
-const FAQS: { q: string; a: string }[] = [
-  {
-    q: "What is DSCR?",
-    a: "Debt Service Coverage Ratio measures how well a property's income covers its mortgage payment. DSCR = Net Operating Income ÷ Annual Debt Service. A DSCR of 1.0 means the property's NOI exactly covers debt; 1.25 means there's 25% cushion above debt service.",
-  },
-  {
-    q: "What's a good DSCR?",
-    a: "Most conventional and DSCR-loan lenders want at least 1.25. Below 1.0 the property loses money each month (you're subsidizing it). Between 1.0 and 1.25 is acceptable for some products but tight. 1.25 to 1.5 is a comfortable cushion for most products; above 1.5 is strong, and above 2.0 is rare in markets with normal cap rates.",
-  },
-  {
-    q: "How is DSCR different from cash-on-cash return?",
-    a: "DSCR measures whether the property can cover its mortgage. Cash-on-cash measures the return you personally get on your invested capital. A property can have a great DSCR (income comfortably covers debt) but bad CoC (because you put in too much cash), or vice versa.",
-  },
-  {
-    q: "What's a DSCR loan?",
-    a: "A DSCR loan is generally a business-purpose investment-property loan that uses the property's coverage as a primary qualifying metric instead of personal DTI. Many programs do not use tax returns or W-2s to calculate that ratio, but documentation, credit, reserves, entity, property, appraisal, insurance, pricing, and leverage requirements vary by lender and program. Clearing a stated DSCR threshold does not guarantee approval.",
-  },
-  {
-    q: "What's NOT included in NOI?",
-    a: "Mortgage principal and interest are NOT operating expenses — they go below the NOI line as debt service. Also excluded: depreciation, capital expenditures (treated separately), and your personal income tax. NOI is the property's operating performance as if it were owned free and clear.",
-  },
-  {
-    q: "What's an annualized DSCR vs a monthly DSCR?",
-    a: "Same ratio either way — you just need to use matching periods. Monthly NOI ÷ monthly P&I = the same number as annual NOI ÷ annual P&I. Lenders typically state DSCR using annual numbers, but the math works either way.",
-  },
-];
-
 export default function DscrCalculatorPage() {
   if (!isCalculatorReleased("dscr-calculator")) {
     permanentRedirect(HISTORICAL_TOOL_REDIRECTS["dscr-calculator"]);
   }
 
   const siteUrl = getSiteUrl();
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap DSCR Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/dscr-calculator"),
-    url: `${siteUrl}/tools/dscr-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "dscr-calculator",
     name: "DSCR Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free DSCR calculator for rental property and DSCR loans. Compute Debt Service Coverage Ratio in seconds, plus a good-DSCR benchmark for lenders.",
-    url: `${siteUrl}/tools/dscr-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Compute DSCR from NOI + debt service",
       "1.20/1.25 lender threshold check",
       "Single + multi-family support",
     ],
-  };
+  });
 
   return (
     <>
@@ -146,9 +83,7 @@ export default function DscrCalculatorPage() {
         toolPath="/tools/dscr-calculator"
         toolName="DSCR calculator"
       />
-      <JsonLd data={webAppLd} />
-      <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

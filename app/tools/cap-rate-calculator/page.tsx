@@ -23,8 +23,8 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -98,18 +98,6 @@ export default function CapRateCalculatorPage() {
 
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap Cap Rate Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/cap-rate-calculator"),
-    url: `${siteUrl}/tools/cap-rate-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online calculator for rental property capitalization rate (cap rate), with built-in NOI breakdown and market-context benchmarks.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -121,34 +109,18 @@ export default function CapRateCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "cap-rate-calculator",
     name: "Cap Rate Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free cap rate calculator for rental property analysis. Calculate capitalization rate in seconds, plus learn what counts as a good cap rate by market type.",
-    url: `${siteUrl}/tools/cap-rate-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Calculate cap rate from purchase price + NOI",
       "Adjust for vacancy + operating expenses",
       "Compare to market benchmarks",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
@@ -157,9 +129,8 @@ export default function CapRateCalculatorPage() {
         toolPath="/tools/cap-rate-calculator"
         toolName="Cap rate calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main
