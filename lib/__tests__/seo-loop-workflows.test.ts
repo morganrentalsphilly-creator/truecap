@@ -686,3 +686,47 @@ describe("open-pr writes a literal command (third live run)", () => {
     expect(job.permissions).toMatchObject({ "pull-requests": "read" });
   });
 });
+
+describe("proposals are not re-filed under a new title (third live run)", () => {
+  const file = (existing: string[], proposed: Array<{ title: string; body: string }>) => {
+    const dir = tmp();
+    const manifest = path.join(dir, "run-manifest.json");
+    writeFileSync(manifest, JSON.stringify({ runId: "1", changes: [], skipped: [], issues: proposed }));
+    const calls = path.join(dir, "calls.txt");
+    const bin = stubs(dir, {
+      gh: [
+        `echo "$*" >> "${calls}"`,
+        'case "$1 $2" in',
+        `  "issue list") echo '${JSON.stringify(existing)}';;`,
+        '  "issue create") echo "https://github.com/o/r/issues/200";;',
+        "esac",
+        "exit 0",
+      ].join("\n"),
+    });
+    execFileSync("cp", ["-R", path.join(ROOT, "seo"), path.join(dir, "seo")]);
+    const run = spawnSync("bash", [path.join(dir, "seo", "scripts", "proposal-issues.sh"), manifest], { cwd: dir, env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, RUNNER_TEMP: dir }, encoding: "utf8" });
+    return { code: run.status, out: `${run.stdout}${run.stderr}`, calls: existsSync(calls) ? readFileSync(calls, "utf8") : "" };
+  };
+
+  it("drops a reworded proposal whose topic is already open", () => {
+    const r = file(["Calculator demand on content pages"], [{ title: "Calculator demand on content pages (recurring)", body: "b" }]);
+    expect(r.code, r.out).toBe(0);
+    expect(r.calls).not.toMatch(/issue create/);
+  });
+
+  it("still files a new decision", () => {
+    const r = file(["Calculator demand on content pages"], [{ title: "Data study pitch for October", body: "b" }]);
+    expect(r.code, r.out).toBe(0);
+    expect(r.calls).toMatch(/issue create --title Data study pitch for October/);
+  });
+
+  it("gives the model the open proposals through the data job", () => {
+    const data = weekly.jobs.data;
+    expect(data.permissions).toMatchObject({ issues: "read" });
+    const list = data.steps.find((s) => s.name === "List open proposals") as Step;
+    expect(list.run).toContain("gh issue list --label seo-proposal --state open");
+    expect(list.run).toContain("seo/data/open-proposals.json");
+    const order = data.steps.map((s) => s.name);
+    expect(order.indexOf("List open proposals")).toBeLessThan(order.indexOf("Score, outcomes, brakes, holdout"));
+  });
+});
