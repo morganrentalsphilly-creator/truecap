@@ -25,6 +25,8 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { GLOSSARY_TERM_SET_NAME, glossaryTermSetId } from "@/lib/seo/glossary-ld";
+import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Real Estate Glossary",
@@ -347,12 +349,15 @@ export default function GlossaryPage() {
 
   // DefinedTermSet schema — Google's recommended structure for glossary
   // pages. Each term becomes a DefinedTerm with its own @id (the anchor
-  // URL), so Google can deep-link to specific definitions from SERP.
+  // URL), so Google can deep-link to specific definitions from SERP. The
+  // set's @id (lib/seo/glossary-ld.ts) is the one every term page's
+  // DefinedTerm points at too (F4).
+  const termSetId = glossaryTermSetId(siteUrl);
   const definedTermSetLd = {
     "@context": "https://schema.org",
     "@type": "DefinedTermSet",
-    "@id": `${siteUrl}/glossary#set`,
-    name: "TrueCap Real Estate Glossary",
+    "@id": termSetId,
+    name: GLOSSARY_TERM_SET_NAME,
     url: `${siteUrl}/glossary`,
     publisher: { "@id": `${siteUrl}/#organization` },
     hasDefinedTerm: TERMS.map((t) => ({
@@ -360,7 +365,7 @@ export default function GlossaryPage() {
       "@id": `${siteUrl}/glossary#${t.slug}`,
       name: t.term,
       description: t.definition,
-      inDefinedTermSet: `${siteUrl}/glossary#set`,
+      inDefinedTermSet: { "@id": termSetId },
     })),
   };
 
@@ -368,6 +373,7 @@ export default function GlossaryPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={definedTermSetLd} />
+      <BreadcrumbSchema items={[{ name: "Glossary", path: "/glossary" }]} />
 
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
