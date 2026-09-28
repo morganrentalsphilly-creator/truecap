@@ -202,13 +202,17 @@ export default async function PricingPage() {
     ["Agent Pro Monthly", agentMonthly],
     ["Agent Pro Annual", agentAnnual],
   ] as const;
+  // The product the homepage declares (app/page.tsx, @id /#software), again,
+  // to carry the paid Offers: same @id, name and url, so a crawler reads one
+  // entity with every offer rather than two "TrueCap" apps (F4 review).
   const pricingSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
+    "@id": `${siteUrl}/#software`,
     name: "TrueCap",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
-    url: `${siteUrl}/pricing`,
+    url: siteUrl,
     offers: [
       {
         "@type": "Offer",

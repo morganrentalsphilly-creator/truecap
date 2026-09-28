@@ -125,7 +125,8 @@ const FOREIGN_DEPLOYMENT = "https://truecap-iota.vercel.app/";
 
 /**
  * Route family -> JSON-LD @types that family must emit, and the F4 values
- * (breadcrumb trails, tool @ids, /analyze -> /#software, the glossary set):
+ * (breadcrumb trails, tool @ids, /analyze -> /#software, one product entity
+ * /#software wherever the product is declared, the glossary set):
  * scripts/seo/structured-data-expectations.mjs, shared with the loop's
  * rendered-page validator (seo/scripts/jsonld-validate.ts).
  *
@@ -877,7 +878,8 @@ function checkPage(path, page) {
   }
 
   // required JSON-LD: the types each route family must emit, then the values
-  // F4 fixed (breadcrumb trails, tool @ids, /analyze, the glossary set).
+  // F4 fixed (breadcrumb trails, tool @ids, /analyze, the product entity,
+  // the glossary set).
   const ldNodes = jsonLdNodes(html);
   for (const { label, missing } of missingSchema(path, ldNodes)) {
     add(

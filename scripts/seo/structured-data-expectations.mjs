@@ -13,6 +13,9 @@
  *     · a released tool page has exactly ONE application entity, @id
  *       <origin>/tools/<slug>#app, publisher = the Organization's @id;
  *     · /analyze has a WebPage whose mainEntity is <origin>/#software;
+ *     · outside the tool pages the only application entity is the product,
+ *       the homepage's SoftwareApplication <origin>/#software (/pricing
+ *       declares it again to carry the paid Offers, under that @id);
  *     · /glossary's DefinedTermSet has @id <origin>/glossary#terms, and every
  *       DefinedTerm (hub list and term pages) points at it.
  *
@@ -73,6 +76,7 @@ export const REQUIRED_SCHEMA = [
   { pattern: /^\/states$/, types: [["ItemList"], ["BreadcrumbList"]], label: "states hub" },
   { pattern: /^\/glossary$/, types: [["DefinedTermSet"], ["BreadcrumbList"]], label: "glossary hub" },
   { pattern: /^\/analyze$/, types: [["WebPage"]], label: "analyzer" },
+  { pattern: /^\/pricing$/, types: [["SoftwareApplication"]], label: "pricing" },
 ];
 
 /** Hub path -> the name its crumb carries (the /vs pages' middle crumb too). */
@@ -187,6 +191,16 @@ export function structuredDataProblems(path, nodes) {
     const pages = nodes.filter((node) => typesOf(node).includes("WebPage") && !isReference(node));
     if (!pages.some((page) => idPath(page.mainEntity?.["@id"]) === "/#software")) add("no WebPage names the homepage SoftwareApplication (<origin>/#software) as mainEntity");
     if (nodes.some((node) => !isReference(node) && typesOf(node).some((t) => APP_TYPES.has(t)))) add("declares an application entity instead of referencing /#software");
+  }
+
+  // One product, one entity (F4 review): /pricing used to declare a second
+  // "TrueCap" SoftwareApplication with no @id beside the homepage's
+  // /#software. Anywhere but a tool page (its own #app) and /analyze (which
+  // may only reference it), an application entity must BE /#software.
+  if (!/^\/tools\/[^/]+$/.test(path) && path !== "/analyze") {
+    for (const app of nodes.filter((node) => !isReference(node) && typesOf(node).some((t) => APP_TYPES.has(t)))) {
+      if (idPath(app["@id"]) !== "/#software") add(`application entity ${JSON.stringify(app.name ?? null)} has @id ${JSON.stringify(app["@id"] ?? null)}; outside /tools/<slug> the only application is the product, <origin>/#software`);
+    }
   }
 
   if (path === "/glossary") {
