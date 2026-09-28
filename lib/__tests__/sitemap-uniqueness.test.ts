@@ -30,6 +30,9 @@ const OTHER_REDIRECT_SOURCES = [
   "/templates",
   "/vs/dealcheck-for-brrrr",
   "/vs/dealcheck-for-fix-and-flip",
+  // Merged into /blog/how-to-calculate-dscr (next.config.mjs, 2026-09-28).
+  "/blog/what-is-a-good-dscr",
+  "/blog/dscr-loans-explained",
 ] as const;
 
 describe("sitemap URL uniqueness", () => {

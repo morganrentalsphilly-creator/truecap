@@ -270,7 +270,7 @@ export default function BlogPost() {
             Standard owner-occupant conventional loans (Fannie/Freddie) go to
             individuals, not LLCs. To hold title in an LLC you generally use a{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR loan
@@ -428,7 +428,7 @@ export default function BlogPost() {
             </Link>{" "}
             ·{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="font-bold text-foreground hover:underline"
             >
               DSCR loans explained →

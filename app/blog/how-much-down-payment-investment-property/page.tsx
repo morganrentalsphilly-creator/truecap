@@ -205,7 +205,7 @@ export default function DownPaymentPost() {
               <li><strong>Conventional, investment single-family (1-unit):</strong> 15% down minimum (85% LTV).</li>
               <li><strong>Conventional, investment 2–4 units:</strong> 25% down minimum (75% LTV).</li>
               <li><strong>Second home (not a rental):</strong> 10% down — but you can&apos;t rent it full-time and call it a second home.</li>
-              <li><strong><Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loan</Link> (investment):</strong> typically 20–25% down (75–80% LTV), qualified on the property&apos;s rent rather than your income.</li>
+              <li><strong><Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loan</Link> (investment):</strong> typically 20–25% down (75–80% LTV), qualified on the property&apos;s rent rather than your income.</li>
             </ul>
             <p>
               Notice what&apos;s missing from the investment rows: there&apos;s no &quot;3% down with
@@ -239,7 +239,7 @@ export default function DownPaymentPost() {
             </h2>
             <p>
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
-              7.25% (a realistic <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">investment rate</Link> in
+              7.25% (a realistic <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">investment rate</Link> in
               June 2026), renting for $2,500/month — right at the{" "}
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 1% rule

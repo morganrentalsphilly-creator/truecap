@@ -74,7 +74,7 @@ describe("lib/seo/lastmod: parseLastmodMap", () => {
   });
 
   it("lastmodOrPublished never returns a date before publication", () => {
-    const path = "/blog/what-is-a-good-dscr";
+    const path = "/blog/how-to-calculate-dscr";
     const date = lastmodFor(path) as string;
     expect(lastmodOrPublished(path, "2000-01-01")).toBe(date);
     expect(lastmodOrPublished(path, "2999-01-01")).toBe("2999-01-01");

@@ -119,7 +119,7 @@ const CURATED: Term[] = [
       "Annual NOI divided by annual debt service (mortgage P&I). DSCR tells you whether the property can cover its own mortgage from operating income. Every lender pulls it, and each lender sets its own bar.",
     benchmark:
       "1.0-1.25 is the typical lender minimum. Most conventional and DSCR-loan products want ≥1.25; 1.5+ unlocks better rate tiers.",
-    postPath: "/blog/dscr-loans-explained",
+    postPath: "/blog/how-to-calculate-dscr",
   },
   {
     slug: "noi",

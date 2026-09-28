@@ -212,7 +212,7 @@ export default function RefinancePost() {
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">DSCR (non-QM)</h3>
           <p>
-            See our <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans deep dive</Link> for the full picture. These programs primarily underwrite the property&apos;s coverage rather than using personal DTI as the main ratio, while still reviewing borrower and property risks. They can be useful when conventional income rules or financed-property limits constrain a file. Pricing, leverage, documentation, recourse, and prepayment terms vary, so compare current written quotes. See the <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> glossary entry for the math.
+            See our <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans deep dive</Link> for the full picture. These programs primarily underwrite the property&apos;s coverage rather than using personal DTI as the main ratio, while still reviewing borrower and property risks. They can be useful when conventional income rules or financed-property limits constrain a file. Pricing, leverage, documentation, recourse, and prepayment terms vary, so compare current written quotes. See the <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> glossary entry for the math.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Commercial / portfolio loans</h3>
@@ -301,7 +301,7 @@ export default function RefinancePost() {
             the current written terms for your file.
           </p>
           <p>
-            Related reading: <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs CoC vs DSCR</Link> for how refi changes each metric, and <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link> for when DSCR refi is the right choice.
+            Related reading: <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs CoC vs DSCR</Link> for how refi changes each metric, and <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans explained</Link> for when DSCR refi is the right choice.
           </p>
           <p className="text-sm text-muted-foreground">
             General educational information, not a loan quote or approval.

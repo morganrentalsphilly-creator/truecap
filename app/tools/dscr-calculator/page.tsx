@@ -224,7 +224,7 @@ export default function DscrCalculatorPage() {
               written definition and term sheet. For additional educational
               context, see our{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR loans explained

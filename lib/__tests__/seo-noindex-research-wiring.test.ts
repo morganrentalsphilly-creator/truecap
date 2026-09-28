@@ -11,7 +11,7 @@ import { describe, expect, it, vi } from "vitest";
 
 // vi.mock factories are hoisted above module-level consts; vi.hoisted shares values with them.
 const { PRUNED_POST, PRUNED_TERM } = vi.hoisted(() => ({
-  PRUNED_POST: "/blog/what-is-a-good-dscr",
+  PRUNED_POST: "/blog/hard-money-vs-dscr-loan",
   PRUNED_TERM: "/glossary/cap-rate",
 }));
 

@@ -409,7 +409,7 @@ export default function NegativeLeveragePost() {
               at a DSCR of 1.33. That gap between DSCR 1.0 and DSCR 1.33 is a
               wide grey band where a property pays its bills, satisfies a{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR lender

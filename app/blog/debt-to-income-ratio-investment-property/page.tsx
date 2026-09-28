@@ -461,7 +461,7 @@ export default function DtiInvestmentPropertyPost() {
               financed-property constraint under a selected conventional
               program. One alternative to investigate is{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR loans

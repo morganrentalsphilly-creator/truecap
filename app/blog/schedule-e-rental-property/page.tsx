@@ -194,7 +194,7 @@ export default function ScheduleEPost() {
               paid. Financing reviews can also use tax-return information, but
               the documents and calculations depend on the loan program;{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR loans

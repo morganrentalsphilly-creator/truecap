@@ -423,7 +423,7 @@ export default function MortgagePointsPost() {
               a lender&apos;s written matrix used that threshold and accepted
               every other input, the change could affect the file. Actual{" "}
               <Link
-                href="/blog/dscr-loans-explained"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR-loan programs

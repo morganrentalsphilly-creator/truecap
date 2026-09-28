@@ -915,7 +915,7 @@ export default function BlogPost() {
             house with the actual written term sheet rather than assuming a
             standard premium or reserve requirement.{" "}
             <Link
-              href="/blog/dscr-loans-explained"
+              href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               The DSCR-loan mechanics

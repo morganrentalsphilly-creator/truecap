@@ -187,7 +187,7 @@ export const MARKET_CITIES: MarketCity[] = [
     ],
     relatedPosts: [
       "vacancy-rate-rental-property",
-      "dscr-loans-explained",
+      "how-to-calculate-dscr",
       "what-is-a-good-cap-rate",
     ],
   },
