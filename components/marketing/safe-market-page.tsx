@@ -148,7 +148,7 @@ export function MarketBreadcrumb({
   );
 }
 
-/** The sample deal run through the real engine with the HUD 3-bedroom FMR as rent. */
+/** The sample deal run through the real engine with the HUD 3-bedroom FMR as a placeholder rent. */
 function sampleFor(city: string, hud: HudRent) {
   return calculateAnalysis({
     ...SAMPLE_DEAL_FIXTURE.values,
@@ -172,7 +172,7 @@ export function MarketHero({
   const cashFlow = sample ? Math.round(sample.netCashFlow) : null;
   const detail =
     hud && sample && cashFlow !== null
-      ? `At a stated ${usd(SAMPLE_DEAL_FIXTURE.values.purchasePrice)} price with the 3-bedroom FMR as rent, TrueCap's sample underwrite below comes to ${cashFlow < 0 ? "−" : "+"}${usd(Math.abs(cashFlow))}/mo cash flow, a ${sample.capRate.toFixed(1)}% cap rate, and a ${sample.dscr.toFixed(2)} DSCR. A specific ${city} property runs on its own price, rent, tax bill, and insurance.`
+      ? `At a stated ${usd(SAMPLE_DEAL_FIXTURE.values.purchasePrice)} price with the 3-bedroom FMR as a placeholder rent, TrueCap's sample underwrite below comes to ${cashFlow < 0 ? "−" : "+"}${usd(Math.abs(cashFlow))}/mo cash flow, a ${sample.capRate.toFixed(1)}% cap rate, and a ${sample.dscr.toFixed(2)} DSCR. A specific ${city} property runs on its own price, rent, tax bill, and insurance.`
       : `TrueCap has no HUD figure for ${city}. Bring the property's own rent, tax bill, and insurance evidence, then run the address with every assumption labeled and editable.`;
   return (
     <header>
@@ -196,6 +196,21 @@ export function MarketHero({
               HUD
             </a>
             ).{" "}
+            {data.voucherNote ? (
+              <>
+                {data.voucherNote.text} (
+                <a
+                  href={data.voucherNote.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-market-voucher-note=""
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {data.voucherNote.linkLabel}
+                </a>
+                ).{" "}
+              </>
+            ) : null}
           </>
         ) : null}
         {detail}
@@ -230,8 +245,9 @@ export function MarketFmrSection({
         {city} {fmrLabel(hud.year)}
       </h2>
       <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-        {fmrLabel(hud.year)} for {data.areaPhrase}. Use it as your starting
-        rent, then replace it with current leases for the address.
+        {fmrLabel(hud.year)} for {data.areaPhrase}. It is an area
+        benchmark, not what a specific unit rents for: compare it with current
+        leases for the address.
         {area ? (
           <>
             {" "}
@@ -402,7 +418,7 @@ export function MarketSampleUnderwrite({
       </h2>
       <p className="mt-2 text-base leading-relaxed text-muted-foreground">
         Sample underwrite at a stated {usd(price)} price with the HUD
-        3-bedroom FMR as rent — not a listing. TrueCap ran its sample deal with{" "}
+        3-bedroom FMR as a placeholder rent — not a listing. TrueCap ran its sample deal with{" "}
         {usd(hud.rent3br)}/mo of rent and every other assumption unchanged.
       </p>
       <dl className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -506,15 +522,15 @@ export function MarketVerifyLocally({ city }: { city: string }) {
   const items = [
     {
       title: "Property tax bill",
-      body: `Pull the parcel's current bill from the county assessor or treasurer, and check how the assessment resets after a sale. The sample above uses ${SAMPLE_DEAL_FIXTURE.values.propertyTaxPct}% of price; your ${city} bill may be higher or lower.`,
+      body: `Pull the parcel's current bill from the county assessor or treasurer, and check whether a sale changes the assessment. The sample above uses ${SAMPLE_DEAL_FIXTURE.values.propertyTaxPct}% of price; enter the ${city} bill instead.`,
     },
     {
       title: "Rental licensing and permits",
-      body: `Many cities require a rental license, an inspection, or a certificate of occupancy before you can lease. Confirm the ${city} rules for the address and budget the fees before you close.`,
+      body: `Check whether ${city} requires a rental license, registration, inspection, or certificate of occupancy for the address, and budget any fees before you close.`,
     },
     {
       title: "Insurance quotes",
-      body: "Get a written landlord-policy quote for the specific property, including wind, hail, or flood coverage where it applies. Premiums vary by ZIP, building age, and roof.",
+      body: "Get a written landlord-policy quote for the specific property, with wind, hail, or flood coverage where the property needs it, and enter that premium instead of a default.",
     },
   ];
   return (

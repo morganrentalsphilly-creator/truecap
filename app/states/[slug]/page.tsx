@@ -26,16 +26,14 @@ import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import {
-  HUD_FMR_OVERVIEW_RETRIEVED_AT,
-  HUD_FMR_OVERVIEW_URL,
   buildHudDataAsOfLine,
   fmrLabel,
   formatIsoDate,
   usd,
   type SourceLink,
 } from "@/lib/markets/data-copy";
-import { HUD_FMR_AREAS, HUD_FMR_AREAS_RETRIEVED_AT } from "@/lib/markets/hud-fmr-areas";
 import {
+  HUD_FMR_OVERVIEW_SOURCE,
   NOINDEX_FOLLOW,
   STATE_PAGE_GUIDANCE,
   buildStateDescription,
@@ -49,6 +47,7 @@ import {
   getStateHudCities,
   getStateHudRetrievedDates,
   isStateIndexable,
+  stateCityHudSource,
 } from "@/lib/markets/indexability";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES, getStateBySlug } from "@/lib/states";
@@ -131,15 +130,13 @@ export default async function StatePage({
       ? `${buildHudDataAsOfLine(year, hudDates)}${stateFacts ? ` Census figures: American Community Survey ${stateFacts.medianHomeValue.year} 1-year estimates (retrieved ${acsDates.map(formatIsoDate).join(" and ")}).` : ""}`
       : null;
   const cityDocs: SourceLink[] = hudCities.flatMap((city) => {
-    const area = Object.prototype.hasOwnProperty.call(HUD_FMR_AREAS, city.slug) ? HUD_FMR_AREAS[city.slug]! : null;
-    return area && area.year === city.hud.year
-      ? [{ label: `HUD FY${area.year} Fair Market Rent documentation: ${city.name} (${area.areaName})`, href: area.sourceUrl, retrievedAt: HUD_FMR_AREAS_RETRIEVED_AT }]
-      : [];
+    const source = stateCityHudSource(city);
+    return source ? [source] : [];
   });
   const seen = new Set<string>();
   const sources: SourceLink[] = [
     ...facts.map((fact) => fact.source),
-    { label: "HUD Fair Market Rents: definition and uses (huduser.gov)", href: HUD_FMR_OVERVIEW_URL, retrievedAt: HUD_FMR_OVERVIEW_RETRIEVED_AT },
+    HUD_FMR_OVERVIEW_SOURCE,
     ...cityDocs,
   ].filter((source) => (seen.has(source.href) ? false : (seen.add(source.href), true)));
   const cell =
