@@ -644,35 +644,76 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
 
       - uses: actions/download-artifact@v8
         with:
           name: published
           path: ${{ runner.temp }}/published
 
+      # The model's permission rule matches a command by prefix, and a command
+      # that expands shell variables is not matched: the third live run's
+      # `gh pr create --repo "$GH_REPO" ...` was refused and no PR was opened.
+      # So the command is written out with literal values, each validated
+      # against the only shapes the publish job produces.
+      - name: Write the exact command
+        id: cmd
+        env:
+          REPO: ${{ github.repository }}
+          TITLE: ${{ needs.publish.outputs.title }}
+          BODY: ${{ runner.temp }}/published/pr-body.md
+        run: |
+          set -euo pipefail
+          [[ "$REPO" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]] || { echo "::error::unexpected repository name"; exit 1; }
+          [[ "$LOOP_BRANCH" =~ ^seo/[0-9]+$ ]] || { echo "::error::unexpected loop branch $LOOP_BRANCH"; exit 1; }
+          [[ "$TITLE" =~ ^seo-weekly:\ run\ [0-9A-Za-z-]+,\ [0-9]+\ pages?,\ tier\ [0-2]$ ]] || { echo "::error::unexpected PR title"; exit 1; }
+          [[ "$BODY" =~ ^[A-Za-z0-9/._-]+$ ]] && [ -s "$BODY" ] || { echo "::error::PR body file missing or oddly named"; exit 1; }
+          echo "command=gh pr create --repo $REPO --base main --head $LOOP_BRANCH --title '$TITLE' --body-file $BODY" >> "$GITHUB_OUTPUT"
+
       # The Claude GitHub App is the only identity available whose pull
       # requests trigger the required CI checks; GITHUB_TOKEN's do not, and it
       # may not open PRs here at all. So a model step opens the PR — with one
-      # tool, one command, and inputs that are all deterministic or files.
+      # tool and one literal command.
       - name: Open the pull request
         uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790
-        env:
-          GH_REPO: ${{ github.repository }}
-          PR_TITLE: ${{ needs.publish.outputs.title }}
-          PR_BODY_FILE: ${{ runner.temp }}/published/pr-body.md
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Run exactly this one shell command, once, and then stop. Do not run anything else.
-            gh pr create --repo "$GH_REPO" --base main --head "$LOOP_BRANCH" --title "$PR_TITLE" --body-file "$PR_BODY_FILE"
+            Run exactly this one shell command, verbatim, once, and then stop. Do not run anything else.
+            ${{ steps.cmd.outputs.command }}
           claude_args: |
             --max-turns 6
             --setting-sources user
             --allowedTools "Bash(gh pr create:*)"
+
+      # Tool names, denials and turns only — never the transcript (public repo).
+      - name: Summarize the step
+        if: always()
+        run: node seo/scripts/run-flags.ts --summarize-execution "$RUNNER_TEMP/claude-execution-output.json" || true
+
+      # A model step can end "successfully" without having run its command.
+      # Fail here, loudly, instead of letting merge discover a missing PR.
+      - name: The pull request exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            N="$(gh pr list --head "$LOOP_BRANCH" --state open --json number --jq 'length')"
+            [ "$N" = "1" ] && { echo "PR open for $LOOP_BRANCH"; exit 0; }
+            sleep 5
+          done
+          echo "::error::no open pull request for $LOOP_BRANCH after the open step"
+          exit 1
 
   merge:
     needs: [gate, data, verify-static, publish, open-pr]
