@@ -36,8 +36,8 @@ import { CANONICAL_SITE_URL } from "@/lib/site-url";
  * state guide and at most five nearby markets, glossary pages link their
  * calculator only while it is released, and /blog/topics counts its hubs.
  *
- * Four pages read request state or live services while rendering and cannot
- * render in a unit test (NOT_UNIT_RENDERABLE). Their own literal hrefs are
+ * Four pages need the mounted app router, request state or live services
+ * while rendering and cannot render in a unit test (NOT_UNIT_RENDERABLE). Their own literal hrefs are
  * checked against rule 2 from source, their outbound links do not count
  * toward rule 1 (which only makes it stricter), and the loopback crawl of
  * the built site covers them (seo/scripts/crawl.ts --base).
@@ -47,8 +47,8 @@ const ROOT = process.cwd();
 const APP = join(ROOT, "app");
 
 const NOT_UNIT_RENDERABLE: Record<string, string> = {
-  "/": "a Suspense-wrapped client banner (BillingSuccessBanner) suspends outside the app router",
-  "/analyze": "the analyzer needs the root layout's ActionConfirmProvider",
+  "/": "client components (BillingSuccessBanner) call useRouter/useSearchParams, which need the mounted app router",
+  "/analyze": "the analyzer's client components need the mounted app router and the root layout's ActionConfirmProvider",
   "/pricing": "reads the Supabase session cookie and Stripe display prices",
   "/reviews": "reads live usage counts through unstable_cache",
 };
@@ -191,7 +191,7 @@ describe("internal link graph (every sitemap page, rendered)", () => {
     return "not in the sitemap (noindexed or unlisted)";
   }
 
-  it("renders every sitemap page except the documented request-state pages", () => {
+  it("renders every sitemap page except the documented pages that need a request", () => {
     expect(sitemapPaths.length).toBeGreaterThan(380);
     expect(renderProblems).toEqual([]);
     expect(rendered.size).toBe(sitemapPaths.length - Object.keys(NOT_UNIT_RENDERABLE).length);
