@@ -124,6 +124,5 @@ The orchestrator itself has no tier. Each file's tier is derived from its diff:
 Tier 2 never auto-merges.
 
 ## Budget
-You have about 90 turns and $4. Prefer three excellent edits to ten sloppy ones.
-Stop and write the manifest by turn ~75 whatever state you are in: an
-unwritten manifest wastes the whole run.
+You have $4 (the binding limit) and up to 160 turns, counting the turns of the skills and the critic subagent you call. Prefer three excellent edits to ten sloppy ones.
+Write the manifest as soon as your edits are done, and no later than about $3.50 spent or turn ~140, whatever state you are in: the workflow proposes this run's edits only when `seo/data/run-manifest.json` exists with this run's `runId`, so an unwritten manifest wastes the whole run.

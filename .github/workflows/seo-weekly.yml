@@ -255,8 +255,15 @@ jobs:
           LIST="$(node seo/scripts/run-flags.ts --print-model-tools)"
           echo "list=$LIST" >> "$GITHUB_OUTPUT"
 
+      # continue-on-error: the action fails a run whose turn count (which
+      # includes skill and subagent turns) passes --max-turns even when the
+      # model finished and reported success — the fourth live run did its
+      # work in 116 turns for $3.85 and lost all of it. Whether the work is
+      # complete is decided below (a manifest for THIS run), and every job
+      # after this one still fences, builds and criticises it.
       - name: Run the seo-weekly skill
         id: claude
+        continue-on-error: true
         uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -270,7 +277,7 @@ jobs:
             Do not commit, push or open a PR; the workflow does that.
           claude_args: |
             --model claude-sonnet-5
-            --max-turns 90
+            --max-turns 160
             --max-budget-usd 4
             --allowedTools "${{ steps.tools.outputs.list }}"
 
@@ -287,7 +294,13 @@ jobs:
           # Denials, turns and cost only — never the transcript (public repo).
           node seo/scripts/run-flags.ts --summarize-execution "$RUNNER_TEMP/claude-execution-output.json" \
             > "$RUNNER_TEMP/proposal/run-summary.json" || echo '{}' > "$RUNNER_TEMP/proposal/run-summary.json"
-          if [ -s "$RUNNER_TEMP/proposal/patch.diff" ]; then echo "proposed=true" >> "$GITHUB_OUTPUT"; else echo "proposed=false" >> "$GITHUB_OUTPUT"; fi
+          # A proposal needs a non-empty patch AND a run manifest the model
+          # wrote for THIS run (its last step): a run cut short leaves none,
+          # and its partial edits are never proposed.
+          COMPLETE=false
+          if [ -f seo/data/run-manifest.json ] && node -e 'const m=JSON.parse(require("fs").readFileSync("seo/data/run-manifest.json","utf8")); process.exit(String(m.runId)===process.env.SEO_RUN_ID && Array.isArray(m.changes) ? 0 : 1)'; then COMPLETE=true; fi
+          if [ "${{ steps.claude.outcome }}" != "success" ]; then echo "::warning::the model step ended with '${{ steps.claude.outcome }}'; manifest for this run: $COMPLETE"; fi
+          if [ -s "$RUNNER_TEMP/proposal/patch.diff" ] && [ "$COMPLETE" = "true" ]; then echo "proposed=true" >> "$GITHUB_OUTPUT"; else echo "proposed=false" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/upload-artifact@v7
         if: always()
