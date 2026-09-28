@@ -2,9 +2,10 @@
  * Per-term glossary page at /glossary/[slug].
  *
  * Each term in lib/glossary.ts produces a dedicated URL that ranks
- * for the term's name + common variants. Schema markup includes
- * DefinedTerm (Google understands "what is X" queries) + FAQPage
- * (powers question-answer snippets in SERPs).
+ * for the term's name + common variants. Schema markup: a DefinedTerm
+ * (in the hub's DefinedTermSet, by @id) and the BreadcrumbList. No
+ * FAQPage: the page renders definition sections, not questions, and
+ * FAQ markup must mirror a visible FAQ (F4).
  *
  * Internal links to related terms compound the topic-cluster SEO
  * signal — Google's algorithm rewards densely-linked subject matter.
@@ -29,6 +30,7 @@ import type { GlossaryCategory } from "@/lib/glossary";
 import { truncateMetaDescription } from "@/lib/utils";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { glossaryTermSetRef } from "@/lib/seo/glossary-ld";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -140,49 +142,8 @@ export default async function GlossaryTermPage({
     description: entry.definition,
     url: `${siteUrl}/glossary/${entry.slug}`,
     dateModified: lastmodFor(`/glossary/${entry.slug}`),
-    inDefinedTermSet: {
-      "@type": "DefinedTermSet",
-      name: "TrueCap Real Estate Investing Glossary",
-      url: `${siteUrl}/glossary`,
-    },
-  };
-
-  // FAQPage: powers Google's question-answer snippets in SERPs
-  const faqItems: Array<{ q: string; a: string }> = [
-    { q: `What is ${entry.term}?`, a: entry.definition },
-  ];
-  if (entry.formula) {
-    faqItems.push({
-      q: `How is ${entry.term} calculated?`,
-      a: entry.formula + (entry.example ? ` Example: ${entry.example}` : ""),
-    });
-  }
-  if (entry.benchmark) {
-    faqItems.push({
-      q: `What's a good ${entry.term}?`,
-      a: entry.benchmark,
-    });
-  }
-  if (entry.whyItMatters) {
-    faqItems.push({
-      q: `Why does ${entry.term} matter for rental property investing?`,
-      a: entry.whyItMatters,
-    });
-  }
-  if (entry.howToCheck) {
-    faqItems.push({
-      q: `How do I check ${entry.term} before I rely on it?`,
-      a: entry.howToCheck,
-    });
-  }
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqItems.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
+    // The hub's DefinedTermSet, by its @id (lib/seo/glossary-ld.ts, F4).
+    inDefinedTermSet: glossaryTermSetRef(siteUrl),
   };
 
   const breadcrumbLd = {
@@ -213,7 +174,6 @@ export default async function GlossaryTermPage({
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={definedTermLd} />
-      <JsonLd data={faqLd} />
       <JsonLd data={breadcrumbLd} />
 
       <Header />
