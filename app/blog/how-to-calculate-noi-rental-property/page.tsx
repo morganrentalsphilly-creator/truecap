@@ -147,40 +147,6 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to calculate NOI on a rental property",
-    description:
-      "Five-step process to compute net operating income correctly: build effective gross income, subtract every operating expense, and stop before the mortgage.",
-    step: [
-      {
-        "@type": "HowToStep",
-        name: "Start with gross potential rent",
-        text: "Monthly market rent for every unit × 12. Use signed-lease rent if occupied, comparable market rent if vacant.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Subtract vacancy and credit loss",
-        text: "Typically 5–8% of gross rents to cover turnover gaps and the occasional non-paying tenant.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Add other income",
-        text: "Laundry, pet rent, storage, parking, application fees — small but real.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Subtract operating expenses",
-        text: "Taxes, insurance, management, maintenance, reserves, owner-paid utilities, HOA, lawn/snow. NOT the mortgage, depreciation, or income tax.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "The result is NOI",
-        text: "Effective gross income minus operating expenses equals net operating income — the pre-financing earning power of the building.",
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,7 +154,6 @@ export default function BlogPost() {
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={howToLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">

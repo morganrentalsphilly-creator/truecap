@@ -7,10 +7,12 @@
  *
  *   - every application/ld+json block parses and has a schema.org @context;
  *   - required properties per @type (Article/BlogPosting, BreadcrumbList,
- *     FAQPage, SoftwareApplication, Organization, WebSite, DefinedTerm, WebPage);
+ *     FAQPage, HowTo, SoftwareApplication, Organization, WebSite, DefinedTerm,
+ *     WebPage);
  *   - FAQ questions are VISIBLE in the page's main text. Google requires FAQ
  *     markup to mirror visible content; invisible FAQ markup is a spam-policy
- *     problem, not a style nit.
+ *     problem, not a style nit. The same holds for HowTo steps: each step's
+ *     text (its name when it has no text) must be on the page.
  *   - the page's F4 values, by its path (scripts/seo/structured-data-
  *     expectations.mjs, shared with the production healthcheck): hub and /vs
  *     breadcrumb trails, one application entity per tool with @id
@@ -226,6 +228,36 @@ const RULES: Rule[] = [
         if (name.trim() && !visible.includes(normalizeVisible(name))) {
           const shown = name.length > 80 ? `${name.slice(0, 79)}…` : name;
           report(`question not visible on the page: ${JSON.stringify(shown)}`);
+        }
+      });
+    },
+  },
+  {
+    // Structured data must describe what the page shows. Five posts carried
+    // HowTo steps written as a separate paraphrase of the page (F4 review),
+    // so a step counts only when its text is visible.
+    types: ["HowTo"],
+    check: (node, report, visible) => {
+      const steps = asList(node.step);
+      if (!steps.length) {
+        report("missing step");
+        return;
+      }
+      steps.forEach((raw, index) => {
+        const step = asObject(raw);
+        if (!step) {
+          report(`step[${index}] is not an object`);
+          return;
+        }
+        const key = typeof step.text === "string" && step.text.trim() ? "text" : "name";
+        const value = typeof step[key] === "string" ? (step[key] as string) : "";
+        if (!value.trim()) {
+          report(`step[${index}] has no text or name`);
+          return;
+        }
+        if (!visible.includes(normalizeVisible(value))) {
+          const shown = value.length > 80 ? `${value.slice(0, 79)}…` : value;
+          report(`step[${index}].${key} not visible on the page: ${JSON.stringify(shown)}`);
         }
       });
     },
@@ -491,6 +523,10 @@ function selfTest(): void {
   check(validateHtml(page([article, faq], "<details><summary>What is <strong>NOI</strong>?</summary>Income.</details>"), "/blog/x").length === 0, "valid Article + visible FAQ");
   const hidden = validateHtml(page([faq], "<p>No questions here.</p>"), "/blog/x");
   check(hidden.length === 1 && hidden[0].type === "FAQPage" && hidden[0].detail.startsWith("question not visible"), "invisible FAQ is a finding");
+  const howTo = JSON.stringify({ "@context": "https://schema.org", "@type": "HowTo", name: "H", step: [{ "@type": "HowToStep", name: "Gather rent", text: "Multiply monthly rent by 12." }, { "@type": "HowToStep", name: "Divide NOI by price" }] });
+  check(validateHtml(page([howTo], "<ol><li>Multiply monthly rent by <b>12</b>.</li><li>Divide NOI by price</li></ol>"), "/blog/x").length === 0, "visible HowTo steps pass");
+  const hiddenSteps = validateHtml(page([howTo], "<p>Divide NOI by price</p>"), "/blog/x");
+  check(hiddenSteps.length === 1 && hiddenSteps[0].type === "HowTo" && hiddenSteps[0].detail.startsWith("step[0].text not visible"), "an invisible HowTo step is a finding");
   const breakout = validateHtml(page(['{"@context":"https://schema.org","@type":"WebPage","name":"x</script><img src=x>"}'], "<p>x</p>"), "/blog/x");
   check(breakout.some((f) => f.severity === "critical"), "raw </script inside JSON-LD is critical");
   const bad = validateBlocks([{ "@type": "Organization", name: "TrueCap" }], "", "/");

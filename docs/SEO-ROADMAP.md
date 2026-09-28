@@ -56,6 +56,8 @@ Targets: TX, FL, OH, PA, GA, NC, TN, IN, MO, MI, AZ, NV, IL, SC, AL.
 
 #### 3. **HowTo schema on existing tutorial blog posts** (~30 min of work)
 
+> **Retired (F4 review, 2026-09-28).** Google no longer shows the HowTo rich result, on desktop or mobile ([Google's how-to documentation](https://developers.google.com/search/docs/appearance/structured-data/how-to)). The five posts that carried HowTo markup described their steps in words the pages never showed, so the markup was removed; `seo/scripts/jsonld-validate.ts` now fails any HowTo step whose text is not visible on the page. Do not add it back.
+
 Google can show HowTo cards (step-by-step) in SERPs for queries like "how to underwrite a rental property." You have a post that's perfectly structured for this — just add the schema.
 
 Add HowTo schema to:

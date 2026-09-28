@@ -143,40 +143,6 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to calculate cash-on-cash return on a rental property",
-    description:
-      "Five-step process: compute NOI, subtract annual debt service for cash flow, tally total cash invested, divide.",
-    step: [
-      {
-        "@type": "HowToStep",
-        name: "Compute NOI",
-        text: "Gross rent minus vacancy minus all operating expenses. NOT including mortgage.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Compute annual debt service",
-        text: "Monthly mortgage payment (principal + interest) × 12.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Calculate annual cash flow",
-        text: "NOI minus annual debt service equals annual pre-tax cash flow.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Tally total cash invested",
-        text: "Down payment + closing costs + upfront rehab + initial reserves.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Divide cash flow by cash invested",
-        text: "Express as percentage. This is year-1 cash-on-cash return.",
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,7 +150,6 @@ export default function BlogPost() {
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={howToLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">

@@ -142,40 +142,6 @@ export default function BlogPost() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  const howToLd = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to calculate cap rate on a rental property",
-    description:
-      "Five-step process to compute cap rate correctly: gather gross rent, subtract operating expenses to get NOI, divide by purchase price or market value.",
-    step: [
-      {
-        "@type": "HowToStep",
-        name: "Gather gross annual rent",
-        text: "Multiply monthly market rent by 12. Use actual rent if leased, market rent if not.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Subtract vacancy allowance",
-        text: "Typical 5-8% of gross rents to account for turnover periods.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Subtract operating expenses",
-        text: "Property tax, insurance, management, recurring maintenance, utilities you pay, and HOA. Keep CapEx as a separate below-NOI reserve under the lender-style convention. Do not subtract the mortgage from NOI.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Calculate NOI",
-        text: "What's left after vacancy and operating expenses. This is net operating income.",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Divide NOI by price",
-        text: "Cap rate = NOI / purchase price. Express as percentage.",
-      },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,7 +149,6 @@ export default function BlogPost() {
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={howToLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
