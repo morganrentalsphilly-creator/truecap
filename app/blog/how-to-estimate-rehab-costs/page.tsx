@@ -89,10 +89,10 @@ export default function RehabEstimatePost() {
       <h2>6. Reconcile the budget before relying on an acquisition model</h2>
       <p>
         Update the scope after inspections and bid leveling, then model schedule
-        and cash timing as well as total cost. TrueCap&apos;s released core
-        analyzer does not replace contractor bids, engineering, permits, or a
-        specialist construction model. Use it only for the released preliminary
-        rental metrics under the assumptions actually shown.
+        and cash timing as well as total cost. TrueCap&apos;s core analyzer
+        does not replace contractor bids, engineering, permits, or a specialist
+        construction model. Use it only for the preliminary rental metrics under
+        the assumptions actually shown.
       </p>
 
       <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />

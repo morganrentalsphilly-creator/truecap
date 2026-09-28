@@ -29,6 +29,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
@@ -38,7 +39,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "70% rule for flipping: the price screen (2026)";
 const DESCRIPTION =
-  "The 70% rule caps your offer at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
+  "The 70% rule screens a flip's price at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
 const PUBLISHED_AT = "2026-07-05";
 const MODIFIED_AT = lastmodFor("/blog/70-percent-rule-house-flipping") ?? PUBLISHED_AT;
 const READING_TIME = 11;
@@ -84,7 +85,7 @@ const FAQS = [
   },
   {
     q: "Is the 70% rule outdated in 2026?",
-    a: "It still works as a screen, but 70 was never a universal number. Higher financing costs — hard money runs roughly 9.5–13% plus points in 2026 — make holding costs a bigger drag on long rehabs, which argues for a lower multiplier on heavy projects. On cheap houses, fixed costs push you toward 60–65%; on expensive houses with light work, 72–75% can be justified. Treat 70% as the center of a range, not a law.",
+    a: "It still works as a screen, but 70 was never a universal number. Higher financing costs — hard money usually costs more than conventional financing — make holding costs a bigger drag on long rehabs, which argues for a lower multiplier on heavy projects. On cheap houses, fixed costs push you toward 60–65%; on expensive houses with light work, 72–75% can be justified. Treat 70% as the center of a range, not a law.",
   },
   {
     q: "What if there aren't good comparable sales?",
@@ -163,7 +164,7 @@ export default function SeventyPercentRulePost() {
               too much and no amount of hustle on the rehab earns it back — the
               spread you needed was gone before you got the keys. The 70% rule is
               the back-of-the-napkin screen investors use to keep that from
-              happening: it caps what you offer at 70% of the finished value,
+              happening: it screens the price at 70% of the finished value,
               minus what the repairs will cost. It fits on an index card, it
               works often enough to be worth memorizing, and — like every rule of
               thumb — it quietly lies in exactly the situations where the money is
@@ -201,8 +202,8 @@ export default function SeventyPercentRulePost() {
               </code>
             </div>
             <p>
-              So you offer no more than $165,000 — not because that&apos;s what
-              the seller wants or what the property is worth in its current
+              So the rule screens the price at $165,000 — not because that&apos;s
+              what the seller wants or what the property is worth in its current
               condition, but because it leaves 30% of the finished value to cover
               everything between the contract and the closing on the resale, plus
               your profit. (The free{" "}
@@ -255,9 +256,9 @@ export default function SeventyPercentRulePost() {
             </ul>
             <p>
               Skip any of these when you&apos;re eyeballing a deal and you&apos;ll
-              systematically overpay. The 70% is calibrated so that, on a normal
-              deal, the first three eat roughly 12–14% of ARV and your profit is
-              the remaining 16–17%. Change any of those assumptions — a longer
+              systematically overpay. In the worked example below, buying,
+              holding, and selling costs take about 12.6% of ARV and profit is
+              about 17.4%. Change any of those assumptions — a longer
               hold, a pricier market, a thinner margin — and the right multiplier
               moves off 70%.
             </p>
@@ -266,8 +267,8 @@ export default function SeventyPercentRulePost() {
               A full worked flip
             </h2>
             <p>
-              Numbers make the 30% concrete. Buy the house at the $165,000 max
-              offer, put $45,000 into it, and sell it six months later at the
+              Numbers make the 30% concrete. Buy the house at the $165,000 price
+              screen, put $45,000 into it, and sell it six months later at the
               $300,000 ARV. Here is the whole ledger:
             </p>
             <ScrollX label="Data table" className="overflow-x-auto">
@@ -336,13 +337,13 @@ export default function SeventyPercentRulePost() {
               >
                 Hard money
               </Link>{" "}
-              in 2026 runs roughly 9.5–13% plus 1.5–3 points, so on a $165,000
-              loan held six months you&apos;re paying about $9,000 in interest and
-              $3,300 in points before you replace a single fixture. Investors who
-              forget that commissions and holding costs scale with the deal — not
-              with the bargain price they paid — are the ones whose
-              &quot;guaranteed&quot; $70,000 profit shows up at closing as
-              $50,000.
+              usually costs more than conventional financing, so get written
+              quotes. At an assumed 11% rate and 2 points, on a $165,000 loan held
+              six months you&apos;re paying about $9,000 in interest and $3,300 in
+              points before you replace a single fixture. Investors who forget
+              that commissions and holding costs scale with the deal — not with
+              the bargain price they paid — are the ones whose projected $70,000
+              profit shows up at closing as $50,000.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -414,28 +415,17 @@ export default function SeventyPercentRulePost() {
             <p>
               ARV sets the top of the deal; the repair estimate sets how much of
               it you keep. Get the rehab wrong and the 70% rule faithfully hands
-              you a 70%-rule price screen that&apos;s also wrong. A rough 2026 scope-to-cost
-              ladder, per finished square foot:
+              you a 70%-rule price screen that&apos;s also wrong. Build the rehab
+              number from contractor bids or the rehab cost estimator&apos;s line
+              items; per-square-foot costs vary widely with local labor and
+              materials.
             </p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>
-                <strong>Cosmetic</strong> (paint, flooring, fixtures, minor
-                kitchen): ~$15–25/sqft
-              </li>
-              <li>
-                <strong>Moderate</strong> (full kitchen and baths, some systems,
-                curb appeal): ~$30–50/sqft
-              </li>
-              <li>
-                <strong>Full gut or major systems</strong> (roof, HVAC,
-                electrical, plumbing, layout): ~$60–90/sqft
-              </li>
-            </ul>
             <p>
-              On the 1,450-sqft subject, a moderate rehab at about $31/sqft is the
-              $45,000 in the example. Whatever number you build bottom-up from a
-              contractor walk-through, add a contingency of 10–25% — the older the
-              house, the higher — because the expensive surprises (knob-and-tube
+              On the 1,450-sqft subject, the example&apos;s $45,000 works out to
+              about $31/sqft. Whatever number you build bottom-up from a
+              contractor walk-through, add a contingency — the rehab cost
+              estimator starts at 10%, and the older the house, the higher it
+              should go — because the expensive surprises (knob-and-tube
               wiring, a failed sewer lateral, rot behind the tub) are the ones you
               find after demolition, not before. The{" "}
               <Link
@@ -473,7 +463,7 @@ export default function SeventyPercentRulePost() {
                   <tr className="bg-muted">
                     <th className="text-left">Situation</th>
                     <th className="text-left">What&apos;s different</th>
-                    <th className="text-right">Offer as % of ARV</th>
+                    <th className="text-right">Screen as % of ARV</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -531,9 +521,23 @@ export default function SeventyPercentRulePost() {
               </Link>{" "}
               you&apos;re not selling — you refinance the finished rental and pull
               your cash back out to do it again. The binding constraint is the
-              refinance. There is no universal cash-out ceiling: maximum LTV,
-              eligible value, seasoning, appraisal treatment, and approval vary
-              by lender, program, borrower, and property. The 75% case below is
+              refinance. There is no universal cash-out ceiling: maximum LTV
+              (for a conforming cash-out refinance of an investment property,{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac allows up to 75% on one unit and 70% on 2-4 units
+              </a>
+              ), eligible value, seasoning (
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae generally requires six months on title
+              </a>
+              ), appraisal treatment, and approval vary by lender, program,
+              borrower, and property. The 75% case below is
               an editable planning scenario, not a loan quote, appraisal, or
               promise that capital can be recovered.
             </p>
@@ -548,8 +552,8 @@ export default function SeventyPercentRulePost() {
               scenario does not promise that little or no cash remains invested.
               That potential capital recycling is the appeal of BRRRR, and
               it&apos;s why the 70% purchase cap fits so naturally: the roughly
-              five-point gap between the 70% you paid and the 75% you can
-              refinance is about the room the transaction costs need. Miss high on
+              five-point gap between the 70% you paid and a 75% refinance, where
+              one is available, is about the room the transaction costs need. Miss high on
               the rehab or drag the timeline and you leave more cash in — the{" "}
               <Link
                 href="/blog/brrrr-method-explained"
@@ -576,17 +580,17 @@ export default function SeventyPercentRulePost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The honest version: solve the offer backward
+              The honest version: solve the price backward
             </h2>
             <p>
-              The 70% rule is triage, not underwriting. A more complete 70%-rule price screen starts
-              from ARV and subtracts modeled costs plus
-              the profit you require, leaving the price as the remainder:
+              The 70% rule is triage, not underwriting. A more complete backward
+              solve starts from ARV and subtracts modeled costs plus the profit
+              you require, leaving the price as the remainder:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                70%-rule price screen = ARV − selling − holding − buying − rehab − required
-                profit
+                Backward-solve price = ARV − selling − holding − buying − rehab −
+                required profit
               </code>
             </div>
             <p>
@@ -595,8 +599,8 @@ export default function SeventyPercentRulePost() {
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                70%-rule price screen = $300,000 − $19,500 − $15,000 − $3,300 − $45,000 −
-                $50,000 = $167,200
+                Backward-solve price = $300,000 − $19,500 − $15,000 − $3,300 −
+                $45,000 − $50,000 = $167,200
               </code>
             </div>
             <p>
@@ -627,8 +631,8 @@ export default function SeventyPercentRulePost() {
             <p>
               The 70% rule earns its place because it compresses a real
               underwriting model into one line you can run in your head on a
-              listing: offer 70% of the finished value, minus the repairs, and
-              you&apos;ve usually left enough room for the costs and the profit.
+              listing: screen at 70% of the finished value, minus the repairs,
+              and you&apos;ve usually left enough room for the costs and the profit.
               Respect what it&apos;s actually doing, though. The 70 is an average
               of assumptions about holding, selling, and margin — honest on a
               typical deal in a typical market, and quietly wrong on a cheap house,
@@ -642,11 +646,24 @@ export default function SeventyPercentRulePost() {
               runs a property&apos;s 70%-rule price screen, cash flow, cap rate, and DSCR from
               the same inputs — so whether you&apos;re flipping it or holding it,
               you can see the number that protects your spread before you write the
-              offer. None of this is investment or lending advice; confirm your own
-              costs, comps, and financing terms before recording a decision. The 70%-rule price screen is not a recommended offer.
+              offer. Confirm your own costs, comps, and financing terms before
+              recording a decision; the 70%-rule price screen is not a
+              recommended offer.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-1.3-03, Cash-Out Refinance Transactions",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

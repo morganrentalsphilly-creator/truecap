@@ -17,6 +17,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "house-hacking-explained";
 const TITLE = "House hacking explained: how to (almost) live for free in a 2-4 unit";
@@ -85,14 +86,14 @@ export default function HouseHackingPost() {
           </p>
           <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            House hacking is the most under-rated path into rental investing. Done right, your tenants pay your mortgage and you build equity in property you live in — with as little as 3.5% down. Here&apos;s the actual math, the rules, and how to tell whether a specific 2-4 unit pencils.
+            House hacking is the most under-rated path into rental investing. Done right, your tenants pay your mortgage and you build equity in property you live in — with as little as <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">3.5% down on an FHA loan</a> (for credit scores of 580 or higher). Here&apos;s the actual math, the rules, and how to tell whether a specific 2-4 unit pencils.
           </p>
         </header>
 
         <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What house hacking actually is</h2>
           <p>
-            House hacking = you buy a 2-4 unit property using owner-occupant financing (FHA, conventional 5% down, or VA if you qualify), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (the FHA + conventional owner-occupant residency minimum), you can move out and the property converts to a full investment rental.
+            House hacking = you buy a 2-4 unit property using owner-occupant financing (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">FHA</a>, <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">conventional 5% down</a>, or <a href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/" className="text-primary font-semibold hover:underline">VA if you qualify</a>), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (FHA requires the intent to occupy for at least one year; a conventional 2-4 unit loan carries a one-year occupancy covenant only if the lender <a href="https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions" className="text-primary font-semibold hover:underline">keeps it in the loan documents</a>, so check yours), you may be able to move out and convert the property to a full investment rental.
           </p>
           <p>
             The leverage advantage is enormous. Compare:
@@ -113,10 +114,10 @@ export default function HouseHackingPost() {
             example, current FHA policy generally includes:
           </p>
           <ul>
-            <li><strong>You must occupy the property as your primary residence</strong> within 60 days of closing</li>
+            <li><strong>You must occupy the property as your primary residence</strong> <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">within 60 days of closing</a></li>
             <li><strong>Intent to continue principal-residence occupancy for at least one year</strong>, subject to Handbook exceptions and the facts</li>
             <li><strong>Eligible property and unit-count rules</strong> that the lender must verify</li>
-            <li><strong>FHA Net Self-Sufficiency Rental Income Eligibility</strong> on 3-4 unit properties, calculated by the lender under the current Handbook</li>
+            <li><strong>FHA Net Self-Sufficiency Rental Income Eligibility</strong> on 3-4 unit properties, calculated by the lender under the <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">current Handbook</a></li>
           </ul>
           <p>
             Conventional programs use different eligibility and underwriting.
@@ -147,12 +148,26 @@ export default function HouseHackingPost() {
             On TrueCap, set <strong>Property type = Owner-occupant</strong>, then enter per-unit rents (zero for your unit). The score uses owner-occupant break-even bands ($300/mo near-zero), not investor cash-flow bands ($1,000/mo).
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">FHA MIP — the catch nobody mentions</h2>
+          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">FHA MIP — the catch in the 3.5%</h2>
           <p>
-            Mortgage-insurance amount and duration depend on the current program,
-            loan terms, origination date, LTV, and payment history. Use the
-            lender&apos;s written FHA and conventional quotes rather than a generic
-            annual percentage or cancellation timeline.
+            On a 3.5%-down, 30-year FHA loan with a base amount of $726,200 or
+            less, HUD charges an{" "}
+            <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" className="text-primary font-semibold hover:underline">upfront premium of 1.75% of the base loan</a>,
+            which{" "}
+            <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">can be financed into the loan</a>,
+            plus an annual premium of 0.55% of the balance, paid monthly for
+            the life of the loan. Put 10% or more down and the annual premium
+            ends after 11 years.
+            Conventional PMI on a Fannie Mae-backed two- to four-unit home, by
+            contrast,{" "}
+            <a href="https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance" className="text-primary font-semibold hover:underline">can be cancelled at your request</a>{" "}
+            once the balance reaches 70% of the original value, and otherwise
+            ends at the midpoint of the loan term.
+          </p>
+          <p>
+            Your own amount and duration depend on the loan terms, origination
+            date, and LTV, so use the lender&apos;s written FHA and conventional
+            quotes rather than a generic figure.
           </p>
           <p>
             Translation: compare the complete written scenarios, including APR,
@@ -191,7 +206,7 @@ export default function HouseHackingPost() {
           </p>
           <ul>
             <li><strong>2-4 units in a livable city neighborhood</strong> — you&apos;re going to live there for at least a year</li>
-            <li><strong>Owner-occupied-friendly rent-to-price ratio</strong> — units should rent for 0.6-1%+ of price each</li>
+            <li><strong>Owner-occupied-friendly rent-to-price ratio</strong> — the units&apos; combined rent should run about 0.6-1%+ of price</li>
             <li><strong>Separate utilities</strong> — sub-metered electric/gas means tenants pay their own, no allocation disputes</li>
             <li><strong>Newer roof, electrical, HVAC</strong> — you can&apos;t cash-out-refi-rehab during your live-in year easily; pick a property that doesn&apos;t need major capex up front</li>
             <li><strong>Good local PM market</strong> — when you move out in year 2, you&apos;ll likely hand it to a PM. Check fees and references before buying.</li>
@@ -204,22 +219,54 @@ export default function HouseHackingPost() {
           </p>
           <ul>
             <li><strong>You live next to your tenants.</strong> Loud party at 2am? You&apos;re the one on the wall. Maintenance call at 7am? You&apos;re probably the one walking over.</li>
-            <li><strong>You can only do this with FHA once at a time</strong> (FHA requires 1 primary residence per borrower at a time, mostly). You can chain conventional 5%-down owner-occupant loans but each needs the year of residency.</li>
+            <li><strong>You can only do this with FHA once at a time</strong> (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">FHA won&apos;t insure more than one principal residence per borrower</a> at a time, with a few listed exceptions). You can chain conventional 5%-down owner-occupant loans, since <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="text-primary font-semibold hover:underline">Fannie Mae sets no limit on financed properties for principal-residence loans</a>, but each purchase must genuinely be your principal residence, and your loan documents may require a year of occupancy.</li>
             <li><strong>Year 1 cash flow is usually break-even or negative.</strong> Your personal balance sheet needs to carry that for 12 months until you can move out.</li>
             <li><strong>Tenant turnover during your residency hurts more</strong> — you can&apos;t easily move other units while you&apos;re living there to do rehab during turnover.</li>
           </ul>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The bottom line</h2>
           <p>
-            House hacking is the highest-leverage strategy in real estate that&apos;s actually accessible to a normal-income buyer. $10-20k down for a $300-400k 2-4 unit, year of living break-even, then year 2 onward producing real cash flow on what was originally your housing.
+            House hacking is the highest-leverage strategy in real estate that&apos;s actually accessible to a normal-income buyer. <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">$10-20k down</a> for a $300-400k 2-4 unit, a year of living at or near break-even, then, if verified rents and costs support it, a year-2 move-out that can turn what was your housing into a rental.
           </p>
           <p>
-            The deals that pencil are out there in most US markets — Philadelphia, Cleveland, Indianapolis, Memphis, Pittsburgh, and the Midwest in general have the highest hit rate. Coastal markets are harder but not impossible (Sacramento, Oakland, parts of Boston). Run any specific property through{" "}
+            Deals that pencil exist in many US markets, but whether a specific 2-4 unit works depends on its local price, rents, taxes and insurance, so test each property rather than relying on a city list. Run any specific property through{" "}
             <Link href="/analyze?type=owner-occupant" prefetch={false} className="text-primary font-semibold hover:underline">TrueCap with property type = owner-occupant</Link> to see whether the math works before you commit. The starter template &quot;Starter — House hack&quot; on{" "}
             <Link href="/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%23plans" className="text-primary font-semibold hover:underline">Pro templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">how to find off-market rental properties</Link>.
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook (update issued Aug. 12, 2026)",
+              url: "https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf",
+            },
+            {
+              title: "Fannie Mae Eligibility Matrix (Aug. 5, 2026)",
+              url: "https://singlefamily.fanniemae.com/media/20786/display",
+            },
+            {
+              title: "U.S. Department of Veterans Affairs, VA purchase loan",
+              url: "https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/",
+            },
+            {
+              title: "Fannie Mae, Instructions for the 1-4 Family Rider (Form 3170)",
+              url: "https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions",
+            },
+            {
+              title: "HUD Mortgagee Letter 2023-05 (Feb. 22, 2023), FHA mortgage insurance premiums",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf",
+            },
+            {
+              title: "Fannie Mae Servicing Guide B-8.1-04, Termination of Conventional Mortgage Insurance",
+              url: "https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-2-03, Multiple Financed Properties for the Same Borrower",
+              url: "https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

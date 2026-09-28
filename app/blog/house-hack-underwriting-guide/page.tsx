@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "house-hack-underwriting-guide";
 const TITLE =
@@ -93,11 +94,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Should I house hack a duplex or a fourplex?",
-    a: "Duplex if you value privacy and want to test landlording at small scale. Fourplex if you want maximum scale and tolerate more management complexity. Triplex is a sweet spot many investors love — three income streams, one shared roof, often eligible for FHA self-sufficiency. The actual answer depends on which configuration is available in your market at a price the underwriting supports — don't over-optimize between configurations you can't actually find.",
+    a: "Duplex if you value privacy and want to test landlording at small scale. Fourplex if you want maximum scale and tolerate more management complexity. A triplex adds a third income stream, but as a three-unit property an FHA purchase must pass HUD's self-sufficiency test, which applies to every three- to four-unit property. The actual answer depends on which configuration is available in your market at a price the underwriting supports — don't over-optimize between configurations you can't actually find.",
   },
   {
     q: "What's the biggest mistake first-time house hackers make?",
-    a: "Underestimating the management overhead. Living next door to your tenants means hearing every late-night argument, fielding every drip-faucet text at 11pm, and handling every awkward conversation about late rent in person. It's not 'passive.' Build in a self-management premium when you compare to renting — your time has a real cost. Many house hackers move out at year 2 specifically to put distance between themselves and the management work.",
+    a: "Underestimating the management overhead. Living next door to your tenants means hearing every late-night argument, fielding every drip-faucet text at 11pm, and handling every awkward conversation about late rent in person. It's not 'passive.' Build in a self-management premium when you compare to renting — your time has a real cost. If you plan to move out later, check the loan's occupancy terms first; FHA, for example, requires intent to occupy for at least one year.",
   },
 ];
 
@@ -187,18 +188,32 @@ export default function BlogPost() {
         <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
             House hacking is one of the highest-leverage moves in residential
-            real estate: 3.5-5% down owner-occupant financing, the ability to
-            offset most of your housing cost with tenant rent, and a year-1 head
-            start on your investment career. But the math is misleading if you
+            real estate: owner-occupant financing from{" "}
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              3.5% down on FHA
+            </a>{" "}
+            to{" "}
+            <a
+              href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+              className="text-primary font-semibold hover:underline"
+            >
+              5% down on a conventional 2-4 unit primary residence
+            </a>
+            , the ability to offset part of your housing cost with tenant rent,
+            and a year-1 head start on your investment career. But the math is
+            misleading if you
             compare it to a traditional rental analysis — a house hack rarely
             &ldquo;cash flows&rdquo; in the way a pure rental does, and you can
             talk yourself out of great deals by using the wrong benchmark.
           </p>
           <p>
             This guide walks through what to actually model, the owner-occupant
-            tax wrinkles, the FHA self-sufficiency test that kills many 3-4 unit
-            deals, and the comparison that matters: house hack vs. renting the
-            equivalent.
+            tax wrinkles, the FHA self-sufficiency test that every 3-4 unit FHA
+            purchase must pass, and the comparison that matters: house hack vs.
+            renting the equivalent.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -241,7 +256,7 @@ export default function BlogPost() {
             </li>
             <li>
               Flat, upside, and downside property-value cases; appreciation is
-              not earned monthly or guaranteed.
+              not earned monthly and may not happen.
             </li>
             <li>
               An illustrative depreciation calculation based on a supported
@@ -287,16 +302,37 @@ export default function BlogPost() {
 
           <h3>4. Appreciation</h3>
           <p>
-            Long-term residential appreciation has averaged 3-5% annually. On a
-            $500K property that&apos;s $15-25K/year of expected wealth growth.
-            Underwrite conservatively (3% or use the historical average for your
-            specific MSA from FHFA data), but don&apos;t zero it out.
+            Long-term U.S. home-price growth has averaged roughly 3-5% a year in
+            nominal terms, depending on the start date, per{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/USSTHPI"
+              className="text-primary font-semibold hover:underline"
+            >
+              FHFA&apos;s House Price Index
+            </a>
+            . On a $500K property, 3-5% would be $15-25K/year of paper wealth
+            growth. Underwrite conservatively (3%, or the historical average for
+            your specific MSA from FHFA&apos;s metro-area index —{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/ATNHPIUS26900Q"
+              className="text-primary font-semibold hover:underline"
+            >
+              Indianapolis&apos;s, for example
+            </a>
+            ), but don&apos;t zero it out.
           </p>
 
           <h3>5. Tax shield</h3>
           <p>
-            The rental portion of the property gets <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E treatment</Link>. That
-            means depreciation, mortgage interest allocation, and operating
+            The rental portion of the property gets <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E treatment</Link>{" "}
+            (see{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              IRS Publication 527 on renting part of a property
+            </a>
+            ). That means depreciation, mortgage interest allocation, and operating
             expense deductions on the rented unit(s). Your occupied portion may
             receive different treatment. Allocation, deductibility, passive-loss
             limits, basis, and personal-use rules are taxpayer-specific; the
@@ -308,16 +344,29 @@ export default function BlogPost() {
           </h2>
           <p>
             FHA loans are the most-celebrated house hack vehicle — 3.5% down,
-            lower credit score thresholds, owner-occupant rates. But for 3-4
-            unit properties, HUD applies a
+            credit-score tiers down to 500 (
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              580 or higher for maximum financing
+            </a>
+            ). But for 3-4 unit properties, HUD applies a
             <strong> Net Self-Sufficiency Rental Income Eligibility</strong>{" "}
-            calculation. The lender performs it using the current Handbook and
-            appraisal inputs; a TrueCap rent scenario does not establish the
+            calculation, which every 3-4 unit FHA purchase must pass. The lender
+            performs it using the{" "}
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              current HUD Handbook 4000.1
+            </a>{" "}
+            and appraisal inputs; a TrueCap rent scenario does not establish the
             eligible rent, denominator, result, or loan approval.
           </p>
           <p>
             If the FHA calculation does not support a proposed loan, possible
-            next questions—not guaranteed workarounds—include:
+            next questions—not sure-fire workarounds—include:
           </p>
           <ul>
             <li>
@@ -328,7 +377,7 @@ export default function BlogPost() {
             <li>
               <strong>A different down payment</strong>: ask the lender to
               recalculate using verified terms; more equity does not by itself
-              guarantee eligibility.
+              establish eligibility.
             </li>
             <li>
               <strong>A different property</strong>: ask the lender whether a
@@ -360,10 +409,12 @@ export default function BlogPost() {
 
           <h3>2. Realistic operating expenses</h3>
           <p>
-            Maintenance 1.5-2% of property value annually, CapEx reserve 1%,
-            vacancy 8% (despite owner-occupant being there for year 1+),
-            property management 0 if self-managed (most house hackers do),
-            utilities for common areas and any you provide. Don&apos;t skip
+            Start from TrueCap&apos;s editable calculator defaults — maintenance
+            10% of rent, CapEx reserve 5%, vacancy 5% on the rented units
+            (despite owner-occupant being there for year 1+) — and adjust them
+            for the building&apos;s age and condition. Property management 0 if
+            you self-manage, plus utilities for common areas and any you
+            provide. Don&apos;t skip
             CapEx reserves because the building &ldquo;looks new&rdquo; — the
             roof and furnace age regardless.
           </p>
@@ -385,9 +436,16 @@ export default function BlogPost() {
 
           <h3>4. The tax allocation</h3>
           <p>
-            Square-footage allocation between owner-occupied and rental
-            portions. Talk to a CPA on the specifics — the rules are mechanical
-            but the deductions add up.
+            Allocation between owner-occupied and rental portions using any
+            reasonable method;{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              the IRS names square footage and number of rooms as the most
+              common
+            </a>
+            . Talk to a CPA on the specifics.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The non-financial costs</h2>
@@ -417,10 +475,16 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            None of these kill the strategy. But they&apos;re why most
-            successful house hackers move out at month 13 and convert the deal
-            into a pure rental. House hacking is a tactic, not a long-term
-            lifestyle.
+            None of these kill the strategy. But they&apos;re why some owners
+            plan an eventual move-out and convert the deal into a pure rental —
+            after confirming the loan&apos;s occupancy terms (
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              FHA requires intent to occupy for at least one year
+            </a>
+            ). House hacking is a tactic, not a long-term lifestyle.
           </p>
 
           <div className="not-prose"></div>
@@ -465,6 +529,30 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook (Update 18, August 2026)",
+              url: "https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "FHFA All-Transactions House Price Index for the United States (USSTHPI), via FRED",
+              url: "https://fred.stlouisfed.org/series/USSTHPI",
+            },
+            {
+              title: "FHFA All-Transactions House Price Index for Indianapolis-Carmel-Anderson, IN (MSA), via FRED",
+              url: "https://fred.stlouisfed.org/series/ATNHPIUS26900Q",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -475,8 +563,7 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Analyzing a duplex or fourplex as a house hack? TrueCap models
-            owner-occupant deals with one unit vacant to you — the math that
-            almost no other calculator handles cleanly.{" "}
+            owner-occupant deals with one unit vacant to you.
           </p>
         </footer>
       </main>

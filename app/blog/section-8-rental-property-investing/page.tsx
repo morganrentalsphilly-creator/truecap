@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "section-8-rental-property-investing";
 const TITLE =
@@ -79,7 +80,7 @@ const FAQS = [
   },
   {
     q: "What is the NSPIRE inspection and how often does it happen?",
-    a: "NSPIRE is HUD's inspection framework for covered housing, but the applicable inspection process, timing, cure period, and payment consequences depend on current program and PHA rules. Obtain the current checklist and written local process before estimating lease-up timing or repair cost.",
+    a: "NSPIRE is HUD's inspection framework for covered housing. For voucher units, HUD has deferred NSPIRE compliance to February 1, 2027, so ask your PHA which inspection standard it currently uses. The applicable inspection process, timing, cure period, and payment consequences depend on current program and PHA rules. Obtain the current checklist and written local process before estimating lease-up timing or repair cost.",
   },
 ];
 
@@ -159,20 +160,20 @@ export default function Section8RentalPost() {
               How the program actually pays you
             </h2>
             <p>
-              The Housing Choice Voucher program — commonly called Section 8 — is administered locally through public housing authorities (PHAs). Under an executed Housing Assistance Payments contract, the PHA pays the approved assistance portion directly to the owner, subject to the contract and continuing program compliance.
+              The Housing Choice Voucher program — commonly called Section 8 — is <a href="https://www.hud.gov/helping-americans/housing-choice-vouchers-tenants" className="text-primary font-semibold hover:underline">administered locally through public housing authorities (PHAs)</a>. Under an executed Housing Assistance Payments contract, the PHA <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-L/section-982.451" className="text-primary font-semibold hover:underline">pays the approved assistance portion directly to the owner</a>, subject to the contract and continuing program compliance.
             </p>
             <p>
-              The split depends on the household calculation, utility allowance, approved contract rent, and local program administration. For a hypothetical scenario, a written notice might allocate part to the tenant and part to HAP. Model those portions separately, but do not treat the assistance portion as unconditional: verify the executed contract, effective date, payment schedule, inspection status, and abatement terms.
+              The split depends on the household calculation, utility allowance, approved contract rent, and local program administration. For a hypothetical scenario, a written notice might allocate part to the tenant and part to HAP. Model those portions separately, but do not treat the assistance portion as unconditional — <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-L/section-982.451" className="text-primary font-semibold hover:underline">the HAP amount can change during the contract term</a>. Verify the executed contract, effective date, payment schedule, inspection status, and abatement terms.
             </p>
             <p>
-              Your contract rent has to clear two separate ceilings before the PHA signs off:
+              Your contract rent has to pass two separate tests before the PHA signs off: rent reasonableness, and, where the rent exceeds the payment standard, an affordability cap on the family&apos;s share at initial occupancy:
             </p>
             <ul>
               <li>
-                <strong>The payment standard.</strong> The PHA publishes current bedroom-count or ZIP-level standards using HUD benchmarks and applicable program rules. The standard is not an approved rent, a market-rent comp, or the amount the owner will receive.
+                <strong>Rent reasonableness.</strong> Independent of the payment standard, the PHA must <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507" className="text-primary font-semibold hover:underline">verify your asking rent is in line with comparable <em>unassisted</em> units</a> nearby. If market comps support $1,450, you don&apos;t get $1,680 just because the payment standard is that high.
               </li>
               <li>
-                <strong>Rent reasonableness.</strong> Independent of the standard, the PHA must verify your asking rent is in line with comparable <em>unassisted</em> units nearby. If market comps support $1,450, you don&apos;t get $1,680 just because the payment standard allows it.
+                <strong>The payment standard and the family&apos;s share.</strong> The PHA <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.503" className="text-primary font-semibold hover:underline">publishes current bedroom-count or ZIP-level standards</a> using HUD benchmarks and applicable program rules. The standard is not an approved rent, a market-rent comp, or the amount the owner will receive: it is an input to the subsidy calculation. Rent can generally exceed it, but then the family pays a larger share, and at initial occupancy the <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.508" className="text-primary font-semibold hover:underline">family&apos;s share can&apos;t exceed 40% of its adjusted monthly income</a>.
               </li>
             </ul>
             <p>
@@ -186,7 +187,7 @@ export default function Section8RentalPost() {
               Take a 3-bed single-family in a working-class Midwest neighborhood: <strong>$135,000 purchase</strong>, 25% down, $101,250 loan at 7.1% on a 30-year fixed — about <strong>$680/month</strong> in principal and interest.
             </p>
             <p>
-              For illustration, assume the PHA&apos;s written property-specific approval sets contract rent at <strong>$1,500</strong>, allocates <strong>$700</strong> to the tenant, and schedules <strong>$800</strong> as HAP. Those are hypothetical inputs, not an Indianapolis or nationwide benchmark.
+              For illustration, assume the PHA&apos;s written property-specific approval sets contract rent at <strong>$1,500</strong>, allocates <strong>$700</strong> to the tenant, and schedules <strong>$800</strong> as HAP. Those are hypothetical inputs, not a local or nationwide benchmark.
             </p>
             <p>
               Run the annual numbers: $18,000 gross rent, minus $2,400 property tax, $1,200 insurance, $2,200 maintenance and capex reserves, $1,800 management (10%), and $720 vacancy (4%) — that&apos;s an NOI of about <strong>$9,680</strong>, a <strong>7.2% cap rate</strong>, a DSCR of roughly <strong>1.19</strong>, and cash flow near <strong>$126/month</strong> after debt service. Check the math yourself in the free{" "}
@@ -201,7 +202,7 @@ export default function Section8RentalPost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The pros, quantified
+              The pros
             </h2>
             <p>
               <strong>The payer mix changes collection exposure.</strong> In the hypothetical, 53% of scheduled rent is assigned to HAP and the balance to the tenant. Verify the executed contract and model delayed, adjusted, or abated assistance as well as tenant-portion collection risk; a rental payment is not a Treasury instrument.
@@ -218,13 +219,13 @@ export default function Section8RentalPost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The cons, quantified
+              The cons
             </h2>
             <p>
               <strong>Lease-up timing is a property-specific risk.</strong> Paperwork, rent review, inspection, corrections, contract execution, and agency workload can delay the effective date or payment. Ask the PHA for its current process and model a range of delay scenarios rather than a universal timeline.
             </p>
             <p>
-              <strong>Inspections can affect timing and payment.</strong> Obtain the current checklist, inspect before submission, and price actual deficiencies with contractor bids. Cure periods and payment consequences follow the applicable rules and contract; do not substitute a property-class repair range for an inspection. Add verified work to your{" "}
+              <strong>Inspections can affect timing and payment.</strong> Obtain the current checklist, inspect before submission, and price actual deficiencies with contractor bids. Cure periods and payment consequences follow the applicable rules and contract. For HAP contracts executed on or after, or renewed after, June 6, 2024, the owner must <a href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-I/section-982.404" className="text-primary font-semibold hover:underline">fix life-threatening deficiencies within 24 hours</a> of notice and others within 30 calendar days (or a PHA-approved extension). The PHA may withhold payments once it notifies you in writing of the deficiencies, and must abate them if the repairs miss the cure period. PHAs running voucher programs <a href="https://www.federalregister.gov/documents/2025/09/30/2025-19070/economic-growth-regulatory-relief-and-consumer-protection-act-implementation-of-national-standards" className="text-primary font-semibold hover:underline">don&apos;t have to comply with HUD&apos;s newer NSPIRE inspection standards until February 1, 2027</a>, so yours may still inspect under the older Housing Quality Standards. Do not substitute a property-class repair range for an inspection. Add verified work to your{" "}
               <Link href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">
                 rehab budget
               </Link>{" "}
@@ -234,7 +235,7 @@ export default function Section8RentalPost() {
               <strong>Rent changes follow a process.</strong> Confirm the notice, timing, affordability, rent-reasonableness, and approval rules with the PHA. Compare approved-rent scenarios with current unassisted comps; do not assume voucher rent will lead, match, or lag the market.
             </p>
             <p>
-              <strong>The tenant portion remains collection risk.</strong> Apply lawful screening consistently and verify program-specific notice obligations. Nonpayment remedies, timing, cost, and PHA coordination depend on the lease, contract, facts, and current local law.
+              <strong>The tenant portion remains collection risk.</strong> Apply lawful screening consistently, check whether your state or city bars <a href="https://www.hud.gov/sites/dfiles/PIH/documents/HCV_Guidebook-Chapter_Fair-Housing_April-2025.pdf" className="text-primary font-semibold hover:underline">source-of-income discrimination</a>, and verify program-specific notice obligations. Nonpayment remedies, timing, cost, and PHA coordination depend on the lease, contract, facts, and current local law.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -310,6 +311,42 @@ export default function Section8RentalPost() {
             ))}
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "HUD, Housing Choice Voucher Program (information for tenants)",
+              url: "https://www.hud.gov/helping-americans/housing-choice-vouchers-tenants",
+            },
+            {
+              title: "24 CFR 982.451, Housing assistance payments contract",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-L/section-982.451",
+            },
+            {
+              title: "24 CFR 982.507, Rent to owner: Reasonable rent",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507",
+            },
+            {
+              title: "24 CFR 982.503, Payment standard areas, schedule, and amounts",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.503",
+            },
+            {
+              title: "24 CFR 982.508, Maximum family share at initial occupancy",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.508",
+            },
+            {
+              title: "24 CFR 982.404, Maintenance: Owner and family responsibility; PHA remedies",
+              url: "https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-I/section-982.404",
+            },
+            {
+              title: "HUD, NSPIRE compliance-date extension for the HCV, PBV and Moderate Rehabilitation programs, Federal Register doc. 2025-19070 (Sept. 30, 2025)",
+              url: "https://www.federalregister.gov/documents/2025/09/30/2025-19070/economic-growth-regulatory-relief-and-consumer-protection-act-implementation-of-national-standards",
+            },
+            {
+              title: "HUD Housing Choice Voucher Program Guidebook, Fair Housing and Nondiscrimination Requirements (April 2025)",
+              url: "https://www.hud.gov/sites/dfiles/PIH/documents/HCV_Guidebook-Chapter_Fair-Housing_April-2025.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

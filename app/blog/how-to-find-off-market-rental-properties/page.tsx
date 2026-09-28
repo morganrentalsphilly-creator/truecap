@@ -8,6 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -101,24 +102,24 @@ export default function OffMarketPost() {
           </p>
           <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            MLS deals are crowded — every listing has 5-15 investors looking at it, bidding it up, and squeezing margins. The investors closing real off-market deals at real margins are using sources most never think about. Here are the 8 channels that actually work, with realistic timelines and costs.
+            MLS deals are visible to every buyer, so good ones draw competing offers that bid prices up and squeeze margins. The investors closing real off-market deals at real margins are using sources most never think about. Here are the 8 channels that actually work, and what each one takes to run.
           </p>
         </header>
 
         <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
           <p>
-            One framing note before we start: <strong>off-market deal flow is a long-game effort</strong>. Most channels take 3-12 months of consistent work before producing a deal. The compounding ones (PM networking, wholesaler relationships, direct mail) are the most reliable. The fast ones (driving for dollars, cold calling) require sustained energy. Pick 2-3 channels that fit your temperament and run them for 12 months before changing strategy.
+            One framing note before we start: <strong>off-market deal flow is a long-game effort</strong>. Most channels take months of consistent work before producing a deal. The compounding ones (PM networking, wholesaler relationships, direct mail) are the most reliable. The fast ones (driving for dollars, cold calling) require sustained energy. Pick 2-3 channels that fit your temperament and run them for 12 months before changing strategy.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">1. Property manager networking — the highest-ROI source</h2>
           <p>
-            Most investors never think to pitch property managers as a deal-sourcing channel. They should. Property managers know which of their owners are tired, dealing with rising capex bills, behind on rent collection, or thinking about retirement. PMs hear about future sales 6-12 months before the property hits MLS.
+            Most investors never think to pitch property managers as a deal-sourcing channel. They should. Property managers know which of their owners are tired, dealing with rising capex bills, behind on rent collection, or thinking about retirement. PMs can hear about a planned sale before the property hits the MLS.
           </p>
           <p>
             The play: build relationships with 5-10 PMs in your target market. Buy coffee with them. Ask which of their owners they think might be open to selling. Most PMs are happy to refer because (a) they often keep the management contract with the new buyer, and (b) you become a known reliable buyer they can call repeatedly.
           </p>
           <p>
-            Timeline: 3-6 months to build the relationships. Cost: ~$200/mo in coffees + lunches. Deal flow: 1-3 deals/year from a well-built PM network, indefinitely.
+            Timeline: expect months to build the relationships. Cost: mostly your time, plus coffees and lunches. Deal flow: track what your network actually produces.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">2. Direct mail to targeted owner lists</h2>
@@ -126,35 +127,35 @@ export default function OffMarketPost() {
             The classic off-market source. Buy a list (PropStream, ListSource, DataTree are common providers), filter to your target criteria (absentee owners, equity-rich owners, tax-delinquent, pre-foreclosure, code violations), and mail postcards or letters.
           </p>
           <p>
-            What works in 2026:
+            What works:
           </p>
           <ul>
-            <li><strong>Absentee owner lists</strong> — landlords who live in a different state often want out. Response rates: 0.5-2%.</li>
-            <li><strong>Tax-delinquent lists</strong> — owners 1-2 years behind on property tax. Higher motivation. Response: 1-3%.</li>
-            <li><strong>Inherited property lists</strong> — heirs of recently-deceased owners often want to liquidate. Response: 2-5% but lists are harder to source.</li>
-            <li><strong>30-90 day pre-foreclosure</strong> — last-resort sellers. Response high (3-5%) but you&apos;ll compete with foreclosure investors.</li>
+            <li><strong>Absentee owner lists</strong> — landlords who live out of the area may be open to selling. Track your own response rate.</li>
+            <li><strong>Tax-delinquent lists</strong> — owners behind on property tax, who may be more motivated to sell. Track your own response rate.</li>
+            <li><strong>Inherited property lists</strong> — heirs of recently-deceased owners may want to sell. These lists are harder to source; track your own response rate.</li>
+            <li><strong>Pre-foreclosure</strong> — owners behind on their mortgage. Expect competition from foreclosure investors; when the home is the borrower&apos;s <a href="https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-C/section-1024.30" className="text-primary font-semibold hover:underline">principal residence</a>, federal servicing rules (<a href="https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-C/section-1024.41" className="text-primary font-semibold hover:underline">Regulation X</a>) generally bar a servicer from starting foreclosure until the loan is more than 120 days delinquent.</li>
           </ul>
           <p>
             What doesn&apos;t work: spray-and-pray to every property in a zip code. Targeting is the entire game.
           </p>
           <p>
-            Budget: $0.45-0.90 per piece all-in (postcard + postage + list cost). $2-5k/month sustainable budget produces 1-3 deals/year for an investor who answers calls within 4 hours and runs the math fast (use <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to underwrite leads in 60 seconds instead of 30 minutes).
+            Budget: price the postcard, postage and list per piece with your vendors before you start, and track cost per deal from your own campaigns. Answer calls quickly and run the math fast (use <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to underwrite leads in 60 seconds instead of 30 minutes).
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">3. Driving for dollars</h2>
           <p>
-            Old-school: drive target neighborhoods looking for properties with signs of distress (overgrown lawn, deferred maintenance, mail piling up, broken windows, vacant). Record the addresses. Look up the owners via county appraisal district records or services like DealMachine. Cold call or mail.
+            Old-school: drive target neighborhoods looking for properties with signs of distress (overgrown lawn, deferred maintenance, mail piling up, broken windows, vacant). Record the addresses. Look up the owners through county property records (the assessor, appraisal district or recorder) or services like DealMachine. Cold call or mail.
           </p>
           <p>
-            What works: consistent 1-2 hour Saturday drives in 2-3 target neighborhoods. Apps like DealMachine ($59/mo) record the addresses + auto-skip-trace owners + queue them for cold call or mail.
+            What works: consistent 1-2 hour Saturday drives in 2-3 target neighborhoods. Apps like DealMachine record the addresses, skip-trace owners and queue them for calls or mail. Before you call or text skip-traced numbers, check the <a href="https://www.ecfr.gov/current/title-47/chapter-I/subchapter-B/part-64/subpart-L/section-64.1200" className="text-primary font-semibold hover:underline">federal calling and texting rules</a> and your state&apos;s rules.
           </p>
           <p>
-            Timeline: First deal in 2-4 months for an aggressive driver who actually calls owners. Most investors quit before the 4-month mark because the rejection rate is high.
+            Timeline: expect months, not weeks, and a high rejection rate — consistency is what separates results.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">4. Wholesaler relationships</h2>
           <p>
-            Wholesalers source distressed properties + assign the contract to investors for a markup of $5-15k. Done right, they&apos;re a real source of pre-MLS deals. Done wrong, they&apos;re a way to overpay on a property dressed up as a deal.
+            Wholesalers source distressed properties and assign the contract to investors for a fee added to the price. Done right, they&apos;re a real source of pre-MLS deals. Done wrong, they&apos;re a way to overpay on a property dressed up as a deal.
           </p>
           <p>
             The play: build relationships with 5-10 active wholesalers in your market. Get on their cash-buyer email lists. Respond to every deal they email — fast (run it through <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> in 60 seconds), then either commit or pass clearly. Wholesalers prioritize investors who respond fast and close reliably; ghost their emails and you fall off their list.
@@ -168,21 +169,21 @@ export default function OffMarketPost() {
             Most agents work the MLS. A subset specializes in investor clients and hears about pocket listings (deals an owner wants to sell but hasn&apos;t listed yet). These investor-focused agents are gold.
           </p>
           <p>
-            How to find them: ask wholesalers + property managers + other investors which agents have brought them deals. The same 2-3 names will come up. Build relationships with those agents. Make it easy for them to bring you deals — fast underwriting (60 seconds via TrueCap), clear buying criteria, reliable closes, no haggling on commission.
+            How to find them: ask wholesalers + property managers + other investors which agents have brought them deals. The same few names tend to come up. Build relationships with those agents. Make it easy for them to bring you deals — fast underwriting (60 seconds via TrueCap), clear buying criteria, reliable closes, no haggling on commission.
           </p>
           <p>
-            The deal flow from a single well-positioned investor agent can be 5-15 properties per year. Worth the time investment.
+            A single well-positioned investor agent can be a steady source of deals. Worth the time investment.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">6. Public records — auctions and tax-lien sales</h2>
           <p>
-            County websites publish foreclosure auction lists, tax-lien certificate sales, and sheriff sale schedules. These are public, free to access, and meaningfully under-shopped by individual investors (most attendees are professional flippers).
+            County websites publish foreclosure auction lists, tax-lien certificate sales, and sheriff sale schedules. Many counties post these online, free to access.
           </p>
           <p>
-            What works: tax-lien auctions in landlord-friendly states (FL, IN, AZ, OH). Tax-deed sales in NC, IA. Specific knowledge of your county&apos;s auction process is critical — the rules vary dramatically by jurisdiction.
+            Tax-sale systems are set by state law — some states sell tax-lien certificates, others sell the property at a tax-deed or tax-foreclosure sale — so learn which system your state and county use before bidding. Specific knowledge of your county&apos;s auction process is critical — the rules vary dramatically by jurisdiction.
           </p>
           <p>
-            What doesn&apos;t: showing up to a foreclosure auction unprepared. Most properties at auction need cash purchase (no financing contingency), have unknown condition (often you can&apos;t see inside), and have title issues (junior liens, occupancy disputes). Don&apos;t bid until you&apos;ve gone to 3-5 auctions to observe.
+            What doesn&apos;t: showing up to a foreclosure auction unprepared. Read the county&apos;s published sale terms first: auction purchases can require cash-equivalent payment with no financing contingency, may not allow an interior inspection, and can leave liens or occupants in place. Don&apos;t bid until you&apos;ve gone to 3-5 auctions to observe.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">7. Facebook + Nextdoor + local FB investor groups</h2>
@@ -193,15 +194,15 @@ export default function OffMarketPost() {
             What works: join 3-5 local real estate Facebook groups + your neighborhood Nextdoor. Be present. Comment substantively. Never pitch in the thread (admins will ban you). When someone posts &quot;thinking about selling my rental,&quot; DM them privately and offer to chat.
           </p>
           <p>
-            Timeline: 6-12 months of presence before the deal flow starts. Pays off indefinitely once it does.
+            Timeline: expect many months of presence before deals start coming. Pays off indefinitely once it does.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">8. Bandit signs (with caveats)</h2>
           <p>
-            &quot;We Buy Houses&quot; signs at intersections. They work — measurably. They&apos;re also illegal in many municipalities and create brand-perception issues if you ever want to do other things in real estate.
+            &quot;We Buy Houses&quot; signs at intersections. Results vary, so track your own response. They can also break local sign ordinances and create brand-perception issues if you ever want to do other things in real estate.
           </p>
           <p>
-            If you go this route, post in zip codes where they&apos;re legal, use cheap signs you can replace weekly, and have a dedicated phone number that goes to a virtual assistant who pre-qualifies leads. Cost: $1-2 per sign + ~$200/mo for VA. Response: 5-15 calls/month per 100 signs in a major metro.
+            If you go this route, post in zip codes where they&apos;re legal, use cheap signs you can replace weekly, and have a dedicated phone number that goes to a virtual assistant who pre-qualifies leads. Price signs and a virtual assistant locally, and track calls per sign yourself.
           </p>
           <p>
             The bigger investors mostly use this as a brand-building tactic combined with direct mail and digital. Solo investors should weigh the legal + reputational tradeoffs.
@@ -215,16 +216,32 @@ export default function OffMarketPost() {
             What predicts success more than channel selection:
           </p>
           <ul>
-            <li><strong>Speed of response</strong> — answer calls and emails within 4 hours, ideally faster. Sellers who reach out to multiple investors go with whoever responds first.</li>
-            <li><strong>Speed of underwriting</strong> — being able to run a deal in 60 seconds vs 30 minutes lets you respond to 20x more leads per month. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> exists specifically for this moment.</li>
+            <li><strong>Speed of response</strong> — answer calls and emails within 4 hours, ideally faster. Sellers who reach out to multiple investors often go with whoever responds first.</li>
+            <li><strong>Speed of underwriting</strong> — being able to run a deal in about a minute instead of half an hour lets you respond to far more leads each month. <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> exists specifically for this moment.</li>
             <li><strong>Clear buying criteria</strong> — wholesalers + agents send deals to investors who say &quot;yes&quot; or &quot;no&quot; cleanly. Investors who waffle get fewer deals.</li>
             <li><strong>Reliability of close</strong> — fall through on one deal and the source stops sending you deals. Close fast, close clean, close on terms agreed.</li>
           </ul>
           <p>
-            Pick your 2-3 channels. Run them for 12 months. The deals come.
+            Pick your 2-3 channels. Run them for 12 months. Then judge what they produced.
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "12 CFR 1024.41 (Regulation X), Loss mitigation procedures",
+              url: "https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-C/section-1024.41",
+            },
+            {
+              title: "12 CFR 1024.30 (Regulation X), Scope",
+              url: "https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-C/section-1024.30",
+            },
+            {
+              title: "47 CFR 64.1200, Delivery restrictions (calls and texts)",
+              url: "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-B/part-64/subpart-L/section-64.1200",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

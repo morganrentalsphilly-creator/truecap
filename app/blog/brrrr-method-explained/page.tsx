@@ -19,6 +19,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "brrrr-method-explained";
 const TITLE = "The BRRRR method in 2026: the complete numbers walkthrough";
@@ -206,8 +207,9 @@ export default function BrrrrMethodPost() {
             </li>
             <li>
               <strong>Closing + holding costs:</strong> $10,000 — purchase
-              closing, 7 months of taxes, insurance, utilities, and (if you
-              used hard money) interest and points.
+              closing and 7 months of taxes, insurance, and utilities. Loan
+              points and interest are not in this line; the financing section
+              below adds them.
             </li>
             <li>
               <strong>All-in basis:</strong> $195,000
@@ -241,24 +243,26 @@ export default function BrrrrMethodPost() {
             Under those assumptions, the modeled lender advance is $123,250 of the purchase and the
             $40,000 rehab in draws. Two points on the ~$163,000 total
             commitment is about $3,300 up front. Interest-only payments start
-            around $1,080/month and climb toward $1,430 as draws fund — call
-            it $8,500-9,000 over a 7-month hold. Your{" "}
+            around $1,130/month and climb toward $1,500 as draws fund — call
+            it $9,000-9,500 over a 7-month hold. Your{" "}
             <Link
               href="/blog/how-much-money-to-buy-a-rental-property"
               className="text-primary font-semibold hover:underline"
             >
               actual cash into the deal
             </Link>{" "}
-            is the $21,750 down payment, purchase closing costs, points,
-            and the monthly carry: roughly <strong>$35,000-38,000</strong>{" "}
-            instead of $195,000.
+            is the $21,750 down payment, the $10,000 of closing and holding
+            costs, the points, and the interest carry: roughly{" "}
+            <strong>$44,000</strong> instead of $195,000.
           </p>
           <p>
             The catch: the points and interest don&apos;t disappear — they add
-            $11,000-12,000 to your all-in basis, which comes straight out of
-            your cash-out at the end. Hard money buys you velocity with less
-            capital; it does not make the deal better. If the spread only
-            works on the cash version, it doesn&apos;t work.
+            roughly $12,300-12,800 to your all-in basis, which comes straight
+            out of your cash-out at the end. The Option A and B figures below
+            are the cash version; financed this way, each leaves that much more
+            in the deal. Hard money buys you velocity with less capital; it
+            does not make the deal better. If the spread only works on the cash
+            version, it doesn&apos;t work.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -423,7 +427,7 @@ export default function BrrrrMethodPost() {
             <strong>2. The rehab overruns.</strong> A 30% overrun ($40,000 →
             $52,000) pushes all-in to $207,000 and more than doubles the
             trapped capital. Budget a 25% contingency on day one — overruns are
-            the norm on first-time rehabs, not the exception.
+            common on first-time rehabs.
           </p>
           <p>
             <strong>3. Rates move during your rehab window.</strong> You
@@ -455,26 +459,28 @@ export default function BrrrrMethodPost() {
           <p>
             The fifth R depends on each earlier refinance occurring, so treat
             this as a hypothetical projection. Say you start with $60,000 and use the
-            hard-money structure above, putting ~$36,000 of cash into each
-            deal during the rehab phase. Cycle one takes 7-9 months
-            (purchase through refinance), returns most of your cash at the
-            refi, and leaves $11,000-24,000 of it in the stabilized property
-            depending on which LTV you take.
+            hard-money structure above, putting roughly $44,000 of cash into
+            the deal before the refinance. Cycle one takes 7-9 months
+            (purchase through refinance). At the example&apos;s 75% refinance,
+            the new $183,750 loan repays the $163,250 bridge loan and hands
+            back about $20,500 before refinance closing costs, leaving about
+            $24,000 of your cash in the stabilized property. At 70%, about
+            $8,250 comes back and about $36,000 stays in.
           </p>
           <p>
-            If every rehabilitation and refinance completes on the modeled
-            schedule and terms, the projection completes roughly three cycles
-            in 24-30 months. The modeled outcome is three stabilized rentals,
-            $35,000-70,000 of your original
-            capital converted into trapped-but-working equity, $150,000+ of
-            created equity across the portfolio, and your remaining cash still
-            liquid for cycle four. The same $60,000 deployed as a single 25%
-            down payment buys exactly one turnkey property and then stops.
-            That is the entire argument for BRRRR — and it only holds if every
-            deal in the chain clears its Offer Ceiling. One
-            overpriced deal doesn&apos;t just underperform; it traps the
-            capital that was supposed to fund the next cycle. Actual timing,
-            appraisal, approval, proceeds, and portfolio outcome may differ.
+            So after cycle one you hold roughly $24,000-36,000 of liquid
+            capital, short of the ~$44,000 this structure used. On these
+            numbers the second cycle needs a lower purchase price, cheaper
+            money, or more capital. That is the real arithmetic of the fifth
+            R: the capital you recycle is only what each refinance hands back,
+            and every dollar of points, interest, and overpayment stays in the
+            property. The same $60,000 deployed as a single 25% down payment
+            buys one turnkey property and then stops; BRRRR&apos;s argument is
+            that a deal bought below its Offer Ceiling hands more of your
+            capital back for the next one. One overpriced deal doesn&apos;t
+            just underperform; it traps the capital that was supposed to fund
+            the next cycle. Actual timing, appraisal, approval, proceeds, and
+            portfolio outcome may differ.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -482,19 +488,52 @@ export default function BrrrrMethodPost() {
           </h2>
           <p>
             <strong>Cash-out proceeds are not income.</strong> The $183,750
-            you pull out at the refinance is loan principal, not taxable gain
+            you pull out at the refinance is{" "}
+            <a
+              href="https://www.irs.gov/publications/p334"
+              className="text-primary font-semibold hover:underline"
+            >
+              loan principal, not taxable gain
+            </a>{" "}
             — you&apos;re borrowing against value, not selling it. This is one
             of the quiet advantages BRRRR has over flipping, where the same
-            $50,000 spread would be taxed as ordinary income in the year of
-            sale.
+            $50,000 spread on a flip held a year or less would be{" "}
+            <a
+              href="https://www.irs.gov/taxtopics/tc409"
+              className="text-primary font-semibold hover:underline"
+            >
+              taxed at ordinary-income rates
+            </a>{" "}
+            in the year of sale.
           </p>
           <p>
             <strong>Rehab costs are capitalized, not deducted.</strong> The
-            $40,000 renovation isn&apos;t a year-one expense — it&apos;s added
-            to your depreciable basis and recovered over 27.5 years (faster
-            for appliances and some components via cost segregation). Repairs
-            made <em>after</em> the property is in service follow the normal
-            deduction rules — see the{" "}
+            $40,000 renovation generally isn&apos;t a year-one expense —
+            it&apos;s{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              added to your depreciable basis and recovered over 27.5 years
+            </a>{" "}
+            (faster for appliances and carpet, which are 5-year property, and,
+            via cost segregation, some other components; 5-year items acquired
+            and placed in service after January 19, 2025 can qualify for{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              100% bonus depreciation
+            </a>
+            ). Repairs
+            made <em>after</em> the property is in service follow the{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              normal deduction rules
+            </a>{" "}
+            — see the{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
               className="text-primary font-semibold hover:underline"
@@ -508,11 +547,12 @@ export default function BrrrrMethodPost() {
             BRRRR vs just buying a turnkey rental
           </h2>
           <p>
-            With the same ~$50,000 of starting capital you could buy one
+            With the same $60,000 of starting capital you could buy one
             turnkey rental with 25% down — or run the BRRRR above, finish with
-            $11,000-24,000 left in the deal, and redeploy the rest into the
-            next one. Over a few cycles that&apos;s the difference between
-            owning two properties and owning four or five. The price you pay
+            roughly $24,000-36,000 left in the deal, and redeploy what the
+            refinance hands back into the next one. Over several cycles of
+            well-bought deals, that is how one pile of capital ends up behind
+            more than one rental. The price you pay
             for that velocity: rehab execution risk, appraisal risk, rate risk
             during the hold, and a lot more of your time. BRRRR is a
             part-time job that pays in equity. Turnkey is a purchase. Neither
@@ -582,6 +622,22 @@ export default function BrrrrMethodPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS Publication 334 (2025), Tax Guide for Small Business",
+              url: "https://www.irs.gov/publications/p334",
+            },
+            {
+              title: "IRS Topic no. 409, Capital gains and losses",
+              url: "https://www.irs.gov/taxtopics/tc409",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>
