@@ -24,6 +24,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources, type PostSource } from "@/components/blog/post-sources";
 
 const SLUG = "depreciation-recapture-rental-property";
 const TITLE =
@@ -37,6 +38,58 @@ const DESCRIPTION =
 const PUBLISHED_AT = "2026-06-14";
 const MODIFIED_AT = lastmodFor("/blog/depreciation-recapture-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
+
+// Every source the page links, in order of first use (F3 founder rule:
+// every number and rule links to a primary source).
+const SOURCES: PostSource[] = [
+  {
+    title: "IRS Publication 946 (2025), How To Depreciate Property",
+    url: "https://www.irs.gov/publications/p946",
+  },
+  {
+    title: "IRS Publication 551 (Rev. 12-2025), Basis of Assets",
+    url: "https://www.irs.gov/publications/p551",
+  },
+  {
+    title: "IRS Publication 544 (2025), Sales and Other Dispositions of Assets",
+    url: "https://www.irs.gov/publications/p544",
+  },
+  {
+    title: "IRS Topic no. 409, Capital gains and losses",
+    url: "https://www.irs.gov/taxtopics/tc409",
+  },
+  {
+    title: "26 U.S.C. 1031, Exchange of real property held for productive use or investment",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim",
+  },
+  {
+    title: "IRS, 2025 Instructions for Form 8824, Like-Kind Exchanges",
+    url: "https://www.irs.gov/instructions/i8824",
+  },
+  {
+    title: "IRS Publication 537 (2025), Installment Sales",
+    url: "https://www.irs.gov/publications/p537",
+  },
+  {
+    title: "26 U.S.C. 469, Passive activity losses and credits limited (469(g))",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim",
+  },
+  {
+    title: "IRS Topic no. 559, Net investment income tax",
+    url: "https://www.irs.gov/taxtopics/tc559",
+  },
+  {
+    title: "IRS Publication 523 (2025), Selling Your Home",
+    url: "https://www.irs.gov/publications/p523",
+  },
+];
+
+/** The one FAQ phrase with no earlier body link: it links to its source
+ *  where the answer renders. The answer text itself is unchanged, so the
+ *  visible answer and the FAQPage JSON-LD stay identical. */
+const HOME_SALE_SOURCE_URL = "https://www.irs.gov/publications/p523";
+const HOME_SALE_SOURCE_PHRASE =
+  "Depreciation adjustments, periods of nonqualified use, ownership and use tests";
 
 export const metadata: Metadata = {
   title: SERP_TITLE,
@@ -74,7 +127,7 @@ const FAQS = [
   },
   {
     q: "Does a 1031 exchange eliminate depreciation recapture?",
-    a: "A qualifying like-kind exchange may postpone recognition of some gain, but cash, debt relief, other property, basis, eligibility, related-party rules, deadlines, and the rest of the transaction can create current tax. It does not guarantee full deferral or a permanently tax-free result. Model the exchange and replacement basis with qualified advisers before the transfer.",
+    a: "A qualifying like-kind exchange may postpone recognition of some gain, but cash, debt relief, other property, basis, eligibility, related-party rules, deadlines, and the rest of the transaction can create current tax. It does not ensure full deferral or a permanently tax-free result. Model the exchange and replacement basis with qualified advisers before the transfer.",
   },
   {
     q: "Can the home-sale exclusion shelter recapture if I move into my rental?",
@@ -85,6 +138,23 @@ const FAQS = [
     a: "Different portions of a sale can have different character. Unrecaptured Section 1250 gain, Section 1245 recapture, other long-term gain, net-investment-income tax, state tax, and offsetting items may each require separate calculations. Do not infer the answer from the building label or marginal bracket alone.",
   },
 ];
+
+function FaqAnswer({ answer }: { answer: string }) {
+  const at = answer.indexOf(HOME_SALE_SOURCE_PHRASE);
+  if (at < 0) return <>{answer}</>;
+  return (
+    <>
+      {answer.slice(0, at)}
+      <a
+        href={HOME_SALE_SOURCE_URL}
+        className="text-primary font-semibold hover:underline"
+      >
+        {HOME_SALE_SOURCE_PHRASE}
+      </a>
+      {answer.slice(at + HOME_SALE_SOURCE_PHRASE.length)}
+    </>
+  );
+}
 
 export default function DepreciationRecapturePost() {
   const siteUrl = getSiteUrl();
@@ -176,12 +246,17 @@ export default function DepreciationRecapturePost() {
               What depreciation recapture actually is
             </h2>
             <p>
-              Residential rental buildings are generally recovered under the
-              applicable depreciation rules, while land is not depreciable.
-              Supported basis, classification, placed-in-service timing,
+              Residential rental buildings are generally recovered over{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                27.5 years under MACRS, while land is not depreciable
+              </a>
+              . Supported basis, classification, placed-in-service timing,
               conventions, personal use, and limitations affect the deduction.
               As a simplified illustration, dividing a supported $200,000
-              building basis by an assumed 27.5-year period produces about{" "}
+              building basis by that 27.5-year period produces about{" "}
               <strong>$7,273 per full year</strong> before those adjustments.
               That modeled non-cash expense helps explain why cash flow and{" "}
               <Link
@@ -193,7 +268,13 @@ export default function DepreciationRecapturePost() {
               income can differ.
             </p>
             <p>
-              Depreciation generally reduces adjusted basis. That can increase
+              <a
+                href="https://www.irs.gov/publications/p551"
+                className="text-primary font-semibold hover:underline"
+              >
+                Depreciation generally reduces adjusted basis
+              </a>
+              . That can increase
               the gain measured on a later disposition, but the amount and
               character still depend on the full depreciation schedule,
               improvements, selling costs, asset classes, transaction structure,
@@ -219,11 +300,17 @@ export default function DepreciationRecapturePost() {
                 >
                   closing-cost breakdown
                 </Link>
-                ), but a tax professional should classify the actual lines.
+                , but a tax professional should classify the actual lines.
               </li>
               <li>
                 <strong>Accumulated depreciation</strong> — the supported
-                depreciation history, including allowed-or-allowable
+                depreciation history, including{" "}
+                <a
+                  href="https://www.irs.gov/publications/p946"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  allowed-or-allowable
+                </a>{" "}
                 adjustments. Reconcile the return history, asset ledger, and
                 preparer&apos;s depreciation schedule.
               </li>
@@ -243,8 +330,14 @@ export default function DepreciationRecapturePost() {
               Why the gain may have more than one character
             </h2>
             <p>
-              A sale can include unrecaptured Section 1250 gain, Section 1245
-              recapture, other long-term gain, or other character depending on
+              A sale can include{" "}
+              <a
+                href="https://www.irs.gov/publications/p544"
+                className="text-primary font-semibold hover:underline"
+              >
+                unrecaptured Section 1250 gain, Section 1245 recapture
+              </a>
+              , other long-term gain, or other character depending on
               the assets and depreciation history. The applicable rates and
               ordering also depend on current law, income, other return items,
               and the transaction. A two-bucket shortcut is useful for a
@@ -299,11 +392,24 @@ export default function DepreciationRecapturePost() {
                 <strong>
                   Modeled §1250 component (assumed equal to depreciation):
                 </strong>{" "}
-                $72,727, assigned a 25% rate only for this sensitivity
+                $72,727, assigned the{" "}
+                <a
+                  href="https://www.irs.gov/taxtopics/tc409"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  25% maximum rate for unrecaptured section 1250 gain
+                </a>{" "}
+                only for this sensitivity
               </li>
               <li>
-                <strong>Remaining modeled gain:</strong> $85,000, assigned a 15%
-                rate only for this illustration
+                <strong>Remaining modeled gain:</strong> $85,000, assigned the{" "}
+                <a
+                  href="https://www.irs.gov/taxtopics/tc409"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  15% long-term capital gain rate
+                </a>{" "}
+                only for this illustration
               </li>
             </ul>
             <p>
@@ -357,9 +463,14 @@ export default function DepreciationRecapturePost() {
               when the return history is incomplete. If prior-year depreciation
               was missed or misclassified, the proper correction may depend on
               how many years are affected, the accounting method, and other
-              facts. Have a qualified professional determine whether an amended
-              return, accounting-method procedure, or another treatment applies
-              before filing or selling.
+              facts. Have a qualified professional determine whether an{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                amended return, accounting-method procedure
+              </a>
+              , or another treatment applies before filing or selling.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -375,8 +486,14 @@ export default function DepreciationRecapturePost() {
                 Bonus depreciation and cost segregation
               </Link>{" "}
               may classify supported components separately from the building.
-              Some components can receive Section 1245 treatment rather than the
-              building&apos;s treatment. Classification, depreciation method,
+              Some components can receive{" "}
+              <a
+                href="https://www.irs.gov/publications/p544"
+                className="text-primary font-semibold hover:underline"
+              >
+                Section 1245 treatment
+              </a>{" "}
+              rather than the building&apos;s treatment. Classification, depreciation method,
               gain, income, and current law determine the actual result; do not
               assign an ordinary rate or recapture amount from a generic
               example.
@@ -393,9 +510,21 @@ export default function DepreciationRecapturePost() {
             </h2>
             <p>
               <strong>1. A possible 1031 exchange.</strong> A qualifying
-              exchange may postpone recognition of some gain, but property
-              eligibility, deadlines, basis, liabilities, cash or other property
-              received, related parties, and transaction costs all matter. Put
+              exchange{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                may postpone recognition of some gain
+              </a>
+              , but property eligibility, deadlines, basis,{" "}
+              <a
+                href="https://www.irs.gov/instructions/i8824"
+                className="text-primary font-semibold hover:underline"
+              >
+                liabilities, cash or other property received
+              </a>
+              , related parties, and transaction costs all matter. Put
               the exchange team and written plan in place before the transfer;
               the mechanics and limitations are in{" "}
               <Link
@@ -408,14 +537,25 @@ export default function DepreciationRecapturePost() {
             </p>
             <p>
               <strong>2. A possible installment sale.</strong> Payment timing
-              may change when some gain is recognized, while recapture,
-              interest, security, default, servicing, and state-law issues can
-              receive different treatment. Have tax and legal advisers model the
+              may change when some gain is recognized, but{" "}
+              <a
+                href="https://www.irs.gov/publications/p537"
+                className="text-primary font-semibold hover:underline"
+              >
+                depreciation recapture is generally reported in the year of sale
+              </a>
+              , and interest, security, default, servicing, and state-law
+              issues can receive different treatment. Have tax and legal advisers model the
               exact note and asset schedule before offering seller financing.
             </p>
             <p>
-              <strong>3. Passive-loss carryforwards.</strong> A qualifying fully
-              taxable disposition of an entire interest to an unrelated party
+              <strong>3. Passive-loss carryforwards.</strong> A qualifying{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                fully taxable disposition of an entire interest to an unrelated party
+              </a>{" "}
               can affect suspended losses differently from a partial,
               related-party, installment, gifted, or deferred transaction.
               Reconcile the carryforward schedule and proposed structure before
@@ -423,17 +563,30 @@ export default function DepreciationRecapturePost() {
             </p>
             <p>
               <strong>4. Tax-year timing.</strong> Income, other gains and
-              losses, filing status, net-investment-income-tax exposure,
+              losses, filing status,{" "}
+              <a
+                href="https://www.irs.gov/taxtopics/tc559"
+                className="text-primary font-semibold hover:underline"
+              >
+                net-investment-income-tax exposure
+              </a>
+              ,
               estimated-tax obligations, and future law can change the result.
               Compare more than one supported timing scenario rather than
               assuming a low-income year produces a specific rate.
             </p>
             <p>
-              <strong>5. Estate and gift planning.</strong> Basis at death or
-              after a gift depends on ownership, valuation, prior transfers,
-              estate and gift rules, state law, and the law then in effect. Do
-              not market holding until death as a guaranteed basis reset,
-              recapture erasure, or zero-tax strategy; coordinate the property,
+              <strong>5. Estate and gift planning.</strong>{" "}
+              <a
+                href="https://www.irs.gov/publications/p551"
+                className="text-primary font-semibold hover:underline"
+              >
+                Basis at death or after a gift
+              </a>{" "}
+              depends on ownership, valuation, prior transfers, estate and gift
+              rules, state law, and the law then in effect. Do not count on
+              holding until death as an automatic basis reset, recapture
+              erasure, or zero-tax strategy; coordinate the property,
               entity, debt, and estate plan with qualified advisers.
             </p>
 
@@ -476,7 +629,9 @@ export default function DepreciationRecapturePost() {
                 <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
                   {f.q}
                 </h3>
-                <p>{f.a}</p>
+                <p>
+                  <FaqAnswer answer={f.a} />
+                </p>
               </div>
             ))}
 
@@ -484,7 +639,6 @@ export default function DepreciationRecapturePost() {
               The bottom line
             </h2>
             <p>
-              This is general education, not tax, legal, or estate advice.
               Depreciation can reduce adjusted basis, but a sale requires the
               complete basis, character, limitation, and transaction analysis.
               Build alternative disposition scenarios with qualified advisers
@@ -501,6 +655,7 @@ export default function DepreciationRecapturePost() {
             </p>
           </div>
         </article>
+        <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

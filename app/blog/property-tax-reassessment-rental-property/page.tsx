@@ -8,11 +8,12 @@
  * tax bill wrong".
  *
  * Angle: the single most common rookie underwriting error is copying the
- * seller's property-tax line off the listing. A sale usually resets the
- * assessed value toward the purchase price (and strips any owner-occupant
- * exemption), so the real bill is higher — often enough to flip a thin
- * deal negative. On-brand for TrueCap, whose enrichment pulls the
- * state-level effective tax rate rather than the seller's stale number.
+ * seller's property-tax line off the listing. In states that reassess on a sale,
+ * a purchase can reset the assessed value toward the purchase price (and
+ * strips any owner-occupant exemption), so the real bill is often higher —
+ * enough to flip a thin deal negative. On-brand for TrueCap, whose
+ * analyzer keeps property tax as a manual local input rather than copying
+ * the seller's stale number.
  */
 
 import type { Metadata } from "next";
@@ -29,6 +30,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "property-tax-reassessment-rental-property";
 const TITLE =
@@ -38,7 +40,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Property tax reassessment for rentals (2026)";
 const DESCRIPTION =
-  "Buying a rental usually resets property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real bill before you buy.";
+  "Buying a rental can reset property taxes toward your purchase price. Why the seller's bill misleads and how to estimate the real bill before you buy.";
 const PUBLISHED_AT = "2026-06-27";
 const MODIFIED_AT = lastmodFor("/blog/property-tax-reassessment-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
@@ -72,11 +74,11 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "Will my property taxes go up when I buy a rental?",
-    a: "Usually yes. In most jurisdictions a sale is a triggering event: the assessor resets the assessed value toward your purchase price, and as a landlord you lose any homestead or owner-occupant exemption the previous owner enjoyed. How big the jump is depends on your county's rules and how stale the prior assessment had become — a long-held property that was assessed years ago can see taxes rise sharply once it changes hands.",
+    a: "Often. In states that reassess on a change of ownership, a sale is a triggering event: the assessor resets the assessed value toward your purchase price, and as a landlord you lose any homestead or owner-occupant exemption the previous owner enjoyed. How big the jump is depends on your county's rules and how stale the prior assessment had become — a long-held property that was assessed years ago can see taxes rise sharply once it changes hands.",
   },
   {
     q: "Why is the seller's property tax bill lower than what I'll pay?",
-    a: "Because the seller's bill reflects an assessed value that may be years out of date. Many states cap how fast an existing owner's assessment can rise, so a property held for a decade can be assessed well below market. The bill may also include a homestead or owner-occupant exemption that does not transfer to an investor. After the sale, the assessment resets toward market or purchase price and the exemption falls away, so your bill is typically higher than the number printed on the listing.",
+    a: "Because the seller's bill reflects an assessed value that may be years out of date. Some states, California and Michigan among them, cap how fast an existing owner's assessment can rise, so a property held for a decade can be assessed well below market. The bill may also include a homestead or owner-occupant exemption that does not transfer to an investor. After the sale, the assessment resets toward market or purchase price and the exemption falls away, so your bill is often higher than the number printed on the listing.",
   },
   {
     q: "How do I estimate property taxes on a rental before I buy?",
@@ -84,7 +86,7 @@ const FAQS = [
   },
   {
     q: "What is a supplemental property tax bill?",
-    a: "In reassessment-on-sale states such as California, after you close the assessor issues a one-time supplemental bill for the difference between the old and new assessed value, prorated over the remainder of the tax year — and it arrives on top of the regular bill. It is easy to miss because it shows up months after closing. Budget for it as a first-year cash item so it does not surprise you.",
+    a: "In reassessment-on-sale states such as California, after you close the assessor issues a supplemental assessment for the difference between the old and new assessed value, prorated over the rest of the fiscal year (two supplemental bills if you close between January 1 and May 31) — and the supplemental billing arrives on top of the regular bill. It is easy to miss because it shows up months after closing. Budget for it as a first-year cash item so it does not surprise you.",
   },
   {
     q: "Does buying through an LLC avoid reassessment?",
@@ -173,8 +175,9 @@ export default function PropertyTaxReassessmentPost() {
               expenses in a rental underwrite — and one of the most quietly
               wrong. The number you see is the <em>seller&apos;s</em> bill, set
               against an assessed value that may be a decade stale and may carry
-              an owner-occupant break you will never get. Buy the property and
-              the assessor resets the clock toward what you paid. Copy that
+              an owner-occupant break you will never get. Buy the property and,
+              in states that reassess on a sale, the assessor resets the clock
+              toward what you paid. Copy that
               listing figure into your pro forma and you can &quot;win&quot; a
               deal on paper that loses money the moment the real tax bill lands.
               Here is why it happens, how much it can move, and how to
@@ -191,14 +194,27 @@ export default function PropertyTaxReassessmentPost() {
               <strong>assessed value</strong>, which is the county&apos;s
               number, not the market&apos;s. Assessed value drifts away from
               what a property is actually worth for two everyday reasons. First,
-              most states cap how fast an existing owner&apos;s assessment can
-              climb — California limits the annual increase to 2%, and many
-              other states run their own caps or reassess only every few years.
+              some states cap how fast an existing owner&apos;s assessment can
+              climb —{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                California limits the annual increase to 2%
+              </a>
+              , and some other states run their own caps or reassess only every
+              few years.
               A property held since 2014 can be carried on the rolls at a value
               that has nothing to do with 2026 prices. Second, owner-occupants
               often receive a <strong>homestead exemption</strong> that shaves a
-              fixed amount off the taxable value — a benefit that does not apply
-              to a rental.
+              fixed amount off the taxable value —{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                a benefit that does not apply to a rental
+              </a>
+              .
             </p>
             <p>
               So the seller&apos;s low tax bill is not a market quirk you get to
@@ -211,7 +227,8 @@ export default function PropertyTaxReassessmentPost() {
               What a sale actually triggers
             </h2>
             <p>
-              In most jurisdictions a change of ownership is a{" "}
+              In some states — California and Michigan among them — a
+              change of ownership is a{" "}
               <strong>reassessment event</strong>. The recorded sale tells the
               assessor what the property is worth — you just proved it by paying
               for it — and the assessed value is reset upward toward that price.
@@ -220,44 +237,88 @@ export default function PropertyTaxReassessmentPost() {
             </p>
             <p>
               <strong>Acquisition-value states.</strong> California&apos;s
-              Proposition 13 is the cleanest example: when you buy, the assessor
-              sets a new base-year value equal to your purchase price, then caps
-              growth at 2% a year going forward. The reset can be dramatic
-              because you are replacing a base that may date back decades.
-              Michigan &quot;uncaps&quot; taxable value to the state equalized
-              value on transfer; Florida&apos;s Save Our Homes cap likewise
-              resets when a homesteaded property sells or converts to a rental.
-              In all of these, the sale itself is the moment the number jumps.
+              Proposition 13 is the cleanest example: when you buy, the
+              assessor{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                sets a new base-year value equal to your purchase price, then
+                caps growth at 2% a year
+              </a>{" "}
+              going forward. The reset can be dramatic because you are replacing
+              a base that may date back decades. Michigan{" "}
+              <a
+                href="https://www.michigan.gov/taxes/property/change-ownership"
+                className="text-primary font-semibold hover:underline"
+              >
+                &quot;uncaps&quot; taxable value in the year after a transfer
+              </a>
+              , resetting it to the state equalized value. In both, the sale
+              triggers the reset: right away through a{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/supplemental-assessment/"
+                className="text-primary font-semibold hover:underline"
+              >
+                supplemental bill in California
+              </a>
+              , and on the next year&apos;s assessment in Michigan.
             </p>
             <p>
-              <strong>Cyclical-reassessment states.</strong> Many states
-              reassess on a schedule — annually, or every two, three, or five
-              years — regardless of sales, but a recent sale gives the assessor
+              <strong>Cyclical-reassessment states.</strong> Some states
+              reassess on a fixed cycle, whose length varies by state,
+              regardless of sales, but a recent sale gives the assessor
               a fresh, defensible value to apply at the next cycle. The danger
               here is timing: you may pay the old, low figure for your first
               year, then watch it leap when the cycle catches up. Underwriting
               the first-year bill as if it were permanent is a trap.
             </p>
             <p>
-              Either way, the practical rule is the same: assume a purchase
-              resets your taxes toward your purchase price, and treat any year
-              you pay less as a temporary gift, not the baseline.
+              Either way, the practical rule is the same: unless your county
+              confirms otherwise, underwrite as if a purchase resets your taxes
+              toward your purchase price, and treat any year you pay less as a
+              temporary gift, not the baseline.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               The formula — and the shortcut
             </h2>
-            <p>The full mechanic is three numbers multiplied together:</p>
+            <p>
+              The full mechanic is three numbers multiplied together, with the
+              mill rate stated per $1,000:
+            </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Annual tax = Assessed value × Assessment ratio × Mill rate
+                Annual tax = Market value × Assessment ratio × Mill rate ÷ 1,000
               </code>
             </div>
             <p>
               The <strong>assessment ratio</strong> is the fraction of market
-              value a county taxes (some assess at 100%, others at 10% or 35%),
-              and the <strong>mill rate</strong> (or millage) is the tax per
-              dollar of that taxable base. You can chase all three down at the
+              value a county taxes (some{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                assess at 100%
+              </a>
+              ;{" "}
+              <a
+                href="https://codes.ohio.gov/ohio-administrative-code/rule-5703-25-05"
+                className="text-primary font-semibold hover:underline"
+              >
+                Ohio uses 35%
+              </a>
+              ;{" "}
+              <a
+                href="https://www.dor.ms.gov/county-services/property-tax-frequently-asked-questions"
+                className="text-primary font-semibold hover:underline"
+              >
+                Mississippi uses 10% for owner-occupied homes and 15% for other
+                real property, including rentals
+              </a>
+              ), and the <strong>mill rate</strong> (or millage) is the tax per
+              $1,000 of that taxable base (one mill is $1 per $1,000). You can
+              chase all three down at the
               assessor&apos;s office — and for a precise budget you eventually
               should — but for underwriting there is a faster move that folds
               them into one number:
@@ -274,9 +335,8 @@ export default function PropertyTaxReassessmentPost() {
               the county, or back it out yourself: find a comparable property
               that sold recently, divide its post-sale tax bill by its sale
               price, and you have a clean rate to apply to your own deal.
-              Effective rates run roughly from 0.3% in the lowest states to well
-              over 2% in the highest, so this is a local number, not a national
-              one.
+              Effective rates vary widely from state to state and county to
+              county, so this is a local number, not a national one.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -284,9 +344,9 @@ export default function PropertyTaxReassessmentPost() {
             </h2>
             <p>
               Take a $400,000 duplex. You put 25% down ($100,000) and finance
-              $300,000 at 7.5% over 30 years — about par for an investment loan
-              in mid-2026. That principal-and-interest payment is roughly $2,098
-              a month, or about $25,170 a year (check it on the{" "}
+              $300,000 at an illustrative 7.5% over 30 years (use your own
+              lender quote). That principal-and-interest payment is roughly
+              $2,098 a month, or about $25,170 a year (check it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -394,12 +454,12 @@ export default function PropertyTaxReassessmentPost() {
                 net operating income
               </Link>{" "}
               drops $2,600, the cap rate sheds nearly two-thirds of a point,
-              DSCR falls to 0.90 — below the 1.20 floor most lenders want and
-              below the 1.0 line where the property stops covering its own loan
-              — and cash flow swings from +$9 to −$208 a month. Same building,
-              same rent, same price. The only thing that changed was using an
-              honest tax number, and it turned a deal you would sign into one
-              you would walk from.
+              DSCR falls to 0.90 — below your lender&apos;s minimum (ask what it
+              is) and below the 1.0 line where the property stops covering its
+              own loan — and cash flow swings from +$9 to −$208 a month. Same
+              building, same rent, same price. The only thing that changed was
+              using an honest tax number, and it turned a deal you would sign
+              into one you would walk from.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -409,10 +469,17 @@ export default function PropertyTaxReassessmentPost() {
               In reassessment-on-sale states there is a second, smaller
               surprise. The annual bill resets at the next cycle, but the county
               also wants the difference between the old and new assessment for
-              the part of the year you already own the place. That comes as a
-              one-time <strong>supplemental tax bill</strong> (California&apos;s
-              name; other states call it an escape or omitted assessment), and
-              it lands weeks or months after closing — long after most buyers
+              the part of the year you already own the place. That comes as one
+              or two <strong>supplemental tax bills</strong> (California&apos;s
+              term;{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/supplemental-assessment/"
+                className="text-primary font-semibold hover:underline"
+              >
+                two if you close between January 1 and May 31
+              </a>
+              ; check how your state bills a mid-year change), and they land
+              weeks or months after closing — long after most buyers
               have stopped watching for new costs. On our duplex, a $2,600
               annual increase prorated over, say, eight remaining months is
               roughly $1,700 of first-year cash you did not plan for. It is not
@@ -447,12 +514,28 @@ export default function PropertyTaxReassessmentPost() {
             </p>
             <p>
               A few traps to avoid while you are at it. Do not assume an LLC or
-              a clever title structure dodges the reassessment — a purchase is a
-              change of ownership regardless of who signs. Do not forget that
+              a clever title structure dodges the reassessment —{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                a purchase is a change of ownership regardless of who signs
+              </a>
+              . California&apos;s{" "}
+              <a
+                href="https://www.boe.ca.gov/proptaxes/leopexclusions.htm"
+                className="text-primary font-semibold hover:underline"
+              >
+                proportional transfer exclusion
+              </a>
+              , for example, covers only a change in how the same owners hold
+              title, with each owner&apos;s share unchanged — not a purchase
+              from a seller. Do not forget that
               the
               <strong> exemptions vanish</strong> along with the low assessment:
-              a homestead, senior, or veteran exemption the seller held does not
-              transfer to a landlord, and stripping it can raise the bill even
+              a homestead exemption, or any other exemption tied to the owner
+              living there, that the seller held does not transfer to a
+              landlord, and stripping it can raise the bill even
               before the value resets. And do not treat a low first-year bill in
               a cyclical state as your run-rate — find out when the next
               reassessment hits and underwrite to the post-reset number.
@@ -497,10 +580,10 @@ export default function PropertyTaxReassessmentPost() {
             <p>
               The property-tax line on a listing is the seller&apos;s number,
               not yours, and underwriting to it is one of the most expensive
-              shortcuts in the business. A purchase usually resets the
-              assessment toward what you paid and strips the owner-occupant
-              breaks you never qualified for, so the bill you inherit is almost
-              always higher than the bill you see. Estimate it the right way —
+              shortcuts in the business. A purchase can reset the assessment
+              toward what you paid and strip the owner-occupant breaks you never
+              qualified for, so the bill you inherit is often higher than the
+              bill you see. Estimate it the right way —
               purchase price times the local effective rate, cross-checked
               against a recently sold comp — and budget the supplemental bill as
               a closing-year cost. The full{" "}
@@ -520,6 +603,34 @@ export default function PropertyTaxReassessmentPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "California State Board of Equalization, Publication 29 (March 2025), California Property Tax: An Overview",
+              url: "https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf",
+            },
+            {
+              title: "Michigan Department of Treasury, Changes in Ownership and Uncapping of Property",
+              url: "https://www.michigan.gov/taxes/property/change-ownership",
+            },
+            {
+              title: "California State Board of Equalization, Supplemental Assessments",
+              url: "https://www.boe.ca.gov/proptaxes/supplemental-assessment/",
+            },
+            {
+              title: "Ohio Administrative Code Rule 5703-25-05",
+              url: "https://codes.ohio.gov/ohio-administrative-code/rule-5703-25-05",
+            },
+            {
+              title: "Mississippi Department of Revenue, Property Tax Frequently Asked Questions",
+              url: "https://www.dor.ms.gov/county-services/property-tax-frequently-asked-questions",
+            },
+            {
+              title: "California State Board of Equalization, LEOP Exclusions for Reassessment",
+              url: "https://www.boe.ca.gov/proptaxes/leopexclusions.htm",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

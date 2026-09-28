@@ -26,6 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources, type PostSource } from "@/components/blog/post-sources";
 
 const SLUG = "rental-property-tax-deductions";
 const TITLE =
@@ -39,6 +40,55 @@ const DESCRIPTION =
 const PUBLISHED_AT = "2026-05-26";
 const MODIFIED_AT = lastmodFor("/blog/rental-property-tax-deductions") ?? PUBLISHED_AT;
 const READING_TIME = 11;
+
+// Every source the body links, in order of first use (F3 founder rule:
+// every number and rule links to a primary source).
+const SOURCES: PostSource[] = [
+  {
+    title: "Schedule E (Form 1040) 2025, Supplemental Income and Loss",
+    url: "https://www.irs.gov/pub/irs-pdf/f1040se.pdf",
+  },
+  {
+    title: "IRS Publication 527 (2025), Residential Rental Property",
+    url: "https://www.irs.gov/publications/p527",
+  },
+  {
+    title: "IRS Publication 925 (2025), Passive Activity and At-Risk Rules",
+    url: "https://www.irs.gov/publications/p925",
+  },
+  {
+    title: "IRS Publication 946 (2025), How To Depreciate Property",
+    url: "https://www.irs.gov/publications/p946",
+  },
+  {
+    title: "IRS Publication 5653 (2-2025), Cost Segregation Audit Techniques Guide",
+    url: "https://www.irs.gov/pub/irs-pdf/p5653.pdf",
+  },
+  {
+    title: "IRS, Standard mileage rates",
+    url: "https://www.irs.gov/tax-professionals/standard-mileage-rates",
+  },
+  {
+    title: "IRS, 2025 Instructions for Schedule E (Form 1040)",
+    url: "https://www.irs.gov/instructions/i1040se",
+  },
+  {
+    title: "IRS Publication 587 (2025), Business Use of Your Home",
+    url: "https://www.irs.gov/publications/p587",
+  },
+  {
+    title: "26 U.S.C. 461, Limitation on excess business losses (461(l))",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section461&num=0&edition=prelim",
+  },
+  {
+    title: "IRS Topic no. 409, Capital gains and losses",
+    url: "https://www.irs.gov/taxtopics/tc409",
+  },
+  {
+    title: "26 U.S.C. 1031, Exchange of real property held for productive use or investment",
+    url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim",
+  },
+];
 
 export const metadata: Metadata = {
   title: SERP_TITLE,
@@ -144,9 +194,15 @@ export default function TaxDeductionsPost() {
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <p>
-              A note before we start: this is general education, not tax advice.
-              Eligibility depends on your facts and the law for the relevant tax
-              year. Use this as a checklist alongside current{" "}
+              A note before we start: eligibility depends on your facts and the
+              law for the relevant tax year. The line numbers below follow the{" "}
+              <a
+                href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                2025 Schedule E (Form 1040)
+              </a>
+              . Use this as a checklist alongside current{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
                 className="text-primary font-semibold hover:underline"
@@ -168,13 +224,19 @@ export default function TaxDeductionsPost() {
               1. Mortgage interest (Schedule E line 12)
             </h2>
             <p>
-              The interest allocable to rental use is generally a rental
-              expense. Principal is not a current expense, and limits can apply
-              to interest depending on the facts.
+              The interest allocable to rental use is{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                generally a rental expense
+              </a>
+              . Principal is not a current expense, and limits can apply to
+              interest depending on the facts.
             </p>
             <p>
               <strong>Illustrative example:</strong> a $300k, 30-year loan at 7%
-              produces about $20,800 of interest during the first 12 payments.
+              produces about $20,900 of interest during the first 12 payments.
               The allowable rental deduction may differ because of closing
               dates, points, mixed use, business-interest limits, or other
               adjustments. Use the lender&apos;s records and your actual
@@ -193,8 +255,14 @@ export default function TaxDeductionsPost() {
             </h2>
             <p>
               Depreciation is a common non-cash deduction. Residential rental
-              buildings are generally recovered over 27.5 years under MACRS;
-              land is not depreciable. Basis allocation, placed-in-service
+              buildings are generally recovered over{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                27.5 years under MACRS; land is not depreciable
+              </a>
+              . Basis allocation, placed-in-service
               timing, personal use, and first- and last-year conventions affect
               the actual deduction.
             </p>
@@ -203,7 +271,8 @@ export default function TaxDeductionsPost() {
               assigns $400k of a $500k purchase to the residential-rental
               building, simple division by 27.5 is about $14,545 per full year
               before conventions and other adjustments. That figure is a modeled
-              deduction, not a guaranteed current tax saving. Passive-activity,
+              deduction; on its own it does not establish a current tax saving.
+              Passive-activity,
               basis, at-risk, and other limits can change when or whether it
               reduces tax. The{" "}
               <Link
@@ -226,7 +295,7 @@ export default function TaxDeductionsPost() {
               payback multiple. Compare the after-tax present value under
               adviser-reviewed scenarios and review the IRS{" "}
               <a
-                href="https://www.irs.gov/businesses/small-businesses-self-employed/audit-techniques-guides-atgs"
+                href="https://www.irs.gov/pub/irs-pdf/p5653.pdf"
                 className="text-primary font-semibold hover:underline"
               >
                 Cost Segregation Audit Technique Guide
@@ -245,8 +314,15 @@ export default function TaxDeductionsPost() {
               3. Property tax (Schedule E line 16)
             </h2>
             <p>
-              Annual real estate tax paid to the county. Pull it from the county
-              appraisal district website — do NOT rely on the seller&apos;s
+              Annual real estate tax paid to the county;{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                Publication 527
+              </a>{" "}
+              lists taxes among the expenses that can be deducted from rental
+              income. Pull the figure from the county appraisal district website — do NOT rely on the seller&apos;s
               last-year number, which may have changed with reassessment.
             </p>
             <p>
@@ -276,8 +352,14 @@ export default function TaxDeductionsPost() {
               5. Repairs (Schedule E line 14)
             </h2>
             <p>
-              A qualifying repair may be a current expense, while an improvement
-              generally must be capitalized. The result turns on the work
+              A qualifying repair may be a current expense, while an improvement{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                generally must be capitalized
+              </a>
+              . The result turns on the work
               performed, the unit of property, and any applicable safe
               harbor—not merely on whether the invoice says &quot;repair.&quot;
             </p>
@@ -290,8 +372,15 @@ export default function TaxDeductionsPost() {
             <p>
               <strong>Items often reviewed as improvements:</strong> a full roof
               replacement, kitchen remodel, addition, HVAC replacement, or full
-              re-piping. Recovery periods and elections depend on the component
-              and facts.
+              re-piping;{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                Publication 527&apos;s table of improvement examples
+              </a>{" "}
+              lists similar items. Recovery periods and elections depend on the
+              component and facts.
             </p>
             <p>
               The line gets fuzzy. Review material first-year work with a tax
@@ -304,10 +393,11 @@ export default function TaxDeductionsPost() {
               6. Property management fees (Schedule E line 11)
             </h2>
             <p>
-              Ordinary management fees, leasing fees, and maintenance
-              coordination costs allocable to rental operations are commonly
-              current expenses. Capital-project fees, prepaid amounts, and
-              mixed-use costs may require different treatment.
+              Ordinary management fees and maintenance coordination costs
+              allocable to rental operations are commonly current expenses (a
+              leasing commission may instead belong on line 8, commissions).
+              Capital-project fees, prepaid amounts, and mixed-use costs may
+              require different treatment.
             </p>
             <p>
               Your own labor is not a cash expense. Ordinary and necessary
@@ -346,9 +436,14 @@ export default function TaxDeductionsPost() {
               9. Travel (Schedule E line 6)
             </h2>
             <p>
-              Ordinary and necessary travel primarily to manage, conserve, or
-              maintain a rental may be deductible, subject to allocation and
-              substantiation. The optional business mileage rate can change,
+              Ordinary and necessary travel{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                primarily to manage, conserve, or maintain a rental
+              </a>{" "}
+              may be deductible, subject to allocation and substantiation. The optional business mileage rate can change,
               including within a year; use the{" "}
               <a
                 href="https://www.irs.gov/tax-professionals/standard-mileage-rates"
@@ -359,9 +454,20 @@ export default function TaxDeductionsPost() {
               for the trip date.
             </p>
             <p>
-              <strong>Deductible:</strong> mileage to inspect the property, meet
-              a contractor, attend an HOA meeting, drive to Home Depot for
-              repair supplies, visit a prospective tenant.
+              Trips between your home and a rental are{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                generally nondeductible commuting
+              </a>{" "}
+              unless your home is your principal place of business. Subject to
+              that rule, mileage <strong>can be deductible</strong> when the
+              trip is to collect rent or to manage, conserve, or maintain the
+              rental: for example, to inspect the property, meet a contractor
+              about a repair, attend an HOA meeting, drive to Home Depot for
+              repair supplies, or visit a prospective tenant. Trips for an
+              improvement are recovered through the improvement.
             </p>
             <p>
               <strong>Not deductible:</strong> primary-purpose-personal trips
@@ -375,33 +481,56 @@ export default function TaxDeductionsPost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              10. Professional services (Schedule E line 11)
+              10. Professional services (Schedule E line 10)
             </h2>
             <p>
               Fees for tax preparation allocable to the rental, bookkeeping,
-              property management, and qualifying legal work may be current
-              rental expenses. Acquisition costs and selling expenses follow
+              and qualifying legal work may be current rental expenses
+              (management fees go on line 11). Acquisition costs and selling
+              expenses follow
               different capitalization or sale-treatment rules; commissions are
               not automatically a current Schedule E deduction.
             </p>
             <p>
               The portion of a tax-preparation fee allocable to the rental
-              activity may be deductible; personal-return work and entity-level
+              activity{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                may be deductible
+              </a>
+              ; personal-return work and entity-level
               fees may be reported differently.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              11. HOA fees (Schedule E line 14)
+              11. HOA fees (Schedule E line 19, other)
             </h2>
             <p>
               Ordinary HOA dues allocable to rental use are generally rental
-              expenses. A special assessment may instead fund a capital
-              improvement and require capitalization. Ask what the assessment
-              pays for before deciding how to report it.
+              expenses. Schedule E has no dedicated HOA line; the{" "}
+              <a
+                href="https://www.irs.gov/instructions/i1040se"
+                className="text-primary font-semibold hover:underline"
+              >
+                Schedule E instructions
+              </a>{" "}
+              send ordinary and necessary expenses not listed on lines 5
+              through 18 to line 19. A special assessment may instead fund a
+              capital improvement and{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                require capitalization
+              </a>
+              . Ask what the assessment pays for before deciding how to report
+              it.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              12. Advertising (Schedule E line 4)
+              12. Advertising (Schedule E line 5)
             </h2>
             <p>
               Ordinary costs to advertise an available rental—listing fees and
@@ -415,7 +544,13 @@ export default function TaxDeductionsPost() {
             </h2>
             <p>
               Certain costs of obtaining a rental-property loan, including
-              qualifying points, are generally recovered over the loan term
+              qualifying points, are{" "}
+              <a
+                href="https://www.irs.gov/instructions/i1040se"
+                className="text-primary font-semibold hover:underline"
+              >
+                generally recovered over the loan term
+              </a>{" "}
               rather than deducted entirely at closing. Other fees may be
               capitalized into basis, treated as selling costs, or follow a
               different rule. Do not assume every line in the lender&apos;s
@@ -433,23 +568,36 @@ export default function TaxDeductionsPost() {
             </h2>
             <p>
               A home-office deduction may be available when a qualifying space
-              is used exclusively and regularly for the rental activity and the
-              other applicable requirements are met. The method, allocable
+              is{" "}
+              <a
+                href="https://www.irs.gov/publications/p587"
+                className="text-primary font-semibold hover:underline"
+              >
+                used exclusively and regularly
+              </a>{" "}
+              for the rental activity and the other applicable requirements are
+              met. The method, allocable
               expenses, rental&apos;s status as a trade or business, and other
               facts determine the amount; there is no standard savings range.
             </p>
             <p>
-              The exclusive-and-regular-use test is strict. The IRS doesn&apos;t
-              accept &quot;I sometimes work from the kitchen table.&quot; Use a
-              dedicated home office only.
+              The exclusive-use test is strict: Publication 587 says an area
+              used for both business and personal purposes does not meet it. A
+              kitchen table you also eat at is one everyday example.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               The passive activity loss rules — why your losses might not deduct
             </h2>
             <p>
-              Rental activities are generally passive under federal rules, even
-              when the owner participates, unless an exception applies. Passive
+              Rental activities are{" "}
+              <a
+                href="https://www.irs.gov/publications/p925"
+                className="text-primary font-semibold hover:underline"
+              >
+                generally passive under federal rules
+              </a>
+              , even when the owner participates, unless an exception applies. Passive
               losses generally offset passive income and otherwise may carry
               forward, subject to basis, at-risk, personal-use, and other
               limitations.
@@ -459,19 +607,36 @@ export default function TaxDeductionsPost() {
               <strong>
                 Special allowance for qualifying rental real estate.
               </strong>{" "}
-              An individual who actively participates may be able to deduct up
-              to $25,000 of qualifying loss against nonpassive income, but MAGI,
+              An individual who actively participates may be able to deduct{" "}
+              <a
+                href="https://www.irs.gov/publications/p925"
+                className="text-primary font-semibold hover:underline"
+              >
+                up to $25,000 of qualifying loss
+              </a>{" "}
+              against nonpassive income, but MAGI,
               filing status, ownership, phaseout, basis, and at-risk rules
               apply. Use the current Form 8582 instructions and Publication 925
               rather than treating the maximum as automatic.
             </p>
             <p>
-              <strong>Real estate professional status.</strong> Passing the
-              more-than-half and 750-hour tests is only part of the analysis.
-              The taxpayer must also materially participate in the relevant
-              rental activity or a valid grouped activity, and basis, at-risk,
-              excess-business-loss, and other limitations can still restrict a
-              deduction. Status does not automatically make every rental loss
+              <strong>Real estate professional status.</strong> Passing the{" "}
+              <a
+                href="https://www.irs.gov/publications/p925"
+                className="text-primary font-semibold hover:underline"
+              >
+                more-than-half and 750-hour tests
+              </a>{" "}
+              is only part of the analysis. The taxpayer must also materially
+              participate in the relevant rental activity or a valid grouped
+              activity, and basis, at-risk,{" "}
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section461&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                excess-business-loss
+              </a>
+              , and other limitations can still restrict a deduction. Status does not automatically make every rental loss
               fully deductible.
             </p>
 
@@ -479,10 +644,23 @@ export default function TaxDeductionsPost() {
               When you sell — depreciation recapture
             </h2>
             <p>
-              Depreciation allowed or allowable generally reduces adjusted
-              basis. On a taxable sale, part of the gain attributable to
-              depreciation may be treated as unrecaptured section 1250 gain,
-              which has a maximum federal rate of 25%; other character,
+              Depreciation{" "}
+              <a
+                href="https://www.irs.gov/publications/p946"
+                className="text-primary font-semibold hover:underline"
+              >
+                allowed or allowable
+              </a>{" "}
+              generally reduces adjusted basis. On a taxable sale, part of the
+              gain attributable to depreciation may be treated as unrecaptured
+              section 1250 gain, which has a{" "}
+              <a
+                href="https://www.irs.gov/taxtopics/tc409"
+                className="text-primary font-semibold hover:underline"
+              >
+                maximum federal rate of 25%
+              </a>
+              ; other character,
               ordering, state-tax, and limitation rules can also apply.
             </p>
             <p>
@@ -501,7 +679,13 @@ export default function TaxDeductionsPost() {
               >
                 section 1031 exchange
               </Link>{" "}
-              may defer recognized gain when strict eligibility, identification,
+              <a
+                href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
+                className="text-primary font-semibold hover:underline"
+              >
+                may defer recognized gain
+              </a>{" "}
+              when strict eligibility, identification,
               timing, title, and reinvestment requirements are met. It defers
               rather than erases tax, and it is not a cure-all for every sale.
             </p>
@@ -536,13 +720,15 @@ export default function TaxDeductionsPost() {
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap
-              </Link>
-              &apos;s tax-impact output as an illustrative scenario. It does not
-              determine eligibility, passive-loss treatment, filing position, or
-              the advice a tax professional would give for your return.
+              </Link>{" "}
+              to screen the property&apos;s pre-tax rental cash flow. It does
+              not currently model tax impact, eligibility, passive-loss
+              treatment, or filing position; build those scenarios with a
+              qualified tax professional.
             </p>
           </div>
         </article>
+        <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>
