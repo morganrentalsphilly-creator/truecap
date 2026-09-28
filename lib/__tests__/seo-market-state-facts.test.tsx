@@ -69,6 +69,12 @@ describe("lib/seo/market-facts: parseMarketFacts", () => {
     ["a missing value", market({ ...goodEntry(), countyEffectiveTaxRate: { ...goodEntry().countyEffectiveTaxRate, value: "1.2" } }), /percent between 0 and 10/],
     ["a non-boolean licensing flag", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, required: "yes" } }), /true or false/],
     ["markup in a summary", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, summary: "Registration is <b>required</b>." } }), /markup/],
+    // The page collapses whitespace and the FAQPage JSON-LD keeps it, so only single spaces pass; the error names the field.
+    ["a doubled space in an FAQ answer", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, a: "HUD's FY2026 Fair Market Rent is $1,430  for a 2-bedroom unit." }] }), /columbus\.faq\[0\]\.a contains whitespace other than single spaces/],
+    ["a line break in a summary", market({ ...goodEntry(), rentalLicensing: { ...goodEntry().rentalLicensing, summary: "The city requires a rental registration\nfor every rental unit." } }), /rentalLicensing\.summary contains whitespace other than single spaces/],
+    ["a non-breaking space in a county name", market({ ...goodEntry(), countyEffectiveTaxRate: { ...goodEntry().countyEffectiveTaxRate, county: "Franklin\u00a0County" } }), /countyEffectiveTaxRate\.county contains whitespace other than single spaces/],
+    ["a trailing space in a question", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, q: "What is the FY2026 Fair Market Rent here? " }] }), /columbus\.faq\[0\]\.q starts or ends with whitespace/],
+    ["a leading space in an FAQ source title", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, sources: [{ ...REF, title: " Fair Market Rents" }] }] }), /faq\[0\]\.sources\[0\]\.title starts or ends with whitespace/],
     ["FMR called average rent", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, a: "The average rent is $1,430 per HUD." }] }), /forbidden phrase/],
     ["FMR called market rent", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, a: "HUD's market rent is $1,430." }] }), /forbidden phrase/],
     ["an investment verdict", market({ ...goodEntry(), faq: [{ ...goodEntry().faq[0]!, a: "Columbus is a good investment at $1,430." }] }), /forbidden phrase/],
@@ -140,6 +146,7 @@ describe("lib/seo/state-facts: parseStateFacts", () => {
     ["a non-government host", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://ohio-tax-rates.example.org/x" } } } } }, /not a primary-source domain/],
     ["a .gov look-alike", { states: { ohio: { ...goodState(), medianRealEstateTaxesPaid: { ...censusFact(2937), source: { ...censusFact(2937).source, url: "https://tax.ohio.gov.example.com/x" } } } } }, /not a primary-source domain/],
     ["a verdict in a source title", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, title: "Why Ohio is a strong market" } } } } }, /forbidden phrase/],
+    ["a doubled space in a source title", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, title: "table  B25077" } } } } }, /medianHomeValue\.source\.title contains whitespace other than single spaces/],
     ["a future retrieval date", { states: { ohio: { ...goodState(), medianHomeValue: { ...censusFact(239800), source: { ...censusFact(239800).source, retrievedAt: "2099-12-31" } } } } }, /is in the future/],
   ];
 

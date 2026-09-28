@@ -150,7 +150,20 @@ describe("trust-language guards", () => {
 
     expect(taxDeductions).toContain("https://www.irs.gov/publications/p527");
     expect(taxDeductions).toContain("https://www.irs.gov/publications/p925");
-    expect(taxDeductions).toContain("Cost Segregation Audit Technique Guide");
+    // The cost-segregation claim links IRS Publication 5653 on www.irs.gov
+    // (today its PDF; an irs.gov HTML page for it, which seo-citations step 4
+    // prefers, would also do), and a link's own text names it: by number
+    // ("IRS Publication 5653", the anchor form seo-citations step 6 gives) or
+    // by title ("Cost Segregation Audit Technique(s) Guide"). Inline tags in
+    // the link are fine; the sources list's title does not count.
+    const p5653Anchors = [
+      ...taxDeductions.matchAll(/<a\s[^>]*href="https:\/\/www\.irs\.gov\/[^"]*\bp5653\b[^"]*"[^>]*>([\s\S]*?)<\/a>/g),
+    ].map((m) => m[1]!.replace(/\{"\s*"\}/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+    expect(p5653Anchors.length).toBeGreaterThan(0);
+    expect(
+      p5653Anchors.some((anchor) => /\bPublication 5653\b|\bCost Segregation Audit Techniques? Guide\b/.test(anchor)),
+      p5653Anchors.join(" | "),
+    ).toBe(true);
     expect(taxDeductions).not.toMatch(/typically saves you 3-5x/i);
     expect(taxDeductions).not.toMatch(/typically pays back 4-10x/i);
     expect(taxDeductions).not.toMatch(/Worth doing on properties over/i);

@@ -31,7 +31,7 @@ SEO" — that is a normal task, not the loop.
    - `app/blog/<slug>/page.tsx` and `app/blog/<slug>/opengraph-image.tsx`
    - `app/vs/<slug>/page.tsx`
    - `lib/blog-posts.ts`, `lib/blog-topics.ts`
-   - `content/seo/*.json`
+   - `content/seo/*.json`, except `content/seo/state-facts.json`, which is owner-maintained (the market-intelligence PDF is generated from it by a script the loop cannot run), and `content/seo/lastmod.json`, which the publish job owns. File a stale state fact as a tier-2 issue.
    - `app/research/<slug>/page.tsx` and `public/research/*.csv` (data study only)
 
    Never touch pricing, terms, privacy, methodology, the analyzer, auth, billing, components, the sitemap, the layout, tools pages, tests, scripts, workflows or `.claude/`.

@@ -338,9 +338,20 @@ describe("FAQPage entries == the visible FAQ, on a registry-driven sample of eve
     const html = await renderVs("airdna");
     const faqs = faqsOf(html);
     expect(faqs.length).toBeGreaterThan(0);
-    expect(faqs[0].a).toBe(
-      "No — they solve different problems. AirDNA is STR market + revenue data; TrueCap is the underwriting calculator. AirDNA feeds revenue inputs; TrueCap runs the cap rate / DSCR / cash flow math on top. STR investors typically use both.",
+    // The markup's first answer is the rendered first answer's own text, case
+    // and spacing kept: the answer under the <details> whose question it
+    // names, tags dropped (inline ones join, as plainTextOf joins them),
+    // entities decoded. The loop may reword the answer (seo-citations,
+    // seo-refresh); the two must stay one string.
+    const block = [...mainHtml(html).matchAll(/<details\b[^>]*>\s*<summary\b[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi)].find(
+      (m) => decodeEntities(m[1].replace(/<span\b[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/span>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim() === faqs[0].q,
     );
+    expect(block, faqs[0].q).toBeDefined();
+    const visibleAnswer = decodeEntities(block![2].replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
+    expect(visibleAnswer.length).toBeGreaterThan(20);
+    expect(faqs[0].a).toBe(visibleAnswer);
+    // No hand-kept paraphrase: the plainTextAnswer field 24082ee removed stays gone.
+    for (const slug of VS_SLUGS) expect(readFileSync(join(ROOT, "app/vs", slug, "page.tsx"), "utf8"), slug).not.toContain("plainTextAnswer");
     // No HTML entity survives into a question or an answer (they render literally).
     for (const slug of VS_SLUGS) {
       for (const { q, a } of faqsOf(await renderVs(slug))) expect(`${q} ${a}`, slug).not.toMatch(/&[a-z]+;|&#x?[0-9a-f]+;/i);

@@ -378,6 +378,8 @@ describe("path fences", () => {
     expect(pathViolations("app/blog/x/layout.tsx", config).map((v) => v.rule)).toContain("forbidden-file-name");
     expect(pathViolations("app/blog/../../proxy.ts", config).map((v) => v.rule)).toEqual(["path-unsafe"]);
     expect(pathViolations("content/seo/market-facts.json", config)).toEqual([]);
+    // State facts are owner-maintained (seo-weekly hard rule 1): inside the content/seo/*.json allow glob, and denied by name.
+    expect(pathViolations("content/seo/state-facts.json", config).map((v) => v.rule)).toEqual(["path-denied"]);
     expect(pathViolations("seo/config.json", config).map((v) => v.rule)).toEqual(expect.arrayContaining(["path-not-allowed", "path-denied"]));
   });
 
@@ -698,13 +700,23 @@ describe("links", () => {
     expect(out).toEqual(["/blog/brrrr-method-explained → www.dealcheck.io"]);
   });
 
-  it("keeps config.paths.vendorLinkAllow equal to /vs plus the comparisons hub", () => {
+  it("keeps config.paths.vendorLinkAllow within /vs plus the comparisons hub", () => {
+    // Containment, not equality: seo-gap-article may add a comparisons post
+    // that names no vendor, and the loop cannot edit seo/config.json. A hub
+    // post missing from the list is fail-safe (its vendor links are refused);
+    // a listed page outside /vs and the hub is not.
     const topics = readFileSync(path.join(__dirname, "../../lib/blog-topics.ts"), "utf8");
     const at = topics.indexOf('slug: "comparisons"');
     const list = topics.slice(at, topics.indexOf("]", topics.indexOf("postSlugs", at)));
     const hub = [...list.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]).filter((x) => x !== "comparisons");
     expect(hub.length).toBeGreaterThanOrEqual(10);
-    expect([...(config.paths.vendorLinkAllow ?? [])].sort()).toEqual(["app/vs/*/page.tsx", ...hub.map((s) => `app/blog/${s}/page.tsx`)].sort());
+    const allowed = new Set(["app/vs/*/page.tsx", ...hub.map((s) => `app/blog/${s}/page.tsx`)]);
+    const listed = config.paths.vendorLinkAllow ?? [];
+    expect(listed.length).toBeGreaterThan(0);
+    for (const entry of listed) {
+      expect(allowed.has(entry), entry).toBe(true);
+      if (!entry.includes("*")) expect(existsSync(path.join(__dirname, "../..", entry)), entry).toBe(true);
+    }
   });
 
   it("checks internal links against the sitemap", () => {
