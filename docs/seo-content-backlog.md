@@ -101,8 +101,8 @@ skip beats a post that cannot rank.
       prose, none with a dollar figure. Angle: the question has two
       answers because conventional wants 25% down on a 2-4 unit
       investment purchase and 5% owner-occupied, so one $400K duplex is
-      $138,140 for −$277/mo or $44,990 to live in. Plus the year-2
-      problem (5%-down duplex loses $974/mo after move-out) and the
+      $138,140 for −$277/mo or $58,129 to live in. Plus the year-2
+      problem (5%-down duplex loses $949/mo after move-out) and the
       head-to-head vs a same-priced single-family.
 - [ ] "DSCR calculator no personal info / max loan at 1.25 DSCR" —
       refresh the EXISTING dscr post/tool copy with the max-loan angle

@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -128,17 +129,21 @@ export default function SfrVsMfrPost() {
             Single-family: lower variance income, easier financing, simpler operations, easier exit. Good first-investment choice, scales linearly (every new property is another deal to find).
           </p>
           <p>
-            Multi-family (2-4 units): higher cap rate per dollar invested, diversified rent rolls, still qualifies for residential financing. Sweet spot for investors past the first 1-2 deals.
+            Multi-family (2-4 units): diversified rent rolls, and it still qualifies for{" "}
+            <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">Fannie Mae</a>{" "}
+            and{" "}
+            <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="text-primary font-semibold hover:underline">Freddie Mac</a>{" "}
+            1-4 unit residential financing — compare cap rates deal by deal. Sweet spot for investors past the first 1-2 deals.
           </p>
           <p>
-            Small multi-family (5-20 units): best cap rates in the housing investment world, but commercial financing + larger capex events + harder liquidity. Only after you&apos;ve mastered the residential rhythm.
+            Small multi-family (5-20 units): multifamily (commercial) financing underwritten on the property&apos;s income, plus larger capex events. Only after you&apos;ve mastered the residential rhythm.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             The honest side-by-side
           </h2>
           <p>
-            Same market, same neighborhood, comparable condition — typical 2026 numbers:
+            An illustrative example (made-up inputs, not market data) for one hypothetical neighborhood:
           </p>
           <ul>
             <li>
@@ -162,42 +167,48 @@ export default function SfrVsMfrPost() {
             </li>
           </ul>
           <p>
-            Multi-family cap rates beat SFR by 1-3 points per dollar invested. But the absolute monthly cash flow per unit is similar — multi-family wins on aggregate, not per-unit. The real difference shows up in scale: a fourplex is one closing, one PM relationship, one tax bill instead of four.
+            In this example, the multi-family cap rates run 1 to 2.5 points above the SFR&apos;s, and the SFR earns more cash flow per unit — multi-family wins on aggregate, not per-unit. The real difference shows up in scale: a fourplex is one closing, one PM relationship, one tax bill instead of four.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             What single-family wins on
           </h2>
           <p>
-            <strong>Financing.</strong> 30-year fixed conventional at 80-90% LTV, FHA 3.5%, VA 0% — residential financing on SFRs is the cheapest debt available to individual investors. No comparable financing exists for 5+ unit properties.
+            <strong>Financing.</strong> 30-year fixed conventional financing goes up to{" "}
+            <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">85% LTV on a one-unit investment purchase</a>{" "}
+            under Fannie Mae&apos;s and{" "}
+            <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="text-primary font-semibold hover:underline">Freddie Mac&apos;s</a>{" "}
+            limits; FHA (<a href="https://www.hud.gov/helping-americans/loans" className="text-primary font-semibold hover:underline">as little as 3.5% down</a>) and VA (<a href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/" className="text-primary font-semibold hover:underline">no down payment</a> when the price doesn&apos;t exceed the appraised value) are open{" "}
+            <a href="https://www.hud.gov/hud-partners/single-family-sfh203b" className="text-primary font-semibold hover:underline">only if you&apos;ll live in the home</a>. 5+ unit properties need multifamily loans instead, qualified mainly on the property&apos;s income —{" "}
+            <a href="https://multifamily.fanniemae.com/financing-options/small-loans/small-mortgage-loan-program-term-sheet" className="text-primary font-semibold hover:underline">Fannie Mae&apos;s Small Mortgage Loan program</a>, for example, requires at least a 1.25x debt service coverage ratio (DSCR).
           </p>
           <p>
-            <strong>Liquidity.</strong> SFRs sell to two buyer pools — owner-occupants and investors. That doubles the demand at exit. Multi-family sells only to investors, which means longer time-on-market and price-sensitive buyers.
+            <strong>Liquidity.</strong> SFRs sell to owner-occupants and investors. 2-4 unit buildings can also sell to owner-occupants who house-hack with FHA, VA or conventional loans, but 5+ unit properties need multifamily financing.
           </p>
           <p>
-            <strong>Tenant quality.</strong> Married couples with kids, established professionals, retirees — SFRs attract longer-term tenants because the property feels like &quot;their home,&quot; not &quot;an apartment.&quot; Multi-family attracts shorter-term tenants on average. Annual turnover on SFRs runs 20-30%; on multi-family it runs 40-60%.
+            <strong>Tenant tenure.</strong> SFRs may appeal to tenants looking for a longer stay; check actual lease lengths in your market rather than assuming by property type. Tenant turnover varies by market and property, so check the seller&apos;s rent roll and lease history before you set a turnover rate.
           </p>
           <p>
             <strong>Capex predictability.</strong> One furnace, one roof, one water heater, one kitchen. Easier to budget capex. Multi-family means multiple of each system, and they fail on different schedules. The math averages out over a portfolio, but year-to-year variance is higher.
           </p>
           <p>
-            <strong>Exit optionality.</strong> Need to sell? You can list to a homeowner couple in a week. Multi-family takes 60-180 days to find the right investor buyer.
+            <strong>Exit optionality.</strong> Need to sell? An SFR can go to owner-occupant buyers as well as investors; a 5+ unit building needs a buyer who can get multifamily financing, so allow more time.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             What multi-family wins on
           </h2>
           <p>
-            <strong>Cap rate per dollar.</strong> The economies of scale are real. One roof spreads across 2-10 units. One furnace covers a common area. Shared yard. Shared parking. These efficiencies flow through to higher cap rates.
+            <strong>Cap rate per dollar.</strong> The economies of scale are real. One roof spreads across 2-10 units. One furnace covers a common area. Shared yard. Shared parking. These efficiencies can flow through to higher cap rates.
           </p>
           <p>
             <strong>Income diversification.</strong> When one of four units goes vacant, you lose 25% of rent — not 100%. A 30-day vacancy on an SFR is brutal; a 30-day vacancy on a fourplex is barely noticeable.
           </p>
           <p>
-            <strong>Less buyer competition.</strong> Owner-occupants don&apos;t bid on multi-family. Less competition means better deals. The 2-4 unit market in particular has weaker price discovery than SFR — meaning more deals fall to the patient investor.
+            <strong>Less buyer competition at 5+ units.</strong> On 5+ unit properties, owner-occupant homebuyers drop out because 1-4 unit home loans no longer apply; on 2-4 units you&apos;ll still compete with owner-occupants house-hacking with FHA, VA or conventional loans.
           </p>
           <p>
-            <strong>House-hacking optionality.</strong> Live in one unit, rent out the others. FHA 3.5% down on a 2-4 unit. This is the most powerful first-time-investor move in the country. See the{" "}
+            <strong>House-hacking optionality.</strong> Live in one unit, rent out the others. FHA loans allow as little as 3.5% down on a 2-4 unit you live in. This is the most powerful first-time-investor move in the country. See the{" "}
             <Link
               href="/blog/house-hacking-explained"
               className="text-primary font-semibold hover:underline"
@@ -218,14 +229,17 @@ export default function SfrVsMfrPost() {
           </p>
           <ul>
             <li>
-              <strong>4-unit:</strong> residential financing, 30-year fixed, 80-90% LTV, FHA 3.5% if owner-occupant, qualifies on personal income.
+              <strong>4-unit:</strong> residential financing, 30-year fixed,{" "}
+              <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">up to 75% LTV as an investment purchase</a>{" "}
+              (<a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">up to 95% conventional</a>, or FHA with as little as 3.5% down, if you live in one unit), qualifies on personal income.
             </li>
             <li>
-              <strong>5+ unit:</strong> commercial financing, 5/1 or 7/1 ARM with 25-year amortization, 70-75% LTV, rates 50-150bp above conventional, qualifies primarily on property cash flow (debt service coverage).
+              <strong>5+ unit:</strong> multifamily (commercial) financing, qualified primarily on property cash flow (debt service coverage) —{" "}
+              <a href="https://multifamily.fanniemae.com/financing-options/small-loans/small-mortgage-loan-program-term-sheet" className="text-primary font-semibold hover:underline">Fannie Mae&apos;s Small Mortgage Loan program</a>, for example, allows up to 80% LTV and amortization up to 30 years, with fixed- or variable-rate options and a minimum 1.25x DSCR.
             </li>
           </ul>
           <p>
-            This cliff is real and significant. Many investors deliberately cap their portfolio at 4-unit per property specifically to keep residential financing. Others step up to 5-20 unit specifically because the cap rate premium offsets the financing penalty. There&apos;s no right answer — but you need to choose deliberately, not by accident.
+            This cliff is real and significant. Staying at 4 units or fewer per property keeps residential financing available; stepping up to 5-20 units means multifamily financing. Stepping up can make sense when a specific deal&apos;s numbers justify the financing change. There&apos;s no right answer — but you need to choose deliberately, not by accident.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -235,28 +249,29 @@ export default function SfrVsMfrPost() {
             Stage 0: First investment
           </h3>
           <p>
-            Single-family or house-hacked 2-4 unit. Easier financing, simpler operations, the learning curve isn&apos;t compounded by tenant management complexity. If you can house-hack, do it — FHA 3.5% on a duplex is unbeatable on dollar-leverage terms.
+            Single-family or house-hacked 2-4 unit. Easier financing, simpler operations, the learning curve isn&apos;t compounded by tenant management complexity. If you can house-hack, consider it — FHA&apos;s 3.5% minimum down payment on a duplex you live in is among the lowest available, and eligible veterans can use a{" "}
+            <a href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/" className="text-primary font-semibold hover:underline">VA-backed loan with no down payment on up to 4 units</a>.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
             Stage 1: Properties 2-4
           </h3>
           <p>
-            Mix of SFR and 2-4 unit. By now you understand tenant rhythms. Adding multi-family diversifies your cash flow and improves your aggregate cap rate. Still residential financing.
+            Mix of SFR and 2-4 unit. By now you understand tenant rhythms. Adding multi-family diversifies your cash flow and can improve your aggregate cap rate. Still residential financing.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
             Stage 2: Properties 5-9
           </h3>
           <p>
-            Mostly small multi-family (2-4 unit) plus occasional SFR for diversification. Conventional financing slots running out (Fannie/Freddie cap individual borrowers at 10 financed). Time to start thinking about <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans</Link> for the next 5 properties or commercial financing for a step-up.
+            Mostly small multi-family (2-4 unit) plus occasional SFR for diversification. Conventional financing slots running out (<a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="text-primary font-semibold hover:underline">Fannie Mae</a> and <a href="https://guide.freddiemac.com/app/guide/section/4201.13" className="text-primary font-semibold hover:underline">Freddie Mac</a> cap investment-property borrowers at 10 financed 1-4 unit properties). Time to start thinking about <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans</Link> for the next 5 properties or commercial financing for a step-up.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
             Stage 3: 10+ properties or 5+ unit step-up
           </h3>
           <p>
-            Either continue with DSCR financing on residential properties past the conventional cap, OR step up to 5-20 unit commercial multi-family for the cap rate premium and forced-appreciation optionality. This decision typically comes down to whether you want to be a portfolio operator or an asset manager — they&apos;re different jobs.
+            Either continue with DSCR financing on residential properties past the conventional cap, OR step up to 5-20 unit commercial multi-family when a specific deal&apos;s cap rate and forced-appreciation potential justify it. This decision typically comes down to whether you want to be a portfolio operator or an asset manager — they&apos;re different jobs.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -298,6 +313,42 @@ export default function SfrVsMfrPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae, Eligibility Matrix (August 5, 2026)",
+              url: "https://singlefamily.fanniemae.com/media/20786/display",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "HUD, Let FHA Loans Help You",
+              url: "https://www.hud.gov/helping-americans/loans",
+            },
+            {
+              title: "VA, VA-backed purchase loan",
+              url: "https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/",
+            },
+            {
+              title: "HUD, 203(b) Mortgage Insurance",
+              url: "https://www.hud.gov/hud-partners/single-family-sfh203b",
+            },
+            {
+              title: "Fannie Mae Multifamily, Small Mortgage Loan Program Term Sheet",
+              url: "https://multifamily.fanniemae.com/financing-options/small-loans/small-mortgage-loan-program-term-sheet",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-2-03, Multiple Financed Properties for the Same Borrower",
+              url: "https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower",
+            },
+            {
+              title: "Freddie Mac Seller/Servicer Guide 4201.13, Investment Property Mortgages",
+              url: "https://guide.freddiemac.com/app/guide/section/4201.13",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

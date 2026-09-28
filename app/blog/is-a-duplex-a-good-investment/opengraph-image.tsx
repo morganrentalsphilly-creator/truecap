@@ -83,7 +83,7 @@ export default function Image() {
               display: "flex",
             }}
           >
-            $138,140 as a rental. $44,990 if you live in it.
+            $138,140 as a rental. $58,129 if you live in it.
           </div>
         </div>
 

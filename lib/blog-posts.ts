@@ -42,7 +42,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Is a duplex a good investment? The same $400,000 building, underwritten as a rental and as a house hack",
     excerpt:
-      "A duplex is not one investment, it is two, and the loan application decides which you get. Conventional financing wants 25% down on a 2-4 unit investment purchase and 5% owner-occupied — $138,140 of cash for a $277-a-month loss, or $44,990 to live there at $389 a month above rent while building $4,050 of equity. Includes the year-2 problem (the 5%-down duplex loses $974 a month once you move out), the head-to-head against a same-priced single-family the duplex wins on cap rate 5.31% to 4.09%, and the $1,840 a year that two units under one roof genuinely save.",
+      "The same $400,000 duplex underwritten two ways. As a pure rental with 25% down it needs $138,140 of cash and loses $277 a month; owner-occupied with 5% down it needs $58,129. Both paths worked line by line, plus the year-2 move-out math and a head-to-head against a same-priced single-family.",
     readingTimeMinutes: 13,
     publishedAt: "2026-08-05",
     available: true,
@@ -167,9 +167,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "70-percent-rule-house-flipping",
     title:
-      "The 70% rule for house flipping (and BRRRR): calculate an Offer Ceiling (2026)",
+      "The 70% rule for house flipping (and BRRRR): calculate a 70%-rule price screen (2026)",
     excerpt:
-      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it's really doing under the hood. The Offer Ceiling formula worked on a $300K flip, a full P&L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
+      "The 70% rule — 70% of after-repair value, minus repairs — as a quick price screen, and what it does under the hood. Worked on a $300K flip with a full P&L showing where the 30% spread goes ($37,800 of costs, $52,200 of profit), the BRRRR version, and the cheap-house and long-rehab cases where 70% is the wrong number.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-05",
     available: true,
@@ -370,7 +370,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Section 8 rentals: how the math actually works in 2026 (pros, cons, underwriting)",
     excerpt:
-      "How the voucher program actually pays — payment standards, FMR math, the two ceilings on your rent, NSPIRE inspection costs, and the five underwriting adjustments that decide whether Section 8 makes a deal better or worse.",
+      "How the Housing Choice Voucher program pays: how to verify payment standards, approved rent and the tenant's share, what inspections involve, payment timing, and the property-level assumptions to adjust when you underwrite a voucher rental.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-10",
     available: true,
@@ -399,7 +399,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "brrrr-method-explained",
     title: "The BRRRR method in 2026: the complete numbers walkthrough",
     excerpt:
-      "Buy, rehab, rent, refinance, repeat — with real 2026 numbers. One full deal start to finish: refinance LTV limits, seasoning rules, DSCR qualification, and the two constraints on your cash-out most guides skip.",
+      "Buy, rehab, rent, refinance, repeat: one full deal walked start to finish on stated financing assumptions. Refinance LTV limits, seasoning, DSCR qualification and the limits on your cash-out, all of which vary by program and lender.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,
@@ -581,7 +581,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Single-family vs multi-family rental property — which actually wins?",
     excerpt:
-      "The honest comparison: cash flow, cap rate, financing, tenant quality, exit liquidity, capex risk, and which property type fits your specific stage. Side-by-side numbers with 2026 financing.",
+      "Single-family vs multi-family compared on cash flow, cap rate, financing, tenants, exit liquidity and capex risk, with an illustrative side-by-side example.",
     readingTimeMinutes: 11,
     publishedAt: "2026-05-27",
     available: true,
@@ -589,9 +589,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "how-to-estimate-rehab-costs",
     title:
-      "How to estimate rehab costs on a rental property — the honest framework",
+      "How to estimate rehab costs without relying on generic price bands",
     excerpt:
-      "The framework experienced investors use: sq-ft pricing for cosmetic, kitchen, bath, systems work. Plus the 25% contingency rule and on-site walkthrough checklist.",
+      "A rehab-budget framework: document the scope and condition, get local written bids, add permits and carrying costs, and set a disclosed reserve for what you can't see yet.",
     readingTimeMinutes: 12,
     publishedAt: "2026-05-27",
     available: true,
@@ -621,7 +621,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to find off-market rental properties — 8 sources that actually work",
     excerpt:
-      "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.",
+      "The 8 sources investors use to find off-market rental deals: driving for dollars, direct mail, wholesalers, networking, public records and more.",
     readingTimeMinutes: 10,
     publishedAt: "2026-05-26",
     available: true,
@@ -639,7 +639,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "best-states-for-rental-investors-2026",
     title: "Best states for rental property investors in 2026",
     excerpt:
-      "An honest ranking of the top 10 US states for rental investors — cap rates, property tax, income tax, landlord laws, and the trade-offs that decide which state actually fits your strategy.",
+      "Ten US states compared for rental investing on property tax, income tax and landlord-tenant rules, and the trade-offs between cash-flow and appreciation markets.",
     readingTimeMinutes: 12,
     publishedAt: "2026-05-25",
     available: true,
@@ -676,7 +676,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "property-management-yes-or-no",
     title: "Should I use a property management company? The actual math.",
     excerpt:
-      "8-10% of rent + lease-up fees + maintenance markup — does paying a PM still beat managing yourself? The honest break-even math, plus when to switch each direction.",
+      "Percent-of-rent fees, lease-up fees and maintenance markups: does paying a property manager still beat managing yourself? The break-even math, plus when to switch either way.",
     readingTimeMinutes: 8,
     publishedAt: "2026-05-25",
     available: true,
@@ -704,7 +704,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Cash flow vs appreciation: which rental strategy actually wins in 2026?",
     excerpt:
-      "A 10-year side-by-side across three market types with 2026 borrowing costs — and the two return components most comparisons silently forget.",
+      "A 10-year side-by-side of cash-flow and appreciation strategies across three market types, the four sources of rental return, and how borrowing costs change the math.",
     readingTimeMinutes: 9,
     publishedAt: "2026-05-24",
     available: true,

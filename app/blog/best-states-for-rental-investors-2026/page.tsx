@@ -20,11 +20,12 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "best-states-for-rental-investors-2026";
 const TITLE = "Best states for rental property investors in 2026";
 const DESCRIPTION =
-  "The top 10 US states for rental property investors in 2026, ranked on cap rates, property tax, income tax, landlord laws, and which fits your strategy.";
+  "The top 10 US states for rental property investors in 2026, compared on property tax, income tax, landlord laws, and which fits your strategy.";
 const PUBLISHED_AT = "2026-05-25";
 const MODIFIED_AT = lastmodFor("/blog/best-states-for-rental-investors-2026") ?? PUBLISHED_AT;
 const READING_TIME = 12;
@@ -194,26 +195,60 @@ export default function BestStatesPost() {
                 wildfire, water-shortage exposure
               </li>
             </ul>
+            <p>
+              Where this guide gives property tax as a percentage of median home
+              value, it divides Census ACS 2024 median real estate taxes paid (
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                table B25103
+              </a>
+              ) by median home value (
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25077.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                table B25077
+              </a>
+              ). Both tables cover owner-occupied homes only.
+            </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               Tier 1 — Cash flow leaders
             </h2>
             <p>
-              States where the 1% rule (gross monthly rent ≥ 1% of price) still
-              routinely works in 2026:
+              Cash-flow-oriented states — test each listing against the 1% rule
+              (gross monthly rent ≥ 1% of price):
             </p>
 
             <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
               1. Indiana (Indianapolis + smaller cities)
             </h3>
             <p>
-              Indianapolis remains one of the few major US metros where
-              workforce neighborhoods consistently produce 7-9% cap rates and
-              the 1% rule works. Indiana&apos;s 2% property tax cap (Indiana
-              Constitution Article 10) is structural — you can&apos;t get a
-              property-tax-reassessment surprise the way you can in Texas or
-              Florida. Mature out-of-state PM market. Limited appreciation
-              tailwind (2-4%/yr).
+              Indianapolis workforce neighborhoods are a common cash-flow
+              target; verify each property&apos;s cap rate from its own rent,
+              expense, and price evidence. Indiana caps property taxes on
+              non-homestead residential property, including rentals, at 2% of
+              gross assessed value (Indiana Constitution Article 10), but the{" "}
+              <a
+                href="https://www.in.gov/dlgf/files/240429-Fact-Sheet-Circuit-Breaker-Caps.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                Indiana DLGF&apos;s property tax caps fact sheet
+              </a>{" "}
+              notes that assessed values are adjusted every year and that
+              voter-approved referendum funds are generally exempt from the
+              caps, so a rental&apos;s bill can still rise. Mature
+              out-of-state PM market.{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/ATNHPIUS26900Q"
+                className="text-primary font-semibold hover:underline"
+              >
+                FHFA&apos;s Indianapolis-area house price index
+              </a>{" "}
+              rose about 3.7% a year from 1991 to mid-2026 and about 7.5% a year
+              over the last decade (nominal).
             </p>
             <p>
               <strong>Read the full Indianapolis breakdown:</strong>{" "}
@@ -236,13 +271,23 @@ export default function BestStatesPost() {
               2. Ohio (Cleveland + Cincinnati + Columbus)
             </h3>
             <p>
-              Cleveland produces the widest cap-rate range of any major US
-              market — 5-7% in gentrified Tremont to 12%+ in Slavic Village.
-              Real BRRRR market with abundant distressed inventory at $40-90k
-              entry prices. The tradeoff: older housing stock means significant
-              capex risk on properties that haven&apos;t been recently rehabbed.
-              Ohio property tax effective rate is ~1.4-1.8% — higher than
-              Indiana but lower than Texas.
+              Cleveland&apos;s cap rates vary widely by neighborhood — verify
+              each property&apos;s numbers rather than relying on neighborhood
+              ranges. Real BRRRR market with distressed inventory at low entry
+              prices. The tradeoff: older housing stock means significant capex
+              risk on properties that haven&apos;t been recently rehabbed.
+              For owner-occupied homes, Ohio&apos;s statewide median property
+              tax is{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 1.2% of median home value (Census ACS 2024)
+              </a>{" "}
+              — higher than Indiana&apos;s 0.74% and a little below Texas&apos;s
+              1.31% — and about 1.4–1.8% in the Columbus, Cincinnati and
+              Cleveland counties (Franklin 1.40%, Hamilton 1.44%, Cuyahoga
+              1.80%); a rental&apos;s bill can be higher.
             </p>
             <p>
               <strong>Read the full Cleveland breakdown:</strong>{" "}
@@ -266,11 +311,18 @@ export default function BestStatesPost() {
             </h3>
             <p>
               Kansas City is the most-reliable Missouri play. Eastern Jackson
-              County (Raytown, Independence, Grandview) produces 7-9% cap rates
-              in working-class suburbs with manageable due diligence. Caveat:
-              Jackson County went through significant tax reassessments
-              2023-2024 — always pull current tax records, not seller&apos;s
-              prior bill.
+              County (Raytown, Independence, Grandview) has working-class
+              suburbs where cap rates are worth testing, with manageable due
+              diligence. Caveat: Jackson County&apos;s 2023 reassessment led to
+              a{" "}
+              <a
+                href="https://stc.mo.gov/wp-content/uploads/sites/5/2024/08/Order-of-STC-to-Jackson-County-Regarding-2023-and-2024-Assessments.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                Missouri State Tax Commission order correcting 2023 and 2024
+                residential assessments
+              </a>{" "}
+              — always pull current tax records, not seller&apos;s prior bill.
             </p>
             <p>
               <strong>Read the full Kansas City breakdown:</strong>{" "}
@@ -293,12 +345,12 @@ export default function BestStatesPost() {
               4. Michigan (Detroit metro)
             </h3>
             <p>
-              Detroit produces the highest headline cap rates of any major US
-              market (15%+ in distressed neighborhoods) but the operational risk
-              to capture them is also the highest. Northwest Detroit (Bagley,
-              Rosedale) and East English Village are the safer entry points at
-              6-9% caps. Save the 15%+ Brightmoor / Far East deals until you
-              have local relationships.
+              Detroit&apos;s distressed neighborhoods can show very high
+              headline cap rates, but the operational risk to capture them is
+              also high. Northwest Detroit (Bagley, Rosedale) and East English
+              Village are commonly treated as safer entry points; verify each
+              property&apos;s cap rate. Deals in the most distressed pockets are
+              harder to run without local relationships.
             </p>
             <p>
               <strong>Read the full Detroit breakdown:</strong>{" "}
@@ -354,11 +406,33 @@ export default function BestStatesPost() {
             </h3>
             <p>
               Charlotte is the best example of a market where you can still get
-              conventional cash flow (5-7% caps in suburbs) AND ride a real
-              appreciation tailwind (50k+ residents/yr added to the MSA, fintech
-              + banking hub). NC effective property tax is low (~0.85-0.95% in
-              Mecklenburg). Reassessments happen on a 4-8 year cycle, so expect
-              step-changes rather than annual creep.
+              conventional cash flow in some suburbs AND ride a real
+              appreciation tailwind (the{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv"
+                className="text-primary font-semibold hover:underline"
+              >
+                MSA added more than 50,000 residents a year in 2022–2025, per
+                Census estimates
+              </a>
+              ; fintech + banking hub). NC property tax is low: in Mecklenburg
+              County, median real estate taxes run{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 0.68% of median home value (Census ACS 2024)
+              </a>{" "}
+              for owner-occupied homes; rentals can pay more.{" "}
+              <a
+                href="https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-286.html"
+                className="text-primary font-semibold hover:underline"
+              >
+                N.C. General Statute 105-286
+              </a>{" "}
+              requires each county to reappraise all real property at least
+              every eighth year, and a county may adopt a shorter cycle, so
+              expect step-changes rather than annual creep.
             </p>
             <p>
               <strong>Read the full Charlotte breakdown:</strong>{" "}
@@ -381,12 +455,18 @@ export default function BestStatesPost() {
               7. Georgia (Atlanta + secondary cities)
             </h3>
             <p>
-              Atlanta is a balanced cash + appreciation play with a meaningful
-              additional advantage: Georgia is one of the most landlord-friendly
-              states in the US for evictions (typical timeline is 30-45 days vs
-              90+ in CA or NY). Combined with reasonable property tax
-              (~1.0-1.2%) and strong job growth (BeltLine area is one of the
-              highest-appreciation submarkets in the US since 2015).
+              Atlanta is a balanced cash + appreciation play; confirm the
+              current dispossessory process and timelines for the county with
+              local counsel before underwriting. Property tax is reasonable:
+              Census ACS 2024 puts median real estate taxes at{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 0.86% of median home value in Fulton County
+              </a>{" "}
+              for owner-occupied homes; rentals without homestead exemptions
+              can pay more, so pull the parcel&apos;s bill.
             </p>
             <p>
               <strong>Read the full Atlanta breakdown:</strong>{" "}
@@ -413,13 +493,44 @@ export default function BestStatesPost() {
               8. Arizona (Phoenix)
             </h3>
             <p>
-              Phoenix combines very low property tax (~0.55-0.7%), low state
-              income tax (2.5% flat), and massive net in-migration (500k+
-              residents in 5 years). Cap rates compress to 3-5% in core
-              neighborhoods, 5-7% in inner suburbs. Long-term water risk for far
-              suburbs is real but unlikely to materially affect a 5-10 year
-              hold. STR-permissive at state level (cities can permit + tax but
-              not ban).
+              Phoenix combines very low property tax (Census ACS 2024:{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                median taxes about 0.40% of median home value in Maricopa
+                County
+              </a>{" "}
+              for owner-occupied homes; rentals can pay more), low state income
+              tax (
+              <a
+                href="https://azdor.gov/forms/individual/form-140-x-y-tables"
+                className="text-primary font-semibold hover:underline"
+              >
+                a 2.5% flat rate for tax year 2023 and beyond, per the Arizona
+                Department of Revenue
+              </a>
+              ), and strong net in-migration (
+              <a
+                href="https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 300,000 net migrants and 354,000 added residents from July
+                2020 to July 2025, per Census estimates
+              </a>
+              ). Cap rates are lower in core neighborhoods than in inner
+              suburbs; verify each property&apos;s numbers. Long-term water
+              supply for some far suburbs is a real question; check the
+              parcel&apos;s water provider and any development restrictions.
+              STR-permissive at state level: under{" "}
+              <a
+                href="https://www.azleg.gov/ars/9/00500-39.htm"
+                className="text-primary font-semibold hover:underline"
+              >
+                A.R.S. 9-500.39
+              </a>
+              , a city or town may require a local permit or license but may
+              not prohibit short-term rentals.
             </p>
             <p>
               <strong>Read the full Phoenix breakdown:</strong>{" "}
@@ -443,10 +554,10 @@ export default function BestStatesPost() {
             </h3>
             <p>
               Florida is the textbook no-income-tax appreciation play. The catch
-              in 2026 is insurance — post-Ian + ongoing carrier exits have made
-              property insurance the biggest single underwriting variable in FL.
-              A 7% headline cap easily becomes 5% net after a binding insurance
-              quote. Always pull the binding quote BEFORE you commit; the
+              in 2026 is insurance: property insurance is a large, volatile
+              expense in Florida, so price it with a binding quote. A 7%
+              headline cap, for example, can become 5% net once that quote is
+              in. Always pull the binding quote BEFORE you commit; the
               seller&apos;s prior policy is not what you&apos;ll pay.
             </p>
             <p>
@@ -471,9 +582,25 @@ export default function BestStatesPost() {
             </h3>
             <p>
               Texas is the trickiest top-10 entry. No state income tax + massive
-              growth = the obvious appreciation thesis. The catch: Texas has the
-              HIGHEST effective property tax rates in the US — 1.6-2.5%+ in most
-              counties, 2.8-3.2% in new-construction MUDs. The income-tax
+              growth = the obvious appreciation thesis. The catch: Texas has the{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                eighth-highest ratio of median property tax to median home value
+                among the 50 states
+              </a>{" "}
+              — Census ACS 2024: about 1.31% statewide and about 1.4–1.5% in
+              Dallas, Harris and Tarrant counties for owner-occupied homes (a
+              rental&apos;s bill can differ), and homes in municipal utility
+              districts (MUDs) can owe an extra district property tax (see{" "}
+              <a
+                href="https://www.tceq.texas.gov/downloads/water-districts/guidance/gi-043.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                TCEQ&apos;s guide to Texas water districts
+              </a>
+              ). The income-tax
               savings often get clawed back through property tax. Always pull
               the parcel-specific tax record from the County Appraisal District
               (Dallas CAD, Tarrant CAD, Collin CAD, Harris CAD).
@@ -536,9 +663,28 @@ export default function BestStatesPost() {
                 </Link>{" "}
                 (Birmingham + Huntsville)
               </strong>{" "}
-              — Birmingham produces solid 8-10% caps in workforce neighborhoods
-              with low entry prices and low property tax (~0.4% effective — one
-              of the lowest in the US).
+              — Birmingham has workforce neighborhoods where cap rates are worth
+              testing, with low entry prices. Owner-occupied homes pay low
+              property tax there (Alabama&apos;s statewide median real estate
+              tax is{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 0.38% of median home value, second-lowest among states
+                after Hawaii
+              </a>
+              ; about 0.59% in Jefferson County — Census ACS 2024), but a rental
+              is assessed at a higher ratio: the{" "}
+              <a
+                href="https://www.revenue.alabama.gov/property-tax/property-tax-assessment"
+                className="text-primary font-semibold hover:underline"
+              >
+                Alabama Department of Revenue&apos;s assessment classes
+              </a>{" "}
+              put single-family owner-occupied homes in Class III at 10% of
+              value and property not otherwise classified, which includes
+              rentals, in Class II at 20%. Pull the parcel&apos;s bill.
             </p>
             <p>
               <strong>
@@ -550,9 +696,24 @@ export default function BestStatesPost() {
                 </Link>{" "}
                 (Oklahoma City + Tulsa)
               </strong>{" "}
-              — quietly one of the most consistent cash-flow markets in the US.
-              Low entry prices, low property tax, stable rental demand from
-              oil/gas + healthcare employment.
+              — a cash-flow market with low entry prices (Census ACS 2024{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25077.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                median home value: $244,000 in Oklahoma County and $259,100 in
+                Tulsa County, vs $360,600 nationally
+              </a>
+              ). Property taxes on owner-occupied homes run near the national
+              norm in Oklahoma City and Tulsa (Census ACS 2024:{" "}
+              <a
+                href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
+                className="text-primary font-semibold hover:underline"
+              >
+                about 0.94% and 0.90% of median home value, vs 0.89%
+                nationally
+              </a>
+              ); rentals can pay more.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -628,6 +789,54 @@ export default function BestStatesPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, owner-occupied housing units (summary file)",
+              url: "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25077 Median Value, Owner-Occupied Housing Units (summary file)",
+              url: "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25077.dat",
+            },
+            {
+              title: "Indiana Department of Local Government Finance, Property Tax Caps / Circuit Breaker Credits fact sheet (April 2024)",
+              url: "https://www.in.gov/dlgf/files/240429-Fact-Sheet-Circuit-Breaker-Caps.pdf",
+            },
+            {
+              title: "FHFA All-Transactions House Price Index for Indianapolis-Carmel-Anderson, IN (MSA), via FRED",
+              url: "https://fred.stlouisfed.org/series/ATNHPIUS26900Q",
+            },
+            {
+              title: "State Tax Commission of Missouri, Order to Jackson County regarding 2023 and 2024 assessments (August 6, 2024)",
+              url: "https://stc.mo.gov/wp-content/uploads/sites/5/2024/08/Order-of-STC-to-Jackson-County-Regarding-2023-and-2024-Assessments.pdf",
+            },
+            {
+              title: "U.S. Census Bureau, Vintage 2025 Metropolitan Population Estimates (CBSA-EST2025-alldata)",
+              url: "https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv",
+            },
+            {
+              title: "North Carolina General Statutes § 105-286 (county reappraisal schedule)",
+              url: "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-286.html",
+            },
+            {
+              title: "Arizona Department of Revenue, Form 140 X and Y tables page (flat 2.5% rate from tax year 2023)",
+              url: "https://azdor.gov/forms/individual/form-140-x-y-tables",
+            },
+            {
+              title: "Arizona Revised Statutes § 9-500.39 (city and town rules for vacation and short-term rentals)",
+              url: "https://www.azleg.gov/ars/9/00500-39.htm",
+            },
+            {
+              title: "Texas Commission on Environmental Quality, GI-043 Texas Water Districts: A General Guide (October 2019)",
+              url: "https://www.tceq.texas.gov/downloads/water-districts/guidance/gi-043.pdf",
+            },
+            {
+              title: "Alabama Department of Revenue, Property Tax Assessment (classes of property and assessment ratios)",
+              url: "https://www.revenue.alabama.gov/property-tax/property-tax-assessment",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

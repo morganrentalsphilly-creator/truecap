@@ -36,6 +36,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "is-a-duplex-a-good-investment";
 const TITLE =
@@ -45,7 +46,7 @@ const TITLE =
 // The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Is a Duplex a Good Investment? (2026 Math)";
 const DESCRIPTION =
-  "The same $400,000 duplex needs $138,140 of cash as a pure rental and loses $277 a month, or $44,990 owner-occupied. Both paths worked line by line.";
+  "The same $400,000 duplex needs $138,140 of cash as a pure rental and loses $277 a month, or $58,129 owner-occupied. Both paths worked line by line.";
 const PUBLISHED_AT = "2026-08-05";
 const MODIFIED_AT = lastmodFor("/blog/is-a-duplex-a-good-investment") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 13;
@@ -83,11 +84,11 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Is a duplex a good investment?",
-    a: "It depends almost entirely on whether you live in one unit. Owner-occupied, a duplex is one of the best-structured purchases available to an individual investor: 5% down conventional (3.5% FHA), primary-residence pricing, and a tenant covering roughly half your housing payment. As a pure rental it is a harder deal, because conventional financing requires 25% down on a 2-4 unit investment purchase against 15-20% on a single-family. Our $400,000 example needs $44,990 of cash the first way and $138,140 the second, for the same building and the same rents.",
+    a: "It depends almost entirely on whether you live in one unit. Owner-occupied, a duplex gets unusually favorable terms for an income property: 5% down conventional (3.5% FHA), primary-residence pricing, and a tenant covering roughly half your housing payment. As a pure rental it is a harder deal, because conventional financing requires 25% down on a 2-4 unit investment purchase against 15-20% on a single-family. Our $400,000 example needs $58,129 of cash the first way and $138,140 the second, for the same building and the same rents.",
   },
   {
     q: "How much down payment do you need for a duplex?",
-    a: "Three different numbers depending on occupancy. Non-owner-occupied conventional: 25% minimum on a 2-4 unit purchase — there is no 15% or 20% tier the way there is for a single-family investment property. Owner-occupied conventional: 5% since Fannie Mae extended the low-down-payment option to 2-4 units. Owner-occupied FHA: 3.5%, with a 2026 two-unit loan limit of $693,050 in standard-cost areas and more in high-cost counties. The 20-point spread between the investment and owner-occupied tiers is the single largest variable in whether a duplex works.",
+    a: "Three different numbers depending on occupancy. Non-owner-occupied conventional: 25% minimum on a 2-4 unit purchase — there is no 15% or 20% tier the way there is for a single-family investment property. Owner-occupied conventional: 5% since Fannie Mae extended the low-down-payment option to 2-4 units. Owner-occupied FHA: 3.5%, with a 2026 two-unit loan limit of $693,050 in low-cost areas (HUD's national floor) and up to $1,599,375 in high-cost counties. The 20-point spread between the investment and owner-occupied tiers is the single largest variable in whether a duplex works.",
   },
   {
     q: "Is a duplex better than a single-family rental?",
@@ -95,19 +96,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does a duplex cash flow with 5% down?",
-    a: "Not once you move out. Our $400,000 duplex at 5% down carries a $380,000 loan at 6.75% plus $253 a month of PMI — $32,616 a year of debt service against $20,932 of NOI when both units are rented, so it loses $974 a month as a pure rental. That is the year-2 problem nobody mentions: the loan that made the purchase possible makes the rental unprofitable. Break-even needs the loan down to about $269,000, which is 33% down at purchase, or roughly fifteen years of 3% rent growth if you buy at 5% and wait.",
+    a: "Not once you move out. Our $400,000 duplex at 5% down carries a $380,000 loan at 6.75% plus $253 a month of PMI — $32,616 a year of debt service against $21,232 of NOI when both units are rented, so it loses $949 a month as a pure rental. That is the year-2 problem nobody mentions: the loan that made the purchase possible makes the rental unprofitable. Break-even needs the loan down to about $273,000, which is 32% down at purchase, or roughly fifteen years of 3% rent growth if you buy at 5% and wait.",
   },
   {
     q: "What are the real downsides of buying a duplex?",
-    a: "Four, in order of how much money they cost. The 25% down payment requirement on an investment purchase; a comps-based appraisal that caps value growth, because properties under five units are valued on sales comparison rather than on income, so raising rents does not raise the appraised value; a thinner resale buyer pool, which shows up as longer days on market and a softer price; and tenant proximity, which is a genuine cost if you live there — the shared wall means you hear the problems and the tenant knows where you live.",
+    a: "Four, in order of how much money they cost. The 25% down payment requirement on an investment purchase; a comps-driven appraisal that limits value growth, because a 2-4 unit's income approach uses a gross rent multiplier from comparable sales rather than a cap rate on NOI, so raising rents moves the appraised value far less than it would on a five-plus-unit building; a thinner resale buyer pool, which shows up as longer days on market and a softer price; and tenant proximity, which is a genuine cost if you live there — the shared wall means you hear the problems and the tenant knows where you live.",
   },
   {
     q: "Do duplexes appreciate as well as single-family homes?",
-    a: "In the same neighborhood they generally track the residential comp set, because a 2-4 unit is appraised the same way a house is. What you do not get is the income-approach upside: on a five-unit or larger property, adding $6,000 of NOI at a 6% cap rate adds $100,000 of value. On a duplex it adds nothing to the appraisal — the appraiser is looking at what other duplexes sold for. If your plan is to force value through operations, that plan needs five units, not two.",
+    a: "In the same neighborhood they generally track the residential comp set, because a 2-4 unit appraisal rests on comparable sales, with an income approach based on a gross rent multiplier rather than a cap rate on NOI. What you do not get is the cap-rate upside: on a five-unit or larger property, adding $6,000 of NOI at a 6% cap rate adds $100,000 of value. On a duplex it adds little to the appraisal — the appraiser is looking at what other duplexes sold for. If your plan is to force value through operations, that plan needs five units, not two.",
   },
   {
     q: "Is a duplex a good first investment property?",
-    a: "It is the best first purchase for most people, provided you live in it for the required year. You get an owner-occupied down payment on a property that produces income, you learn tenant management with one tenant instead of none or five, and a 6.75% primary-residence rate stays with the loan after you leave. The trap is treating the 5%-down version as a rental the moment you move out — plan the refinance, the extra principal, or the sale before you sign, not after.",
+    a: "Owner-occupied, it combines primary-residence financing with rental income, provided you live in it for at least a year (FHA requires the intent to; a conventional 2-4 unit loan may require it through the loan documents). You put an owner-occupied down payment on a property that produces income, you learn tenant management with one tenant instead of none or five, and a 6.75% primary-residence rate stays with the loan after you leave. The trap is treating the 5%-down version as a rental the moment you move out — plan the refinance, the extra principal, or the sale before you sign, not after.",
   },
   {
     q: "How much does a duplex save on expenses versus two houses?",
@@ -202,15 +203,41 @@ export default function BlogPost() {
             <strong>do you live there?</strong>
           </p>
           <p>
-            The gap is not marginal. Conventional financing requires{" "}
-            <strong>25% down</strong> on a 2-4 unit investment purchase — there
-            is no 15% or 20% tier the way there is for a single-family rental —
-            while the same building owner-occupied takes{" "}
-            <strong>5% down</strong> conventional or 3.5% FHA, at
-            primary-residence pricing roughly half a point cheaper. Run one
-            $400,000 duplex down both paths and the capital requirement is{" "}
-            <strong>$138,140</strong> against <strong>$44,990</strong>. Same
-            roof, same tenants, same rents. Three times the money.
+            The gap is not marginal. Conventional financing{" "}
+            <a
+              href="https://singlefamily.fanniemae.com/media/20786/display"
+              className="text-primary font-semibold hover:underline"
+            >
+              requires <strong>25% down</strong> on a 2-4 unit investment
+              purchase
+            </a>{" "}
+            — there is no 15% or 20% tier the way there is for a single-family
+            rental — while the same building owner-occupied takes{" "}
+            <a
+              href="https://singlefamily.fanniemae.com/media/20786/display"
+              className="text-primary font-semibold hover:underline"
+            >
+              <strong>5% down</strong> conventional
+            </a>{" "}
+            or{" "}
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              3.5% FHA
+            </a>
+            , at primary-residence pricing: Fannie Mae&apos;s current matrix{" "}
+            <a
+              href="https://singlefamily.fanniemae.com/media/9391/display"
+              className="text-primary font-semibold hover:underline"
+            >
+              adds a 2.125%-of-loan price adjustment
+            </a>{" "}
+            to a 75%-LTV investment purchase that an owner-occupied loan does
+            not carry. Run one $400,000 duplex down both paths and the capital
+            requirement is{" "}
+            <strong>$138,140</strong> against <strong>$58,129</strong>. Same
+            roof, same tenants, same rents. About 2.4 times the money.
           </p>
           <p>
             Every pros-and-cons article on this question lists &ldquo;two income
@@ -223,9 +250,26 @@ export default function BlogPost() {
           <p className="text-sm">
             <em>
               Rate assumptions throughout: 7.25% on the investment loans and
-              6.75% on the owner-occupied ones, which is the early-August-2026
-              spread (roughly 6.65-6.875% on a primary residence, plus the
-              0.50-0.75 point investor surcharge). PMI is modelled at 0.8% of
+              6.75% on the owner-occupied ones, set in early August 2026, when
+              the 30-year fixed on a primary residence ran{" "}
+              <a
+                href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-07-01"
+                className="text-primary font-semibold hover:underline"
+              >
+                roughly 6.65-6.875%
+              </a>
+              . The 7.25% adds an assumed 0.50-point rate premium for an
+              investment loan (Fannie Mae&apos;s actual investor charge is an
+              upfront loan-level price adjustment, 2.125% of the loan at 70-75%
+              LTV, so get a written quote). Freddie Mac&apos;s weekly survey
+              average has since{" "}
+              <a
+                href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-07-01"
+                className="text-primary font-semibold hover:underline"
+              >
+                risen to 7.03% (September 24, 2026)
+              </a>
+              . PMI is modelled at 0.8% of
               the loan balance a year. Fees are typical, not quoted — your Loan
               Estimate is the only figure that binds.
             </em>
@@ -364,7 +408,7 @@ export default function BlogPost() {
                 <tr>
                   <td>Vacancy (6%)</td>
                   <td className="font-mono text-right">−$2,304</td>
-                  <td>One month per unit per two years</td>
+                  <td>About 1.4 months per unit every two years</td>
                 </tr>
                 <tr>
                   <td>Property tax</td>
@@ -445,10 +489,11 @@ export default function BlogPost() {
             >
               cash-on-cash return
             </Link>{" "}
-            of <strong>−2.7%</strong>. A 0.86 DSCR does not clear a
-            lender&apos;s 1.20 threshold, so on a DSCR loan this property would
-            not qualify at 75% LTV at all — you would be pushed to 30-35% down
-            before the coverage worked. Check yours in the free{" "}
+            of <strong>−2.7%</strong>. A 0.86 DSCR means NOI does not cover the
+            payment; at this NOI, coverage only reaches 1.0 at about 35% down,
+            and any lender minimum above 1.0 needs more. DSCR lenders define the
+            ratio and minimum differently, so check the lender&apos;s formula.
+            Check yours in the free{" "}
             <Link
               href="/analyze" prefetch={false}
               className="text-primary font-semibold hover:underline"
@@ -512,7 +557,7 @@ export default function BlogPost() {
           </ScrollX>
           <p>
             $138,140 to lose $277 a month. That is not a broken example — it is
-            what a 9.6%-gross-yield duplex does at 2026 investment rates with
+            what a 9.6%-gross-yield duplex does at a 7.25% investment rate with
             the minimum down payment, and it is why the honest answer to this
             question starts with the financing rather than the building. The
             reserve line is money you show rather than spend; the{" "}
@@ -536,10 +581,17 @@ export default function BlogPost() {
           </h2>
           <p>
             Now live in the left unit. The down payment drops to 5%, the rate
-            prices at 6.75%, and the lender counts 75% of the appraiser&apos;s
-            market rent on the other unit toward your qualifying income — which
-            is how a $400,000 purchase becomes reachable on a salary that would
-            not carry it alone.
+            prices at 6.75%, and the lender{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              counts 75% of the appraiser&apos;s market rent on the other unit
+            </a>{" "}
+            when qualifying you (with less than 12 months of property-management
+            experience, it can offset the housing payment but not add to your
+            income) — which is how a $400,000 purchase becomes reachable on a
+            salary that would not carry it alone.
           </p>
           <p>
             The loan is $380,000. P&amp;I is <strong>$2,464.68</strong>, PMI at
@@ -601,11 +653,20 @@ export default function BlogPost() {
             </table>
           </ScrollX>
           <p>
-            Cash to close: $20,000 down, $10,500 of closing costs, $4,921 of
+            Cash required: $20,000 down, $10,500 of closing costs, $4,921 of
             prepaids and escrow setup, $3,000 to make the rental unit ready —{" "}
-            <strong>$38,421 spent</strong> — plus two months of reserves rather
-            than six, $6,569, for <strong>$44,990 total</strong>. Size your own
-            version in the{" "}
+            <strong>$38,421 spent</strong> — plus six months of reserves,
+            $19,708, for <strong>$58,129 total</strong>. Living there does not
+            shrink the reserve line: Fannie Mae{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+              className="text-primary font-semibold hover:underline"
+            >
+              requires six months of reserves on a two- to four-unit principal
+              residence
+            </a>
+            , measured in months of PITIA, the same as on an investment
+            purchase. Size your own version in the{" "}
             <Link
               href="/analyze?strategy=house-hack"
               prefetch={false}
@@ -647,31 +708,80 @@ export default function BlogPost() {
 
           <h3>FHA at 3.5%, briefly</h3>
           <p>
-            FHA takes the down payment to $14,000 and finances the 1.75% upfront
-            premium into the loan ($6,755), giving a balance of $392,755 —
-            P&amp;I of $2,547.42 — plus annual MIP at 0.55% of $386,000, or $177
-            a month. PITIA lands at <strong>$3,291</strong>, within $7 of the
-            5%-down conventional payment. So FHA saves $6,000 of cash for
-            essentially the same monthly cost, and charges for it later: above
-            90% LTV at origination the MIP never falls off, where conventional
-            PMI ends at 80%. The 2026 FHA two-unit limit is $693,050 in
-            standard-cost areas, which is generous enough that it rarely binds
-            outside expensive coastal counties.
+            FHA (with a{" "}
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              credit score of 580 or higher
+            </a>
+            ) takes the down payment to $14,000 and finances the{" "}
+            <a
+              href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              1.75% upfront premium
+            </a>{" "}
+            into the loan ($6,755), giving a balance of $392,755 — P&amp;I of
+            $2,547.42 — plus{" "}
+            <a
+              href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              annual MIP at 0.55%
+            </a>{" "}
+            of $386,000, or $177 a month.
+            PITIA lands at <strong>$3,291</strong>, within $7 of the 5%-down
+            conventional payment. So FHA saves $6,000 of cash for essentially
+            the same monthly cost, and charges for it later: above 90% LTV at
+            origination the MIP never falls off, where conventional PMI on a
+            Fannie Mae-backed two- to four-unit loan{" "}
+            <a
+              href="https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance"
+              className="text-primary font-semibold hover:underline"
+            >
+              can be cancelled at your request
+            </a>{" "}
+            once the balance reaches 70% of the original value, and otherwise
+            ends automatically at the midpoint of the loan term. The{" "}
+            <a
+              href="https://www.hud.gov/news/hud-no-25-145"
+              className="text-primary font-semibold hover:underline"
+            >
+              2026 FHA two-unit limit
+            </a>{" "}
+            is $693,050 in low-cost areas (HUD&apos;s national floor), well
+            above this example&apos;s $386,000 base loan.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The year-2 problem</h2>
           <p>
-            Here is the part the pros-and-cons posts never reach. You satisfied
-            the twelve-month occupancy requirement, you move out, you rent your
-            unit. Both units now produce $1,600 and the property is a pure
-            rental with an owner-occupied loan still attached.
+            Here is the part the pros-and-cons posts never reach. You live
+            there for twelve months, which satisfies{" "}
+            <a
+              href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              FHA&apos;s one-year occupancy intent
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions"
+              className="text-primary font-semibold hover:underline"
+            >
+              any one-year covenant in your conventional loan documents
+            </a>
+            , you move out, you rent your unit. Both units now produce $1,600
+            and the property is a pure rental with an owner-occupied loan still
+            attached.
           </p>
           <p>
-            Switch the landlord policy on ($2,700 instead of $2,400) and add 8%
-            management, and NOI is <strong>$20,932</strong>. Debt service is
-            $29,576 of P&amp;I plus $3,040 of PMI — the balance is still 94% of
-            value, nowhere near the 80% where PMI can be cancelled — for{" "}
-            <strong>$32,616</strong>.
+            Move to the same $2,400 landlord policy as Path A and add 8%
+            management, and NOI is the Path A figure,{" "}
+            <strong>$21,232</strong>. Debt service is $29,576 of P&amp;I plus
+            $3,040 of PMI — the balance is still 94% of value, nowhere near the
+            70% of original value at which Fannie Mae lets you cancel PMI on a
+            two- to four-unit loan — for <strong>$32,616</strong>.
           </p>
           <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
@@ -696,13 +806,13 @@ export default function BlogPost() {
                   <td>5% down, owner-occ loan (year 2)</td>
                   <td className="font-mono text-right">$380,000</td>
                   <td className="font-mono text-right">$32,616</td>
-                  <td className="font-mono text-right">−$11,684</td>
+                  <td className="font-mono text-right">−$11,384</td>
                 </tr>
                 <tr>
                   <td>20% down, owner-occ, no PMI</td>
                   <td className="font-mono text-right">$320,000</td>
                   <td className="font-mono text-right">$24,906</td>
-                  <td className="font-mono text-right">−$3,974</td>
+                  <td className="font-mono text-right">−$3,674</td>
                 </tr>
                 <tr>
                   <td>25% down investment loan (Path A)</td>
@@ -712,20 +822,20 @@ export default function BlogPost() {
                 </tr>
                 <tr>
                   <td>Break-even</td>
-                  <td className="font-mono text-right">$269,000</td>
-                  <td className="font-mono text-right">$20,932</td>
+                  <td className="font-mono text-right">$273,000</td>
+                  <td className="font-mono text-right">$21,232</td>
                   <td className="font-mono text-right">$0</td>
                 </tr>
               </tbody>
             </table>
           </ScrollX>
           <p>
-            <strong>−$974 a month.</strong> The loan that made the purchase
+            <strong>−$949 a month.</strong> The loan that made the purchase
             possible makes the rental unprofitable. And rent growth will not
             rescue it on any useful timeline: 3% on $38,400 is $1,152 of gross,
             which after the 27% of expenses that scale with rent and 3% growth
-            on the $7,100 of fixed bills leaves about{" "}
-            <strong>$628 of extra NOI in year three</strong>. Compounding that
+            on the $6,800 of fixed bills leaves about{" "}
+            <strong>$637 of extra NOI in year three</strong>. Compounding that
             3% forward against a fixed $32,616 of debt service, NOI grows into
             its own payment in roughly <strong>fifteen years</strong>.
           </p>
@@ -733,11 +843,27 @@ export default function BlogPost() {
             So the 5%-down duplex needs an exit decided in advance. The real
             options are a refinance if rates fall (dropping to 6.0% on the
             $376,000 balance saves about $210 a month, and kills PMI only if the
-            appraisal supports 80% LTV), aggressive principal paydown, living
+            appraisal supports 75% LTV,{" "}
+            <a
+              href="https://singlefamily.fanniemae.com/media/20786/display"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae&apos;s refinance limit
+            </a>{" "}
+            for a 2-4 unit investment property once you have moved out, or 80%
+            LTV if you still live there), aggressive principal paydown, living
             there longer than a year, or selling into the residential buyer pool
-            while you still qualify for the primary-residence capital-gains
-            exclusion on your half. What does not work is assuming the property
-            becomes a good rental because you stopped living in it.
+            once you have owned and lived in your unit for at least two of the
+            five years before the sale, when the{" "}
+            <a
+              href="https://www.irs.gov/publications/p523"
+              className="text-primary font-semibold hover:underline"
+            >
+              home-sale exclusion
+            </a>{" "}
+            can cover the gain on your own unit (not the rented unit or
+            depreciation). What does not work is assuming the property becomes
+            a good rental because you stopped living in it.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -749,8 +875,14 @@ export default function BlogPost() {
             gross yield against the duplex&apos;s 9.6%, which is the normal
             relationship, because a house sells partly on owner-occupant demand
             and a duplex mostly on rent. The single-family also gets the easier
-            down payment: 20% conventional, or 15% if you accept mortgage
-            insurance.
+            down payment: 20% conventional, or 15% if you{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
+              className="text-primary font-semibold hover:underline"
+            >
+              accept mortgage insurance
+            </a>
+            .
           </p>
           <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[520px] text-sm">
@@ -830,16 +962,15 @@ export default function BlogPost() {
             that matters: it reaches break-even cash flow with{" "}
             <strong>$59,400 less capital</strong> than the same-priced house.
             The extra five points of down payment are the cheapest thing in the
-            table — 1.8 points of extra gross yield buys them back in under two
-            years. Both are in{" "}
+            table — the $7,200 a year of extra gross rent repays the extra
+            $20,000 of down payment in under three years. Both are in{" "}
             <Link
               href="/blog/negative-leverage-real-estate"
               className="text-primary font-semibold hover:underline"
             >
               negative leverage
             </Link>{" "}
-            at 2026 rates, which is the normal condition; the duplex is simply
-            less deep in it.
+            at these rates; the duplex is simply less deep in it.
           </p>
           <p>
             Run your own pair — the{" "}
@@ -904,7 +1035,7 @@ export default function BlogPost() {
               6-8% either way
             </Link>{" "}
             — but the distribution is far kinder, and for a first or second
-            property that own the downside is what keeps you solvent. Two units
+            property that softer downside is what keeps you solvent. Two units
             also means two lease-expiry dates you can deliberately stagger so
             you are never turning both at once.
           </p>
@@ -920,9 +1051,17 @@ export default function BlogPost() {
               LTV
             </Link>{" "}
             and financed-property count. That last point compounds: Fannie
-            Mae&apos;s reserve escalator and the ten-financed-property ceiling
-            count <em>loans</em>, not doors, so a duplex reaches the same unit
-            count as two houses while consuming half the slots.
+            Mae&apos;s reserve escalator and its{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower"
+              className="text-primary font-semibold hover:underline"
+            >
+              ten-financed-property limit
+            </a>{" "}
+            for second-home and investment loans count <em>properties</em>, not
+            doors (a two-unit counts as one financed property), so a duplex
+            reaches the same unit count as two houses while consuming half the
+            slots.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -937,12 +1076,19 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>A comps-based appraisal ceiling.</strong> Properties under
-              five units are valued on sales comparison, not on income. Raise
-              rents $250 a unit and a five-unit gains roughly $100,000 of
-              appraised value at a 6% cap; a duplex gains nothing the appraiser
-              will sign for, because the answer is whatever other duplexes sold
-              for. If your plan is to force value through operations, that plan
-              needs five units.
+              five units are not valued by capitalizing NOI.{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae requires an income approach for 2-4 units
+              </a>
+              , but it uses a gross rent multiplier drawn from comparable sales
+              and cannot stand alone, so the appraisal still tracks what
+              comparable duplexes sold for. Raise rents $100 a unit and a
+              five-unit gains roughly $100,000 of appraised value at a 6% cap; a
+              duplex gains far less. If your plan is to force value through
+              operations, that plan needs five units.
             </li>
             <li>
               <strong>A thinner exit.</strong> Your resale buyer pool is
@@ -957,8 +1103,9 @@ export default function BlogPost() {
               <strong>Tenant proximity.</strong> Free to model and expensive to
               live. A shared wall means you hear every problem first, your
               tenant knows exactly where you live, and &ldquo;I&apos;ll fix it
-              this weekend&rdquo; becomes a standing obligation. It is the most
-              common reason house hackers leave after twelve months and one day.
+              this weekend&rdquo; becomes a standing obligation. It is a real
+              quality-of-life cost to weigh before you commit to a year of
+              occupancy.
             </li>
             <li>
               <strong>Doubled capex timing risk.</strong> Two kitchens, two
@@ -983,13 +1130,15 @@ export default function BlogPost() {
           <ol>
             <li>
               <strong>
-                If you will live in it for a year, a duplex is probably the best
-                first purchase available to you.
+                If you will live in it for a year, the owner-occupied path is
+                where a duplex&apos;s structural edge sits.
               </strong>{" "}
-              $44,990 of cash for a $400,000 income-producing asset, at a rate
-              half a point under investment pricing that stays with the loan
-              after you leave, is a structural advantage you get exactly once
-              per property. Take it before you take the pure-rental path.
+              $58,129 of cash ($38,421 spent, the rest reserves you show the
+              lender) for a $400,000 income-producing asset, at
+              owner-occupied pricing without the investment-property price
+              adjustment, on a loan that stays in place after you leave, is an
+              advantage you get once per property. Price that path before the
+              pure-rental one.
             </li>
             <li>
               <strong>
@@ -1019,7 +1168,7 @@ export default function BlogPost() {
                 Never model a 5%-down duplex as a rental without modelling the
                 move-out.
               </strong>{" "}
-              −$974 a month is the year-2 number on our example. Decide the
+              −$949 a month is the year-2 number on our example. Decide the
               refi, the paydown, or the sale before you sign.
             </li>
             <li>
@@ -1073,6 +1222,66 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae Eligibility Matrix (Aug. 5, 2026)",
+              url: "https://singlefamily.fanniemae.com/media/20786/display",
+            },
+            {
+              title: "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook (update issued Aug. 12, 2026)",
+              url: "https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf",
+            },
+            {
+              title: "Fannie Mae Loan-Level Price Adjustment Matrix (Sept. 9, 2026)",
+              url: "https://singlefamily.fanniemae.com/media/9391/display",
+            },
+            {
+              title: "Freddie Mac Primary Mortgage Market Survey, 30-year fixed average (FRED series MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-07-01",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-3.8-02, Rental Income from the Subject Property",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+            {
+              title: "HUD Mortgagee Letter 2023-05 (Feb. 22, 2023), FHA mortgage insurance premiums",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf",
+            },
+            {
+              title: "Fannie Mae Servicing Guide B-8.1-04, Termination of Conventional Mortgage Insurance",
+              url: "https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance",
+            },
+            {
+              title: "HUD No. 25-145 (Dec. 11, 2025), FHA 2026 loan limits",
+              url: "https://www.hud.gov/news/hud-no-25-145",
+            },
+            {
+              title: "Fannie Mae, Instructions for the 1-4 Family Rider (Form 3170)",
+              url: "https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions",
+            },
+            {
+              title: "IRS Publication 523 (2025), Selling Your Home",
+              url: "https://www.irs.gov/publications/p523",
+            },
+            {
+              title: "Fannie Mae Selling Guide B7-1-01, Provision of Mortgage Insurance",
+              url: "https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-2-03, Multiple Financed Properties for the Same Borrower",
+              url: "https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

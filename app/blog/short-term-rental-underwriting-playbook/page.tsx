@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "short-term-rental-underwriting-playbook";
 const TITLE =
@@ -73,19 +74,19 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What's the most common mistake new STR investors make?",
-    a: "Treating gross revenue as cash flow. AirDNA shows you the top of the funnel — projected gross — but STRs eat 30-50% of gross in operating expenses (cleaning, supplies, channel fees, dynamic pricing tools, lawn care, utilities, internet, hot tub maintenance, restocking, owner labor). New investors plug AirDNA gross into a long-term-rental spreadsheet that assumes 40% OpEx ratio and the deal looks great. Then year one comes in 20-30% below pro forma because the OpEx ratio for an STR is closer to 55-65%.",
+    a: "Treating gross revenue as cash flow. AirDNA shows you the top of the funnel — projected gross — but a long list of operating expenses comes out of that gross (cleaning, supplies, channel fees, dynamic pricing tools, lawn care, utilities, internet, hot tub maintenance, restocking, owner labor). New investors plug AirDNA gross into a long-term-rental spreadsheet that assumes 40% OpEx ratio and the deal looks great. Then year one comes in below pro forma because the STR's real operating costs were never itemized.",
   },
   {
     q: "Should I trust AirDNA's projections?",
-    a: "AirDNA is the best single source we have, but the projections are most reliable for established markets with deep comp pools (Smoky Mountains, Destin, Joshua Tree) and least reliable for emerging markets or unusual properties. Always pull at least 5-8 comparable active listings yourself on Airbnb and VRBO, sort by review count to filter out new listings, and check 60-day-out availability calendars to triangulate occupancy. Treat AirDNA's Investor-tier projections as a useful midpoint, not the answer.",
+    a: "AirDNA is the best single source we have, but treat its projections as a starting point. Always pull at least 5-8 comparable active listings yourself on Airbnb and VRBO, sort by review count to filter out new listings, and check 60-day-out availability calendars to triangulate occupancy. Treat AirDNA's projections as a useful midpoint, not the answer.",
   },
   {
     q: "How do I model occupancy realistically?",
-    a: "Use a blended occupancy that accounts for seasonality. Pull the 12-month occupancy series for your top 5-10 comps, take the median, and underwrite to 85% of that. The 15% haircut covers (a) you're a new listing without reviews, (b) bookings cluster in peak months so off-season fills slower than the annual average suggests, and (c) cancellations and gap nights between bookings aren't fully captured in raw occupancy data.",
+    a: "Use a blended occupancy that accounts for seasonality. Pull the 12-month occupancy series for your top 5-10 comps, take the median, and then discount it for (a) being a new listing without reviews, (b) bookings clustering in peak months, so the off-season fills slower than the annual average suggests, and (c) cancellations and gap nights between bookings that raw occupancy data doesn't fully capture. Size that discount from your comps' evidence and disclose it, rather than applying a universal haircut.",
   },
   {
     q: "What's a realistic operating expense ratio for an STR?",
-    a: "55-65% of gross revenue for self-managed; 65-80% for full-service property management. The full list: cleaning fees (often passed through but with shortfall risk), supplies and restocking ($30-80 per turnover), channel fees (Airbnb 14-16%, VRBO 8% plus service fee), dynamic pricing software ($20-50/mo), lawn/pool/hot tub service, utilities (always included for guests), internet and streaming, linens replacement, OTA listing photography refreshes, software, accounting, lodging tax remittance, repairs at 2-3x long-term rental rates.",
+    a: "It varies by property, market and management model; build it line by line from the list below rather than assuming a ratio. The full list: cleaning fees (often passed through but with shortfall risk), supplies and restocking (priced per turnover from your own supplier quotes), channel fees (each platform publishes its host fee; check the current rate before you model it), dynamic pricing software (check each vendor's current pricing), lawn/pool/hot tub service, utilities (always included for guests), internet and streaming, linens replacement, OTA listing photography refreshes, software, accounting, lodging tax remittance, repairs (budget from the property's condition and local contractor quotes).",
   },
   {
     q: "How should I stress-test an STR deal?",
@@ -93,11 +94,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Are STR loans different from long-term rental loans?",
-    a: "Mostly the same products with caveats. Conventional investment-property loans don't distinguish STR from LTR — they qualify on personal income. DSCR loans usually compute DSCR based on long-term market rent (not projected STR revenue), which can make qualification tougher. Some specialty DSCR lenders will use AirDNA-projected STR revenue at 70-80% haircut to compute DSCR — these are great if available but typically charge 0.5-1.0pp above standard DSCR. Bridge and hard money work for STR acquisitions when you need speed.",
+    a: "Mostly the same products with caveats. Conventional loans can count short-term rental income on one-unit investment properties, but under their own documentation rules — Fannie Mae's Selling Guide has a separate section for short-term rental income from the subject property — so ask the lender how STR income will be documented. DSCR lenders differ on whether they use long-term market rent or short-term rental history to compute DSCR; ask each lender which income it will count. Some lenders may count projected STR revenue toward DSCR; ask how they discount it and how it affects pricing, and compare written quotes. Bridge and hard money work for STR acquisitions when you need speed.",
   },
   {
     q: "What's the most under-appreciated cost in STR underwriting?",
-    a: "Furnishing CapEx is the biggest. A 3-bedroom STR typically needs $25-50K of furniture, mattresses, kitchen kit, decor, smart locks, hot tub, outdoor furniture, and photography to launch competitively in 2026. Then plan on 15-20% of that annually in replacement (mattresses every 4-5 years, sofas every 5-7, kitchenware ongoing, linens annually). Spread over 7 years that's another $5-7K/year in true operating cost most pro formas don't include.",
+    a: "Furnishing CapEx is the biggest. A 3-bedroom STR needs a full furnishing package (furniture, mattresses, kitchen kit, decor, smart locks, outdoor furniture, photography); price it from real quotes. Then budget an annual replacement reserve: divide the package cost by the years you expect it to last and treat that as an operating cost.",
   },
 ];
 
@@ -188,13 +189,12 @@ export default function BlogPost() {
             Short-term rentals look great on paper. A 3-bedroom mountain cabin
             renting for $300/night at 60% occupancy grosses ~$65K/year — far
             more than the $2,200/month ($26K/year) it would pull as a long-term
-            rental. The math is so obviously better that thousands of investors
-            entered the space between 2020 and 2024 without running it
-            carefully. Many of them are now distressed sellers.
+            rental. The math looks so obviously better that it&apos;s tempting
+            to skip running it carefully.
           </p>
           <p>
-            STRs aren&apos;t worse than long-term rentals — many produce 2-3x
-            the cash flow. But they hide costs and risks long-term-rental
+            STRs aren&apos;t worse than long-term rentals — some produce more
+            cash flow — but they hide costs and risks long-term-rental
             underwriting misses entirely. This post is the full playbook: what
             to model, where to get the data, what hidden costs everyone forgets,
             and how to stress-test for a bad year.
@@ -236,8 +236,8 @@ export default function BlogPost() {
           </div>
 
           <p>
-            Worked example. Cabin at $300 ADR, 55% occupancy, 60% OpEx ratio,
-            $4,200/mo PITI:
+            Worked example. Cabin at $300 ADR, 55% occupancy, an assumed 60%
+            OpEx ratio, $4,200/mo PITI:
           </p>
           <ul>
             <li>
@@ -254,13 +254,13 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            That same deal pencils for an investor who got the OpEx ratio wrong:
-            $300 × 0.55 × 365 × 0.65 = $39,146 NOI minus $50,400 debt service =
-            −$11,254/yr (still bad, but feels survivable). Move OpEx to 40%
-            (long-term-rental thinking): $36,135 NOI − $50,400 = −$14,265/yr.
-            Now imagine the bullish-version investor who assumes 70% occupancy:
-            $300 × 0.70 × 365 × 0.65 = $49,820 NOI − $50,400 = −$580/yr —
-            basically break even.
+            That same deal looks different to an investor who borrows a
+            long-term-rental OpEx ratio of 40%: $300 × 0.55 × 365 × 0.60 =
+            $36,135 NOI − $50,400 = −$14,265/yr. Shave OpEx to 35% and it&apos;s
+            $39,146 NOI minus $50,400 debt service = −$11,254/yr (still bad, but
+            feels survivable). Now imagine the bullish-version investor who also
+            assumes 70% occupancy: $300 × 0.70 × 365 × 0.65 ≈ $49,820 NOI −
+            $50,400 ≈ −$580/yr — basically break even.
           </p>
           <p>
             Same property, four different conclusions, all driven by which of
@@ -272,15 +272,13 @@ export default function BlogPost() {
             Where to get ADR and occupancy data
           </h2>
 
-          <h3>1. AirDNA — the institutional starting point</h3>
+          <h3>1. AirDNA — the starting point</h3>
           <p>
-            AirDNA scrapes Airbnb and VRBO and publishes market-level and
-            property-level analytics. Their MarketMinder and Rentalizer tools
-            give you projected ADR, occupancy, and revenue for a specific
-            property address. Most institutional STR investors use it. It&apos;s
+            AirDNA tracks Airbnb and Vrbo listings and publishes market-level and
+            property-level analytics. Its Rentalizer tool gives you projected
+            ADR, occupancy, and revenue for a specific property address. It&apos;s
             the best single source — but treat it as a starting point, not the
-            answer. Coverage is excellent in established STR markets and weaker
-            in emerging ones.
+            answer, and check it against the comps you pull yourself.
           </p>
 
           <h3>2. Direct comp pulls from Airbnb and VRBO</h3>
@@ -311,10 +309,10 @@ export default function BlogPost() {
           <h3>3. PriceLabs or Wheelhouse for granular pricing data</h3>
           <p>
             These dynamic pricing tools have access to real booked rate data
-            (not just published rates). A free PriceLabs market dashboard gives
-            you actual booked ADR by market and by bedroom count over the last
-            12 months — usually more honest than scraping published nightly
-            rates.
+            (not just published rates). A PriceLabs Market Dashboard, a paid
+            product (check current pricing), can show median booked prices
+            alongside a market&apos;s median listed prices — usually more honest
+            than scraping published nightly rates.
           </p>
 
           <h3>4. The local property manager call</h3>
@@ -353,50 +351,53 @@ export default function BlogPost() {
           <h3>Variable costs (scale with bookings)</h3>
           <ul>
             <li>
-              <strong>Channel fees.</strong> Airbnb charges hosts 14-16% of
-              gross. VRBO is 8% commission plus per-booking service fee. Direct
-              bookings via your own site (Hostfully, Lodgify) cut this
-              materially.
+              <strong>Channel fees.</strong> Airbnb and Vrbo each publish their
+              host fees; check the current rate on each platform before you
+              model it. Direct bookings via your own site (Hostfully, Lodgify)
+              cut this materially.
             </li>
             <li>
-              <strong>Supplies and restocking.</strong> $30-80 per turnover for
-              coffee, paper goods, soap, hot tub chemicals.
+              <strong>Supplies and restocking.</strong> Priced per turnover for
+              coffee, paper goods, soap, hot tub chemicals — use your own
+              supplier quotes.
             </li>
             <li>
-              <strong>Dynamic pricing software.</strong> PriceLabs $20-50/mo,
-              Wheelhouse similar.
+              <strong>Dynamic pricing software.</strong> PriceLabs, Wheelhouse
+              or similar; check each vendor&apos;s current pricing.
             </li>
             <li>
               <strong>Channel manager / PMS.</strong> Hostfully, Hostaway,
-              Guesty $40-100/mo or 1-2% of revenue.
+              Guesty. Pricing varies by vendor and listing count; get a current
+              quote from each vendor.
             </li>
             <li>
               <strong>Damage / overage.</strong> Even with deposits and guest
-              insurance, 1-2% of revenue annually goes to damage you can&apos;t
-              recover.
+              insurance, some damage may go unrecovered — budget a reserve for
+              it.
             </li>
           </ul>
 
           <h3>Fixed costs (don&apos;t scale with bookings)</h3>
           <ul>
             <li>
-              <strong>Utilities.</strong> You pay them all, year-round. Plan
-              2-3x long-term rental utility cost because guests run the AC at
-              65°F in August.
+              <strong>Utilities.</strong> You pay them all, year-round. Plan for
+              higher utility costs than a long-term rental, estimated from the
+              property&apos;s actual utility history.
             </li>
             <li>
-              <strong>Internet, streaming subscriptions.</strong> $80-150/mo.
+              <strong>Internet, streaming subscriptions.</strong> Price from
+              local provider quotes.
             </li>
             <li>
               <strong>Lawn / pool / hot tub service.</strong> Weekly in season.
-              $200-600/mo depending on amenity set.
+              Cost depends on the amenity set; get local service quotes.
             </li>
             <li>
-              <strong>Pest control.</strong> Monthly. $50-100/mo.
+              <strong>Pest control.</strong> Often monthly; get a local quote.
             </li>
             <li>
-              <strong>STR-specific insurance.</strong> 1.5-2.5x standard
-              landlord policy. Proper / CBIZ / Steadily.
+              <strong>STR-specific insurance.</strong> Get a binding quote for
+              a policy that covers short-term rental use.
             </li>
             <li>
               <strong>Permits, lodging tax remittance.</strong> Recurring annual
@@ -411,24 +412,24 @@ export default function BlogPost() {
           <h3>CapEx amortization (the silent killer)</h3>
           <p>
             A long-term rental needs a roof and an HVAC. An STR needs that plus:
-            furniture replacement every 5-7 years, mattresses every 4-5, decor
-            refresh every 3-4 (Airbnb listings with dated photos convert
-            poorly), kitchen equipment churn, photography refresh every 2-3
-            years, and bigger-ticket items like hot tubs that need replacement
-            every 7-10 years.
+            periodic replacement of furniture, mattresses, decor, kitchen
+            equipment and listing photography, plus big-ticket items like hot
+            tubs.
           </p>
           <p>
-            Add it up and a $35K furnishing package amortizes to ~$5K/year in
-            true operating cost. Most pro formas put 0 here.
+            Add it up: a $35K furnishing package you expect to replace every 7
+            years, for example, amortizes to ~$5K/year in true operating cost.
+            Don&apos;t put 0 here.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
             Modeling seasonality properly
           </h2>
           <p>
-            STRs don&apos;t book evenly across the year. A Smoky Mountains cabin
-            might do 85% occupancy June-August and 25% February-March. Modeling
-            with a flat 55% blended occupancy hides cash flow timing risk — you
+            STRs don&apos;t book evenly across the year. A hypothetical mountain
+            cabin might do 85% occupancy June-August and 25% February-March.
+            Modeling with a flat 55% blended occupancy hides cash flow timing
+            risk — you
             might have months where revenue doesn&apos;t cover the mortgage and
             you&apos;re burning operating reserves.
           </p>
@@ -487,6 +488,19 @@ export default function BlogPost() {
             Keep any unresolved permission or transfer question explicit in the
             model and contract review. Do not capitalize STR revenue until the
             relevant evidence supports the assumed operation.
+          </p>
+          <p>
+            Financing has its own STR rules, too. Conventional loans can count
+            short-term rental income on one-unit investment properties, but
+            under their own documentation rules —{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-3.8-03/rental-income-subject-property-short-term-rental"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae&apos;s Selling Guide has a separate section for
+              short-term rental income from the subject property
+            </a>{" "}
+            — so ask the lender how STR income will be documented.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -558,6 +572,14 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae Selling Guide B3-3.8-03, Rental Income from the Subject Property: Short-Term Rental",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.8-03/rental-income-subject-property-short-term-rental",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
