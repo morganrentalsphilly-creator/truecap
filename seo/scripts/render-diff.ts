@@ -18,7 +18,7 @@ import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { flagString, requireFlag, runMain, check, log } from "./lib/cli.ts";
 import type { Args } from "./lib/cli.ts";
-import { loadConfig } from "./lib/config.ts";
+import { globMatch, loadConfig } from "./lib/config.ts";
 import { ensureDir, readJson, writeJson } from "./lib/io.ts";
 import { extractPage, sha256 } from "./lib/html.ts";
 import { parseSitemap } from "./lib/sitemap.ts";
@@ -82,14 +82,21 @@ export function compareRenders(base: RenderHashes, patched: RenderHashes, verdic
  * time shows up only in the rendered page. Any outbound host a changed page
  * gains must be a primary-source domain (or, on /vs pages, a vendor domain).
  */
-export function newDisallowedHosts(base: RenderHashes, patched: RenderHashes, changed: string[], allowed: string[], vendor: string[]): string[] {
+export function newDisallowedHosts(
+  base: RenderHashes,
+  patched: RenderHashes,
+  changed: string[],
+  allowed: string[],
+  vendor: string[],
+  vendorPage: (path: string) => boolean = (p) => p.startsWith("/vs/"),
+): string[] {
   const ok = (host: string, list: string[]): boolean => list.some((d) => host === d || host.endsWith(`.${d}`));
   const out: string[] = [];
   for (const p of changed) {
     const before = new Set(base.pages[p]?.externalHosts ?? []);
     for (const host of patched.pages[p]?.externalHosts ?? []) {
       if (before.has(host)) continue;
-      if (ok(host, allowed) || (p.startsWith("/vs/") && ok(host, vendor))) continue;
+      if (ok(host, allowed) || (vendorPage(p) && ok(host, vendor))) continue;
       out.push(`${p} → ${host}`);
     }
   }
@@ -115,7 +122,9 @@ async function main(args: Args): Promise<number> {
     return 1;
   }
   const config = loadConfig();
-  const hosts = newDisallowedHosts(base, patched, [...result.changed, ...result.gained], config.primarySourceDomains, config.vendorDomains);
+  // A page may carry vendor links when its source file may (config.paths.vendorLinkAllow).
+  const vendorPage = (p: string): boolean => (config.paths.vendorLinkAllow ?? ["app/vs/*/page.tsx"]).some((g) => globMatch(g, `app${p}/page.tsx`));
+  const hosts = newDisallowedHosts(base, patched, [...result.changed, ...result.gained], config.primarySourceDomains, config.vendorDomains, vendorPage);
   if (hosts.length) {
     console.error(`NEW OUTBOUND HOSTS NOT ON THE SOURCE LIST:\n${hosts.map((h) => `  ${h}`).join("\n")}`);
     return 1;

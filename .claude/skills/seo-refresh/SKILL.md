@@ -111,7 +111,7 @@ Read `git diff -- <editableSource>` and confirm each item before you hand back.
   - a string containing `</`, `<!--` or `<script`;
   - a denied identifier used as code (`process`, `fetch`, `globalThis`, `window`, `constructor`, …);
   - an href that is not a single literal or a top-level const;
-  - an added external link that is not https on `primarySourceDomains` (`vendorDomains` only for a competitor claim in `app/vs/*/page.tsx`);
+  - an added external link that is not https on `primarySourceDomains` (`vendorDomains` only for a competitor claim in a file listed in `config.paths.vendorLinkAllow`);
   - a shortener, a redirector or a `utm_*` parameter;
   - an internal link outside `sitemapPaths`;
   - any change to a date value, robots metadata or `next/navigation`.

@@ -158,15 +158,18 @@
   ],
   "_why_domains": "Outbound links an agent adds must land on a primary source. State statute, county assessor and city licensing domains are added here by the owner as markets are enriched (never by the model).",
   "vendorDomains": [
+    "airbnb.com",
     "airdna.co",
     "appfolio.com",
     "arrived.com",
     "avail.co",
+    "avail.com",
     "baselane.com",
     "batchleads.io",
     "biggerpockets.com",
     "bricked.ai",
     "buildium.com",
+    "calculator.net",
     "cozy.co",
     "crexi.com",
     "dealcheck.io",
@@ -189,8 +192,10 @@
     "rentspree.com",
     "reonomy.com",
     "roofstock.com",
+    "smoobu.com",
     "stessa.com",
     "turbotenant.com",
+    "workspace.google.com",
     "yardibreeze.com",
     "zillow.com"
   ],
@@ -298,7 +303,23 @@
       "http",
       "https",
       "net"
-    ]
+    ],
+    "vendorLinkAllow": [
+      "app/vs/*/page.tsx",
+      "app/blog/best-rental-property-calculator-2026/page.tsx",
+      "app/blog/best-free-rental-property-calculator-2026/page.tsx",
+      "app/blog/best-rental-property-calculator-for-brrrr/page.tsx",
+      "app/blog/best-rental-analysis-tool-for-house-hackers/page.tsx",
+      "app/blog/best-short-term-rental-analysis-tool-2026/page.tsx",
+      "app/blog/best-dealcheck-alternatives/page.tsx",
+      "app/blog/free-biggerpockets-calculator-alternatives/page.tsx",
+      "app/blog/dealcheck-vs-biggerpockets-vs-truecap/page.tsx",
+      "app/blog/dealcheck-vs-stessa-vs-truecap/page.tsx",
+      "app/blog/roofstock-vs-mashvisor-vs-propstream/page.tsx",
+      "app/blog/stessa-vs-avail-vs-baselane/page.tsx",
+      "app/blog/hostfully-vs-hostaway-vs-guesty/page.tsx"
+    ],
+    "_vendorLinkAllowWhy": "Pages that may link a competitor's own site (vendorDomains) for that competitor's own facts: every /vs page and the posts of the 'comparisons' topic hub (lib/blog-topics.ts; a test keeps the two lists equal). A vendor's pricing or feature page is the only primary source for its pricing and features; everywhere else vendor links stay refused."
   },
   "sweepCommits": {
     "_readme": "Commits that touched (nearly) every page for presentation-only reasons (vocabulary, identity, header, lint/format, runtime). lastmod seeding skips them; a URL's date is the newest non-sweep commit that changed its own content or data. These SHAs are sweeps that were already on main; a SHA must be in the seeded history (`lastmod.ts seed` refuses to run when one is not, and names the landed copy of a rebased commit). A NEW sweep marks itself instead with a `Lastmod-Sweep: true` trailer in its commit message, which survives rebases, cherry-picks and GitHub's rebase-merge (F1, the unnamed author, and F4's structured-data commits and their review fixes carry it).",
