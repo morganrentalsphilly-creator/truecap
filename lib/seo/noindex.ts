@@ -6,9 +6,11 @@
  * caps.noindexShareOfIndexedPerRun and gated by verify-static); re-indexing is
  * an owner edit. A listed path:
  *   · leaves app/sitemap.ts and app/llms.txt;
- *   · is served with `X-Robots-Tag: noindex` by proxy.ts (exact path match).
- * Nothing else reads the list, so pruning a page never changes another page's
- * body (seo-prune's precondition).
+ *   · is served with `X-Robots-Tag: noindex` by proxy.ts (exact path match);
+ *   · drops out of every registry-driven link block on other pages
+ *     (lib/seo/link-policy.ts, F9), so a prune re-renders the pages that
+ *     linked it, which is why seo-prune files every prune as a tier-2
+ *     proposal.
  *
  * Validated at import: a malformed list throws, so `next build` fails instead
  * of deindexing the wrong page. Pure data + validation: no React, no

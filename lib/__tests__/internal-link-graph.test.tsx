@@ -9,10 +9,11 @@ import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { UNRELEASED_UNDERWRITING_CALCULATORS, isCalculatorReleased } from "@/lib/calculator-registry";
 import { GLOSSARY } from "@/lib/glossary";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
-import { nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
+import { nearbyMarketGroups, nearbyMarkets, stateGuideSlugFor } from "@/lib/markets/nearby";
 import { NOINDEX_PATHS } from "@/lib/seo/noindex";
-import { blogTopicForPost } from "@/lib/seo/link-policy";
+import { blogTopicForPost, isLinkablePath } from "@/lib/seo/link-policy";
 import { CANONICAL_SITE_URL } from "@/lib/site-url";
+import { STATES } from "@/lib/states";
 
 /**
  * F9 — the internal link graph, rendered.
@@ -33,14 +34,23 @@ import { CANONICAL_SITE_URL } from "@/lib/site-url";
  * The registry-driven blocks stay inside rule 2 through lib/seo/link-policy.ts;
  * a hand-written href in a page body is caught here. Then the F9 blocks
  * themselves: every post links its hub once, city pages link their indexable
- * state guide and at most five nearby markets, glossary pages link their
- * calculator only while it is released, and /blog/topics counts its hubs.
+ * state guide and at most five other markets under labels the data supports,
+ * glossary pages link their calculator only while it is released, and
+ * /blog/topics counts its hubs.
+ *
+ * The per-family checks walk the SITEMAP's pages, not the registries, and a
+ * separate check holds the sitemap and the link policy to the same pages. So
+ * listing a post, market or term on content/seo/noindex.json (a prune) needs
+ * no edit here: the path leaves the sitemap and every registry block, and
+ * only a hand-written body link to it fails rule 2.
  *
  * Four pages need the mounted app router, request state or live services
- * while rendering and cannot render in a unit test (NOT_UNIT_RENDERABLE). Their own literal hrefs are
- * checked against rule 2 from source, their outbound links do not count
- * toward rule 1 (which only makes it stricter), and the loopback crawl of
- * the built site covers them (seo/scripts/crawl.ts --base).
+ * while rendering and cannot render in a unit test (NOT_UNIT_RENDERABLE).
+ * Their literal hrefs, and those of every component module they import
+ * (followed through the import graph), are checked against rule 2 from
+ * source; their outbound links do not count toward rule 1 (which only makes
+ * it stricter), and the loopback crawl of the built site covers them
+ * (seo/scripts/crawl.ts --base).
  */
 
 const ROOT = process.cwd();
@@ -51,6 +61,16 @@ const NOT_UNIT_RENDERABLE: Record<string, string> = {
   "/analyze": "the analyzer's client components need the mounted app router and the root layout's ActionConfirmProvider",
   "/pricing": "reads the Supabase session cookie and Stripe display prices",
   "/reviews": "reads live usage counts through unstable_cache",
+};
+
+/**
+ * Targets the source scan finds behind the same env gate that lists them in
+ * the sitemap: the scan sees the literal href, not the condition around it.
+ * Each entry is the app/sitemap.ts gate that must still hold.
+ */
+const ENV_GATED_SITEMAP_PATHS: Record<string, RegExp> = {
+  // components/marketing/pricing-value-stack.tsx links it inside `agentProConfigured ? …`.
+  "/for-agents": /isAgentProConfigured\(\)\s*\?\s*\[sitemapEntry\(siteUrl,\s*"\/for-agents"\)\]/,
 };
 
 type Rendered = { html: string; links: string[]; mainLinks: string[] };
@@ -121,15 +141,44 @@ function mainOf(html: string): string {
   return start === -1 || end === -1 ? "" : html.slice(start, end);
 }
 
-/** Literal internal hrefs in a source file (for the pages a unit test cannot render). */
-function sourceTargets(file: string): string[] {
-  const source = readFileSync(join(ROOT, file), "utf8");
-  const out = new Set<string>();
-  for (const m of source.matchAll(/href\s*[:=]\s*\{?\s*["'`](\/[^"'`}\s]*)/g)) {
-    if (m[1].includes("${") || m[1].startsWith("//")) continue;
-    out.add(m[1].split(/[?#]/)[0] || "/");
+/** The component module an import specifier names, or null (only @/components/… and relative imports inside components/ are followed). */
+function resolveComponentImport(fromFile: string, spec: string): string | null {
+  let base: string;
+  if (spec.startsWith("@/components/")) base = join(ROOT, spec.slice(2));
+  else if (spec.startsWith(".") && fromFile.startsWith("components/")) base = join(ROOT, fromFile, "..", spec);
+  else return null;
+  for (const ext of [".tsx", ".ts", "/index.tsx", "/index.ts"]) {
+    if (existsSync(base + ext)) return (base + ext).slice(ROOT.length + 1);
   }
-  return [...out];
+  return null;
+}
+
+/**
+ * Literal internal hrefs in a route file and in every component module it
+ * imports, followed through the import graph (for the pages a unit test
+ * cannot render: their links live in imported sections, not the route file).
+ */
+function sourceTargets(file: string): Array<{ target: string; file: string }> {
+  const out = new Map<string, string>();
+  const seen = new Set<string>([file]);
+  const queue = [file];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const source = readFileSync(join(ROOT, current), "utf8");
+    for (const m of source.matchAll(/href\s*[:=]\s*\{?\s*["'`](\/[^"'`}\s]*)/g)) {
+      if (m[1].includes("${") || m[1].startsWith("//")) continue;
+      const target = m[1].split(/[?#]/)[0] || "/";
+      if (!out.has(target)) out.set(target, current);
+    }
+    for (const m of source.matchAll(/(?:from|import\()\s*["']([^"']+)["']/g)) {
+      const next = resolveComponentImport(current, m[1]);
+      if (next && !seen.has(next)) {
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return [...out].map(([target, from]) => ({ target, file: from }));
 }
 
 const FILE_EXTENSION = /\.[a-z0-9]{2,5}$/i;
@@ -218,9 +267,62 @@ describe("internal link graph (every sitemap page, rendered)", () => {
     for (const path of Object.keys(NOT_UNIT_RENDERABLE)) {
       const route = routeFor(path);
       expect(route, path).not.toBeNull();
-      for (const target of sourceTargets(route!.file)) await check(`${path} (source)`, target);
+      const targets = sourceTargets(route!.file);
+      // The route files hold almost no hrefs; the imported sections hold them.
+      expect(targets.length, `${path}: hrefs found in its source and imports`).toBeGreaterThan(10);
+      for (const { target, file } of targets) {
+        const gate = ENV_GATED_SITEMAP_PATHS[target];
+        if (gate) {
+          expect(readFileSync(join(APP, "sitemap.ts"), "utf8"), `${target} is listed under its env gate`).toMatch(gate);
+          continue;
+        }
+        await check(`${path} (source: ${file})`, target);
+      }
     }
     expect(violations).toEqual([]);
+  });
+
+  it("puts a registry page in the sitemap exactly when the link policy lets blocks link it", () => {
+    // What keeps the per-family checks below honest after a prune: they walk
+    // the sitemap, and here every registry page is in it iff it is linkable.
+    const registryPaths = [
+      ...BLOG_POSTS.map((p) => `/blog/${p.slug}`),
+      ...BLOG_TOPICS.map((t) => `/blog/topics/${t.slug}`),
+      ...[...BESPOKE_MARKETS, ...MARKET_CITIES].map((m) => `/markets/${m.slug}`),
+      ...Object.values(STATES).map((st) => `/states/${st.slug}`),
+      ...Object.values(GLOSSARY).map((g) => `/glossary/${g.slug}`),
+      ...readdirSync(join(APP, "tools"))
+        .filter((slug) => existsSync(join(APP, "tools", slug, "page.tsx")))
+        .map((slug) => `/tools/${slug}`),
+    ];
+    const disagree = [...new Set(registryPaths)].filter((path) => inSitemap.has(path) !== isLinkablePath(path));
+    expect(disagree, "in the sitemap but not linkable, or linkable but not in the sitemap").toEqual([]);
+  });
+
+  it("never glues a link to the words around it", () => {
+    // JSX drops a line break between text and a <Link>: "insurance.<a>House-hackers</a>"
+    // reads "insurance.House-hackers". A link that follows sentence punctuation,
+    // or runs straight into the next word, lost its {" "}.
+    const glued: string[] = [];
+    for (const [path, page] of rendered) {
+      const main = mainOf(page.html);
+      for (const m of main.matchAll(/[A-Za-z0-9)][.!?;:,]<a\b[^>]*>(?=[^\s<])/g)) glued.push(`${path}: …${main.slice(Math.max(0, m.index! - 30), m.index! + m[0].length + 20)}`);
+      for (const m of main.matchAll(/<\/a>(?=[A-Za-z0-9])/g)) glued.push(`${path}: …${main.slice(Math.max(0, m.index! - 40), m.index! + 20)}`);
+    }
+    expect(glued).toEqual([]);
+  });
+
+  it("offers the comparison posts no calculator: none of them is about ARV", () => {
+    const comparisons = BLOG_TOPICS.find((t) => t.slug === "comparisons");
+    expect(comparisons?.postSlugs.length).toBeGreaterThan(5);
+    for (const slug of comparisons!.postSlugs) {
+      const html = rendered.get(`/blog/${slug}`)?.html;
+      if (html === undefined) continue; // not in the sitemap (unpublished or pruned)
+      const at = html.indexOf('data-related-content=""');
+      expect(at, slug).toBeGreaterThan(-1);
+      const box = internalTargets(html.slice(at, html.indexOf("</nav>", at)));
+      expect(box, slug).not.toContain("/tools/arv-calculator");
+    }
   });
 
   it("keeps redirects, noindexed paths and unreleased tools out of the sitemap", () => {
@@ -234,7 +336,7 @@ describe("internal link graph (every sitemap page, rendered)", () => {
   });
 
   it("links every published post back to its hub once, and the hub lists it", () => {
-    for (const post of BLOG_POSTS.filter((p) => p.available)) {
+    for (const post of BLOG_POSTS.filter((p) => p.available && inSitemap.has(`/blog/${p.slug}`))) {
       const path = `/blog/${post.slug}`;
       const html = rendered.get(path)?.html;
       expect(html, path).toBeDefined();
@@ -261,9 +363,9 @@ describe("internal link graph (every sitemap page, rendered)", () => {
     }
   });
 
-  it("links each city page to its indexable state guide and to at most five nearby markets, same state first", () => {
+  it("links each city page to its indexable state guide and to at most five other markets, same state first", () => {
     const markets = [...BESPOKE_MARKETS, ...MARKET_CITIES];
-    for (const market of markets) {
+    for (const market of markets.filter((m) => inSitemap.has(`/markets/${m.slug}`))) {
       const path = `/markets/${market.slug}`;
       const page = rendered.get(path);
       expect(page, path).toBeDefined();
@@ -282,8 +384,45 @@ describe("internal link graph (every sitemap page, rendered)", () => {
     }
   });
 
+  it("labels the other markets by what the data says, never as nearby", () => {
+    // No coordinates exist, so most same-state picks are the state's next
+    // markets alphabetically (Fort Worth lists Houston, not Dallas). The
+    // labels say only that: the state, and a HUD FMR area across the line.
+    let across = 0;
+    for (const market of [...BESPOKE_MARKETS, ...MARKET_CITIES].filter((m) => inSitemap.has(`/markets/${m.slug}`))) {
+      const path = `/markets/${market.slug}`;
+      const html = rendered.get(path)!.html;
+      const at = html.indexOf('data-market-nearby=""');
+      const groups = nearbyMarketGroups(market.slug)!;
+      if (at === -1) {
+        expect(groups.sameState.length + groups.acrossStateLine.length, path).toBe(0);
+        continue;
+      }
+      const section = html.slice(at + 'data-market-nearby=""'.length, html.indexOf("</section>", at));
+      expect(section, path).not.toMatch(/nearby/i);
+      const group = (name: string) => {
+        const start = section.indexOf(`data-market-group="${name}"`);
+        return start === -1 ? null : section.slice(start, section.indexOf("</div></div>", start));
+      };
+      const state = group("state");
+      const line = group("across-state-line");
+      if (groups.sameState.length > 0) {
+        expect(state, path).toContain(`More ${market.stateName} markets`);
+        expect(internalTargets(state!), path).toEqual(groups.sameState.map((m) => `/markets/${m.slug}`));
+      } else expect(state, path).toBeNull();
+      if (groups.acrossStateLine.length > 0) {
+        across += 1;
+        expect(line, path).toContain("Across the state line");
+        expect(internalTargets(line!), path).toEqual(groups.acrossStateLine.map((m) => `/markets/${m.slug}`));
+        for (const m of groups.acrossStateLine) expect(m.stateName, path).not.toBe(market.stateName);
+      } else expect(line, path).toBeNull();
+    }
+    // At least one page lists a market across a state line (a state with few markets).
+    expect(across).toBeGreaterThan(0);
+  });
+
   it("links a glossary term's calculator only while it is released", () => {
-    for (const entry of Object.values(GLOSSARY)) {
+    for (const entry of Object.values(GLOSSARY).filter((e) => inSitemap.has(`/glossary/${e.slug}`))) {
       const path = `/glossary/${entry.slug}`;
       const html = rendered.get(path)?.html;
       expect(html, path).toBeDefined();

@@ -256,8 +256,8 @@ export default async function MarketCityPage({
           </section>
         ) : null}
 
-        {/* Up to five nearby markets (same state first, then the county
-            bridge) — lib/markets/nearby.ts. */}
+        {/* Up to five other markets: "More {State} markets", then "Across
+            the state line" for a shared HUD FMR area — lib/markets/nearby.ts. */}
         <MarketNearby slug={data.slug} />
       </main>
 

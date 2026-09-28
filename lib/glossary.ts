@@ -657,7 +657,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "Small assumed rates compound into large modeled exit differences. Build the base case from current local evidence and include flat and declining-value scenarios; no market tier guarantees appreciation.",
     howToCheck:
       "Look at the closed-sale history for similar properties in the same neighborhood over the last decade, including the years values fell, and ask what drove the changes: jobs, supply, and lending conditions, not the national headline. Then build the base case from that evidence and run flat and declining cases beside it. The projection should tell you what you are betting on, not confirm it.",
-    related: ["irr", "rentGrowth", "principalPaydown"],
+    related: ["irr", "rentGrowth"],
   },
   sellingCost: {
     term: "Selling Cost %",

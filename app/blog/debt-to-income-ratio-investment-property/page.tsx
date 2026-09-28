@@ -430,7 +430,7 @@ export default function DtiInvestmentPropertyPost() {
                 className="text-primary font-semibold hover:underline"
               >
                 depreciation
-              </Link>
+              </Link>{" "}
               and certain already-counted housing expenses. Eligibility,
               averaging period, add-backs, and payment treatment vary. A tax
               loss therefore does not by itself reveal the qualifying result;

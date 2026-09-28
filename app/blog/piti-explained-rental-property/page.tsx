@@ -331,7 +331,7 @@ export default function PitiExplainedPost() {
               <li>
                 <strong>Bigger down payment, usually no PMI.</strong> Investment
                 loans want 20–25% down (more on 2–4 units), which keeps you at
-                or below 80% LTV and sidesteps private mortgage insurance.
+                or below 80% LTV and sidesteps private mortgage insurance.{" "}
                 <Link
                   href="/glossary/house-hack"
                   className="text-primary font-semibold hover:underline"
