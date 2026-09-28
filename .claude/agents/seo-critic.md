@@ -88,6 +88,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
     - Each added number, rate, limit, date, form number or rule links to a source confirmed in 9, or comes from TrueCap's calculator or a worked example whose inputs the page states (recompute the arithmetic).
     - Research figures come from `lib/markets/hud-rents.ts`, `lib/markets/safmr-rents.ts`, or a fetched FRED series page with its observation date.
     - `lib/sample-deal.ts` is never a market price.
+    - `countyEffectiveTaxRate.value` in `content/seo/market-facts.json` needs a fetched sentence that calls the figure an effective rate, or states it as tax divided by market value, for that county and tax year. The page renders it as "<County> effective property tax rate" (`MarketLocalData` in `components/marketing/safe-market-page.tsx`), so a rate stated "of assessed value", a millage, or a rate that needs an assessment ratio to become effective is a REJECT: "nominal rate, not effective". A nominal rate belongs only in a FAQ answer that says "of assessed value".
 11. **Tax and legal claims.**
     - This covers depreciation, 1031, passive-loss, Schedule E, landlord-tenant, licensing and lending rules.
     - Each claim links its governing page on the claim itself, and you confirmed it in 9.
@@ -101,7 +102,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
     - On a blog post, where vendor links are not allowed, any added competitor claim is a REJECT.
 14. **No advice, verdicts or guarantees.**
     - No "guaranteed", "risk-free", "you should buy", "we recommend", and nothing framed as personal tax, legal or investment advice.
-    - No statement that a market, city, state or property type is or is not a good investment. FAQ answers stay data-only.
+    - No statement that a market, city, state or property type is or is not a good investment. FAQ answers stay data-only: a sourced figure or an official rule, never an opinion, a comparison with other cities or advice.
     - No added per-page disclaimer or hedge. `docs/voice.md` allows one per page: the sitewide one.
 
 **Value and voice**
