@@ -29,6 +29,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "2-percent-rule-vs-1-percent-rule";
 const TITLE =
@@ -84,7 +85,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is the 1% rule still realistic with 7% mortgage rates?",
-    a: "Barely, and only in cash-flow markets. At 2026 borrowing costs, break-even rent-to-price sits around 0.76% before you clear a dollar of profit, so a property that exactly hits 1% is a thin deal, not a slam dunk. In appreciation metros where prices sit at 0.4-0.6% of rent, the 1% rule fails almost everything — which is a signal about the market, not necessarily a reason to skip it.",
+    a: "Only as a floor, and only in cash-flow markets. At today's roughly 7% mortgage rates, with 25% down and half of rent going to operating costs, break-even rent-to-price sits around 1.0% before you clear a dollar of profit, so a property that exactly hits 1% only breaks even — a reason to underwrite, not a slam dunk. In high-price appreciation metros, where monthly rent is often well under 1% of price, the 1% rule fails almost everything — which is a signal about the market, not necessarily a reason to skip it.",
   },
   {
     q: "Which rule should I use to screen deals?",
@@ -187,7 +188,7 @@ export default function BlogPost() {
             different heights. Understanding that they&apos;re one screen with
             two settings is the whole game, because it tells you exactly when
             each one is useful and when it&apos;s quietly lying to you. This
-            post works both bars with real 2026 numbers, shows you the cap-rate
+            post works both bars with illustrative 2026 numbers, shows you the cap-rate
             and{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
@@ -281,7 +282,8 @@ export default function BlogPost() {
           <p>
             The rules feel abstract until you attach dollar rents to them. Here
             is what the 1% and 2% bars ask for across three common price points,
-            next to the kind of rent those properties actually command in 2026:
+            next to illustrative rents for each price point (your local rent
+            comps will differ):
           </p>
           <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
@@ -297,7 +299,7 @@ export default function BlogPost() {
                     2% rent target
                   </th>
                   <th className="text-left p-3 font-bold text-foreground">
-                    Typical real rent
+                    Illustrative rent
                   </th>
                   <th className="text-left p-3 font-bold text-foreground">
                     Which bar it clears
@@ -335,20 +337,34 @@ export default function BlogPost() {
           </ScrollX>
           <p>
             The pattern is the story. In cheaper, cash-flow-oriented markets the
-            1% rule is a live screen — plenty of properties near it, a few over.
-            In median and appreciation markets even the 1% bar is a stretch, and
-            the 2% bar is science fiction: a $450,000 house renting for $9,000 a
-            month doesn&apos;t exist in a normal neighborhood. The 2% rule
-            isn&apos;t wrong; it&apos;s just describing a corner of the market
-            most investors never shop in.
+            1% rule can still be a live screen. In median and appreciation
+            markets even the 1% bar is a stretch, and the 2% bar is science
+            fiction: a $450,000 house renting for $9,000 a month doesn&apos;t
+            exist in a normal neighborhood. The 2% rule isn&apos;t wrong;
+            it&apos;s just describing a corner of the market most investors
+            never shop in.
+          </p>
+          <p>
+            The national numbers point the same way. In the{" "}
+            <a
+              href="https://www.census.gov/library/stories/2026/01/housing-costs.html"
+              className="text-primary font-semibold hover:underline"
+            >
+              Census Bureau&apos;s 2020-2024 American Community Survey
+            </a>
+            , renters paid a median of $1,413 a month and the median home value
+            was $332,700 — rent of about 0.42% of value per month. Those two
+            medians describe different homes, so treat the ratio as a rough
+            gauge, but it sits well under even the 1% bar and under a quarter
+            of the 2% bar.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
             A same-dollar worked comparison
           </h2>
           <p>
-            Abstract ratios hide the trade-off. Let&apos;s underwrite two real
-            deals that each sit right on their respective rule, both financed at
+            Abstract ratios hide the trade-off. Let&apos;s underwrite two
+            illustrative deals that each sit right on their respective rule, both financed at
             25% down, 7%, 30 years, so you can see what &ldquo;passing 2%&rdquo;
             actually buys you — and what it costs.
           </p>
@@ -377,12 +393,12 @@ export default function BlogPost() {
             A $75,000 house in a class-C, cash-flow market renting for
             $1,500/month ($18,000/year) hits the 2% rule. You put $18,750 down
             and finance $56,250. The payment is about{" "}
-            <strong>$374/month</strong> ($4,489/year). But cheaper properties in
-            weaker neighborhoods run
+            <strong>$374/month</strong> ($4,491/year). But cheaper properties in
+            weaker neighborhoods can run
             <em> higher</em> expense ratios — more turnover, more repairs, more
-            delinquency — so use 58%: $10,440/year. NOI is about{" "}
-            <strong>$7,560</strong>, a 10.1% cap rate, and cash flow after the
-            mortgage is roughly <strong>$3,071/year</strong> ($256/month). On
+            delinquency — so this example assumes 58%: $10,440/year. NOI is
+            about <strong>$7,560</strong>, a 10.1% cap rate, and cash flow after
+            the mortgage is roughly <strong>$3,069/year</strong> ($256/month). On
             $18,750 invested that&apos;s a <strong>16.4% cash-on-cash</strong>{" "}
             return.
           </p>
@@ -432,7 +448,7 @@ export default function BlogPost() {
           </ScrollX>
           <p>
             On the numbers alone, the 2% deal buries the 1% deal — higher cap
-            rate, real cash flow, a return you can retire on. So why
+            rate, real cash flow, a double-digit cash-on-cash return. So why
             doesn&apos;t everyone chase 2% properties? Because the spreadsheet
             doesn&apos;t price the risk.
           </p>
@@ -443,9 +459,9 @@ export default function BlogPost() {
           <p>
             A 2% rent-to-price ratio is a market&apos;s way of telling you why
             the property is cheap. Properties that rent for 2% of a low price
-            cluster in neighborhoods with soft or negative appreciation, higher
-            tenant turnover, more deferred maintenance, longer eviction
-            timelines, and thinner buyer demand when you go to sell. The
+            often sit in neighborhoods with soft appreciation, higher tenant
+            turnover, more deferred maintenance, and thinner buyer demand when
+            you go to sell. The
             &ldquo;10% cap rate&rdquo; is real, but so is the vacancy month you
             didn&apos;t model, the $9,000 roof on a $75,000 house (that&apos;s
             12% of the purchase price in one repair), and the property manager
@@ -454,8 +470,15 @@ export default function BlogPost() {
           </p>
           <p>
             There&apos;s also a simple math reason the 2% rule went quiet. In
-            the cheap-money era, a 2% property financed at 4% threw off enormous
-            leveraged returns, so investors evangelized the rule. At 2026
+            the cheap-money era, a 2% property{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+              className="text-primary font-semibold hover:underline"
+            >
+              financed at 4%
+            </a>{" "}
+            threw off enormous leveraged returns, so investors evangelized the
+            rule. At 2026
             borrowing costs the deals that clear 2% are scarcer, and the ones
             that exist come with the risk profile above. The rule didn&apos;t
             stop working — the market that produced it thinned out.
@@ -465,13 +488,21 @@ export default function BlogPost() {
             Why even the 1% rule needs an asterisk in 2026
           </h2>
           <p>
-            The 1% rule is the one you&apos;ll actually use, but 7% rates moved
-            its meaning. Break-even rent-to-price — the ratio at which a
-            leveraged property covers its mortgage and operating costs with
-            nothing left over — has climbed to roughly <strong>0.76%</strong> at
-            today&apos;s rates. That means a property sitting exactly at 1.0%
-            has only a slim margin above breakeven, not the comfortable buffer
-            the rule implied when money was cheap. Deal A above makes the point:
+            The 1% rule is the one you&apos;ll actually use, but{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+              className="text-primary font-semibold hover:underline"
+            >
+              7% rates
+            </a>{" "}
+            moved its meaning (Freddie Mac&apos;s weekly 30-year fixed average
+            was 7.03% on September 24, 2026).
+            Break-even rent-to-price — the ratio at which a leveraged property
+            covers its mortgage and operating costs with nothing left over — has
+            climbed to roughly <strong>1.0%</strong> (25% down, 50% expense
+            ratio) at today&apos;s rates. That means a property sitting exactly
+            at 1.0% is right at breakeven, not the comfortable buffer the rule
+            implied when money was cheap. Deal A above makes the point:
             a textbook 1% property that cash-flows about three dollars a month.
           </p>
           <p>
@@ -570,6 +601,20 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "U.S. Census Bureau, Renters in 20% of U.S. Counties Paid More in 2020-2024 Than in Previous Five Years (ACS 2020-2024 5-year)",
+              url: "https://www.census.gov/library/stories/2026/01/housing-costs.html",
+            },
+            {
+              title:
+                "Freddie Mac Primary Mortgage Market Survey via FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

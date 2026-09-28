@@ -26,6 +26,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "break-even-occupancy-rental-property";
 const TITLE = "Break-even occupancy: how much vacancy a rental can survive (2026)";
@@ -72,11 +73,11 @@ const FAQS = [
   },
   {
     q: "What is a good break-even ratio for a rental?",
-    a: "As a rule of thumb, investors and lenders like to see a break-even occupancy (or break-even ratio) below about 85% — that leaves at least a 15-point cushion for vacancy, turnover, and the occasional non-paying tenant. 85%–90% is workable but tight; above 90% you have very little room for error; and above 100% the property loses money even at full occupancy. It is a guideline, not a hard line, and the right threshold depends on how stable rents are in your market.",
+    a: "As a rule of thumb, many investors like to see a break-even occupancy (or break-even ratio) below about 85% — that leaves at least a 15-point cushion for vacancy, turnover, and the occasional non-paying tenant. 85%–90% is workable but tight; above 90% you have very little room for error; and above 100% the property loses money even at full occupancy. It is a guideline, not a hard line, and the right threshold depends on how stable rents are in your market.",
   },
   {
     q: "How is break-even occupancy different from DSCR?",
-    a: "They are two views of the same cushion. Break-even occupancy is the exact occupancy level at which DSCR falls to 1.0 — the point where net operating income equals debt service and not a dollar more. DSCR measures coverage at your projected occupancy; break-even occupancy tells you how far occupancy can fall before that coverage disappears. A deal can have a comfortable break-even occupancy and still sit just under a lender's 1.20 DSCR floor, because the two answer different questions.",
+    a: "They are two views of the same cushion. Break-even occupancy is the exact occupancy level at which DSCR falls to 1.0 — the point where net operating income equals debt service and not a dollar more. DSCR measures coverage at your projected occupancy; break-even occupancy tells you how far occupancy can fall before that coverage disappears. A deal can have a comfortable break-even occupancy and still fall short of a lender's minimum DSCR (Freddie Mac's conventional multifamily loans require at least 1.25x), because the two answer different questions.",
   },
   {
     q: "Is break-even occupancy the same as the break-even calculator on TrueCap?",
@@ -158,10 +159,31 @@ export default function BreakEvenOccupancyPost() {
               Cap rate and cash-on-cash tell you what a rental earns when
               everything goes right. Break-even occupancy tells you the opposite —
               how far rent can fall or vacancy can climb before the property stops
-              covering its own bills. It is the quiet downside metric lenders run
-              and small investors skip, and in a 2026 market of 7% money and flat
-              rents, it is often the number that separates a resilient deal from a
-              fragile one. Here is the formula, a worked example with the cushion
+              covering its own bills. It is a downside metric that also shows up
+              in{" "}
+              <a
+                href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                multifamily loan underwriting
+              </a>
+              , and one that is easy to skip on a small rental. In a 2026 market
+              of roughly{" "}
+              <a
+                href="https://www.freddiemac.com/pmms"
+                className="text-primary font-semibold hover:underline"
+              >
+                7% mortgage rates
+              </a>{" "}
+              and modest rent growth (
+              <a
+                href="https://www.bls.gov/news.release/cpi.t02.htm"
+                className="text-primary font-semibold hover:underline"
+              >
+                rent of primary residence up 2.7% in the year to August 2026
+              </a>
+              , per BLS), it is often the number that separates a resilient deal
+              from a fragile one. Here is the formula, a worked example with the cushion
               measured to the point, and the clean bridge that ties it to DSCR.
             </p>
           </header>
@@ -300,8 +322,8 @@ export default function BreakEvenOccupancyPost() {
             <p>
               So the duplex pays for itself as long as you collect at least 86% of
               full rent. You can lose up to <strong>14%</strong> of gross rent to
-              vacancy and non-payment — roughly a month and a half of empty unit per
-              year across the building — before monthly cash flow turns negative.
+              vacancy and non-payment — about 1.7 months a year of the whole
+              building sitting empty — before monthly cash flow turns negative.
               If you underwrote a 5% vacancy assumption (95% collection), you are
               sitting nine full points above your break-even line. That gap is the
               margin of safety, and it is the thing cap rate alone never shows you.
@@ -366,8 +388,16 @@ export default function BreakEvenOccupancyPost() {
               of 1.0. At the projected 95% occupancy, NOI is about $21,000 and DSCR
               is roughly 1.17. That second number is a reminder that the two metrics
               answer different questions: a deal can carry a comfortable 14-point
-              occupancy cushion and still land just under a lender&apos;s typical
-              1.20 DSCR floor. Break-even occupancy measures resilience; DSCR
+              occupancy cushion and still land below a lender&apos;s minimum DSCR
+              (
+              <a
+                href="https://mf.freddiemac.com/docs/product/fixed_rate.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac&apos;s conventional multifamily loans, for example,
+                require at least 1.25x
+              </a>
+              ). Break-even occupancy measures resilience; DSCR
               measures coverage at your assumed occupancy. You want both, and you
               want to know which one a given deal is failing.
             </p>
@@ -380,9 +410,10 @@ export default function BreakEvenOccupancyPost() {
               same duplex — same two units, same $2,800 of rent — but assume you win
               a bidding war and pay $340,000 instead of $300,000. Now you finance
               $255,000, the payment climbs to about $1,697 a month ($20,364 a year),
-              and the higher assessed value pushes property taxes up to roughly
-              $4,400, lifting operating expenses to $11,700. Same income, heavier
-              cost:
+              and the higher assessed value pushes property taxes up to about
+              $4,080 (1.2% of price, the same rate as the $3,600 on $300,000),
+              lifting operating expenses to
+              $11,380. Same income, heavier cost:
             </p>
 
             <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
@@ -403,7 +434,7 @@ export default function BreakEvenOccupancyPost() {
                   <tr>
                     <td>Operating expenses</td>
                     <td className="text-right">$10,900</td>
-                    <td className="text-right">$11,700</td>
+                    <td className="text-right">$11,380</td>
                   </tr>
                   <tr>
                     <td>Debt service</td>
@@ -418,7 +449,7 @@ export default function BreakEvenOccupancyPost() {
                       <strong>86%</strong>
                     </td>
                     <td className="text-right">
-                      <strong>95%</strong>
+                      <strong>94%</strong>
                     </td>
                   </tr>
                 </tbody>
@@ -426,9 +457,9 @@ export default function BreakEvenOccupancyPost() {
             </ScrollX>
 
             <p>
-              At $340,000, fixed cost is $32,064 and break-even occupancy jumps to
-              $32,064 ÷ $33,600 = <strong>95.4%</strong>. The cushion has shrunk from
-              14 points to under 5. A single vacant month across the building is an
+              At $340,000, fixed cost is $31,744 and break-even occupancy jumps to
+              $31,744 ÷ $33,600 = <strong>94.5%</strong>. The cushion has shrunk from
+              14 points to about 5.5. A single vacant month across the building is an
               8.3% income loss — that alone drops you below the break-even line and
               into negative cash flow for the year. The same property, the same rent,
               and a $40,000 difference in price quietly converts a resilient deal into
@@ -445,8 +476,9 @@ export default function BreakEvenOccupancyPost() {
               up against the vacancy you actually expect. If your market runs 6%
               vacancy and your deal breaks even at 86% occupancy (i.e. it tolerates
               14% vacancy), you have an 8-point margin — healthy. If the same market
-              meets a deal that breaks even at 95%, your realistic vacancy already
-              eats most of the room, and one bad tenant turns the year red. The
+              meets a deal that breaks even at 95%, your expected 6% vacancy is
+              already bigger than the 5 points of room, so an ordinary year runs
+              red before a single tenant goes bad. The
               honest vacancy figure to compare against is its own exercise, covered
               in{" "}
               <Link
@@ -464,9 +496,9 @@ export default function BreakEvenOccupancyPost() {
               demands a stable rental market; and anything at or above 100% means the
               property loses money even fully occupied — an appreciation bet, not a
               cash-flow deal. One honest caveat on the math: we treated operating
-              expenses as fixed. In reality, percentage-based costs like property
-              management (typically 8%–10% of collected rent) shrink as collections
-              fall, which nudges your true break-even occupancy slightly lower. It is
+              expenses as fixed. In reality, costs that scale with collections, like
+              property management (usually charged as a percentage of collected
+              rent), shrink as collections fall, which nudges your true break-even occupancy slightly lower. It is
               a small, conservative-leaning simplification — your real cushion is a
               touch larger than the fixed-cost formula implies, which is the right
               direction to be wrong in.
@@ -518,6 +550,26 @@ export default function BreakEvenOccupancyPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "HUD, Multifamily Accelerated Processing (MAP) Guide (March 2021 revision), §7.14.1 break-even occupancy",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf",
+            },
+            {
+              title: "Freddie Mac, Primary Mortgage Market Survey (30-year fixed average, week of Sept. 24, 2026)",
+              url: "https://www.freddiemac.com/pmms",
+            },
+            {
+              title: "U.S. Bureau of Labor Statistics, Consumer Price Index News Release, Table 2 (August 2026)",
+              url: "https://www.bls.gov/news.release/cpi.t02.htm",
+            },
+            {
+              title: "Freddie Mac Multifamily, Optigo Conventional Fixed-Rate Loans product snapshot (April 2026)",
+              url: "https://mf.freddiemac.com/docs/product/fixed_rate.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

@@ -6,11 +6,11 @@
  * rental property", "how to calculate operating expense ratio", "opex
  * ratio rental", "operating expense ratio formula".
  *
- * Angle: OER is the measured efficiency metric appraisers and lenders
- * use — operating expenses ÷ effective gross income — not the 50% rule
- * heuristic. Give the formula, the strict in/out inclusion rules (the
- * four things that aren't operating expenses), a full line-by-line
- * duplex example, 2026 benchmark bands, the exact reconciliation to the
+ * Angle: OER is the measured efficiency metric — operating expenses ÷
+ * effective gross income — not the 50% rule heuristic. Give the
+ * formula, the strict in/out inclusion rules (the four things that
+ * aren't operating expenses), a full line-by-line duplex example,
+ * illustrative benchmark bands, the exact reconciliation to the
  * 50% rule, and the OER → NOI → cap rate → value ripple. Slots into the
  * NOI / cap-rate / 50%-rule cluster and funnels into the NOI + cap-rate
  * calculators and the analyzer.
@@ -30,6 +30,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "operating-expense-ratio-rental-property";
 const TITLE_PLAIN =
@@ -39,7 +40,7 @@ const TITLE_PLAIN =
 // window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
 const SERP_TITLE = "Operating expense ratio (OER) for rentals (2026)";
 const DESCRIPTION =
-  "OER = operating expenses ÷ effective gross income. The formula, what counts (and what doesn't), 2026 benchmark bands, and a worked duplex.";
+  "OER = operating expenses ÷ effective gross income. The formula, what counts (and what doesn't), rough benchmark bands, and a worked duplex.";
 const PUBLISHED_AT = "2026-07-06";
 const MODIFIED_AT = lastmodFor("/blog/operating-expense-ratio-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
@@ -73,11 +74,11 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What is a good operating expense ratio for a rental property?",
-    a: "For a typical single-family or small multifamily rental in 2026, a healthy OER runs about 40–50% of effective gross income. Newer, well-run properties in low-tax areas can sit in the 30s; older buildings with owner-paid utilities in high-tax metros routinely run 50–60% or more. There is no universally 'good' number — a higher OER isn't automatically bad if the rents are high enough that the property still throws off strong NOI. OER measures efficiency, not profitability.",
+    a: "In the Census Bureau and HUD's 2021 Rental Housing Finance Survey (covering 2020), average operating expenses came to about 45% of average rent collected for single-unit rentals ($6,194 a year against $1,153 a month) and about 44% for two-to-four-unit properties ($4,935 a year against $938 a month, per unit). Newer, well-run properties in low-tax areas can run lower; older buildings with owner-paid utilities in high-tax metros run higher. There is no universally 'good' number — a higher OER isn't automatically bad if the rents are high enough that the property still throws off strong NOI. OER measures efficiency, not profitability.",
   },
   {
     q: "How do you calculate the operating expense ratio?",
-    a: "Divide total annual operating expenses by effective gross income (gross rent plus other income, minus vacancy and collection loss). On a duplex collecting $28,200 of effective income with $11,156 of operating expenses, the OER is $11,156 ÷ $28,200 ≈ 40%. Include taxes, insurance, management, repairs, owner-paid utilities, and reserves; exclude the mortgage, depreciation, and income taxes.",
+    a: "Divide total annual operating expenses by effective gross income (gross rent plus other income, minus vacancy and collection loss). On a duplex collecting $28,200 of effective income with $12,856 of operating expenses (including a $1,700 replacement reserve), the OER is $12,856 ÷ $28,200 ≈ 46%. Include taxes, insurance, management, repairs, owner-paid utilities, and reserves; exclude the mortgage, depreciation, and income taxes.",
   },
   {
     q: "Does the operating expense ratio include the mortgage?",
@@ -85,7 +86,7 @@ const FAQS = [
   },
   {
     q: "What's the difference between the OER and the 50% rule?",
-    a: "The 50% rule is the napkin version of the OER. It says operating costs run roughly half of gross rent, and it bundles vacancy and capital reserves into that 'half' while excluding the mortgage. The OER is the measured metric: actual operating expenses divided by effective (post-vacancy) income. On the same duplex the 50% rule flags about $15,000 of all-in costs against $30,000 of gross rent, while the precise OER lands near 40–46% of the $28,200 of effective income. The rule screens; the ratio underwrites.",
+    a: "The 50% rule is the napkin version of the OER. It says operating costs run roughly half of gross rent, and it bundles vacancy and capital reserves into that 'half' while excluding the mortgage. The OER is the measured metric: actual operating expenses divided by effective (post-vacancy) income. On the same duplex the 50% rule flags about $15,000 of all-in costs against $30,000 of gross rent, while the precise OER, with reserves in, lands near 46% of the $28,200 of effective income. The rule screens; the ratio underwrites.",
   },
 ];
 
@@ -160,15 +161,13 @@ export default function OperatingExpenseRatioPost() {
               Two rentals can collect the exact same rent and be worth wildly
               different amounts, because one keeps 60 cents of every rent dollar
               and the other keeps 40. The operating expense ratio is the number
-              that tells you which is which. It&apos;s the metric appraisers and
-              commercial lenders reach for first — a one-line read on how
+              that tells you which is which. It&apos;s a one-line read on how
               efficiently a property runs, and the hinge that quietly sets your
-              net operating income, your cap rate, and what the building is
-              actually worth. Here is the formula, the strict rules for what
-              counts as an operating expense and what doesn&apos;t, a
-              line-by-line worked example, honest 2026 benchmarks, and the
-              reason a wrong OER assumption can misprice a deal by tens of
-              thousands of dollars.
+              net operating income, your cap rate, and any value you build from
+              them. Here is the formula, the strict rules for what counts as an
+              operating expense and what doesn&apos;t, a line-by-line worked
+              example, rough benchmark bands, and the reason a wrong OER
+              assumption can misprice a deal by tens of thousands of dollars.
             </p>
           </header>
 
@@ -207,10 +206,18 @@ export default function OperatingExpenseRatioPost() {
               to keep less.
             </p>
             <p>
-              That last point is why OER matters more than it looks. NOI, cap
-              rate, and — for anything a bank underwrites on its economics —
-              value all sit downstream of this one ratio. Miss it and every
-              number built on top of it is wrong in the same direction.
+              That last point is why OER matters more than it looks. NOI and cap
+              rate sit downstream of this one ratio, and so does value wherever
+              it is set by capitalizing NOI (
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+                className="text-primary font-semibold hover:underline"
+              >
+                agency appraisals of two-to-four-unit rentals instead apply a
+                gross rent multiplier to gross rent
+              </a>
+              ). Miss it and every number built on top of it is wrong in the same
+              direction.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -229,7 +236,17 @@ export default function OperatingExpenseRatioPost() {
               <li>Utilities the owner pays (water/sewer, trash, common-area electric)</li>
               <li>HOA dues, landscaping, snow removal, pest control</li>
               <li>Licensing, turnover/advertising, and property-level accounting or legal</li>
-              <li>Replacement reserves for big-ticket items (by appraisal convention)</li>
+              <li>
+                Replacement reserves for big-ticket items (
+                <a
+                  href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  HUD&apos;s multifamily appraisal rules count them in total
+                  operating expenses
+                </a>
+                )
+              </li>
             </ul>
             <p>
               Four costs are <strong>not</strong> operating expenses, and folding
@@ -242,12 +259,25 @@ export default function OperatingExpenseRatioPost() {
                 never touches the OER.
               </li>
               <li>
-                <strong>Depreciation.</strong> A paper deduction on your tax
-                return, not a cash cost of running the building.
+                <strong>Depreciation.</strong> A{" "}
+                <a
+                  href="https://www.irs.gov/publications/p527"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  paper deduction on your tax return
+                </a>
+                , not a cash cost of running the building.
               </li>
               <li>
                 <strong>Capital expenditures.</strong> A new roof or a full HVAC
-                replacement is a capital item, not an operating one — though a
+                replacement is a{" "}
+                <a
+                  href="https://www.irs.gov/publications/p527"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  capital item
+                </a>
+                , not an operating one — though a
                 <em> reserve</em> that sets money aside for it is a legitimate
                 operating line. Book the reserve, not the lumpy replacement.
               </li>
@@ -330,8 +360,8 @@ export default function OperatingExpenseRatioPost() {
               So the ratio is $11,156 ÷ $28,200 ≈ <strong>40%</strong>, and NOI
               is $28,200 − $11,156 = <strong>$17,044</strong>, a 6.8% cap rate on
               the $250,000 price. But notice what&apos;s missing: reserves. Add a
-              modest <strong>$1,700 replacement reserve</strong> — the appraiser
-              always does — and operating expenses climb to $12,856, the OER
+              modest <strong>$1,700 replacement reserve</strong> and operating
+              expenses climb to $12,856, the OER
               rises to <strong>about 46%</strong>, and NOI falls to $15,344, a
               6.1% cap rate. That single decision, whether to book reserves, is
               worth six points of OER and 0.7 points of cap rate on the very same
@@ -347,20 +377,21 @@ export default function OperatingExpenseRatioPost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What&apos;s a good OER? Honest 2026 benchmarks
+              What&apos;s a good OER? Rough benchmark bands
             </h2>
             <p>
               There is no single right answer, because the ratio depends heavily
               on the age of the building, who pays the utilities, and how
-              punishing the local tax bill is. As a working set of 2026 bands,
-              measured on effective gross income and excluding debt service:
+              punishing the local tax bill is. As a rough illustration (rules of
+              thumb, not measured 2026 data), measured on effective gross income
+              and excluding debt service:
             </p>
             <ScrollX label="Data table" className="overflow-x-auto">
               <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Property profile</th>
-                    <th className="text-right">Typical OER</th>
+                    <th className="text-right">Illustrative OER</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -395,6 +426,21 @@ export default function OperatingExpenseRatioPost() {
               pay their own power — that&apos;s a difference in who holds the
               expense, not in how well the property is run.
             </p>
+            <p>
+              For a measured anchor, in the Census Bureau and HUD&apos;s{" "}
+              <a
+                href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                2021 Rental Housing Finance Survey
+              </a>{" "}
+              (covering 2020), average operating expenses came to about 45% of
+              average rent collected for single-unit rentals ($6,194 a year
+              against $1,153 a month) and about 44% for two-to-four-unit
+              properties ($4,935 a year against $938 a month, per unit). Those
+              are national averages of what owners reported spending, not what
+              a given property should budget.
+            </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               OER and the 50% rule are the same idea
@@ -421,8 +467,7 @@ export default function OperatingExpenseRatioPost() {
               five-second screen against gross rent that lets you triage a
               listing before you&apos;ve gathered a single real number. The OER
               is the measured metric against effective income that you compute
-              once you have the actuals — the version that survives a lender&apos;s
-              or an appraiser&apos;s review. Use the rule to decide whether a
+              once you have the actuals. Use the rule to decide whether a
               deal is worth an hour; use the OER when you sit down to underwrite
               it.
             </p>
@@ -432,9 +477,10 @@ export default function OperatingExpenseRatioPost() {
             </h2>
             <p>
               Here&apos;s the part that turns OER from a trivia number into a
-              money number. Value on any income property a bank underwrites runs
+              money number. Wherever value is set by capitalizing income, it runs
               through NOI, and NOI is just effective income times one minus the
-              OER:
+              OER (agency appraisals of two-to-four-unit rentals use a gross rent
+              multiplier instead):
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
@@ -448,8 +494,9 @@ export default function OperatingExpenseRatioPost() {
               <strong>35% OER</strong> — the number you get by lowballing
               management and skipping reserves — and NOI reads $28,200 × 0.65 =
               $18,330. Run it honestly at the <strong>~46%</strong> we built line
-              by line, and NOI is $15,344. At a 6.5% market cap rate, that&apos;s
-              the difference between a <strong>$282,000</strong> valuation and a{" "}
+              by line, and NOI is $15,344. Capitalize each at a 6.5% market cap
+              rate, the way an investor prices the income, and that&apos;s the
+              difference between a <strong>$282,000</strong> valuation and a{" "}
               <strong>$236,000</strong> one — about{" "}
               <strong>$46,000</strong> of value riding on an eleven-point
               assumption about operating efficiency. Nobody argues over a $46,000
@@ -482,8 +529,8 @@ export default function OperatingExpenseRatioPost() {
               </li>
               <li>
                 <strong>Zeroing out management because you self-manage.</strong>{" "}
-                Your time isn&apos;t free, and a future buyer will price in 8–10%
-                for a manager. Leave it in, or your OER is a personal number that
+                Your time isn&apos;t free, and a future buyer will price in a
+                manager&apos;s fee. Leave it in, or your OER is a personal number that
                 doesn&apos;t transfer with the property.
               </li>
               <li>
@@ -537,12 +584,32 @@ export default function OperatingExpenseRatioPost() {
               </Link>{" "}
               carry the operating expenses straight through to NOI, cap rate,
               cash flow, and DSCR — so the ratio you assume and the modeled result
-              always come from the same set of numbers. None of this is
-              investment advice; confirm the actual expenses, taxes, and rents on
-              any specific property before you rely on the ratio.
+              always come from the same set of numbers. Confirm the actual
+              expenses, taxes, and rents on any specific property before you rely
+              on the ratio.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+            {
+              title: "HUD, Multifamily Accelerated Processing (MAP) Guide (March 2021 revision), §7.8 operating expenses and reserve for replacements",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+            {
+              title: "U.S. Census Bureau and HUD, 2021 Rental Housing Finance Survey infographic",
+              url: "https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

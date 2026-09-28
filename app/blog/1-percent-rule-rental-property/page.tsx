@@ -8,7 +8,7 @@
  *
  * Fills the obvious gap in the screening-metric cluster: the blog
  * already covers the 50% rule, GRM, cap rate, DSCR, and cash-on-cash,
- * but not the single most-Googled rule of thumb in REI — and there is
+ * but not one of the best-known rules of thumb in REI — and there is
  * a /tools/1-percent-rule-calculator begging for an explainer to link.
  */
 
@@ -25,6 +25,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "1-percent-rule-rental-property";
 const TITLE = "The 1% rule for rental property: does it still work in 2026?";
@@ -33,7 +34,7 @@ const TITLE = "The 1% rule for rental property: does it still work in 2026?";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "The 1% rule for rental property in 2026";
 const DESCRIPTION =
-  "The 1% rule says a rental's monthly rent should be at least 1% of its price. How it works, why 2026 rates made it harder to pass, and what it hides.";
+  "The 1% rule says a rental's monthly rent should be at least 1% of its price. How it works, why 2026 rates thinned its cushion, and what it hides.";
 const PUBLISHED_AT = "2026-06-23";
 const MODIFIED_AT = lastmodFor("/blog/1-percent-rule-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 10;
@@ -71,21 +72,62 @@ const FAQS = [
   },
   {
     q: "Does the 1% rule still work in 2026?",
-    a: "As a quick filter, yes — but with two caveats. First, higher rates raised the bar: at a 7% investment-property rate, a typical financed rental breaks even at roughly 0.76% rent-to-price, versus about 0.57% back when loans were 3.5%, so a 1% deal cash-flows on a thinner margin than it used to. Second, 1% deals have gotten scarce in appreciation and coastal markets, where many listings sit at 0.4–0.6%. The rule still works, but passing it is now necessary, not sufficient.",
+    a: "As a quick filter, yes — but with two caveats. First, higher rates raised the bar: under this article's example assumptions (25% down, 1.2% tax, 0.6% insurance, 15% of rent set aside), a 7% loan breaks even at roughly 0.76% rent-to-price, versus about 0.57% at 3.5%, so a 1% deal cash-flows on a thinner margin than it used to. Second, 1% deals are hard to find in high-priced coastal and appreciation markets, where rents are a small fraction of home values. The rule still works as a screen, but passing it is no longer enough on its own.",
   },
   {
     q: "What's the difference between the 1% rule and the 2% rule?",
-    a: "Same formula, higher bar. The 2% rule wants monthly rent of at least 2% of price — a $100,000 house renting for $2,000/month. In 2026 that is essentially extinct outside deep-discount, low-value, or heavy-management properties (think sub-$80k homes in soft markets), and a listing that clears 2% usually signals a rough neighborhood, heavy capex, or a rent number that won't hold. Most investors today treat 1% as the aspirational screen and anything above it as a flag to look harder, not a green light.",
+    a: "Same formula, higher bar. The 2% rule wants monthly rent of at least 2% of price — a $100,000 house renting for $2,000/month. In 2026 that is rare, and mostly limited to deep-discount, low-value, or heavy-management properties, and a listing that clears 2% usually signals a rough neighborhood, heavy capex, or a rent number that won't hold. A more useful habit is to treat 1% as the aspirational screen and anything above it as a flag to look harder, not a green light.",
   },
   {
     q: "Does the 1% rule use rent before or after expenses?",
-    a: "Gross rent, before any expenses, against the purchase price. That is exactly why it can mislead: two properties can both hit 1% and throw off very different cash flow once you account for property tax (which ranges from under 0.5% to over 2.2% of value by state), insurance, HOA dues, and condition. For a fixer or BRRRR deal, use your all-in cost — price plus rehab — as the denominator, or the rule will flatter a property you haven't finished paying for.",
+    a: "Gross rent, before any expenses, against the purchase price. That is exactly why it can mislead: two properties can both hit 1% and throw off very different cash flow once you account for property tax (a state's median tax bill runs from about 0.3% of the median home value in Hawaii to about 1.9% in Illinois and New Jersey, per Census ACS 2024 data), insurance, HOA dues, and condition. For a fixer or BRRRR deal, use your all-in cost — price plus rehab — as the denominator, or the rule will flatter a property you haven't finished paying for.",
   },
   {
     q: "Is a property that fails the 1% rule always a bad deal?",
-    a: "No. The 1% rule is blind to appreciation, rent growth, tax benefits, and below-market rents you can raise. Plenty of properties in strong appreciation markets sit at 0.6–0.8% and still win over a 10-year hold on equity growth and forced appreciation. The rule is a cash-flow screen, so it's most useful when cash flow is your goal. If your thesis is appreciation or a value-add, run the full underwrite and don't let a single ratio veto the deal.",
+    a: "No. The 1% rule is blind to appreciation, rent growth, tax benefits, and below-market rents you can raise. Plenty of properties in strong appreciation markets fail the 1% rule and can still do well over a long hold on equity growth and forced appreciation. The rule is a cash-flow screen, so it's most useful when cash flow is your goal. If your thesis is appreciation or a value-add, run the full underwrite and don't let a single ratio veto the deal.",
   },
 ];
+
+/** The one sourced FAQ figure with no earlier body link. It is a ratio of two
+ *  Census ACS 2024 tables (B25103 median real estate taxes ÷ B25077 median
+ *  value), so each input links to its own table where the answer renders and
+ *  a reader can redo the division. The answer text itself is unchanged, so the
+ *  visible answer and the FAQPage JSON-LD stay identical. */
+const STATE_TAX_SOURCE_URL =
+  "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000";
+const STATE_VALUE_SOURCE_URL =
+  "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000";
+const STATE_TAX_SOURCE_PHRASE =
+  "a state's median tax bill runs from about 0.3% of the median home value in Hawaii to about 1.9% in Illinois and New Jersey";
+const STATE_TAX_LINK_TEXT = "a state's median tax bill";
+const STATE_VALUE_LINK_TEXT = "the median home value";
+
+function FaqAnswer({ answer }: { answer: string }) {
+  const at = answer.indexOf(STATE_TAX_SOURCE_PHRASE);
+  if (at < 0) return <>{answer}</>;
+  const phrase = STATE_TAX_SOURCE_PHRASE;
+  const valueAt = phrase.indexOf(STATE_VALUE_LINK_TEXT);
+  return (
+    <>
+      {answer.slice(0, at)}
+      <a
+        href={STATE_TAX_SOURCE_URL}
+        className="text-primary font-semibold hover:underline"
+      >
+        {STATE_TAX_LINK_TEXT}
+      </a>
+      {phrase.slice(STATE_TAX_LINK_TEXT.length, valueAt)}
+      <a
+        href={STATE_VALUE_SOURCE_URL}
+        className="text-primary font-semibold hover:underline"
+      >
+        {STATE_VALUE_LINK_TEXT}
+      </a>
+      {phrase.slice(valueAt + STATE_VALUE_LINK_TEXT.length)}
+      {answer.slice(at + phrase.length)}
+    </>
+  );
+}
 
 export default function OnePercentRulePost() {
   const siteUrl = getSiteUrl();
@@ -167,14 +209,27 @@ export default function OnePercentRulePost() {
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Glance at a listing price and a rent figure and you can screen a
               rental in about three seconds: is the monthly rent at least 1% of
-              the purchase price? That is the 1% rule — the most-Googled rule of
-              thumb in real estate investing, and the first filter most
-              investors run before they bother opening a spreadsheet. It is
-              fast, it is famous, and in 2026 it is more contested than ever,
-              because the rule was calibrated in an era of 3–4% mortgages and
-              today money costs nearly twice that. Here is exactly how it works,
-              what it quietly ignores, and how to use it without letting it talk
-              you into a bad deal.
+              the purchase price? That is the 1% rule — one of the best-known
+              rules of thumb in real estate investing, and a common first filter
+              before anyone opens a spreadsheet. It is fast, it is famous, and
+              in 2026 it is more contested than ever, because a fixed 1% bar
+              doesn&apos;t move when rates do: Freddie Mac&apos;s 30-year fixed
+              average was{" "}
+              <a
+                href="https://www.freddiemac.com/pmms"
+                className="text-primary font-semibold hover:underline"
+              >
+                7.03% on Sept. 24, 2026
+              </a>
+              , more than double its{" "}
+              <a
+                href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fam=avg"
+                className="text-primary font-semibold hover:underline"
+              >
+                2.96% average for 2021
+              </a>
+              . Here is exactly how it works, what it quietly ignores, and how
+              to use it without letting it talk you into a bad deal.
             </p>
           </header>
 
@@ -253,9 +308,7 @@ export default function OnePercentRulePost() {
               that if gross rent is about 1% of price each month — 12% of price
               a year — there&apos;s usually enough income to cover the mortgage,
               taxes, insurance, vacancy, and repairs with a little left over,{" "}
-              <em>
-                at the interest rates that were normal when the rule caught on.
-              </em>{" "}
+              <em>as long as borrowing is cheap enough.</em>{" "}
               It is a rent-to-price ratio dressed up as a pass/fail test.
             </p>
             <p>
@@ -299,15 +352,27 @@ export default function OnePercentRulePost() {
             </p>
             <ul>
               <li>
-                <strong>At a 3.5% loan</strong> (the 2021 world): principal and
+                <strong>At a 3.5% loan</strong> (about half a point above
+                Freddie Mac&apos;s 2.96% average for owner-occupied loans in
+                2021): principal and
                 interest on the $75,000 borrowed run about $337/month, plus $150
                 of taxes and insurance — roughly $487 of fixed carry. Cover that
                 plus reserves and you break even at about{" "}
                 <strong>0.57% rent-to-price</strong>.
               </li>
               <li>
-                <strong>At a 7% loan</strong> (2026 investment-property
-                pricing): P&amp;I on the same $75,000 jumps to about $499/month,
+                <strong>At a 7% loan</strong> (about Freddie Mac&apos;s 7.03%
+                owner-occupied average on Sept. 24, 2026; investment-property
+                loans also carry{" "}
+                <a
+                  href="https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  an extra Freddie Mac credit fee, 2.125% of the loan at 70–75%
+                  LTV
+                </a>
+                , so they cost more): P&amp;I on the same $75,000 jumps to about
+                $499/month,
                 plus the same $150 — about $649 of fixed carry. Break-even
                 climbs to roughly <strong>0.76% rent-to-price</strong>.
               </li>
@@ -417,8 +482,8 @@ export default function OnePercentRulePost() {
                 The numerator should be real market rent, not the listing&apos;s
                 hopeful number.
               </strong>{" "}
-              Sellers and pro formas quote rents that are often 5–15% above what
-              the unit will actually fetch. Pull comps before you trust a rent
+              Sellers and pro formas often quote rents above what the unit will
+              actually fetch. Pull comps before you trust a rent
               figure, because a 10% haircut on rent drops a 1.0% property
               straight to 0.9%. And the rule is silent on everything that
               decides whether you keep that rent: condition, tenant quality,
@@ -432,19 +497,33 @@ export default function OnePercentRulePost() {
             <p>
               The 2% rule is the same test with the bar doubled: monthly rent of
               at least 2% of price — a $100,000 house renting for $2,000. In
-              2026 that is effectively extinct outside deep-discount, low-value,
-              or management-intensive properties. When a listing genuinely
+              2026 that is rare outside deep-discount, low-value, or
+              management-intensive properties. When a listing genuinely
               clears 2%, it&apos;s usually telling you something — a rough
               block, deferred capex, or a rent number that won&apos;t survive a
               real lease-up — not that you&apos;ve found a unicorn.
             </p>
             <p>
-              Where do 1% deals actually live now? Overwhelmingly in the Midwest
-              and South, and in the sub-$200,000 price tiers — Ohio, Indiana,
-              Alabama, parts of Texas and the Carolinas. In coastal and
-              high-growth metros (San Diego, Denver, Austin, Seattle), most
-              rentals pencil at 0.4–0.6%, and investors there are explicitly
-              betting on appreciation rather than monthly cash flow. Neither
+              Where do 1% deals actually live now? Mostly in lower-priced
+              markets and price tiers, where rent is a larger share of the
+              price. In coastal and high-growth metros (San Diego, Denver,
+              Austin, Seattle), median monthly rent runs roughly 0.26–0.37% of
+              median home value (Census ACS 2024{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25064&g=010XX00US$3100000"
+                className="text-primary font-semibold hover:underline"
+              >
+                median gross rent
+              </a>{" "}
+              divided by{" "}
+              <a
+                href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$3100000"
+                className="text-primary font-semibold hover:underline"
+              >
+                median value
+              </a>
+              ), and investors there are explicitly betting on appreciation
+              rather than monthly cash flow. Neither
               approach is wrong; they&apos;re different games, and the 1% rule
               is only scoring one of them. If cash flow isn&apos;t your goal, a
               failing ratio isn&apos;t a verdict.
@@ -462,7 +541,7 @@ export default function OnePercentRulePost() {
                 <strong>Screen fast.</strong> Run the ratio on every listing. In
                 2026&apos;s rate environment, give yourself margin — treat 1.0%
                 as the floor for a cash-flow deal, not the target, since
-                break-even already sits near 0.76%.
+                break-even in our example already sits near 0.76%.
               </li>
               <li>
                 <strong>Use all-in cost and real rent.</strong> Price plus rehab
@@ -502,7 +581,9 @@ export default function OnePercentRulePost() {
                 <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
                   {f.q}
                 </h3>
-                <p>{f.a}</p>
+                <p>
+                  <FaqAnswer answer={f.a} />
+                </p>
               </div>
             ))}
 
@@ -514,7 +595,8 @@ export default function OnePercentRulePost() {
               real estate, and on a cheap, cash-flow-market rental it still
               flags the right deals in seconds. But it&apos;s a rent-to-price
               ratio with a fixed threshold in a world where rates move, and in
-              2026 the break-even floor has crept up to roughly 0.76%, leaving
+              our example the break-even floor has crept up to roughly 0.76%
+              at a 7% loan, leaving
               far less daylight between &quot;passes&quot; and
               &quot;bleeds.&quot; Use it to decide what to look at, never what
               to buy. Screen on all-in cost and real rent, then run the
@@ -530,6 +612,38 @@ export default function OnePercentRulePost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Freddie Mac, Primary Mortgage Market Survey (30-year fixed average, week of Sept. 24, 2026)",
+              url: "https://www.freddiemac.com/pmms",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US), annual averages (CSV download)",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fam=avg",
+            },
+            {
+              title: "Freddie Mac Seller/Servicer Guide, Exhibit 19: Credit Fees (Bulletin 2026-H)",
+              url: "https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25064 Median Gross Rent, metro areas",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25064&g=010XX00US$3100000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25077 Median Value (Dollars), metro areas",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$3100000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25077 Median Value (Dollars), by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

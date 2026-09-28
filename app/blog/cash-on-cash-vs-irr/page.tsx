@@ -19,11 +19,12 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "cash-on-cash-vs-irr";
 const TITLE = "Cash-on-cash vs IRR: which one tells the truth?";
 const DESCRIPTION =
-  "Cash-on-cash and IRR answer different questions. Learn when each one is right, when each one misleads, and which to trust on which type of deal.";
+  "Cash-on-cash and IRR answer different questions. Learn when each one is right, when each one misleads, and which to lead with on which type of deal.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = lastmodFor("/blog/cash-on-cash-vs-irr") ?? PUBLISHED_AT;
 const READING_TIME = 7;
@@ -121,8 +122,8 @@ export default function CashOnCashVsIrrPost() {
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Cash-on-cash and IRR are both return metrics for rental real
               estate. They answer completely different questions, and treating
-              them as interchangeable is one of the most common ways to convince
-              yourself a bad deal is a good one.
+              them as interchangeable can make a weak deal look stronger than it
+              is.
             </p>
           </header>
 
@@ -156,7 +157,7 @@ export default function CashOnCashVsIrrPost() {
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              IRR: the time-weighted truth across the whole hold
+              IRR: the time-weighted return across the whole hold
             </h2>
             <p>
               <Link
@@ -168,8 +169,8 @@ export default function CashOnCashVsIrrPost() {
               is the discount rate that makes the net present value of all the
               deal&apos;s cash flows (initial investment, every year&apos;s
               operating cash flow, sale proceeds at exit) equal to zero. Said
-              more simply: it&apos;s the time-adjusted average return you
-              actually earned over the whole hold.
+              more simply: it&apos;s the annualized, time-adjusted return
+              implied by the modeled cash flows over the whole hold.
             </p>
             <p>
               IRR can incorporate items CoC omits: modeled rent and expense
@@ -182,17 +183,19 @@ export default function CashOnCashVsIrrPost() {
               When each one can mislead
             </h2>
             <p>
-              <strong>CoC lies when</strong> you compare deals across different
-              appreciation profiles. A 9% CoC in Cleveland (low appreciation)
-              and a 6% CoC in Charlotte (high appreciation) can produce
+              <strong>CoC misleads when</strong> you compare deals across
+              different appreciation profiles. A 9% CoC in a low-appreciation
+              market and a 6% CoC in a high-appreciation market can produce
               identical 10-year IRR. If you optimize only on CoC, you
               systematically over-invest in pure cash-flow markets and miss the
               deals where compounding appreciation does the heavy lifting.
             </p>
             <p>
-              <strong>IRR lies when</strong> the appreciation assumption is
-              wrong. IRR is hyper-sensitive to your exit-year sale price. A 1%
-              bump in annual appreciation can move IRR by 3-4 points. If your
+              <strong>IRR misleads when</strong> the appreciation assumption is
+              wrong. IRR is hyper-sensitive to your exit-year sale price. A
+              one-percentage-point change in annual appreciation can move a
+              leveraged IRR materially; how much depends on leverage, hold
+              period, and selling costs. If your
               underwriting model assumes 5%/yr appreciation in a market that
               actually does 2%/yr, your projected IRR is fantasy. Always
               stress-test IRR against a flat-appreciation scenario.
@@ -203,29 +206,41 @@ export default function CashOnCashVsIrrPost() {
                 explicitly includes tax assumptions.
               </strong>{" "}
               An after-tax result is taxpayer-specific: filing status, activity
-              classification, basis, limitations, holding structure, state
-              sourcing, and disposition all matter. Keep the property-level
+              classification, basis, limitations (see the rental-loss limits in{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                IRS Publication 527
+              </a>
+              ), holding structure, state sourcing, and disposition all matter. Keep the property-level
               metrics comparable, then have an adviser review any after-tax
               scenario.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Which metric to trust on which deal
+              Which metric to lead with on which deal
             </h2>
             <p>
-              <strong>Pure cash-flow deals</strong> (Midwest workforce
-              neighborhoods, working-class East Coast blocks): trust CoC.
-              Appreciation is small enough that the long-term IRR isn&apos;t
-              materially different from the year-1 CoC compounded. If the deal
-              cash-flows now, it cash-flows long-term.
+              <strong>Pure cash-flow deals</strong> (where the return case rests
+              on current cash flow, not price growth): lead with CoC, and check
+              the metro&apos;s{" "}
+              <a
+                href="https://www.fhfa.gov/document/d/hpi/fhfa-house-price-index-report-2026q2"
+                className="text-primary font-semibold hover:underline"
+              >
+                recent price history
+              </a>{" "}
+              before assuming appreciation is small. Recheck that the deal still
+              cash-flows under your rent, vacancy, and expense stress cases.
             </p>
             <p>
-              <strong>Appreciation-leaning deals</strong> (Sun Belt growth,
-              coastal Tier-1, gentrifying inner-city): trust IRR — but only if
+              <strong>Appreciation-leaning deals</strong> (where the return case
+              depends on price growth): lead with IRR — but only if
               you&apos;ve stress-tested the appreciation assumption. Don&apos;t
               commit to a deal whose entire return story is &quot;rent
               appreciates 4% and price appreciates 5% for 10 years.&quot; Both
-              could happen. Neither is guaranteed.
+              could happen. Neither is certain.
             </p>
             <p>
               <strong>
@@ -262,7 +277,8 @@ export default function CashOnCashVsIrrPost() {
               still work if appreciation is 1pp lower than I assumed?).
             </p>
             <p>
-              If all three pass, the deal is probably good. If CoC is great but
+              If all three pass, the deal meets the criteria you set. If CoC is
+              great but
               IRR collapses on stress test, you have a pure cash-flow play and
               should treat it that way. If IRR is great but CoC is negative,
               you&apos;re betting on appreciation and need a personal balance
@@ -277,13 +293,27 @@ export default function CashOnCashVsIrrPost() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              shows cash-on-cash return plus released pre-tax operating and
-              equity projections and sensitivity tools. Build any IRR or
-              disposition case separately with explicit exit assumptions; the
-              integrated exit-scenario model is not currently released.
+              shows cash-on-cash return. Pro adds pre-tax cash-flow and equity
+              projections, sensitivity tools, and an Offer Ceiling (the highest
+              price that still meets your targets) that can test a minimum
+              10-year pre-tax IRR target. Build any other IRR or disposition
+              case separately with explicit exit assumptions; TrueCap
+              doesn&apos;t offer an integrated exit-scenario model.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+            {
+              title: "FHFA House Price Index Report, 2026Q2 (Aug 25, 2026)",
+              url: "https://www.fhfa.gov/document/d/hpi/fhfa-house-price-index-report-2026q2",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

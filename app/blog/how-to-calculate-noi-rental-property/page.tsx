@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-calculate-noi-rental-property";
 const TITLE =
@@ -85,7 +86,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does NOI include capital expenditures (CapEx) and maintenance reserves?",
-    a: "Maintenance is always an operating expense. CapEx is the gray area. Purists and conservative underwriters fund a CapEx reserve inside NOI; appraisers and most commercial lenders treat CapEx as a below-the-line capital item and leave it out of NOI. Both are defensible — just be consistent and know which convention a quoted cap rate assumes. The cash leaving your account is identical either way; only the label and the cap rate change.",
+    a: "Maintenance is always an operating expense. CapEx is the gray area. Purists and conservative underwriters fund a CapEx reserve inside NOI; some lenders, including Fannie Mae's multifamily program, deduct it below NOI instead, subtracting the replacement reserve from underwritten NOI to reach underwritten net cash flow. Both are defensible — just be consistent and know which convention a quoted cap rate assumes. The cash leaving your account is identical either way; only the label and the cap rate change.",
   },
   {
     q: "What is the difference between NOI and cash flow?",
@@ -180,7 +181,7 @@ export default function BlogPost() {
             built on — cap rate, DSCR, and the value of any 5+ unit building all
             key off it. Get NOI wrong and everything downstream is wrong too.
             Here&apos;s the formula, a full line-by-line example on a $250K
-            duplex, and the two directions people get it wrong.
+            duplex, and the three ways people get it wrong.
           </p>
         </header>
 
@@ -234,15 +235,29 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Minus vacancy and credit loss.</strong> Even a great
-              property turns over. A reasonable default is 5–8% of gross rents —
-              and you should{" "}
+              property turns over. For reference, the{" "}
+              <a
+                href="https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                national rental vacancy rate was 7.3% in Q2 2026
+              </a>{" "}
+              (Census Bureau), and{" "}
+              <a
+                href="https://mfguide.fanniemae.com/fnmf-pdf/download/7526"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae&apos;s multifamily underwriting
+              </a>{" "}
+              uses at least 5% of gross potential rent for vacancy, concessions
+              and bad debt combined — but you should{" "}
               <Link
                 href="/blog/vacancy-rate-rental-property"
                 className="text-primary font-semibold hover:underline"
               >
                 derive vacancy from turnover math
               </Link>{" "}
-              rather than guessing 5%. Credit loss (a tenant who stops paying
+              rather than guessing. Credit loss (a tenant who stops paying
               before you evict) lives in the same line.
             </li>
             <li>
@@ -268,30 +283,47 @@ export default function BlogPost() {
           <ul>
             <li>
               <strong>Property taxes.</strong> Use the figure you will actually
-              pay — many jurisdictions reassess to the sale price, so the
-              seller&apos;s current bill can understate yours badly.
+              pay — in some jurisdictions a transfer of ownership typically
+              results in a reassessment and higher taxes (
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae&apos;s Selling Guide
+              </a>{" "}
+              has lenders estimate taxes on a purchase from the value of the
+              land and improvements, and applies that policy in those
+              jurisdictions too), so the seller&apos;s current bill can
+              understate yours.
             </li>
             <li>
               <strong>Insurance.</strong> A landlord (dwelling) policy, not a
-              homeowner&apos;s policy. Premiums have jumped in much of the
-              country; get a real quote, do not copy the seller&apos;s.
+              homeowner&apos;s policy.{" "}
+              <a
+                href="https://home.treasury.gov/news/press-releases/jy2791"
+                className="text-primary font-semibold hover:underline"
+              >
+                Premiums have jumped in much of the country
+              </a>
+              ; get a real quote, do not copy the seller&apos;s.
             </li>
             <li>
-              <strong>Property management.</strong> Typically 8–10% of collected
-              rent. Budget it even if you self-manage — your time is not free,
-              and you will eventually want to hand the property off.
+              <strong>Property management.</strong> Price it from local
+              management proposals (the fee plus leasing and other charges).
+              Budget it even if you self-manage — your time is not free, and you
+              will eventually want to hand the property off.
             </li>
             <li>
               <strong>Maintenance and repairs.</strong> Turn-make-ready, the
-              leaky valve, the failed appliance. A common default is 5–10% of
-              rent, or a per-door dollar figure scaled to the building&apos;s
-              age.
+              leaky valve, the failed appliance. Budget it from work orders,
+              invoices and the building&apos;s age and condition, or a per-door
+              dollar figure scaled to the building&apos;s age.
             </li>
             <li>
-              <strong>Owner-paid utilities.</strong> Water, sewer, and trash are
-              frequently the landlord&apos;s on small multifamily; common-area
-              electric and gas too. Submetered or tenant-paid? Then it is zero —
-              but confirm, do not assume.
+              <strong>Owner-paid utilities.</strong> On small multifamily the
+              landlord may pay water, sewer, and trash, plus common-area electric
+              and gas. Submetered or tenant-paid? Then it is zero — but confirm,
+              do not assume.
             </li>
             <li>
               <strong>
@@ -318,8 +350,7 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">What is NOT in NOI</h2>
           <p>
-            Four things people wrongly subtract. Memorize the exclusions and you
-            will out-underwrite half the listings you read:
+            Four things people wrongly subtract. Memorize the exclusions:
           </p>
           <ul>
             <li>
@@ -328,8 +359,14 @@ export default function BlogPost() {
               NOI to get cash flow.
             </li>
             <li>
-              <strong>Depreciation.</strong> A non-cash tax deduction. It
-              belongs on your{" "}
+              <strong>Depreciation.</strong> A non-cash{" "}
+              <a
+                href="https://www.irs.gov/instructions/i1040se"
+                className="text-primary font-semibold hover:underline"
+              >
+                tax deduction
+              </a>
+              . It belongs on your{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
                 className="text-primary font-semibold hover:underline"
@@ -372,7 +409,7 @@ export default function BlogPost() {
           <ul>
             <li>Property taxes: −$3,600</li>
             <li>Insurance: −$1,500</li>
-            <li>Management (8% of collected rent): −$2,250</li>
+            <li>Management (about 8% of collected rent): −$2,250</li>
             <li>Maintenance &amp; repairs: −$1,800</li>
             <li>CapEx reserve: −$2,500</li>
             <li>Owner-paid water / sewer / trash: −$1,500</li>
@@ -398,9 +435,9 @@ export default function BlogPost() {
               operating expense ratio
             </Link>
             : $14,200 ÷ $28,500 =
-            <strong> 50%</strong>. That is right in the normal band for a small,
-            owner-paid-utility multifamily — which is the quick sanity check
-            that tells you no big line item got skipped. The old{" "}
+            <strong> 50%</strong>. Treat that as a prompt to check each line
+            against property evidence, not as proof that no big line item got
+            skipped. The old{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
               className="text-primary font-semibold hover:underline"
@@ -423,8 +460,17 @@ export default function BlogPost() {
               <strong>5.7%</strong>.
             </li>
             <li>
-              <strong>Appraiser / lender view:</strong> CapEx is a below-NOI
-              capital item. NOI = $16,800, cap rate = <strong>6.7%</strong>.
+              <strong>Lender view:</strong> CapEx is a below-NOI capital item.
+              Some lenders work this way —{" "}
+              <a
+                href="https://mfguide.fanniemae.com/fnmf-pdf/download/7526"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae&apos;s multifamily guide
+              </a>{" "}
+              subtracts the replacement reserve from underwritten NOI to reach
+              underwritten net cash flow. NOI = $16,800, cap rate ={" "}
+              <strong>6.7%</strong>.
             </li>
           </ul>
           <p>
@@ -460,22 +506,24 @@ export default function BlogPost() {
           </p>
           <h3>DSCR = NOI ÷ debt service</h3>
           <p>
-            Finance the duplex with 25% down ($62,500) at 7% on a 30-year loan
-            and the principal-and-interest payment is about $1,247/month, or
-            $14,970/year. Honest DSCR = $14,300 ÷ $14,970 ={" "}
-            <strong>0.96</strong> — under 1.0, meaning the building does not
-            quite cover its own mortgage once you fund real reserves. Yet a{" "}
+            Finance the duplex with 25% down ($62,500) at an assumed 7% on a
+            30-year loan and the principal-and-interest payment is about
+            $1,247/month, or $14,970/year. DSCR on the reserve-funded NOI =
+            $14,300 ÷ $14,970 = <strong>0.96</strong> — under 1.0, meaning the
+            building does not quite cover its own mortgage once you fund real
+            reserves. Yet the same deal measured as gross rent ÷ PITIA gives
+            $2,500 ÷ $1,672 = <strong>1.50</strong> — ask any{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
               className="text-primary font-semibold hover:underline"
             >
               DSCR lender
             </Link>{" "}
-            who computes coverage as gross rent ÷ PITIA gets $2,500 ÷ $1,672 ={" "}
-            <strong>1.50</strong> and happily approves it. The gap between 0.96
-            and 1.50 is vacancy, management, and reserves — the exact lines the
-            lender&apos;s shortcut ignores. Both numbers are &ldquo;DSCR;&rdquo;
-            only one reflects how the property will actually live.
+            which formula it uses. The gap between 0.96 and 1.50 is vacancy,
+            management, maintenance, reserves, and the other operating lines —
+            everything the gross-rent shortcut ignores. Both numbers are
+            &ldquo;DSCR;&rdquo; only one reflects how the property will actually
+            live.
           </p>
           <h3>Value = NOI ÷ market cap rate (5+ units)</h3>
           <p>
@@ -487,9 +535,22 @@ export default function BlogPost() {
             <strong>$34,000</strong>. That multiplier is why operators obsess
             over small, durable NOI gains: on commercial property they are not
             worth their face value, they are worth ~15× their face value.
-            (One-to-four-unit homes are still priced by sales comps, so this
-            lever is weaker there — but NOI still tells you whether the comp
-            price cash-flows.)
+            (One-to-four-unit homes are still{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
+              className="text-primary font-semibold hover:underline"
+            >
+              priced by sales comps
+            </a>
+            , and Fannie Mae does not accept an appraisal that{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+              className="text-primary font-semibold hover:underline"
+            >
+              relies on the income approach alone
+            </a>
+            , so this lever is weaker there — but NOI still tells you whether
+            the comp price cash-flows.)
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -507,7 +568,7 @@ export default function BlogPost() {
           </div>
           <p>
             So this &ldquo;5.7% cap&rdquo; duplex is mildly cash-flow negative
-            at 25% down and 7% — not because the building is bad, but because
+            at 25% down and an assumed 7% — not because the building is bad, but because
             the interest rate sits above the cap rate, so leverage works against
             you. This is the difference between analyzing a <em>property</em>{" "}
             (NOI, cap rate) and analyzing an <em>investment</em> (cash flow,
@@ -534,10 +595,9 @@ export default function BlogPost() {
               is complete.
             </li>
             <li>
-              <strong>Sneaking the mortgage in.</strong> The most common
-              beginner error. The moment debt service is inside
-              &ldquo;NOI,&rdquo; you have computed something else — and your cap
-              rate and any value derived from it are garbage.
+              <strong>Sneaking the mortgage in.</strong> The moment debt service
+              is inside &ldquo;NOI,&rdquo; you have computed something else — and
+              your cap rate and any value derived from it are garbage.
             </li>
           </ul>
 
@@ -590,6 +650,43 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "U.S. Census Bureau, Quarterly Residential Vacancies and Homeownership, Second Quarter 2026 (CB26-116)",
+              url: "https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf",
+            },
+            {
+              title:
+                "Fannie Mae Multifamily Selling and Servicing Guide, Part II Sec. 203.01, Underwritten NCF",
+              url: "https://mfguide.fanniemae.com/fnmf-pdf/download/7526",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-6-03, Monthly Housing Expense for the Subject Property",
+              url: "https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property",
+            },
+            {
+              title:
+                "U.S. Treasury, Homeowners Insurance Costs Rising (press release, Jan 16, 2025)",
+              url: "https://home.treasury.gov/news/press-releases/jy2791",
+            },
+            {
+              title: "IRS, 2025 Instructions for Schedule E (Form 1040)",
+              url: "https://www.irs.gov/instructions/i1040se",
+            },
+            {
+              title: "Fannie Mae Selling Guide B4-1.3-08, Comparable Sales",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -600,9 +697,10 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Don&apos;t want to assemble the OpEx stack by hand? TrueCap builds
-            NOI from the same line items above, then computes cap rate,
-            cash-on-cash, DSCR, and a 10-year projection in one pass — and flags
-            the expenses most calculators quietly skip.{" "}
+            NOI from the same operating line items, keeps the CapEx reserve below
+            the NOI line (the lender convention above) and still subtracts it
+            before cash flow, then computes cap rate, cash-on-cash, DSCR, and a
+            10-year projection in one pass.
           </p>
         </footer>
       </main>

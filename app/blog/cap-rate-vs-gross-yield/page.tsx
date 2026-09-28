@@ -28,6 +28,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "cap-rate-vs-gross-yield";
 const TITLE =
@@ -87,7 +88,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is a good gross yield on a rental property?",
-    a: "In 2026 US markets, roughly 8-12% gross is where leveraged deals start to pencil — that's a GRM of about 8-12, or 0.67-1% of price in monthly rent. Below 7% gross, a financed property almost never covers its mortgage and expenses. But 'good' depends entirely on the expense ratio underneath: a 10% gross yield with 6% property taxes can cash flow worse than an 8.5% gross yield in a low-tax county.",
+    a: "At today's roughly 7% mortgage rates, a financed deal with 25% down needs about 10-12% gross just to break even at a 40-50% expense ratio — a GRM of about 8.3-10, or 0.83-1% of price in monthly rent. Below 7% gross, a financed property almost never covers its mortgage and expenses. But 'good' depends entirely on the expense ratio underneath: a 10% gross yield in a high-property-tax county can cash flow worse than an 8.5% gross yield in a low-tax county.",
   },
   {
     q: "Does cap rate include the mortgage?",
@@ -242,7 +243,17 @@ export default function BlogPost() {
             That makes net yield essentially the same number as cap rate under a
             different name. When anyone quotes you &ldquo;a yield,&rdquo; your
             first question is always <em>gross or net?</em> — because the gap
-            between the two is typically 40-50% of the number.
+            between the two is{" "}
+            <a
+              href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              typically 40-50% of the number
+            </a>
+            . (In the Census Bureau and HUD&apos;s 2021 Rental Housing Finance
+            Survey, mean operating expenses per unit equal about 41-45% of mean
+            rent in 2020 across every property size, before capital
+            improvements.)
           </p>
 
           <h2 className="text-2xl sm:text-3xl">All three on one duplex</h2>
@@ -302,8 +313,17 @@ export default function BlogPost() {
             >
               50% rule
             </Link>{" "}
-            exists precisely because most long-term rentals land somewhere near
-            a 50% expense ratio, which gives you the mental shortcut:{" "}
+            works as a rule of thumb because the average rental spends a bit
+            under half its collected rent on operating costs (in the{" "}
+            <a
+              href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              Census/HUD 2021 Rental Housing Finance Survey
+            </a>
+            , mean operating expenses equal about 41-45% of mean rent, before
+            capital improvements), close to a 50% expense ratio, which
+            gives you the mental shortcut:{" "}
             <strong>cap rate ≈ half the gross yield</strong>. An 8% gross
             property is roughly a 4% cap. A 12% gross property (the 1% rule) is
             roughly a 6% cap. It&apos;s triage math, not underwriting — but it
@@ -466,8 +486,15 @@ export default function BlogPost() {
             When you&apos;re triaging forty listings, you have two numbers per
             property — price and asking rent — and that&apos;s exactly what the
             gross metrics consume. Divide, rank, and cut everything below your
-            line (in most 2026 markets, leveraged deals stop penciling somewhere
-            below 8-10% gross, i.e. GRM above 10-12). Whether you use GRM or
+            line (leveraged deals stop penciling somewhere below roughly 10-12%
+            gross at{" "}
+            <a
+              href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+              className="text-primary font-semibold hover:underline"
+            >
+              today&apos;s ~7% mortgage rates
+            </a>{" "}
+            with 25% down, i.e. GRM above about 8.3-10). Whether you use GRM or
             gross yield is pure preference — they carry identical information.
             The{" "}
             <Link
@@ -505,7 +532,10 @@ export default function BlogPost() {
           <p>
             All three metrics in this post are unlevered — they don&apos;t know
             your mortgage exists. A 6.4% cap rate financed at 7% is negative
-            leverage; the same cap rate financed at 5% cash flows. Once debt
+            leverage: the loan costs more than the building yields, so debt
+            pulls your cash-on-cash return below the cap rate even if the
+            property still cash flows. At 5%, the loan costs about what the
+            building yields. Once debt
             enters, you graduate to cash-on-cash return and DSCR, which is{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
@@ -561,6 +591,20 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "U.S. Census Bureau and HUD, 2021 Rental Housing Finance Survey infographic (2020 mean rental receipts and operating expenses)",
+              url: "https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf",
+            },
+            {
+              title:
+                "Freddie Mac Primary Mortgage Market Survey via FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

@@ -19,6 +19,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "50-percent-rule-rentals";
 const TITLE = "The 50% rule for rentals — is it still useful in 2026?";
@@ -126,7 +127,7 @@ export default function FiftyPercentRulePost() {
               The 50% rule says: operating expenses (everything except debt
               service) typically run ~50% of gross rent. So NOI ≈ rent × 0.5,
               and your cash flow is whatever&apos;s left after your mortgage
-              payment. Three-second triage. Does it still work in 2026?
+              payment. Triage in seconds. Does it still work in 2026?
             </p>
           </header>
 
@@ -135,8 +136,8 @@ export default function FiftyPercentRulePost() {
               What the rule actually says
             </h2>
             <p>
-              The 50% rule, popularized in BiggerPockets-era investor
-              communities, is a shorthand for estimating{" "}
+              The 50% rule, a long-standing investor rule of thumb, is a
+              shorthand for estimating{" "}
               <Link
                 href="/glossary/noi"
                 className="text-primary font-semibold hover:underline"
@@ -213,23 +214,33 @@ export default function FiftyPercentRulePost() {
               Where it works well
             </h2>
             <p>
-              The 50% rule is genuinely accurate for a specific kind of
-              property:
+              The 50% rule is most defensible as a starting assumption for a
+              specific kind of property:
             </p>
             <ul>
               <li>
                 <strong>1940s-70s single-family rentals</strong> in Midwest
-                workforce neighborhoods (think Indianapolis, Kansas City,
-                Cleveland, Memphis)
+                workforce neighborhoods (think Indianapolis and Kansas City)
+                and{" "}
+                <a
+                  href="https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  similar Southern markets such as Memphis
+                </a>
               </li>
               <li>
                 <strong>
-                  Renting at market rates with full PM management (8-10% fee)
-                </strong>
+                  Renting at market rates with full-service property
+                  management
+                </strong>{" "}
+                (use the manager&apos;s written fee schedule)
               </li>
               <li>
-                <strong>In states with mid-range property tax</strong>{" "}
-                (~1.0-1.5% effective)
+                <strong>
+                  In places where the parcel&apos;s property tax bill is near
+                  the national norm
+                </strong>
               </li>
               <li>
                 <strong>Without HOA</strong>
@@ -240,10 +251,11 @@ export default function FiftyPercentRulePost() {
               </li>
             </ul>
             <p>
-              Across a portfolio of properties matching that profile, 50% is
-              shockingly accurate over multi-year averages. Vacancy +
-              maintenance + CapEx + PM + tax + insurance + everything else
-              really does converge near half of gross rent.
+              For properties matching that profile, 50% can be a reasonable
+              starting assumption, but check it against the property&apos;s
+              actual expense lines: vacancy + maintenance + CapEx + PM + tax +
+              insurance + everything else, added up from that property&apos;s
+              own numbers.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -254,13 +266,37 @@ export default function FiftyPercentRulePost() {
               Texas / Illinois — high property tax
             </h3>
             <p>
-              Texas effective property tax can hit 2.5-3.2% in new-construction
-              MUD suburbs. On a $300k property renting for $2,400/mo, the
-              property tax alone is $7,500-9,600/year — already 25-33% of gross
-              rent. Add insurance + maintenance + vacancy + CapEx + management
-              and you&apos;re at 60-65% expenses, not 50%. The 50% rule
-              UNDERESTIMATES expenses by 20-30% in Texas. Deals that look great
-              by the 50% rule actually break even or lose money.
+              Texas property tax runs well above the national norm (Census ACS
+              2024 puts the state&apos;s{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US48"
+                className="text-primary font-semibold hover:underline"
+              >
+                median real-estate-tax bill at $4,108
+              </a>
+              , against{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=010XX00US"
+                className="text-primary font-semibold hover:underline"
+              >
+                $3,211 nationally
+              </a>
+              ), and individual parcels can run far above the state median, so
+              pull the actual tax bill. Illinois runs higher still, with a{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US17"
+                className="text-primary font-semibold hover:underline"
+              >
+                2024 median bill of $5,399
+              </a>
+              . At an illustrative 2.5-3.2% tax rate, a $300k property renting
+              for $2,400/mo pays $7,500-9,600/year in property tax alone —
+              already 26-33% of gross rent. To stay at 50%, insurance +
+              maintenance + vacancy + CapEx + management would have to fit in
+              the remaining 17-24% of rent. Price those lines from the
+              property&apos;s own quotes and history; if they add up to more,
+              expenses run past 50%, and a deal that looks fine by the 50%
+              rule can break even or lose money.
             </p>
             <p>
               See the{" "}
@@ -306,24 +342,66 @@ export default function FiftyPercentRulePost() {
               Pre-1940 housing stock — CapEx
             </h3>
             <p>
-              The 50% rule assumes ~5-8% CapEx reserve. Pre-1940 housing (much
-              of Cleveland, Philadelphia, Detroit, Pittsburgh, parts of
-              Baltimore) routinely consumes 10-15% in real-world CapEx — roof,
-              electrical service upgrades, plumbing replacement, foundation
-              work, lead paint. A property that pencils at the 50% rule may
-              grind to break-even once the actual CapEx hits. Underwrite older
-              buildings at 55-60% expense ratio.
+              The 50% rule has no separate CapEx line, so it can&apos;t flex
+              for older buildings. Pre-1940 housing, which makes up much of
+              the stock in{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US3916000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Cleveland
+              </a>
+              ,{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4260000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Philadelphia
+              </a>
+              ,{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2622000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Detroit
+              </a>
+              ,{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4261000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Pittsburgh
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2404000"
+                className="text-primary font-semibold hover:underline"
+              >
+                Baltimore
+              </a>
+              , can need major capital work (roof, electrical service
+              upgrades, plumbing replacement, foundation work, lead paint), so
+              budget CapEx from an inspection, not a percentage. A property
+              that pencils at the 50% rule may grind to break-even once the
+              actual CapEx hits. Itemize the expense lines instead of nudging
+              the flat percentage up.
             </p>
 
             <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
               Short-term rentals (Airbnb / VRBO)
             </h3>
             <p>
-              STRs run materially higher than 50% — typical operating expenses
-              (cleaning fees per turnover, higher insurance, mgmt at 15-25%,
-              higher maintenance from frequent turnover) hit 60-75% of gross
-              revenue. The 50% rule doesn&apos;t apply at all to STR; use
-              STR-specific underwriting.
+              STRs carry expense lines a long-term rental doesn&apos;t
+              (cleaning per turnover, higher insurance, higher management
+              fees, more wear from frequent turnover), so the 50% rule
+              doesn&apos;t apply; use{" "}
+              <Link
+                href="/blog/short-term-rental-underwriting-playbook"
+                className="text-primary font-semibold hover:underline"
+              >
+                STR-specific underwriting
+              </Link>
+              .
             </p>
 
             <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
@@ -332,8 +410,9 @@ export default function FiftyPercentRulePost() {
             <p>
               An HOA of $400/mo on a $1,800/mo rental is already 22% of gross
               rent before any other expense. Add tax, insurance, maintenance,
-              vacancy, CapEx and you&apos;re well above 50%. Many newer condos
-              in growth markets (Charlotte, Phoenix, Atlanta) fit this profile.
+              vacancy, CapEx and you&apos;re well above 50%. Check the HOA
+              dues first on any condo; in some buildings they alone push
+              expenses well past 50%.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -342,8 +421,8 @@ export default function FiftyPercentRulePost() {
             <p>
               Owner-occupant house hacks, BRRRR mid-stabilization, properties
               with utilities included, properties with significant vacancy risk
-              (college towns, transient neighborhoods), and properties in states
-              with rent-control regimes (CA, OR, parts of NY) all have expense
+              (college towns, transient neighborhoods), and properties subject
+              to state or local rent-regulation rules all have expense
               profiles that diverge from 50%. Don&apos;t use the rule on these
               without explicit adjustment.
             </p>
@@ -354,7 +433,7 @@ export default function FiftyPercentRulePost() {
             <p>
               The 50% rule is a{" "}
               <strong>triage tool, not a final-decision tool</strong>. Use it in
-              5 seconds to decide whether a property is worth opening the full
+              a few seconds to decide whether a property is worth opening the full
               underwrite (the free{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -387,8 +466,8 @@ export default function FiftyPercentRulePost() {
             <p>
               Above all:{" "}
               <strong>do not commit to a deal based on the 50% rule.</strong>{" "}
-              Use it to filter out the bottom 80% of listings so you only spend
-              serious time on the top 20%. For that top 20%, run the actual
+              Use it to filter out most listings so you only spend serious
+              time on the few that survive. For those, run the actual
               property through{" "}
               <Link
                 href="/"
@@ -399,7 +478,7 @@ export default function FiftyPercentRulePost() {
               with the address — the analyzer replaces the 50% guess with
               editable expense lines, can start rent and rate from labeled
               HUD/FRED benchmarks, and keeps property tax as a manual local
-              input. Five seconds with the 50% rule, then a property-specific
+              input. A few seconds with the 50% rule, then a property-specific
               underwrite before relying on the result.
             </p>
 
@@ -410,12 +489,29 @@ export default function FiftyPercentRulePost() {
               If you want a faster + more accurate triage than the 50% rule:
             </p>
             <p>
-              <strong>For high-property-tax states (TX, IL, NJ):</strong> Use
-              the 60% rule. Operating expenses run closer to 60% of gross rent.
+              <strong>
+                For high-property-tax states such as Texas, Illinois and{" "}
+                <a
+                  href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US34"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  New Jersey
+                </a>
+                :
+              </strong>{" "}
+              Replace the 50% rule&apos;s implied tax allowance with the
+              parcel&apos;s actual tax bill before relying on the screen.
             </p>
             <p>
               <strong>
-                For high-insurance states (FL, parts of LA + coastal NC/SC):
+                For{" "}
+                <a
+                  href="https://home.treasury.gov/system/files/311/Analyses_of_US_Homeowners_Insurance_Markets_2018-2022_Climate-Related_Risks_and_Other_Factors_0.pdf"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  hurricane-exposed coastal areas
+                </a>{" "}
+                (FL, LA and the Carolinas, for example):
               </strong>{" "}
               Pull a binding insurance quote BEFORE you do any other math. That
               single number is more diagnostic than any rule of thumb.
@@ -439,8 +535,8 @@ export default function FiftyPercentRulePost() {
                 For appreciation-leaning coastal Tier-1 (CA, parts of WA, NYC):
               </strong>{" "}
               No rule of thumb works because expense ratios are dominated by
-              individual property quirks (rent control, parking, parking,
-              parking, special assessments). Always do the full underwrite.
+              individual property quirks (rent control, parking, special
+              assessments). Always do the full underwrite.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -453,14 +549,61 @@ export default function FiftyPercentRulePost() {
               lines before making a decision.
             </p>
             <p>
-              The investors who use it best treat it as a &quot;10-second
-              listing filter&quot; while keeping the actual decision math
-              separate. The investors who lose money on it use it as the actual
-              underwriting calculation in markets where it&apos;s wrong by 15-25
-              percentage points.
+              The investors who use it best treat it as a quick listing
+              filter while keeping the actual decision math separate. The
+              investors who lose money on it use it as the actual
+              underwriting calculation in markets where it&apos;s badly wrong.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "U.S. Census Bureau, Census Regions and Divisions of the United States",
+              url: "https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, Texas",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US48",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, United States",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25103?g=010XX00US",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, Illinois",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US17",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25034 Year Structure Built, Cleveland city, Ohio",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US3916000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25034 Year Structure Built, Philadelphia city, Pennsylvania",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4260000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25034 Year Structure Built, Detroit city, Michigan",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2622000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25034 Year Structure Built, Pittsburgh city, Pennsylvania",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4261000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25034 Year Structure Built, Baltimore city, Maryland",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2404000",
+            },
+            {
+              title: "U.S. Census Bureau, American Community Survey 2024 1-year, B25103 Median Real Estate Taxes Paid, New Jersey",
+              url: "https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US34",
+            },
+            {
+              title: "U.S. Treasury Federal Insurance Office, Analyses of U.S. Homeowners Insurance Markets, 2018-2022 (January 2025)",
+              url: "https://home.treasury.gov/system/files/311/Analyses_of_US_Homeowners_Insurance_Markets_2018-2022_Climate-Related_Risks_and_Other_Factors_0.pdf",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

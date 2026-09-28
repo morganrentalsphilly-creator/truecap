@@ -27,6 +27,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "return-on-equity-rental-property";
 const TITLE =
@@ -82,7 +83,7 @@ const FAQS = [
   },
   {
     q: "What is a good return on equity for a rental?",
-    a: "There is no universal number, because the right benchmark is your opportunity cost — what the same equity could earn if you moved it. Many buy-and-hold investors get uncomfortable when total ROE drifts into the high single digits and the cash-only portion (cash flow divided by equity) falls below roughly 4%–5%, because at that point a large amount of equity is producing very little spendable cash. The test is comparison, not an absolute: if a fresh deal or a redeployment would earn meaningfully more on the same dollars, your current equity is getting lazy.",
+    a: "There's no standard threshold, because the right benchmark is your opportunity cost — what the same equity could earn if you moved it. Compare the equity's current return, both total and cash-only, with what the same dollars could earn elsewhere. The test is comparison, not an absolute: if a fresh deal or a redeployment would earn meaningfully more on the same dollars, your current equity is getting lazy.",
   },
   {
     q: "Should I refinance or sell just because ROE dropped?",
@@ -157,16 +158,24 @@ export default function ReturnOnEquityPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Most investors track the return on the cash they put in the day
-              they bought and never revisit it. But a rental you have owned for
+              It&apos;s easy to track the return on the cash you put in the day
+              you bought and never revisit it. But a rental you have owned for
               years isn&apos;t financed by that old down payment anymore — it is
               financed by the equity sitting in it <em>today</em>, which has
               quietly grown into a much larger number. Return on equity asks the
               question cash-on-cash stops answering: what is that trapped equity
               actually earning right now? It is the metric behind every
               &quot;should I refinance and buy another?&quot; decision, and in a
-              2026 market of high prices and 7% money, it is where a lot of
-              paper-rich portfolios turn out to be cash-poor.
+              2026 market of high prices and mortgage rates near 7% (Freddie
+              Mac&apos;s 30-year fixed average was{" "}
+              <a
+                href="https://www.freddiemac.com/pmms"
+                className="text-primary font-semibold hover:underline"
+              >
+                7.03% on Sept. 24, 2026
+              </a>
+              ), it is where a lot of paper-rich portfolios turn out to be
+              cash-poor.
             </p>
           </header>
 
@@ -274,8 +283,8 @@ export default function ReturnOnEquityPost() {
               $10,535. Against year-one equity of $62,500 (the $250,000 value
               minus the $187,500 loan), that is a{" "}
               <strong>total ROE of 16.9%</strong>. The thin-cash-flow deal is
-              actually working hard — because most of its return is leverage
-              amplifying a modest appreciation rate on a thin equity slice. Now
+              earning far more than its cash flow suggests — because most of its
+              return is leverage amplifying a modest appreciation rate on a thin equity slice. Now
               watch what happens as that slice thickens:
             </p>
 
@@ -378,9 +387,9 @@ export default function ReturnOnEquityPost() {
               equity — and the picture sharpens. In year one it is $1,130 on
               $62,500, about 1.8%. By year ten it is $6,040 on $161,700, about
               3.7%. So $161,700 of real, extractable equity is producing under
-              four cents of actual cash per dollar per year. You could very likely
-              do better than 3.7% on that money almost anywhere — which is the
-              whole reason the &quot;lazy equity&quot; conversation exists. The
+              four cents of actual cash per dollar per year. Whether 3.7% is
+              enough depends on what the same money could earn elsewhere — which
+              is the whole reason the &quot;lazy equity&quot; conversation exists. The
               equity is safe and it is growing, but as a cash-producing asset it
               has gone slack.
             </p>
@@ -400,9 +409,16 @@ export default function ReturnOnEquityPost() {
               </Link>{" "}
               into something with more upside, or do nothing on purpose. Run the
               redeployment math on our example. At year ten you hold $161,700 of
-              equity; a cash-out refinance to 75% of the $326,200 value is a new
-              $244,600 loan, and after retiring the $164,500 balance you free up
-              roughly $80,000 — enough to be the 25%-plus down payment on another
+              equity; a cash-out refinance to{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                75%
+              </a>{" "}
+              of the $326,200 value is a new $244,600 loan, and after retiring
+              the $164,500 balance you free up roughly $80,000 before the
+              refinance&apos;s own closing costs — enough to be the 25%-plus down payment on another
               $250,000-ish rental that starts its own life at a high-teens ROE. On
               paper, splitting one lazy pile of equity into two working piles lifts
               your blended return.
@@ -436,12 +452,20 @@ export default function ReturnOnEquityPost() {
             </p>
             <p>
               One more honest adjustment: you can never redeploy all of your
-              equity. A cash-out refinance typically caps at 75% loan-to-value on
-              an investment property, and a sale surrenders roughly 6%–8% to
-              commissions and closing costs — so the equity you can actually move
+              equity. A cash-out refinance typically caps at{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                75% loan-to-value on a one-unit investment property (70% for two
+                to four units)
+              </a>
+              , and a sale surrenders a meaningful slice to commissions and
+              closing costs — so the equity you can actually move
               is meaningfully smaller than the book figure sitting in your ROE
               denominator. On our example, $161,700 of book equity translates to
-              about $80,000 of genuinely extractable cash through a refinance. That
+              about $80,000 of extractable cash through a refinance, before that
+              refinance&apos;s own closing costs. That
               does not change the direction ROE points, but it shrinks the size of
               the move, and it is why a small ROE gap rarely justifies the friction
               of a refinance or sale on its own — the edge has to clear the cost of
@@ -462,12 +486,11 @@ export default function ReturnOnEquityPost() {
               paying down higher-rate debt would earn on the same dollars.
             </p>
             <p>
-              As loose benchmarks for a buy-and-hold rental: a total ROE in the
-              low-to-mid teens is healthy and usually worth holding; high single
-              digits is a yellow flag worth a second look; and once the hard
-              ROE — cash flow plus paydown, no appreciation — slips toward 4%–5%,
-              you are carrying a lot of idle equity and should at least model a
-              refinance or sale. Two caveats keep the number honest. First, ROE
+              There&apos;s no standard threshold for a good ROE: compare the
+              equity&apos;s current return, both total and cash-only, with what
+              the same dollars could earn elsewhere, and when the gap is wide,
+              model a refinance or sale before you decide anything. Two caveats
+              keep the number honest. First, ROE
               ignores timing and the eventual sale, so for a hold-or-sell call over
               many years,{" "}
               <Link
@@ -516,6 +539,18 @@ export default function ReturnOnEquityPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Freddie Mac, Primary Mortgage Market Survey (30-year fixed average, week of Sept. 24, 2026)",
+              url: "https://www.freddiemac.com/pmms",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

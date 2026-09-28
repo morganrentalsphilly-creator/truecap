@@ -60,9 +60,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "what-is-a-good-rental-yield",
     title:
-      "What is a good rental yield? 2026 benchmarks, the gross-vs-net trap, and the financed test that actually decides",
+      "What is a good rental yield? A consistent comparison method",
     excerpt:
-      "In most 2026 US markets, 8-12% gross yield ($667-$1,000 of monthly rent per $100K of price) is where leveraged deals start to pencil — but the number alone can't clear a deal. Gross and net yield worked on a $220K house (10.1% gross, 5.4% net), benchmark ranges from coastal 4-6% to cash-flow-market 13%, and the financed test where that 'good' 10.1% yield loses $102/month at 25% down and 7% — with the rent it takes to hit DSCR 1.25.",
+      "Rental yield depends on the formula and the evidence behind it. How gross and net yield differ, what to verify before you compare two properties, and why consistent, property-specific inputs matter more than a market threshold.",
     readingTimeMinutes: 10,
     publishedAt: "2026-07-22",
     available: true,
@@ -81,7 +81,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "2-percent-rule-vs-1-percent-rule",
     title: "2% rule vs 1% rule: which rental screen actually applies in 2026?",
     excerpt:
-      "The 1% and 2% rules are the same rent-to-price screen with the bar at two heights — and knowing that tells you when each applies. The GRM and cap-rate math underneath (1% ≈ a 6% cap at the 50% rule; 2% ≈ 12%), a same-dollar comparison where a textbook 1% duplex cash-flows $3/month while a $75K 2% house returns 16.4% cash-on-cash, why the 2% niche carries the risk the spreadsheet doesn't price, and the 0.76% break-even line that turned the 1% rule from a buy signal into a keep-looking line.",
+      "The 1% and 2% rules are the same rent-to-price screen with the bar at two heights. The GRM and cap-rate math underneath (1% ≈ a 6% cap at the 50% rule; 2% ≈ 12%), a same-dollar comparison where a 1% duplex cash-flows $3 a month while a $75K 2% house returns 16.4% cash-on-cash, and the risk the 2% niche carries that the spreadsheet doesn't price.",
     readingTimeMinutes: 10,
     publishedAt: "2026-07-20",
     available: true,
@@ -159,7 +159,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Operating expense ratio (OER): what's a good one for a rental? (2026)",
     excerpt:
-      "The metric appraisers reach for first — operating expenses ÷ effective gross income — and the hinge that sets NOI, cap rate, and value. The formula, the four costs that aren't operating expenses (mortgage, depreciation, CapEx, income tax), a line-by-line duplex that runs 40% before reserves and 46% after, the exact reconciliation to the 50% rule (~49% of gross rent), and why a 35%-vs-46% assumption swings the building's value about $46,000.",
+      "OER = operating expenses ÷ effective gross income, the ratio behind NOI and cap rate. The formula, the four costs that aren't operating expenses (mortgage, depreciation, CapEx, income tax), and a line-by-line duplex that runs 40% before reserves and 46% after, reconciled to the 50% rule.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-06",
     available: true,
@@ -237,7 +237,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "break-even-occupancy-rental-property",
     title: "Break-even occupancy: how much vacancy a rental can survive (2026)",
     excerpt:
-      "Cap rate tells you what a rental earns; break-even occupancy tells you how much can go wrong before it stops paying for itself. The formula — (operating expenses + debt service) ÷ gross potential rent — a worked 2026 duplex where 86% break-even leaves a 14-point cushion, the overpaid twin where that cushion collapses below 5 points, and why break-even occupancy is just the occupancy where DSCR hits 1.0.",
+      "Cap rate tells you what a rental earns; break-even occupancy tells you how much can go wrong before it stops covering its bills. The formula — (operating expenses + debt service) ÷ gross potential rent — a worked duplex where an 86% break-even leaves a 14-point cushion, an overpaid twin that leaves far less, and why break-even occupancy is the occupancy where DSCR hits 1.0.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-26",
     available: true,
@@ -253,9 +253,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "rental-property-insurance",
-    title: "Rental property insurance: landlord coverage and cost in 2026",
+    title: "Rental property insurance: coverage, quotes, and underwriting",
     excerpt:
-      "The most-underestimated line in a 2026 underwrite. Landlord (DP-3) vs homeowners coverage, what loss-of-rent actually protects, real 2026 cost ranges (~$1,200–$1,900 and climbing), how to estimate it before you have a quote, and how a $1,500-vs-$3,500 premium swings cash flow ~$167/month and drags DSCR below the line.",
+      "How to collect property-specific landlord-insurance evidence: landlord (DP-3) versus homeowners coverage, what loss-of-rent coverage protects, the exclusions to compare, and how a $1,500-versus-$3,500 premium cuts cash flow by about $167 a month and moves DSCR.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-23",
     available: true,
@@ -292,7 +292,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "1-percent-rule-rental-property",
     title: "The 1% rule for rental property: does it still work in 2026?",
     excerpt:
-      "The fastest screen in real estate — monthly rent ≥ 1% of price — and why 7% rates quietly moved the bar. The GRM bridge (a 1% deal is a GRM of ~8.3), the break-even ratio that climbed from ~0.57% to ~0.76%, two 1% properties whose returns sit 40% apart, and how to use the rule without letting it talk you into a bad deal.",
+      "The 1% rule says monthly rent should be at least 1% of the price. The GRM bridge (a 1% deal is a GRM of about 8.3), how higher mortgage rates raise the break-even rent-to-price in this article's example (about 0.57% at a 3.5% loan, 0.76% at 7%), two 1% properties whose returns sit 40% apart, and what the rule hides.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-23",
     available: true,
@@ -321,7 +321,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Gross rent multiplier (GRM) explained: how to screen rentals fast (2026)",
     excerpt:
-      "GRM = price ÷ annual gross rent — the fastest screen in real estate and the first number to compute on any listing. The formula, a three-listing screen, the cap-rate bridge ((1 − expense ratio) ÷ GRM), how it maps to the 1% rule, and two $250K duplexes with identical GRMs that cash flow +$365 and −$155.",
+      "GRM = price ÷ annual gross rent, a quick rental screen. The formula, a three-listing screen, the cap-rate bridge ((1 − expense ratio) ÷ GRM), how it maps to the 1% rule, and two $250K duplexes with identical GRMs that cash-flow +$365 and −$155 a month.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-17",
     available: true,
@@ -329,7 +329,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "how-to-calculate-noi-rental-property",
     title:
-      "How to calculate NOI (net operating income) on a rental property (2026)",
+      "How to calculate NOI (net operating income) on a rental property — 2026 guide",
     excerpt:
       "NOI = effective gross income minus operating expenses, before the mortgage — and it's the number cap rate, DSCR, and 5+ unit valuation are all built on. The formula, a full line-by-line $250K duplex example, the CapEx classification trap that swings the cap rate a full point, and the three ways people get NOI wrong.",
     readingTimeMinutes: 10,
@@ -360,7 +360,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "CapEx and maintenance reserves: how much to actually budget for a rental (2026)",
     excerpt:
-      "Percent-of-rent defaults understate capex on exactly the properties that can least afford it. The component-lifespan method with 2026 prices, an age-weighted reserve formula, and what honest reserves do to NOI, DSCR, and cash flow on a $220K rental.",
+      "Percent-of-rent defaults can understate capex on cheaper properties. The component-lifespan method with illustrative replacement costs, an age-weighted reserve formula, and what realistic reserves do to NOI, DSCR and cash flow on a $220K rental.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-11",
     available: true,
@@ -390,7 +390,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Vacancy rate for rentals: what to assume in 2026 (and why 5% is usually a guess)",
     excerpt:
-      "Physical vs economic vacancy, the turnover math that derives the number instead of guessing it, what 5 points does to cash flow and DSCR, and why your DSCR lender ignores vacancy entirely.",
+      "Physical vs economic vacancy, the turnover math that derives the number instead of guessing it, what 5 points of vacancy does to cash flow and DSCR, and why a DSCR lender's formula may treat vacancy differently from your underwrite.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -609,9 +609,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "rental-property-pro-forma-explained",
     title:
-      "How to read a rental property pro forma (and the 7 lies inside most of them)",
+      "How to read a rental property pro forma (and verify its assumptions)",
     excerpt:
-      "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.",
+      "A pro forma is a seller's projection, not a result. How to turn one into numbers you can verify: rent, vacancy, insurance, taxes, maintenance, reserves, management and bad debt.",
     readingTimeMinutes: 9,
     publishedAt: "2026-05-26",
     available: true,
@@ -657,7 +657,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "50-percent-rule-rentals",
     title: "The 50% rule for rentals — is it still useful in 2026?",
     excerpt:
-      "The classic 50% rule says operating expenses run ~half of gross rent. Honest take on when it works as a triage tool, when it lies, and what to use instead.",
+      "The classic 50% rule says operating expenses run about half of gross rent. When it works as a triage tool, when it misleads, and what to use instead.",
     readingTimeMinutes: 6,
     publishedAt: "2026-05-25",
     available: true,
@@ -685,7 +685,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "spot-bad-rental-in-60-seconds",
     title: "How to spot a bad rental deal in 60 seconds — 7 red flags",
     excerpt:
-      "Seven red flags that tell you a rental doesn't pencil — before you waste hours running the full underwrite. The triage every experienced investor does in their head.",
+      "Seven red flags that tell you a rental may not pencil, checked before you spend hours on a full underwrite.",
     readingTimeMinutes: 8,
     publishedAt: "2026-05-24",
     available: true,
@@ -694,7 +694,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "cash-on-cash-vs-irr",
     title: "Cash-on-cash vs IRR: which one tells the truth?",
     excerpt:
-      "Cash-on-cash and IRR are both return metrics, but they answer completely different questions. When each one is right, when each one lies, and which to trust.",
+      "Cash-on-cash and IRR are both return metrics, but they answer different questions: when each one is the right lens, when each one misleads, and how to use them together.",
     readingTimeMinutes: 7,
     publishedAt: "2026-05-24",
     available: true,
@@ -711,9 +711,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "what-is-a-good-cap-rate",
-    title: "What's a good cap rate for rental property in 2026?",
+    title: "What is a good cap rate? A property-specific framework",
     excerpt:
-      "Benchmarks by market type, the framework professionals actually use to evaluate cap rate, and why pre-2022 intuition is silently buying investors into negative leverage.",
+      "There is no universal good cap rate. What the ratio measures, how to compare consistent inputs, and which property-specific evidence to check first.",
     readingTimeMinutes: 9,
     publishedAt: "2026-05-24",
     available: true,
@@ -722,16 +722,16 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "cap-rate-vs-cash-on-cash-vs-dscr",
     title: "Cap rate vs cash-on-cash vs DSCR: which one actually matters?",
     excerpt:
-      "Three different metrics, three different jobs. A plain-English guide to when each one matters and the 2026 negative-leverage trap most investors miss.",
+      "Three metrics, three different jobs: a plain-English guide to what cap rate, cash-on-cash and DSCR each measure, when each one matters, and how negative leverage shows up when you compare them.",
     readingTimeMinutes: 8,
     publishedAt: "2026-05-24",
     available: true,
   },
   {
     slug: "how-to-underwrite-a-rental-property-in-60-seconds",
-    title: "How to underwrite a rental property in 60 seconds",
+    title: "How to screen a rental property in 60 seconds",
     excerpt:
-      "The five numbers, four metrics, and two sanity checks every investor uses to triage a deal — without a spreadsheet.",
+      "A fast rental screen: organize five inputs, review four modeled metrics, and see what still needs checking before a full underwrite.",
     readingTimeMinutes: 9,
     publishedAt: "2026-05-24",
     available: true,

@@ -19,6 +19,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "spot-bad-rental-in-60-seconds";
 const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
@@ -27,7 +28,7 @@ const TITLE = "How to spot a bad rental deal in 60 seconds — 7 red flags";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "How to spot a bad rental deal: 7 red flags";
 const DESCRIPTION =
-  "Seven red flags that tell you a rental doesn't pencil before you spend hours on a full underwrite — the triage experienced investors do in their head.";
+  "Seven red flags that tell you a rental may not pencil, checked before you spend hours on a full underwrite — a quick triage you can run in your head.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = lastmodFor("/blog/spot-bad-rental-in-60-seconds") ?? PUBLISHED_AT;
 const READING_TIME = 8;
@@ -124,24 +125,22 @@ export default function SpotBadRentalPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Seven red flags that tell you a rental doesn&apos;t pencil —
-              before you waste hours running the full underwrite. The triage
-              every experienced investor does in their head in the time it takes
-              to load the listing.
+              Seven red flags that tell you a rental may not pencil — before
+              you spend hours running the full underwrite. A quick triage you
+              can run in your head in the time it takes to load the listing.
             </p>
           </header>
 
           <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
             <p>
-              Every serious rental investor builds a mental triage filter. They
+              Many experienced investors build a mental triage filter. They
               glance at a listing, look at five numbers, and either move on or
               open the analyzer. The point isn&apos;t to run a perfect
               underwrite in 60 seconds — it&apos;s to know whether the deal is
               worth the next 30 minutes.
             </p>
             <p>
-              Here are the seven red flags I run through, in the order I check
-              them.
+              Here are seven red flags to run through, in this order.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -157,21 +156,30 @@ export default function SpotBadRentalPost() {
                 1% rule
               </Link>{" "}
               says monthly rent should be at least 1% of purchase price.
-              That&apos;s gotten harder to hit since 2020 — many growing markets
-              are 0.5-0.7% now. But under 0.7% in a typical
+              That&apos;s gotten harder to hit since 2020: FHFA&apos;s{" "}
+              <a href="https://fred.stlouisfed.org/series/HPIPONM226S" className="text-primary font-semibold hover:underline">
+                purchase-only house price index
+              </a>{" "}
+              rose about 59% from January 2020 to June 2026, while the{" "}
+              <a href="https://fred.stlouisfed.org/series/CUSR0000SEHA" className="text-primary font-semibold hover:underline">
+                CPI for rent of primary residence
+              </a>{" "}
+              rose about 33% through August 2026. But under 0.7% in a typical
               conventional-financing market is a red flag worth pausing on.
             </p>
             <p>
-              The math: a $300k house renting for $1,800/mo (0.6%) is going to
-              have negative cash flow at almost any conventional financing in a
-              normal rate environment. If you&apos;re still interested,
+              The math: a $300k house renting for $1,800/mo (0.6%). At an
+              assumed 7% rate with 25% down, principal and interest alone run
+              about $1,500 a month, leaving roughly $300 for taxes, insurance,
+              vacancy, and repairs — so expect negative cash flow. If
+              you&apos;re still interested,
               you&apos;re betting on appreciation, not yield. That&apos;s a
               valid bet — but it&apos;s a different bet, and you should know
               you&apos;re making it.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              2. Property taxes are above 2% of value
+              2. The parcel&apos;s property tax is above 2% of value
             </h2>
             <p>
               <Link
@@ -180,34 +188,50 @@ export default function SpotBadRentalPost() {
               >
                 Property tax
               </Link>{" "}
-              is a fixed, recurring drag on cash flow that you can&apos;t
-              negotiate. In Texas (1.6-2.5%+ effective), Illinois (2.3%+), or
-              new-construction Sun Belt MUDs (2.8-3.2%+), a deal that looks
-              great on rent-to-price can lose half its cash flow to the tax
-              bill.
+              is a recurring cost set by the local assessment and tax rate, not
+              by the deal, and it{" "}
+              <a href="https://www.consumerfinance.gov/ask-cfpb/why-did-my-monthly-mortgage-payment-go-up-or-change-en-213/" className="text-primary font-semibold hover:underline">
+                can change from year to year
+              </a>
+              . In Illinois and New Jersey, the{" "}
+              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000" className="text-primary font-semibold hover:underline">
+                median real estate tax bill
+              </a>{" "}
+              on owner-occupied homes is about 1.9% of the{" "}
+              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000" className="text-primary font-semibold hover:underline">
+                median home value
+              </a>
+              , and in Texas about 1.3% (Census ACS 2024) — and rates vary by
+              taxing district, so check the parcel&apos;s actual bill. A deal
+              that looks great on rent-to-price can see its cash flow shrink
+              sharply once the actual tax bill is in.
             </p>
             <p>
-              Always pull the actual current tax bill from the County Appraisal
-              District for the specific parcel. The seller&apos;s last bill may
-              not reflect post-reassessment reality (especially in Jackson
-              County MO, parts of Florida, and Texas MUDs).
+              Always pull the actual current tax bill from the local assessor or
+              tax office for the specific parcel. The seller&apos;s last bill
+              may not reflect the post-sale or post-reassessment amount — in
+              some jurisdictions a{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property" className="text-primary font-semibold hover:underline">
+                transfer of ownership typically results in a reassessment
+              </a>
+              .
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               3. The listing photos are aggressively staged but exclude a room
             </h2>
             <p>
-              This sounds like a soft signal. It&apos;s actually one of the
-              strongest hard ones. When you see 30 photos and they&apos;ve
-              photographed the same living room from 4 angles but there&apos;s
-              no kitchen shot or no bathroom shot, the seller knows that room
-              costs money to fix and they&apos;re not showing you. Budget rehab
-              accordingly.
+              This sounds like a soft signal, but it is worth a question. When
+              you see 30 photos and they&apos;ve photographed the same living
+              room from 4 angles but there&apos;s no kitchen shot or no bathroom
+              shot, ask why and budget for the possibility that the room needs
+              work.
             </p>
             <p>
               Related signal: the photos look professionally staged but the
-              comps in the neighborhood are wholesaler-flagged. You&apos;re
-              looking at a polished wholesaler listing. Reduce your offer.
+              comps in the neighborhood are wholesaler-flagged. Check whether
+              you&apos;re looking at a polished wholesaler listing, and price it
+              from sold comps and your own numbers rather than the marketing.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -319,6 +343,39 @@ export default function SpotBadRentalPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "FRED, FHFA Purchase-Only House Price Index for the United States (HPIPONM226S)",
+              url: "https://fred.stlouisfed.org/series/HPIPONM226S",
+            },
+            {
+              title:
+                "FRED, BLS CPI for All Urban Consumers: Rent of Primary Residence (CUSR0000SEHA)",
+              url: "https://fred.stlouisfed.org/series/CUSR0000SEHA",
+            },
+            {
+              title: "CFPB, Why did my monthly mortgage payment go up or change?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/why-did-my-monthly-mortgage-payment-go-up-or-change-en-213/",
+            },
+            {
+              title:
+                "U.S. Census Bureau, American Community Survey 2024 1-year, Table B25103: Median Real Estate Taxes Paid, by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000",
+            },
+            {
+              title:
+                "U.S. Census Bureau, American Community Survey 2024 1-year, Table B25077: Median Value (Dollars), by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-6-03, Monthly Housing Expense for the Subject Property",
+              url: "https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

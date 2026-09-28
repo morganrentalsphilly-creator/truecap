@@ -22,6 +22,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "rental-property-insurance";
 const TITLE = "Rental property insurance: coverage, quotes, and underwriting";
@@ -234,7 +235,7 @@ export default function BlogPost() {
             What a landlord policy actually covers
           </h2>
           <p>
-            Four buckets matter, and one of them is the one investors forget:
+            Four buckets matter:
           </p>
           <ol>
             <li>
@@ -261,9 +262,17 @@ export default function BlogPost() {
           <p>
             Do not assume the policy covers tenant property, flood, wind, named
             storms, water backup, ordinance upgrades, vacancy, or business
-            activities. Coverage and separate-policy requirements vary. Read the
-            quoted forms, endorsements, deductibles, and exclusions, and have
-            the agent answer material questions in writing.
+            activities.{" "}
+            <a
+              href="https://www.fema.gov/flood-insurance"
+              className="text-primary font-semibold hover:underline"
+            >
+              FEMA notes that most homeowners insurance does not cover flood
+              damage
+            </a>
+            . Coverage and separate-policy requirements vary. Read the quoted
+            forms, endorsements, deductibles, and exclusions, and have the
+            agent answer material questions in writing.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -353,8 +362,7 @@ export default function BlogPost() {
             monthly rent, 25% down, and an entered 7% loan rate. If all other
             assumptions are held constant, changing the annual insurance input
             from $1,500 to $3,500 adds about $167 per month of expense. In this
-            model, that moves cash flow from roughly +$150 to −$17 per month and
-            lowers{" "}
+            model, that cuts monthly cash flow by the same ~$167 and lowers{" "}
             <Link
               href="/glossary/dscr"
               className="text-primary font-semibold hover:underline"
@@ -377,7 +385,17 @@ export default function BlogPost() {
             <li>
               <strong>Flood, wind, wildfire, and water:</strong> obtain written
               coverage and lender requirements rather than assuming the dwelling
-              form includes them.
+              form includes them. FEMA notes that{" "}
+              <a
+                href="https://www.fema.gov/flood-insurance"
+                className="text-primary font-semibold hover:underline"
+              >
+                homes in high-risk flood areas with mortgages from
+                government-backed lenders are required to have flood
+                insurance, and an NFIP policy typically has a 30-day waiting
+                period
+              </a>{" "}
+              (with exceptions, such as lender-required coverage).
             </li>
             <li>
               <strong>Valuation:</strong> ask how the dwelling limit was
@@ -396,14 +414,21 @@ export default function BlogPost() {
             </li>
           </ol>
 
-          <div className="not-prose"></div>
-
           <p>
             TrueCap keeps insurance visible and editable so you can replace a
             preliminary assumption with a current property-specific quote and
-            compare how the input changes cap rate, cash flow, and DSCR. Tax
-            treatment depends on allocation, policy period, accounting method,
-            use, and other facts; review it with the{" "}
+            compare how the input changes cap rate, cash flow, and DSCR.
+            Premiums allocable to a rental activity may be deductible, and if
+            you prepay more than a year of coverage,{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              IRS Publication 527 has you deduct only the part of the premium
+              that applies to each year
+            </a>
+            . Beyond that, tax treatment depends on allocation, accounting
+            method, use, and other facts; review it with the{" "}
             <Link
               href="/blog/schedule-e-rental-property"
               className="text-primary font-semibold hover:underline"
@@ -444,6 +469,18 @@ export default function BlogPost() {
             you buy.
           </p>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "FEMA, Flood Insurance",
+              url: "https://www.fema.gov/flood-insurance",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
