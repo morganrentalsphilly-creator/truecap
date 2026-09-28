@@ -265,7 +265,7 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">What DSCR actually is</h2>
           <p>
             <Link
-              href="/blog/how-to-calculate-dscr#dscr-loans"
+              href="/blog/how-to-calculate-dscr"
               className="text-primary font-semibold hover:underline"
             >
               DSCR
@@ -280,8 +280,8 @@ export default function BlogPost() {
           <p>Common structures to verify in a current written quote:</p>
           <ul>
             <li>
-              <strong>Rate and points:</strong> quote-specific and often higher
-              than comparable conventional financing.
+              <strong>Rate and points:</strong> quote-specific; compare them
+              against a conventional quote for the same property.
             </li>
             <li>
               <strong>Term:</strong> long-term amortization is common, but fixed
@@ -515,13 +515,6 @@ export default function BlogPost() {
 
           <p className="text-sm text-muted-foreground mt-6">
             Related reading:{" "}
-            <Link
-              href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
-            >
-              DSCR loans explained
-            </Link>
-            ,{" "}
             <Link
               href="/blog/brrrr-method-explained"
               className="text-primary font-semibold hover:underline"

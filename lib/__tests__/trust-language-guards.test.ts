@@ -92,6 +92,8 @@ describe("trust-language guards", () => {
     expect(combined).not.toMatch(/DSCR loans bypass it entirely/i);
     expect(combined).not.toMatch(/DSCR loans approve based on/i);
     expect(combined).not.toMatch(/1\.25\+ is bankable/i);
+    // F3 research: no primary source compares DSCR and conventional pricing.
+    expect(combined).not.toMatch(/often\s+(?:priced\s+)?higher\s+than\s+comparable\s+conventional/i);
     expect(explainer).toContain(
       "Requirements vary by lender, program, state, borrower, and property",
     );
