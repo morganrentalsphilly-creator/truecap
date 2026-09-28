@@ -16,8 +16,9 @@
  *     from another fiscal year, and the thin flag is its rule. The
  *     seo-market-enrich skill writes that file, so these hold for whatever it
  *     holds, and a synthetic dataset (vi.doMock) proves the fact-item and
- *     thin branches, never today's file contents. Whether a fact answer must
- *     carry a number is not tested (the critic checks it);
+ *     thin branches, never today's file contents. No test requires a fact
+ *     answer to carry a number: the loader's forbidden-phrase list and critic
+ *     rubric 14 hold fact answers to facts;
  *   - the 12 bespoke metros are indexable on HUD rows, listed in the sitemap
  *     and llms.txt, with the same framing, FAQ and sources block;
  *   - every state fact is sourced, and nothing unsourced renders;
@@ -184,9 +185,9 @@ function hudVintageProblems(slug: string, facts: readonly Pick<MarketFaqFact, "q
  * (hudVintageProblems); the visible FAQ equals the FAQPage JSON-LD, and
  * jsonld-validate finds nothing. A sourced tax-rate or licensing answer needs
  * no dollar figure and no FY, so only the template items are held to them.
- * No test requires a fact answer to carry a number (seo-market-enrich step 5,
- * "Answer with numbers"): the critic checks that, and the incident's approved
- * licensing answer carries none.
+ * No test requires a fact answer to carry a number: a licensing rule is a
+ * fact without one (seo-market-enrich step 5). The loader's forbidden-phrase
+ * list and critic rubric 14 keep fact answers to facts.
  */
 function expectMarketFaq(html: string, slug: string, facts: readonly MarketFaqFact[]): void {
   const ld = faqLd(html);
