@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T01:56:04.561Z",
+  "generatedAt": "2026-09-28T05:29:31.913Z",
   "site": "sc-domain:usetruecap.com",
   "sitemapReport": [
     {
@@ -16,12 +16,12 @@
     "used": 378
   },
   "summary": {
-    "total": 393,
+    "total": 391,
     "indexed": 338,
     "byClass": {
       "indexed": 338,
-      "never_crawled": 21,
-      "crawled_not_indexed": 32,
+      "never_crawled": 20,
+      "crawled_not_indexed": 31,
       "dropped_after_indexed": 0,
       "excluded": 2,
       "unknown": 0
@@ -64,7 +64,7 @@
         "indexed": 8
       },
       "blog-post": {
-        "total": 75,
+        "total": 73,
         "indexed": 46
       },
       "vs": {
@@ -1533,7 +1533,7 @@
           "indexed": false
         }
       ],
-      "removedFromSitemap": null,
+      "removedFromSitemap": "2026-09-28",
       "mainHash": "a6743155a33980cf48df73284e6602a5cf4946f0a010b1286b865a42225dcbaf",
       "crawledAt": "2026-09-28T01:56:28.205Z"
     },
@@ -4050,7 +4050,7 @@
           "indexed": false
         }
       ],
-      "removedFromSitemap": null,
+      "removedFromSitemap": "2026-09-28",
       "mainHash": "03e7f13c9b9fac526025578b3d55cba48591888371e5d84113f1d9d7d4231cf1",
       "crawledAt": "2026-09-28T01:56:28.205Z"
     },
@@ -22347,13 +22347,1184 @@
   },
   "run": {
     "date": "2026-09-28",
-    "mode": "inspect",
-    "due": 183,
-    "planned": 183,
-    "inspected": 183,
+    "mode": "no-inspect",
+    "due": 234,
+    "planned": 0,
+    "inspected": 0,
     "errors": [],
     "quotaExhausted": false,
-    "skipped": [],
+    "skipped": [
+      {
+        "path": "/blog/1-percent-rule-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/1031-exchange-basics",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/50-percent-rule-rentals",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/2-percent-rule-vs-1-percent-rule",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/70-percent-rule-house-flipping",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-dealcheck-alternatives",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-rental-analysis-tool-for-house-hackers",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-rental-property-calculator-2026",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-free-rental-property-calculator-2026",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-rental-property-calculator-for-brrrr",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-short-term-rental-analysis-tool-2026",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/best-states-for-rental-investors-2026",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/break-even-occupancy-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/bonus-depreciation-rental-property-2026",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/brrrr-method-explained",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/buying-rental-property-with-tenants",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/cap-rate-vs-gross-yield",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/capex-maintenance-reserves-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/cash-flow-vs-appreciation",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/cash-on-cash-vs-irr",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/cash-out-refinance-vs-heloc-rental",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/closing-costs-investment-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/dealcheck-vs-biggerpockets-vs-truecap",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/dealcheck-vs-stessa-vs-truecap",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/debt-to-income-ratio-investment-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/depreciation-recapture-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/exit-cap-rate-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/gross-rent-multiplier-explained",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/free-biggerpockets-calculator-alternatives",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/hostfully-vs-hostaway-vs-guesty",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/hard-money-vs-dscr-loan",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/house-hack-underwriting-guide",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-much-down-payment-investment-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/house-hacking-explained",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-much-money-to-buy-a-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-arv",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-cash-on-cash-return",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-cap-rate",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-dscr",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-noi-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-calculate-rental-property-depreciation",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-estimate-rehab-costs",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-estimate-rent-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-find-off-market-rental-properties",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-read-a-rent-roll",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-refinance-a-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-truecap-verdict-engine-works",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/how-to-underwrite-a-rental-property-in-60-seconds",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/investment-property-appraisal",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/is-a-duplex-a-good-investment",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/mortgage-points-investment-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/negative-leverage-real-estate",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/operating-expense-ratio-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/piti-explained-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/property-management-yes-or-no",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/property-tax-reassessment-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/rental-property-insurance",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/rental-property-llc",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/rental-property-pro-forma-explained",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/rental-property-tax-deductions",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/return-on-equity-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/section-8-rental-property-investing",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/roofstock-vs-mashvisor-vs-propstream",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/schedule-e-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/seller-financing-subject-to",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/short-term-rental-underwriting-playbook",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/spot-bad-rental-in-60-seconds",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/single-family-vs-multi-family-rental",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/stessa-vs-avail-vs-baselane",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/topics",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/topics/financing",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/topics/strategy",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/topics/tax",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/topics/underwriting",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/vacancy-rate-rental-property",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/blog/what-is-a-good-cap-rate",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/glossary",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/glossary/appreciation-rate",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/glossary/arv",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/glossary/cap-rate",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/glossary/ten-year-total-return",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/vs/appfolio",
+        "reason": "lastmod",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/akron",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/albuquerque",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/albany",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/allentown",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/amarillo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/ann-arbor",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/anchorage",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/asheville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/athens",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/augusta",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/austin",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/bakersfield",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/baltimore",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/beaumont",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/baton-rouge",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/billings",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/birmingham",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/bellingham",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/boise",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/boulder",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/brownsville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/buffalo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/canton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/cedar-rapids",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/champaign",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/charleston",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/chicago",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/chattanooga",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/cincinnati",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/clarksville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/colorado-springs",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/columbia",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/columbus",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/corpus-christi",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/davenport",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/daytona-beach",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/dayton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/denton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/denver",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/des-moines",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/durham",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/el-paso",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/erie",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/eugene",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/evansville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fargo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/flint",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fayetteville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fort-wayne",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fort-collins",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fort-worth",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fort-myers",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/fresno",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/gainesville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/grand-rapids",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/green-bay",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/greensboro",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/greenville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/harrisburg",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/greeley",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/gulfport",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/hartford",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/huntsville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/jackson",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/jacksonville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/kalamazoo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/killeen",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/knoxville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lafayette",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lakeland",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lancaster",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lansing",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/laredo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/las-vegas",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lexington",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lincoln",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/little-rock",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/louisville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lowell",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/macon",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/lubbock",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/madison",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/manchester",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/mcallen",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/mesa",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/milwaukee",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/minneapolis",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/mobile",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/modesto",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/montgomery",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/myrtle-beach",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/nampa",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/nashville",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/naples",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/new-haven",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/new-orleans",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/newark",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/norfolk",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/ocala",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/ogden",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/oklahoma-city",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/olathe",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/omaha",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/orlando",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/paterson",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/pensacola",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/peoria",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/pittsburgh",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/portland",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/providence",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/provo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/raleigh",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/pueblo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/reading",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/reno",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/richmond",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/rochester",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/rockford",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/sacramento",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/salem",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/salt-lake-city",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/savannah",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/san-antonio",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/scranton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/sarasota",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/shreveport",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/sioux-falls",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/south-bend",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/spartanburg",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/spokane",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/st-louis",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/stockton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/syracuse",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/tacoma",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/tallahassee",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/topeka",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/toledo",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/trenton",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/tucson",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/tulsa",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/tuscaloosa",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/vancouver",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/virginia-beach",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/waco",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/wichita",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/wilmington",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/winston-salem",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/worcester",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/york",
+        "reason": "content",
+        "why": "no-inspect"
+      },
+      {
+        "path": "/markets/youngstown",
+        "reason": "content",
+        "why": "no-inspect"
+      }
+    ],
     "seededSnapshots": 0,
     "sitemapReportError": null
   }
