@@ -11,6 +11,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -81,11 +82,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is there a seasoning requirement?",
-    a: "Possibly. Ownership, existing-lien, value-basis, and cash-out seasoning rules vary by program and can affect both timing and usable appraised value. Some conventional files may qualify for a delayed-financing exception after an eligible cash purchase, subject to detailed documentation and loan limits; it is not automatic or a promise of immediate cash-out. Verify the current guide with the lender before closing the acquisition.",
+    a: "Possibly. Ownership, existing-lien, value-basis, and cash-out seasoning rules vary by program and can affect both timing and usable appraised value. Fannie Mae's cash-out refinance rules, for example, look at how long a borrower has been on title and how old the existing first mortgage is. Some conventional files may qualify for a delayed-financing exception after an eligible cash purchase, subject to detailed documentation and loan limits (Fannie Mae's version caps the new loan at the documented purchase investment plus the closing costs, prepaid fees, and points financed on the new loan); it is not automatic or a promise of immediate cash-out. Verify the current guide with the lender before closing the acquisition.",
   },
   {
     q: "Is the interest tax deductible?",
-    a: "When the borrowed funds are used for the rental business (rehab, another rental purchase, operating costs), the interest is generally deductible against rental income. If you spend it on personal items, it isn't. Tracing the use of funds matters — keep clean records and confirm with a CPA.",
+    a: "When the borrowed funds are used for the rental business (rehab, another rental purchase, operating costs), the interest is generally deductible against rental income, subject to the passive-activity and at-risk limits. If you spend it on personal items, it isn't: IRS Publication 527 says interest on refinance proceeds not related to rental use generally can't be deducted as a rental expense. Tracing the use of funds matters — keep clean records and confirm with a CPA.",
   },
 ];
 
@@ -196,22 +197,43 @@ export default function BlogPost() {
             <strong>HELOC (home equity line of credit)</strong> — a revolving
             second lien that sits <em>on top</em> of your existing mortgage.
             Your first loan is untouched; you get a credit line you can draw,
-            repay, and redraw during the draw period, usually at a variable rate
-            and often interest-only while you draw.
+            repay, and redraw during the draw period, usually at a{" "}
+            <a
+              href="https://files.consumerfinance.gov/f/documents/cfpb_heloc-brochure.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              variable rate
+            </a>
+            , and some plans allow interest-only payments while you draw.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
             The investment-property variables to verify
           </h2>
           <p>
-            Both products are meaningfully stricter on a rental than on the home
-            you live in:
+            Agency cash-out limits are lower on a rental than on the home you
+            live in, and investment-property HELOC terms vary by lender:
           </p>
           <ul>
             <li>
-              <strong>Cash-out refi:</strong> confirm the current LTV matrix,
-              seasoning and value basis, appraisal rules, coverage or DTI
-              treatment, reserves, pricing, and closing costs.
+              <strong>Cash-out refi:</strong> confirm the current LTV matrix
+              (Freddie Mac&apos;s{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                maximum cash-out LTV
+              </a>{" "}
+              is 75% for a one-unit investment property and 70% for two to four
+              units, against 80% and 75% for a home you live in),{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
+                className="text-primary font-semibold hover:underline"
+              >
+                seasoning
+              </a>{" "}
+              and value basis, appraisal rules, coverage or DTI treatment, reserves, pricing,
+              and closing costs.
             </li>
             <li>
               <strong>HELOC on a rental:</strong> confirm combined LTV, credit
@@ -261,7 +283,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">When each one wins</h2>
+          <h2 className="text-2xl sm:text-3xl">When each one may fit</h2>
           <h3>Cash-out refinance may fit better when…</h3>
           <ul>
             <li>
@@ -345,8 +367,19 @@ export default function BlogPost() {
             <li>
               <strong>HELOC variable rate.</strong> Many lines use variable
               rates, and some agreements permit a lender to freeze or reduce
-              availability under stated conditions. Read the actual agreement
-              before relying on future draws.
+              availability under stated conditions. For consumer home equity
+              lines,{" "}
+              <a
+                href="https://www.consumerfinance.gov/rules-policy/regulations/1026/40/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Regulation Z
+              </a>{" "}
+              lets a lender stop further draws or cut the credit limit when,
+              among other conditions, the property&apos;s value declines
+              significantly; a line on a rental may be business-purpose credit
+              outside that rule. Read the actual agreement before relying on
+              future draws.
             </li>
             <li>
               <strong>Refi reset + closing costs.</strong> A refi applies the
@@ -357,6 +390,18 @@ export default function BlogPost() {
               <strong>Over-leverage.</strong> Borrowing near the maximum a
               lender offers can thin the cash-flow cushion. Stress-test lower
               value, higher rate, vacancy, repairs, and a frozen line.
+            </li>
+            <li>
+              <strong>Use of the proceeds.</strong>{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                IRS Publication 527
+              </a>{" "}
+              says interest on the part of the proceeds that is not related to
+              rental use generally can&apos;t be deducted as a rental expense,
+              so the after-tax cost depends on where the cash goes.
             </li>
           </ul>
 
@@ -370,10 +415,10 @@ export default function BlogPost() {
             >
               TrueCap
             </Link>{" "}
-            with the new debt in place and watch what it does to cash flow and
-            DSCR — the analyzer&apos;s mortgage scenarios let you compare a
-            cash-out refi against a HELOC-on-top side by side, so the
-            cheap-mortgage trap shows up before you sign. If you&apos;re
+            with the new debt terms and watch what they do to cash flow and
+            DSCR. TrueCap&apos;s mortgage scenarios do not model a HELOC second
+            lien, so compare the cash-out loan and HELOC-on-top payments
+            yourself before you sign. If you&apos;re
             recycling capital, pair this with the{" "}
             <Link
               href="/blog/brrrr-method-explained"
@@ -407,11 +452,34 @@ export default function BlogPost() {
           ))}
 
           <p className="text-sm text-muted-foreground">
-            General educational information, not lending or tax advice. Rates,
-            LTV caps, and qualification vary by lender and change often —
-            confirm current terms with a lender and your CPA.
+            Rates, LTV caps, and qualification vary by lender and change often
+            — confirm current terms with a lender and your CPA.
           </p>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "CFPB, What you should know about home equity lines of credit (brochure)",
+              url: "https://files.consumerfinance.gov/f/documents/cfpb_heloc-brochure.pdf",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-1.3-03, Cash-Out Refinance Transactions",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions",
+            },
+            {
+              title: "CFPB, Regulation Z § 1026.40, Requirements for Home Equity Plans",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/40/",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

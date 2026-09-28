@@ -21,6 +21,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-much-down-payment-investment-property";
 const TITLE =
@@ -63,15 +64,15 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How much down payment do you need for an investment property?",
-    a: "For a conventional loan on a property you will not live in, plan on 15% down for a single-family rental and 25% down for a 2–4 unit building. On a $250,000 single-family that is $37,500; on a $250,000 duplex it is $62,500. The big exception is owner-occupancy: if you live in one unit, FHA lets you buy a 1–4 unit property with 3.5% down, and a VA-eligible buyer can do it with nothing down.",
+    a: "For a conventional loan on a property you will not live in, plan on at least 15% down for a single-family rental (with mortgage insurance on anything under 20%) and 25% down for a 2–4 unit building. On a $250,000 single-family that is $37,500; on a $250,000 duplex it is $62,500. The big exception is owner-occupancy: if you live in one unit, FHA lets you buy a 1–4 unit property with 3.5% down, and a VA-eligible buyer can do it with nothing down.",
   },
   {
     q: "Can you put 15% down on an investment property?",
-    a: "Yes — but only on a one-unit conventional investment loan, and only if you are not living in it. Fannie Mae and Freddie Mac allow 85% loan-to-value on a single-family rental. You will pay a rate add-on for the low down payment, and unlike an owner-occupied loan there is no PMI option to bridge the gap, so 15% is a hard floor. Two-to-four-unit investment properties require 25% down regardless of credit.",
+    a: "Yes — but only on a one-unit conventional investment loan, and only if you are not living in it. Fannie Mae and Freddie Mac allow 85% loan-to-value on a single-family rental. You will pay higher loan-level price adjustments for the low down payment (Fannie Mae's investment-property adjustment is larger above 80% LTV), and a 15%-down loan also needs mortgage insurance, which is required above 80% LTV. The 85% cap makes 15% a hard floor. Two-to-four-unit investment properties require 25% down regardless of credit.",
   },
   {
     q: "Is it better to put 20% or 25% down on a rental?",
-    a: "It depends entirely on whether your borrowing cost is above or below the property's cap rate. At June 2026 investment-loan rates near 7.25%, the loan constant (annual debt service ÷ loan balance) runs about 8.2% — higher than a typical 6–7.5% cap rate. When the loan constant exceeds the cap rate you have negative leverage, and every extra borrowed dollar drags your cash-on-cash down. In that environment 25% down produces both a higher cash-on-cash return and a stronger DSCR than 20%. Run your own numbers before assuming less-down is better.",
+    a: "It depends entirely on whether your borrowing cost is above or below the property's cap rate. At a hypothetical 7.25% investment-loan rate, the loan constant (annual debt service ÷ loan balance) runs about 8.2%, higher than this example's 7.46% cap rate. When the loan constant exceeds the cap rate you have negative leverage, and every extra borrowed dollar drags your cash-on-cash down. In that case 25% down produces both a higher cash-on-cash return and a stronger DSCR than 20%. Run your own numbers before assuming less-down is better.",
   },
   {
     q: "How can I buy an investment property with little money down?",
@@ -79,7 +80,7 @@ const FAQS = [
   },
   {
     q: "Do you pay PMI on an investment property?",
-    a: "No. Private mortgage insurance is only offered on owner-occupied conventional loans with less than 20% down. Investment-property lenders do not offer it — that is precisely why the down-payment floor sits at 15–25% instead. If you live in the property and put down less than 20%, you will pay PMI (conventional) or MIP (FHA), which is a real monthly cost you have to underwrite.",
+    a: "Only if you put less than 20% down. Fannie Mae and Freddie Mac allow as little as 15% down on a single-family rental (25% on 2–4 units), and any conventional loan above 80% LTV requires mortgage insurance. At 20% or more down there is none. If you live in the property and put down less than 20%, you will pay PMI (conventional) or MIP (FHA), which is a real monthly cost you have to underwrite.",
   },
 ];
 
@@ -152,11 +153,12 @@ export default function DownPaymentPost() {
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               &quot;How much do I need to put down?&quot; is the first real question
               every new rental investor hits, and the internet&apos;s favorite answer —
-              &quot;20%&quot; — is wrong more often than it&apos;s right. The honest answer
+              &quot;20%&quot; — is often the wrong one. The honest answer
               depends on three things: whether you&apos;ll live in the property, how many
               units it has, and what loan you use. This guide walks the full 2026 menu,
               with the worked cash-on-cash and DSCR math that shows why putting <em>more</em>{" "}
-              down can actually be the higher-return move at today&apos;s rates.
+              down can actually be the higher-return move when borrowing costs more than the
+              property yields.
             </p>
           </header>
 
@@ -167,15 +169,41 @@ export default function DownPaymentPost() {
             <p>
               If you are buying a property you will <strong>not</strong> live in, a
               conventional loan requires <strong>15% down on a single-family rental</strong>{" "}
-              and <strong>25% down on a 2–4 unit building</strong>. Those are Fannie Mae
-              and Freddie Mac floors, and they don&apos;t move with your credit score — a
+              and <strong>25% down on a 2–4 unit building</strong>. Those are{" "}
+              <a
+                href="https://singlefamily.fanniemae.com/media/20786/display"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac
+              </a>{" "}
+              floors, and they don&apos;t move with your credit score — a
               780 FICO still puts 25% down on a fourplex.
             </p>
             <p>
               If you <em>will</em> live in the property — even just one unit of a duplex,
               triplex, or fourplex for a year — the whole table changes. Owner-occupied
-              financing opens up: <strong>FHA at 3.5% down</strong> on a 1–4 unit, a{" "}
-              <strong>VA loan at 0% down</strong> for eligible veterans, or conventional
+              financing opens up:{" "}
+              <a
+                href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>FHA at 3.5% down</strong>
+              </a>{" "}
+              on a 1–4 unit, a{" "}
+              <a
+                href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>VA loan at 0% down</strong>
+              </a>{" "}
+              for eligible veterans, or conventional
               owner-occupied as low as 5%. That single distinction — investor vs.
               owner-occupant — is the biggest lever on your cash-to-close, often a 7x
               difference on the same building.
@@ -187,41 +215,84 @@ export default function DownPaymentPost() {
             <p>
               Here&apos;s the practical range by loan type. &quot;Owner-occupied&quot; means you
               live in the property as your primary residence; lenders typically require you
-              to move in within 60 days and stay at least 12 months.
+              to{" "}
+              <a
+                href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                move in within 60 days and stay at least 12 months
+              </a>
+              .
             </p>
             <ul>
               <li><strong>FHA, owner-occupied (1–4 units):</strong> 3.5% down with a 580+ score. The low-down workhorse for house hackers.</li>
-              <li><strong>VA, owner-occupied (1–4 units):</strong> 0% down for eligible veterans and service members. No PMI, but a one-time funding fee applies.</li>
-              <li><strong>Conventional, owner-occupied 1-unit:</strong> 3–5% down. Under 20% you pay PMI until you reach 20% equity.</li>
-              <li><strong>Conventional, owner-occupied 2-unit:</strong> as little as 5% down; 3–4 units run higher (commonly 15%+).</li>
-              <li><strong>Conventional, investment single-family (1-unit):</strong> 15% down minimum (85% LTV).</li>
+              <li><strong>VA, owner-occupied (1–4 units):</strong> 0% down for eligible veterans and service members. No PMI, but a one-time funding fee usually applies.</li>
+              <li><strong>Conventional, owner-occupied 1-unit:</strong> 3–5% down. Under 20% down you pay PMI until you{" "}
+                <a
+                  href="https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  ask to cancel it at 20% equity
+                </a>{" "}
+                (it ends automatically at 22%).</li>
+              <li><strong>Conventional, owner-occupied 2–4 units:</strong>{" "}
+                <a
+                  href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  as little as 5% down
+                </a>{" "}
+                through Fannie Mae&apos;s or Freddie Mac&apos;s automated underwriting (manually underwritten loans require more).</li>
+              <li><strong>Conventional, investment single-family (1-unit):</strong> 15% down minimum (85% LTV), with mortgage insurance on anything under 20% down.</li>
               <li><strong>Conventional, investment 2–4 units:</strong> 25% down minimum (75% LTV).</li>
-              <li><strong>Second home (not a rental):</strong> 10% down — but you can&apos;t rent it full-time and call it a second home.</li>
-              <li><strong><Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loan</Link> (investment):</strong> typically 20–25% down (75–80% LTV), qualified on the property&apos;s rent rather than your income.</li>
+              <li><strong>Second home (not a rental):</strong> 10% down — but you{" "}
+                <a
+                  href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  can&apos;t rent it full-time and call it a second home
+                </a>
+                .</li>
+              <li><strong><Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loan</Link> (investment):</strong> down payment and qualification rules vary by lender and program; get the written term sheet. Many programs qualify primarily on the property&apos;s rent.</li>
             </ul>
             <p>
-              Notice what&apos;s missing from the investment rows: there&apos;s no &quot;3% down with
-              PMI&quot; option. That brings us to the most misunderstood part of the whole
+              Notice what&apos;s missing from the investment rows: there&apos;s no 3%- or
+              5%-down option. That brings us to the most misunderstood part of the whole
               topic.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why there&apos;s no PMI on a rental
+              Rentals can carry mortgage insurance, but 15% down is the floor
             </h2>
             <p>
               On an owner-occupied loan, private mortgage insurance lets you put down less
               than 20% — the insurer covers the lender&apos;s risk in exchange for a monthly
-              premium. <strong>That product simply doesn&apos;t exist for investment
-              properties.</strong> Lenders price the higher default risk of a non-owner-occupied
-              loan directly into the down payment instead, which is why 15% (single-family)
-              and 25% (multi) are hard floors rather than negotiable starting points.
+              premium. <strong>Mortgage insurance does exist for investment properties, but
+              only down to 15% down:</strong> Fannie Mae and Freddie Mac cap single-family
+              investment loans at 85% LTV (75% on 2–4 units), and{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
+                className="text-primary font-semibold hover:underline"
+              >
+                any conventional loan above 80% LTV requires mortgage insurance
+              </a>
+              . That is why 15% (single-family) and 25% (multi) are hard floors rather
+              than negotiable starting points.
             </p>
             <p>
               The flip side: if you house-hack with less than 20% down, you <em>do</em> pay
-              mortgage insurance. FHA charges an annual MIP around 0.55% of the loan — on a
-              $241,250 FHA balance that&apos;s roughly $1,327 a year, about $110 a month — and
-              it sticks for the life of the loan on most FHA loans. Conventional PMI at 5%
-              down is similar in size but drops off automatically at 20% equity. Either way,
+              mortgage insurance. FHA charges an{" "}
+              <a
+                href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
+                className="text-primary font-semibold hover:underline"
+              >
+                annual MIP around 0.55% of the loan
+              </a>{" "}
+              — on a $241,250 FHA balance that&apos;s roughly $1,327 a year, about $110 a
+              month — and at 3.5% down it lasts for the life of the loan (FHA drops annual
+              MIP after 11 years only when the original LTV is 90% or less). Conventional PMI
+              at 5% down can be cancelled at your request once the balance is scheduled to
+              reach 80% of the original value, and must end automatically at 78%. Either way,
               that premium is a real operating cost you have to fold into your underwriting,
               not a footnote.
             </p>
@@ -231,8 +302,17 @@ export default function DownPaymentPost() {
             </h2>
             <p>
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
-              7.25% (a realistic <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">investment rate</Link> in
-              June 2026), renting for $2,500/month — right at the{" "}
+              a hypothetical 7.25%{" "}
+              <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">investment rate</Link>{" "}
+              (for reference,{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac&apos;s survey of primary-residence 30-year rates averaged about
+                6.5% in June 2026
+              </a>
+              ), renting for $2,500/month — right at the{" "}
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 1% rule
               </Link>{" "}
@@ -242,7 +322,7 @@ export default function DownPaymentPost() {
               rate. Now watch what the down payment does:
             </p>
             <ul>
-              <li><strong>15% down — $37,500:</strong> $212,500 loan, $1,450/mo P&amp;I. Cash flow ≈ <strong>+$105/mo</strong> ($1,255/yr). With ~$9,000 closing costs, cash in is $46,500 → <strong>cash-on-cash 2.7%</strong>, <strong>DSCR 1.07</strong>.</li>
+              <li><strong>15% down — $37,500:</strong> $212,500 loan, $1,450/mo P&amp;I. Before mortgage insurance, cash flow ≈ <strong>+$105/mo</strong> ($1,255/yr). With ~$9,000 closing costs, cash in is $46,500 → <strong>cash-on-cash 2.7%</strong>, <strong>DSCR 1.07</strong>. A 15%-down loan also carries mortgage insurance, which lowers all three.</li>
               <li><strong>20% down — $50,000:</strong> $200,000 loan, $1,364/mo P&amp;I. Cash flow ≈ <strong>+$190/mo</strong> ($2,278/yr). Cash in $59,000 → <strong>cash-on-cash 3.9%</strong>, <strong>DSCR 1.14</strong>.</li>
               <li><strong>25% down — $62,500:</strong> $187,500 loan, $1,279/mo P&amp;I. Cash flow ≈ <strong>+$275/mo</strong> ($3,301/yr). Cash in $71,500 → <strong>cash-on-cash 4.6%</strong>, <strong>DSCR 1.22</strong>.</li>
             </ul>
@@ -281,7 +361,7 @@ export default function DownPaymentPost() {
             <p>
               This reverses the moment the cap rate clears the loan constant — a higher-yield
               market, a value-add that lifts NOI, or a lower rate all flip leverage back to
-              positive, and suddenly the 15%-down row wins on cash-on-cash. The takeaway
+              positive, and the lower-down rows can pull ahead on cash-on-cash. The takeaway
               isn&apos;t &quot;always put 25% down.&quot; It&apos;s that the right down payment is a math
               question, not a rule of thumb, and the answer changes with rates. Compare your
               deal&apos;s cap rate to its loan constant before you assume minimum-down is optimal —
@@ -307,7 +387,14 @@ export default function DownPaymentPost() {
             <p>
               The owner-occupied routes get you into the building for <strong>$8,750 instead
               of $62,500</strong> — roughly one-seventh the cash — and at a lower interest rate,
-              because owner-occupied loans price better than investor loans. The trade is that
+              because owner-occupied loans price better than investor loans:{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae applies a loan-level price adjustment to every investment-property loan
+              </a>
+              . The trade is that
               you live there for at least a year, carry a bigger loan balance, and pay mortgage
               insurance. For most first-timers it&apos;s the single fastest way into rental real
               estate. The full playbook is in{" "}
@@ -325,7 +412,14 @@ export default function DownPaymentPost() {
               and skipping them is how new investors end up short at the table:
             </p>
             <p>
-              <strong>Closing costs.</strong> Budget 2–5% of the price for a financed deal —
+              <strong>Closing costs.</strong> Budget{" "}
+              <a
+                href="https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/"
+                className="text-primary font-semibold hover:underline"
+              >
+                2–5% of the price
+              </a>{" "}
+              for a financed deal —
               roughly $5,000–$12,500 on our $250k rental — covering lender fees, title,
               transfer taxes, and prepaids. They&apos;re sunk the day you sign, so they belong in
               your return math up front. The full line-by-line breakdown is in{" "}
@@ -340,7 +434,14 @@ export default function DownPaymentPost() {
             </p>
             <p>
               <strong>Reserves.</strong> Conventional investment loans require you to <em>have</em>{" "}
-              about six months of PITI (principal, interest, taxes, insurance) in the bank after
+              about{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+                className="text-primary font-semibold hover:underline"
+              >
+                six months of PITI
+              </a>{" "}
+              (principal, interest, taxes, insurance) in the bank after
               closing — money you don&apos;t spend but must prove. On the 25%-down case that&apos;s
               roughly $1,650/mo PITI × 6 ≈ $9,900 sitting in reserve. Add it up: $62,500 down +
               $9,000 closing + $9,900 reserves means the deal really needs about{" "}
@@ -356,7 +457,7 @@ export default function DownPaymentPost() {
               start from what you actually qualify for. Then weigh four things:
             </p>
             <ul>
-              <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t (the common case at 2026 rates), more down does. Check it deal by deal.</li>
+              <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t, more down does. Check it deal by deal.</li>
               <li><strong>DSCR headroom.</strong> Lenders and your own safety both want{" "}
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 DSCR
@@ -398,6 +499,58 @@ export default function DownPaymentPost() {
             ))}
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae, Eligibility Matrix",
+              url: "https://singlefamily.fanniemae.com/media/20786/display",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf",
+            },
+            {
+              title: "VA.gov, VA-backed purchase loan",
+              url: "https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/",
+            },
+            {
+              title: "CFPB, When can I remove private mortgage insurance (PMI) from my loan?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-1.1-01, Occupancy Types",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types",
+            },
+            {
+              title: "Fannie Mae Selling Guide B7-1-01, Provision of Mortgage Insurance",
+              url: "https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance",
+            },
+            {
+              title: "HUD Mortgagee Letter 2023-05, Reduction of FHA Annual Mortgage Insurance Premium Rates",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (Freddie Mac PMMS)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+            {
+              title: "CFPB Owning a Home, Figure out how much you want to spend",
+              url: "https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+            {
+              title: "Fannie Mae, Loan-Level Price Adjustment (LLPA) Matrix",
+              url: "https://singlefamily.fanniemae.com/media/9391/display",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

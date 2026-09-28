@@ -31,6 +31,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "debt-to-income-ratio-investment-property";
 const TITLE =
@@ -86,7 +87,7 @@ const FAQS = [
   },
   {
     q: "How do lenders count rental income if I have no landlord history?",
-    a: "Documentation depends on program and property. Some agency workflows may use an appraisal rent schedule, such as Form 1007 or Form 1025, together with an eligible lease; others may use tax returns or additional history. The permitted rent, percentage, add-backs, and required ownership or landlord history vary. Ask the lender which documents and calculation apply before relying on projected rent.",
+    a: "Documentation depends on program and property. Some agency workflows may use the appraiser's market-rent opinion (Form 1007 for one unit or the Form 1025 appraisal report for two to four units, replaced by the redesigned appraisal report's Rental Information section for appraisals submitted on or after Nov. 2, 2026), together with an eligible lease; others may use tax returns or additional history. The permitted rent, percentage, add-backs, and required ownership or landlord history vary. Ask the lender which documents and calculation apply before relying on projected rent.",
   },
   {
     q: "Does an existing rental hurt my DTI when I buy the next one?",
@@ -161,7 +162,14 @@ export default function DtiInvestmentPropertyPost() {
             </p>
             <BlogByline />
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Debt-to-income can be an important ratio in conventional and FHA
+              Debt-to-income can be an important ratio in{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="text-primary font-semibold hover:underline">
+                conventional
+              </a>{" "}
+              and{" "}
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+                FHA
+              </a>{" "}
               underwriting, alongside credit, reserves, LTV, property, income,
               and other program requirements. One important question is —
               how much of the rent does the bank actually let you count?
@@ -182,11 +190,17 @@ export default function DtiInvestmentPropertyPost() {
             </h2>
             <p>
               Debt-to-income ratio is your recurring monthly debt divided by
-              your gross (pre-tax) monthly income, expressed as a percentage.
-              Some programs look at two versions. The <strong>front-end</strong> ratio
-              is just your housing payment over your income. The{" "}
-              <strong>back-end</strong> ratio adds applicable recurring
-              obligations under the program&apos;s rules, which may include the
+              your gross (pre-tax) monthly income, expressed as a percentage.{" "}
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+                Some programs look at two versions
+              </a>
+              . The <strong>front-end</strong> ratio is just your housing
+              payment over your income. The <strong>back-end</strong> ratio
+              adds{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="text-primary font-semibold hover:underline">
+                applicable recurring obligations under the program&apos;s rules
+              </a>
+              , which may include the
               new mortgage, car loans, student loans, minimum
               credit-card payments, child support, and any other rental
               payments. Ordinary living expenses are generally outside this
@@ -212,8 +226,18 @@ export default function DtiInvestmentPropertyPost() {
             </h2>
             <p>
               A common agency-style example for some one-to-four-unit scenarios
-              uses <strong>75% of eligible gross rent</strong>, with the
-              reduction serving as an allowance for vacancy and maintenance.
+              uses{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+                <strong>75% of eligible gross rent</strong>
+              </a>
+              . The 25% cut works like an allowance for vacancy and
+              maintenance: FHA&apos;s{" "}
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+                self-sufficiency test for three- and four-unit properties
+                subtracts at least 25% of fair market rent for vacancies and
+                maintenance
+              </a>
+              .
               The actual percentage, eligible rent, documents, and housing-cost
               treatment depend on the program and file. It is not a substitute
               for the{" "}
@@ -256,6 +280,17 @@ export default function DtiInvestmentPropertyPost() {
               including taxes and insurance — not the loan payment alone. A
               property with positive modeled cash flow can still show a small
               negative under this simplified qualifying-income treatment.
+            </p>
+            <p>
+              One current wrinkle: under{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+                Fannie Mae&apos;s rental-income guidance
+              </a>
+              , a positive result counts as qualifying income only when the
+              borrower has at least 12 months of property-management
+              experience. Without that history, the rent can offset the
+              property&apos;s own PITIA but cannot add to income. A negative
+              result is added to your monthly obligations either way.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -306,8 +341,8 @@ export default function DtiInvestmentPropertyPost() {
                 cash-on-cash math
               </Link>{" "}
               that $446 is real money; to the lender it evaporated in the 25%
-              haircut. The property is a strong performer that reads as neutral
-              on the application.
+              haircut. The property is a strong performer that reads as a slight
+              negative on the application.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -370,11 +405,17 @@ export default function DtiInvestmentPropertyPost() {
               vary; the example below again assumes 75%.
             </p>
             <p>
-              Say you buy a $350,000 duplex with 5% down on an owner-occupied
-              conventional loan — a $332,500 loan at 6.75%, about $2,157 in
-              principal and interest, plus $365 tax, $150 insurance, and $139 of
-              PMI for low-down-payment financing: a $2,810 PITIA. You live in one
-              side; the other rents for $1,700.
+              Say you buy a $350,000 duplex with{" "}
+              <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="text-primary font-semibold hover:underline">
+                5% down on an owner-occupied conventional loan
+              </a>{" "}
+              — a $332,500 loan at 6.75%, about $2,157 in principal and
+              interest, plus $365 tax, $150 insurance, and $139 of{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance" className="text-primary font-semibold hover:underline">
+                PMI for low-down-payment financing
+              </a>
+              : a $2,811 PITIA. You live in one side; the other rents for
+              $1,700.
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
               <code className="block text-sm sm:text-base text-foreground font-mono">
@@ -386,16 +427,22 @@ export default function DtiInvestmentPropertyPost() {
             </div>
             <p>
               With $700 of other monthly debts, your back-end ratio is
-              ($2,810 + $700) ÷ $7,775 = <strong>45.2%</strong> under the stated
-              assumptions. That is a modeled ratio, not an automated approval.
-              Strip the rental credit out and
-              qualify on your $6,500 salary alone, and the same ratio balloons to
-              <strong> 54%</strong>, above the illustration&apos;s chosen screen.
+              ($2,811 + $700) ÷ $7,775 = <strong>45.2%</strong> under the stated
+              assumptions — just above the illustration&apos;s 45% screen, and a
+              modeled ratio, not an automated approval. Strip the rental credit
+              out and qualify on your $6,500 salary alone, and the same ratio
+              balloons to
+              <strong> 54%</strong>, well above that screen.
               The tenant&apos;s modeled rent credit drives the difference. This is
               the structural edge house hacking has over a standalone rental
-              purchase: the rent counts as income against a low owner-occupant
-              down payment, instead of merely netting against the payment on an
-              investment loan.
+              purchase:{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+                the rent counts as income
+              </a>{" "}
+              against a low owner-occupant down payment, instead of merely
+              netting against the payment on an investment loan. The Fannie Mae
+              property-management-experience limit described above applies here
+              too, so ask the lender which treatment your file gets.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -408,23 +455,44 @@ export default function DtiInvestmentPropertyPost() {
             </p>
             <p>
               <strong>A property you&apos;re buying, no history.</strong> The
-              selected agency workflow may use a market-rent addendum such as
-              Form 1007 or Form 1025 together with an eligible lease. Which value
+              selected agency workflow may use the appraiser&apos;s market-rent
+              opinion, such as a{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+                Single-Family Comparable Rent Schedule (Form 1007) for one unit
+                or the Form 1025 appraisal report for two to four units
+              </a>{" "}
+              (replaced by the redesigned appraisal report&apos;s Rental
+              Information section for appraisals{" "}
+              <a href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign" className="text-primary font-semibold hover:underline">
+                submitted on or after Nov. 2, 2026
+              </a>
+              ), together with an eligible lease. Which value
               controls and whether a percentage applies must be confirmed under
               the current guide and lender overlays.
             </p>
             <p>
-              <strong>A rental you already own.</strong> Once the property has
-              appeared on two years of{" "}
+              <strong>A rental you already own.</strong> Once the property
+              appears on your filed returns&apos;{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
                 className="text-primary font-semibold hover:underline"
               >
                 Schedule E
-              </Link>
-              , a program may use tax returns and a rental-income worksheet.
-              Some methods start with reported net income and adjust eligible
-              non-cash or already-counted lines, which may include{" "}
+              </Link>{" "}
+              (
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+                the most recent year for Fannie Mae
+              </a>
+              ;{" "}
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+                two years for FHA
+              </a>
+              ), a program may use tax returns and a rental-income worksheet.
+              Some methods start with reported net income and{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+                adjust eligible non-cash or already-counted lines
+              </a>
+              , which may include{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
                 className="text-primary font-semibold hover:underline"
@@ -438,8 +506,12 @@ export default function DtiInvestmentPropertyPost() {
             </p>
             <p>
               One thing DTI doesn&apos;t capture but your lender checks
-              separately: <strong>reserves.</strong> Financed investment
-              properties may require program-specific reserves — they may not
+              separately: <strong>reserves.</strong>{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements" className="text-primary font-semibold hover:underline">
+                Financed investment properties may require program-specific
+                reserves
+              </a>{" "}
+              — they may not
               change the ratio itself, but a file can still fail other
               underwriting conditions. Verify amount, eligible assets, and
               treatment with the lender.
@@ -449,16 +521,19 @@ export default function DtiInvestmentPropertyPost() {
               When DTI constrains the file: compare DSCR programs
             </h2>
             <p>
-              A borrower may eventually encounter a DTI, documentation, or
-              financed-property constraint under a selected conventional
-              program. One alternative to investigate is{" "}
+              A borrower may eventually encounter a DTI, documentation, or{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="text-primary font-semibold hover:underline">
+                financed-property constraint
+              </a>{" "}
+              under a selected conventional program. One alternative to
+              investigate is a{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
                 className="text-primary font-semibold hover:underline"
               >
-                DSCR loans
-              </Link>{" "}
-              exist to solve. Many DSCR programs use the property&apos;s coverage
+                DSCR loan
+              </Link>
+              . Many DSCR programs use the property&apos;s coverage
               instead of personal DTI as the primary qualifying ratio —
               whether its rent covers its debt service, measured by the{" "}
               <Link
@@ -502,8 +577,11 @@ export default function DtiInvestmentPropertyPost() {
               rent-to-payment ratio</strong>, since a rental whose 75%-credited
               rent clears its PITIA flips from a debt to an income line.{" "}
               <strong>Document all your income</strong> — bonus, overtime, and
-              side income may enlarge the denominator when it satisfies the
-              program&apos;s history, stability, and documentation rules. And when
+              side income may enlarge the denominator when it satisfies the{" "}
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.1-01/general-income-information" className="text-primary font-semibold hover:underline">
+                program&apos;s history, stability, and documentation rules
+              </a>
+              . And when
               none of that is enough, <strong>compare DSCR and portfolio
               programs.</strong> Notice the first three are the
               same move you make when you{" "}
@@ -543,13 +621,64 @@ export default function DtiInvestmentPropertyPost() {
               </Link>{" "}
               models payment, coverage, and cash flow from user-entered
               assumptions; it is not a lender worksheet, appraisal, automated
-              underwriting system, quote, or approval. None of this is lending
-              or financial advice — confirm the current program guide and
-              written lender calculation against your own file before you make
-              an offer.
+              underwriting system, quote, or approval. Confirm the current
+              program guide and the lender&apos;s written calculation against
+              your own file before you make an offer.
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "Fannie Mae Selling Guide B3-6-02, Debt-to-Income Ratios",
+              url: "https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios",
+            },
+            {
+              title:
+                "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook (Update 18, redline)",
+              url: "https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-3.8-02, Rental Income from the Subject Property",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-3.8-01, General Rental Income Information",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income",
+            },
+            {
+              title:
+                "Freddie Mac Single-Family, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B7-1-01, Provision of Mortgage Insurance",
+              url: "https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance",
+            },
+            {
+              title: "Freddie Mac, UAD and Forms Redesign FAQs",
+              url: "https://sf.freddiemac.com/faqs/uad-and-forms-redesign",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B2-2-03, Multiple Financed Properties for the Same Borrower",
+              url: "https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B3-3.1-01, General Income Information",
+              url: "https://selling-guide.fanniemae.com/sel/b3-3.1-01/general-income-information",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

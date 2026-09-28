@@ -26,6 +26,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "hard-money-vs-dscr-loan";
 const TITLE =
@@ -194,8 +195,8 @@ export default function BlogPost() {
             interest, fees, maturity risk, or prepayment cost.
           </p>
           <p>
-            Hard money and DSCR aren&apos;t alternatives. They&apos;re
-            automatically interchangeable. Some investors use a bridge loan to
+            Hard money and DSCR aren&apos;t interchangeable alternatives. Some
+            investors use a bridge loan to
             acquire and rehab, then pursue DSCR or another long-term refinance
             after stabilization; that exit remains conditional. This post walks
             through how each works, when each makes sense, and the
@@ -287,8 +288,14 @@ export default function BlogPost() {
               and adjustable structures vary.
             </li>
             <li>
-              <strong>LTV and equity:</strong> matrix-specific; cash-out is
-              often more constrained than a purchase.
+              <strong>LTV and equity:</strong> matrix-specific; compare the
+              lender&apos;s purchase and cash-out limits (for conventional
+              investor loans, for example,{" "}
+              <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="text-primary font-semibold hover:underline">
+                Freddie Mac caps a one-unit investment purchase at 85% LTV and a
+                cash-out refinance at 75%
+              </a>
+              ).
             </li>
             <li>
               <strong>DSCR minimum:</strong> defined by the program&apos;s rent
@@ -333,7 +340,7 @@ export default function BlogPost() {
                 <tr>
                   <td className="text-muted-foreground">Rate</td>
                   <td>Quote-specific; generally priced for short-term risk</td>
-                  <td>Quote-specific; often above comparable conventional</td>
+                  <td>Quote-specific; compare with a conventional quote</td>
                 </tr>
                 <tr>
                   <td className="text-muted-foreground">Points / fees</td>
@@ -394,7 +401,7 @@ export default function BlogPost() {
           </h2>
           <p>
             BRRRR (Buy, Rehab, Rent, Refinance, Repeat) is the use case where
-            these two products work together. Done right:
+            these two products work together. A common sequence:
           </p>
           <ol>
             <li>
@@ -432,8 +439,8 @@ export default function BlogPost() {
               loan. You bring $37.5K + closing + rehab $50K = ~$92K cash in.
             </li>
             <li>
-              <strong>Rehab 4 months:</strong> ~$5K interest ($112.5K × 11% ×
-              4/12) + 2 points origination = $7.25K total cost.
+              <strong>Rehab 4 months:</strong> ~$4.1K interest ($112.5K × 11% ×
+              4/12) + 2 points origination ($2.25K) = ~$6.4K total cost.
             </li>
             <li>
               <strong>Refi to DSCR:</strong> 75% of $250K ARV = $187.5K new
@@ -443,7 +450,8 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Net cash trapped after refi:</strong> $92K in − $70K out =
-              $22K trapped. The scenario then models the property on a long-term
+              $22K trapped, or about $26K if you also pay the ~$4.1K of bridge
+              interest out of pocket. The scenario then models the property on a long-term
               DSCR loan.
             </li>
           </ul>
@@ -552,6 +560,15 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac Single-Family, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -562,9 +579,10 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Picking the right loan product changes whether a deal pencils.
-            TrueCap models DSCR live, side-by-side scenarios for cash,
-            conventional, DSCR, and hard money — so you can see which financing
-            structure actually makes the numbers work.{" "}
+            TrueCap models DSCR live and compares financing scenarios side by
+            side (your current terms, more down, a 15-year term, and a
+            DSCR-style rate) so you can see which structure actually makes the
+            numbers work.
           </p>
         </footer>
       </main>

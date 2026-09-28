@@ -23,6 +23,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "seller-financing-subject-to";
 const TITLE =
@@ -82,11 +83,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What happens if the lender calls a subject-to loan?",
-    a: "If the lender invokes the due-on-sale clause, the full balance becomes due. You'd typically need to refinance into your own loan or pay it off. Experienced subject-to buyers keep payments current, keep reserves, and plan an exit (refinance or sale) precisely because a call — while uncommon on a performing loan — is always possible.",
+    a: "If the lender invokes the due-on-sale clause, the full balance becomes due. You'd typically need to refinance into your own loan or pay it off. Experienced subject-to buyers keep payments current, keep reserves, and plan an exit (refinance or sale) precisely because a call is always possible.",
   },
   {
     q: "Why would a seller agree to finance the deal?",
-    a: "Several reasons: they own free and clear and want monthly income, they want to spread the capital-gains hit over years via installment-sale treatment, they want a higher sale price in exchange for flexible terms, or the property is hard to finance conventionally. A motivated seller trading terms for price is the core of most creative deals.",
+    a: "Several reasons: they own free and clear and want monthly income, they want to spread the capital-gains hit over years via installment-sale treatment (though any part of the gain that is ordinary income under the depreciation-recapture rules must still be reported in the year of sale), they want a higher sale price in exchange for flexible terms, or the property is hard to finance conventionally. A motivated seller trading terms for price is the core of most creative deals.",
   },
 ];
 
@@ -171,8 +172,12 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            With mortgage rates in the 7&apos;s, a lot of deals that don&apos;t
-            work with a new bank loan still work with{" "}
+            With 30-year mortgage rates running roughly 6% to 7% in 2026 (
+            <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
+              Freddie Mac&apos;s weekly average ranged from 5.98% to 7.03%
+              through Sept. 24, 2026
+            </a>
+            ), a lot of deals that don&apos;t work with a new bank loan still work with{" "}
             <strong>creative financing</strong> — structures where the seller,
             not a bank, provides some or all of the financing. The two
             you&apos;ll hear most are
@@ -196,8 +201,13 @@ export default function BlogPost() {
           </p>
           <p>
             Why a seller agrees: monthly income on an asset they wanted to sell,
-            spreading the capital-gains tax over years via installment-sale
-            treatment, a higher sale price in exchange for flexible terms, or a
+            spreading the capital-gains tax over years via{" "}
+            <a href="https://www.irs.gov/taxtopics/tc705" className="text-primary font-semibold hover:underline">
+              installment-sale treatment
+            </a>{" "}
+            (though any part of the gain that is ordinary income under the
+            depreciation-recapture rules must still be reported in the year of
+            sale), a higher sale price in exchange for flexible terms, or a
             faster close on a property that&apos;s hard to finance
             conventionally. The whole game is a motivated seller trading{" "}
             <em>terms</em> for <em>price</em>.
@@ -218,15 +228,22 @@ export default function BlogPost() {
           </p>
           <p>
             The catch is the <strong>due-on-sale clause</strong>. If the loan
-            documents contain one, federal law generally permits the lender to
-            enforce it when title transfers, subject to listed exceptions and
-            the contract. The Garn-St. Germain Act exempts certain transfers
-            (into a living trust, to relatives) but <strong>not</strong>
-            an arm&apos;s-length sale to an investor. So the lender <em>
-              can
-            </em>{" "}
-            call the loan. Whether and when the lender exercises that option is
-            lender- and fact-specific; timely payments do not waive it.
+            documents contain one,{" "}
+            <a href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim" className="text-primary font-semibold hover:underline">
+              federal law generally permits the lender to enforce it
+            </a>{" "}
+            when title transfers, subject to listed exceptions and the
+            contract. The Garn-St. Germain Act bars enforcement for certain
+            transfers of a home with fewer than five units (for example, into a
+            living trust in which the borrower remains a beneficiary, to a
+            relative after the borrower&apos;s death, or to a spouse or
+            children) but <strong>not</strong> an arm&apos;s-length sale to an
+            investor. So the lender <em>can</em> call the loan. Whether and
+            when the lender exercises that option is lender- and fact-specific;{" "}
+            <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
+              timely payments do not waive it
+            </a>
+            .
           </p>
           <p>
             Due-on-sale exposure is only one issue; it does not determine
@@ -243,9 +260,11 @@ export default function BlogPost() {
           <p>
             A wraparound mortgage (AITD) is a blend: the seller keeps their
             underlying loan and finances you for a larger amount that
-            &quot;wraps&quot; around it, pocketing the spread. It carries the
-            same due-on-sale exposure as subject-to, because the underlying loan
-            stays in place.
+            &quot;wraps&quot; around it, pocketing the spread. It carries the{" "}
+            <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
+              same due-on-sale exposure
+            </a>{" "}
+            as subject-to, because the underlying loan stays in place.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -254,13 +273,19 @@ export default function BlogPost() {
           <p>
             Federal mortgage rules include definitions and exemptions that can
             turn on occupancy, property type, the seller&apos;s activity, and
-            the transaction structure. An investment purpose can change which
-            rules apply, but it is not a blanket exemption from federal or state
-            lending, licensing, disclosure, servicing, usury, or consumer laws.
+            the transaction structure.{" "}
+            <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/" className="text-primary font-semibold hover:underline">
+              An investment purpose can change which rules apply
+            </a>
+            , but it is not a blanket exemption from federal or state lending,
+            licensing, disclosure, servicing, usury, or consumer laws.
           </p>
           <p>
-            Seller-financer exclusions and exemptions are technical and
-            conditional; a property count alone does not establish compliance.
+            <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/36/" className="text-primary font-semibold hover:underline">
+              Seller-financer exclusions and exemptions
+            </a>{" "}
+            are technical and conditional; a property count alone does not
+            establish compliance.
             Have a real-estate attorney and, where appropriate, a licensed
             mortgage professional and servicer review the actual documents
             before offering or accepting terms.
@@ -270,9 +295,9 @@ export default function BlogPost() {
             The 2026 rate arbitrage, with eyes open
           </h2>
           <p>
-            Why is this suddenly popular again? Rate arbitrage. Picture a
-            $300,000 property with an assumable-in-practice 3.5% loan via
-            subject-to versus a new loan at 7%:
+            Why consider it now? Rate arbitrage. Picture a $300,000 property
+            with an existing 3.5% loan taken subject-to versus a new loan at
+            7%:
           </p>
           <ul>
             <li>
@@ -286,8 +311,8 @@ export default function BlogPost() {
           </ul>
           <p>
             That ~$650/month swing can be the entire difference between negative
-            and positive cash flow on the deal — which is exactly why subject-to
-            is back. But the honest underwrite prices the due-on-sale risk and a
+            and positive cash flow on the deal — which is why the structure
+            draws interest when new-loan rates are high. But the honest underwrite prices the due-on-sale risk and a
             refinance exit alongside the savings; the rate gap is the reward,
             the call risk is the cost.
           </p>
@@ -310,8 +335,11 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Seller, subject-to:</strong> the loan stays on{" "}
-              <em>your</em> credit and your name — if the buyer stops paying,
-              it&apos;s your default. This is why subject-to demands deep trust
+              <em>your</em> credit and your name —{" "}
+              <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
+                if the buyer stops paying, it&apos;s your default
+              </a>
+              . This is why subject-to demands deep trust
               and airtight paperwork.
             </li>
           </ul>
@@ -371,12 +399,44 @@ export default function BlogPost() {
 
           <p className="text-sm text-muted-foreground">
             <FileSignature className="inline w-4 h-4 mr-1 align-text-bottom" />
-            General educational information, not legal, tax, or investment
-            advice. Creative-financing structures carry real legal and financial
-            risk and vary by state — always work with a real-estate attorney and
+            Creative-financing structures carry real legal and financial risk,
+            and the rules vary by state. Work with a real-estate attorney and a
             title company before entering one.
           </p>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac Primary Mortgage Market Survey, 30-year fixed rate, weekly (FRED series MORTGAGE30US, CSV)",
+              url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01",
+            },
+            {
+              title: "IRS Topic No. 705, Installment sales",
+              url: "https://www.irs.gov/taxtopics/tc705",
+            },
+            {
+              title:
+                "12 U.S.C. 1701j-3, Garn-St Germain Act preemption of due-on-sale prohibitions",
+              url: "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim",
+            },
+            {
+              title:
+                "Fannie Mae/Freddie Mac Uniform Instrument, Form 3043 (Tennessee Deed of Trust), Sections 12, 13 and 18",
+              url: "https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc",
+            },
+            {
+              title:
+                "Regulation Z, Official Interpretation of 12 CFR 1026.3 (business-purpose credit)",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/",
+            },
+            {
+              title:
+                "Regulation Z, 12 CFR 1026.36 (seller-financer exclusions from loan originator)",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/36/",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />

@@ -52,7 +52,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How much money do you need to buy a rental property? Cash-to-close worked at $150K, $300K, and $500K",
     excerpt:
-      "Total cash is 1.4-1.7x the down payment, not 20% plus a bit — $50,744 for a $150K rental, $89,388 for a $300K, $142,231 for a $500K, itemised down to the tax escrow cushion. Includes the two buckets everyone omits (prepaids and lender reserves), the 2% reserve escalator on other financed properties, the 5%-down duplex that costs less cash than a $150K house, and what $50,744 actually earns: $881 a year.",
+      "Total cash to buy a rental runs about 1.4 to 1.7x the down payment: about $50,700 for a $150K rental, $89,400 for a $300K and $142,200 for a $500K. Full line-item math for each tier, including the two buckets most estimates omit: prepaids and lender reserves.",
     readingTimeMinutes: 12,
     publishedAt: "2026-08-02",
     available: true,
@@ -179,7 +179,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Debt-to-income ratio for an investment property: how lenders count rental income (2026)",
     excerpt:
-      "Every investor assumes the rent \"covers itself\" on a loan application. It doesn't. Lenders credit 75% of gross rent, then subtract the property's full payment — so a rental pulling $446/month over its payment reads as a −$79 debt, not income. The net-rental mechanic worked on a $250K rental, why the 25% haircut swings DTI ~3 points, the house-hack version where the same rule adds $1,275 of income and turns a 54% ratio into 45%, the Schedule E add-backs that make a paper loss net to breakeven, and the DSCR escape hatch when your ratio finally hits the wall.",
+      "An illustrative debt-to-income calculation for a rental. Under the common 75%-of-gross-rent method, a $250K rental earning $446 a month over its payment still adds a −$79 monthly debt. Plus a house-hack example and the DSCR-loan alternative. Actual lender methods and approval requirements vary.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-04",
     available: true,
@@ -206,9 +206,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "mortgage-points-investment-property",
-    title: "Are mortgage points worth it on an investment property? (2026)",
+    title: "Mortgage points on an investment property: compare the actual quotes",
     excerpt:
-      "Points trade cash at closing for a permanently lower rate. At 2026 pricing the break-even runs about five years and the implied return about 20% a year — but only while you keep the loan. The buydown-ladder steepness that actually sets the break-even, the IRS rule that makes you amortize rental points instead of deducting them up front, the two points that lift a $200K-loan deal from a 1.14 to a 1.20 DSCR, and the refinance trap where buying down a rate you abandon in three years quietly costs about $1,600.",
+      "Points trade cash at closing for a lower rate. How to use a lender's written rate-and-fee ladder to compare point cost, payment savings, break-even, DSCR and cash-on-cash, and why the tax treatment depends on your own facts.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-29",
     available: true,
@@ -218,7 +218,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Negative leverage in real estate: when borrowing lowers your return (2026)",
     excerpt:
-      "\"Use leverage, returns go up\" is only true when the asset out-earns the debt — and in 2026 it usually doesn't. The one number that sets the sign (the loan constant, not the rate), the cap-rate-vs-loan-constant rule, the leverage identity that makes it exact, a worked $300K property across five cap rates, and the trap where a deal still cash-flows and still clears a DSCR lender while quietly dragging cash-on-cash below the all-cash return.",
+      "Leverage raises your return only when the asset out-earns the debt. The number that sets the sign (the loan constant, not the rate), the cap-rate-vs-loan-constant rule, a worked $300K property across five cap rates, and the deal that still cash-flows while leverage drags cash-on-cash below the all-cash return.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-28",
     available: true,
@@ -265,7 +265,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Cash-out refinance vs HELOC on a rental: which pulls equity better in 2026?",
     excerpt:
-      "Two ways to pull equity from a rental — and in 2026 they aren't interchangeable. The investment-property LTV and rate reality, the cheap-first-mortgage trap (a refi resets your whole 3.5% loan to 7%; a HELOC doesn't), and a worked side-by-side where the higher-rate HELOC is the cheaper decision by thousands a year.",
+      "Two ways to pull equity from a rental, with different eligibility and terms. How a cash-out refinance and a HELOC work on an investment property, why replacing a low-rate first mortgage changes the math, and an illustrative side-by-side of the cost.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-23",
     available: true,
@@ -283,7 +283,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "seller-financing-subject-to",
     title: "Seller financing and subject-to: creative deals explained (2026)",
     excerpt:
-      "When 7% bank loans kill the deal, creative financing moves it. How seller financing and subject-to work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply to investors, and the 2026 rate arbitrage (~$650/month on a 3.5% subject-to loan) underwritten with the downside priced in.",
+      "How seller financing and subject-to deals work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply to investors, and how to underwrite the gap between a seller's older low-rate loan and today's rates with the downside priced in.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-23",
     available: true,
@@ -301,7 +301,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "piti-explained-rental-property",
     title: "PITI explained: the real monthly payment on a rental (2026)",
     excerpt:
-      "P&I isn't your real payment — PITI is: principal, interest, taxes, and insurance. On a $250k rental at 7% with 25% down, taxes and insurance pile $400/month on top of the loan — 32% more — before the reassessment trap and escrow surprises. How to estimate each part, and how a $1,647 payment becomes a 1.27 DSCR.",
+      "PITI (principal, interest, taxes and insurance) is a rental's real monthly payment. On a $250k rental at 7% with 25% down, taxes and insurance add about $400 a month on top of the loan. How to estimate each part, handle escrow, and turn the payment into DSCR.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-20",
     available: true,
@@ -311,7 +311,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How much down payment do you need for an investment property? (2026)",
     excerpt:
-      "15% down on a single-family rental, 25% on a 2–4 unit — but only if you don't live in it. The full 2026 down-payment menu, the no-PMI rule, and worked cash-on-cash and DSCR math on a $250k rental at 15% vs 20% vs 25% down — including why more down can mean a higher return when the loan constant (~8.2%) tops the cap rate. Plus the house-hack route in for $8,750.",
+      "Conventional investment loans start at 15% down on a single-family rental and 25% on a 2–4 unit. Worked cash-on-cash and DSCR math on a $250k rental at 15%, 20% and 25% down, why more down can raise the return when the loan constant tops the cap rate, and the owner-occupied house-hack route in for $8,750.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-18",
     available: true,
@@ -378,9 +378,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "closing-costs-investment-property",
     title:
-      "Closing costs on an investment property — the full breakdown (2026)",
+      "Closing costs on an investment property: build the property-specific stack",
     excerpt:
-      "Every line item in investment-property closing costs, with real 2026 dollar figures on a $250k rental. Lender fees, title, transfer taxes, prepaids — what's negotiable, what isn't, and how to fold it into your cash-to-close.",
+      "Estimate cash to close on an investment property from the lender, title, government, insurer, tax and contract documents. A hypothetical $250k example walks through lender fees, title, transfer taxes and prepaids, and how they fold into cash to close.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-09",
     available: true,
@@ -467,7 +467,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Hard money vs DSCR: which loan product is right for your next deal in 2026",
     excerpt:
-      "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you'll rehab and exit; DSCR is long-term capital for a rental you'll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here's how to choose.",
+      "Hard money and DSCR loans solve different problems: hard money is short-term capital for a deal you'll rehab and exit; DSCR is long-term capital for a rental you'll hold. How each is structured, compared through an illustrative BRRRR sequence.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,
@@ -601,7 +601,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to refinance a rental property — rate-and-term, cash-out, and DSCR options",
     excerpt:
-      "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.",
+      "How to refinance a rental property: rate-and-term vs cash-out, LTV and DSCR considerations, the break-even math, and five mistakes to avoid.",
     readingTimeMinutes: 10,
     publishedAt: "2026-05-26",
     available: true,

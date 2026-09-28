@@ -26,6 +26,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "mortgage-points-investment-property";
 const TITLE =
@@ -176,7 +177,13 @@ export default function MortgagePointsPost() {
             </h2>
             <p>
               A quote may use one point to mean{" "}
-              <strong>1% of the loan amount</strong>. Confirm whether each
+              <a
+                href="https://www.consumerfinance.gov/ask-cfpb/how-should-i-use-lender-credits-and-points-also-called-discount-points-en-136/"
+                className="text-primary font-semibold hover:underline"
+              >
+                <strong>1% of the loan amount</strong>
+              </a>
+              . Confirm whether each
               charge is a discount point, origination charge, or another fee,
               and read the rate change from the lender&apos;s written ladder:
             </p>
@@ -336,7 +343,15 @@ export default function MortgagePointsPost() {
             </h2>
             <p>
               Do not copy primary-residence treatment to a rental or assume
-              every charge called a point is prepaid interest. Classification
+              every charge called a point is prepaid interest.{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                IRS Publication 527
+              </a>{" "}
+              generally has points on a rental-property loan deducted over the
+              loan term, not in full in the year paid. Classification
               and timing can depend on the charge, loan purpose, use, payment
               period, accounting method, refinance or payoff facts, and current
               law. The{" "}
@@ -585,6 +600,18 @@ export default function MortgagePointsPost() {
             </p>
           </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "CFPB, How should I use lender credits and points (also called discount points)?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/how-should-i-use-lender-credits-and-points-also-called-discount-points-en-136/",
+            },
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

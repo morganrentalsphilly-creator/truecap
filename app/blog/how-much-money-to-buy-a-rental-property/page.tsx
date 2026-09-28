@@ -14,7 +14,7 @@
  * the closing line items. This one owns the sum — including the two
  * buckets the SERP incumbents omit (prepaids/escrow setup, and lender
  * reserves as money HELD rather than spent) — worked at three price
- * tiers, plus the house-hack path that beats all three on cash.
+ * tiers, plus the house-hack path that beats all three on cash spent.
  */
 
 import type { Metadata } from "next";
@@ -31,6 +31,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-much-money-to-buy-a-rental-property";
 const TITLE =
@@ -78,11 +79,11 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "How much money do you need to buy a rental property?",
-    a: "At 20% down and mid-2026 investment-property rates, budget 28-34% of the purchase price in total cash — roughly 1.4 to 1.7 times the down payment itself. A $150,000 rental works out to about $50,700 ($43,958 actually spent plus $6,786 of lender reserves you keep in the bank), a $300,000 rental to about $89,400, and a $500,000 rental to about $142,200. The multiple is highest on cheap houses because closing fees and make-ready costs are largely fixed dollars, not percentages.",
+    a: "At 20% down and this article's hypothetical 7.25% investment-loan rate, budget 28-34% of the purchase price in total cash — roughly 1.4 to 1.7 times the down payment itself. A $150,000 rental works out to about $50,700 ($43,958 actually spent plus $6,786 of lender reserves you keep in the bank), a $300,000 rental to about $89,400, and a $500,000 rental to about $142,200. The multiple is highest on cheap houses because closing fees and make-ready costs are largely fixed dollars, not percentages.",
   },
   {
     q: "Can you buy a rental property with $30,000?",
-    a: "Not as a straight 20%-down investment purchase in most markets — $30,000 is the down payment on a $150,000 house, and you still need roughly $21,000 more for closing costs, escrow setup, make-ready, and lender reserves. It is enough for the owner-occupant path: a 5%-down conventional loan on a $400,000 duplex needs about $46,000 all-in, and FHA at 3.5% down needs less, so with $30,000 you are shopping a $250,000-$300,000 two-unit you live in rather than a $150,000 rental you do not.",
+    a: "Not as a straight 20%-down investment purchase in most markets — $30,000 is the down payment on a $150,000 house, and you still need roughly $21,000 more for closing costs, escrow setup, make-ready, and lender reserves. The owner-occupant path stretches it further: a 5%-down conventional loan on a $400,000 duplex needs about $59,000 all-in once Fannie Mae's six months of reserves are included, and FHA at 3.5% down needs less, so with $30,000 you are shopping a smaller two-unit you live in rather than a $150,000 rental you do not.",
   },
   {
     q: "How much do lenders require in reserves for an investment property?",
@@ -90,15 +91,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do closing costs come on top of the down payment?",
-    a: "Yes, and so do prepaids. Closing costs — origination, appraisal, underwriting, title, recording and transfer taxes, inspection — run about 3-4% of the purchase price on an investment loan. Escrow setup is separate again: prepaid interest to the end of the closing month, twelve months of hazard insurance, and a three-to-four-month property-tax cushion, which together add another 1-2%. Your earnest-money deposit is not extra; it credits against the total at closing.",
+    a: "Yes, and so do prepaids. Closing costs — origination, appraisal, underwriting, title, recording and transfer taxes, inspection — typically run 2-5% of the purchase price, per the CFPB. Escrow setup is separate again: prepaid interest to the end of the closing month, twelve months of hazard insurance, and an initial property-tax escrow deposit (taxes for the period before your first payment plus a cushion RESPA caps at two months), which together add another 1-2%. Your earnest-money deposit is not extra; it credits against the total at closing.",
   },
   {
     q: "Is 20% down enough for an investment property?",
-    a: "It clears Fannie Mae's minimum (15% on a single-family investment purchase, 25% on 2-4 units), and it avoids the mortgage insurance that 15% triggers. Whether it is enough to make the deal work is a different question. On a $300,000 house renting for $2,400 a month, 20% down produces a DSCR of 0.81 and loses $319 a month; break-even needs about 36% down. More down payment raises your cash requirement and, when the loan constant exceeds the cap rate, raises your cash-on-cash return too.",
+    a: "On a single-family rental it clears the 15% minimum that Fannie Mae and Freddie Mac set for investment purchases (2-4 units need 25%), and it avoids the mortgage insurance required above 80% LTV. Whether it is enough to make the deal work is a different question. On a $300,000 house renting for $2,400 a month, 20% down produces a DSCR of 0.81 and loses $319 a month; break-even needs about 36% down. More down payment raises your cash requirement and, when the loan constant exceeds the cap rate, raises your cash-on-cash return too.",
   },
   {
     q: "What is the cheapest way to buy your first rental property?",
-    a: "Buy a 2-4 unit you live in for a year. Owner-occupied financing takes 5% down conventional (3.5% FHA), prices at primary-residence rates roughly half a point below investment rates, and requires about two months of reserves instead of six. A $400,000 duplex on that structure needs roughly $46,000 of cash — less than a $150,000 single-family rental — and the tenant's rent covers most of your own housing payment.",
+    a: "In cash actually spent, it is often a 2-4 unit you live in for a year. Owner-occupied financing takes 5% down conventional through automated underwriting (3.5% FHA) and avoids the extra loan-level price adjustments Fannie Mae applies to investment loans, though Fannie still requires six months of reserves on a 2-4 unit principal residence. A $400,000 duplex on that structure needs about $39,400 of cash actually spent (less than a $150,000 single-family rental's $44,000) plus about $19,600 of reserves, and in this article's example the tenant's rent covers almost half of your own housing payment.",
   },
   {
     q: "How much cash do I need for a rental that actually cash flows?",
@@ -187,35 +188,42 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            The short answer: at 20% down and mid-2026 investment-property
-            rates, budget <strong>28% to 34% of the purchase price</strong> in
+            The short answer: at 20% down and a hypothetical 7.25%
+            investment-loan rate, budget{" "}
+            <strong>28% to 34% of the purchase price</strong> in
             total cash — which is roughly{" "}
             <strong>1.4 to 1.7 times the down payment itself</strong>. A
             $150,000 rental needs about $50,700. A $300,000 rental needs about
             $89,400. A $500,000 rental needs about $142,200.
           </p>
           <p>
-            Most answers to this question stop at &ldquo;down payment plus 2-5%
-            closing costs,&rdquo; which understates the real number by
-            $10,000-$25,000 depending on the tier. Two buckets get left out
-            almost every time: <strong>escrow setup and prepaids</strong> (a
-            year of insurance and a tax cushion, funded in cash on closing day)
-            and <strong>lender reserves</strong> (six months of payments you
-            have to prove you hold). This post works all five buckets line by
-            line at three price points, then does the part nobody does — checks
-            what that cash actually earns.
+            Many answers to this question stop at &ldquo;down payment plus 2-5%
+            closing costs,&rdquo; which, in the three tiers below, leaves out
+            about $15,000-$30,000 of prepaids, make-ready, and reserves. Two
+            buckets often get left out: <strong>escrow setup and prepaids</strong>{" "}
+            (a year of insurance and an initial tax deposit, funded in cash on
+            closing day) and <strong>lender reserves</strong> (six months of
+            payments you have to prove you hold). This post works all five
+            buckets line by line at three price points, then does the part that
+            often gets skipped — checks what that cash actually earns.
           </p>
           <p className="text-sm">
             <em>
-              Assumptions used throughout: 30-year fixed at 7.25% on the
-              investment loans, which is the low end of the mid-2026
-              non-owner-occupied range (roughly 7.25-7.75% against ~6.8% for a
-              primary residence). Each additional 0.25 points of rate adds about
-              $41 a month per $240,000 borrowed and about $250 to the reserve
-              requirement, so at the top of the range a $300,000 purchase costs
-              roughly $82 more a month and $500 more in reserves. Fees are
-              typical, not quoted — your Loan Estimate is the only figure that
-              binds.
+              Assumptions used throughout: 30-year fixed at a hypothetical 7.25%
+              investment-loan rate. For reference,{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac&apos;s weekly survey of primary-residence 30-year
+                rates
+              </a>{" "}
+              averaged about 6.4–6.7% in June–July 2026 (7.03% on September 24,
+              2026). Each additional 0.25 points of rate adds about $41 a month
+              per $240,000 borrowed and about $250 to the reserve requirement,
+              so at 7.75% a $300,000 purchase would cost roughly $82 more a month
+              and about $500 more in reserves. Fees are illustrative assumptions,
+              not quotes — your Loan Estimate is the only figure that binds.
             </em>
           </p>
 
@@ -238,9 +246,22 @@ export default function BlogPost() {
                   Down payment
                 </Link>
               </strong>{" "}
-              — 15% minimum on a conventional single-family investment purchase,
-              25% on 2-4 units, and 20% is the practical default because it
-              avoids mortgage insurance.{" "}
+              —{" "}
+              <a
+                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                className="text-primary font-semibold hover:underline"
+              >
+                15% minimum on a conventional single-family investment purchase,
+                25% on 2-4 units
+              </a>
+              , and on a single-family 20% is the practical default because it{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
+                className="text-primary font-semibold hover:underline"
+              >
+                avoids mortgage insurance
+              </a>
+              .{" "}
               <Link
                 href="/blog/how-much-down-payment-investment-property"
                 className="text-primary font-semibold hover:underline"
@@ -259,8 +280,14 @@ export default function BlogPost() {
                 </Link>
               </strong>{" "}
               — origination, appraisal, underwriting, title, settlement,
-              recording, transfer tax, inspection. About 3-4% of price on an
-              investment loan, and{" "}
+              recording, transfer tax, inspection.{" "}
+              <a
+                href="https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Typically 2-5% of the purchase price, per the CFPB
+              </a>{" "}
+              (2.5-3.6% in the examples below), and{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
                 className="text-primary font-semibold hover:underline"
@@ -271,9 +298,17 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Prepaids and escrow setup</strong> — prepaid interest from
-              closing to month-end, twelve months of hazard insurance, and a
-              three-to-four-month property-tax cushion to seed the escrow
-              account. Another 1-2% of price. This is the line that surprises
+              closing to month-end, twelve months of hazard insurance, and an
+              initial property-tax deposit to seed the escrow account (enough to
+              cover taxes for the period before your first payment, plus a
+              cushion that federal RESPA rules{" "}
+              <a
+                href="https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-B/section-1024.17"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap at one-sixth of a year&apos;s escrow payments
+              </a>
+              ). Another 1-2% of price. This is the line that surprises
               first-time investors at the settlement table.
             </li>
             <li>
@@ -283,8 +318,14 @@ export default function BlogPost() {
               just the cost of making a house rentable.
             </li>
             <li>
-              <strong>Reserves</strong> — six months of PITIA that Fannie Mae
-              requires you to <em>document</em> on an investment purchase. You
+              <strong>Reserves</strong> —{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+                className="text-primary font-semibold hover:underline"
+              >
+                six months of PITIA that Fannie Mae requires
+              </a>{" "}
+              you to <em>document</em> on an investment purchase. You
               do not hand it over. You show a statement, and the money stays
               yours.
             </li>
@@ -390,7 +431,7 @@ export default function BlogPost() {
                   <td>Paid in full at closing</td>
                 </tr>
                 <tr>
-                  <td>Tax escrow cushion (4 months)</td>
+                  <td>Initial tax escrow deposit (4 months)</td>
                   <td className="font-mono text-right">$750</td>
                   <td></td>
                 </tr>
@@ -499,9 +540,9 @@ export default function BlogPost() {
             >
               closing cost calculator
             </Link>{" "}
-            — recording and transfer is the line that varies most between
-            states, from near-zero in much of the Midwest to over 2% of price in
-            parts of the Northeast.
+            — recording and transfer is a line that varies widely between
+            states and counties, so check your own jurisdiction&apos;s recording
+            and transfer-tax rates.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -695,7 +736,7 @@ export default function BlogPost() {
           </ul>
           <p>
             $50,744 of cash to earn $881 a year in cash flow. That is the honest
-            arithmetic of a decent-but-not-special rental at 2026 rates, and it
+            arithmetic of a decent-but-not-special rental at a 7.25% rate, and it
             is why the total-cash question and the is-this-a-good-deal question
             have to be answered together. The 2.0% cash-on-cash excludes
             principal paydown (about $1,160 in year one), any appreciation, and
@@ -710,14 +751,15 @@ export default function BlogPost() {
             cash flow at any conventional down payment tier — break-even needs a
             loan of about $193,300, which is <strong>36% down</strong>. That is
             not a defect in the example; a $300,000 house at $2,400 rent is a
-            9.6% gross yield, and{" "}
+            9.6% gross yield, and with this example&apos;s expenses and 20% down
+            at 7.25%, break-even takes about an 11.3% gross yield (more on{" "}
             <Link
               href="/blog/what-is-a-good-rental-yield"
               className="text-primary font-semibold hover:underline"
             >
-              break-even at 2026 rates starts around 10.5-11%
+              what a good rental yield looks like
             </Link>
-            .
+            ).
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Does putting more down help?</h2>
@@ -774,10 +816,25 @@ export default function BlogPost() {
           </ScrollX>
           <p>
             Three things in that table. First, 15% down is the worst of the
-            three: it adds mortgage insurance — budget roughly 1% of the loan
-            balance a year, about $234 a month here — which is why the DSCR
-            collapses to 0.67, and many lenders will not write an investment
-            purchase above 80% LTV at all. Second, the reserve requirement falls
+            three: it{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
+              className="text-primary font-semibold hover:underline"
+            >
+              adds mortgage insurance
+            </a>{" "}
+            — budget roughly 1.1% of the loan balance a year as a planning
+            assumption ($234 a month here; the lender&apos;s Loan Estimate shows
+            the actual premium) — which is why
+            the DSCR collapses to 0.67. Some lenders may set stricter limits than
+            Fannie Mae&apos;s and Freddie Mac&apos;s{" "}
+            <a
+              href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+              className="text-primary font-semibold hover:underline"
+            >
+              85% maximum for a single-family investment purchase
+            </a>
+            . Second, the reserve requirement falls
             as you put more down, because reserves are six months of PITIA and
             PITIA shrinks; the total-cash line still rises, just less than the
             down payment does. Third, and least intuitive:{" "}
@@ -794,24 +851,54 @@ export default function BlogPost() {
             >
               negative leverage
             </Link>
-            , and it is the normal condition in most 2026 metros.
+            , and it applies whenever a deal&apos;s loan constant exceeds its cap
+            rate, so check yours.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
-            The cheapest legitimate door: house-hack a duplex
+            The least cash spent: house-hack a duplex
           </h2>
           <p>
             If the honest answer to &ldquo;how much do I need&rdquo; is more
             than you have, the structural fix is not a cheaper house. It is
             owner-occupied financing. Live in one unit of a 2-4 unit for a year
-            and three things change at once: the minimum down payment drops to
-            5% conventional (3.5% FHA), the rate prices at primary-residence
-            levels roughly half a point below investment rates, and the reserve
-            requirement drops from six months to about two.
+            and two things change at once: the minimum down payment drops to{" "}
+            <a
+              href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+              className="text-primary font-semibold hover:underline"
+            >
+              5% conventional
+            </a>{" "}
+            through automated underwriting (manually underwritten loans
+            require more) or{" "}
+            <a
+              href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              3.5% FHA
+            </a>
+            , and the rate prices at primary-residence levels without the{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
+              className="text-primary font-semibold hover:underline"
+            >
+              extra loan-level price adjustments Fannie Mae applies to
+              investment loans
+            </a>
+            . The reserve requirement does not necessarily shrink:{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae still requires six months of reserves on a 2-4 unit
+              principal residence
+            </a>
+            .
           </p>
           <p>
-            Take a $400,000 duplex at 5% down and 6.75%. The loan is $380,000,
-            P&amp;I is $2,464.68, PMI at 0.8% of the balance is $253 a month,
+            Take a $400,000 duplex at 5% down and an assumed 6.75%. The loan is
+            $380,000, P&amp;I is $2,464.68, PMI (assumed at 0.8% of the
+            balance) is $253 a month,
             taxes at 1.1% are $367, insurance is $183 — PITIA{" "}
             <strong>$3,268</strong>.
           </p>
@@ -849,23 +936,25 @@ export default function BlogPost() {
                   <td className="font-mono text-right font-bold">$39,421</td>
                 </tr>
                 <tr>
-                  <td>Reserves (2 × $3,268)</td>
-                  <td className="font-mono text-right">$6,536</td>
+                  <td>Reserves (6 × $3,268)</td>
+                  <td className="font-mono text-right">$19,608</td>
                 </tr>
                 <tr className="bg-muted/30">
                   <td className="font-bold">Total cash required</td>
-                  <td className="font-mono text-right font-bold">$45,957</td>
+                  <td className="font-mono text-right font-bold">$59,029</td>
                 </tr>
               </tbody>
             </table>
           </ScrollX>
           <p>
             <strong>
-              A $400,000 two-unit costs less cash to buy than a $150,000
+              A $400,000 two-unit takes less cash actually spent than a $150,000
               single-family rental
             </strong>{" "}
-            — $45,957 against $50,744 — because the down-payment percentage does
-            more work than the price does. And the tenant pays down your own
+            — $39,421 against $43,958 — because the down-payment percentage does
+            more work than the price does, though with Fannie Mae&apos;s six
+            months of reserves its total cash required (about $59,000) is
+            higher. And the tenant pays down your own
             housing cost while you are there: at $1,500 for the other unit, your
             effective monthly housing expense is $1,768 instead of $3,268. Size
             your own version in the{" "}
@@ -887,8 +976,22 @@ export default function BlogPost() {
           </p>
           <p>
             FHA at 3.5% goes lower still — $14,000 down on the same duplex — but
-            the trade-offs are real: 1.75% upfront mortgage insurance, annual
-            MIP that never drops off above 90% LTV, county loan limits that bind
+            the trade-offs are real:{" "}
+            <a
+              href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              1.75% upfront mortgage insurance, annual MIP that never drops off
+              above 90% LTV
+            </a>
+            ,{" "}
+            <a
+              href="https://www.hud.gov/news/hud-no-25-145"
+              className="text-primary font-semibold hover:underline"
+            >
+              county loan limits
+            </a>{" "}
+            that can bind
             on two-to-four-unit properties in expensive metros, and an appraisal
             process sellers dislike in competitive markets. It is the right tool
             when the down payment is genuinely the binding constraint, and the
@@ -943,24 +1046,43 @@ export default function BlogPost() {
             not their first. Fannie Mae wants six months of PITIA on the subject
             investment property — and if you already carry other financed
             properties, an additional{" "}
-            <strong>2% of their combined unpaid principal balances</strong>,
-            escalating to 4% at five to six financed properties and 6% at seven
-            to ten.
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+              className="text-primary font-semibold hover:underline"
+            >
+              <strong>2% of their combined unpaid principal balances</strong>
+            </a>
+            , escalating to 4% at five to six financed properties and 6% at
+            seven to ten.
           </p>
           <p>
             Concretely: you own two rentals with $310,000 of combined mortgage
             balances and you are buying the Tier 2 house. Your reserve
             requirement is $12,423 for the new loan <em>plus</em> $6,200 for the
             existing two — $18,623 documented, pushing total cash on that
-            purchase to roughly $95,600. That escalator is the quiet reason a
+            purchase to roughly $95,600. That escalator is one quiet reason a
             fourth or fifth conventional rental gets harder than the second, and
-            it is why portfolio investors migrate to DSCR and commercial paper.
+            one reason portfolio investors look at DSCR and commercial loans.
           </p>
           <p>
-            Two practical notes. Retirement accounts count toward reserves at a
-            discount — typically 60-70% of the vested balance, net of any loan —
-            so a 401(k) can satisfy the requirement without being liquidated.
-            And treat the lender minimum as a floor, not a target: six months of
+            Two practical notes.{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-4.3-03/retirement-accounts"
+              className="text-primary font-semibold hover:underline"
+            >
+              Retirement accounts can count toward reserves without being
+              withdrawn
+            </a>
+            : Fannie Mae counts vested funds, and{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-4.3-01/stocks-stock-options-bonds-and-mutual-funds"
+              className="text-primary font-semibold hover:underline"
+            >
+              100% of the value of stock, bond and mutual-fund assets used for
+              reserves
+            </a>
+            . Ask your lender how
+            it will value your account. And treat the lender minimum as a floor, not a target: six months of
             PITIA does not cover a $9,000 roof, and the{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
@@ -975,20 +1097,33 @@ export default function BlogPost() {
             The cost of the deals you do not buy
           </h2>
           <p>
-            One line item that never appears in the answers to this question:
-            money spent on properties you walk away from. Inspection ($400-700)
-            and appraisal ($650-900) are usually paid upfront and are not
-            refundable when the inspection turns up a foundation problem or the
-            appraisal comes in $20,000 light. Two dead deals before the one that
-            closes is normal, and that is $2,000-$3,000 of real cash on top of
-            everything above.
+            One line item that rarely appears in the answers to this question:
+            money spent on properties you walk away from. Inspection and
+            appraisal fees, which{" "}
+            <a
+              href="https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay"
+              className="text-primary font-semibold hover:underline"
+            >
+              vary with the home&apos;s size, value and location
+            </a>
+            , are usually paid upfront and are not refundable when the
+            inspection turns up a foundation problem or the appraisal comes in
+            $20,000 light. Each deal that falls through can cost you those fees
+            again, on top of everything above.
           </p>
           <p>
             Earnest money is the opposite — a common false worry. It is not
             additional cash; it credits against your total at closing, so a
-            $3,000 deposit reduces what you wire at settlement by $3,000. You
-            only lose it by breaching the contract after your contingencies
-            expire.
+            $3,000 deposit reduces what you wire at settlement by $3,000.{" "}
+            <a
+              href="https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/"
+              className="text-primary font-semibold hover:underline"
+            >
+              Whether you can lose it depends on your purchase contract
+            </a>
+            : if the contract is terminated for a permissible reason, such as a
+            contingency it includes, the deposit is returned, but if you do not
+            perform in good faith it may be forfeited to the seller.
           </p>
           <p>
             The cheap defence against both is arithmetic before offers.
@@ -1030,16 +1165,16 @@ export default function BlogPost() {
             cash flow on a $150,000 house costs $32,000 more of capital than $73
             a month does. Whether that is a good use of $32,000 depends on what
             else the money can do — which is a portfolio question, not a
-            property question, and the reason experienced investors optimise
-            total return rather than monthly cash flow.
+            property question, and a reason to weigh total return rather than
+            monthly cash flow alone.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The checklist</h2>
           <ol>
             <li>
               <strong>Start from the multiple, not the percentage.</strong>{" "}
-              1.4-1.7× your intended down payment is the number to have
-              available, and lean toward 1.7× under $200,000.
+              In these examples, 1.4-1.7× the intended down payment is the
+              number to have available, and closer to 1.7× under $200,000.
             </li>
             <li>
               <strong>Separate spent from shown.</strong> Reserves stay yours;
@@ -1049,8 +1184,8 @@ export default function BlogPost() {
             <li>
               <strong>Get a Loan Estimate before you get attached.</strong>{" "}
               Origination, transfer taxes, and title vary enough between lenders
-              and states to move total cash by $4,000-$5,000 on a $300,000
-              purchase.
+              and states to move total cash meaningfully, so compare Loan
+              Estimates before you commit to a purchase.
             </li>
             <li>
               <strong>Budget the make-ready with the roof in mind.</strong> A
@@ -1105,6 +1240,66 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (Freddie Mac PMMS)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+            {
+              title: "Freddie Mac, Maximum LTV/TLTV/HTLTV Ratio Requirements for Conforming and Super Conforming Mortgages",
+              url: "https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages",
+            },
+            {
+              title: "Fannie Mae Selling Guide B7-1-01, Provision of Mortgage Insurance",
+              url: "https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance",
+            },
+            {
+              title: "CFPB Owning a Home, Figure out how much you want to spend",
+              url: "https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/",
+            },
+            {
+              title: "12 CFR 1024.17 (Regulation X), Escrow accounts",
+              url: "https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-B/section-1024.17",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+            {
+              title: "HUD Handbook 4000.1, FHA Single Family Housing Policy Handbook",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf",
+            },
+            {
+              title: "Fannie Mae Selling Guide B2-1.1-01, Occupancy Types",
+              url: "https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types",
+            },
+            {
+              title: "HUD Mortgagee Letter 2023-05, Reduction of FHA Annual Mortgage Insurance Premium Rates",
+              url: "https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf",
+            },
+            {
+              title: "HUD No. 25-145, 2026 FHA loan limits",
+              url: "https://www.hud.gov/news/hud-no-25-145",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.3-03, Retirement Accounts",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.3-03/retirement-accounts",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.3-01, Stocks, Stock Options, Bonds, and Mutual Funds",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.3-01/stocks-stock-options-bonds-and-mutual-funds",
+            },
+            {
+              title: "Freddie Mac My Home, What are closing costs and how much will I pay?",
+              url: "https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay",
+            },
+            {
+              title: "CFPB, Mortgage key terms",
+              url: "https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
