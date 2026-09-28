@@ -16,6 +16,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const SLUG = "best-short-term-rental-analysis-tool-2026";
 const TITLE =
@@ -260,22 +261,10 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={itemListSchema} />
+      <JsonLd data={faqSchema} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">

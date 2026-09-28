@@ -23,6 +23,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
@@ -392,10 +393,7 @@ export default function VsHubPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <JsonLd data={structuredData} />
       <Header />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Hero */}

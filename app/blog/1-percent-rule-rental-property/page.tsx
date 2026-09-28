@@ -24,6 +24,7 @@ import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const SLUG = "1-percent-rule-rental-property";
 const TITLE = "The 1% rule for rental property: does it still work in 2026?";
@@ -136,18 +137,9 @@ export default function OnePercentRulePost() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
+      <JsonLd data={articleLd} />
+      <JsonLd data={breadcrumbLd} />
+      <JsonLd data={faqLd} />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article>

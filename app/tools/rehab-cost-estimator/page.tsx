@@ -11,6 +11,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
@@ -117,9 +118,9 @@ export default function RehabEstimatorPage() {
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/rehab-cost-estimator" toolName="Rehab cost estimator" />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <JsonLd data={webAppLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
 
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

@@ -11,6 +11,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
   description:
@@ -128,18 +129,9 @@ export default function OnePercentRulePage() {
         toolPath="/tools/1-percent-rule-calculator"
         toolName="1% rule calculator"
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
-      />
+      <JsonLd data={webAppLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
 
       <div className="min-h-screen bg-background">
         <main

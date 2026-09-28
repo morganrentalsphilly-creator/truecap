@@ -50,6 +50,7 @@ import {
 } from "@/lib/pricing-evaluation";
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -243,10 +244,7 @@ export default async function PricingPage() {
       <Header initialUser={user} initialEntitlements={entitlements} />
 
       <main id="main" className="min-h-screen bg-background">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingSchema) }}
-        />
+        <JsonLd data={pricingSchema} />
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div
@@ -611,18 +609,15 @@ export default async function PricingPage() {
         </section>
 
         {/* JSON-LD FAQPage for SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            }),
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
           }}
         />
       </main>

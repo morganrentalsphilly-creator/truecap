@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Blog Topics",
@@ -54,7 +55,7 @@ export default function BlogTopicsIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <JsonLd data={schema} />
       <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">

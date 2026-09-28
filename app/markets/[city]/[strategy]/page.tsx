@@ -31,6 +31,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { fmrLabel } from "@/lib/markets/data-copy";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const dynamicParams = false;
 
@@ -164,18 +165,9 @@ export default async function CityStrategyPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
+      <JsonLd data={webPageLd} />
+      <JsonLd data={breadcrumbLd} />
+      <JsonLd data={faqLd} />
       <Header />
 
       <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">

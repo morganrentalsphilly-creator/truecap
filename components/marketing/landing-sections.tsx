@@ -60,6 +60,7 @@ import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import { JsonLd } from "@/components/seo/json-ld";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -758,18 +759,15 @@ export function HomepageFaq({
       </section>
       {/* Only one URL should claim this exact FAQ block in structured data. */}
       {structuredData ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            }),
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
           }}
         />
       ) : null}

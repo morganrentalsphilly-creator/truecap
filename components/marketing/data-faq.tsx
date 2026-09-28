@@ -13,6 +13,7 @@
 
 import type { DataFaqItem } from "@/lib/markets/data-copy";
 import { formatIsoDate } from "@/lib/markets/data-copy";
+import { JsonLd } from "@/components/seo/json-ld";
 
 /** The FAQPage node for `items` (exported so tests compare it to the visible Q&A). */
 export function buildFaqPageLd(items: readonly DataFaqItem[]) {
@@ -37,10 +38,7 @@ export function DataFaq({
   if (items.length === 0) return null;
   return (
     <section data-faq="" className="mt-12" aria-labelledby="data-faq-heading">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqPageLd(items)) }}
-      />
+      <JsonLd data={buildFaqPageLd(items)} />
       <h2 id="data-faq-heading" className="text-2xl font-extrabold text-foreground">
         {heading}
       </h2>

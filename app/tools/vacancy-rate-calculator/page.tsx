@@ -16,6 +16,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -123,18 +124,9 @@ export default function VacancyRateCalculatorPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
-      />
+      <JsonLd data={ld} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
       <ToolBreadcrumbSchema
         toolName="Vacancy Rate Calculator"
         toolPath="/tools/vacancy-rate-calculator"

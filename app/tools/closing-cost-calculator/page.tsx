@@ -16,6 +16,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Free Closing Cost Calculator — Every Line Item",
@@ -115,9 +116,9 @@ export default function ClosingCostCalculatorPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <JsonLd data={ld} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
       <ToolBreadcrumbSchema toolName="Closing Cost Calculator" toolPath="/tools/closing-cost-calculator" />
 
       <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">

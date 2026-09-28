@@ -20,6 +20,7 @@
  */
 
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
 
 type Props = {
   /** Path starting with /tools/ (no trailing slash, no full URL). */
@@ -57,9 +58,6 @@ export function ToolBreadcrumbSchema({ toolPath, toolName }: Props) {
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-    />
+    <JsonLd data={breadcrumbLd} />
   );
 }

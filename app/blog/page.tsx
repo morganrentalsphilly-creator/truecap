@@ -24,6 +24,7 @@ import { lastmodOrPublished } from "@/lib/seo/lastmod";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
 import { Header } from "@/components/investcalc/header";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Rental Property Investing Blog",
@@ -88,10 +89,7 @@ export default function BlogIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd) }}
-      />
+      <JsonLd data={blogLd} />
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">

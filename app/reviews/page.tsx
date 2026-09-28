@@ -34,6 +34,7 @@ import {
   MIN_SAVED_DEALS_FOR_PUBLISH,
   PUBLISH_DELAY_HOURS,
 } from "@/lib/testimonials/rules";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const revalidate = 3600;
 
@@ -328,10 +329,7 @@ export default async function ReviewsPage() {
         </section>
       </main>
       <SiteFooter />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsLd) }}
-      />
+      <JsonLd data={reviewsLd} />
     </>
   );
 }

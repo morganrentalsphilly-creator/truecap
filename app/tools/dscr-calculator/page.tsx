@@ -21,6 +21,7 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -145,18 +146,9 @@ export default function DscrCalculatorPage() {
         toolPath="/tools/dscr-calculator"
         toolName="DSCR calculator"
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
-      />
+      <JsonLd data={webAppLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
 
       <div className="min-h-screen bg-background">
         <main

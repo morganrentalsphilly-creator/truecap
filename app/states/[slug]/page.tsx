@@ -54,6 +54,7 @@ import { STATES, getStateBySlug } from "@/lib/states";
 import { stateFactsFor } from "@/lib/seo/state-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export async function generateStaticParams() {
   return Object.values(STATES).map((state) => ({ slug: state.slug }));
@@ -187,18 +188,9 @@ export default async function StatePage({
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(placeLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
+      <JsonLd data={placeLd} />
+      <JsonLd data={webPageLd} />
+      <JsonLd data={breadcrumbLd} />
       <Header />
 
       <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">

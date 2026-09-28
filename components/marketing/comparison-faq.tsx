@@ -24,6 +24,7 @@
 
 import type { ReactNode } from "react";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
+import { JsonLd } from "@/components/seo/json-ld";
 
 /**
  * Manual last-reviewed date for the comparison content (feature rows +
@@ -76,10 +77,7 @@ export function ComparisonFaq({
 
   return (
     <section className="mb-12 sm:mb-16">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
+      <JsonLd data={schema} />
       <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-2">
         Common questions about TrueCap vs {competitorName}
       </h2>

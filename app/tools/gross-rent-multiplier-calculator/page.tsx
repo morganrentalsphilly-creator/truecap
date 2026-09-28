@@ -18,6 +18,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Free GRM Calculator — Gross Rent Multiplier Screen",
@@ -138,18 +139,9 @@ export default function GrmCalculatorPage() {
         toolPath="/tools/gross-rent-multiplier-calculator"
         toolName="GRM calculator"
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
-      />
+      <JsonLd data={webAppLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={softwareAppLd} />
 
       <div className="min-h-screen bg-background">
         <main
