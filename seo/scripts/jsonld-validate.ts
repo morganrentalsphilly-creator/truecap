@@ -11,6 +11,11 @@
  *   - FAQ questions are VISIBLE in the page's main text. Google requires FAQ
  *     markup to mirror visible content; invisible FAQ markup is a spam-policy
  *     problem, not a style nit.
+ *   - the page's F4 values, by its path (scripts/seo/structured-data-
+ *     expectations.mjs, shared with the production healthcheck): hub and /vs
+ *     breadcrumb trails, one application entity per tool with @id
+ *     <origin>/tools/<slug>#app, /analyze -> <origin>/#software, and the
+ *     glossary's one DefinedTermSet. Reported as type "page".
  *
  * Load-bearing constraints:
  *   - A raw `</script` or `<!--` inside JSON-LD text is CRITICAL. The HTML
@@ -42,6 +47,7 @@ import { loadConfig } from "./lib/config.ts";
 import { decodeEntities, mainTextOf } from "./lib/html.ts";
 import { readJson, writeJson } from "./lib/io.ts";
 import { toPath } from "./lib/sitemap.ts";
+import { structuredDataProblems } from "../../scripts/seo/structured-data-expectations.mjs";
 
 export type Severity = "critical" | "error" | "warning";
 export type JsonLdFinding = { url: string; type: string; severity: Severity; detail: string };
@@ -283,6 +289,33 @@ export function validateBlocks(blocks: unknown[], visibleText: string, url = "")
   return findings;
 }
 
+/** Every node of the parsed blocks: top level, @graph members and nested objects. */
+function allNodes(blocks: unknown[]): Record<string, unknown>[] {
+  const out: Record<string, unknown>[] = [];
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    const node = asObject(value);
+    if (!node) return;
+    out.push(node);
+    for (const child of Object.values(node)) if (child && typeof child === "object") visit(child);
+  };
+  blocks.forEach(visit);
+  return out;
+}
+
+/**
+ * The F4 values the page at `url` must carry (breadcrumb trails, tool @ids,
+ * /analyze, the glossary set), by its path. `url` is a page id ("/vs/x") or a
+ * full URL; anything else matches no rule.
+ */
+export function pageExpectationFindings(blocks: unknown[], url: string): JsonLdFinding[] {
+  const pagePath = url.startsWith("/") ? url : toPath(url);
+  return structuredDataProblems(pagePath, allNodes(blocks)).map((detail: string) => ({ url, type: "page", severity: "error" as const, detail }));
+}
+
 /** Everything for one rendered page: extraction problems plus the rules. */
 export function validateHtml(html: string, url: string): JsonLdFinding[] {
   const findings: JsonLdFinding[] = [];
@@ -293,6 +326,7 @@ export function validateHtml(html: string, url: string): JsonLdFinding[] {
     if (block.parsed) parsed.push(block.value);
   });
   findings.push(...validateBlocks(parsed, mainTextOf(html), url));
+  findings.push(...pageExpectationFindings(parsed, url));
   return findings;
 }
 
@@ -466,6 +500,9 @@ function selfTest(): void {
   check(shifted.fresh.length === 0 && shifted.known.length === 1, "a renumbered block keeps its baseline");
   check(applyBaseline([noContext(1), noContext(2)], [noContext(1)]).fresh.length === 1, "a duplicated finding is still new");
   check(allowedUrl("https://evil.example/") === null && allowedUrl("http://127.0.0.1:3100/x") !== null, "fetch fence");
+  const crumbs = (...paths: string[]) => JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: paths.map((p, i) => ({ "@type": "ListItem", position: i + 1, name: ["TrueCap", "Comparisons", "TrueCap vs X"][i], item: `https://usetruecap.com${p}` })) });
+  check(validateHtml(page([crumbs("/", "/vs", "/vs/x")], "<p>x</p>"), "/vs/x").length === 0, "a three-level /vs trail passes");
+  check(validateHtml(page([crumbs("/", "/vs/x")], "<p>x</p>"), "/vs/x").some((f) => f.type === "page"), "a two-level /vs trail is a page finding");
 }
 
 /** Every flag this script reads (lib/cli.ts rejects any other). */
