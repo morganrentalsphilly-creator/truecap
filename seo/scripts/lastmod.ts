@@ -12,7 +12,7 @@
  *     main content). The model never writes dates; this deterministic step
  *     does, from the publish plan.
  *   · `seed` (owner, F2): builds the map from git history. For every sitemap
- *     URL the date is the committer date (%cs) of the NEWEST commit that
+ *     URL the date is the committer date (in UTC) of the NEWEST commit that
  *     changed that URL's content signature (lib/content-signature.ts: visible
  *     text and data, never classNames, imports, whitespace or the dates
  *     themselves), walking history newest to oldest and skipping the
@@ -286,12 +286,16 @@ class History {
   fileLog(file: string): FileChange[] {
     const cached = this.logs.get(file);
     if (cached) return cached;
-    const out = this.git(["log", "--no-renames", "--format=%x01%H %cs", "--raw", "--no-abbrev", "--", file]);
+    // %ct, read in UTC: %cs is the day in the committer's OWN zone, and
+    // GitHub's rebase-merge commits in a US zone, so a merge at 01:50 UTC on
+    // the 28th read as the 27th — while the publish job dates in UTC.
+    const out = this.git(["log", "--no-renames", "--format=%x01%H %ct", "--raw", "--no-abbrev", "--", file]);
     const changes: FileChange[] = [];
     for (const chunk of out.split("\u0001")) {
       const lines = chunk.split("\n").filter(Boolean);
       if (!lines.length) continue;
-      const [sha, date] = lines[0].split(" ");
+      const [sha, epoch] = lines[0].split(" ");
+      const date = utcDay(Number(epoch));
       for (const line of lines.slice(1)) {
         if (!line.startsWith(":")) continue;
         const [meta, changedPath] = line.split("\t");
@@ -413,6 +417,11 @@ export function jsonEntryParts(text: string, path: readonly string[], omit: read
     return v;
   };
   return [`json:${JSON.stringify(canonical(value))}`];
+}
+
+/** A unix timestamp's calendar day in UTC (YYYY-MM-DD): one clock for seed and publish. */
+export function utcDay(epochSeconds: number): string {
+  return new Date(epochSeconds * 1000).toISOString().slice(0, 10);
 }
 
 function digest(parts: string[]): string {
@@ -749,6 +758,8 @@ async function selfTest(): Promise<void> {
   check(sweepProblems(["af6211a", "af6211"], ["af6211a1", "af6211a2"]).length === 2, "an ambiguous or short entry is an error");
   check(sweepProblems([""], reach).length === 1, "an empty entry (it would skip every commit) is an error");
   check(hasSweepTrailer("feat: x\n\nbody\n\nLastmod-Sweep: true\nCo-Authored-By: a <b@c>"), "a trailer marks a sweep");
+  // 2026-09-28T01:50:00Z, which a US-zone committer's %cs reads as the 27th.
+  check(utcDay(1790560200) === "2026-09-28", "commit days are read in UTC");
   const facts = (v: number, day: string) => JSON.stringify({ states: { ohio: { tax: { value: v, source: { url: "https://x.gov", retrievedAt: day } } } } });
   check(jsonEntryParts(facts(1, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join() === jsonEntryParts(facts(1, "2026-09-27"), ["states", "ohio"], ["retrievedAt"]).join(), "a re-fetch day alone is not content");
   check(jsonEntryParts(facts(1, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join() !== jsonEntryParts(facts(2, "2026-09-01"), ["states", "ohio"], ["retrievedAt"]).join(), "a changed value is content");
