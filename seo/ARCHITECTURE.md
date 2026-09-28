@@ -27,7 +27,7 @@ Read this before changing anything the SEO loop touches. The loop itself is desc
 | `/` | SoftwareApplication `/#software` + Offer, FAQPage |
 | `/pricing` | SoftwareApplication with the same `@id` `/#software` (name and url as the homepage's) carrying the Free and paid Offers, FAQPage. Outside `/tools/<slug>`, any application entity must be `/#software` (F4 review) |
 | `/analyze` | WebPage whose `mainEntity` is `/#software` (by @id, F4) |
-| blog post (75) | Article/BlogPosting (author = Organization `@id`), BreadcrumbList, FAQPage on the 63 posts that show a FAQ (F4 removed it from 5 whose FAQ was never rendered). No HowTo: the 5 posts that had one described steps the page never showed (F4 review); jsonld-validate fails a HowTo step whose text is not visible |
+| blog post (73 since the DSCR consolidation) | Article/BlogPosting (author = Organization `@id`), BreadcrumbList, FAQPage on the 61 posts that show a FAQ (F4 removed it from 5 whose FAQ was never rendered; the two merged DSCR posts took theirs with them). No HowTo: the 5 posts that had one described steps the page never showed (F4 review); jsonld-validate fails a HowTo step whose text is not visible |
 | market city (150) | WebPage (dateModified from the lastmod map, F2; author = Organization `@id`), BreadcrumbList, FAQPage built from the same list as the visible FAQ (F8, `components/marketing/data-faq.tsx`) |
 | bespoke market (12, indexable since F8) | WebPage + Place (author = Organization), 4-level BreadcrumbList, FAQPage (visible, F8) |
 | state (33) | Place, WebPage (author = Organization), BreadcrumbList, FAQPage (visible, F8) |
@@ -69,7 +69,7 @@ Everything the loop can edit is **git-tracked source**. There is no CMS, and no 
   - Before F2, importing it pulled in the `/blog` page's React tree, which is why `seo-guards.test.ts` still reads `app/sitemap.ts` as text.
   - **Drift:** 13 registry titles and some excerpts no longer match their pages (e.g. the rental-yield excerpt still quotes figures the page removed). Every post's `MODIFIED_AT` now reads the lastmod map (F2), so it matches the sitemap.
 - **Topic hubs:** `lib/blog-topics.ts` holds 8 hubs (`slug, title, description, intro, postSlugs, calculatorSlugs`) rendered at `/blog/topics/<slug>`.
-  - Underwriting hub: 19 posts. Tax hub: 8. Financing hub: 12.
+  - Underwriting hub: 19 posts. Tax hub: 8. Financing hub: 11 (12 before the DSCR consolidation removed `dscr-loans-explained`).
   - Every published post is in exactly one hub. Five were in none: F9 filed four, and the fifth, `what-is-a-good-dscr`, was merged into `/blog/how-to-calculate-dscr` by the DSCR consolidation. Each post links back once through a registry-driven "Part of: <Hub>" line (`components/marketing/blog-hub-link.tsx`, rendered by `RelatedBlogPosts`), so filing a post under a hub is the only edit it needs.
   - A hub may name a few glossary terms (`glossarySlugs`, the tax and strategy hubs today); its page renders them as a "Terms these guides use" line with a link to the full glossary.
   - The `/blog/topics` copy derives the hub count from `BLOG_TOPICS` (it said "five" while there were eight).
