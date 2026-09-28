@@ -13,8 +13,8 @@ import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -83,18 +83,6 @@ export default function CoCCalculatorPage() {
 
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap Cash-on-Cash Return Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/cash-on-cash-calculator"),
-    url: `${siteUrl}/tools/cash-on-cash-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online calculator for cash-on-cash return on rental property, including mortgage math and operating expense estimation.",
-  };
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -105,33 +93,17 @@ export default function CoCCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "cash-on-cash-calculator",
     name: "Cash-on-Cash Return Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free cash-on-cash return calculator. Annual cash flow ÷ cash invested with built-in mortgage math. Plus what counts as a good CoC return.",
-    url: `${siteUrl}/tools/cash-on-cash-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Compute cash-on-cash from cash invested + annual cash flow",
       "Include closing costs + reserves",
       "Compare to alternative investments",
     ],
-  };
+  });
 
   return (
     <>
@@ -140,9 +112,8 @@ export default function CoCCalculatorPage() {
         toolPath="/tools/cash-on-cash-calculator"
         toolName="Cash-on-cash return calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

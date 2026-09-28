@@ -26,8 +26,8 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -101,18 +101,6 @@ export default function HouseHackingCalculatorPage() {
 
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap House Hacking Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/house-hacking-calculator"),
-    url: `${siteUrl}/tools/house-hacking-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online house hacking calculator for 2-4 unit owner-occupied properties: effective monthly housing cost after tenant rent, with reserves.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -124,34 +112,18 @@ export default function HouseHackingCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "house-hacking-calculator",
     name: "House Hacking Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free house hacking calculator for 2-4 unit properties. See your effective monthly housing cost after tenant rent — duplex, triplex, or fourplex.",
-    url: `${siteUrl}/tools/house-hacking-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Duplex, triplex, and fourplex owner-occupant math",
       "Effective housing cost after tenant rent",
       "After-reserves number (vacancy, maintenance, CapEx)",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
@@ -160,9 +132,8 @@ export default function HouseHackingCalculatorPage() {
         toolPath="/tools/house-hacking-calculator"
         toolName="House hacking calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main

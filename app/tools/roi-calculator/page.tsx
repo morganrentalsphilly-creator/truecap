@@ -19,6 +19,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -88,6 +89,7 @@ export default function RoiCalculatorPage() {
     url: `${siteUrl}/tools/roi-calculator`,
     dateModified: lastmodFor("/tools/roi-calculator"),
     publisher: { "@id": `${siteUrl}/#organization` },
+    mainEntity: { "@id": toolAppId(siteUrl, "roi-calculator") },
   };
   const faqLd = {
     "@context": "https://schema.org",
@@ -99,40 +101,24 @@ export default function RoiCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "roi-calculator",
     name: "Rental Property ROI Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free modeled ROI calculator combining entered cash flow, principal paydown, and appreciation assumptions.",
-    url: `${siteUrl}/tools/roi-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Combine cash flow, principal paydown, appreciation",
       "Simple one-year modeled ROI estimate",
       "Separate contribution from each entered component",
     ],
-  };
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
       <ToolBreadcrumbSchema
         toolName="ROI Calculator"
         toolPath="/tools/roi-calculator"

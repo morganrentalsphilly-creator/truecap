@@ -26,8 +26,8 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
-import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
 export const metadata: Metadata = {
   title: "50% Rule Calculator | Free Rental Expense Triage",
   description:
@@ -96,18 +96,6 @@ export default function FiftyPercentRuleCalculatorPage() {
 
   const siteUrl = getSiteUrl();
 
-  const webAppLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TrueCap 50% Rule Calculator",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    dateModified: lastmodFor("/tools/50-percent-rule-calculator"),
-    url: `${siteUrl}/tools/50-percent-rule-calculator`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    description:
-      "Free online 50% rule calculator: estimated operating expenses, NOI, and cash flow from gross rent, with an adjustable expense ratio.",
-  };
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -119,34 +107,18 @@ export default function FiftyPercentRuleCalculatorPage() {
     })),
   };
 
-  const softwareAppLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const appLd = buildToolAppLd(siteUrl, {
+    slug: "50-percent-rule-calculator",
     name: "50% Rule Calculator",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Real Estate Calculator",
-    operatingSystem: "Web",
     description:
       "Free 50% rule calculator. Estimate rental operating expenses, NOI, and cash flow in 3 seconds — with an adjustable expense ratio for the markets where 50% is wrong.",
-    url: `${siteUrl}/tools/50-percent-rule-calculator`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "TrueCap",
-      url: "https://usetruecap.com",
-    },
     featureList: [
       "Estimated expenses + NOI + cash flow from gross rent",
       "Adjustable expense ratio (50-65%) for hard markets",
       "Instant positive / negative triage",
       "Free, no signup",
     ],
-  };
+  });
 
   return (
     <>
@@ -155,9 +127,8 @@ export default function FiftyPercentRuleCalculatorPage() {
         toolPath="/tools/50-percent-rule-calculator"
         toolName="50% rule calculator"
       />
-      <JsonLd data={webAppLd} />
       <JsonLd data={faqLd} />
-      <JsonLd data={softwareAppLd} />
+      <JsonLd data={appLd} />
 
       <div className="min-h-screen bg-background">
         <main
