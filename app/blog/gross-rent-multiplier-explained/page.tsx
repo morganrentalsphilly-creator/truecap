@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "gross-rent-multiplier-explained";
 const TITLE =
@@ -29,7 +30,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Gross rent multiplier (GRM) explained (2026)";
 const DESCRIPTION =
-  "GRM = price ÷ annual gross rent — the fastest rental screen. The formula, 2026 worked examples, GRM vs cap rate, a good GRM range, and where it lies.";
+  "GRM = price ÷ annual gross rent — the fastest rental screen. The formula, worked examples, GRM vs cap rate, how to judge a good GRM, and where it lies.";
 const PUBLISHED_AT = "2026-06-17";
 const MODIFIED_AT = lastmodFor("/blog/gross-rent-multiplier-explained") ?? PUBLISHED_AT;
 const READING_TIME = 10;
@@ -67,7 +68,7 @@ const FAQS = [
   },
   {
     q: "What is a good gross rent multiplier?",
-    a: "It is market-dependent, not universal. A rough 2026 guide: under 6 is very strong (usually distressed), 6-10 is healthy cash-flow territory (the Midwest, parts of the Sun Belt), 10-14 is balanced, 14-20 signals an appreciation market where the thesis is price growth over cash flow, and above 20 is luxury territory where current yield is minimal. Always derive the 'good' number from recent sold comps in the submarket.",
+    a: "It is market-dependent, not universal. Derive the 'good' number from recent sold comps in the submarket; a lower GRM means more gross rent per dollar of price, not necessarily a better deal.",
   },
   {
     q: "What is the difference between GRM and cap rate?",
@@ -75,11 +76,11 @@ const FAQS = [
   },
   {
     q: "How do you calculate GRM from monthly rent?",
-    a: "Multiply monthly rent by 12 for annual gross rent, then divide the price by it. A $250,000 duplex renting for $2,600/month has $31,200 of annual gross rent and a GRM of 250,000 ÷ 31,200 = 8.0. A 'monthly GRM' (price ÷ monthly rent) would be 96 here, but the annual version is the convention used in comps.",
+    a: "Multiply monthly rent by 12 for annual gross rent, then divide the price by it. A $250,000 duplex renting for $2,600/month has $31,200 of annual gross rent and a GRM of 250,000 ÷ 31,200 = 8.0. A 'monthly GRM' (price ÷ monthly rent) would be 96 here; the legacy Fannie Mae/Freddie Mac appraisal forms for 1–4 unit homes use that monthly version, so check which convention your comps use before comparing.",
   },
   {
     q: "Can you use GRM to value a property?",
-    a: "Yes, for small multifamily where rent drives value. Take the market GRM from three or four recently sold comps and multiply it by the subject's annual gross rent. If duplex comps sold at GRMs of 9.0-9.5 and the subject grosses $36,000/year, the implied value is roughly 9.2 × 36,000 ≈ $331,000. Treat it as a sanity check that frames a price range, not a substitute for a full underwrite.",
+    a: "Yes, for small multifamily where rent drives value. Fannie Mae's Selling Guide, for example, requires the income approach, including the gross rent multiplier calculation, when appraising two- to four-unit properties. Take the market GRM from three or four recently sold comps and multiply it by the subject's annual gross rent. If duplex comps sold at GRMs of 9.0-9.5 and the subject grosses $36,000/year, the implied value is roughly 9.2 × 36,000 ≈ $331,000. Keep the conventions matched: a GRM taken from a legacy Fannie Mae/Freddie Mac appraisal form is a monthly GRM, so multiply it by monthly rent instead. Treat it as a sanity check that frames a price range, not a substitute for a full underwrite.",
   },
 ];
 
@@ -154,7 +155,7 @@ export default function GrossRentMultiplierPost() {
             computes on a listing — one division, no spreadsheet, no expense
             breakdown. It will not tell you whether a deal is good, only — in
             about ten seconds — whether it is worth the twenty minutes a real
-            underwrite takes. Here is the formula, a good GRM range for 2026, how
+            underwrite takes. Here is the formula, how to judge a good GRM, how
             it maps onto cap rate and the 1% rule, and the exact place it quietly
             lies to you.
           </p>
@@ -181,10 +182,25 @@ export default function GrossRentMultiplierPost() {
             yield, cheaper relative to the rent it produces.
           </p>
           <p>
-            One convention to nail down: GRM almost always uses{" "}
-            <em>annual</em> gross rent. A &quot;monthly GRM&quot; (price ÷
-            monthly rent) exists — 96 here — but the annual figure of 8.0 is what
-            brokers, appraisers, and comps use, so default to it.
+            One convention to nail down. A &quot;monthly GRM&quot; (price ÷
+            monthly rent) is 96 here. This post uses the <em>annual</em> version
+            (8.0), but the legacy Fannie Mae/Freddie Mac appraisal forms for
+            one- to four-unit homes (Forms{" "}
+            <a
+              href="https://sf.freddiemac.com/docs/pdf/forms/70.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              1004/70
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5"
+              className="text-primary font-semibold hover:underline"
+            >
+              1025/72
+            </a>
+            ) multiply the GRM by monthly rent — so always check which
+            convention a quoted GRM uses.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -241,52 +257,39 @@ export default function GrossRentMultiplierPost() {
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What counts as a good GRM in 2026
+            What counts as a good GRM
           </h2>
           <p>
-            There is no universal &quot;good&quot; GRM — it bakes in whatever
-            rent-to-price relationship a market carries. A reasonable national
-            frame:
+            There is no universal &quot;good&quot; GRM — it reflects whatever
+            rent-to-price relationship a market carries. A lower GRM means more
+            gross rent per dollar of price, not necessarily a better deal.
           </p>
-          <ul>
-            <li>
-              <strong>Under 6</strong> — very strong. Usually distressed, deeply
-              discounted, or a rough submarket. Verify why it is this cheap.
-            </li>
-            <li>
-              <strong>6 to 10</strong> — healthy cash-flow territory. The
-              Midwest, much of the Sun Belt, and older small multifamily live
-              here.
-            </li>
-            <li>
-              <strong>10 to 14</strong> — balanced. Cash flow is thin at today&apos;s
-              rates; the deal leans on modest cash flow plus appreciation.
-            </li>
-            <li>
-              <strong>14 to 20</strong> — appreciation market. The return thesis
-              is price growth and rent growth, not current yield. Coastal and
-              Tier-1 metros.
-            </li>
-            <li>
-              <strong>Above 20</strong> — luxury or ultra-coastal. Current yield
-              is essentially zero; you are betting entirely on the asset.
-            </li>
-          </ul>
           <p>
             The honest way to set a target is local: pull the GRMs of recently{" "}
             <em>sold</em> comparable buildings (not active listings, which are
             asking-price wishful thinking). If sold duplex comps cluster around
             9, then a 9 is &quot;market,&quot; an 8 is a relative win, and an 11
-            means you are paying up. A national benchmark is the starting point;
-            the comp set is the answer.
+            means you are paying up. The comp set is the answer.
+          </p>
+          <p>
+            Lenders&apos; appraisers use GRM too: for two- to four-unit
+            properties, Fannie Mae&apos;s{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
+              className="text-primary font-semibold hover:underline"
+            >
+              Selling Guide requires the income approach, including the gross
+              rent multiplier calculation
+            </a>
+            , though an appraisal may not rely on the income approach alone.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
             Turning GRM into an Offer Ceiling
           </h2>
           <p>
-            Because GRM is just price over rent, you can rearrange it into a
-            an Offer Ceiling once you select a target multiple:
+            Because GRM is just price over rent, you can rearrange it into an
+            Offer Ceiling once you select a target multiple:
           </p>
           <p>
             <strong>Max price = target GRM × annual gross rent.</strong>
@@ -379,8 +382,8 @@ export default function GrossRentMultiplierPost() {
           </ul>
           <p>
             Identical GRM, and a $6,240/year ($520/month) gap in NOI. Now layer
-            on financing at a ~7% investment-property rate, 25% down ($187,500
-            loan): principal and interest run about <strong>$1,247/month</strong>{" "}
+            on financing at an assumed 7% rate, 25% down ($187,500 loan):
+            principal and interest run about <strong>$1,247/month</strong>{" "}
             (check any scenario in the{" "}
             <Link
               href="/tools/mortgage-payment-calculator"
@@ -414,8 +417,22 @@ export default function GrossRentMultiplierPost() {
           <p>
             <strong>1. Operating expenses.</strong> Covered above — taxes,
             insurance, maintenance, vacancy, and management can swing the real
-            return by two full cap-rate points on the same GRM. High-tax states
-            (New Jersey, Illinois, Texas) punish GRM-only thinking hardest.
+            return by two full cap-rate points on the same GRM. States where the{" "}
+            <a
+              href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000"
+              className="text-primary font-semibold hover:underline"
+            >
+              median property-tax bill
+            </a>{" "}
+            is a high share of the{" "}
+            <a
+              href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000"
+              className="text-primary font-semibold hover:underline"
+            >
+              median home value
+            </a>{" "}
+            — Illinois, New Jersey, and Texas among them — punish GRM-only
+            thinking hardest.
           </p>
           <p>
             <strong>2. Condition and capex.</strong> A turnkey duplex and a gut
@@ -446,8 +463,8 @@ export default function GrossRentMultiplierPost() {
           </p>
           <p>
             <strong>4. Whether the rent is real.</strong> The sneaky one.
-            Brokers quote pro-forma or &quot;market&quot; rent, not what is
-            actually collected. If a listing advertises $2,600/month but the
+            Listings often quote pro-forma or &quot;market&quot; rent, not what
+            is actually collected. If a listing advertises $2,600/month but the
             in-place leases are $2,300, your GRM of 8.0 is fiction — the real GRM
             on collected rent is 250,000 ÷ 27,600 = <strong>9.1</strong>. Always
             screen on in-place rent, and read{" "}
@@ -475,8 +492,7 @@ export default function GrossRentMultiplierPost() {
             should be at least 1% of price. Flip it: rent ÷ price ≥ 0.01 per
             month means annual rent ÷ price ≥ 0.12, which means price ÷ annual
             rent ≤ 8.33. <strong>The 1% rule is just &quot;GRM of 8.33 or
-            lower.&quot;</strong> The old 2% rule is a GRM of 4.17 — which is why
-            almost nothing clears it anymore.
+            lower.&quot;</strong> The old 2% rule is a GRM of 4.17.
           </p>
           <p>
             Our Listing A at $250,000 and $2,600/month is at 1.04% (a GRM of
@@ -496,7 +512,7 @@ export default function GrossRentMultiplierPost() {
             where effective gross income is gross rent minus a vacancy allowance
             plus other income (laundry, parking, pet rent). On a building
             grossing $31,200 with 6% vacancy and $600 of laundry income, that is
-            $29,928, for an EGIM of 250,000 ÷ 29,928 = 8.35. It counts the rent
+            $29,928, for an EGIM of 250,000 ÷ 29,928 = 8.35. It nets out the rent
             you will not actually collect, so when comparing a full building
             against a half-empty one it stops you from rewarding the better{" "}
             <em>story</em> over the better income. For fast screening, plain GRM
@@ -599,6 +615,35 @@ export default function GrossRentMultiplierPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Freddie Mac Form 70 / Fannie Mae Form 1004 (March 2005), Uniform Residential Appraisal Report",
+              url: "https://sf.freddiemac.com/docs/pdf/forms/70.pdf",
+            },
+            {
+              title:
+                "Freddie Mac Form 72 / Fannie Mae Form 1025 (March 2005), Small Residential Income Property Appraisal Report",
+              url: "https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5",
+            },
+            {
+              title:
+                "Fannie Mae Selling Guide B4-1.3-10, Cost and Income Approach to Value",
+              url: "https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value",
+            },
+            {
+              title:
+                "U.S. Census Bureau, American Community Survey 2024 1-year, Table B25103: Median Real Estate Taxes Paid, by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000",
+            },
+            {
+              title:
+                "U.S. Census Bureau, American Community Survey 2024 1-year, Table B25077: Median Value (Dollars), by state",
+              url: "https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

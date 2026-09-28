@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "capex-maintenance-reserves-rental-property";
 const TITLE =
@@ -62,11 +63,11 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How much should I budget for capex on a rental property?",
-    a: "Derive it from component lifespans rather than picking a percentage. Sum each big-ticket item's replacement cost divided by its useful life — roof, HVAC, water heater, kitchen, baths, flooring, paint, windows, exterior — and you'll land around $330-400/month full-cycle on a typical 1,400 sq ft single-family, before routine maintenance. Most percent-of-rent defaults (5-10%) understate that badly on low-rent properties, because a roof costs the same whether the house rents for $1,100 or $2,800.",
+    a: "Derive it from component lifespans rather than picking a percentage. Sum each big-ticket item's replacement cost divided by its useful life — roof, HVAC, water heater, kitchen, baths, flooring, paint, windows, exterior — and on this article's illustrative schedule you'll land around $366/month full-cycle for a 1,400 sq ft single-family, before routine maintenance. Most percent-of-rent defaults (5-10%) understate that badly on low-rent properties, because a roof costs the same whether the house rents for $1,100 or $2,800.",
   },
   {
     q: "What is the difference between maintenance and capital expenditures?",
-    a: "Maintenance (repairs) keeps the property in its current condition — fixing a leak, patching drywall, servicing the furnace. CapEx replaces or improves whole components — a new roof, new HVAC, a kitchen renovation. The IRS treats them differently too: repairs are deductible in the year you pay them, while capital improvements are depreciated over 27.5 years (with a de minimis safe harbor that lets you expense items up to $2,500 per invoice). In your underwrite, budget both: roughly $80-150/month for routine maintenance plus a separate capex reserve.",
+    a: "Maintenance (repairs) keeps the property in its current condition — fixing a leak, patching drywall, servicing the furnace. CapEx replaces or improves whole components — a new roof, new HVAC, a kitchen renovation. The IRS treats them differently too: repairs are generally deductible in the year you pay them. Improvements to the building itself, such as a roof or furnace, are generally depreciated over 27.5 years, while appliances, carpeting and furniture used in the rental are 5-year property, and a de minimis safe harbor election lets you expense items costing up to $2,500 per invoice or item. In your underwrite, budget both: an illustrative $80-150/month for routine maintenance plus a separate capex reserve.",
   },
   {
     q: "Is the 1% rule a good way to estimate maintenance costs?",
@@ -74,11 +75,11 @@ const FAQS = [
   },
   {
     q: "Does capex count against NOI?",
-    a: "By appraisal convention, no — NOI is calculated before capital expenditures, which is why listing pro formas love it. In your own underwrite, you should absolutely model a capex reserve as a recurring monthly cost, because the cash leaves your account either way. Just know which convention a number uses before you compare cap rates: a seller's 7% cap with zero capex and your 7% cap with $250/month reserved are not the same deal.",
+    a: "By appraisal convention, no — NOI is calculated before capital expenditures, which is why listing pro formas love it. In your own underwrite, you should absolutely model a capex reserve as a recurring monthly cost, because the cash leaves your account either way. Just know which convention a number uses before you compare cap rates: a seller's 7% cap with zero capex and your 7% cap with $300/month reserved are not the same deal.",
   },
   {
     q: "How big should my cash reserve be at closing?",
-    a: "A practical floor is six months of PITIA (principal, interest, taxes, insurance, association dues) plus an age-weighted capex fund: for each major component, multiply replacement cost by its age divided by its lifespan, and hold the shortfall. A 9-year-old water heater on a 10-year life means you should already have ~90% of its $1,800 replacement banked on day one. Many DSCR lenders also require 3-6 months of PITIA in verified reserves just to close.",
+    a: "A practical floor is six months of PITIA (principal, interest, taxes, insurance, association dues) plus an age-weighted capex fund: for each major component, multiply replacement cost by its age divided by its lifespan, and hold the shortfall. A 9-year-old water heater on a 12-year life means you should already have 75% of its $1,800 replacement banked on day one. Lenders can require verified reserves to close as well (Fannie Mae's DU, for example, requires six months' reserves on an investment-property transaction), so get your program's written requirement.",
   },
 ];
 
@@ -167,17 +168,44 @@ export default function CapexReservesPost() {
             <strong>Maintenance</strong> (repairs) keeps the property in its
             current condition: the $180 service call, the $90 garbage
             disposal, the drywall patch after a tenant moves out. It&apos;s
-            frequent, individually small, and — usefully — deductible in the
-            year you pay it.
+            frequent, individually small, and — usefully — generally{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              deductible in the year you pay it
+            </a>
+            .
           </p>
           <p>
             <strong>Capital expenditures</strong> replace or improve whole
             components: a roof, a furnace, a kitchen. They&apos;re rare,
-            individually large, and depreciated over 27.5 years rather than
-            deducted immediately (the de minimis safe harbor lets you expense
-            items up to $2,500 per invoice, which catches appliances and
-            water heaters for most small landlords). The distinction matters
-            at tax time — the full breakdown is in{" "}
+            individually large, and usually capitalized rather than deducted
+            immediately:{" "}
+            <a
+              href="https://www.irs.gov/publications/p527"
+              className="text-primary font-semibold hover:underline"
+            >
+              building components like a roof or furnace are depreciated over
+              27.5 years, while appliances and carpeting are 5-year property
+            </a>{" "}
+            that may qualify for the special depreciation allowance (
+            <a
+              href="https://www.irs.gov/publications/p946"
+              className="text-primary font-semibold hover:underline"
+            >
+              restored to 100% for qualified property acquired and placed in
+              service after January 19, 2025
+            </a>
+            ). The de minimis safe harbor lets you expense items costing{" "}
+            <a
+              href="https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations"
+              className="text-primary font-semibold hover:underline"
+            >
+              up to $2,500 per invoice or item
+            </a>{" "}
+            if you make the annual election. The distinction matters at tax
+            time — the full breakdown is in{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
               className="text-primary font-semibold hover:underline"
@@ -197,25 +225,25 @@ export default function CapexReservesPost() {
           <p>
             The common defaults — 5% of rent for maintenance, 5-10% for capex
             — share one fatal assumption: that wear scales with rent. It
-            doesn&apos;t. A 30-year architectural shingle roof on a 1,400 sq
-            ft house costs about $11,000 to replace whether that house rents
-            for $1,100 in{" "}
+            doesn&apos;t. A roof replacement doesn&apos;t get cheaper because
+            a 1,400 sq ft house rents for $1,100 in{" "}
             <Link
               href="/markets/cleveland"
               className="text-primary font-semibold hover:underline"
             >
               Cleveland
             </Link>{" "}
-            or $2,800 in{" "}
+            instead of $2,800 in{" "}
             <Link
               href="/markets/phoenix"
               className="text-primary font-semibold hover:underline"
             >
               Phoenix
             </Link>
-            . At 8% of rent, the Cleveland house banks $1,056/year toward
-            capex; the Phoenix house banks $2,688 — for the same roof, the
-            same furnace, the same water heater on the same clock.
+            ; using an illustrative $11,000 roof, at 8% of rent the Cleveland
+            house banks $1,056/year toward capex and the Phoenix house banks
+            $2,688 — for the same roof, the same furnace, the same water
+            heater on the same clock.
           </p>
           <p>
             The result is systematic: <strong>percentage rules understate
@@ -239,36 +267,45 @@ export default function CapexReservesPost() {
           </h2>
           <p>
             For each big-ticket component, divide replacement cost by useful
-            life. Here&apos;s the full schedule for a typical 1,400 sq ft,
-            3-bed single-family at 2026 contractor prices:
+            life. Here&apos;s the full schedule for a 1,400 sq ft, 3-bed
+            single-family, using illustrative replacement costs (swap in your
+            own contractor quotes). The useful lives follow{" "}
+            <a
+              href="https://www.hud.gov/sites/documents/eul_for_cna_e_tool.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              HUD&apos;s estimated useful life table for capital needs
+              assessments
+            </a>
+            , blended where one line covers several components:
           </p>
           <ul>
             <li>
-              <strong>Roof (architectural shingle):</strong> $11,000 ÷ 25
-              years = $440/year
+              <strong>Roof (asphalt shingle):</strong> $11,000 ÷ 20 years =
+              $550/year
             </li>
             <li>
               <strong>HVAC (furnace + condenser):</strong> $9,000 ÷ 18 years
               = $500/year
             </li>
             <li>
-              <strong>Water heater:</strong> $1,800 ÷ 10 years = $180/year
+              <strong>Water heater:</strong> $1,800 ÷ 12 years = $150/year
             </li>
             <li>
               <strong>Kitchen (cabinets, counters, appliances):</strong>{" "}
-              $14,000 ÷ 20 years = $700/year
+              $14,000 ÷ 15 years ≈ $933/year
             </li>
             <li>
               <strong>Bathrooms (2 × $7,000):</strong> $14,000 ÷ 20 years =
               $700/year
             </li>
             <li>
-              <strong>Flooring (LVP throughout):</strong> $7,000 ÷ 12 years ≈
-              $583/year
+              <strong>Flooring (LVP throughout):</strong> $7,000 ÷ 15 years ≈
+              $467/year
             </li>
             <li>
-              <strong>Interior paint (full repaint):</strong> $3,500 ÷ 6
-              years ≈ $583/year
+              <strong>Interior paint (full repaint):</strong> $3,500 ÷ 10
+              years = $350/year
             </li>
             <li>
               <strong>Windows:</strong> $9,000 ÷ 30 years = $300/year
@@ -278,18 +315,19 @@ export default function CapexReservesPost() {
               $8,000 ÷ 25 years = $320/year
             </li>
             <li>
-              <strong>Electrical / plumbing allowance:</strong> $6,000 ÷ 30
-              years = $200/year
+              <strong>Electrical / plumbing allowance:</strong> $6,000 ÷ 50
+              years = $120/year
             </li>
           </ul>
           <p>
-            Total: <strong>about $4,500/year, or ~$375/month</strong> —
+            Total: <strong>about $4,390/year, or ~$366/month</strong> —
             before a dollar of routine maintenance. On a $1,600/month rent,
             that&apos;s 23% of gross income for capex alone, which is why
-            the 5-10% defaults feel comfortable and underwrite wrong. Add
-            $80-150/month for routine maintenance (more for older systems
-            and rougher tenant classes) and the honest combined line on this
-            archetype runs <strong>$450-500/month full-cycle</strong>.
+            the 5-10% defaults feel comfortable and underwrite wrong. Add an
+            illustrative $80-150/month for routine maintenance (more for
+            older systems and rougher tenant classes) and the honest combined
+            line on this archetype runs{" "}
+            <strong>about $445-515/month full-cycle</strong>.
           </p>
           <p>
             Two fair adjustments before you panic. First, full-cycle assumes
@@ -406,7 +444,7 @@ export default function CapexReservesPost() {
             >
               reading a pro forma
             </Link>{" "}
-            covers the other six places seller math drifts optimistic.
+            covers the other seven places seller math drifts optimistic.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -423,17 +461,25 @@ export default function CapexReservesPost() {
               <strong>Liquidity floor: six months of PITIA.</strong> On the
               deal above, roughly $8,600. This is the buffer that turns a
               dead HVAC plus a vacant month from a crisis into a bad
-              quarter. Many DSCR lenders independently require 3-6 months of
-              verified reserves at closing.
+              quarter. Lenders can require verified reserves at closing too
+              (
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
+                className="text-primary font-semibold hover:underline"
+              >
+                Fannie Mae&apos;s DU requires six months&apos; reserves on an
+                investment-property transaction
+              </a>
+              ), so get your program&apos;s written requirement.
             </li>
             <li>
               <strong>Age-weighted capex funding at purchase.</strong> For
               each component: replacement cost × (age ÷ lifespan). A
-              9-year-old water heater on a 10-year life means ~$1,620 of its
+              9-year-old water heater on a 12-year life means ~$1,350 of its
               $1,800 replacement should be banked on day one — the previous
               owner consumed that life, and the inspection is where you
               find out. Sum the shortfalls across components; on older
-              properties this number routinely hits $8,000-15,000 and
+              properties this number can reach five figures and
               belongs in your cash-to-close math right next to{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
@@ -471,16 +517,17 @@ export default function CapexReservesPost() {
             <strong>Scaling single-family numbers to multifamily by
             doormat count.</strong> A duplex shares one roof but carries two
             kitchens, two baths, and often two furnaces and water heaters.
-            Per-unit capex on small multifamily runs 75-90% of a comparable
-            single-family — not 50%. The shared-structure discount is real
-            but smaller than it looks.
+            Per-unit capex on a duplex doesn&apos;t halve just because the
+            roof is shared: count the kitchens, baths, furnaces and water
+            heaters. The shared-structure discount is real but smaller than
+            it looks.
           </p>
           <p>
             <strong>Confusing deferred maintenance with capex.</strong> The
             $12,000 of work the inspector finds is not a reserve item —
             it&apos;s purchase price. Negotiate it, fund it at closing, or
             walk. Reserves are for the components that are fine today and
-            won&apos;t be in 2031.
+            won&apos;t be in a few years.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -533,6 +580,30 @@ export default function CapexReservesPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "IRS Publication 527 (2025), Residential Rental Property",
+              url: "https://www.irs.gov/publications/p527",
+            },
+            {
+              title: "IRS Publication 946 (2025), How To Depreciate Property",
+              url: "https://www.irs.gov/publications/p946",
+            },
+            {
+              title: "IRS, Tangible Property Final Regulations (de minimis safe harbor election)",
+              url: "https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations",
+            },
+            {
+              title: "HUD, Capital Needs Assessment e-Tool Estimated Useful Life Table",
+              url: "https://www.hud.gov/sites/documents/eul_for_cna_e_tool.pdf",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-4.1-01, Minimum Reserve Requirements",
+              url: "https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

@@ -19,6 +19,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "rental-property-pro-forma-explained";
 const TITLE = "How to read a rental property pro forma (and verify its assumptions)";
@@ -99,7 +100,7 @@ export default function ProFormaPost() {
           </p>
           <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            Every rental property listed for sale comes with a pro forma — a seller&apos;s projection of how the property will perform after you take it over. And almost every one of those pro formas is misleading. Here&apos;s how to read one, what to verify, and the 7 line items where pro formas reliably lie.
+            Many rental listings come with a pro forma — a seller&apos;s projection of how the property will perform after you take it over. Treat it as a projection to verify, not a result. Here&apos;s how to read one, what to verify, and the 8 line items to check before you trust it.
           </p>
         </header>
 
@@ -141,7 +142,7 @@ export default function ProFormaPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #4: Property tax carried forward without a sale scenario</h2>
           <p>
-            Assessment rules, exemptions, sale treatment, and billing cycles vary by jurisdiction. The seller&apos;s bill may not represent the buyer&apos;s stabilized obligation.
+            Assessment rules, exemptions, sale treatment, and billing cycles vary by jurisdiction; in some, a transfer of ownership typically results in a <a href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property" className="text-primary font-semibold hover:underline">reassessment and higher taxes</a>. The seller&apos;s bill may not represent the buyer&apos;s stabilized obligation.
           </p>
           <p>
             <strong>Verification:</strong> review the parcel record and current assessor guidance, remove seller-specific exemptions, and model the applicable post-sale or reassessment case.
@@ -173,7 +174,7 @@ export default function ProFormaPost() {
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Risk #8: Legal costs and bad debt at $0</h2>
           <p>
-            Pro formas rarely include legal expenses (eviction processing, lease enforcement, attorney consultations) or bad debt (rent that&apos;s owed but never collected). Both are real costs.
+            Pro formas may leave out legal expenses (eviction processing, lease enforcement, attorney consultations) or bad debt (rent that&apos;s owed but never collected). Both are real costs — <a href="https://mfguide.fanniemae.com/fnmf-pdf/download/7526" className="text-primary font-semibold hover:underline">Fannie Mae&apos;s multifamily underwriting</a>, for example, deducts bad debt from rental income.
           </p>
           <p>
             <strong>Verification:</strong> use the property&apos;s collection history, manager records, lease terms, and current local legal guidance. Model a downside case rather than assigning a fixed cost from a state label or eviction timeline.
@@ -187,14 +188,14 @@ export default function ProFormaPost() {
             <li><strong>Rent</strong>: use current rent (from rent roll), not projected market rent</li>
             <li><strong>Vacancy and bad debt</strong>: derive from collections, turnover, concessions, lease expirations, and a downside case</li>
             <li><strong>Insurance</strong>: use fresh quote in your name</li>
-            <li><strong>Property tax</strong>: use post-sale reassessment estimate</li>
+            <li><strong>Property tax</strong>: model the post-sale or reassessment case that applies in the property&apos;s jurisdiction</li>
             <li><strong>Maintenance</strong>: use work orders, invoices, condition, and local service costs</li>
             <li><strong>Capital reserve</strong>: build from component age, remaining life, scope, and current bids</li>
             <li><strong>Management</strong>: use a current proposal matching the services you expect</li>
             <li><strong>Legal</strong>: use property history and current local guidance, plus a downside case</li>
           </ul>
           <p>
-            Recompute NOI and divide by price. You now have a supported scenario, not a guaranteed cap rate.
+            Recompute NOI and divide by price. You now have a supported scenario, not a certain cap rate.
           </p>
           <p>
             Compare the supported base and downside cases with the seller&apos;s projection. The gap is property-specific and should be explained by evidence, not a universal haircut.
@@ -220,6 +221,20 @@ export default function ProFormaPost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "Fannie Mae Selling Guide B3-6-03, Monthly Housing Expense for the Subject Property",
+              url: "https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property",
+            },
+            {
+              title:
+                "Fannie Mae Multifamily Selling and Servicing Guide, Part II Sec. 203.01, Underwritten NCF",
+              url: "https://mfguide.fanniemae.com/fnmf-pdf/download/7526",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

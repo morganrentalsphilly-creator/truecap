@@ -20,6 +20,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "vacancy-rate-rental-property";
 const TITLE =
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What is a good vacancy rate assumption for a rental property?",
-    a: "Derive it from expected turnover, then sanity-check against property class: 4-6% for A-class properties in stable metros with long tenancies, 6-9% for typical B-class workforce rentals, 8-12% for C-class properties with annual turnover, and higher for student rentals that turn over every year on a fixed calendar. The popular default of 5% is only correct when tenants stay about two years and units re-lease in under a month.",
+    a: "Derive it from expected turnover: by the formula in this article, a two-year average stay with 30 days to re-lease works out to about 4%, annual turnover with 30 days to about 7.6%, and annual turnover with 45 days to about 11%; student rentals on a fixed calendar need their own calendar-based estimate. The popular default of 5% roughly matches tenants who stay about two years with five to six weeks of downtime between them.",
   },
   {
     q: "What is the difference between physical and economic vacancy?",
@@ -70,15 +71,15 @@ const FAQS = [
   },
   {
     q: "How does vacancy affect DSCR?",
-    a: "In an NOI-based operating model, higher vacancy reduces effective income and DSCR. Lender formulas vary: some programs use specified rent evidence and PITIA with different adjustments. Obtain the exact written formula and requirements, and keep a separate operating calculation that includes vacancy and expenses. Approval is not validation of the deal's cash flow.",
+    a: "In an NOI-based operating model, higher vacancy reduces effective income and DSCR. Lender formulas vary, so get the program's exact written DSCR formula and rent-evidence rules, and keep a separate operating calculation that includes vacancy and expenses. Approval is not validation of the deal's cash flow.",
   },
   {
     q: "What is the average rental vacancy rate in the US?",
-    a: "The Census Bureau's national rental vacancy rate has run roughly 6-7% in recent years, but the national number is nearly useless for underwriting a specific property — it blends hot coastal metros under 4% with soft markets over 10%, and Class A with Class C. Use your submarket and property class, and when in doubt ask a local property manager what their actual days-on-market and renewal rates look like.",
+    a: "The Census Bureau's national rental vacancy rate was 7.3% in the second quarter of 2026, after running 6.3-7.2% from 2023 through 2025, but the national number is nearly useless for underwriting a specific property — it blends hot coastal metros under 4% with soft markets over 10%, and Class A with Class C. Use your submarket and property class, and when in doubt ask a local property manager what their actual days-on-market and renewal rates look like.",
   },
   {
     q: "Is 0% vacancy ever a reasonable assumption?",
-    a: "No — not even for a long-term tenant in place. Every property eventually turns over, and one month vacant in a 24-month tenancy is 4.2% all by itself. A 0% line is the single most common tell that a seller's pro forma is marketing, not math. If the deal only pencils at 0% vacancy, the deal doesn't pencil.",
+    a: "No — not even for a long-term tenant in place. Every property eventually turns over, and one month vacant in a 24-month tenancy is 4.2% all by itself. A 0% line is a classic tell that a seller's pro forma is marketing, not math. If the deal only pencils at 0% vacancy, the deal doesn't pencil.",
   },
 ];
 
@@ -195,7 +196,7 @@ export default function VacancyRatePost() {
           <p>
             This is why a C-class building can truthfully report 3% physical
             vacancy and still be missing 12% of its scheduled income. When
-            you read a seller&apos;s package, this gap is one of the seven
+            you read a seller&apos;s package, this gap is one of the eight
             standard tricks covered in{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
@@ -223,8 +224,8 @@ export default function VacancyRatePost() {
           <p>Run the realistic scenarios:</p>
           <ul>
             <li>
-              <strong>Good operator, B-class, 2-year average tenancy, 30 days
-              to turn and re-lease:</strong> 30 ÷ 760 ≈ <strong>4%</strong>
+              <strong>Good operator, 2-year average tenancy, 30 days to turn
+              and re-lease:</strong> 30 ÷ 760 ≈ <strong>4%</strong>
             </li>
             <li>
               <strong>Same property, 1-year tenancies:</strong> 30 ÷ 395 ≈{" "}
@@ -244,8 +245,9 @@ export default function VacancyRatePost() {
           <p>
             Notice what drives the result: <em>tenancy length</em>, far more
             than days-on-market. Cutting re-lease time from 30 days to 20 saves
-            you about a point; getting tenants to stay a second year cuts
-            vacancy nearly in half. That asymmetry should shape how you
+            you about a point on two-year tenancies (3.9% to 2.7%) and more
+            than two points on annual turnover (7.6% to 5.2%); getting tenants
+            to stay a second year cuts vacancy nearly in half. That asymmetry should shape how you
             operate — and it&apos;s the real reason renewals beat rent
             maximization for most small landlords. The{" "}
             <Link
@@ -254,7 +256,8 @@ export default function VacancyRatePost() {
             >
               vacancy rate calculator
             </Link>{" "}
-            runs this turnover math both directions.
+            converts vacant days and turnover cost into an annual vacancy
+            rate.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -282,17 +285,17 @@ export default function VacancyRatePost() {
             Five points of vacancy — the gap between &quot;copied a guru
             default&quot; and &quot;C-class with annual turnover&quot; — cut
             this deal&apos;s cash flow by <strong>60%</strong> and dropped
-            DSCR from acceptable to fragile. No other single assumption in
-            the underwrite moves the answer this much per percentage point
-            except rent itself. That&apos;s the entire argument for spending
+            DSCR from acceptable to fragile. Each percentage point of vacancy
+            costs this deal $28 a month of cash flow. That&apos;s the entire
+            argument for spending
             ten minutes on this line instead of zero.
           </p>
           <p>
             And the duplex math has a wrinkle a single-family doesn&apos;t:
             vacancy arrives in 50% chunks. A &quot;7% vacancy year&quot; on a
-            duplex is really one unit empty for seven weeks — $1,400 of
-            missing rent concentrated in two months, not $98 missing evenly
-            every month. Hold reserves accordingly. Stress-test your own
+            duplex is roughly one unit empty for seven weeks — about $2,300
+            of missing rent concentrated in two months, not about $196
+            missing evenly every month. Hold reserves accordingly. Stress-test your own
             numbers in the free{" "}
             <Link
               href="/analyze" prefetch={false}
@@ -304,7 +307,8 @@ export default function VacancyRatePost() {
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The DSCR loan wrinkle: your lender ignores vacancy
+            The DSCR loan wrinkle: your lender&apos;s formula may ignore
+            vacancy
           </h2>
           <p>
             Here&apos;s the part that surprises investors using{" "}
@@ -314,10 +318,10 @@ export default function VacancyRatePost() {
             >
               DSCR loans
             </Link>
-            : some programs use specified rent evidence divided by
-            <strong> PITIA</strong>, while others apply different adjustments.
-            Ask for the exact written formula, accepted rent evidence,
-            threshold, and full eligibility rules.
+            : some programs divide rent by <strong>PITIA</strong>, while
+            others apply different adjustments; ask for the exact written
+            formula, accepted rent evidence, threshold, and full eligibility
+            rules.
           </p>
           <p>
             On the duplex above: $2,800 gross rent against roughly $1,922 of
@@ -337,22 +341,23 @@ export default function VacancyRatePost() {
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Benchmarks by property class (sanity checks, not answers)
+            Sanity checks by property class (not answers)
           </h2>
           <ul>
             <li>
-              <strong>A-class, stable metro:</strong> 4-6%. Long tenancies,
-              fast lease-up, tenants with options who behave like it.
+              <strong>A-class, stable metro:</strong> long tenancies and fast
+              lease-up; a two-year average stay with 30 days to re-lease works
+              out to about 4% by the formula above.
             </li>
             <li>
-              <strong>B-class workforce housing:</strong> 6-9%. The bread
-              and butter of small-portfolio investing; turnover roughly every
-              18-24 months.
+              <strong>B-class workforce housing:</strong> the bread and butter
+              of small-portfolio investing; derive it from the property&apos;s
+              own lease history and turn times rather than a class average.
             </li>
             <li>
-              <strong>C-class:</strong> 8-12% <em>economic</em> — physical
-              vacancy may look fine while non-payment and turnover costs eat
-              the difference.
+              <strong>C-class:</strong> model <em>economic</em> vacancy;
+              annual turnover with a 45-day turn is already about 11% by the
+              formula above, before non-payment.
             </li>
             <li>
               <strong>Student rentals:</strong> derive turnover and summer
@@ -361,9 +366,23 @@ export default function VacancyRatePost() {
             </li>
           </ul>
           <p>
-            The Census Bureau&apos;s national rental vacancy figure has
-            hovered around 6-7% recently, but national averages blend
-            markets that have nothing to do with each other. The better
+            The Census Bureau&apos;s national rental vacancy figure{" "}
+            <a
+              href="https://www.census.gov/housing/hvs/data/histtab1.xlsx"
+              className="text-primary font-semibold hover:underline"
+            >
+              was 7.3% in the second quarter of 2026, after running 6.3-7.2%
+              from 2023 through 2025
+            </a>
+            , but national averages blend markets that have nothing to do
+            with each other: in that same quarter,{" "}
+            <a
+              href="https://www.census.gov/housing/hvs/data/rates/tab4_msa_26_rvr.xlsx"
+              className="text-primary font-semibold hover:underline"
+            >
+              13 of the 75 largest metros were under 4% and 15 were over 10%
+            </a>
+            . The better
             calibration source is free: call two local property managers and
             ask their average days-on-market and renewal rate for your
             property type. They know the real number because they live in it
@@ -463,8 +482,9 @@ export default function VacancyRatePost() {
           <p>
             <strong>Pre-lease during the notice period.</strong> Showing the
             unit in the last 30 days of a tenancy and turning it in under a
-            week converts a 30-day vacancy into a 5-day one — worth nearly a
-            point of vacancy rate by itself on annual-turnover properties.
+            week converts a 30-day vacancy into a 5-day one, worth about six
+            points of vacancy rate on annual-turnover properties (30 ÷ 395 ≈
+            7.6% vs 5 ÷ 370 ≈ 1.4%).
           </p>
           <p>
             <strong>Screen for tenure, not just credit.</strong> A 680-score
@@ -522,6 +542,18 @@ export default function VacancyRatePost() {
           </p>
         </div>
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "U.S. Census Bureau, HVS Table 1: Quarterly Rental Vacancy Rates, 1956 to Present",
+              url: "https://www.census.gov/housing/hvs/data/histtab1.xlsx",
+            },
+            {
+              title: "U.S. Census Bureau, HVS Table 4: Rental Vacancy Rates for the 75 Largest MSAs, 2026",
+              url: "https://www.census.gov/housing/hvs/data/rates/tab4_msa_26_rvr.xlsx",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
       </main>

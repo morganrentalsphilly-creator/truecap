@@ -29,6 +29,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "cap-rate-vs-cash-on-cash-vs-dscr";
 const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
@@ -37,7 +38,7 @@ const TITLE = "Cap rate vs cash-on-cash vs DSCR: which one actually matters?";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Cap rate vs cash-on-cash vs DSCR: which matters?";
 const DESCRIPTION =
-  "Three metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and why most investors get this wrong.";
+  "Three metrics, three different jobs. A plain-English guide to when each one matters, when to ignore each one, and the mistakes to avoid.";
 const PUBLISHED_AT = "2026-05-24";
 const MODIFIED_AT = lastmodFor("/blog/cap-rate-vs-cash-on-cash-vs-dscr") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 8;
@@ -95,7 +96,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Which metric do lenders care about?",
-    a: "It depends on the product. DSCR is a primary coverage metric in many commercial and DSCR programs, while valuation, LTV, credit, reserves, guarantor strength, property eligibility, and other conditions also matter. Formula, threshold, and pricing tiers vary by lender and program.",
+    a: "It depends on the product. DSCR is a primary coverage metric in many commercial and DSCR programs, while valuation, LTV, credit, reserves, property eligibility, and other conditions also matter. Formula, threshold, and pricing tiers vary by lender and program.",
   },
 ];
 
@@ -180,17 +181,16 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            Every rental property pitch deck shows three numbers: cap rate,
-            cash-on-cash return, DSCR. They all look like &ldquo;return&rdquo;
-            metrics. They&apos;re not. Each one does a completely different job,
-            and conflating them is the single most common analytical mistake new
-            investors make.
+            This post compares three numbers: cap rate, cash-on-cash return,
+            DSCR. They all look like &ldquo;return&rdquo; metrics. They&apos;re
+            not. Each one does a completely different job, and conflating them
+            can lead new investors to the wrong conclusion.
           </p>
 
           <p>
-            This post is a plain-English guide to what each metric actually
-            tells you, when to use which one, and the trap that catches almost
-            every first-time investor in 2026&apos;s rate environment.
+            Below is a plain-English guide to what each metric actually tells
+            you, when to use which one, and the negative-leverage trap to check
+            for when borrowing costs are high.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -200,8 +200,8 @@ export default function BlogPost() {
             <strong>Cap rate</strong> measures the property&apos;s unleveraged
             return (use it to compare properties).{" "}
             <strong>Cash-on-cash return</strong> measures the return on YOUR
-            specific cash invested after financing (use it to make personal
-            investment decisions). <strong>DSCR</strong> measures the modeled
+            specific cash invested after financing (use it to see what the
+            financing does to your own return). <strong>DSCR</strong> measures the modeled
             NOI relative to modeled debt service (some lenders use their own
             version as one part of underwriting).
           </p>
@@ -217,8 +217,8 @@ export default function BlogPost() {
                 </Link>
               </strong>{" "}
               — the property&apos;s unleveraged annual return. Use it to{" "}
-              <em>compare properties</em> against each other and against
-              alternatives like bonds.
+              <em>compare properties</em> against each other; set it beside
+              alternatives like bonds only as context.
             </li>
             <li>
               <strong>
@@ -249,8 +249,9 @@ export default function BlogPost() {
             </li>
           </ul>
           <p>
-            Three metrics, three jobs. You need all of them. Skipping any one
-            means you&apos;re missing critical risk.
+            Three metrics, three jobs. Read them together: each one covers a
+            risk the other two leave out. On a cash purchase there is no debt
+            service, so DSCR drops out.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">
@@ -261,7 +262,8 @@ export default function BlogPost() {
               <span className="font-bold">Cap Rate</span> = NOI ÷ Purchase Price
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              where NOI = Annual Rent − Annual Operating Expenses
+              where NOI = Annual Rent − Vacancy Allowance − Annual Operating
+              Expenses
             </div>
           </div>
           <p>
@@ -274,30 +276,37 @@ export default function BlogPost() {
             >
               NOI
             </Link>
-            , is the single most-disputed line in residential underwriting.
+            , depends on every rent and expense assumption, so verify it line by
+            line.
           </p>
           <p>
-            <strong>Why it matters:</strong> cap rate is the only metric that
-            strips out financing. Two investors looking at the same property
-            with different down payments and different interest rates will get
-            different cash-on-cash numbers, but the cap rate is identical. That
-            makes cap rate the right metric for comparing properties to each
-            other, and for comparing real estate to other asset classes
-            (Treasuries, dividend stocks, REITs).
+            <strong>Why it matters:</strong> of these three, cap rate is the
+            only one that strips out financing. Two investors looking at the
+            same property with different down payments and different interest
+            rates will get different cash-on-cash numbers, but the cap rate is
+            identical. That makes cap rate the right metric for comparing
+            properties to each other, and a starting point, though not an
+            apples-to-apples one, for setting real estate beside other asset
+            classes (Treasuries, dividend stocks, REITs).
           </p>
           <p>
-            <strong>The benchmark rule:</strong> your cap rate should
-            comfortably exceed the 10-year Treasury yield. If Treasuries pay
-            4.5% and you&apos;re buying at a 4% cap, you&apos;re taking real-
-            estate-level risk for less than risk-free return. That&apos;s a deal
-            you need an appreciation thesis to justify.
+            <strong>A reference point, not a rule:</strong> set the cap rate
+            beside the yield on a lower-risk alternative such as the 10-year
+            Treasury. If Treasuries pay 4.5% and you&apos;re buying at a 4% cap,
+            you&apos;re taking on property risk and work for less current yield
+            than the Treasury pays, so the case rests on rent growth or
+            appreciation you would need to support with evidence. Liquidity,
+            leverage, taxes, and workload all differ, so treat the comparison as
+            context.
           </p>
           <p>
             <strong>Where it breaks:</strong> cap rate ignores financing
-            entirely. A property with a 6% cap rate could be a great deal
-            (interest rates at 4%, you keep the spread) or a disaster (interest
-            rates at 8%, you&apos;re paying more in mortgage than the property
-            earns). Cap rate alone can&apos;t tell you which.
+            entirely. Take a 6% cap rate with a 75% loan on a 30-year schedule.
+            At a 4% rate, the annual payments come to about 4.3% of the price,
+            so the loan leaves a spread and lifts the cash return. At 8%, they
+            come to about 6.6% of the price, more than the 6% the property
+            earns. Cap rate alone can&apos;t tell you which of those deals
+            you&apos;re looking at.
           </p>
           <h2 className="text-2xl sm:text-3xl">
             Cash-on-cash — what it actually tells you
@@ -318,17 +327,23 @@ export default function BlogPost() {
             flow per year, that&apos;s an 8.3% CoC.
           </p>
           <p>
-            <strong>Why it matters:</strong> this is the metric for your
-            personal investment decision. Cap rate doesn&apos;t care about your
-            down payment. Cash-on-cash does. CoC tells you whether the leverage
+            <strong>Why it matters:</strong> this is the metric that shows what
+            your financing does to your own return. Cap rate doesn&apos;t care
+            about your down payment. Cash-on-cash does. CoC tells you whether the leverage
             you&apos;re using is helping or hurting.
           </p>
           <p>
-            <strong>The benchmark rule:</strong> 8-10% CoC is strong, 5-7% is
-            acceptable in most 2026 markets, below 5% needs an appreciation
-            story. Compare against your alternatives — if you can get 5% from
-            high-yield savings with zero risk, a 5% CoC on a rental needs to
-            offer something extra under an explicitly sourced scenario, while
+            <strong>The benchmark rule:</strong> there is no universal
+            cash-on-cash band. Set your own required return, then compare the
+            result with verified alternatives: if an{" "}
+            <a
+              href="https://www.consumerfinance.gov/ask-cfpb/how-can-i-be-sure-my-money-is-safe-in-my-bank-account-en-1005/"
+              className="text-primary font-semibold hover:underline"
+            >
+              insured savings account
+            </a>{" "}
+            or a Treasury pays close to the rental&apos;s CoC, the rental needs
+            to offer something extra under an explicitly sourced scenario, while
             any tax outcome remains taxpayer-specific.
           </p>
           <p>
@@ -364,14 +379,37 @@ export default function BlogPost() {
             <strong>Why it matters:</strong> DSCR is a primary coverage metric
             in many commercial and non-QM DSCR programs. Those programs often
             use property coverage instead of personal DTI as the main ratio,
-            while still applying borrower, credit, reserve, appraisal,
-            insurance, and property requirements.
+            while still applying their own{" "}
+            <a
+              href="https://mf.freddiemac.com/docs/conventional_small.pdf"
+              className="text-primary font-semibold hover:underline"
+            >
+              borrower, credit, reserve, and property-eligibility requirements
+            </a>
+            , plus appraisal and insurance conditions. Credit to buy or
+            maintain a rental the owner doesn&apos;t live in is{" "}
+            <a
+              href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/"
+              className="text-primary font-semibold hover:underline"
+            >
+              business-purpose credit
+            </a>
+            , which Regulation Z does not cover.
           </p>
           <p>
             <strong>The benchmark rule:</strong> there is no market-wide
-            approval threshold. Ask the lender for its current formula, accepted
-            rent evidence, payment components, rounding, minimum, and pricing
-            tiers. Use a separate, more conservative operating DSCR for your own
+            approval threshold. Even one lender&apos;s minimum can vary:{" "}
+            <a
+              href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae&apos;s multifamily guide
+            </a>{" "}
+            sets its DSCR requirements by underwriting tier and computes debt
+            service at the note rate or a floor rate, whichever is higher. Ask
+            the lender for its current formula,
+            accepted rent evidence, payment components, rounding, minimum, and
+            pricing tiers. Use a separate, more conservative operating DSCR for your own
             risk decision.
           </p>
           <p>
@@ -380,7 +418,6 @@ export default function BlogPost() {
             because of a large equity contribution. DSCR is one financing input,
             not a return metric or approval promise.
           </p>
-          <p></p>
 
           <h2 className="text-2xl sm:text-3xl">A negative-leverage scenario</h2>
           <p>
@@ -396,9 +433,10 @@ export default function BlogPost() {
             percentages alone.
           </p>
           <p>
-            How to spot it: compare your cap rate to your effective borrowing
-            rate. If borrowing rate exceeds cap rate, you have negative
-            leverage. An upside value scenario, principal paydown, or a
+            How to spot it: compare your cap rate with your loan constant
+            (annual debt service ÷ loan amount), not just the note rate. If the
+            loan constant exceeds the cap rate, debt lowers your cash-on-cash
+            return below the cap rate. An upside value scenario, principal paydown, or a
             taxpayer-specific tax outcome does not erase a current operating
             shortfall; model each separately and decide whether you can carry
             the downside.
@@ -452,8 +490,8 @@ export default function BlogPost() {
                 </tr>
                 <tr>
                   <td className="text-muted-foreground">Cash purchase?</td>
-                  <td>Same as CoC</td>
-                  <td>Same as cap rate</td>
+                  <td>Close to CoC (differs by closing costs, repairs, and CapEx reserve)</td>
+                  <td>Close to cap rate (differs by closing costs, repairs, and CapEx reserve)</td>
                   <td>{NO_DEBT_SERVICE_DSCR_LABEL}</td>
                 </tr>
               </tbody>
@@ -473,12 +511,10 @@ export default function BlogPost() {
           </p>
           <p>
             All three numbers live next to each other in TrueCap&apos;s main
-            analyzer, alongside the released 10-year cash-flow and equity
-            projection, sensitivity grid, and Offer Ceiling. Run a real deal in
-            60 seconds.
+            analyzer. Pro adds the 10-year cash-flow and equity projection, the
+            sensitivity grid, and the Offer Ceiling: the highest price that
+            still meets your targets. Run a real deal in 60 seconds.
           </p>
-
-          <div className="not-prose"></div>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
@@ -495,6 +531,28 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title: "CFPB, How can I be sure my money is safe in my bank account?",
+              url: "https://www.consumerfinance.gov/ask-cfpb/how-can-i-be-sure-my-money-is-safe-in-my-bank-account-en-1005/",
+            },
+            {
+              title: "Freddie Mac Multifamily, Optigo Conventional Small term sheet (4/26)",
+              url: "https://mf.freddiemac.com/docs/conventional_small.pdf",
+            },
+            {
+              title:
+                "CFPB, Official Interpretation of 12 CFR 1026.3(a), Regulation Z business-purpose exemption",
+              url: "https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/",
+            },
+            {
+              title:
+                "Fannie Mae Multifamily Selling and Servicing Guide, Part II Sec. 203.02, Underwritten DSCR",
+              url: "https://mfguide.fanniemae.com/fnmf-pdf/download/10786",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -505,8 +563,8 @@ export default function BlogPost() {
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Want the full underwriting workflow? TrueCap turns each of these
-            metrics — plus a 10-year cash-flow and equity projection,
-            sensitivity, and Offer Ceiling — into a single live analyzer.{" "}
+            metrics into a single live analyzer, and Pro adds a 10-year
+            cash-flow and equity projection, sensitivity, and Offer Ceiling.
           </p>
         </footer>
       </main>

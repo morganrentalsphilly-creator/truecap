@@ -26,6 +26,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PostSources } from "@/components/blog/post-sources";
 
 const SLUG = "how-to-underwrite-a-rental-property-in-60-seconds";
 const TITLE = "How to screen a rental property in 60 seconds";
@@ -86,7 +87,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why use a calculator instead of a spreadsheet?",
-    a: "A well-built spreadsheet can be flexible, but the owner must maintain its formulas, units, versioning, and input sources. TrueCap provides a reviewed calculation path, labeled HUD and rate benchmarks, editable assumptions, and repeatable stress scenarios; those starting estimates still require property-specific verification.",
+    a: "A well-built spreadsheet can be flexible, but the owner must maintain its formulas, units, versioning, and input sources. TrueCap provides a reviewed calculation path, labeled HUD and rate benchmarks, editable assumptions, and (on Pro) repeatable stress scenarios; those starting estimates still require property-specific verification.",
   },
   {
     q: "Should I underwrite a property before I tour it or after?",
@@ -204,9 +205,17 @@ export default function BlogPost() {
             <li>
               <strong>Monthly gross rent.</strong> If the property is occupied,
               record the current lease amount separately. If vacant, enter an
-              estimated market rent supported by recent comparable properties.
-              HUD Fair Market Rent can provide labeled area context, but it is
-              not a floor or a property-specific rent comp.
+              estimated market rent supported by recent comparable properties.{" "}
+              <a
+                href="https://www.govinfo.gov/content/pkg/FR-2026-09-01/html/2026-17891.htm"
+                className="text-primary font-semibold hover:underline"
+              >
+                HUD Fair Market Rent
+              </a>{" "}
+              is an area-wide 40th-percentile gross rent, utilities included.
+              It can provide labeled area context, but it is
+              not a floor or a property-specific rent comp. Where the tenant
+              pays utilities, it can overstate the rent the owner collects.
             </li>
             <li>
               <strong>Operating expenses (annualized).</strong>{" "}
@@ -231,21 +240,22 @@ export default function BlogPost() {
               >
                 maintenance
               </Link>
-              , management,{" "}
+              , management, HOA, owner-paid utilities. Two allowances sit
+              beside them: a{" "}
               <Link
                 href="/glossary/vacancy"
                 className="text-primary font-semibold hover:underline"
               >
-                vacancy reserve
+                vacancy allowance
               </Link>
-              , HOA, owner- paid utilities,{" "}
+              , which comes off the rent before NOI, and a{" "}
               <Link
                 href="/glossary/capex"
                 className="text-primary font-semibold hover:underline"
               >
                 replacement reserve
               </Link>
-              . A{" "}
+              , which TrueCap keeps below NOI and takes out of cash flow. A{" "}
               <Link
                 href="/blog/50-percent-rule-rentals"
                 className="text-primary font-semibold hover:underline"
@@ -259,8 +269,15 @@ export default function BlogPost() {
               <strong>Financing terms.</strong> Down payment percentage,
               interest rate, amortization term, and loan fees. Use a clearly
               labeled benchmark for an early screen, then replace it with the
-              written quote and terms for the loan you may use. For a cash
-              purchase, model no debt service.
+              written quote and terms for the loan you may use. The national
+              30-year rate TrueCap pre-fills comes from{" "}
+              <a
+                href="https://www.freddiemac.com/pmms/about-pmms"
+                className="text-primary font-semibold hover:underline"
+              >
+                Freddie Mac&apos;s survey of owner-occupied purchase loans
+              </a>
+              , not investor loans. For a cash purchase, model no debt service.
             </li>
             <li>
               <strong>Closing costs and initial cash items.</strong> Enter
@@ -321,15 +338,16 @@ export default function BlogPost() {
           <p>
             Cap rate (capitalization rate) measures the unleveraged annual
             return — what the property earns as a percentage of its price,
-            ignoring financing. It&apos;s the single most-used commercial real
-            estate metric.
+            ignoring financing. Investors use it to compare properties before
+            financing enters the picture.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
               <span className="font-bold">Cap Rate</span> = NOI ÷ Purchase Price
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              where NOI = Annual Rent − Annual Operating Expenses
+              where NOI = Annual Rent − Vacancy Allowance − Annual Operating
+              Expenses
             </div>
           </div>
           <p>
@@ -358,7 +376,7 @@ export default function BlogPost() {
           </h2>
           <p>
             Cap rate ignores financing, which is great for comparing properties
-            but useless for your personal investment decision. Cash-on-cash
+            but says nothing about the return on your own cash. Cash-on-cash
             return measures the return on the cash <em>you actually invest</em>,
             after the mortgage payment.
           </p>
@@ -368,8 +386,12 @@ export default function BlogPost() {
               Cash Invested
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              Total Cash Invested = Down Payment + Closing Costs + Initial
-              Repairs
+              Annual Cash Flow = NOI − Debt Service − PMI (if any) −
+              Replacement Reserve
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Total Cash Invested = Down Payment + Closing Costs + Loan Fees +
+              Initial Repairs + Initial Reserves
             </div>
           </div>
           <p>
@@ -381,10 +403,25 @@ export default function BlogPost() {
           </p>
           <h2 className="text-2xl sm:text-3xl">Metric 4: DSCR (10 seconds)</h2>
           <p>
-            Debt Service Coverage Ratio — the metric every lender pulls before
-            approving a mortgage. DSCR is annual NOI divided by annual mortgage
-            payments. It tells you (and your lender) whether the property can
-            service its debt with operating income alone.
+            Debt Service Coverage Ratio — a coverage test multifamily lenders
+            such as{" "}
+            <a
+              href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae
+            </a>{" "}
+            apply before sizing a loan; conforming one-to-four-unit mortgages
+            are qualified mainly on the borrower&apos;s{" "}
+            <a
+              href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios"
+              className="text-primary font-semibold hover:underline"
+            >
+              debt-to-income ratio
+            </a>
+            . DSCR is annual NOI divided by annual mortgage payments. It tells
+            you (and your lender) whether the property can service its debt
+            with operating income alone.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
@@ -394,12 +431,19 @@ export default function BlogPost() {
           </div>
           <p>
             DSCR definitions, minimums, rent evidence, expense treatment,
-            leverage, and pricing tiers vary by lender and program. Use this
-            ratio to test coverage and downside, then obtain the lender&apos;s
-            written formula and quote; a modeled band does not establish
-            approval or pricing.
+            leverage, and pricing tiers vary by lender and program.{" "}
+            <a
+              href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
+              className="text-primary font-semibold hover:underline"
+            >
+              Fannie Mae&apos;s multifamily version
+            </a>
+            , for example, divides underwritten
+            net cash flow, not plain NOI, by debt service at the note rate or a
+            floor rate, whichever is higher. Use this ratio to test coverage
+            and downside, then obtain the lender&apos;s written formula and
+            quote; a modeled band does not establish approval or pricing.
           </p>
-          <p></p>
 
           <h2 className="text-2xl sm:text-3xl">The two sanity checks</h2>
           <p>
@@ -430,9 +474,8 @@ export default function BlogPost() {
             >
               TrueCap&apos;s Philadelphia market page
             </Link>{" "}
-            is one example of the labeled HUD Fair Market Rent and price
-            context that should replace a national figure once you know the
-            submarket.
+            is one example of the labeled HUD Fair Market Rent context that
+            should replace a national figure once you know the submarket.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Putting it together</h2>
@@ -472,8 +515,6 @@ export default function BlogPost() {
             swap in property-specific evidence as you get it.
           </p>
 
-          <div className="not-prose"></div>
-
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
             <details
@@ -489,6 +530,28 @@ export default function BlogPost() {
             </details>
           ))}
         </article>
+        <PostSources
+          sources={[
+            {
+              title:
+                "HUD, Fair Market Rents for Fiscal Year 2027 (Federal Register doc. 2026-17891, Sep 1, 2026)",
+              url: "https://www.govinfo.gov/content/pkg/FR-2026-09-01/html/2026-17891.htm",
+            },
+            {
+              title: "Freddie Mac, About the Primary Mortgage Market Survey (PMMS)",
+              url: "https://www.freddiemac.com/pmms/about-pmms",
+            },
+            {
+              title:
+                "Fannie Mae Multifamily Selling and Servicing Guide, Part II Sec. 203.02, Underwritten DSCR",
+              url: "https://mfguide.fanniemae.com/fnmf-pdf/download/10786",
+            },
+            {
+              title: "Fannie Mae Selling Guide B3-6-02, Debt-to-Income Ratios",
+              url: "https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios",
+            },
+          ]}
+        />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
@@ -498,9 +561,8 @@ export default function BlogPost() {
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            TrueCap is a rental property analysis tool used by individual
-            investors, agents, and active flippers to underwrite deals in
-            seconds. Built by real estate investors, in Philadelphia.{" "}
+            TrueCap is a rental property analysis tool for screening rental
+            deals. Built by one rental investor in Philadelphia.
           </p>
         </footer>
       </main>

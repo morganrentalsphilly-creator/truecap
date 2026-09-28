@@ -90,10 +90,12 @@ export default function GoodCapRatePost() {
       <h2>Use TrueCap as a preliminary screen</h2>
       <p>
         The TrueCap analyzer calculates cap rate beside cash flow, cash-on-cash
-        return, and model DSCR under editable assumptions. Labeled HUD and FRED
-        values are starting benchmarks, not property facts; property tax remains
-        a manual local input. Replace each value with reviewed property-specific
-        evidence before relying on the result.
+        return, and modeled DSCR under editable assumptions. Labeled HUD and
+        FRED values are starting benchmarks, not property facts; property tax
+        remains a manual local input. A blank property-tax field uses a
+        TrueCap default of 1.1% of purchase price — replace it with your local
+        number. Replace each value with reviewed property-specific evidence before
+        relying on the result.
       </p>
 
       <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />
