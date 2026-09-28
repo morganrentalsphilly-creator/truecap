@@ -686,7 +686,13 @@ describe("links", () => {
     expect(hv("https://www.irs.gov/x", BLOG, 0)).toMatch(/tier-0 files may add internal links only/);
     expect(hv("http://www.irs.gov/x")).toMatch(/http: links/);
     expect(hv("//www.irs.gov/x")).toMatch(/protocol-relative/);
-    expect(hv("https://notirs.gov/x")).toMatch(/not a primary-source domain/);
+    // Any .gov host is primary (only governments can hold one): a county
+    // assessor or a city's licensing page. Look-alikes are not.
+    expect(hv("https://www.polkcountyiowa.gov/assessor")).toBeNull();
+    expect(hv("https://www.phila.gov/services/permits-violations-licenses/")).toBeNull();
+    expect(hv("https://notirs.example/x")).toMatch(/not a primary-source domain/);
+    expect(hv("https://gov.evil.example/x")).toMatch(/not a primary-source domain/);
+    expect(hv("https://evilgov.com/x")).toMatch(/not a primary-source domain/);
     expect(hv("https://irs.gov.evil.example/x")).toMatch(/not a primary-source domain/);
     expect(hv("https://bit.ly/abc")).toMatch(/shortener/);
     expect(hv("https://93.184.216.34/x")).toMatch(/IP-address/);

@@ -153,7 +153,8 @@
     "va.gov",
     "benefits.va.gov",
     "fema.gov",
-    "usa.gov"
+    "usa.gov",
+    "gov"
   ],
   "_why_domains": "Outbound links an agent adds must land on a primary source. State statute, county assessor and city licensing domains are added here by the owner as markets are enriched (never by the model).",
   "vendorDomains": [
@@ -376,5 +377,6 @@
         0.0002
       ]
     ]
-  }
+  },
+  "_primarySourceDomainsWhy": "Federal domains are listed for clarity; \"gov\" admits every .gov host (subdomains of gov), because only US federal, state, local and tribal governments can register a .gov name, so a county assessor or a city's rental-licensing page is a primary source. Added 2026-09-28 after the fifth live run skipped every market-enrich candidate for lack of county/city domains (#136). Non-.gov government sites (e.g. a county appraisal district on .org) are still added one by one, by the owner."
 }

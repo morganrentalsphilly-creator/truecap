@@ -710,7 +710,8 @@ describe("structural reasons and routing helpers", () => {
     const withHosts = (hosts: string[]) => ({ ...page("/blog/a", { family: "blog-post", outboundExternal: hosts.length }), externalHosts: hosts });
     expect(needsCitations(withHosts(["www.example.com"]), domains)).toBe(true);
     expect(needsCitations(withHosts(["www.irs.gov"]), domains)).toBe(false);
-    expect(needsCitations(withHosts(["notirs.gov"]), domains)).toBe(true);
+    expect(needsCitations(withHosts(["www.polkcountyiowa.gov"]), domains)).toBe(false);
+    expect(needsCitations(withHosts(["notirs.example"]), domains)).toBe(true);
   });
 
   it("NEEDS_CITATIONS never fires on a crawl record that did not answer 200", () => {
