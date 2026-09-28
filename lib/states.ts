@@ -12,8 +12,9 @@
  * state pages, llms.txt and site search show only the sourced figures in
  * content/seo/state-facts.json (lib/seo/state-facts.ts);
  * lib/__tests__/public-stale-registry-render-guards.test.tsx keeps pitch,
- * tier, landlord lean and propertyTaxRatePct off the HTML. The fields stay for
- * scripts/build-market-intelligence-pack.ts; do not render them.
+ * tier, landlord lean and propertyTaxRatePct off the HTML. Nothing reads them
+ * any more: scripts/build-market-intelligence-pack.ts prints the sourced
+ * Census facts and HUD FMR instead (F8 review). Do not render them.
  */
 
 export type LandlordFriendliness = "Strong" | "Mixed" | "Tenant-leaning";

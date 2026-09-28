@@ -52,10 +52,39 @@ describe("public downloadable artifacts", () => {
 
     expect(pdf).not.toMatch(/BRRRR/i);
     expect(pdf).not.toMatch(/Fits strategies/i);
-    expect(pdf).toMatch(/Buy-and-hold screening note/i);
     expect(generator).not.toContain("s.bestStrategies");
     expect(generator).not.toContain("Fits strategies");
-    expect(generator).toContain("Buy-and-hold screening note");
+  });
+
+  it("prints only the sourced data behind /states and /markets (F8): Census facts and HUD FMR", () => {
+    // The pack says it comes from the data behind /states and /markets, so it
+    // may print only what those pages render: content/seo/state-facts.json
+    // (Census ACS, each fact sourced) and HUD Fair Market Rent. The unsourced
+    // lib/states.ts tier, landlord lean, tax rate, eviction timeline, medians
+    // and the rent-to-price screen built on them are gone.
+    const pdf = readFileSync(packPath).toString("latin1");
+    const generator = readFileSync(
+      path.join(ROOT, "scripts/build-market-intelligence-pack.ts"),
+      "utf8",
+    );
+    const facts = JSON.parse(
+      readFileSync(path.join(ROOT, "content/seo/state-facts.json"), "utf8"),
+    ).states as Record<string, { medianHomeValue: { value: number }; medianRealEstateTaxesPaid: { value: number } }>;
+
+    for (const phrase of [/Landlord law/i, /\bTier\b/, /Eviction/i, /effective-rate/i, /rent-to-price/i, /Median rent/i, /screening note/i, /landlord[- ]friendly|Tenant-leaning/i]) {
+      expect(pdf).not.toMatch(phrase);
+    }
+    expect(pdf).toContain("American Community Survey");
+    // PDF string literals escape parentheses: "\(FY2026\)".
+    expect(pdf).toMatch(/HUD Fair Market Rent \\?\(FY\d{4}\\?\)/);
+    expect(pdf).toContain("payment standard amounts for the Housing Choice Voucher program");
+    for (const slug of ["alabama", "ohio", "texas"]) {
+      expect(pdf, slug).toContain(`$${facts[slug]!.medianHomeValue.value.toLocaleString("en-US")}`);
+      expect(pdf, slug).toContain(`$${facts[slug]!.medianRealEstateTaxesPaid.value.toLocaleString("en-US")} a year`);
+    }
+    for (const field of ["tier", "landlord", "propertyTaxRatePct", "evictionTimelineDays", "medianHomePrice", "medianRent", "pitch"]) {
+      expect(generator, field).not.toMatch(new RegExp(`\\b[a-z]+\\.${field}\\b`));
+    }
   });
 
   it("keeps the stale market pack out of active capture and links the reviewed playbook", () => {
