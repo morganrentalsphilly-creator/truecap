@@ -28,7 +28,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Best free rental property calculator 2026: 5 tools";
 const DESCRIPTION =
-  "A 2026 ranking of five free rental-analysis tools: TrueCap, DealCheck Starter, Stessa, spreadsheet templates, and Zillow's mortgage calculator.";
+  "Compare 5 free rental property calculators — TrueCap, DealCheck Starter, Stessa, Excel/Sheets templates, and Zillow's mortgage calculator — 2026.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/best-free-rental-property-calculator-2026") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 9;
