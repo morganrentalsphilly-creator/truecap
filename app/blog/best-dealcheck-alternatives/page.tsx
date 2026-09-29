@@ -78,6 +78,29 @@ export const metadata: Metadata = {
 /** Inline source link inside the not-prose table and tool cards. */
 const SOURCE_LINK = "font-semibold text-primary hover:underline";
 
+/** Pinned verbatim by lib/__tests__/public-underwriting-claims-guard.test.ts. */
+const TRUECAP_BENCHMARKS_STRENGTH =
+  "Labeled HUD rent and FRED rate benchmarks; manual local property tax";
+
+/** Links the "FRED rate" phrase to its source while keeping the string above intact. */
+function withFredSource(text: string): ReactNode {
+  const phrase = "FRED rate";
+  const at = text.indexOf(phrase);
+  if (at === -1) return text;
+  return (
+    <>
+      {text.slice(0, at)}
+      <a
+        href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+        className={SOURCE_LINK}
+      >
+        {phrase}
+      </a>
+      {text.slice(at + phrase.length)}
+    </>
+  );
+}
+
 type Tool = {
   rank: number;
   name: string;
@@ -101,7 +124,7 @@ const TOOLS: Tool[] = [
       "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow — free, unlimited, no signup",
-      "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
+      withFredSource(TRUECAP_BENCHMARKS_STRENGTH),
       "Buy Box fit with each metric benchmarked inline, plus a Deal score",
       "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
     ],
@@ -701,6 +724,10 @@ export default function BestDealCheckAlternativesPost() {
               {
                 title: "BiggerPockets, FilePlace (member-shared real estate files)",
                 url: "https://www.biggerpockets.com/files",
+              },
+              {
+                title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+                url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
               },
             ]}
           />
