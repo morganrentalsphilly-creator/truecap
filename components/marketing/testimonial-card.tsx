@@ -8,10 +8,12 @@
  * testimonial exists, and nothing fake can ever render (the registries are
  * typed, verified, and customer-approved by construction).
  *
- * Server components: pure render, no state.
+ * Server components: pure render, no state. Set as quotations on rules
+ * (DESIGN.md "Components": cards only for things a visitor compares), the
+ * same form as the homepage's Testimonials.
  */
 
-import { Quote } from "lucide-react";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import {
   VERIFIED_TESTIMONIALS,
   VERIFIED_AGENT_PROOF,
@@ -45,20 +47,17 @@ function metricLine(record: VerifiedTestimonial): string | null {
 export function TestimonialCard({ record }: { record: VerifiedTestimonial }) {
   const metrics = metricLine(record);
   return (
-    <figure className="flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-      <Quote aria-hidden className="size-5 text-primary/40" />
-      <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
+    <figure className="flex h-full flex-col border-t-2 border-foreground pt-4">
+      <blockquote className="flex-1 text-pretty text-lg leading-relaxed text-foreground">
         &ldquo;{record.quote}&rdquo;
       </blockquote>
-      <figcaption className="mt-4 border-t border-border pt-3">
-        <p className="text-sm font-bold text-foreground">{record.customerName}</p>
-        <p className="text-xs text-muted-foreground">
+      <figcaption className="mt-4 text-sm">
+        <p className="font-semibold text-foreground">{record.customerName}</p>
+        <p className="text-muted-foreground">
           {ARCHETYPE_LABELS[record.archetype]}
           {record.portfolioSize ? ` · ${record.portfolioSize}` : ""}
         </p>
-        {metrics ? (
-          <p className="mt-1 text-2xs font-semibold text-primary">{metrics}</p>
-        ) : null}
+        {metrics ? <p className="mt-1 text-muted-foreground">{metrics}</p> : null}
       </figcaption>
     </figure>
   );
@@ -74,16 +73,16 @@ export function AgentProofSection() {
   );
   if (publishable.length === 0) return null;
   return (
-    <section className="mb-12 sm:mb-16">
-      <h2 className="mb-2 text-2xl font-extrabold text-foreground sm:text-3xl">
-        Agents on TrueCap
-      </h2>
-      <p className="mb-6 text-base leading-relaxed text-muted-foreground">
+    <Section aria-labelledby="agent-proof-heading">
+      <SectionHeading id="agent-proof-heading">Agents on TrueCap</SectionHeading>
+      <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
         Verified quotes from investor-focused agents — published only with
         their approval.
       </p>
-      <TestimonialStrip segment="agent" limit={3} />
-    </section>
+      <div className="mt-8">
+        <TestimonialStrip segment="agent" limit={3} />
+      </div>
+    </Section>
   );
 }
 
@@ -104,7 +103,7 @@ export function TestimonialStrip({
   if (publishable.length === 0) return null;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
       {publishable.map((record) => (
         <TestimonialCard key={record.id} record={record} />
       ))}
