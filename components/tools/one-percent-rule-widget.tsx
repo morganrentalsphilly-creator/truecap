@@ -3,13 +3,22 @@
 /**
  * 1% rule calculator widget — simple pass/fail screener.
  * Rent ÷ price × 100. Passes if ≥ 1%.
+ *
+ * Set on the calculator parts (components/tools/tool-parts.tsx): the frame
+ * opens on the 2px ink rule with no card; the two fields are the shared
+ * ToolNumberField; the ratio is the key figure in DM Mono over the double
+ * rule, in ink; only the verdict takes a color, green for a pass and orange
+ * for a miss (LedgerVerdict), because it is a pass or miss against the rule.
+ * The frame's grid reads its own width (@container), so the same widget
+ * lays out in the tool page's hero column and in the /embed iframe.
  */
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles, Check, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { LedgerVerdict } from "@/components/ledger/ledger-parts";
+import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { ToolFrame, ToolResult } from "@/components/tools/tool-parts";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 
@@ -46,58 +55,31 @@ export function OnePercentRuleWidget() {
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            1% Rule Calculator
-          </h2>
-
-          <div>
-            <Label
-              htmlFor="onepct-price"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Purchase Price
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                $
-              </span>
-              <Input
-                id="onepct-price"
-                type="number"
-                inputMode="numeric"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="pl-7 border-input bg-background text-base"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label
-              htmlFor="onepct-rent"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Monthly Rent
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                $
-              </span>
-              <Input
-                id="onepct-rent"
-                type="number"
-                inputMode="numeric"
-                value={rent}
-                onChange={(e) => setRent(e.target.value)}
-                className="pl-7 border-input bg-background text-base"
-              />
-            </div>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
+    // The page and the /embed iframe both show an H1 naming the calculator,
+    // so the widget's own heading is for the outline only.
+    <ToolFrame aria-labelledby="onepct-heading">
+      <h2 id="onepct-heading" className="sr-only">
+        1% Rule Calculator
+      </h2>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-6 @lg:grid-cols-2">
+        <div className="min-w-0 space-y-5">
+          <ToolNumberField
+            id="onepct-price"
+            label="Purchase price"
+            prefix="$"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            error={null}
+          />
+          <ToolNumberField
+            id="onepct-rent"
+            label="Monthly rent"
+            prefix="$"
+            value={rent}
+            onChange={(e) => setRent(e.target.value)}
+            error={null}
+          />
+          <p className="max-w-[46ch] text-pretty text-sm text-muted-foreground">
             The 1% rule is a screening filter, not an investment decision. A
             property that passes is worth a deeper underwrite. A property that
             fails isn&apos;t necessarily a bad deal — appreciation markets often
@@ -105,57 +87,41 @@ export function OnePercentRuleWidget() {
           </p>
         </div>
 
-        <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-center items-center text-center">
-          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Rent / Price
-          </div>
-          <div
-            className={cn(
-              "font-mono text-4xl sm:text-5xl font-extrabold mt-2 tabular-nums",
-              !hasResult
-                ? "text-muted-foreground"
-                : passes
-                  ? "text-[var(--metric-positive)]"
-                  : "text-[var(--metric-negative)]",
-            )}
-          >
-            {hasResult ? `${ratio.toFixed(2)}%` : "—"}
-          </div>
-          {/* No verdict badge without a result. An em-dash placeholder plus a
-              corrective sentence is the contract Break-Even already uses. */}
-          {hasResult ? (
-            <div className="mt-3">
-              {passes ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--brand-green-light)] text-[var(--metric-positive)] font-bold text-sm">
-                  <Check className="w-4 h-4" /> Passes 1% rule
-                </span>
+        {/* On one column the result opens on the rule under the fields. */}
+        <ToolResult
+          className="border-t border-border pt-5 @lg:border-t-0 @lg:pt-0"
+          label="Rent / price"
+          figure={hasResult ? `${ratio.toFixed(2)}%` : "—"}
+          pending={!hasResult}
+          // No verdict without a result. An em-dash placeholder plus a
+          // corrective sentence is the contract Break-Even already uses.
+          verdict={
+            hasResult ? (
+              passes ? (
+                <LedgerVerdict pass>Passes 1% rule</LedgerVerdict>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-negative/10 text-[var(--metric-negative)] font-bold text-sm">
-                  <X className="w-4 h-4" /> Fails 1% rule
-                </span>
-              )}
-            </div>
-          ) : null}
-          <p className="text-xs text-muted-foreground mt-4 max-w-xs">
-            {!hasResult
+                <LedgerVerdict pass={false}>Fails 1% rule</LedgerVerdict>
+              )
+            ) : null
+          }
+          note={
+            !hasResult
               ? "Enter a purchase price and monthly rent to calculate."
               : passes
                 ? "Run a full underwrite — this property may cash-flow well."
-                : "Either this is an appreciation play, or the price is too high relative to rent."}
-          </p>
-        </div>
+                : "Either this is an appreciation play, or the price is too high relative to rent."
+          }
+        />
       </div>
 
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        className={cn(buttonVariants({ size: "cta" }), "mt-6")}
       >
-        <Sparkles className="w-4 h-4" />
         Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash
         flow — free in TrueCap
-        <ArrowUpRight className="w-4 h-4" />
       </AnalyzerHandoffLink>
-    </div>
+    </ToolFrame>
   );
 }

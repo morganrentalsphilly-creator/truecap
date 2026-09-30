@@ -150,15 +150,57 @@ describe("free tool widgets", () => {
     expect(widget).toContain("interestRate: Math.max(0, num(rateInput))");
   });
 
-  it("render every hero result in the numeral token", () => {
+  it("render every hero result in the numeral token", async () => {
     const sans: string[] = [];
+    const onKeyFigure: string[] = [];
     for (const file of readdirSync(join(process.cwd(), "components/tools"))) {
       if (!file.endsWith("-widget.tsx")) continue;
       const source = read(`components/tools/${file}`);
+      // The widgets not yet on the design pass: the figure's own class string.
       for (const match of source.matchAll(/"([^"]*text-(?:4xl|5xl)[^"]*font-extrabold[^"]*)"/g)) {
         if (!/font-mono/.test(match[1])) sans.push(`${file}: ${match[1]}`);
       }
+      // Any figure a widget sets at a key-figure size itself is DM Mono too.
+      // On <LedgerTotal>/<LedgerFigure> the primitive brings font-mono, so
+      // there the class string fails only if it overrides the family (cn
+      // would let a later font-sans/-serif/-display win over font-mono).
+      for (const match of source.matchAll(/"([^"]*\btext-key(?:-sm)?\b[^"]*)"/g)) {
+        const tagStart = source.lastIndexOf("<", match.index);
+        const tag = /^<([A-Za-z][\w.]*)/.exec(source.slice(tagStart))?.[1];
+        const mono =
+          tag === "LedgerTotal" || tag === "LedgerFigure"
+            ? !/\bfont-(?:sans|serif|display)\b/.test(match[1])
+            : /\bfont-mono\b/.test(match[1]);
+        if (!mono) sans.push(`${file}: ${match[1]}`);
+      }
+      if (/<ToolResult\b/.test(source)) onKeyFigure.push(file);
     }
     expect(sans).toEqual([]);
+    // The converted widgets set their result through the shared ToolResult
+    // (design pass, 2026-09-30), whose figure is LedgerTotal at the key-figure
+    // size. That LedgerTotal renders it in DM Mono is proven by the render
+    // below, not by pinning ledger-parts.tsx's class order.
+    expect(onKeyFigure).toContain("one-percent-rule-widget.tsx");
+    expect(read("components/tools/tool-parts.tsx")).toContain(
+      '<LedgerTotal className="text-key-sm sm:text-key">',
+    );
+    // Rendered, because cn (tailwind-merge) reads text-key-sm as a text color
+    // and drops it beside a color class: the figure must keep both key-figure
+    // steps, in DM Mono, with figure and unit in one text node (the e2e specs
+    // match "1.05%" as one node), with or without a result.
+    const { createElement } = await import("react");
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const { ToolResult } = await import("@/components/tools/tool-parts");
+    for (const pending of [false, true]) {
+      const html = renderToStaticMarkup(
+        createElement(ToolResult, { label: "Rent / price", figure: "1.05%", pending }),
+      );
+      const figureClass = /<span class="([^"]*)">1\.05%<\/span>/.exec(html)?.[1];
+      expect(figureClass, `pending=${pending}: "1.05%" as one span`).toBeDefined();
+      const tokens = (figureClass ?? "").split(/\s+/);
+      for (const token of ["font-mono", "tabular-nums", "text-key-sm", "sm:text-key"]) {
+        expect(tokens, `pending=${pending}`).toContain(token);
+      }
+    }
   });
 });
