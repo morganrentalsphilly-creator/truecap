@@ -76,6 +76,48 @@ export function buildSourceFirstArticleMetadata(
   };
 }
 
+/**
+ * The H1's text with its phrases held together from 640px: a hyphenated
+ * compound never breaks at its hard hyphen, and a one-letter word ("A")
+ * stays with the word after it instead of ending a line. At 1095 "What is a
+ * good cap rate? A / property-specific framework" becomes "What is a good cap
+ * rate? / A property-specific framework". Below 640px the title wraps
+ * freely: in 343px the compound cannot share a line with its neighbours, and
+ * holding it together there would cost a fourth line with "rate?" alone.
+ * The spans only wrap: the H1's text is article.title byte for byte, so it
+ * still equals the JSON-LD headline and the breadcrumb name.
+ */
+function titleWithPhrasesKept(title: string): ReactNode[] {
+  const words = title.split(" ");
+  const units: string[] = [];
+  for (let i = 0; i < words.length; i += 1) {
+    if (/^\p{L}$/u.test(words[i]) && i + 1 < words.length) {
+      units.push(`${words[i]} ${words[i + 1]}`);
+      i += 1;
+    } else {
+      units.push(words[i]);
+    }
+  }
+  const nodes: ReactNode[] = [];
+  let run = "";
+  units.forEach((unit, index) => {
+    const space = index === 0 ? "" : " ";
+    if (unit.includes(" ") || /\p{L}-\p{L}/u.test(unit)) {
+      if (run + space) nodes.push(run + space);
+      run = "";
+      nodes.push(
+        <span key={index} className="sm:whitespace-nowrap">
+          {unit}
+        </span>,
+      );
+    } else {
+      run += space + unit;
+    }
+  });
+  if (run) nodes.push(run);
+  return nodes;
+}
+
 export function SourceFirstArticle({
   article,
   children,
@@ -145,13 +187,15 @@ export function SourceFirstArticle({
       <JsonLd data={faqLd} />
       <ArticleMain>
         <header className={ARTICLE_HEADER}>
-          <h1 className={ARTICLE_TITLE}>{article.title}</h1>
+          <h1 className={ARTICLE_TITLE}>{titleWithPhrasesKept(article.title)}</h1>
           <p className={ARTICLE_META}>
             <Link href="/blog" className={ARTICLE_META_LINK}>
               TrueCap Blog
             </Link>{" "}
             ·{" "}
+            {/* A date-only publishedAt is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(article.publishedAt).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "long",
               day: "numeric",
