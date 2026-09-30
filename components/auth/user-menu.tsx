@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Crown,
   Layers,
   LayoutDashboard,
   Loader2,
@@ -75,33 +74,28 @@ export function UserMenu({
           type="button"
           variant="ghost"
           className={cn(
-            "h-10 px-2 sm:px-3 rounded-full border border-transparent hover:border-border",
+            "h-10 px-2 sm:px-3 rounded-md border border-transparent hover:border-border",
             triggerClassName,
           )}
         >
-          <div className="relative leading-none">
+          <div className="leading-none">
             <Avatar className="size-8 ring-1 ring-border">
               <AvatarImage
                 key={avatarSrc ?? "user-avatar"}
                 src={avatarSrc}
                 alt={displayName}
               />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              <AvatarFallback className="bg-band text-foreground text-sm font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            {isPremium && (
-              <span className="absolute -top-1 -right-1 !w-4 !h-4 !leading-none transform-none rounded-full bg-[var(--brand-orange)] text-white border border-card flex items-center justify-center !shrink-0">
-                <Crown className="!w-[10px] !h-[10px] !shrink-0" />
-              </span>
-            )}
           </div>
           <div className="hidden sm:flex flex-col items-start leading-tight ml-1">
-            <span className="text-xs font-semibold text-foreground max-w-[120px] truncate">
+            <span className="text-sm font-semibold text-foreground max-w-[120px] truncate">
               {displayName}
             </span>
             {email ? (
-              <span className="text-2xs text-muted-foreground max-w-[120px] truncate">
+              <span className="text-sm text-muted-foreground max-w-[120px] truncate">
                 {email}
               </span>
             ) : null}
@@ -111,29 +105,24 @@ export function UserMenu({
 
       <DropdownMenuContent align={align} className="w-64">
         <DropdownMenuLabel className="flex items-center gap-2 py-2">
-          <div className="relative">
+          <div className="shrink-0">
             <Avatar className="size-8 ring-1 ring-border">
               <AvatarImage
                 key={(avatarSrc ?? "menu-avatar") + "-menu"}
                 src={avatarSrc}
                 alt={displayName}
               />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              <AvatarFallback className="bg-band text-foreground text-sm font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            {isPremium && (
-              <span className="absolute -top-1 -right-1 !w-4 !h-4 !leading-none transform-none rounded-full bg-[var(--brand-orange)] text-white border border-card flex items-center justify-center !shrink-0">
-                <Crown className="!w-[10px] !h-[10px] !shrink-0" />
-              </span>
-            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">
               {displayName}
             </p>
             {email ? (
-              <p className="text-xs text-muted-foreground truncate">{email}</p>
+              <p className="text-sm text-muted-foreground truncate">{email}</p>
             ) : null}
           </div>
         </DropdownMenuLabel>

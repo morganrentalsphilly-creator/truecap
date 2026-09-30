@@ -24,18 +24,25 @@ const ToastViewport = React.forwardRef<
 ))
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
+/**
+ * A toast is a float (DESIGN.md "Chrome"): raised paper with a 1px rule edge,
+ * the one float shadow and the 10px float radius. Every variant sits on the
+ * same opaque paper; the variant class only marks the group so the status
+ * icon (components/ui/toaster.tsx) takes the pass, caution or fail color.
+ * The swipe snap-back is the only transition, and it names its property.
+ * min-h-16 keeps a title-only toast (about 50px of padding box) tall enough
+ * that the 44px close target at top-2 and its 3px + 2px focus outline fit
+ * inside the overflow-hidden box instead of being clipped at the bottom.
+ */
 const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-start justify-between gap-3 overflow-hidden rounded-2xl border p-4 pr-10 shadow-[0_16px_40px_rgba(15,23,42,0.14)] backdrop-blur transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
+  'group pointer-events-auto relative flex min-h-16 w-full items-start justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 pr-14 text-foreground shadow-md transition-transform data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
   {
     variants: {
       variant: {
-        default: 'border-border/80 bg-card/95 text-foreground',
-        success:
-          'success border-positive/30 bg-positive-light text-positive',
-        warning:
-          'warning border-caution/30 bg-caution-light text-caution-text',
-        destructive:
-          'destructive border-negative/30 bg-negative/10 text-destructive-text',
+        default: '',
+        success: 'success',
+        warning: 'warning',
+        destructive: 'destructive',
       },
     },
     defaultVariants: {
@@ -66,7 +73,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive',
+      'inline-flex min-h-11 shrink-0 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50',
       className,
     )}
     {...props}
@@ -82,7 +89,7 @@ const ToastClose = React.forwardRef<
     ref={ref}
     aria-label="Close notification"
     className={cn(
-      'absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-all hover:bg-background/70 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring group-[.success]:text-positive group-[.success]:hover:text-positive group-[.warning]:text-caution-text group-[.warning]:hover:text-caution-text group-[.destructive]:text-destructive-text group-[.destructive]:hover:text-destructive-text',
+      'absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
       className,
     )}
     toast-close=""
@@ -99,7 +106,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn('text-sm font-bold leading-tight tracking-tight', className)}
+    className={cn('text-sm font-semibold leading-tight text-pretty', className)}
     {...props}
   />
 ))
@@ -111,7 +118,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn('text-sm leading-relaxed text-muted-foreground group-[.success]:text-positive group-[.warning]:text-caution-text group-[.destructive]:text-destructive-text', className)}
+    className={cn('text-sm leading-relaxed text-pretty text-muted-foreground', className)}
     {...props}
   />
 ))

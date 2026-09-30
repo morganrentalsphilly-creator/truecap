@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle2, Info } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   Toast,
@@ -18,19 +18,29 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         const variant = props.variant
+        // Each variant has its own glyph, so a failure never differs from a
+        // caution or an info toast by color alone (WCAG 1.4.1) now that
+        // every variant sits on the same paper.
         const Icon =
           variant === 'success'
             ? CheckCircle2
-            : variant === 'destructive' || variant === 'warning'
-              ? AlertTriangle
-              : Info
+            : variant === 'destructive'
+              ? XCircle
+              : variant === 'warning'
+                ? AlertTriangle
+                : Info
 
         return (
           <Toast key={id} {...props}>
             <div className="flex min-w-0 flex-1 items-start gap-3">
-              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-[.success]:bg-positive-light group-[.success]:text-positive group-[.warning]:bg-caution-light group-[.warning]:text-caution-text group-[.destructive]:bg-negative/10 group-[.destructive]:text-destructive-text">
-                <Icon className="size-4" />
-              </span>
+              {/* The status icon alone, no tinted circle behind it. Only the
+                  pass, caution and fail variants color it (DESIGN.md: Signal
+                  Blue means "act here", so an info toast's icon is ink); the
+                  text stays in ink on the raised paper. */}
+              <Icon
+                aria-hidden
+                className="mt-0.5 size-4 shrink-0 text-foreground group-[.success]:text-positive group-[.warning]:text-caution-text group-[.destructive]:text-destructive-text"
+              />
               <div className="grid min-w-0 gap-1">
                 {title && <ToastTitle>{title}</ToastTitle>}
                 {description && (

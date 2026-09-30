@@ -11,12 +11,12 @@ export const MEMO_SHOT = "memo";
  * nothing when the shot has not been captured: never a placeholder, never a
  * mock.
  *
- * Frames (DESIGN.md "Chrome": no shadow at rest, radius by role):
- *   - "browser" (default, `true`): a quiet chrome bar over the screen, for
- *     app screens. A 1px rule and the 6px object radius.
- *   - "document": a printed page, for the memo. A 1px rule, no radius, no
- *     browser chrome, at the capture's own proportion.
- *   - `false`: the image alone.
+ * Frames (DESIGN.md "Chrome": no shadow at rest, radius by role; the Avoid
+ * list bans "a screenshot inside a fake browser frame"):
+ *   - "document" (the default): the shot as a printed page. A 1px rule, no
+ *     radius, no chrome, at the capture's own proportion, in a <figure> so a
+ *     caption stays attached.
+ *   - `false`: the image alone, with no rule and no caption.
  */
 export function findProductShot(
   shot: string,
@@ -32,7 +32,7 @@ export function ProductShot({
   priority = false,
   sizes = "(min-width: 1024px) 560px, 100vw",
   className = "",
-  frame = true,
+  frame = "document",
   caption,
 }: {
   shot: string;
@@ -41,7 +41,7 @@ export function ProductShot({
   priority?: boolean;
   sizes?: string;
   className?: string;
-  frame?: boolean | "browser" | "document";
+  frame?: "document" | false;
   caption?: React.ReactNode;
 }) {
   const entry = findProductShot(shot, viewport);
@@ -61,28 +61,12 @@ export function ProductShot({
     />
   );
   if (!frame) return <div className={className}>{image}</div>;
-  const captionNode = caption ? (
-    <figcaption className="mt-2.5 text-sm text-muted-foreground">{caption}</figcaption>
-  ) : null;
-  if (frame === "document") {
-    return (
-      <figure className={`min-w-0 ${className}`.trim()}>
-        <div className="overflow-hidden border border-border bg-card">{image}</div>
-        {captionNode}
-      </figure>
-    );
-  }
   return (
     <figure className={`min-w-0 ${className}`.trim()}>
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <div aria-hidden className="flex items-center gap-1.5 border-b border-border bg-band px-3 py-2">
-          <span className="size-2 rounded-full bg-rule-soft" />
-          <span className="size-2 rounded-full bg-rule-soft" />
-          <span className="size-2 rounded-full bg-rule-soft" />
-        </div>
-        {image}
-      </div>
-      {captionNode}
+      <div className="overflow-hidden border border-border bg-card">{image}</div>
+      {caption ? (
+        <figcaption className="mt-2.5 text-sm text-muted-foreground">{caption}</figcaption>
+      ) : null}
     </figure>
   );
 }
