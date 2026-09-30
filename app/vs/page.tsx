@@ -24,6 +24,13 @@
  * server-rendered <a href>: this page is the in-graph inbound link for
  * the whole /vs library (internal-link-graph.test.tsx "no orphans"), so
  * no client filtering, tabs or pagination.
+ *
+ * Prefetch: the rows and the close's secondary link are IntentPrefetchLink,
+ * which prefetches on hover or keyboard focus, never on scroll. While the
+ * rows were default next/links, a 390px scroll of this page pulled 120 RSC
+ * payloads (3.5 MB) before any click. The hero's links keep the default
+ * (the first screen, the likeliest clicks) and every /analyze link keeps
+ * prefetch={false}. lib/__tests__/intent-prefetch-vs.test.ts pins it.
  */
 
 import type { ReactNode } from "react";
@@ -40,6 +47,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 import { VS_HUB_CRUMB } from "@/components/marketing/vs-breadcrumb-schema";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
@@ -518,7 +526,7 @@ export default function VsHubPage() {
             <ul className="mt-8 grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
               {group.items.map((c) => (
                 <li key={c.slug} className="flex min-w-0 flex-col border-b border-rule-soft">
-                  <Link href={`/vs/${c.slug}`} className="group flex flex-1 flex-col py-4">
+                  <IntentPrefetchLink href={`/vs/${c.slug}`} className="group flex flex-1 flex-col py-4">
                     <h3 className="text-balance text-lg font-semibold text-foreground">
                       {/* Keeps the link's name in step with the ItemList
                           names ("TrueCap vs …") without a visible kicker. */}
@@ -531,7 +539,7 @@ export default function VsHubPage() {
                     <span className="tc-link mt-auto self-start pt-2 text-base font-medium group-hover:text-primary-deep">
                       Read the comparison
                     </span>
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               ))}
             </ul>
@@ -578,9 +586,9 @@ export default function VsHubPage() {
               <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
                 Run a deal — 60 seconds
               </Link>
-              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+              <IntentPrefetchLink href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
