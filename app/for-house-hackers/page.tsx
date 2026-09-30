@@ -115,28 +115,44 @@ export default function ForHouseHackersPage() {
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
-          title="Live in one, rent the others. Do the math first."
+          // The imperative holds together on one line ("Do the math first."
+          // is about 270px at 38px and 332px at 1095's display size, inside
+          // the 343px phone column and the 396px hero column); text-balance
+          // alone stranded "Do" at the end of the second line at every width.
+          title={
+            <>
+              Live in one, rent the others.{" "}
+              <span className="whitespace-nowrap">Do the math first.</span>
+            </>
+          }
           lede="TrueCap handles the math that makes house hacks unique: owner-occupant break-even bands, FHA 3.5% down, MIP, your-unit subsidy, with a separate-scenario workflow for a later move-out."
           actions={
-            <ActionRow>
-              {/* Deep-link into /analyze with the House Hack play pre-selected
-                  (?strategy= analyzer handoff) — owner-occupant form + FHA-style
-                  defaults, not a blank single-family deal. The analyzer no
-                  longer lives on "/", so the seed must target /analyze. */}
-              <Link
-                href="/analyze?strategy=house-hack"
-                prefetch={false}
-                className={buttonVariants({ size: "cta" })}
-              >
-                Run a free house-hack analysis
-              </Link>
-              <Link
-                href="/pricing"
-                className={buttonVariants({ size: "cta", variant: "outline" })}
-              >
-                See Pro pricing
-              </Link>
-            </ActionRow>
+            <>
+              <ActionRow>
+                {/* Deep-link into /analyze with the House Hack play pre-selected
+                    (?strategy= analyzer handoff) — owner-occupant form + FHA-style
+                    defaults, not a blank single-family deal. The analyzer no
+                    longer lives on "/", so the seed must target /analyze. */}
+                <Link
+                  href="/analyze?strategy=house-hack"
+                  prefetch={false}
+                  className={buttonVariants({ size: "cta" })}
+                >
+                  Run a free house-hack analysis
+                </Link>
+              </ActionRow>
+              {/* The homepage hero's grammar: one filled button, the secondary
+                  as a text link under it. Two cta buttons need about 434px and
+                  the hero's 5fr column is 396px at 1095, so the outline button
+                  wrapped under the filled one at a different width. The 44px
+                  target comes from padding the negative margin takes back out
+                  of the line box. */}
+              <p className="mt-3 text-base">
+                <Link href="/pricing" className="tc-link -my-3 inline-block py-3">
+                  See Pro pricing
+                </Link>
+              </p>
+            </>
           }
           note="Free screen: no card or signup"
           aside={
@@ -184,21 +200,38 @@ export default function ForHouseHackersPage() {
           <RuledList items={USE_CASES} columns={2} className="mt-8" />
         </Section>
 
+        {/* The homepage FAQ's split from 1024px: the heading in the 5fr
+            column beside its list in the 7fr one (about 545px at 1095, inside
+            the step measure), so the list uses the container instead of
+            leaving its right third bare. Stacked below 1024px, where the
+            grid gap keeps the 32px the list's mt-8 gave. */}
         <Section aria-labelledby="workflow-heading">
-          <SectionHeading id="workflow-heading">The house-hack workflow</SectionHeading>
-          <StepList steps={WORKFLOW_STEPS} className="mt-8" />
+          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <SectionHeading id="workflow-heading">The house-hack workflow</SectionHeading>
+            <StepList steps={WORKFLOW_STEPS} />
+          </div>
         </Section>
 
         <Section aria-labelledby="why-pick-heading">
-          <SectionHeading id="why-pick-heading">Why house hackers pick TrueCap</SectionHeading>
-          <RuledList items={WHY_HOUSE_HACKERS} className="mt-8 max-w-[68ch]" />
-          {/* The page's one honest limit on tax allocation: a boundary, so it
-              is set as a Note under the reasons rather than as one of them. */}
-          <Note title="Mixed-use boundary." className="mt-8">
-            TrueCap does not currently expose a tax-specific module or allocate
-            basis, depreciation, or interest between personal and rental use.
-            Build that calculation with a qualified tax professional.
-          </Note>
+          {/* The same split. The reasons span both rows of the 7fr column and
+              the Note sits under the heading in the 5fr one; the 1fr second
+              row takes the list's extra height, so the Note stays 32px under
+              the heading. Source order (and the phone stack) keeps the Note
+              after the reasons. */}
+          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:grid-rows-[auto_1fr]">
+            <SectionHeading id="why-pick-heading">Why house hackers pick TrueCap</SectionHeading>
+            <RuledList
+              items={WHY_HOUSE_HACKERS}
+              className="max-w-[68ch] lg:col-start-2 lg:row-span-2 lg:row-start-1"
+            />
+            {/* The page's one honest limit on tax allocation: a boundary, so it
+                is set as a Note beside the reasons rather than as one of them. */}
+            <Note title="Mixed-use boundary." className="lg:col-start-1 lg:row-start-2">
+              TrueCap does not currently expose a tax-specific module or allocate
+              basis, depreciation, or interest between personal and rental use.
+              Build that calculation with a qualified tax professional.
+            </Note>
+          </div>
         </Section>
 
         <Section rhythm="tight" aria-labelledby="reading-heading">
