@@ -1,333 +1,420 @@
 /**
- * /for-agents — persona-specific landing page for real estate agents.
+ * /for-agents — the canonical landing page for real estate agents who work
+ * with investor buyers (2026-09 agent-first marketing pass). Destination for
+ * agent-targeted paid traffic; the homepage speaks to agents first but keeps
+ * its investor topic, so agent keyword targeting lives HERE.
  *
- * Useful as a paid-ad landing page: ad copy targeting agents
- * ("underwrite investor deals in 60 seconds") matches the page
- * messaging better than the generic homepage. Higher Quality Score
- * on Google Ads + higher conversion than generic-LP traffic.
+ * What the page promises is bounded by what the code does — see
+ * lib/agent-faqs.ts for the per-claim sources. In short: a share link needs
+ * no account and is read-only; co-branding (Pro and Agent Pro) renders logo,
+ * brand color, "Shared by" and a "Prepared by" block, with TrueCap's name
+ * kept; the roster caps at 100 clients and an account at 12 Buy Boxes; a deal
+ * is screened against ONE client's Buy Box; the no-card trial never includes
+ * the roster. Nothing here implies leads, listings, or closings.
  *
- * Agents are a high-LTV segment: each agent analyzes dozens of deals
- * per year for buyer clients, recommends tools to other agents, and
- * is naturally drawn to the co-branded share-link Pro feature (plain
- * read-only share links are free for everyone; branding is the Pro part).
+ * Shared chrome: the same Header + SiteFooter as every marketing page. The
+ * pricing block mirrors /pricing (same Stripe display prices, same sign-up
+ * URL as PricingPlanButtons) so no agent-facing price or trial term can
+ * differ from the pricing page.
  */
 
 import type { Metadata } from "next";
-import { ProductShot } from "@/components/marketing/product-shot";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import {
   ArrowRight,
   ArrowUpRight,
   Calculator,
-  FileDown,
-  Share2,
-  ShieldCheck,
+  ClipboardCheck,
+  Clock,
+  FileText,
+  Handshake,
+  Link2,
   Sparkles,
-  Zap,
+  Tags,
+  Users,
 } from "lucide-react";
+import { Header } from "@/components/investcalc/header";
+import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
+import { Disclaimer } from "@/components/marketing/disclaimer";
+import { FaqSection } from "@/components/marketing/landing-sections";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { AgentProofSection } from "@/components/marketing/testimonial-card";
 import { TrackedMarketingLink } from "@/components/marketing/tracked-marketing-link";
+import { AGENT_FAQS } from "@/lib/agent-faqs";
+import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+} from "@/lib/product-access";
+import { PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import {
+  formatPublicUsd,
+  PUBLIC_AGENT_PRO_ANNUAL_USD,
+  PUBLIC_AGENT_PRO_MONTHLY_USD,
+} from "@/lib/public-pricing";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
-import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
-import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
-import { AgentProofSection } from "@/components/marketing/testimonial-card";
-import { Header } from "@/components/investcalc/header";
-import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
+
+const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
+const PAGE_DESCRIPTION =
+  "For real estate agents: screen a listing against each investor client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo in about 60 seconds.";
 
 export const metadata: Metadata = {
-  title: "Agent Pro — Win the Investor. Keep the Investor.",
-  description:
-    "Send investor clients a property with the analysis already done: branded, data-sourced underwriting against each client's own Buy Box, with TrueCap Agent Pro.",
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   keywords: [
+    "real estate agent investment property analysis",
+    "investor client tool for agents",
+    "co-branded rental analysis",
+    "investor-friendly agent tools",
     "real estate agent calculator",
     "rental analysis for agents",
-    "investor client tool",
-    "real estate agent deal analyzer",
   ],
   alternates: { canonical: "/for-agents" },
   openGraph: {
-    title: "TrueCap Agent Pro — Win the Investor. Keep the Investor.",
-    description:
-      "Send investor clients a property with the analysis already done. Client rosters, per-client Buy Boxes, branded analysis.",
+    title: `${PAGE_TITLE} | TrueCap`,
+    description: PAGE_DESCRIPTION,
     url: "/for-agents",
     type: "website",
     images: [
       {
-        url: "/home.jpg",
+        url: "/og/for-agents",
         width: 1200,
         height: 630,
-        alt: "TrueCap for real estate agents",
+        alt: "TrueCap for real estate agents: the decision memo your investor client receives",
       },
     ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: `${PAGE_TITLE} | TrueCap`,
+    description: PAGE_DESCRIPTION,
+    images: ["/og/for-agents"],
+  },
 };
 
-const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
+/** The same sign-up URL PricingPlanButtons uses for an anonymous Agent Pro CTA. */
+const AGENT_PRO_SIGNUP_HREF = `/auth/sign-up?plan=agent-pro&billing=annual&next=${encodeURIComponent("/dashboard/new")}`;
+
+/** NAR's order of what agents buy software for: time, client experience, closings. */
+const PROMISES: { icon: typeof Clock; title: string; body: string }[] = [
   {
-    icon: Calculator,
-    title: "Review the investment case at the showing",
-    body: "Paste the address, review the assumptions, and see Buy Box fit, cash flow, cap rate, cash-on-cash return, and DSCR while the property is still in front of you.",
+    icon: Clock,
+    title: "Save time",
+    body: "First-pass numbers from the address in about 60 seconds, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
   },
   {
-    icon: Share2,
-    title: "Keep a Buy Box for every investor client",
-    body: "Maintain a client roster, attach acquisition criteria to each buyer, assign deals, and let TrueCap screen the same property against the right investor's targets.",
+    icon: Handshake,
+    title: "Improve the client experience",
+    body: "Send deals that already clear the client's Buy Box, with the math attached and your name on it, instead of a stack of listings. When one doesn't fit, say so with the specific criterion it missed.",
   },
   {
-    icon: FileDown,
-    title: "Send a co-branded analysis clients can review",
-    body: "Share a polished PDF or co-branded deal link with the assumptions, Buy Box fit, projections, and context for that buyer.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Keep every starting assumption transparent",
-    body: "Start from visible HUD rent and FRED rate benchmarks, enter a local property-tax bill or reviewed rate, then edit the financing and operating assumptions for the client before presenting a result.",
+    icon: ClipboardCheck,
+    title: "Get to the offer sooner",
+    body: "A client who already knows the highest price that still meets their targets has one less reason to wait. The decision memo travels with the numbers and the reasoning together.",
   },
 ];
 
+const CLIENT_RECEIVES: { icon: typeof Link2; title: string; body: string }[] = [
+  {
+    icon: Link2,
+    title: "A share link that opens without an account",
+    body: "Read-only, expiring, and revocable from your dashboard. The exact address stays hidden unless you choose to include it. Your client needs an account only to save a private copy.",
+  },
+  {
+    icon: FileText,
+    title: "The decision memo, co-branded",
+    body: "With branding set up, the share page carries your logo, your brand color, and “Shared by” your name or company, with a form the client can use to message you. The PDF adds your tagline and a “Prepared by” block with your name, email, phone, and website. TrueCap's name stays on both as the methodology behind the numbers: co-branded, not white-label.",
+  },
+  {
+    icon: Tags,
+    title: "Every number labeled: benchmark or entered",
+    body: `Rent shows as a HUD area benchmark and the rate as a FRED benchmark until you replace them. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
+  },
+  {
+    icon: Calculator,
+    title: "The disclaimer, and their own rerun",
+    body: "The share page states that it is a screening record, not a decision, and that every material assumption should be verified. One click copies the deal into the free analyzer so your client can change any assumption and rerun it themselves.",
+  },
+];
+
+const WORKFLOW_STEPS = [
+  "Open TrueCap on your phone or laptop at the showing.",
+  "Paste the listing address. HUD area rent and the FRED 30-year benchmark fill in as editable starting values; enter the local property-tax bill or a reviewed rate yourself.",
+  "Switch to the client's financing: their down payment, their lender's rate, a DSCR loan if that is what they use.",
+  "Assign the deal to the client. It is screened against that client's Buy Box, and the Offer Ceiling shows the highest price that still meets their targets.",
+  "Send the co-branded share link or PDF. If it misses, the memo names the criterion it missed and by how much.",
+] as const;
+
 export default async function ForAgentsPage() {
   const agentProConfigured = isAgentProConfigured();
+  // Agent Pro is deployment-configured: without a catalog-verified Stripe
+  // Price there is nothing to sell, and the plan cards explain the tiers
+  // that do exist. Keep the persona page from advertising a tier this
+  // deployment cannot check out.
   if (!agentProConfigured) permanentRedirect("/pricing");
-  const [agentMonthly, agentAnnual] = agentProConfigured
-    ? await Promise.all([
-        loadStripeDisplayPrice("agent_pro_monthly"),
-        loadStripeDisplayPrice("agent_pro_annual"),
-      ])
-    : [null, null];
+
+  const [agentMonthly, agentAnnual] = await Promise.all([
+    loadStripeDisplayPrice("agent_pro_monthly"),
+    loadStripeDisplayPrice("agent_pro_annual"),
+  ]);
+  // Mirror /pricing: the annual card shows the effective monthly figure with
+  // the real annual charge under it. Amounts come from the Stripe display
+  // price, with the public catalog as the documented fallback.
+  const annualAmount =
+    Number(agentAnnual?.amountLabel.replace(/[^\d.]/g, "")) || PUBLIC_AGENT_PRO_ANNUAL_USD;
+  const annualPerMonth = `$${(annualAmount / 12).toFixed(2)}`;
+  const annualLabel = agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD);
+  const monthlyLabel = agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD);
+
+  // The waitlist branch is unreachable behind the redirect above; it stays so
+  // a deployment that removes the redirect can never sell an unconfigured tier.
   const agentPrimaryHref = agentProConfigured
-    ? "/pricing?checkout=agent_pro_monthly#plans"
+    ? AGENT_PRO_SIGNUP_HREF
     : "mailto:hello@usetruecap.com?subject=Agent%20Pro%20waitlist";
+  // Sign-up creates a free account with the no-card trial; Agent Pro itself
+  // starts at checkout from the dashboard. The label says exactly that
+  // (mirrors PricingPlanButtons' anonymous Agent Pro CTA).
   const agentPrimaryLabel = agentProConfigured
-    ? "Start Agent Pro"
+    ? "Create a free account — no card"
     : "Email to join Agent Pro waitlist";
 
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <AgentProPageTracker />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Eyebrow + back link */}
-        <div className="mb-2">
-        </div>
-
-        {/* Hero */}
+      <main id="main" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Hero: the agent's outcome in the headline, the product in the
+            subhead, the free analyzer as the primary action (same button as
+            every page), Agent Pro as the secondary. */}
         <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            For real estate agents
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            Win the investor.{" "}
-            Keep the investor.
-          </h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Instead of sending a listing and asking an investor what they
-            think, send the property with the investment analysis already
-            done — checked against that client&apos;s own Buy Box, branded to
-            you, with every assumption labeled.
-          </p>
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:w-fit">
-            {agentProConfigured ? (
-              <>
-                <span className="font-bold text-foreground">
-                  {agentMonthly
-                    ? `${agentMonthly.amountLabel}/${agentMonthly.period}`
-                    : "Live price temporarily unavailable"}
-                </span>
-                {agentAnnual ? (
-                  <span className="text-muted-foreground">
-                    {agentAnnual.amountLabel}/{agentAnnual.period}
-                  </span>
-                ) : null}
-                <span className="text-muted-foreground">
-                  {PRODUCT_EVALUATION_DAYS}-day evaluation · no card
-                </span>
-                <span className="text-muted-foreground">
-                  Client roster included · up to 100 clients
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="font-bold text-foreground">Waitlist open</span>
-                <span className="text-muted-foreground">
-                  Agent Pro is not accepting new subscriptions yet.
-                </span>
-              </>
-            )}
-          </div>
+          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary">
+                <Sparkles className="size-3" />
+                For real estate agents
+              </div>
+              <h1 className="text-balance text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+                Send your investor clients deals that already pencil.
+              </h1>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Paste the listing. In about 60 seconds, see whether it clears
+                your client&apos;s Buy Box, the highest price that still does
+                (the Offer Ceiling), and what could break it. Send it
+                co-branded, with every assumption visible and editable.
+              </p>
+              <p className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground">
+                Cash flow · Cap rate · Cash-on-cash · DSCR · Buy Box fit · Offer Ceiling
+              </p>
 
-          {/* CTAs */}
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <TrackedMarketingLink
-              href={agentPrimaryHref}
-              event="agent_pro_cta_clicked"
-              properties={{ placement: "agent_hero" }}
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
-              <Sparkles className="size-4" />
-              {agentPrimaryLabel}
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </TrackedMarketingLink>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
-            >
-              Analyze a property free
-            </Link>
+              <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href="/analyze"
+                  prefetch={false}
+                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
+                >
+                  Analyze a property free
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <TrackedMarketingLink
+                  href="#pricing"
+                  event="agent_pro_cta_clicked"
+                  properties={{ placement: "agent_hero" }}
+                  className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+                >
+                  <Sparkles className="size-4 text-primary" />
+                  See Agent Pro pricing
+                </TrackedMarketingLink>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {agentProConfigured
+                  ? "Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime."
+                  : "Screen deals free with no card. Sending a waitlist request does not start a trial or subscription."}
+              </p>
+              <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:flex sm:flex-wrap sm:gap-x-6">
+                <div>
+                  <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Agent Pro</dt>
+                  <dd className="font-bold text-foreground">
+                    {agentProConfigured ? `${annualPerMonth}/month billed annually` : "Waitlist open"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Or month to month</dt>
+                  <dd className="font-semibold text-foreground">{monthlyLabel}/month</dd>
+                </div>
+                <div>
+                  <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Roster</dt>
+                  <dd className="font-semibold text-foreground">Client roster included · up to 100 clients</dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* What the client receives — the REAL memo from the free sample
+                deal, with the disclaimer the client sees beside it. */}
+            <div>
+              <ProductShot
+                shot="memo"
+                priority
+                alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+                caption={
+                  <>
+                    What your client receives: the decision memo, generated from the free sample deal.{" "}
+                    <Link href="/sample-decision-memo" className="font-semibold text-primary underline underline-offset-4">
+                      Read the full sample memo →
+                    </Link>
+                  </>
+                }
+              />
+              <Disclaimer tone="card" className="mt-3" />
+            </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            {agentProConfigured
-              ? "Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime."
-              : "Screen deals free with no card. Sending a waitlist request does not start a trial or subscription."}
-          </p>
-          {/* Risk reversal at the hero CTA. The only refund mention used to
-              sit in the pricing band far below the fold. */}
         </section>
 
-        {/* Why it wins the conversation (2026-09 positioning pass). Replaced
-            the commission-math block: agent copy describes the workflow and
-            never promises closings, commissions, or returns. */}
-        <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8">
-          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+        {/* The three things agents buy software for, in NAR's order. */}
+        <section className="mb-12 sm:mb-16" aria-labelledby="agent-promises">
+          <h2 id="agent-promises" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Investors answer the agent who already did the math.
           </h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {[
-              [
-                "Client-specific Buy Boxes",
-                "Each investor's own cash-flow, return, DSCR, and price targets, applied to every property you send them.",
-              ],
-              [
-                "Branded analysis",
-                "A co-branded link or PDF with the assumptions, Offer Ceiling, and risks intact, under your name.",
-              ],
-              [
-                "Faster investor responses",
-                "Give clients the numbers they would otherwise ask for, so the reply can be a decision instead of a question.",
-              ],
-              [
-                "More credible conversations",
-                "Labeled data sources and editable assumptions, so the discussion is about the deal, not whose spreadsheet is right.",
-              ],
-            ].map(([title, body]) => (
-              <li
-                key={title}
-                className="rounded-2xl border border-border bg-card p-4"
-              >
-                <p className="text-sm font-extrabold text-foreground">{title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {body}
-                </p>
-              </li>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {PROMISES.map(({ icon: Icon, title, body }) => (
+              <article key={title} className="rounded-2xl border border-border bg-card p-5">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="size-5" aria-hidden />
+                </span>
+                <h3 className="mt-3 text-base font-extrabold text-foreground sm:text-lg">{title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </article>
             ))}
-          </ul>
+          </div>
         </section>
 
         {/* Verified agent proof — self-hides until records pass the
             lib/proof-records.ts gate (first consumer of VERIFIED_AGENT_PROOF). */}
         <AgentProofSection />
 
-        {/* Use cases */}
-        {/* Real product screenshot from the free sample deal (Phase 4). */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
-          <ProductShot
-            shot="memo"
-            alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
-            caption={<>The memo you can hand a client, from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run the sample yourself →</Link></>}
-          />
-        </section>
-        <section id="use-cases" className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
-            How agents use TrueCap
+        {/* What your client receives */}
+        <section id="what-your-client-receives" className="mb-12 scroll-mt-24 sm:mb-16" aria-labelledby="client-receives">
+          <h2 id="client-receives" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            What your client receives
           </h2>
-          <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Four parts of a faster, more credible investor-client workflow.
+          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            No account on their side, nothing hidden on yours. Branding is set
+            up once in your profile and applies to every link and report.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {USE_CASES.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm"
-              >
-                <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="size-5" />
-                </div>
-                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
-                  {title}
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  {body}
-                </p>
-              </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {CLIENT_RECEIVES.map(({ icon: Icon, title, body }) => (
+              <article key={title} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="size-5" aria-hidden />
+                </span>
+                <h3 className="mt-3 text-base font-extrabold text-foreground">{title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </article>
             ))}
           </div>
         </section>
 
-        {/* Workflow */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
-            The agent workflow
-          </h2>
-          <ol className="mt-4 space-y-3">
-            {[
-              "Open TrueCap on your phone or laptop at the showing.",
-              "Paste the listing address. HUD area rent and the FRED owner-occupied mortgage-rate benchmark can fill as editable starting values; enter a local property-tax bill or reviewed rate manually.",
-              "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
-              "Run the analysis, then review Buy Box fit, the Offer Ceiling, and downside before presenting the result.",
-              "Assign the opportunity to the right client, then send a co-branded link or report.",
-            ].map((step, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
-                  {i + 1}
-                </span>
-                <span className="text-sm sm:text-base leading-relaxed text-foreground">
-                  {step}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* Why agents specifically */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="size-5 text-[var(--brand-green)]" />
-            <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--brand-green)]">
-              Why agents pick TrueCap over a spreadsheet
+        {/* How the client roster works */}
+        <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8" aria-labelledby="roster-heading">
+          <div className="flex items-center gap-2">
+            <Users className="size-5 text-primary" aria-hidden />
+            <h2 id="roster-heading" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+              How the client roster works
             </h2>
           </div>
-          <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li>
-              <strong>Speed.</strong> Build the first-pass underwrite from the
-              address while the property is still being discussed.
-            </li>
-            <li>
-              <strong>Defensibility.</strong> Show the source and assumption
-              behind each starting number, then edit it for the client&apos;s
-              financing.
-            </li>
-            <li>
-              <strong>Client context.</strong> Maintain per-client Buy Boxes and
-              show the specific reason a property meets or misses their
-              targets.
-            </li>
-            <li>
-              <strong>Brand presence.</strong> Put your logo, colors, and
-              contact details on share links and reports.
-            </li>
-            <li>
-              <strong>Continuity.</strong> Assign opportunities to a client and
-              keep the investment conversation organized.
-            </li>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+            {[
+              [
+                "A Buy Box per client",
+                "Add a client to your roster (up to 100 clients) and assign a Buy Box to them: their cash-flow, cash-on-cash, DSCR, cap-rate, and price targets. An account keeps up to 12 Buy Boxes in total, yours and your clients' combined.",
+              ],
+              [
+                "Deal assignment",
+                "Assign any saved deal to a client. From then on it is screened against that client's Buy Box, not yours, and its share link opens in client-report mode with the address hidden unless you include it.",
+              ],
+              [
+                "“Doesn't fit, and here's why”",
+                "A miss names the criterion: “Biggest gap — Cap rate: 5.2% vs 6.5%.” A pass shows the tightest margin. The roster card shows how many of each client's assigned deals meet their criteria.",
+              ],
+              [
+                "One client per deal, today",
+                "A deal is screened against one client's Buy Box at a time. To check the same listing for another client, reassign it or save it again. Screening one listing against the whole roster at once is not released yet.",
+              ],
+            ].map(([title, body]) => (
+              <li key={title} className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-sm font-extrabold text-foreground">{title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </li>
+            ))}
           </ul>
         </section>
 
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
+        {/* The agent workflow */}
+        <section className="mb-12 sm:mb-16" aria-labelledby="workflow-heading">
+          <h2 id="workflow-heading" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            The agent workflow
+          </h2>
+          <ol className="mt-4 space-y-3">
+            {WORKFLOW_STEPS.map((step, i) => (
+              <li key={step} className="flex items-start gap-3">
+                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-extrabold tabular-nums text-primary-foreground">
+                  {i + 1}
+                </span>
+                <span className="text-sm leading-relaxed text-foreground sm:text-base">{step}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            The decision memo is to an investment purchase what a CMA is to a
+            listing appointment: the document that shows the client what you
+            did and why. It is a screening model, not an appraisal or an
+            opinion of value.
+          </p>
+        </section>
+
+        {/* Proof you can check — no counts, no logos, no quotes we can't source. */}
+        <section className="mb-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8" aria-labelledby="proof-heading">
+          <h2 id="proof-heading" className="text-lg font-extrabold text-foreground sm:text-xl">
+            Proof you can check
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            No customer counts, no brokerage logos, no quotes we cannot source.
+            What you can verify before you pay:
+          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              ["/sample-decision-memo", "The sample decision memo", "Generated by the same engine, labeled as not a customer result."],
+              ["/methodology", "The published methodology", "Every formula, shown. What you hand a client who asks where a number came from."],
+              ["/reviews", "Proof & methodology", "How quotes get published here: real account activity, consent, first name and market."],
+            ].map(([href, title, body]) => (
+              <li key={href}>
+                <Link href={href} className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
+                  {title} →
+                </Link>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Objections, answered from the code — same tone as /reviews. */}
+        <div className="-mx-4 sm:-mx-6">
+          <FaqSection
+            id="honest-answers"
+            eyebrow="Honest answers for agents"
+            heading="The objections, answered plainly."
+            intro="Every answer below describes what TrueCap does today, not a roadmap. Where a limit exists, it is stated."
+            items={AGENT_FAQS}
+          />
+        </div>
+
+        {/* Share-ready resources */}
+        <section className="mb-12 mt-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8">
+          <h2 className="mb-3 text-lg font-extrabold text-foreground sm:text-xl">
             Share-ready resources for investor clients
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
@@ -335,48 +422,38 @@ export default async function ForAgentsPage() {
             answer cites the math: send them the{" "}
             <Link
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-              className="text-primary font-semibold hover:underline"
+              className="font-semibold text-primary hover:underline"
             >
               60-second underwriting workflow
             </Link>
             , the explainer on{" "}
-            <Link
-              href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
+            <Link href="/blog/what-is-a-good-cap-rate" className="font-semibold text-primary hover:underline">
               what counts as a good cap rate in 2026
             </Link>
             , or the{" "}
-            <Link
-              href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
-            >
+            <Link href="/analyze" prefetch={false} className="font-semibold text-primary hover:underline">
               TrueCap analyzer
             </Link>{" "}
             for cap rate and DSCR from one address. They land on a single,
-            well-cited page — better than a long email reply.
+            well-cited page instead of a long email reply.
           </p>
         </section>
 
-        {/* Embed bonus — the EXISTING attributed embeds, positioned as an
-            agent lead surface. Deliberately NOT white-label: embed_whitelabel
-            is shipped:false for a legal reason (Terms) and must not be
-            marketed (pricing-catalog-consistency guard). */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
+        {/* Embed — the EXISTING attributed embeds as a credibility piece.
+            Deliberately NOT white-label: embed_whitelabel is shipped:false for
+            a legal reason (Terms) and must not be marketed. */}
+        <section className="mb-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8">
+          <h2 className="mb-3 text-lg font-extrabold text-foreground sm:text-xl">
             Put the calculators on your own website
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
             {EMBEDDABLE_COUNT} of TrueCap&apos;s {CALCULATOR_COUNT} free
             calculators can be embedded on your site with a copy-and-paste
-            snippet that carries a &ldquo;Powered by TrueCap&rdquo; credit — a
-            working calculator on your agent site keeps investor visitors on
-            YOUR page instead of sending them off to research alone. Copy a
-            snippet from the{" "}
-            <Link
-              href="/embed"
-              className="text-primary font-semibold hover:underline"
-            >
+            snippet that carries a &ldquo;Powered by TrueCap&rdquo; credit. A
+            working calculator on your agent site is a credibility piece for
+            investor visitors; it collects no leads and reports nothing back.
+            Copy a snippet from the{" "}
+            <Link href="/embed" className="font-semibold text-primary hover:underline">
               embed page
             </Link>
             .
@@ -385,16 +462,14 @@ export default async function ForAgentsPage() {
 
         {/* "Land the Investor Client" scripts — published in full, same
             transparency stance as /playbook. */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-lg sm:text-xl font-extrabold text-foreground mb-3">
+        <section className="mb-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8">
+          <h2 className="mb-3 text-lg font-extrabold text-foreground sm:text-xl">
             Land the investor client: three scripts that work with an analysis
             attached
           </h2>
           <ol className="space-y-4 text-sm leading-relaxed text-foreground">
             <li>
-              <strong className="text-foreground">
-                1 · Reactivate a cold investor lead.
-              </strong>{" "}
+              <strong className="text-foreground">1 · Reactivate a cold investor lead.</strong>{" "}
               &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
               screens better than most of what we looked at in [month].
               I&apos;ve attached my underwrite: rent benchmark, cash flow, and
@@ -402,9 +477,7 @@ export default async function ForAgentsPage() {
               minutes this week?&rdquo;
             </li>
             <li>
-              <strong className="text-foreground">
-                2 · Follow up after a showing, same day.
-              </strong>{" "}
+              <strong className="text-foreground">2 · Follow up after a showing, same day.</strong>{" "}
               &ldquo;Before you get ten opinions from the internet: here&apos;s
               the analysis for [address] — every assumption is labeled and you
               can change any of them. At asking it [meets / misses] your
@@ -412,14 +485,12 @@ export default async function ForAgentsPage() {
               does. Tell me which assumption you&apos;d challenge.&rdquo;
             </li>
             <li>
-              <strong className="text-foreground">
-                3 · Introduce yourself to an investor you want.
-              </strong>{" "}
-              &ldquo;I work with rental investors in [market] and I underwrite
-              every property before I send it — attached is a sample analysis so
-              you can see exactly how I evaluate deals. If you tell me your buy
-              criteria, everything I send you will already be screened against
-              them.&rdquo;
+              <strong className="text-foreground">3 · Introduce yourself to an investor you want.</strong>{" "}
+              &ldquo;I work with rental investors in [market] and I run the
+              numbers on every property before I send it — attached is a
+              sample analysis so you can see exactly how I evaluate deals. If
+              you tell me your buy criteria, everything I send you will already
+              be screened against them.&rdquo;
             </li>
           </ol>
           <p className="mt-4 text-xs text-muted-foreground">
@@ -428,79 +499,115 @@ export default async function ForAgentsPage() {
           </p>
         </section>
 
-        {/* Pricing */}
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Turn a showing into a clear acquisition conversation.
+        {/* DealCheck, plainly. Its branded PDF on every tier is a real
+            advantage and is acknowledged. */}
+        <section className="mb-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8" aria-labelledby="dealcheck-heading">
+          <h2 id="dealcheck-heading" className="text-lg font-extrabold text-foreground sm:text-xl">
+            If you are comparing this with DealCheck
           </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers the first screen. Agent Pro adds client rosters,
-            per-client Buy Boxes, deal assignment, co-branded analysis, and the
-            full Pro decision workflow.
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            DealCheck gives you a branded PDF report on its plans, including
+            its free tier, for a lower yearly price; if all you need is a
+            branded calculator PDF, DealCheck is fine. Agent Pro is for
+            screening each listing against a specific client&apos;s Buy Box,
+            showing that client&apos;s Offer Ceiling, and sending a co-branded
+            decision memo with the assumptions and the risks intact. Check
+            DealCheck&apos;s current pricing on its own site; the{" "}
+            <Link href="/vs/dealcheck" className="font-semibold text-primary underline underline-offset-4">
+              full comparison
+            </Link>{" "}
+            is kept deliberately fair.
+          </p>
+        </section>
+
+        {/* Pricing — identical to /pricing: same amounts, same sign-up URL,
+            "no card" beside the CTA, and the trial described as it is. */}
+        <section id="pricing" className="mb-12 scroll-mt-24 rounded-2xl bg-primary p-6 text-primary-foreground sm:mb-16 sm:p-8" aria-labelledby="agent-pricing-heading">
+          <h2 id="agent-pricing-heading" className="mb-2 text-2xl font-extrabold sm:text-3xl">
+            Agent Pro
+          </h2>
+          <p className="mb-5 max-w-2xl text-sm opacity-90 sm:text-base">
+            Everything in Pro (Offer Ceiling, downside stress test, comparisons,
+            10-year projection, co-branded share pages and PDFs) plus the client
+            roster: per-client Buy Boxes, deal assignment, and client-report
+            share links.
           </p>
           {agentProConfigured ? (
-            <p className="mb-5 text-sm font-bold">
-              {agentMonthly
-                ? `${agentMonthly.amountLabel}/${agentMonthly.period}`
-                : "See live pricing"}
-              {agentAnnual
-                ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}`
-                : ""}
-              {` · ${PRODUCT_EVALUATION_DAYS}-day no-card evaluation · client roster included`}
-            </p>
+            <dl className="mb-5 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
+              <div>
+                <dt className="text-3xs font-bold uppercase tracking-widest opacity-80">Billed annually</dt>
+                <dd className="text-2xl font-extrabold tabular-nums">
+                  {annualPerMonth}
+                  <span className="text-sm font-semibold opacity-90">/month</span>
+                </dd>
+                <dd className="text-xs opacity-90">{annualLabel} charged once a year</dd>
+              </div>
+              <div>
+                <dt className="text-3xs font-bold uppercase tracking-widest opacity-80">Month to month</dt>
+                <dd className="text-2xl font-extrabold tabular-nums">
+                  {monthlyLabel}
+                  <span className="text-sm font-semibold opacity-90">/month</span>
+                </dd>
+                <dd className="text-xs opacity-90">Cancel from your profile anytime</dd>
+              </div>
+              <div>
+                <dt className="text-3xs font-bold uppercase tracking-widest opacity-80">To start</dt>
+                <dd className="text-2xl font-extrabold tabular-nums">$0</dd>
+                <dd className="text-xs opacity-90">No card. Checkout shows the exact charge before you confirm.</dd>
+              </div>
+            </dl>
           ) : (
             <p className="mb-5 text-sm font-bold">
               Agent Pro is not accepting new subscriptions yet. Email to ask
               about availability; no checkout or trial starts today.
             </p>
           )}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <TrackedMarketingLink
               href={agentPrimaryHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_final" }}
-              className="inline-flex min-h-11 items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 py-2.5 font-bold text-primary transition-opacity hover:opacity-90"
             >
               {agentPrimaryLabel}
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="size-4" />
             </TrackedMarketingLink>
             <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex min-h-11 items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
+              href="/analyze"
+              prefetch={false}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary-foreground/40 bg-primary-foreground/10 px-4 py-2.5 font-bold text-primary-foreground transition-colors hover:bg-primary-foreground/20"
             >
-              <Calculator className="w-4 h-4" />
+              <Calculator className="size-4" />
               Try the free analyzer
             </Link>
+            <Link href="/pricing#plans" className="text-sm font-semibold underline underline-offset-4 opacity-90 hover:opacity-100">
+              Compare all plans
+            </Link>
           </div>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed opacity-90">
+            A new account gets a {PRODUCT_EVALUATION_DAYS}-day free trial with{" "}
+            {PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and{" "}
+            {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. The client
+            roster and client Buy Boxes are part of the Agent Pro subscription,
+            not the trial.
+          </p>
         </section>
 
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Different strategy? See pages for{" "}
-          <Link
-            href="/for-buy-and-hold"
-            className="font-bold text-foreground hover:underline"
-          >
+        <footer className="border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
+          Investing yourself as well? See TrueCap for{" "}
+          <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
             buy-and-hold
           </Link>
           ,{" "}
-          <Link
-            href="/for-house-hackers"
-            className="font-bold text-foreground hover:underline"
-          >
+          <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
             house hackers
           </Link>
           ,{" "}
-          <Link
-            href="/for-brrrr"
-            className="font-bold text-foreground hover:underline"
-          >
+          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
             BRRRR operators
           </Link>
           , and{" "}
-          <Link
-            href="/for-flippers"
-            className="font-bold text-foreground hover:underline"
-          >
+          <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
             fix-and-flippers
           </Link>
           .
