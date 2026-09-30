@@ -654,14 +654,14 @@ export function AddressAutocomplete({
         <div
           role="status"
           aria-live="polite"
-          className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md"
+          className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-2xl border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md"
         >
           Searching addresses…
         </div>
       ) : null}
       {open && predictions.length > 0 && (
         <div
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[60vh] overflow-y-auto overscroll-contain rounded-md border border-border bg-popover text-popover-foreground shadow-md"
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[60vh] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-popover text-popover-foreground shadow-md"
           style={dropdownMaxHeight ? { maxHeight: dropdownMaxHeight } : undefined}
         >
           <ul role="listbox" id={listboxId} aria-label="Address suggestions">

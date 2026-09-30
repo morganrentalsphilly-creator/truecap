@@ -1,0 +1,3 @@
+# Lighthouse HTML and full JSON reports stay local (about 1 MB each); summary.json carries their numbers.
+local/lighthouse/
+local/lighthouse-baseline-rerun/
