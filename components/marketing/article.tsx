@@ -95,7 +95,7 @@ export const ARTICLE_META_LINK = "tc-link -my-3 inline-block py-3";
  * hero's paragraph are, across the whole reading column so it shares the
  * body's right edge. Ink 2 stays on the meta and byline lines above it.
  */
-export const ARTICLE_LEDE = "mt-6 text-pretty text-lg text-foreground";
+export const ARTICLE_LEDE = "mt-6 text-pretty text-xl leading-snug text-foreground";
 
 /** The page root: paper, and a clip for any sideways bleed (app/page.tsx's root). */
 export function ArticlePage({
