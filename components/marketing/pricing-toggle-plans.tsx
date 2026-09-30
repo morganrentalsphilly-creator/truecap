@@ -2,12 +2,18 @@
 
 /**
  * Pricing toggle + plan cards. Replaces the previous 3-card layout
- * (Free / Pro Monthly / Pro Annual) with 2 cards (Free / Pro) and a
- * Monthly ↔ Annual toggle above the Pro card.
+ * (Free / Pro Monthly / Pro Annual) with the plan cards (Free / Pro, and
+ * Agent Pro where it is sold) under one Monthly ↔ Annual toggle, which
+ * sits above the card row because it sets both paid cards' prices.
  *
  * The toggle pattern is industry standard because it forces users to
  * directly compare per-month cost — making the annual savings tangible.
  * Lifts annual-plan conversion 10-15% vs. side-by-side cards.
+ *
+ * The cards are PlanCard (DESIGN.md "Components": the one card on
+ * marketing pages). On /pricing the paid cards ARE the checkout, so the
+ * Pro card's action is the row's one filled button and Free and Agent Pro
+ * take the outline button.
  *
  * Receives Stripe prices already resolved on the server, plus the
  * user's auth + paid status. Stays a single client component so all
@@ -15,9 +21,11 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { PlanCard } from "@/components/marketing/plan-card";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
@@ -137,6 +145,10 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   },
 ];
 
+/**
+ * The four answers by name, set under the Pro card's questions as a caption
+ * on the list's last rule (it was a tinted box inside the card).
+ */
 const PRO_DECISION_ANSWERS = [
   { answer: "Buy Box fit", proof: "At asking price" },
   { answer: "Offer Ceiling", proof: "Solved from your targets" },
@@ -144,6 +156,11 @@ const PRO_DECISION_ANSWERS = [
   { answer: "How to document it", proof: "Review report" },
 ] as const;
 
+/** The billing-period segments: 44px controls, 2px radius inside the 4px group. */
+const PERIOD_BUTTON =
+  "inline-flex min-h-11 items-center gap-1.5 rounded-sm border px-4 text-base font-semibold transition-colors";
+const PERIOD_BUTTON_PRESSED = "border-foreground bg-band text-foreground";
+const PERIOD_BUTTON_IDLE = "border-transparent text-muted-foreground hover:text-foreground";
 
 function parsePriceAmount(p: ResolvedPrice): number | null {
   if (!p) return null;
@@ -208,6 +225,18 @@ export function PricingTogglePlans({
     monthlyAmount && annualAmount
       ? Math.max(0, Math.round(monthlyAmount * 12 - annualAmount))
       : null;
+  // The annual saving, stated in the Pro card's price note after the annual
+  // charge (it was a pill floating above the card's heading). Prefer the
+  // dollar-amount savings when available because concrete numbers convert
+  // better than percentages. Falls back to "X months free" or % savings.
+  const annualSavingsLabel =
+    period === "annual" && (annualSavingsPct ?? 0) > 0
+      ? annualSavingsDollars && annualSavingsDollars > 0
+        ? `Save $${annualSavingsDollars}/yr`
+        : monthsFreeWithAnnual && monthsFreeWithAnnual > 0
+          ? `${monthsFreeWithAnnual} months free`
+          : `Save ${annualSavingsPct}%`
+      : null;
 
   // Agent Pro exists on the page only when its price resolved (env configured).
   const showAgentPro = agentProConfigured;
@@ -268,291 +297,243 @@ export function PricingTogglePlans({
     <>
       {/* The upgrade logic in one line, before the cards. Without it a visitor
           has to infer the difference between the tiers from the feature lists;
-          with it, the cards below are just the detail. */}
-      {/* Put the recommended plan first, especially in the mobile viewport. */}
-      <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
-        <p className="text-sm">
-          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
+          with it, the cards below are just the detail. Each line takes its
+          card's order, so the recommended plan comes first on phones and the
+          line reads in the cards' order at every width. */}
+      <ul className="flex flex-col gap-y-1 text-base sm:flex-row sm:flex-wrap sm:gap-x-8">
+        <li className="order-1 md:order-2">
+          <span className="font-semibold">{proOfferName}</span>{" "}
           <span className="text-muted-foreground">— know what to offer</span>
-        </p>
-        <p className="text-sm">
-          <span className="font-bold text-foreground">Free</span>{" "}
+        </li>
+        <li className="order-2 md:order-1">
+          <span className="font-semibold">Free</span>{" "}
           <span className="text-muted-foreground">— screen the deal</span>
-        </p>
+        </li>
         {showAgentPro ? (
-          <p className="text-sm">
-            <span className="font-bold text-foreground">Agent Pro</span>{" "}
+          <li className="order-3">
+            <span className="font-semibold">Agent Pro</span>{" "}
             <span className="text-muted-foreground">— win investor clients</span>
-          </p>
+          </li>
         ) : null}
+      </ul>
+
+      {/* Monthly ↔ Annual toggle, above the row: it sets both paid cards'
+          prices. A 4px control whose pressed segment takes the band and an
+          ink edge, so the state does not rest on color alone. */}
+      <div
+        role="group"
+        aria-label="Billing period"
+        className="mt-6 flex w-fit gap-1 rounded-md border border-border p-1"
+      >
+        <button
+          type="button"
+          aria-pressed={period === "monthly"}
+          onClick={() => setPeriod("monthly")}
+          className={cn(
+            PERIOD_BUTTON,
+            period === "monthly" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
+          )}
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          aria-pressed={period === "annual"}
+          onClick={() => setPeriod("annual")}
+          className={cn(
+            PERIOD_BUTTON,
+            period === "annual" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
+          )}
+        >
+          Annual
+          {annualSavingsPct && annualSavingsPct > 0 ? (
+            <span className="text-sm font-semibold">−{annualSavingsPct}%</span>
+          ) : null}
+        </button>
       </div>
-      <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5"}>
-        <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
-          <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-extrabold text-foreground">Free</h3>
-            {/* "Current" only means something for a signed-in free user.
-                Showing it to an anonymous visitor told them they already
-                hold a plan — a status-quo anchor toward staying on Free. */}
-            {isAuthenticated && !isPaid && (
-              <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
-                Current
-              </span>
-            )}
-          </div>
-          <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-            First decision, no account
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            <strong className="font-semibold text-foreground">Screen the deal.</strong>{" "}
-            Understand the economics before spending more time on the
-            property. No card required.
-          </p>
-          <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">$0</span>
-            <span className="text-sm text-muted-foreground">forever</span>
-          </div>
-          <div className="mt-5">
+
+      {/* The homepage plan row: default stretch, so PlanCard's flexible list
+          lines the actions up across the row. Pro comes first on phones. */}
+      <div
+        className={cn(
+          "mt-6 grid gap-4 sm:gap-5",
+          showAgentPro ? "md:grid-cols-3" : "md:grid-cols-2 lg:max-w-4xl",
+        )}
+      >
+        <PlanCard
+          className="order-2 md:order-1"
+          name="Free"
+          // "Current" only means something for a signed-in free user.
+          // Showing it to an anonymous visitor told them they already hold a
+          // plan — a status-quo anchor toward staying on Free.
+          tag={isAuthenticated && !isPaid ? "Current" : undefined}
+          audience="First decision, no account"
+          lead={
+            <>
+              <strong className="font-semibold">Screen the deal.</strong>{" "}
+              Understand the economics before spending more time on the
+              property. No card required.
+            </>
+          }
+          price="$0"
+          period="forever"
+          answers={FREE_FEATURES.map((feature) => ({ term: feature }))}
+          action={
             <PricingPlanButtons
               slot="free"
               isAuthenticated={isAuthenticated}
               activePaidPlanSlug={activePaidPlanSlug}
+              emphasis="secondary"
             />
-          </div>
-          <ul className="mt-6 space-y-2.5">
-            {FREE_FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-2 text-sm">
-                <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
-                <span className="sr-only">Included:</span>
-                <span className="text-foreground">
-                  {feature}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          }
+        />
 
-        {/* PRO (with toggle) */}
-        <div id="pro" className="relative order-1 -mt-2 scroll-mt-24 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:order-2 lg:scale-[1.03]">
-          {/* Savings badge — prefer the dollar-amount savings when
-              available because concrete numbers convert better than
-              percentages. Falls back to "X months free" or % savings. */}
-          {period === "annual" && (annualSavingsPct ?? 0) > 0 ? (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-3xs font-extrabold uppercase tracking-widest text-primary-foreground shadow-md">
-              {annualSavingsDollars && annualSavingsDollars > 0
-                ? `Save $${annualSavingsDollars}/yr`
-                : monthsFreeWithAnnual && monthsFreeWithAnnual > 0
-                  ? `${monthsFreeWithAnnual} months free`
-                  : `Save ${annualSavingsPct}%`}
-            </span>
-          ) : null}
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-lg font-extrabold text-foreground">{proOfferName}</h3>
-            {/* Badges share the header row. "Best value" (annual only) used
-                to be pinned absolute top-right, landing on "Recommended". */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {proCardDecision.kind === "current" ? (
-                <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
-                  Current
-                </span>
-              ) : (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-                  Recommended
-                </span>
-              )}
-            </div>
-          </div>
-          <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-            For your own deals
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            <strong className="font-semibold text-foreground">Know what to offer.</strong>{" "}
-            See whether the deal meets your targets, find your Offer Ceiling,
-            stress-test the assumptions, and document the decision.
-          </p>
-
-          {/* Monthly ↔ Annual toggle */}
-          <div
-            role="group"
-            aria-label="Billing period"
-            className="mt-4 inline-flex rounded-full border border-border bg-muted/40 p-1"
-          >
-            {/* Tap-target sized for mobile: py-2.5 + text-sm = ~40pt
-                total height. Was py-1.5 text-xs (~24pt) which was
-                undersized for a key conversion CTA. */}
-            <button
-              type="button"
-              aria-pressed={period === "monthly"}
-              onClick={() => setPeriod("monthly")}
-              className={
-                period === "monthly"
-                  ? "min-h-11 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  : "min-h-11 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              }
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              aria-pressed={period === "annual"}
-              onClick={() => setPeriod("annual")}
-              className={
-                period === "annual"
-                  ? "inline-flex min-h-11 items-center gap-1.5 rounded-full bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  : "inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              }
-            >
-              Annual
-              {annualSavingsPct && annualSavingsPct > 0 ? (
-                <span className="text-xs font-semibold">−{annualSavingsPct}%</span>
-              ) : null}
-            </button>
-          </div>
-
-          <div className="mt-5 flex items-baseline gap-1.5">
-            <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-              {proCard.priceTop}
-            </span>
-            <span className="text-sm text-muted-foreground">{proCard.priceSub}</span>
-          </div>
-          <div className="mt-1 text-sm text-muted-foreground">{proCard.subline}</div>
-
-          <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.045] p-4">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
-              One address. Four answers.
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {PRO_DECISION_ANSWERS.map((item) => (
-                <div key={item.answer}>
-                  <p className="text-sm font-bold leading-tight text-foreground">{item.answer}</p>
-                  <p className="mt-0.5 text-2xs leading-tight text-muted-foreground">{item.proof}</p>
-                </div>
-              ))}
-            </div>
-           </div>
-           <div className="mt-5">
-             {billingRecoveryRequired ? (
-               <Link
-                 href="/profile#billing"
-                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
-               >
-                 Manage billing to reactivate
-               </Link>
-             ) : (
-               <PricingPlanButtons
-                 slot={proCard.slot}
-                 isAuthenticated={isAuthenticated}
-                 activePaidPlanSlug={activePaidPlanSlug}
-                 priceLabel={proChargeToday}
-                 checkoutReady={period === "monthly" ? monthly != null : annual != null}
-               />
-             )}
-          </div>
-          {!isPaid ? (
-            <PricingTrialTerms
-              isAuthenticated={isAuthenticated}
-              evaluation={evaluation}
-            />
-          ) : null}
-          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus answers to four questions —</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {PRO_OUTCOMES.map((group) => (
-              <div key={group.outcome} className="rounded-xl border border-border bg-muted/25 p-3">
-                <p className="text-xs font-bold text-primary">
-                  {group.outcome}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{group.detail}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* PRO: the row's one filled action (the paid cards are the checkout
+            on this page). The hero's "See Pro plans" jumps to #pro, and the
+            Monthly/Annual toggle that sets this price sits above the row, so
+            the card carries a scroll margin: the html scroll padding (72px)
+            plus 112px puts the toggle band (the row's 24px gap and the 54px
+            group) below the sticky header, including the 36px upgrade bar a
+            signed-in free user sees above it (93px on phones, 101px from
+            640px). */}
+        <PlanCard
+          id="pro"
+          className="order-1 md:order-2 scroll-mt-28"
+          name={proOfferName}
+          tag={proCardDecision.kind === "current" ? "Current" : "Recommended"}
+          audience="For your own deals"
+          lead={
+            <>
+              <strong className="font-semibold">Know what to offer.</strong>{" "}
+              See whether the deal meets your targets, find your Offer Ceiling,
+              stress-test the assumptions, and document the decision.
+            </>
+          }
+          price={proCard.priceTop}
+          period={proCard.priceSub}
+          priceNote={
+            annualSavingsLabel
+              ? `${proCard.subline} · ${annualSavingsLabel}`
+              : proCard.subline
+          }
+          answersCaption="Everything in Free, plus answers to four questions —"
+          answers={PRO_OUTCOMES.map((group) => ({
+            term: group.outcome,
+            detail: group.detail,
+          }))}
+          note={
+            <>
+              <span className="block font-semibold text-foreground">
+                One address. Four answers.
+              </span>
+              <span className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                {PRO_DECISION_ANSWERS.map((item) => (
+                  <span key={item.answer} className="block min-w-0">
+                    <span className="block font-semibold text-foreground">{item.answer}</span>
+                    <span className="block">{item.proof}</span>
+                  </span>
+                ))}
+              </span>
+            </>
+          }
+          footnote={
+            !isPaid ? (
+              <PricingTrialTerms
+                isAuthenticated={isAuthenticated}
+                evaluation={evaluation}
+              />
+            ) : null
+          }
+          action={
+            billingRecoveryRequired ? (
+              <Link
+                href="/profile#billing"
+                className={buttonVariants({ size: "cta", className: "w-full" })}
+              >
+                Manage billing to reactivate
+              </Link>
+            ) : (
+              <PricingPlanButtons
+                slot={proCard.slot}
+                isAuthenticated={isAuthenticated}
+                activePaidPlanSlug={activePaidPlanSlug}
+                priceLabel={proChargeToday}
+                checkoutReady={period === "monthly" ? monthly != null : annual != null}
+                emphasis="primary"
+              />
+            )
+          }
+        />
 
         {/* AGENT PRO — rendered only when its Stripe price is configured.
             Feature list derives from lib/entitlements-catalog (the SSOT):
             "Everything in Pro" + exactly the agent_pro-only feature labels,
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
-          <div id="agent-pro" className="relative order-3 scroll-mt-24 rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
-              <div className="flex flex-wrap justify-end gap-1.5">
-                {agentCardDecision.kind === "current" ? (
-                  <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-foreground">
-                    Current
-                  </span>
-                ) : null}
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
-                  For agents
-                </span>
-              </div>
-            </div>
-            <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-              For agents with investor clients
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <strong className="font-semibold text-foreground">Win investor clients.</strong>{" "}
-              Screen each listing against the client&apos;s own Buy Box and
-              send the decision memo, co-branded, under your name.
-            </p>
-            <div className="mt-5 flex items-baseline gap-1.5">
-              <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-                {agentCard.priceTop}
-              </span>
-              <span className="text-sm text-muted-foreground">{agentCard.priceSub}</span>
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground">{agentCard.subline}</div>
-             <div className="mt-5">
-               {billingRecoveryRequired ? (
-                 <Link
-                   href="/profile#billing"
-                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
-                 >
-                   Manage billing to reactivate
-                 </Link>
-               ) : (
-                 <PricingPlanButtons
-                   slot={agentCard.slot}
-                   isAuthenticated={isAuthenticated}
-                   activePaidPlanSlug={activePaidPlanSlug}
-                   priceLabel={agentChargeToday}
-                   checkoutReady={period === "monthly" ? agentMonthly != null : agentAnnual != null}
-                 />
-               )}
-            </div>
-            {!isPaid ? (
-              <PricingTrialTerms
-                isAuthenticated={isAuthenticated}
-                evaluation={evaluation}
-                tier="agent_pro"
-              />
-            ) : null}
-            <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/[0.04] p-4">
-              <p className="text-xs font-extrabold uppercase tracking-widest text-primary">What changes for your workflow</p>
-              <ul className="mt-3 space-y-2.5">
-                {AGENT_PRO_FEATURES.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span className="text-foreground">{f}</span>
-                  </li>
-                ))}
-                {AGENT_PRO_WORKFLOW.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span className="text-foreground">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          <PlanCard
+            id="agent-pro"
+            className="order-3"
+            name="Agent Pro"
+            tag={agentCardDecision.kind === "current" ? "Current" : undefined}
+            audience="For agents with investor clients"
+            lead={
+              <>
+                <strong className="font-semibold">Win investor clients.</strong>{" "}
+                Screen each listing against the client&apos;s own Buy Box and
+                send the decision memo, co-branded, under your name.
+              </>
+            }
+            price={agentCard.priceTop}
+            period={agentCard.priceSub}
+            priceNote={agentCard.subline}
+            answersCaption="What changes for your workflow"
+            answers={[...AGENT_PRO_FEATURES, ...AGENT_PRO_WORKFLOW].map((f) => ({ term: f }))}
+            note={
+              <>
                 Plus everything in {proOfferName}, including co-branded share
                 pages and PDFs.
-              </p>
-            </div>
-          </div>
+              </>
+            }
+            footnote={
+              !isPaid ? (
+                <PricingTrialTerms
+                  isAuthenticated={isAuthenticated}
+                  evaluation={evaluation}
+                  tier="agent_pro"
+                />
+              ) : null
+            }
+            action={
+              billingRecoveryRequired ? (
+                <Link
+                  href="/profile#billing"
+                  className={buttonVariants({ size: "cta", variant: "outline", className: "w-full" })}
+                >
+                  Manage billing to reactivate
+                </Link>
+              ) : (
+                <PricingPlanButtons
+                  slot={agentCard.slot}
+                  isAuthenticated={isAuthenticated}
+                  activePaidPlanSlug={activePaidPlanSlug}
+                  priceLabel={agentChargeToday}
+                  checkoutReady={period === "monthly" ? agentMonthly != null : agentAnnual != null}
+                  emphasis="secondary"
+                />
+              )
+            }
+          />
         ) : null}
       </div>
     </>
   );
 }
 
+/**
+ * The trial terms, set as a card's fine print (PlanCard's footnote, a div).
+ * Every string here is pinned (pricing-copy-guards.test.ts and the
+ * authenticated e2e specs): restyle, never reword.
+ */
 function PricingTrialTerms({
   isAuthenticated,
   evaluation,
@@ -567,37 +548,33 @@ function PricingTrialTerms({
 }) {
   if (!isAuthenticated) {
     return (
-      <>
-        <p className="mt-2.5 text-center text-xs text-muted-foreground">
-          <strong className="text-foreground">New account: $0 today, no card.</strong>{" "}
-          The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
-          comparison.
-          {tier === "agent_pro"
-            ? " The client roster and client Buy Boxes start with an Agent Pro subscription, not the trial."
-            : ""}{" "}
-          Nothing auto-renews; subscribe only if you choose to later.
-        </p>
-      </>
+      <p>
+        <strong className="font-semibold text-foreground">New account: $0 today, no card.</strong>{" "}
+        The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
+        comparison.
+        {tier === "agent_pro"
+          ? " The client roster and client Buy Boxes start with an Agent Pro subscription, not the trial."
+          : ""}{" "}
+        Nothing auto-renews; subscribe only if you choose to later.
+      </p>
     );
   }
 
   const allowance = formatPricingEvaluationAllowance(evaluation);
   if (evaluation.status === "active" && allowance) {
     return (
-      <>
-        <p className="mt-2.5 text-center text-xs text-muted-foreground">
-          <strong className="text-foreground">Free trial active: {allowance}.</strong>{" "}
-          You can subscribe at the exact displayed price at any time. Saved work stays in your
-          account if you downgrade.
-        </p>
-      </>
+      <p>
+        <strong className="font-semibold text-foreground">Free trial active: {allowance}.</strong>{" "}
+        You can subscribe at the exact displayed price at any time. Saved work stays in your
+        account if you downgrade.
+      </p>
     );
   }
 
   if (evaluation.status === "exhausted") {
     return (
-      <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Your free-trial runs are complete.</strong>{" "}
+      <p>
+        <strong className="font-semibold text-foreground">Your free-trial runs are complete.</strong>{" "}
         Free screening remains available; subscribe only when you choose to run another complete Pro decision.
       </p>
     );
@@ -605,19 +582,17 @@ function PricingTrialTerms({
 
   if (evaluation.status === "expired") {
     return (
-      <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Your no-card free trial has ended.</strong>{" "}
+      <p>
+        <strong className="font-semibold text-foreground">Your no-card free trial has ended.</strong>{" "}
         Free screening remains available; subscribe only when you choose to continue with Pro.
       </p>
     );
   }
 
   return (
-    <>
-      <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Subscription access starts with the charge shown above.</strong>{" "}
-        Cancel online anytime; no contract. Your saved work stays in your account if you downgrade.
-      </p>
-    </>
+    <p>
+      <strong className="font-semibold text-foreground">Subscription access starts with the charge shown above.</strong>{" "}
+      Cancel online anytime; no contract. Your saved work stays in your account if you downgrade.
+    </p>
   );
 }

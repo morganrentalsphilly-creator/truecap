@@ -42,8 +42,15 @@ describe("Phase 9 — pricing page", () => {
     expect(PRICING_OUTCOME_EXAMPLE.overpayPct).toBe(3);
     expect(formatUsdWhole(PRICING_OUTCOME_EXAMPLE.purchasePriceUsd)).toBe("$250,000");
     expect(formatUsdWhole(PRICING_OUTCOME_EXAMPLE.overpayUsd)).toBe("$7,500");
-    // The outcome h1 comes before the plans section.
-    expect(page.indexOf("data-pricing-outcome")).toBeLessThan(page.indexOf('id="plans"'));
+    // The outcome hero leads the page: data-pricing-outcome marks the
+    // PageHero (the shared hero puts its rest props on the <section>), whose
+    // title is the page's h1, and that outcome line comes before the plans.
+    expect(page).toMatch(/<PageHero\s+data-pricing-outcome=""\s+title=\{/);
+    const heroAt = page.indexOf("data-pricing-outcome");
+    const outcomeAt = page.indexOf("before you collect a dollar of rent");
+    expect(heroAt).toBeGreaterThan(-1);
+    expect(heroAt).toBeLessThan(outcomeAt);
+    expect(outcomeAt).toBeLessThan(page.indexOf('id="plans"'));
   });
 
   it("opens on annual with the effective monthly figure and the real annual charge", () => {

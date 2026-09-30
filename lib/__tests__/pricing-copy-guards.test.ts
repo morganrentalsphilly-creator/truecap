@@ -163,9 +163,11 @@ describe("pricing offer hierarchy", () => {
 
   it("puts Pro first in the mobile viewport and keeps Agent behind it", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(plans).toContain('id="pro" className="relative order-1');
-    expect(plans).toContain('className="relative order-2');
-    expect(plans).toContain('id="agent-pro" className="relative order-3');
+    // The cards are PlanCards: Pro first on phones, Free second, Agent Pro
+    // third; from 768px the row reads Free, Pro, Agent Pro.
+    expect(plans).toMatch(/<PlanCard\s+id="pro"\s+className="order-1 md:order-2[\s"]/);
+    expect(plans).toMatch(/<PlanCard\s+className="order-2 md:order-1"\s+name="Free"/);
+    expect(plans).toMatch(/<PlanCard\s+id="agent-pro"\s+className="order-3"/);
   });
 
   it("does not advertise the temporarily disabled Decision Pack", () => {
