@@ -3,7 +3,9 @@ name: TrueCap
 description: The Underwriter's Ledger. Rental decisions set as a ledger, on paper, with every figure sourced.
 # Checkpoint 1 decided 2026-09-30 by the founder: type set A (Archivo), paper
 # Newsprint, the ledger hero and the homepage structure approved, the navy
-# dashboard rail kept.
+# dashboard rail kept. Checkpoint 2 (2026-09-30): the expandable ledger. The
+# type ramp and components below are reconciled with the homepage build
+# (app/globals.css). Shadows, focus and motion live in .impeccable/design.json.
 colors:
   signal-blue: "oklch(0.49 0.18 240)"
   signal-blue-deep: "oklch(0.42 0.16 242)"
@@ -34,6 +36,14 @@ typography:
     fontFamily: "DM Mono, ui-monospace, monospace"
     fontSize: "3.375rem"
     fontWeight: 500
+    lineHeight: 1
+    letterSpacing: "-0.02em"
+    fontVariation: "tabular-nums"
+  numeral-key-sm:
+    fontFamily: "DM Mono, ui-monospace, monospace"
+    fontSize: "2.375rem"
+    fontWeight: 500
+    lineHeight: 1
     letterSpacing: "-0.02em"
     fontVariation: "tabular-nums"
   label:
@@ -52,12 +62,52 @@ typography:
     fontWeight: 400
     lineHeight: 1.5
   display:
-    fontFamily: "Archivo, Arial Narrow, sans-serif"
-    fontSize: "3.4375rem"
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2.375rem, -0.14rem + 4.474vw, 3.4375rem)"
     fontWeight: 750
     fontStretch: "82%"
     lineHeight: 1.02
     letterSpacing: "-0.012em"
+  display-sm:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.375rem"
+    fontWeight: 750
+    fontStretch: "82%"
+    lineHeight: 1.02
+    letterSpacing: "-0.012em"
+  section:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.125rem"
+    fontWeight: 750
+    fontStretch: "82%"
+    lineHeight: 1.08
+    letterSpacing: "-0.012em"
+  section-sm:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 750
+    fontStretch: "82%"
+    lineHeight: 1.1
+    letterSpacing: "-0.012em"
+  h3:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 750
+    fontStretch: "82%"
+    lineHeight: 1.333
+    letterSpacing: "-0.012em"
+  h3-sm:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.3125rem"
+    fontWeight: 750
+    fontStretch: "82%"
+    lineHeight: 1.2
+    letterSpacing: "-0.012em"
+  h4:
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.4
   text:
     fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
@@ -79,7 +129,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.signal-blue}"
-    textColor: "#ffffff"
+    textColor: "oklch(0.99 0 0)"
     rounded: "{rounded.control}"
     height: "48px marketing / 44px app"
     padding: "0 20px"
@@ -91,21 +141,35 @@ components:
     border: "1px solid {colors.ink-2}"
     rounded: "{rounded.control}"
     height: "48px marketing / 44px app"
+    padding: "0 20px"
+  button-secondary-hover:
+    backgroundColor: "{colors.band}"
   field:
     backgroundColor: "{colors.field}"
     textColor: "{colors.ink}"
     border: "1px solid {colors.ink-2}"
+    typography: "{typography.ui}"
     rounded: "{rounded.control}"
     height: "48px"
+    padding: "0 16px"
   plan-card:
     backgroundColor: "{colors.raised}"
     border: "1px solid {colors.rule}"
     rounded: "{rounded.object}"
-    padding: "22px"
+    padding: "20px phone / 22px from 640px"
+  ledger-row-binding:
+    backgroundColor: "{colors.band}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.none}"
+    padding: "12px 0 / 14px from 640px"
+  ledger-total:
+    textColor: "{colors.ink}"
+    typography: "{typography.numeral-key}"
+    rounded: "{rounded.none}"
   menu:
     backgroundColor: "{colors.raised}"
     rounded: "{rounded.float}"
-    shadow: "0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08)"
+    padding: "4px"
 ---
 
 # Design System: TrueCap
@@ -116,8 +180,9 @@ turned the old defaults into rules. The founder settled the open choices on
 2026-09-30: type set A (Archivo), Newsprint paper, the ledger hero and the
 homepage structure, the navy dashboard rail kept. Specimens:
 docs/design-pass/checkpoint-1/ledger-specimens.html. Baseline measurements:
-docs/design-pass/baseline/README.md. .impeccable/design.json is stale until the
-build's documenter pass regenerates it from the built system. -->
+docs/design-pass/baseline/README.md. Reconciled with the homepage build on
+2026-09-30 by the documenter pass, which also regenerated .impeccable/design.json
+from the built system. -->
 
 ## North star: the Underwriter's Ledger, owned
 
@@ -192,13 +257,18 @@ In addition to Impeccable's catalog (impeccable.style/slop):
 - **Scale.** Text sizes step by 1.25 up to H3, then display sizes jump:
   label and small 14px, UI 16px, marketing body 18px, H4 20px, H3 24px,
   H2 34px, H1 55px. Phone sizes: H1 38px, H2 28px, H3 21px.
+  As built: H1 holds 38px below 1024px, then eases to 55px at 1280px, so the
+  hero column keeps the headline to four lines between 1024 and 1279px. The
+  key figure is 54px; its smaller step is 38px (the hero total on phones, the
+  walkthrough's second total, plan prices, which drop to 28px under 380px).
   Nothing below 12px anywhere; the 10px and 11px steps (`text-3xs`,
   `text-2xs`) are retired from marketing pages.
 - **Measure.** Running text 60–68ch. The hero paragraph is capped at 46ch so it
   sits beside the ledger. FAQ answers are capped at 64ch.
 - **Headings** use `text-wrap: balance`. Body text uses `text-wrap: pretty`.
 - **Weights.** Display 750. Labels and plan names 600. Text 400. Key
-  figures 500, table figures 400.
+  figures 500, table figures 400. As built, a plan name is its card's H3 and
+  takes the display voice whole (750 at 82% width), like the other headings.
 
 ### Decided: Archivo
 
@@ -218,7 +288,9 @@ a ten-letter word inside a 195px column (the zoom check in
   condensed cut stays on H1–H3 and plan names. Everything else uses Archivo at
   normal width.
 - **Loading:** `next/font/google` with `display: swap`, the variable `wdth` and
-  `wght` axes, and a size-adjusted fallback. DM Mono keeps weights 400 and 500.
+  `wght` axes, and a size-adjusted fallback. DM Mono keeps weights 400 and 500
+  and never synthesizes a bold: a figure inside a semibold row takes the 500
+  face (`font-synthesis-weight: none` on the mono face), not a smeared 600.
 
 Considered and not chosen (see the specimens): B, Source Serif 4 over Source
 Sans 3; C, Besley over Public Sans.
@@ -244,10 +316,19 @@ Sans 3; C, Besley over Public Sans.
 - **White means write.** White (`field`) is used only where a person types: the
   address field, form inputs, editable cells in the analyzer. Everything else
   sits on paper. Plan cards, menus and dialogs use the raised paper; an exported
-  memo shown as a document is the one other white object.
+  memo shown as a document is the one other white object. As built, a field
+  that asks for the page background (`bg-background`, from when the page was
+  white) gets the field white instead, so no call site turns a field grey; a
+  caller's other background choice still wins.
 - **Retired:** the hero gradient and blur blob, the 70 hard-coded
   `rgba(0,112,196,…)` glows, the gold and glow shadow tokens, the navy auth-page
   hex values.
+- **The blue wash is quiet.** `--brand-blue-light` stays only for surfaces not
+  yet on the ledger primitives (the app's Offer Ceiling card, the older
+  marketing heroes). It was a pale cyan that fought the warm paper; as built it
+  is toned to a wash close to the paper, `oklch(0.935 0.02 240)`, and Ink 2
+  reads 5.9:1 on it. Blue stays for actions: new surfaces do not reach for the
+  wash.
 
 ### Decided: Newsprint
 
@@ -290,7 +371,14 @@ Ledger (green columnar pad) and Bond (cool grey-blue).
   or a major section, the way the Loan Estimate and the FT open a module. The
   double rule (two 1px ink lines 3px apart) marks a final total and nothing else.
 - **No shadow at rest.** One float shadow, for menus, dialogs and the sticky
-  bar. Hairline border plus a wide shadow is banned.
+  bar. Hairline border plus a wide shadow is banned. As built, `shadow-md` and
+  `shadow-lg` are both that float shadow, the resting steps (`shadow-2xs`
+  through `shadow-sm`) render nothing, and bars fixed to the bottom edge (the
+  sticky conversion bar, the cookie banner) cast the same shadow upward
+  (`shadow-float-up`). Every float keeps a 1px rule edge under that shadow
+  (menus, the address suggestions, the mobile sheet, the bottom bars), where
+  raised paper meets paper; the ban reads on objects at rest. The binding
+  row's band bleeding past the ledger is a flat offset fill, not an elevation.
 - **Motion: one moment.** On the homepage the double rule under the Offer
   Ceiling draws in once (520ms, ease-out) after the figures have painted, so
   there is no layout shift and no delay to the largest paint. Nothing else fades
@@ -298,10 +386,27 @@ Ledger (green columnar pad) and Bond (cool grey-blue).
   retire from marketing pages. `prefers-reduced-motion` shows the rule static.
   `transition-all` leaves the Button primitive; transitions name their
   properties (color, background-color, border-color, opacity) at 150ms.
+  As built, the draw runs `cubic-bezier(0.2, 0.8, 0.2, 1)` from the right,
+  200ms after paint. The rule is about page content: floats (menus, popovers,
+  dialogs, the mobile sheet) keep their open and close transitions, and
+  reduced motion collapses those too.
 - **Focus** is a 3px Signal Blue outline with a 2px offset on every control.
   Controls are at least 44×44px (marketing buttons and fields are 48px tall).
+  As built, the outline is a floor (`!important`) over the primitives' own
+  half-transparent rings, which measured about 2.1:1 on paper. Menu items and
+  listbox options (the address suggestions) show focus as the band plus an
+  inset 2px Signal Blue ring instead, since an outline would sit outside the
+  menu. A `tabindex="-1"` target (the skip link's `main`, a dialog panel) is
+  not a control and takes no ring.
+- **Sticky chrome never hides focus.** Scroll padding keeps focus and fragment
+  targets clear of the sticky header (72px; the header is one row, 57px on
+  phones and 65px from 640px) and of whatever is fixed to the bottom edge
+  (72px under a sticky bar, 112px while the cookie banner is up, plus the
+  safe-area inset). The footer takes the same bottom padding while a bar is
+  mounted, so its legal row stays tappable.
 - **Browser surfaces are themed.** Text selection uses the band color, the
-  caret is Signal Blue, and figures use tabular numerals.
+  caret is Signal Blue, and figures use tabular numerals. The browser's theme
+  color is the paper (#efece8), not Signal Blue.
 
 ## Components
 
@@ -312,12 +417,28 @@ Every fix lands in one of these, never as a page-local override.
   standard (1200px) or wide (1280px). Replaces the hand-rolled
   `<section className="border-t …"><div className="mx-auto max-w-… px-4 py-14 sm:py-20">`
   pattern (10 uses) and the persona pages' `mb-12 sm:mb-16` stacks.
+  As built, the widths collapsed to one: every section, the header and the
+  footer share one page container (1280px, 16/24/48px gutters), and a reading
+  column (62–68ch) is set inside it. The top rule is the section rule, the
+  2px ink rule that opens the close, or none (a list stacked under another).
+  Section headings take the display voice (H2).
 - **Ledger primitives** (new, server components, shared by marketing and the
   app): `LedgerTable` (caption row on a heavy rule, sentence-case column heads,
   right-aligned DM Mono cells), `LedgerRow` (label, optional target line,
   figures, optional `binding` state on the band), `LedgerTotal` (display-face
   label, key figure, double rule). The app's decision summary, the share viewer
   and the sample memo move onto them during rollout.
+  As built, the parts are `LedgerCaption` (the caption on the heavy rule),
+  `LedgerFigure` (DM Mono, tabular), `LedgerVerdict` (Yes/Meets in Ledger
+  Green, No/Misses in Caution Orange, at 600), `LedgerTotal` (the key figure
+  over the double rule; `draw` gives the page its one motion) and
+  `DisclosureMark` (the SVG plus/minus, shared with the FAQ), with shared
+  figure-column widths so every ledger's figures line up. `VerdictLedger` sets
+  them closed (the hero); `OpenLedger` sets them open, each row a native
+  `details` open by default, no client JavaScript. The binding row's band runs
+  0.5rem past the rules on both sides (the `ledger-bleed` utilities), so its
+  text keeps the left edge of the rows around it; the ledger's scroll region
+  is 0.5rem wider on each side so the band is never clipped.
 - **Header:** paper, a single bottom rule, no blur and no shadow. Nav: Analyze ·
   For agents · For investors · Pricing · Learn. "Create account" is a primary
   button at 4px radius, not a pill.
@@ -326,13 +447,19 @@ Every fix lands in one of these, never as a page-local override.
 - **Plan card:** raised paper, 1px rule border, 6px radius, no shadow. The plan
   name is the heading, an audience line under it, the price in DM Mono from the
   catalog, the answers as a ruled definition list, one primary button.
+  As built, each card has one action and the row has one filled button: the
+  Free card's (the page's primary action); the paid plans link out with the
+  secondary button. Padding is 20px on phones, 22px from 640px.
 - **FAQ:** a ruled list of `details` rows (question in the text face at 600, a
   plus/minus drawn in SVG), answers capped at 64ch. One FAQPage node mirrors
-  exactly what is visible.
+  exactly what is visible. As built, the list opens on the 2px ink rule, and
+  on the homepage the heading sits beside it from 1024px on the hero's 5/7
+  grid.
 - **Source table:** FRED's grammar. Each row gives the value's name, its
   source, its date or basis, and how to replace it.
 - **Buttons:** primary (Signal Blue), secondary (ink text, Ink 2 border on
-  paper), link. No icon-only decoration.
+  paper), link. No icon-only decoration. As built, the secondary's hover is
+  the band, and marketing buttons are 16px at 600.
 - **Field:** white, 1px Ink 2 border (8.1:1 against white), 4px radius, 48px
   tall, 16px text on phones so iOS does not zoom.
 
@@ -366,6 +493,9 @@ a screenshot:
 - **Grid:** 5/7 columns from 1024px, headline and form left, the ledger in the
   wider column. Below 1024px the ledger follows the investor cue; at 375×812
   and 390×844 the cue sits above the fold and the ledger's head starts at it.
+  As built, the display size eases from 1024px (see Typography) so the
+  investor cue clears the one-line cookie banner in a 1095×760 window, and the
+  ledger's figure columns step down to 9rem between 1024 and 1279px.
 - **Copy:** the copy pass's H1, subhead, CTA, sample link, risk line and
   investor cue, unchanged. The arrow suffixes go ("See the sample deal", "For
   investors"). The ledger's caption calls it the sample deal, never
@@ -396,10 +526,15 @@ top: the artifact leads and the explanation happens on the artifact.
    the price solved from it (the Offer Ceiling and its binding target), and
    what the client receives (the share link and the co-branded memo). It
    replaces both the three question cards and the three steps. Open rhythm.
+   As built, the three step notes sit on the Price, Meets the Buy Box and
+   Offer Ceiling rows; what the client receives is section 4's.
 3. **Where the numbers come from:** a source table (HUD rent, FRED rate,
    property tax as your input with its 1.1% fallback flagged). Dense rhythm.
 4. **What the client receives:** the real memo screenshot shown as a document,
-   no browser frame, with the co-branding facts beside it. (Held: see below.)
+   no browser frame, with the co-branding facts beside it. The memo shown is
+   the 2026-09-06 screenshot, in the app's previous style, until
+   `public/product/*` is regenerated after the rollout; whether a raster
+   belongs in the ledger world at all is an open checkpoint-3 decision.
 5. **Plans:** Free, Pro and Agent Pro as the page's only cards, prices from the
    catalog, the comparison table under them.
 6. **Built by a rental investor:** kept, in a narrow column between rules. The
@@ -413,7 +548,9 @@ top: the artifact leads and the explanation happens on the artifact.
    above; all remain on /for-agents or /for-investors: starting numbers, trusting
    software numbers, one listing against several clients, few clients a year,
    the Agent Pro trial, cancelling, and the rest of the investor set.
-8. **Close:** the address form again, not a button that scrolls back up.
+8. **Close:** the address form again, not a button that scrolls back up. As
+   built, it opens on the 2px ink rule and sits on the hero's grid: the case
+   on the left, the field on the right where the ledger stood.
 
 The proof blocks stay mounted and keep rendering nothing until real, consented
 proof exists.
@@ -459,6 +596,14 @@ competing with it.
   brief. No image generation is configured here (`OPENAI_API_KEY` unset), so
   Impeccable runs code-led until one is; checkpoint 2's directions are drawn in
   code as artboards.
+- 2026-09-30, checkpoint 2 (founder): the expandable ledger (structure 5 in
+  `docs/design-pass/checkpoint-2/structures.md`, seed `d7607ac2`). Build
+  notes, recorded above where they land: the hero is 5/7 from 1024px with the
+  display size easing, so the investor cue clears the one-line cookie banner
+  at 1095×760; the three step notes are set on the Price, Meets the Buy Box
+  and Offer Ceiling rows; the close sits on the hero's grid; orange is
+  reserved for a miss, so the source table's tax-fallback flag is set in ink
+  at 600. The run stays code-led: no image generation is configured.
 
 ## Do and don't
 

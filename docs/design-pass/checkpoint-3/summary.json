@@ -1,0 +1,298 @@
+{
+  "generated": "2026-09-30",
+  "build": "design/ledger-pass, local production build, isolated env (scratchpad isolated-env.sh), 127.0.0.1:3140",
+  "lighthouse": {
+    "after-mobile": {
+      "runs": [
+        {
+          "file": "home-mobile-1.report.json",
+          "performance": 0.87,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 4065,
+          "cls": 0.0022,
+          "tbtMs": 58
+        },
+        {
+          "file": "home-mobile-2.report.json",
+          "performance": 0.88,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 3912,
+          "cls": 0.0022,
+          "tbtMs": 12
+        },
+        {
+          "file": "home-mobile-3.report.json",
+          "performance": 0.9,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 3613,
+          "cls": 0.0022,
+          "tbtMs": 47
+        }
+      ],
+      "median": {
+        "performance": 0.88,
+        "accessibility": 1,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 3912,
+        "cls": 0.0022,
+        "tbtMs": 47
+      }
+    },
+    "after-desktop": {
+      "runs": [
+        {
+          "file": "home-desktop-1.report.json",
+          "performance": 0.99,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 825,
+          "cls": 0.0012,
+          "tbtMs": 0
+        },
+        {
+          "file": "home-desktop-2.report.json",
+          "performance": 0.99,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 830,
+          "cls": 0.0012,
+          "tbtMs": 0
+        },
+        {
+          "file": "home-desktop-3.report.json",
+          "performance": 0.99,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 825,
+          "cls": 0.0012,
+          "tbtMs": 0
+        }
+      ],
+      "median": {
+        "performance": 0.99,
+        "accessibility": 1,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 825,
+        "cls": 0.0012,
+        "tbtMs": 0
+      }
+    },
+    "baselineRerun-mobile": {
+      "runs": [
+        {
+          "file": "home-mobile-1.json",
+          "performance": 0.8,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 5473,
+          "cls": 0.0029,
+          "tbtMs": 40
+        },
+        {
+          "file": "home-mobile-2.json",
+          "performance": 0.86,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 4144,
+          "cls": 0.0029,
+          "tbtMs": 48
+        },
+        {
+          "file": "home-mobile-3.json",
+          "performance": 0.89,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 3796,
+          "cls": 0.0029,
+          "tbtMs": 11
+        }
+      ],
+      "median": {
+        "performance": 0.86,
+        "accessibility": 1,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 4144,
+        "cls": 0.0029,
+        "tbtMs": 40
+      }
+    },
+    "baselineRerun-desktop": {
+      "runs": [
+        {
+          "file": "home-desktop-1.json",
+          "performance": 0.98,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 1141,
+          "cls": 0.0021,
+          "tbtMs": 0
+        },
+        {
+          "file": "home-desktop-2.json",
+          "performance": 1,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 800,
+          "cls": 0.0021,
+          "tbtMs": 0
+        },
+        {
+          "file": "home-desktop-3.json",
+          "performance": 1,
+          "accessibility": 1,
+          "bestPractices": 0.96,
+          "seo": 1,
+          "lcpMs": 772,
+          "cls": 0.0021,
+          "tbtMs": 0
+        }
+      ],
+      "median": {
+        "performance": 1,
+        "accessibility": 1,
+        "bestPractices": 0.96,
+        "seo": 1,
+        "lcpMs": 800,
+        "cls": 0.0021,
+        "tbtMs": 0
+      }
+    }
+  },
+  "vitals": {
+    "baseline": {
+      "desktop-1440": {
+        "INP_ms": [
+          48,
+          56
+        ],
+        "LCP_ms": [
+          60,
+          96
+        ],
+        "CLS": [
+          0.0019,
+          0.0019
+        ]
+      },
+      "mobile-390": {
+        "INP_ms": [
+          72,
+          88
+        ],
+        "LCP_ms": [
+          136,
+          280
+        ],
+        "CLS": [
+          0,
+          0
+        ]
+      }
+    },
+    "after": {
+      "desktop-1440": {
+        "INP_ms": [
+          48,
+          56
+        ],
+        "LCP_ms": [
+          52,
+          96
+        ],
+        "CLS": [
+          0.0011,
+          0.0011
+        ]
+      },
+      "mobile-390": {
+        "INP_ms": [
+          80,
+          80
+        ],
+        "LCP_ms": [
+          136,
+          140
+        ],
+        "CLS": [
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "slop": {
+    "slop-detect": {
+      "design": {
+        "score": 16,
+        "grade": "B",
+        "flagged": [
+          "stat_banner",
+          "faq_accordion",
+          "cream_default_bg",
+          "nested_cards"
+        ]
+      },
+      "copy": {
+        "score": 4
+      },
+      "baseline": {
+        "design": 25,
+        "grade": "C",
+        "copy": 4
+      }
+    },
+    "design-slop-cop": {
+      "score": 7,
+      "tier": "clean",
+      "flagged": [
+        "faq_accordion"
+      ],
+      "baseline": 7
+    }
+  },
+  "detector": {
+    "rendered-1440": {
+      "count": 6,
+      "byRule": {
+        "line-length": 1,
+        "nested-cards": 4,
+        "cream-palette": 1
+      },
+      "baseline": 50
+    },
+    "rendered-390": {
+      "count": 5,
+      "byRule": {
+        "nested-cards": 4,
+        "cream-palette": 1
+      },
+      "baseline": 21
+    },
+    "source": {
+      "primary": 0,
+      "advisory": 0,
+      "baseline": {
+        "primary": 0,
+        "advisory": 8
+      },
+      "note": "after the reconciled DESIGN.md ramp and the header fix"
+    }
+  }
+}

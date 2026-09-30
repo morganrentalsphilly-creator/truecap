@@ -1,0 +1,70 @@
+[
+  {
+    "label": "after",
+    "page": "/",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3140/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 13339,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "Archivo"
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3140/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 11008,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "Archivo"
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3140/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 8865,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "Archivo"
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3140/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 8790,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "Archivo"
+    ],
+    "disclaimers": 1
+  }
+]
