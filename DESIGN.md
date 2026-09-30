@@ -1,10 +1,9 @@
 ---
 name: TrueCap
 description: The Underwriter's Ledger. Rental decisions set as a ledger, on paper, with every figure sourced.
-# CHECKPOINT 1 (2026-09-30): the founder picks ONE type set (A, B or C) and ONE
-# paper (ledger, newsprint or bond). After the pick, delete the other two sets
-# from `colors` and `typography` below and from the prose. Everything else in
-# this file is decided.
+# Checkpoint 1 decided 2026-09-30 by the founder: type set A (Archivo), paper
+# Newsprint, the ledger hero and the homepage structure approved, the navy
+# dashboard rail kept.
 colors:
   signal-blue: "oklch(0.49 0.18 240)"
   signal-blue-deep: "oklch(0.42 0.16 242)"
@@ -17,28 +16,14 @@ colors:
   destructive-text: "oklch(0.5 0.22 27)"
   warning: "oklch(0.78 0.16 75)"
   warning-foreground: "oklch(0.2 0.05 60)"
-  # Paper candidate 1: Ledger
-  ledger-paper: "oklch(0.946 0.024 125)"
-  ledger-raised: "oklch(0.972 0.013 125)"
-  ledger-band: "oklch(0.925 0.032 125)"
-  ledger-rule: "oklch(0.78 0.042 128)"
-  ledger-rule-soft: "oklch(0.875 0.03 126)"
-  ledger-ink: "oklch(0.23 0 0)"
-  ledger-ink-2: "oklch(0.43 0.008 125)"
-  # Paper candidate 2: Newsprint
-  newsprint-paper: "oklch(0.945 0.006 85)"
-  newsprint-raised: "oklch(0.97 0.004 85)"
-  newsprint-band: "oklch(0.925 0.008 85)"
-  newsprint-rule: "oklch(0.78 0.01 85)"
-  newsprint-rule-soft: "oklch(0.875 0.008 85)"
-  newsprint-ink-2: "oklch(0.43 0.006 85)"
-  # Paper candidate 3: Bond
-  bond-paper: "oklch(0.945 0.011 235)"
-  bond-raised: "oklch(0.972 0.007 235)"
-  bond-band: "oklch(0.925 0.014 235)"
-  bond-rule: "oklch(0.78 0.02 236)"
-  bond-rule-soft: "oklch(0.875 0.012 236)"
-  bond-ink-2: "oklch(0.43 0.012 240)"
+  paper: "oklch(0.945 0.006 85)"
+  raised: "oklch(0.97 0.004 85)"
+  band: "oklch(0.925 0.008 85)"
+  rule: "oklch(0.78 0.01 85)"
+  rule-soft: "oklch(0.875 0.008 85)"
+  ink-2: "oklch(0.43 0.006 85)"
+  sidebar-navy: "oklch(0.18 0.04 260)"
+  sidebar-foreground: "oklch(0.85 0.02 250)"
 typography:
   numeral:
     fontFamily: "DM Mono, ui-monospace, monospace"
@@ -52,54 +37,29 @@ typography:
     letterSpacing: "-0.02em"
     fontVariation: "tabular-nums"
   label:
-    fontFamily: "inherit (the text face of the chosen set)"
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 600
     lineHeight: 1.35
   small:
-    fontFamily: "inherit (the text face of the chosen set)"
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.45
   ui:
-    fontFamily: "inherit (the text face of the chosen set)"
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
-  # Type candidate A: Archivo
-  display-a:
+  display:
     fontFamily: "Archivo, Arial Narrow, sans-serif"
     fontSize: "3.4375rem"
     fontWeight: 750
     fontStretch: "82%"
     lineHeight: 1.02
     letterSpacing: "-0.012em"
-  text-a:
+  text:
     fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
-    fontWeight: 400
-    lineHeight: 1.55
-  # Type candidate B: Source Serif 4 over Source Sans 3
-  display-b:
-    fontFamily: "Source Serif 4, Georgia, serif"
-    fontSize: "3.25rem"
-    fontWeight: 600
-    lineHeight: 1.04
-    letterSpacing: "-0.012em"
-  text-b:
-    fontFamily: "Source Sans 3, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.1875rem"
-    fontWeight: 400
-    lineHeight: 1.55
-  # Type candidate C: Besley over Public Sans
-  display-c:
-    fontFamily: "Besley, Georgia, serif"
-    fontSize: "3rem"
-    fontWeight: 700
-    lineHeight: 1.03
-    letterSpacing: "-0.014em"
-  text-c:
-    fontFamily: "Public Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 400
     lineHeight: 1.55
@@ -128,22 +88,22 @@ components:
   button-secondary:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
-    border: "1px solid ink-2"
+    border: "1px solid {colors.ink-2}"
     rounded: "{rounded.control}"
     height: "48px marketing / 44px app"
   field:
     backgroundColor: "{colors.field}"
     textColor: "{colors.ink}"
-    border: "1px solid ink-2"
+    border: "1px solid {colors.ink-2}"
     rounded: "{rounded.control}"
     height: "48px"
   plan-card:
-    backgroundColor: "raised paper"
-    border: "1px solid rule"
+    backgroundColor: "{colors.raised}"
+    border: "1px solid {colors.rule}"
     rounded: "{rounded.object}"
     padding: "22px"
   menu:
-    backgroundColor: "raised paper"
+    backgroundColor: "{colors.raised}"
     rounded: "{rounded.float}"
     shadow: "0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08)"
 ---
@@ -152,8 +112,9 @@ components:
 
 <!-- Rewritten 2026-09-30 as a set of decisions (design pass, checkpoint 1).
 It replaces the 2026-09-24 audit's reading of the incumbent look, which had
-turned the old defaults into rules. Two choices are open until the founder picks
-them: the type set and the paper. Everything else here is decided. Specimens:
+turned the old defaults into rules. The founder settled the open choices on
+2026-09-30: type set A (Archivo), Newsprint paper, the ledger hero and the
+homepage structure, the navy dashboard rail kept. Specimens:
 docs/design-pass/checkpoint-1/ledger-specimens.html. Baseline measurements:
 docs/design-pass/baseline/README.md. .impeccable/design.json is stale until the
 build's documenter pass regenerates it from the built system. -->
@@ -229,47 +190,38 @@ In addition to Impeccable's catalog (impeccable.style/slop):
   the labels by face and alignment. It is also what slop-detect flags as
   `all_caps_labels`.
 - **Scale.** Text sizes step by 1.25 up to H3, then display sizes jump:
-  label and small 14px, UI 16px, marketing body 18px (19px for set B), H4 20px,
-  H3 24px, H2 34px, H1 per set (below). Phone sizes: H1 33–38px, H2 28px.
+  label and small 14px, UI 16px, marketing body 18px, H4 20px, H3 24px,
+  H2 34px, H1 55px. Phone sizes: H1 38px, H2 28px, H3 21px.
   Nothing below 12px anywhere; the 10px and 11px steps (`text-3xs`,
   `text-2xs`) are retired from marketing pages.
 - **Measure.** Running text 60–68ch. The hero paragraph is capped at 46ch so it
   sits beside the ledger. FAQ answers are capped at 64ch.
 - **Headings** use `text-wrap: balance`. Body text uses `text-wrap: pretty`.
-- **Weights.** Display per set. Labels and plan names 600. Text 400. Key
+- **Weights.** Display 750. Labels and plan names 600. Text 400. Key
   figures 500, table figures 400.
 
-### Open: pick one set
+### Decided: Archivo
 
-Rendered side by side in the specimen, each with the homepage H1, the hero
-paragraph, a ledger block and the Pro plan card.
+Archivo semi-condensed (width 82%) at 750 for display; Archivo at normal width,
+400, for text; DM Mono for figures. A grotesk from the rate-sheet and
+stock-table tradition. The narrow display cut keeps the long H1 to three or
+four lines in the narrow hero column, so the ledger gets the width, and it keeps
+a ten-letter word inside a 195px column (the zoom check in
+`e2e/public-product.spec.ts`).
 
-**A · Archivo.** Archivo semi-condensed (width 82%) at 750 for display, Archivo
-at normal width 400 for text. A grotesk from the rate-sheet and stock-table
-tradition. The narrow display cut keeps the long H1 to three or four lines in
-the narrow hero column, so the ledger gets the width. Reads as a tool. Risk: a
-heavy condensed face can tip into tabloid if it spreads, so it stays on H1–H3
-and plan names. H1 55px desktop / 38px phone. Body 18px, measure 62–66ch.
+- **Sizes:** H1 55px desktop, 38px phone; H2 34px, 28px phone; H3 24px, 21px
+  phone; body 18px; label and small 14px.
+- **Measure:** 62–66ch.
+- **Weights:** 750 display, 600 labels and plan names, 400 text, DM Mono 500
+  for key figures and 400 for table figures.
+- **Guardrail:** a heavy condensed face tips into tabloid if it spreads, so the
+  condensed cut stays on H1–H3 and plan names. Everything else uses Archivo at
+  normal width.
+- **Loading:** `next/font/google` with `display: swap`, the variable `wdth` and
+  `wght` axes, and a size-adjusted fallback. DM Mono keeps weights 400 and 500.
 
-**B · Source Serif.** Source Serif 4 (optical size 60 at display sizes) at 600
-for display, Source Sans 3 at 400 for text, its designed companion. The
-prospectus and the loan disclosure: calm and trust-coded for an investor reader.
-Risk: a serif headline is one step from the editorial look this file avoids,
-so it stays roman, never italic, on tinted paper that is not cream, with no
-terracotta and no tracked mono labels. H1 52px / 36px. Body 19px (Source Sans
-sets small), measure 64–68ch.
-
-**C · Besley.** Besley (a Clarendon revival) at 700 for display, Public Sans
-at 400 for text. Clarendon is the face of American commercial paper: auction
-bills, deed books, the ruled heads of bank ledgers. Public Sans is the civic
-sans descended from Franklin Gothic. The most distinctive of the three. Risk:
-Clarendon at weight turns quaint if it is overused or set too black, so it stays
-at 700, sentence case, headlines only. The wider face costs a fourth H1 line on
-desktop. H1 48px / 33px. Body 18px, measure 60–64ch (Public Sans runs wide).
-
-All three are open-license Google Fonts loaded through `next/font/google` with
-`display: swap` and size-adjusted fallbacks; DM Mono keeps weights 400 and 500.
-None is on the avoid list or on Impeccable's overused list.
+Considered and not chosen (see the specimens): B, Source Serif 4 over Source
+Sans 3; C, Besley over Public Sans.
 
 ## Color
 
@@ -297,17 +249,25 @@ None is on the avoid list or on Impeccable's overused list.
   `rgba(0,112,196,…)` glows, the gold and glow shadow tokens, the navy auth-page
   hex values.
 
-### Open: pick one paper
+### Decided: Newsprint
 
-Each paper comes with its raised tone, band (the row that decides), rule, soft
-rule and Ink 2. All pass AA for Ink 2, Signal Blue and the semantics on both
-paper and band.
+A warm grey stock with almost no chroma, so it reads as paper and not as cream.
+Every semantic color reads cleanly on it.
 
-| | Paper | Raised | Band | Rule | Ink 2 | Character |
-|---|---|---|---|---|---|---|
-| **Ledger** | #e9f0df | #f4f7ee | #e1ead3 | #b0bda1 | #4f514c | The accountant's columnar pad: yellow-green paper, green rules, the green-bar band. The most on-concept; the positive green has to work harder against a green page. |
-| **Newsprint** | #efece8 | #f6f5f2 | #e9e6e0 | #bab7b0 | #51504c | A warm grey stock with almost no chroma, so it reads as paper, not cream. The most neutral: every semantic color reads cleanly on it. |
-| **Bond** | #e6eef3 | #f1f7fa | #dee8ee | #acbac3 | #4a5156 | A cool grey-blue bond in Signal Blue's family. Closest to today, but darker and deliberate instead of near-white; the least new. |
+| Token | Value | Use |
+|---|---|---|
+| Paper | `oklch(0.945 0.006 85)` #efece8 | The page |
+| Raised | `oklch(0.97 0.004 85)` #f6f5f2 | Plan cards, menus, dialogs, app panels |
+| Band | `oklch(0.925 0.008 85)` #e9e6e0 | The row that decides; text selection |
+| Rule | `oklch(0.78 0.01 85)` #bab7b0 | Rules under table heads and between sections |
+| Soft rule | `oklch(0.875 0.008 85)` #d8d5d0 | Rules between rows |
+| Ink | `oklch(0.22 0 0)` #1b1b1b | Text (14.7:1 on paper) |
+| Ink 2 | `oklch(0.43 0.006 85)` #51504c | Secondary text, field borders (6.9:1 on paper, 6.5:1 on band) |
+| Field | white | Fields only |
+
+Signal Blue is 4.9:1 on paper and 4.6:1 on the band. The deepened semantics are
+5.5–5.7:1 on paper and at least 5.2:1 on the band. Considered and not chosen:
+Ledger (green columnar pad) and Bond (cool grey-blue).
 
 ## Chrome
 
@@ -463,8 +423,9 @@ The app reads the same tokens: paper, graphite ink, rules, Signal Blue, the
 radius scale, DM Mono figures. It is denser (14–16px text, 44px controls) and
 quieter. Fields are white, panels sit on raised paper, and the decision summary
 moves onto the ledger primitives. The `.dashboard-shell` scope stops overriding
-paper, rules and radius. Whether its navy rail becomes graphite is held for the
-founder (below).
+paper, rules and radius. The navy rail (`sidebar-navy`) stays, by the founder's
+decision: it is the app's one dark surface, and it frames the paper rather than
+competing with it.
 
 ## Token strategy
 
@@ -472,7 +433,7 @@ founder (below).
   (`styles/globals.css` is dead). The change is global: `--background` becomes
   the paper, `--card` becomes the raised paper, `--foreground` the graphite ink,
   `--border` the rule, and a new `--field` token carries white. Radius tokens
-  follow the role scale.
+  follow the role scale. The dashboard's navy rail tokens stay.
 - Fonts change in `app/layout.tsx` and in the three family declarations in
   `app/globals.css` (root, `.dashboard-shell`, `.dashboard-mobile-sheet`).
 - App screens this touches, reviewed at checkpoint 3: the analyzer (/analyze and
@@ -485,22 +446,18 @@ founder (below).
   load no font at all and hard-code hex colors.
 - At the end: regenerate `public/product/*` with `scripts/capture-screenshots.ts`
   (1280×800 and 390×844, DPR 2), then redraw `/og/*` and the OG templates with
-  the chosen faces loaded and the chosen paper.
+  Archivo and DM Mono loaded and the Newsprint paper.
 
-## Held for the founder
+## Decisions log
 
-1. Type set: A, B or C.
-2. Paper: Ledger, Newsprint or Bond.
-3. Approve the ledger hero and the homepage structure, including the FAQ trim.
-4. Dashboard rail: keep navy, or move it to graphite ink to join the neutral
-   system.
-5. Section 4 of the homepage ("What the client receives") adds a section the
-   copy pass did not have. Keep it, or fold its facts into the walkthrough.
-6. Comp-first directions (checkpoint 2) need image generation. Impeccable's
-   `generate-image` reads `OPENAI_API_KEY` (billed to that account; page
-   screenshots are uploaded when used as references). Without it, the three
-   directions are drawn in code as artboards, which is the other route the brief
-   allows.
+- 2026-09-30, checkpoint 1 (founder): type set A (Archivo); paper Newsprint;
+  the ledger hero and the homepage structure approved, including the FAQ trim
+  to eight questions and the "What the client receives" section; the navy
+  dashboard rail kept.
+- `buildPath` is recorded as `comp` in `.impeccable/config.json`, per the
+  brief. No image generation is configured here (`OPENAI_API_KEY` unset), so
+  Impeccable runs code-led until one is; checkpoint 2's directions are drawn in
+  code as artboards.
 
 ## Do and don't
 
