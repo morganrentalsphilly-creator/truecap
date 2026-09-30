@@ -70,7 +70,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
    - REJECT a Person node, a personal name presented as author, founder, reviewer or expert, a bio that is not `seo/author.md`'s Bio verbatim, or a first-person experience claim beyond what `BlogByline` and that Bio already say.
 7. **Repo pins.**
    - Grep `lib/__tests__/` and `e2e/` for the file's slug and path. Every string those tests pin (`toContain`, `toMatch`, `not.toMatch`, counts) must still hold.
-   - Exactly one CTA wrapper per post: one `<BlogStickyCta />` or one `<SourceFirstArticle`, never both, never neither.
+   - Exactly one CTA wrapper per post: one `<BlogStickyCta … />` (bare on an older post, `<BlogStickyCta inArticleColumn />` inside `<ArticleEnd>` on a post on the article frame, `components/marketing/article.tsx`) or one `<SourceFirstArticle`, never both, never neither.
    - No internal link removed (the `seo-guards.test.ts` ratchet).
    - No TrueCap price on a /vs page.
    - A new post is listed under a fitting hub in `lib/blog-topics.ts` (subagent mode: the planned hub row) and meets the link standard: ≥3 glossary, ≥1 market, ≥1 tool and ≥2 blog links.
@@ -78,7 +78,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
 8. **Links.**
    - **Internal, every file:** every added `href` resolves: Glob `app/<path>/page.tsx`, or for a dynamic route a slug in `lib/markets/cities.ts`, `lib/states.ts`, `lib/glossary.ts` or `lib/blog-topics.ts` (subagent mode: a path in `run-flags.sitemapPaths`), or a `public/research/*.csv` in the same patch.
    - **Internal, modified file:** an added internal link is a `<Link>` in body prose, anchored on a phrase already in the sentence, never in nav, breadcrumb, footer or related lists.
-   - **Internal, new file:** links in the standard post shape (the ← Blog back link, breadcrumb, related-post block, the research CSV download via a resolved const) are allowed when they mirror the sibling posts. Prose links follow the modified-file rule.
+   - **Internal, new file:** links in the standard post shape (the Blog link in the meta line under the H1 on a post on the article frame, or the ← Blog back link on an older post; breadcrumb, related-post block, the research CSV download via a resolved const) are allowed when they mirror the sibling posts. Prose links follow the modified-file rule.
    - **External:** a plain `https://` URL on `primarySourceDomains`. Vendor domains are allowed only in the files listed in `config.paths.vendorLinkAllow` (`/vs` pages and the comparisons hub's posts), and only for that competitor's own claim.
    - Never allowed: a shortener, a redirector (`google.com/url`, `l.facebook.com`), `utm_*`/`gclid`/`fbclid`/`mc_cid`, userinfo, a port or an IP host.
 
