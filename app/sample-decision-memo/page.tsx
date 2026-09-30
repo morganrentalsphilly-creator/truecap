@@ -236,8 +236,10 @@ export default function SampleDecisionMemoPage() {
               it, the cash flow after reserves and the DSCR that drove the
               verdict, the assumptions with their sources, the two inputs most
               likely to change the outcome, and what to verify before you
-              offer. It is what you hand a partner, a lender, or a client so
-              the numbers and the reasoning travel together. This one is
+              offer. For an investor, it is what you hand your lender or
+              partner. For an agent, it is what your investor client receives:
+              the numbers and the reasoning travel together, under your name,
+              with every assumption still editable. This one is
               generated from the sample deal by the same engine that runs every
               analysis, so what you see here is exactly what a real deal
               produces.
