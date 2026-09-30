@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  Crown,
-  LayoutDashboard,
-  Zap,
-} from "lucide-react";
+import { LayoutDashboard, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { User } from "@supabase/supabase-js";
 import { AppLogo } from "@/components/brand/app-logo";
 import { UserMenu } from "@/components/auth/user-menu";
 import { MarketingMobileMenu, MarketingNav } from "@/components/marketing/marketing-nav";
+import { PAGE_CONTAINER } from "@/components/marketing/section";
+import { cn } from "@/lib/utils";
 
 type HeaderUser = Pick<User, "id" | "email" | "user_metadata">;
 
@@ -366,39 +364,55 @@ export function Header({
         visitors because (a) 'upgrade' doesn't apply when they don't have
         an account yet, and (b) the AnnualPromoBanner above already
         carries the upsell more appropriately. Reduces the 3-bar mobile
-        stack to 2 bars for the visitor's first impression. */}
+        stack to 2 bars for the visitor's first impression.
+        DESIGN.md (2026-09 design pass): a paper strip on a bottom rule with
+        one Signal Blue link, not a full-bleed blue band, and no Zap
+        ornament. Copy unchanged and shown at the same breakpoints as
+        before: the closing clause shows from sm. Where the whole sentence
+        doesn't fit on one line (mid widths from 640px) it takes two, and the
+        row grows (min-h-9) instead of clipping it the way the old fixed h-9
+        band did. globals.css adds the one-line strip's 36px to the #main
+        scroll margin. */}
     {user && isPremiumStatusReady && !isPremium && !bannerDismissed && (
       <div
         data-analyzer-announcement-bar=""
-        className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative"
+        className="border-b border-border bg-background"
       >
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
-          <span className="hidden sm:inline">
-            Unlock 10-Year Projections, Offer Ceiling and Deal Comparison with
-          </span>
-          <span className="sm:hidden">Upgrade to</span>
-          <Link href="/pricing">
-          <span className="font-bold underline underline-offset-2 cursor-pointer hover:opacity-80 transition-opacity">
-            Pro
-          </span>
-          </Link>
-          <span className="hidden sm:inline opacity-70">for deeper scenarios with transparent, editable assumptions.</span>
+        <div className={cn(PAGE_CONTAINER, "flex min-h-9 items-center gap-3")}>
+          <p className="min-w-0 flex-1 py-1 text-sm text-foreground">
+            <span className="hidden sm:inline">
+              Unlock 10-Year Projections, Offer Ceiling and Deal Comparison with
+            </span>
+            <span className="sm:hidden">Upgrade to</span>{" "}
+            <Link href="/pricing" className="tc-link">
+              Pro
+            </Link>
+            <span className="hidden text-muted-foreground sm:inline">
+              {" "}for deeper scenarios with transparent, editable assumptions.
+            </span>
+          </p>
+          {/* 44px target in the 36px strip: -mb-2 keeps it from growing the
+              row and sends all of the overflow down, never up, since the
+              strip is the first thing in the sticky wrapper and anything
+              above it would sit off the top of the viewport. `relative`
+              paints it over the header's top edge so the part below the rule
+              stays clickable. */}
+          <button
+            type="button"
+            onClick={() => setBannerDismissed(true)}
+            aria-label="Dismiss"
+            className="relative -mb-2 -mr-3 inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
         </div>
-        <button
-          onClick={() => setBannerDismissed(true)}
-          aria-label="Dismiss"
-          className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity text-primary-foreground text-lg leading-none font-light"
-        >
-          &times;
-        </button>
       </div>
     )}
 
     {/* Main nav - sticky handled by the outer wrapper above. Don't re-apply
-        `sticky top-0` here or the white header background overlays the
-        primary-colored announcement bar (visible on mobile as a white box
-        blocking the top banner). */}
+        `sticky top-0` here or the header's paper background overlays the
+        upgrade strip above it (visible on mobile as a box covering the
+        strip). */}
     {/* DESIGN.md "Header": paper and a single bottom rule. No blur, no
         shadow; the gutter is the marketing page container's. */}
     <header className="border-b border-border bg-background">
@@ -411,35 +425,12 @@ export function Header({
         </div>
 
 
-          {/* Center - Pro upsell pill (free / non-premium only, desktop) */}
-          {/* `user &&` matches the sibling upsell bar at :325. Without it a
-              signed-OUT visitor saw this pill AND the founding-pricing bar —
-              two promotional elements on one page. */}
-          {user && isPremiumStatusReady && !isPremium && (
-             <Link href="/pricing"
-            >
-            <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">
-              <span className="inline-flex items-center gap-1 bg-[var(--brand-orange-solid)] text-white text-3xs font-bold px-2 py-[3px] rounded-full uppercase tracking-wider">
-                <Crown className="w-2.5 h-2.5" />
-                Pro
-              </span>
-              <span className="text-2xs font-bold text-[var(--brand-orange-text)] tracking-[0.01em]">
-                See Pro pricing
-              </span>
-              <span className="text-muted-foreground/40 text-2xs">&bull;</span>
-              <span className="text-2xs text-muted-foreground font-medium tracking-[0.01em]">
-                Projections
-              </span>
-              <span className="text-muted-foreground/40 text-2xs">&bull;</span>
-              <span className="text-2xs text-muted-foreground font-medium tracking-[0.01em]">
-                Reports
-              </span>
-            </div>
-            </Link>
-          )}
-
-
-          
+          {/* The xl "Pro · See Pro pricing · Projections · Reports" pill that
+              sat here is gone (2026-09 design pass): it showed on exactly the
+              condition the upgrade strip above shows, linked to the same
+              /pricing, and was an orange pill with an all-caps badge, where
+              orange means a miss (DESIGN.md color). The strip is the one
+              upsell in the chrome. */}
 
           {/* Right - Auth buttons */}
           {/* Right - Nav actions + user */}
@@ -482,7 +473,10 @@ export function Header({
                <div className="hidden lg:block w-px h-5 bg-border/60 mr-1" />
 
           {!authLoaded ? (
-            <div className="h-10 w-10 rounded-full bg-muted animate-pulse" aria-hidden />
+            // Reserves the user menu's space while auth resolves. Static: the
+            // site's one motion is the homepage ledger rule, and without JS
+            // this placeholder never resolves, so a pulse would run forever.
+            <div className="h-10 w-10" aria-hidden />
           ) : user ? (
             <UserMenu
               displayName={displayName}

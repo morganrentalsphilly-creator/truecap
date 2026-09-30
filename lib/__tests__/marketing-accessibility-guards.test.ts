@@ -73,9 +73,24 @@ describe("marketing small-text contrast", () => {
   });
 
   it("uses the accessible variants on every audited failure surface", () => {
+    // The header's small orange "Pro" pill (it used the AA solid/text
+    // variants) went in the 2026-09 design pass: orange means a miss
+    // (DESIGN.md color), so the header sets no orange at all, and the
+    // signed-in upgrade strip carries its one link as tc-link (Signal Blue,
+    // 4.9:1 on paper) instead of text on a blue band.
     const header = read("components/investcalc/header.tsx");
-    expect(header).toContain("bg-[var(--brand-orange-solid)]");
-    expect(header).toContain("text-[var(--brand-orange-text)]");
+    expect(header).not.toMatch(/brand-orange|caution/);
+    // The strip alone: from its marker to the <header> that follows it, so a
+    // tc-link /pricing link elsewhere in the chrome can't satisfy this, and
+    // the whole strip (the closing clause after the link included) sets no
+    // blue band.
+    const stripStart = header.indexOf('data-analyzer-announcement-bar=""');
+    const stripEnd = header.indexOf("<header", stripStart);
+    expect(stripStart).toBeGreaterThan(-1);
+    expect(stripEnd).toBeGreaterThan(stripStart);
+    const strip = header.slice(stripStart, stripEnd);
+    expect(strip).toContain('<Link href="/pricing" className="tc-link">');
+    expect(strip).not.toMatch(/bg-primary|text-primary-foreground/);
 
     // The homepage sections lost their tinted pills in the 2026-09 design
     // pass. Orange now means a miss and nothing else (DESIGN.md color): it

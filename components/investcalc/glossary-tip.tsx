@@ -67,7 +67,7 @@ export function GlossaryTip({
             tabIndex={0}
             aria-label={`${entry.term} - what's this?`}
             className={cn(
-              "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2",
               className,
             )}
             onClick={(e) => {
@@ -88,10 +88,9 @@ export function GlossaryTip({
             {showIcon && <HelpCircle className="h-3 w-3 text-foreground" />}
           </span>
         </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          className="max-w-xs text-xs leading-relaxed bg-popover text-popover-foreground border border-border shadow-md px-3 py-2"
-        >
+        {/* The surface, rule, shadow, float radius, 14px text and pretty
+            wrapping come from the Tooltip primitive. */}
+        <TooltipContent side="top" className="max-w-xs py-2 leading-relaxed">
           <div className="font-semibold text-foreground mb-0.5">
             {entry.term}
           </div>
