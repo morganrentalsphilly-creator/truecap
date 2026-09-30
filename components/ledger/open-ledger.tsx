@@ -4,6 +4,10 @@
  * native disclosure that is open by default and shows where its figure comes
  * from, down to the monthly arithmetic. Native <details> needs no client JS
  * and keeps every row reachable by keyboard; a reader can fold rows away.
+ *
+ * The three step notes sit on the rows they explain: where the inputs come
+ * from on the cash-flow arithmetic, the screen on the Buy Box row, and the
+ * ceiling on the total.
  */
 
 import type { ReactNode } from "react";
@@ -11,7 +15,8 @@ import type { LedgerPair, SampleDealLedger } from "@/lib/sample-deal-ledger";
 import { formatLedgerDollars } from "@/lib/sample-deal-ledger";
 import { formatDscr } from "@/lib/financial-presentation";
 import {
-  LEDGER_FIGURE_COLUMN,
+  DisclosureMark,
+  LEDGER_WIDE_FIGURE_COLUMN,
   LEDGER_GRID,
   LedgerFigure,
   LedgerTotal,
@@ -27,45 +32,32 @@ type SubRow = {
   total?: boolean;
 };
 
-function DisclosureMark() {
-  return (
-    <>
-      {/* Open: minus. Closed: plus. Drawn, one stroke weight, sized to the text. */}
-      <svg
-        aria-hidden
-        viewBox="0 0 18 18"
-        className="hidden size-[18px] shrink-0 group-open:block"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <rect x="1.5" y="1.5" width="15" height="15" />
-        <path d="M5 9h8" />
-      </svg>
-      <svg
-        aria-hidden
-        viewBox="0 0 18 18"
-        className="block size-[18px] shrink-0 group-open:hidden"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <rect x="1.5" y="1.5" width="15" height="15" />
-        <path d="M5 9h8M9 5v8" />
-      </svg>
-    </>
-  );
-}
-
+/**
+ * A group's rows, with the column heads repeated over them: the walkthrough
+ * is two screens long on a phone, and the heads at its top scroll away.
+ */
 function SubRows({ rows, caption }: { rows: SubRow[]; caption: string }) {
+  const cell = "py-1.5 sm:py-2";
   return (
-    <table className="mt-3.5 w-full border-collapse text-sm sm:text-[15.5px]">
+    <table className="mt-4 w-full border-collapse text-sm sm:text-base">
       <caption className="sr-only">{caption}</caption>
-      <thead className="sr-only">
-        <tr>
-          <th scope="col">Line</th>
-          <th scope="col">At asking</th>
-          <th scope="col">At the Offer Ceiling</th>
+      <thead>
+        <tr className="text-sm text-muted-foreground">
+          <th scope="col" className="pb-1 text-left font-normal">
+            <span className="sr-only">Line</span>
+          </th>
+          <th
+            scope="col"
+            className={cn(LEDGER_WIDE_FIGURE_COLUMN, "pb-1 pl-2 text-right font-normal")}
+          >
+            At asking
+          </th>
+          <th
+            scope="col"
+            className={cn(LEDGER_WIDE_FIGURE_COLUMN, "pb-1 pl-2 text-right font-normal")}
+          >
+            At the ceiling
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -74,34 +66,23 @@ function SubRows({ rows, caption }: { rows: SubRow[]; caption: string }) {
             key={row.label}
             className={cn(
               "border-t",
-              row.total
-                ? "border-foreground font-semibold"
-                : "border-rule-soft",
+              row.total ? "border-foreground font-semibold" : "border-rule-soft",
             )}
           >
             <th
               scope="row"
               className={cn(
-                "py-1.5 pr-2 text-left sm:py-2",
+                cell,
+                "pr-2 text-left",
                 row.total ? "font-semibold" : "font-normal",
               )}
             >
               {row.label}
             </th>
-            <td
-              className={cn(
-                LEDGER_FIGURE_COLUMN,
-                "py-1.5 pl-2 text-right sm:py-2",
-              )}
-            >
+            <td className={cn(LEDGER_WIDE_FIGURE_COLUMN, cell, "pl-2 text-right")}>
               {row.asking}
             </td>
-            <td
-              className={cn(
-                LEDGER_FIGURE_COLUMN,
-                "py-1.5 pl-2 text-right sm:py-2",
-              )}
-            >
+            <td className={cn(LEDGER_WIDE_FIGURE_COLUMN, cell, "pl-2 text-right")}>
               {row.ceiling}
             </td>
           </tr>
@@ -139,7 +120,7 @@ function Group({
         className={cn(
           LEDGER_GRID,
           "min-h-12 cursor-pointer list-none items-baseline py-3.5 sm:py-4 [&::-webkit-details-marker]:hidden",
-          banded && "-mx-2 bg-band px-2",
+          banded && "ledger-bleed",
         )}
       >
         {/* The mark sits on the label's first line; a long label wraps
@@ -151,38 +132,42 @@ function Group({
           <span className="min-w-0">
             {label}
             {target ? (
-              <span className="block text-[13px] font-normal text-muted-foreground sm:ml-2.5 sm:inline sm:text-[15px]">
+              <span className="block text-sm font-normal text-muted-foreground sm:ml-2.5 sm:inline sm:text-base">
                 {target}
               </span>
             ) : null}
           </span>
         </span>
-        <span className="text-right text-[14.5px] sm:text-lg lg:text-[22px]">
+        <span className="text-right text-base sm:text-lg lg:text-xl">
           <span className="sr-only">At asking: </span>
           {asking}
         </span>
-        <span className="text-right text-[14.5px] sm:text-lg lg:text-[22px]">
+        <span className="text-right text-base sm:text-lg lg:text-xl">
           <span className="sr-only">At the Offer Ceiling: </span>
           {ceiling}
         </span>
       </summary>
-      <div className="pb-5 pl-3 sm:pl-7">{children}</div>
+      <div className="pb-6 pl-[1.625rem] sm:pl-[1.875rem]">{children}</div>
     </details>
   );
 }
 
 function Note({ lead, children }: { lead: string; children: ReactNode }) {
   return (
-    <p className="max-w-[62ch] text-[15px] leading-relaxed sm:text-[16.5px]">
+    <p className="max-w-[62ch] text-base leading-relaxed sm:text-lg">
       <span className="font-semibold">{lead}</span> {children}
     </p>
   );
 }
 
+export type OpenLedgerNote = { lead: string; body: string };
 export type OpenLedgerNotes = {
-  price: { lead: string; body: string };
-  cashFlow: { lead: string; body: string };
-  ceiling: { lead: string; body: string };
+  /** Where the inputs come from: set over the monthly arithmetic. */
+  cashFlow: OpenLedgerNote;
+  /** Screening against the targets: set over the Buy Box row. */
+  buyBox: OpenLedgerNote;
+  /** The price solved from the targets: set over the total. */
+  ceiling: OpenLedgerNote;
 };
 
 export function OpenLedger({
@@ -197,9 +182,11 @@ export function OpenLedger({
   const { cashToClose } = ledger;
   // Below about 260px (a 390px phone at 200% zoom) the figure columns cannot
   // fit; the ledger then scrolls inside its own keyboard-reachable region
-  // (ScrollX) rather than widening the page.
+  // (ScrollX) rather than widening the page. The region is 0.5rem wider than
+  // the ledger on each side so the binding row's band can bleed past the
+  // rules without the scroll box clipping it.
   return (
-    <ScrollX label="The sample deal, every row open">
+    <ScrollX label="The sample deal, every row open" className="-mx-2 px-2">
       <div
         data-open-ledger=""
         className="min-w-[16rem] border-t-2 border-foreground"
@@ -208,7 +195,7 @@ export function OpenLedger({
           aria-hidden
           className={cn(
             LEDGER_GRID,
-            "border-b border-border py-2.5 text-[13px] font-semibold text-muted-foreground sm:text-[15px]",
+            "border-b border-border py-2.5 text-sm font-semibold text-muted-foreground sm:text-base",
           )}
         >
           <span>The sample deal, every row open</span>
@@ -219,17 +206,12 @@ export function OpenLedger({
         <Group
           label="Price"
           asking={
-            <LedgerFigure>
-              {formatLedgerDollars(ledger.askingPrice)}
-            </LedgerFigure>
+            <LedgerFigure>{formatLedgerDollars(ledger.askingPrice)}</LedgerFigure>
           }
           ceiling={
-            <LedgerFigure>
-              {formatLedgerDollars(ledger.offerCeiling)}
-            </LedgerFigure>
+            <LedgerFigure>{formatLedgerDollars(ledger.offerCeiling)}</LedgerFigure>
           }
         >
-          <Note lead={notes.price.lead}>{notes.price.body}</Note>
           <SubRows
             caption="What it takes to close, at each price"
             rows={[
@@ -244,11 +226,7 @@ export function OpenLedger({
                     : "Closing costs",
                 ...money(cashToClose.closingCosts),
               },
-              {
-                label: "Cash to close",
-                ...money(cashToClose.total),
-                total: true,
-              },
+              { label: "Cash to close", ...money(cashToClose.total), total: true },
             ]}
           />
         </Group>
@@ -307,14 +285,10 @@ export function OpenLedger({
               {
                 label: "Income divided by debt service",
                 asking: (
-                  <LedgerFigure>
-                    {formatDscr(ledger.dscr.asking, true)}
-                  </LedgerFigure>
+                  <LedgerFigure>{formatDscr(ledger.dscr.asking, true)}</LedgerFigure>
                 ),
                 ceiling: (
-                  <LedgerFigure>
-                    {formatDscr(ledger.dscr.ceiling, true)}
-                  </LedgerFigure>
+                  <LedgerFigure>{formatDscr(ledger.dscr.ceiling, true)}</LedgerFigure>
                 ),
                 total: true,
               },
@@ -335,6 +309,7 @@ export function OpenLedger({
             </LedgerVerdict>
           }
         >
+          <Note lead={notes.buyBox.lead}>{notes.buyBox.body}</Note>
           <SubRows
             caption="Each target at each price"
             rows={[
@@ -363,16 +338,12 @@ export function OpenLedger({
                       label: `DSCR at least ${dscrTarget}`,
                       asking: (
                         <LedgerVerdict pass={ledger.dscr.asking >= dscrTarget}>
-                          {ledger.dscr.asking >= dscrTarget
-                            ? "Meets"
-                            : "Misses"}
+                          {ledger.dscr.asking >= dscrTarget ? "Meets" : "Misses"}
                         </LedgerVerdict>
                       ),
                       ceiling: (
                         <LedgerVerdict pass={ledger.dscr.ceiling >= dscrTarget}>
-                          {ledger.dscr.ceiling >= dscrTarget
-                            ? "Meets"
-                            : "Misses"}
+                          {ledger.dscr.ceiling >= dscrTarget ? "Meets" : "Misses"}
                         </LedgerVerdict>
                       ),
                     },
@@ -383,18 +354,20 @@ export function OpenLedger({
         </Group>
 
         <details open className="group">
-          <summary className="flex min-h-12 cursor-pointer list-none flex-wrap items-end justify-between gap-x-4 gap-y-2 pb-2 pt-5 [&::-webkit-details-marker]:hidden">
-            <span className="flex items-center gap-2.5 font-display text-2xl sm:text-3xl">
+          <summary className="flex min-h-12 cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-4 gap-y-2 pb-2 pt-5 [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-2.5 font-display text-2xl">
               <DisclosureMark />
               Offer Ceiling
             </span>
-            <LedgerTotal className="text-key-sm lg:text-[3rem]">
+            {/* The hero carries the page's key figure at 54px; the second
+                total steps down so the two do not compete. */}
+            <LedgerTotal className="text-key-sm">
               {formatLedgerDollars(ledger.offerCeiling)}
             </LedgerTotal>
           </summary>
-          <div className="pl-3 pt-2 sm:pl-7">
+          <div className="pl-[1.625rem] pt-2">
             <Note lead={notes.ceiling.lead}>{notes.ceiling.body}</Note>
-            <dl className="mt-3.5 text-sm sm:text-[15.5px]">
+            <dl className="mt-4 text-sm sm:text-base">
               {ledger.bindingTarget ? (
                 <div className="flex justify-between gap-4 border-t border-rule-soft py-1.5 sm:py-2">
                   <dt>Binding target</dt>
@@ -403,21 +376,23 @@ export function OpenLedger({
               ) : null}
               {ledger.nextConstraint ? (
                 <div className="flex justify-between gap-4 border-t border-rule-soft py-1.5 sm:py-2">
-                  <dt>Next constraint</dt>
+                  <dt>Next target to bind</dt>
                   <dd className="text-right">{ledger.nextConstraint}</dd>
                 </div>
               ) : null}
               <div className="flex justify-between gap-4 border-t border-rule-soft py-1.5 sm:py-2">
                 <dt>Below asking</dt>
                 <dd className="text-right">
-                  <LedgerFigure>
-                    {formatLedgerDollars(ledger.belowAsking)}
-                  </LedgerFigure>
+                  <LedgerFigure>{formatLedgerDollars(ledger.belowAsking)}</LedgerFigure>
                 </dd>
               </div>
             </dl>
           </div>
         </details>
+        <p className="mt-4 border-t border-border pt-3 text-sm text-muted-foreground">
+          Sample inputs throughout. Every figure is rounded to whole dollars, so a
+          month times twelve can differ from the yearly line by a few dollars.
+        </p>
       </div>
     </ScrollX>
   );

@@ -30,14 +30,14 @@ export function Disclaimer({
 }) {
   const base =
     tone === "card"
-      ? "rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs leading-relaxed text-muted-foreground"
-      : "text-xs leading-relaxed text-muted-foreground";
+      ? "rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm leading-relaxed text-muted-foreground"
+      : "max-w-[68ch] text-sm leading-relaxed text-muted-foreground";
   return (
     <p data-disclaimer="" className={`${base} ${className}`.trim()}>
       {DISCLAIMER_LEAD} The math is published in our{" "}
       <IntentPrefetchLink
         href="/methodology"
-        className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="tc-link font-medium"
       >
         Methodology
       </IntentPrefetchLink>

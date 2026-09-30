@@ -187,7 +187,7 @@ export function CookieConsentBanner() {
           375×667 first viewport. Full copy from sm:. */}
       <div className="mx-auto flex max-w-5xl flex-row items-center gap-2 sm:gap-4">
         <div className="flex min-w-0 flex-1 items-center">
-          <p className="text-[13px] leading-snug text-foreground sm:text-[15px] sm:leading-relaxed">
+          <p className="text-sm leading-snug text-foreground sm:text-base sm:leading-relaxed">
             <strong className="font-semibold">We use cookies</strong>
             <span className="sm:hidden">
               {" for analytics & ads. "}
@@ -218,14 +218,14 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-4 sm:text-[15px]"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-4 sm:text-base"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-[15px]"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-base"
           >
             <span className="sm:hidden">Accept</span>
             <span className="hidden sm:inline">Accept all</span>

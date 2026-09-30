@@ -21,14 +21,14 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { cn } from "@/lib/utils";
 
 const cell = "py-3 align-top sm:py-3.5";
-const figure = "text-right text-[15px] sm:text-lg lg:text-xl";
+const figure = "text-right text-base sm:text-lg lg:text-xl";
 
 export function VerdictLedger({
   ledger,
   walkthroughHref,
 }: {
   ledger: SampleDealLedger;
-  /** Where "open every row" goes: the walkthrough section on the same page. */
+  /** Where the walkthrough link goes: the opened ledger on the same page. */
   walkthroughHref?: string;
 }) {
   const cashFlowTarget = ledger.target.monthlyCashFlow;
@@ -48,13 +48,18 @@ export function VerdictLedger({
           390px phone at 200% zoom); there it scrolls inside its own
           keyboard-reachable region instead of pushing the page sideways
           (WCAG 1.4.10 exempts data tables from reflow). */}
-      <ScrollX label="The sample deal at asking and at the Offer Ceiling">
-        <table className="w-full border-collapse text-[15px] sm:text-base lg:text-[17px]">
+      {/* 0.5rem wider than the table on each side, so the binding row's band
+          can bleed past the rules without the scroll box clipping it. */}
+      <ScrollX
+        label="The sample deal at asking and at the Offer Ceiling"
+        className="-mx-2 px-2"
+      >
+        <table className="w-full border-collapse text-base lg:text-lg">
           <caption className="sr-only">
             The sample deal at its asking price and at its Offer Ceiling
           </caption>
           <thead>
-            <tr className="border-b border-border text-[13px] text-muted-foreground sm:text-[15px]">
+            <tr className="border-b border-border text-sm text-muted-foreground sm:text-base">
               <th scope="col" className="py-2.5 text-left font-semibold">
                 <span className="sr-only">Line item</span>
               </th>
@@ -102,12 +107,12 @@ export function VerdictLedger({
                 scope="row"
                 className={cn(
                   cell,
-                  "pr-2 text-left font-medium shadow-[-0.5rem_0_0_var(--band)]",
+                  "ledger-bleed-start pr-2 text-left font-medium",
                 )}
               >
                 Cash flow after reserves
                 {cashFlowTarget != null ? (
-                  <span className="block text-[13px] font-normal text-muted-foreground sm:text-sm">
+                  <span className="block text-sm font-normal text-muted-foreground">
                     Target ≥ {formatLedgerDollars(cashFlowTarget)}/mo
                   </span>
                 ) : null}
@@ -121,14 +126,14 @@ export function VerdictLedger({
                 className={cn(
                   cell,
                   figure,
-                  "pl-2 shadow-[0.5rem_0_0_var(--band)]",
+                  "ledger-bleed-end pl-2",
                 )}
               >
                 <LedgerFigure>
                   {formatLedgerDollars(ledger.cashFlowMonthly.ceiling)}/mo
                 </LedgerFigure>
                 {ledger.bindingTarget ? (
-                  <span className="block font-sans text-xs text-muted-foreground sm:text-[13px]">
+                  <span className="block font-sans text-sm text-muted-foreground">
                     binding target
                   </span>
                 ) : null}
@@ -141,7 +146,7 @@ export function VerdictLedger({
               >
                 DSCR
                 {dscrTarget != null ? (
-                  <span className="block text-[13px] font-normal text-muted-foreground sm:text-sm">
+                  <span className="block text-sm font-normal text-muted-foreground">
                     Target ≥ {dscrTarget}
                   </span>
                 ) : null}
@@ -180,11 +185,11 @@ export function VerdictLedger({
             <tr className="border-t border-foreground">
               <th
                 scope="row"
-                className="pb-3 pt-4 text-left align-bottom font-display text-xl sm:text-2xl lg:text-[28px]"
+                className="pb-3 pt-4 text-left align-baseline font-display text-xl sm:text-2xl"
               >
                 Offer Ceiling
               </th>
-              <td colSpan={2} className="pb-3 pt-3 text-right">
+              <td colSpan={2} className="pb-3 pt-3 text-right align-baseline">
                 <LedgerTotal draw className="text-key-sm lg:text-key">
                   {formatLedgerDollars(ledger.offerCeiling)}
                 </LedgerTotal>
@@ -194,7 +199,7 @@ export function VerdictLedger({
         </table>
       </ScrollX>
       {/* docs/voice.md: state the gap in dollars, never a vague "misses". */}
-      <p className="mt-3 text-sm text-muted-foreground sm:text-[15px]">
+      <p className="mt-3 text-sm text-muted-foreground sm:text-base">
         {ledger.belowAsking > 0
           ? `Asking price is ${formatLedgerDollars(ledger.belowAsking)} above the ceiling.`
           : "Asking price clears the sample targets."}
@@ -203,12 +208,12 @@ export function VerdictLedger({
           : null}
       </p>
       {walkthroughHref ? (
-        <p className="text-sm sm:text-[15px]">
+        <p className="text-base">
           <Link
             href={walkthroughHref}
             className="tc-link inline-flex min-h-11 items-center"
           >
-            Open every row and show the arithmetic
+            See where every figure comes from
           </Link>
         </p>
       ) : null}
