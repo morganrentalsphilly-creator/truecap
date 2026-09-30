@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { Header } from "@/components/investcalc/header";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { LedgerFigure, LedgerTotal } from "@/components/ledger/ledger-parts";
 import { ActionRow, PageHero } from "@/components/marketing/page-parts";
-import { Section } from "@/components/marketing/section";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { buttonVariants } from "@/components/ui/button";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
@@ -14,11 +15,6 @@ import { buildOfferCeilingPresentation } from "@/lib/offer-ceiling";
 import { describeMaoTarget } from "@/lib/mao-targets";
 import { TRUECAP_UNDERWRITING_STANDARD_NAME } from "@/lib/underwriting-methodology";
 import {
-  METRIC_TONE_TEXT_CLASS,
-  capRateTone,
-  cashFlowTone,
-  cocTone,
-  dscrTone,
   formatDscr,
   formatRatioPct,
   formatSignedPct,
@@ -62,6 +58,14 @@ const money = (value: number) =>
 const LEDGER_ROW = "flex justify-between gap-4 border-t border-rule-soft py-2.5";
 
 /**
+ * The hero's 5/7 grid from 1024px, with PageHero's gaps, so a section's matter
+ * sits in the column under the Offer Ceiling and its heading beside it (the
+ * homepage FAQ's grammar). One column below 1024px.
+ */
+const MEMO_SPLIT =
+  "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16";
+
+/**
  * A memo list: opened by the heavy rule, one soft rule under each item. The
  * measure caps the list, not the items, so every rule runs the same width
  * (StepList's grammar); the type size sits on the list so 62ch still counts
@@ -70,6 +74,28 @@ const LEDGER_ROW = "flex justify-between gap-4 border-t border-rule-soft py-2.5"
 const MEMO_LIST =
   "mt-4 max-w-[62ch] border-t-2 border-foreground text-base leading-relaxed sm:text-lg";
 const MEMO_LIST_ITEM = "text-pretty border-b border-rule-soft py-4";
+
+/**
+ * Facts joined by " · ", each kept whole: a line breaks only before a
+ * separator, so no line ends on "·" and no figure leaves its operator
+ * ("DSCR ≥" / "1.25" at 375px). Every part set here fits a 343px column.
+ */
+function Separated({ parts }: { parts: readonly string[] }) {
+  return (
+    <>
+      {parts
+        .filter((part) => part.length > 0)
+        .map((part, index) => (
+          <Fragment key={`${index}-${part}`}>
+            {index > 0 ? " " : null}
+            <span className="whitespace-nowrap">
+              {index > 0 ? `· ${part}` : part}
+            </span>
+          </Fragment>
+        ))}
+    </>
+  );
+}
 
 export default function SampleDecisionMemoPage() {
   const { analysis, dealScore, maxOffer } = calculateSampleDealOutcome();
@@ -81,25 +107,26 @@ export default function SampleDecisionMemoPage() {
   });
   const values = SAMPLE_DEAL_FIXTURE.values;
   const hasDebtService = analysis.monthlyPayment > 0;
-  // Same four numbers, same one-decimal formats and colour rules as the
-  // decision card and the shared viewer (lib/financial-presentation).
+  // Same four numbers and one-decimal formats as the decision card and the
+  // shared viewer (lib/financial-presentation). Set in ink, as the homepage
+  // ledger sets them: in a ledger only a pass or a miss against a target
+  // takes green or orange (LedgerVerdict), and this memo's pass or miss is
+  // the Offer Ceiling's. A sign-green cash flow under a cash-flow target it
+  // misses read as a pass.
   const baseEconomics: {
     label: string;
     term: keyof typeof GLOSSARY;
     value: string;
-    toneClass: string | undefined;
   }[] = [
     {
       label: "Monthly cash flow",
       term: "cashFlow",
       value: money(analysis.netCashFlow),
-      toneClass: METRIC_TONE_TEXT_CLASS[cashFlowTone(analysis.netCashFlow)],
     },
     {
       label: "Cap rate",
       term: "capRate",
       value: formatRatioPct(analysis.capRate),
-      toneClass: METRIC_TONE_TEXT_CLASS[capRateTone(analysis.capRate)],
     },
     {
       label: "Cash-on-cash",
@@ -108,25 +135,33 @@ export default function SampleDecisionMemoPage() {
         analysis.totalCashRequired > 0
           ? formatSignedPct(analysis.cocReturn)
           : "N/A",
-      toneClass:
-        METRIC_TONE_TEXT_CLASS[
-          cocTone(analysis.cocReturn, analysis.totalCashRequired)
-        ],
     },
     {
       label: "DSCR",
       term: "dscr",
       value: formatDscr(analysis.dscr, hasDebtService),
-      toneClass:
-        METRIC_TONE_TEXT_CLASS[
-          dscrTone(
-            analysis.dscr,
-            hasDebtService,
-            values.propertyType === "owner-occupant",
-          )
-        ],
     },
   ];
+
+  // The page's actions: in the hero's first screen, and again where the
+  // reading ends. One filled button per row.
+  const memoActions = (
+    <ActionRow>
+      <Link
+        href="/analyze"
+        prefetch={false}
+        className={buttonVariants({ size: "cta" })}
+      >
+        Analyze a deal
+      </Link>
+      <Link
+        href="/pricing"
+        className={buttonVariants({ variant: "outline", size: "cta" })}
+      >
+        See decision memo access
+      </Link>
+    </ActionRow>
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -136,26 +171,25 @@ export default function SampleDecisionMemoPage() {
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
           title="Doesn't meet your targets at asking."
-          lede={`Sample decision memo · ${SAMPLE_DEAL_FIXTURE.display.shortAddress} · asking ${money(values.purchasePrice)}`}
-        >
-          {/* The truth label stays in the first screen (app/for-agents says
-              the memo is labeled as not a customer result). Under the lede,
-              on a soft rule, in ink: a label above the H1 would be an
-              eyebrow, and orange means a miss. */}
-          <p className="mt-4 max-w-[68ch] text-pretty border-t border-rule-soft pt-2.5 text-base">
-            <strong className="font-semibold">
-              Illustrative sample — not a customer result.
-            </strong>{" "}
-            The address and every input below are illustrative assumptions,
-            not verified property facts.
-          </p>
-        </PageHero>
-
-        <Section aria-labelledby="sample-decision" rhythm="tight" rule="none">
-          <div className="grid gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-            {/* The decision: the Offer Ceiling as the memo's one total, over
-                the double rule (no draw: the homepage keeps the one motion). */}
-            <div className="min-w-0 border-t-2 border-foreground">
+          lede={
+            <Separated
+              parts={[
+                "Sample decision memo",
+                SAMPLE_DEAL_FIXTURE.display.shortAddress,
+                `asking ${money(values.purchasePrice)}`,
+              ]}
+            />
+          }
+          actions={memoActions}
+          aside={
+            // The decision beside the verdict, on the hero's 5/7 grid (the
+            // homepage ledger's place): the Offer Ceiling as the memo's one
+            // total, over the double rule (no draw: the homepage keeps the
+            // one motion).
+            <section
+              aria-labelledby="sample-decision"
+              className="border-t-2 border-foreground"
+            >
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 pb-2 pt-5">
                 <h2
                   id="sample-decision"
@@ -168,8 +202,14 @@ export default function SampleDecisionMemoPage() {
                 </LedgerTotal>
               </div>
               <p className="mt-3 text-base font-semibold">
-                {SAMPLE_DEAL_FIXTURE.targetProfile.name} ·{" "}
-                {describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)}
+                <Separated
+                  parts={[
+                    SAMPLE_DEAL_FIXTURE.targetProfile.name,
+                    ...describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget).split(
+                      " · ",
+                    ),
+                  ]}
+                />
               </p>
               <p className="mt-1 text-pretty text-base text-muted-foreground">
                 The asking price is{" "}
@@ -222,17 +262,34 @@ export default function SampleDecisionMemoPage() {
                   shown.
                 </p>
               </div>
-            </div>
+            </section>
+          }
+        >
+          {/* The truth label stays in the first screen (app/for-agents says
+              the memo is labeled as not a customer result). Under the
+              actions, on a soft rule, in ink: a label above the H1 would be
+              an eyebrow, and orange means a miss. 58.5ch at 16px is the
+              lede's 52ch at 18px, so the rule stops where the lede does. */}
+          <p className="mt-6 max-w-[58.5ch] text-pretty border-t border-rule-soft pt-2.5 text-base">
+            <strong className="font-semibold">
+              Illustrative sample — not a customer result.
+            </strong>{" "}
+            The address and every input below are illustrative assumptions,
+            not verified property facts.
+          </p>
+        </PageHero>
 
-            <div className="min-w-0 border-t-2 border-foreground">
-              <h2 className="font-display text-balance py-2.5 text-h3-sm sm:text-2xl">
-                Base economics at asking
-              </h2>
-              <dl>
-                {baseEconomics.map(({ label, term, value, toneClass }) => (
+        <Section aria-labelledby="memo-economics" rhythm="tight">
+          <div className={MEMO_SPLIT}>
+            <SectionHeading id="memo-economics">
+              Base economics at asking
+            </SectionHeading>
+            <div className="min-w-0">
+              <dl className="border-t-2 border-foreground">
+                {baseEconomics.map(({ label, term, value }) => (
                   <div
                     key={label}
-                    className="flex items-baseline justify-between gap-4 border-t border-rule-soft"
+                    className="flex items-baseline justify-between gap-4 border-t border-rule-soft first:border-t-0"
                   >
                     {/* The dotted underline marks a defined term (DESIGN.md,
                         the OWID reference); it carries the affordance, so
@@ -243,11 +300,7 @@ export default function SampleDecisionMemoPage() {
                       </GlossaryTip>
                     </dt>
                     <dd>
-                      <LedgerFigure
-                        className={cn("text-lg", toneClass ?? "text-foreground")}
-                      >
-                        {value}
-                      </LedgerFigure>
+                      <LedgerFigure className="text-lg">{value}</LedgerFigure>
                     </dd>
                   </div>
                 ))}
@@ -261,16 +314,13 @@ export default function SampleDecisionMemoPage() {
         </Section>
 
         <Section aria-labelledby="memo-what" rhythm="tight">
-          <div className="max-w-[68ch]">
-            {/* Every h2 on the page takes one size, so this aside does not
-                outrank the Offer Ceiling heading above it. */}
-            <h2
-              id="memo-what"
-              className="font-display text-balance text-h3-sm sm:text-2xl"
-            >
+          <div className={MEMO_SPLIT}>
+            <SectionHeading id="memo-what">
               What a decision memo is
-            </h2>
-            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
+            </SectionHeading>
+            {/* The section's own body, not an intro to something below it:
+                set in ink, as the homepage sets its body prose. */}
+            <p className="max-w-[68ch] text-pretty text-lg leading-relaxed">
               A decision memo is the written form of an analysis: the answer at
               asking price, the Offer Ceiling with the targets that produced
               it, the cash flow after reserves and the DSCR that drove the
@@ -290,9 +340,7 @@ export default function SampleDecisionMemoPage() {
         <Section rhythm="tight">
           <div className="grid gap-x-16 gap-y-12 lg:grid-cols-2">
             <div className="min-w-0">
-              <h2 className="font-display text-balance text-h3-sm sm:text-2xl">
-                What could break the decision?
-              </h2>
+              <SectionHeading>What could break the decision?</SectionHeading>
               <ul className={MEMO_LIST}>
                 <li className={MEMO_LIST_ITEM}>
                   <strong className="font-semibold">Rent:</strong>{" "}
@@ -315,9 +363,7 @@ export default function SampleDecisionMemoPage() {
             </div>
 
             <div className="min-w-0">
-              <h2 className="font-display text-balance text-h3-sm sm:text-2xl">
-                What should I verify next?
-              </h2>
+              <SectionHeading>What should I verify next?</SectionHeading>
               {/* The numbers are typed copy, so the list keeps no markers of
                   its own. */}
               <ol className={cn(MEMO_LIST, "list-none")}>
@@ -342,44 +388,27 @@ export default function SampleDecisionMemoPage() {
         </Section>
 
         <Section aria-labelledby="memo-method" rhythm="tight">
-          <div className="max-w-[68ch]">
-            <h2
-              id="memo-method"
-              className="font-display text-balance text-h3-sm sm:text-2xl"
-            >
-              Methodology and scope
-            </h2>
-            <p className="mt-3 text-pretty text-base leading-relaxed text-muted-foreground">
-              Generated from TrueCap&apos;s sample deal using the{" "}
-              {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
-              Targets: {SAMPLE_DEAL_FIXTURE.targetProfile.name}. The same sample
-              powers the homepage preview and the opened sample analysis.
-            </p>
-            <Link
-              href="/methodology"
-              className="tc-link mt-2 inline-flex min-h-11 items-center text-base"
-            >
-              Review the methodology
-            </Link>
+          <div className={MEMO_SPLIT}>
+            <SectionHeading id="memo-method">Methodology and scope</SectionHeading>
+            <div className="min-w-0 max-w-[68ch]">
+              <p className="text-pretty text-base leading-relaxed text-muted-foreground">
+                Generated from TrueCap&apos;s sample deal using the{" "}
+                {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
+                Targets: {SAMPLE_DEAL_FIXTURE.targetProfile.name}. The same sample
+                powers the homepage preview and the opened sample analysis.
+              </p>
+              <Link
+                href="/methodology"
+                className="tc-link mt-2 inline-flex min-h-11 items-center text-base"
+              >
+                Review the methodology
+              </Link>
+              {/* The close: the hero's actions again where the reading ends,
+                  under the case the page has made, instead of a heading-less
+                  slab of buttons. */}
+              <div className="mt-6">{memoActions}</div>
+            </div>
           </div>
-        </Section>
-
-        <Section rule="heavy" rhythm="tight">
-          <ActionRow>
-            <Link
-              href="/analyze"
-              prefetch={false}
-              className={buttonVariants({ size: "cta" })}
-            >
-              Analyze a deal
-            </Link>
-            <Link
-              href="/pricing"
-              className={buttonVariants({ variant: "outline", size: "cta" })}
-            >
-              See decision memo access
-            </Link>
-          </ActionRow>
         </Section>
       </main>
       <SiteFooter />
