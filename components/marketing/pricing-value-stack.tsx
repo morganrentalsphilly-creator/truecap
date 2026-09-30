@@ -14,7 +14,9 @@
  * Server component: no state, renders from props resolved by the page.
  */
 
-import Link from "next/link";
+// Below the plans, so the /for-agents link prefetches on hover or keyboard
+// focus, not on scroll (lib/__tests__/intent-prefetch-landing.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { RuledList } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 
@@ -66,9 +68,9 @@ export function PricingValueStack({
               and it had no inbound link from anywhere on the site. This
               section is where someone is actually weighing $59.99 against
               $29.99, so it is where the fuller argument has to be reachable. */}
-          <Link href="/for-agents" className="tc-link mt-4 inline-flex min-h-11 items-center">
+          <IntentPrefetchLink href="/for-agents" className="tc-link mt-4 inline-flex min-h-11 items-center">
             See how agents use it
-          </Link>
+          </IntentPrefetchLink>
         </>
       ) : null}
     </Section>

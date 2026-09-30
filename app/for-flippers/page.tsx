@@ -25,6 +25,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's tool links keep prefetch={false}, so /analyze never
+// prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "Fix-and-flip planning resources",
@@ -147,12 +151,12 @@ export default function ForFlippersPage() {
           lede="The educational guide explains how the 70% rule is used and why a complete flip model must also account for time, financing, selling costs, and taxes."
           actions={
             <ActionRow>
-              <Link
+              <IntentPrefetchLink
                 href="/blog/70-percent-rule-house-flipping"
                 className={buttonVariants({ size: "cta" })}
               >
                 Read the 70% rule guide
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         >
@@ -161,9 +165,9 @@ export default function ForFlippersPage() {
           {isAgentProConfigured() ? (
             <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Are you an agent working with investor clients?{" "}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </CloseSection>

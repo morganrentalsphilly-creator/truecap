@@ -24,6 +24,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's actions keep next/link's default; /analyze never
+// prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
 import { ActionRow, CloseSection, PageHero, RuledList } from "@/components/marketing/page-parts";
 import { DECISION_SHOT, ProductShot } from "@/components/marketing/product-shot";
@@ -247,9 +251,9 @@ export default function ForInvestorsPage() {
                 </p>
                 {/* justify-self-start: the 44px target stays the label's
                     width instead of stretching across the grid cell. */}
-                <Link href={href} className="tc-link inline-flex min-h-11 items-center justify-self-start text-base">
+                <IntentPrefetchLink href={href} className="tc-link inline-flex min-h-11 items-center justify-self-start text-base">
                   {cta}
-                </Link>
+                </IntentPrefetchLink>
               </li>
             ))}
           </ul>
@@ -262,9 +266,9 @@ export default function ForInvestorsPage() {
           </SectionHeading>
           <RuledList items={WHAT_YOU_GET} columns={2} className="mt-8" />
           <p className="mt-5 text-base">
-            <Link href="/pricing" className="tc-link inline-flex min-h-11 items-center">
+            <IntentPrefetchLink href="/pricing" className="tc-link inline-flex min-h-11 items-center">
               Compare Free and Pro
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </Section>
 
@@ -285,9 +289,9 @@ export default function ForInvestorsPage() {
             ))}
           </dl>
           <p className="mt-5 text-base">
-            <Link href="/methodology" className="tc-link inline-flex min-h-11 items-center">
+            <IntentPrefetchLink href="/methodology" className="tc-link inline-flex min-h-11 items-center">
               Read the methodology
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </Section>
 
@@ -312,9 +316,9 @@ export default function ForInvestorsPage() {
           {agentProConfigured ? (
             <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Working with investor clients as an agent?{" "}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </CloseSection>
