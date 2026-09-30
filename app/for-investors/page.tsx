@@ -27,6 +27,9 @@ import {
   Target,
 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
 import { DECISION_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -180,10 +183,10 @@ export default function ForInvestorsPage() {
                 </span>
                 <h3 className="mt-3 text-base font-extrabold text-foreground sm:text-lg">{title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                <Link href={href} className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+                <IntentPrefetchLink href={href} className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline">
                   {cta}
                   <ArrowRight className="size-4" aria-hidden />
-                </Link>
+                </IntentPrefetchLink>
               </article>
             ))}
           </div>
@@ -207,9 +210,9 @@ export default function ForInvestorsPage() {
               </li>
             ))}
           </ul>
-          <Link href="/pricing" className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
+          <IntentPrefetchLink href="/pricing" className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
             Compare Free and Pro →
-          </Link>
+          </IntentPrefetchLink>
         </section>
 
         {/* Sources */}
@@ -225,9 +228,9 @@ export default function ForInvestorsPage() {
             <li><strong className="text-foreground">Mortgage rate:</strong> {DATA_SOURCE_FACTS.mortgageRate}, with its date shown; replace it with your lender&apos;s quote.</li>
             <li><strong className="text-foreground">Property tax:</strong> {PROPERTY_TAX_FACTS.notAutoFilled} {PROPERTY_TAX_FACTS.blankFieldBehavior}</li>
           </ul>
-          <Link href="/methodology" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
+          <IntentPrefetchLink href="/methodology" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
             Read the methodology →
-          </Link>
+          </IntentPrefetchLink>
         </section>
       </main>
 
@@ -250,9 +253,9 @@ export default function ForInvestorsPage() {
           {agentProConfigured ? (
             <p className="mt-6 text-sm text-muted-foreground">
               Working with investor clients as an agent?{" "}
-              <Link href="/for-agents" className="font-semibold text-primary underline underline-offset-4">
+              <IntentPrefetchLink href="/for-agents" className="font-semibold text-primary underline underline-offset-4">
                 See TrueCap for agents →
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </div>
