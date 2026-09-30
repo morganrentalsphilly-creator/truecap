@@ -299,6 +299,9 @@ export function PricingTogglePlans({
               </span>
             )}
           </div>
+          <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            First decision, no account
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
             <strong className="font-semibold text-foreground">Screen the deal.</strong>{" "}
             Understand the economics before spending more time on the
@@ -358,6 +361,9 @@ export function PricingTogglePlans({
               )}
             </div>
           </div>
+          <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            For your own deals
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
             <strong className="font-semibold text-foreground">Know what to offer.</strong>{" "}
             See whether the deal meets your targets, find your Offer Ceiling,
@@ -479,10 +485,13 @@ export function PricingTogglePlans({
                 </span>
               </div>
             </div>
+            <p data-plan-audience="" className="mt-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              For agents with investor clients
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
               <strong className="font-semibold text-foreground">Win investor clients.</strong>{" "}
-              Analyze investment properties quickly and give each client
-              branded, investor-focused underwriting against their own Buy Box.
+              Screen each listing against the client&apos;s own Buy Box and
+              send the decision memo, co-branded, under your name.
             </p>
             <div className="mt-5 flex items-baseline gap-1.5">
               <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
