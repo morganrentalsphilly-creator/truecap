@@ -5,9 +5,10 @@
  * from, down to the monthly arithmetic. Native <details> needs no client JS
  * and keeps every row reachable by keyboard; a reader can fold rows away.
  *
- * The three step notes sit on the rows they explain: where the inputs come
- * from on the cash-flow arithmetic, the screen on the Buy Box row, and the
- * ceiling on the total.
+ * The three step notes sit on the rows DESIGN.md sets them against, in step
+ * order: the listing you pasted (price, rent and where each came from) on
+ * Price, the client's Buy Box on the Buy Box row, and the price solved from
+ * it on the total.
  */
 
 import type { ReactNode } from "react";
@@ -21,6 +22,7 @@ import {
   LedgerFigure,
   LedgerTotal,
   LedgerVerdict,
+  NBSP,
 } from "@/components/ledger/ledger-parts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { cn } from "@/lib/utils";
@@ -131,6 +133,7 @@ function Group({
           </span>
           <span className="min-w-0">
             {label}
+            {target ? " " : null}
             {target ? (
               <span className="block text-sm font-normal text-muted-foreground sm:ml-2.5 sm:inline sm:text-base">
                 {target}
@@ -162,8 +165,8 @@ function Note({ lead, children }: { lead: string; children: ReactNode }) {
 
 export type OpenLedgerNote = { lead: string; body: string };
 export type OpenLedgerNotes = {
-  /** Where the inputs come from: set over the monthly arithmetic. */
-  cashFlow: OpenLedgerNote;
+  /** The listing you pasted and where each input comes from: on Price. */
+  price: OpenLedgerNote;
   /** Screening against the targets: set over the Buy Box row. */
   buyBox: OpenLedgerNote;
   /** The price solved from the targets: set over the total. */
@@ -212,6 +215,7 @@ export function OpenLedger({
             <LedgerFigure>{formatLedgerDollars(ledger.offerCeiling)}</LedgerFigure>
           }
         >
+          <Note lead={notes.price.lead}>{notes.price.body}</Note>
           <SubRows
             caption="What it takes to close, at each price"
             rows={[
@@ -236,7 +240,7 @@ export function OpenLedger({
           label="Cash flow after reserves"
           target={
             cashFlowTarget != null
-              ? `Target ≥ ${formatLedgerDollars(cashFlowTarget)}/mo`
+              ? `Target ≥${NBSP}${formatLedgerDollars(cashFlowTarget)}/mo`
               : undefined
           }
           asking={
@@ -250,7 +254,6 @@ export function OpenLedger({
             </LedgerFigure>
           }
         >
-          <Note lead={notes.cashFlow.lead}>{notes.cashFlow.body}</Note>
           <SubRows
             caption="Rent down to cash flow after reserves, per month"
             rows={ledger.monthly.map((line) => ({
@@ -263,7 +266,7 @@ export function OpenLedger({
 
         <Group
           label="DSCR"
-          target={dscrTarget != null ? `Target ≥ ${dscrTarget}` : undefined}
+          target={dscrTarget != null ? `Target ≥${NBSP}${dscrTarget}` : undefined}
           asking={
             <LedgerFigure>{formatDscr(ledger.dscr.asking, true)}</LedgerFigure>
           }
@@ -389,10 +392,13 @@ export function OpenLedger({
             </dl>
           </div>
         </details>
-        <p className="mt-4 border-t border-border pt-3 text-sm text-muted-foreground">
-          Sample inputs throughout. Every figure is rounded to whole dollars, so a
-          month times twelve can differ from the yearly line by a few dollars.
-        </p>
+        <div className="mt-4 border-t border-border pt-3">
+          <p className="max-w-[68ch] text-sm text-muted-foreground">
+            Every input is a sample value, and every figure is rounded to whole
+            dollars, so 12 monthly payments can differ from the yearly debt
+            service by a few dollars.
+          </p>
+        </div>
       </div>
     </ScrollX>
   );

@@ -22,6 +22,7 @@
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { Disclaimer } from "@/components/marketing/disclaimer";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
+import { AppLogo } from "@/components/brand/app-logo";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
@@ -192,15 +193,14 @@ export function SiteFooter({
             columns — splitting Product into Product + Learn added a fifth,
             and leaving the count at 5 would have wrapped the last column
             under the brand on desktop. */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-10 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           {/* Brand block — intentionally short. Logo + one-line tagline. */}
-          <div className="col-span-2 border-t border-foreground pt-2 sm:col-span-3 lg:col-span-1">
-            <Link
-              href="/"
-              className="font-display inline-flex min-h-11 min-w-11 items-center text-xl text-foreground"
-            >
-              TrueCap<span className="text-primary">.</span>
-            </IntentPrefetchLink>
+          <div className="col-span-full border-t border-foreground pt-2 lg:col-span-1">
+            {/* The same mark as the header (components/brand/app-logo), so the
+                page carries one wordmark; the link stays the footer's own. */}
+            <Link href="/" className="inline-flex min-h-11 min-w-11 items-center">
+              <AppLogo href="" subtitle="" />
+            </Link>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
@@ -211,7 +211,7 @@ export function SiteFooter({
             .filter((col) => !(hideAccountLinks && col.title === "Account"))
             .map((col) => (
             <div key={col.title} className="border-t border-border pt-2">
-              <h2 className="flex h-11 items-center text-base font-semibold text-foreground">
+              <h2 className="py-2.5 text-base font-semibold leading-snug text-foreground">
                 {col.title}
               </h2>
               <ul>
@@ -251,7 +251,7 @@ export function SiteFooter({
             <li>No card to start</li>
             <li>Stripe for paid upgrades</li>
           </ul>
-          <p className="order-3 flex flex-wrap items-center gap-x-3 gap-y-1 sm:justify-end">
+          <p className="order-3 flex flex-wrap items-center gap-x-5 gap-y-1 sm:justify-end">
             {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
                 strip only, per the no-new-top-level-nav principle; the
                 blog bylines are the other inbound path. */}
@@ -260,28 +260,19 @@ export function SiteFooter({
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               About
-            </IntentPrefetchLink>
-            <span aria-hidden className="text-muted-foreground/30">
-              ·
-            </span>
-            <IntentPrefetchLink
+            </Link>
+            <Link
               href="/privacy"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Privacy
-            </IntentPrefetchLink>
-            <span aria-hidden className="text-muted-foreground/30">
-              ·
-            </span>
-            <IntentPrefetchLink
+            </Link>
+            <Link
               href="/terms"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Terms
-            </IntentPrefetchLink>
-            <span aria-hidden className="text-muted-foreground/30">
-              ·
-            </span>
+            </Link>
             {/* NOTE: llms.txt footer link intentionally removed — it
                 looked like a technical artifact to regular visitors
                 ("what is that?"). The /llms.txt URL still resolves

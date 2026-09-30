@@ -588,6 +588,10 @@ export function AddressAutocomplete({
         id={fieldId}
         placeholder={placeholder}
         autoComplete="off"
+        // The field takes pasted listing URLs as well as addresses: no
+        // spellcheck squiggles, and no autocorrect rewriting street names.
+        spellCheck={false}
+        autoCorrect="off"
         inputMode="text"
         enterKeyHint="search"
         role="combobox"
@@ -681,7 +685,12 @@ export function AddressAutocomplete({
                   onMouseEnter={() => setHighlight(i)}
                   className={cn(
                     "flex min-h-11 cursor-pointer items-center px-3 py-2 text-left text-sm transition-colors",
-                    isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/60"
+                    // The band alone is 1.14:1 on raised paper; the inset
+                    // Signal Blue ring makes the active option visible
+                    // (WCAG 1.4.11 / 2.4.7).
+                    isActive
+                      ? "bg-accent text-accent-foreground ring-2 ring-inset ring-ring"
+                      : "hover:bg-accent/60"
                   )}
                 >
                   {text}

@@ -52,7 +52,9 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#0070c4",
+  // The browser chrome takes the Newsprint paper (--background, #efece8),
+  // not Signal Blue: blue is for actions only (DESIGN.md).
+  themeColor: "#efece8",
 };
 
 const siteUrl = getSiteUrl();

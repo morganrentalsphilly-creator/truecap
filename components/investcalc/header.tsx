@@ -361,7 +361,7 @@ export function Header({
         data-analyzer-announcement-bar=""
         className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative"
       >
-        <div className="flex items-center gap-2 text-[12px] sm:text-sm font-medium">
+        <div className="flex items-center gap-2 text-sm font-medium">
           <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
           <span className="hidden sm:inline">
             Unlock 10-Year Projections, Offer Ceiling and Deal Comparison with
