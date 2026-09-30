@@ -82,9 +82,11 @@ export default async function EmbedPage({
       <EmbedReferralTracker calculator={entry.slug} />
       <main id="main" className="mx-auto max-w-2xl px-4 py-4 sm:px-5 sm:py-5">
         {/* Compact header with title — keeps embed self-explanatory
-            when there's no surrounding TrueCap chrome. */}
+            when there's no surrounding TrueCap chrome. The frame is at most
+            640px wide (the snippet's max-width), so the title takes the
+            display voice at the H4/H3 steps, never the page H1 sizes. */}
         <header className="mb-3">
-          <h1 className="text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
+          <h1 className="font-display text-balance text-xl text-foreground sm:text-2xl">
             {entry.title}
           </h1>
         </header>
@@ -96,8 +98,9 @@ export default async function EmbedPage({
             page in a new tab; the call to action is UTM-tagged so we can
             measure embed-driven traffic. The same credit sits under the
             iframe in the snippet (lib/embed-snippet.ts), where it is the
-            crawlable link: this page is noindex, nofollow. */}
-        <footer className="mt-4 flex flex-wrap items-center justify-between gap-x-3 border-t border-border pt-3 text-xs text-muted-foreground">
+            crawlable link: this page is noindex, nofollow. Both are plain
+            Signal Blue links on the paper, 14px, no pill and no icon. */}
+        <footer className="mt-4 flex flex-wrap items-center justify-between gap-x-3 border-t border-border pt-3 text-sm text-muted-foreground">
           <EmbedPoweredByLink slug={entry.slug} />
           <EmbedAttributionLink
             href={attributionHref}
