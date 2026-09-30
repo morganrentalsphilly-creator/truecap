@@ -60,6 +60,21 @@ export const metadata: Metadata = {
 };
 
 export default function WhyTrueCapPage() {
+  // The page's one analyzer action, set in the hero and again in the close.
+  // A plain link, not AnalyzeCtaLink: that island fires the homepage's CTA
+  // event, which would mislabel clicks from here.
+  const analyzeAction = (
+    <ActionRow>
+      <Link
+        href="/analyze"
+        prefetch={false}
+        className={buttonVariants({ size: "cta" })}
+      >
+        Analyze a property free
+      </Link>
+    </ActionRow>
+  );
+
   return (
     <>
       <Header initialUser={null} initialEntitlements={null} />
@@ -67,10 +82,14 @@ export default function WhyTrueCapPage() {
         {/* The page's one H1, in the display voice; every section heading
             below stays an H2 under it. Its text is the one the 2026-08-02 SEO
             baseline added as an sr-only H1 (it echoes the OG image alt, not
-            the <title>). The lede is the comparison's own introduction. */}
+            the <title>). The lede is the comparison's own introduction; the
+            action and risk line repeat the close's, so the first screen
+            carries the purpose, the case and the action. */}
         <PageHero
           title="Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets"
           lede="These tools overlap. The meaningful difference is how they move you from a listing to a decision—not whether one can win every feature row."
+          actions={analyzeAction}
+          note="No card, no signup."
         />
         <VsCompetitors />
         <HomepageFaq structuredData={false} />
@@ -83,19 +102,7 @@ export default function WhyTrueCapPage() {
               plain-English verdict in 60 seconds. No card, no signup.
             </>
           }
-          actions={
-            // A plain link, not AnalyzeCtaLink: that island fires the
-            // homepage's CTA event, which would mislabel clicks from here.
-            <ActionRow>
-              <Link
-                href="/analyze"
-                prefetch={false}
-                className={buttonVariants({ size: "cta" })}
-              >
-                Analyze a property free
-              </Link>
-            </ActionRow>
-          }
+          actions={analyzeAction}
         />
       </main>
       <SiteFooter />
