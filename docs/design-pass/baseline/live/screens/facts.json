@@ -1,0 +1,346 @@
+[
+  {
+    "label": "live",
+    "page": "/",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Know your walk-away price before you make the offer.",
+    "overflowX": false,
+    "docHeight": 7902,
+    "arrowLinks": 2,
+    "upperSmall": 14,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-agents",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-agents",
+    "title": "Agent Pro — Win the Investor. Keep the Investor. | TrueCap",
+    "h1": "Win the investor. Keep the investor.",
+    "overflowX": false,
+    "docHeight": 7636,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/pricing",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 10838,
+    "arrowLinks": 3,
+    "upperSmall": 49,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-buy-and-hold",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 5584,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/sample-decision-memo",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 4090,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Know your walk-away price before you make the offer.",
+    "overflowX": false,
+    "docHeight": 7190,
+    "arrowLinks": 2,
+    "upperSmall": 14,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-agents",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-agents",
+    "title": "Agent Pro — Win the Investor. Keep the Investor. | TrueCap",
+    "h1": "Win the investor. Keep the investor.",
+    "overflowX": false,
+    "docHeight": 6123,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/pricing",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 7776,
+    "arrowLinks": 3,
+    "upperSmall": 49,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-buy-and-hold",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4586,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/sample-decision-memo",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 3119,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Know your walk-away price before you make the offer.",
+    "overflowX": false,
+    "docHeight": 6128,
+    "arrowLinks": 2,
+    "upperSmall": 14,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-agents",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-agents",
+    "title": "Agent Pro — Win the Investor. Keep the Investor. | TrueCap",
+    "h1": "Win the investor. Keep the investor.",
+    "overflowX": false,
+    "docHeight": 5526,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/pricing",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6406,
+    "arrowLinks": 3,
+    "upperSmall": 49,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-buy-and-hold",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4200,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/sample-decision-memo",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 2269,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Know your walk-away price before you make the offer.",
+    "overflowX": false,
+    "docHeight": 6128,
+    "arrowLinks": 2,
+    "upperSmall": 14,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-agents",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-agents",
+    "title": "Agent Pro — Win the Investor. Keep the Investor. | TrueCap",
+    "h1": "Win the investor. Keep the investor.",
+    "overflowX": false,
+    "docHeight": 5526,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/pricing",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6406,
+    "arrowLinks": 3,
+    "upperSmall": 49,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/for-buy-and-hold",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4200,
+    "arrowLinks": 1,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "live",
+    "page": "/sample-decision-memo",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "https://usetruecap.com/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 2269,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  }
+]

@@ -1,0 +1,910 @@
+{
+  "url": "http://127.0.0.1:3140/",
+  "finalUrl": "http://127.0.0.1:3140/",
+  "title": "Rental Property Calculator & Max Offer | TrueCap",
+  "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+  "h1Font": "\"Plus Jakarta Sans\", \"Plus Jakarta Sans Fallback\", \"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif",
+  "preset": "full",
+  "score": 25,
+  "tier": "Mild",
+  "grade": "C",
+  "verdict": "Decent bones, but the slop is starting to show.",
+  "patternsFlagged": 6,
+  "patternsTotal": 27,
+  "definitionsVersion": "2026.08",
+  "patterns": [
+    {
+      "id": "slop_fonts",
+      "label": "AI-default font stack (Inter / Geist / Space Grotesk)",
+      "short": "Slop fonts",
+      "category": "fonts",
+      "weight": 8,
+      "triggered": true,
+      "evidence": {
+        "slopCount": 395,
+        "total": 401,
+        "ratio": 0.985,
+        "heroIsSlop": true,
+        "heroFam": "\"Plus Jakarta Sans\", \"Plus Jakarta Sans Fallback\", \"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif",
+        "accentSerifItalicCount": 0,
+        "triggered": true
+      }
+    },
+    {
+      "id": "purple_accent",
+      "label": "VibeCode Purple — filled indigo/violet CTAs",
+      "short": "Vibe purple",
+      "category": "colors",
+      "weight": 8,
+      "triggered": false,
+      "evidence": {
+        "purpleEls": 0,
+        "filledCtas": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "gradient_text",
+      "label": "Hero gradient text (background-clip:text)",
+      "short": "Gradient text",
+      "category": "colors",
+      "weight": 6,
+      "triggered": false,
+      "evidence": {
+        "count": 0,
+        "heroHasGradient": false,
+        "triggered": false
+      }
+    },
+    {
+      "id": "gradient_backgrounds",
+      "label": "Gradient-heavy backgrounds (5+ elements)",
+      "short": "Gradient bgs",
+      "category": "colors",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "bgElements": 1,
+        "conic": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "accent_stripe",
+      "label": "Colored top/left card borders (the AI em-dash)",
+      "short": "Accent stripe",
+      "category": "layout",
+      "weight": 6,
+      "triggered": false,
+      "evidence": {
+        "stripeCards": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "glassmorphism",
+      "label": "Glassmorphism (backdrop-filter blur on translucent layers)",
+      "short": "Glass",
+      "category": "css",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "glassCount": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "colored_glows",
+      "label": "Big colored box-shadow glows (purple/blue/pink)",
+      "short": "Colored glows",
+      "category": "css",
+      "weight": 4,
+      "triggered": true,
+      "evidence": {
+        "glowCount": 4,
+        "triggered": true
+      }
+    },
+    {
+      "id": "centered_hero",
+      "label": "Centered hero in generic sans (Inter-style)",
+      "short": "Centered hero",
+      "category": "layout",
+      "weight": 4,
+      "triggered": true,
+      "evidence": {
+        "triggered": true,
+        "fontSize": 38.4,
+        "centered": true,
+        "slopFont": true,
+        "family": "\"Plus Jakarta Sans\", \"Plus Jakarta Sans Fallback\", \"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif"
+      }
+    },
+    {
+      "id": "hero_eyebrow_pill",
+      "label": "Eyebrow pill above hero (\"Now in beta\" / \"New\")",
+      "short": "Eyebrow pill",
+      "category": "layout",
+      "weight": 5,
+      "triggered": false,
+      "evidence": {
+        "triggered": false
+      }
+    },
+    {
+      "id": "all_caps_labels",
+      "label": "All-caps section labels (text-transform:uppercase)",
+      "short": "All-caps",
+      "category": "fonts",
+      "weight": 3,
+      "triggered": true,
+      "evidence": {
+        "count": 17,
+        "samples": [
+          "Analyze",
+          "Screen",
+          "Ceiling"
+        ],
+        "triggered": true
+      }
+    },
+    {
+      "id": "perma_dark_mode",
+      "label": "Perma dark mode + medium-grey body text",
+      "short": "Perma dark",
+      "category": "colors",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "triggered": false,
+        "bodyDark": false
+      }
+    },
+    {
+      "id": "icon_card_grid",
+      "label": "Identical feature cards with icon on top",
+      "short": "Icon cards",
+      "category": "layout",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "maxGroupSize": 1,
+        "triggered": false
+      }
+    },
+    {
+      "id": "numbered_steps",
+      "label": "Numbered \"1 · 2 · 3\" step sequences",
+      "short": "Numbered steps",
+      "category": "layout",
+      "weight": 3,
+      "triggered": false,
+      "evidence": {
+        "bestRun": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "stat_banner",
+      "label": "Big-number stat banner (\"10k+\", \"99.9%\", \"$2M+\")",
+      "short": "Stat banner",
+      "category": "layout",
+      "weight": 3,
+      "triggered": false,
+      "evidence": {
+        "clusterSize": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "faq_accordion",
+      "label": "FAQ accordion in the lower half",
+      "short": "FAQ",
+      "category": "layout",
+      "weight": 2,
+      "triggered": true,
+      "evidence": {
+        "detailsCount": 21,
+        "hasFaqHeading": false,
+        "triggered": true
+      }
+    },
+    {
+      "id": "gradient_letter_avatars",
+      "label": "Gradient-letter avatars (testimonial slop)",
+      "short": "Letter avatars",
+      "category": "images",
+      "weight": 5,
+      "triggered": false,
+      "evidence": {
+        "count": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "bento_grid",
+      "label": "Bento-grid wall — mixed-span rounded card grid",
+      "short": "Bento grid",
+      "category": "layout",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "children": 0,
+        "spanVariety": 0,
+        "rounded": 0,
+        "triggered": false
+      }
+    },
+    {
+      "id": "aurora_mesh_gradient",
+      "label": "Aurora / mesh gradient blobs (blurred glowing backdrop)",
+      "short": "Aurora blobs",
+      "category": "css",
+      "weight": 5,
+      "triggered": false,
+      "evidence": {
+        "blobs": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "ai_sparkle_badges",
+      "label": "AI-sparkle badges (✨ / Sparkles \"magic\" tells)",
+      "short": "AI sparkles",
+      "category": "images",
+      "weight": 3,
+      "triggered": false,
+      "evidence": {
+        "emojiHits": 0,
+        "svgHits": 0.5,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "cream_default_bg",
+      "label": "Cream / beige default page background",
+      "short": "Cream bg",
+      "category": "colors",
+      "weight": 7,
+      "triggered": false,
+      "evidence": {
+        "surface": "#f2f6f8",
+        "triggered": false
+      }
+    },
+    {
+      "id": "low_contrast_text",
+      "label": "Washed-out grey body text (below WCAG AA on a light background)",
+      "short": "Low contrast",
+      "category": "colors",
+      "weight": 7,
+      "triggered": false,
+      "evidence": {
+        "fails": 0,
+        "checked": 68,
+        "ratioFail": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "crushed_tracking",
+      "label": "Crushed letter-spacing on display type",
+      "short": "Crushed tracking",
+      "category": "fonts",
+      "weight": 5,
+      "triggered": false,
+      "evidence": {
+        "count": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "gray_on_color",
+      "label": "Gray text on a colored background",
+      "short": "Gray-on-color",
+      "category": "colors",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "count": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "oversized_hero_h1",
+      "label": "Oversized hero headline (long sentence at display size)",
+      "short": "Oversized H1",
+      "category": "fonts",
+      "weight": 4,
+      "triggered": false,
+      "evidence": {
+        "fontSize": 38,
+        "chars": 66,
+        "text": "Stop forwarding listings. Start sending deals that already p",
+        "triggered": false
+      }
+    },
+    {
+      "id": "nested_cards",
+      "label": "Cards nested inside cards",
+      "short": "Nested cards",
+      "category": "layout",
+      "weight": 4,
+      "triggered": true,
+      "evidence": {
+        "nested": 4,
+        "samples": [
+          "border-b border-border bg-muted/30",
+          "flex flex-col rounded-2xl border-2 borde",
+          "mt-4 flex flex-col gap-3 rounded-2xl bor"
+        ],
+        "triggered": true
+      }
+    },
+    {
+      "id": "wide_body_tracking",
+      "label": "Wide letter-spacing on body text",
+      "short": "Wide tracking",
+      "category": "fonts",
+      "weight": 3,
+      "triggered": false,
+      "evidence": {
+        "count": 0,
+        "samples": [],
+        "triggered": false
+      }
+    },
+    {
+      "id": "flat_type_hierarchy",
+      "label": "Flat type hierarchy (sizes too close together)",
+      "short": "Flat hierarchy",
+      "category": "fonts",
+      "weight": 3,
+      "triggered": false,
+      "evidence": {
+        "distinct": 11,
+        "ratio": 3.8,
+        "min": 10,
+        "max": 38,
+        "triggered": false
+      }
+    }
+  ],
+  "axes": {
+    "design": {
+      "axis": "design",
+      "score": 25,
+      "tier": "Mild",
+      "grade": "C",
+      "patternsFlagged": 6,
+      "patternsTotal": 27,
+      "patterns": [
+        {
+          "id": "slop_fonts",
+          "label": "AI-default font stack (Inter / Geist / Space Grotesk)",
+          "short": "Slop fonts",
+          "category": "fonts",
+          "weight": 8,
+          "triggered": true,
+          "evidence": {
+            "slopCount": 395,
+            "total": 401,
+            "ratio": 0.985,
+            "heroIsSlop": true,
+            "heroFam": "\"Plus Jakarta Sans\", \"Plus Jakarta Sans Fallback\", \"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif",
+            "accentSerifItalicCount": 0,
+            "triggered": true
+          }
+        },
+        {
+          "id": "purple_accent",
+          "label": "VibeCode Purple — filled indigo/violet CTAs",
+          "short": "Vibe purple",
+          "category": "colors",
+          "weight": 8,
+          "triggered": false,
+          "evidence": {
+            "purpleEls": 0,
+            "filledCtas": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "gradient_text",
+          "label": "Hero gradient text (background-clip:text)",
+          "short": "Gradient text",
+          "category": "colors",
+          "weight": 6,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "heroHasGradient": false,
+            "triggered": false
+          }
+        },
+        {
+          "id": "gradient_backgrounds",
+          "label": "Gradient-heavy backgrounds (5+ elements)",
+          "short": "Gradient bgs",
+          "category": "colors",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "bgElements": 1,
+            "conic": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "accent_stripe",
+          "label": "Colored top/left card borders (the AI em-dash)",
+          "short": "Accent stripe",
+          "category": "layout",
+          "weight": 6,
+          "triggered": false,
+          "evidence": {
+            "stripeCards": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "glassmorphism",
+          "label": "Glassmorphism (backdrop-filter blur on translucent layers)",
+          "short": "Glass",
+          "category": "css",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "glassCount": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "colored_glows",
+          "label": "Big colored box-shadow glows (purple/blue/pink)",
+          "short": "Colored glows",
+          "category": "css",
+          "weight": 4,
+          "triggered": true,
+          "evidence": {
+            "glowCount": 4,
+            "triggered": true
+          }
+        },
+        {
+          "id": "centered_hero",
+          "label": "Centered hero in generic sans (Inter-style)",
+          "short": "Centered hero",
+          "category": "layout",
+          "weight": 4,
+          "triggered": true,
+          "evidence": {
+            "triggered": true,
+            "fontSize": 38.4,
+            "centered": true,
+            "slopFont": true,
+            "family": "\"Plus Jakarta Sans\", \"Plus Jakarta Sans Fallback\", \"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif"
+          }
+        },
+        {
+          "id": "hero_eyebrow_pill",
+          "label": "Eyebrow pill above hero (\"Now in beta\" / \"New\")",
+          "short": "Eyebrow pill",
+          "category": "layout",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "triggered": false
+          }
+        },
+        {
+          "id": "all_caps_labels",
+          "label": "All-caps section labels (text-transform:uppercase)",
+          "short": "All-caps",
+          "category": "fonts",
+          "weight": 3,
+          "triggered": true,
+          "evidence": {
+            "count": 17,
+            "samples": [
+              "Analyze",
+              "Screen",
+              "Ceiling"
+            ],
+            "triggered": true
+          }
+        },
+        {
+          "id": "perma_dark_mode",
+          "label": "Perma dark mode + medium-grey body text",
+          "short": "Perma dark",
+          "category": "colors",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "triggered": false,
+            "bodyDark": false
+          }
+        },
+        {
+          "id": "icon_card_grid",
+          "label": "Identical feature cards with icon on top",
+          "short": "Icon cards",
+          "category": "layout",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "maxGroupSize": 1,
+            "triggered": false
+          }
+        },
+        {
+          "id": "numbered_steps",
+          "label": "Numbered \"1 · 2 · 3\" step sequences",
+          "short": "Numbered steps",
+          "category": "layout",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "bestRun": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "stat_banner",
+          "label": "Big-number stat banner (\"10k+\", \"99.9%\", \"$2M+\")",
+          "short": "Stat banner",
+          "category": "layout",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "clusterSize": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "faq_accordion",
+          "label": "FAQ accordion in the lower half",
+          "short": "FAQ",
+          "category": "layout",
+          "weight": 2,
+          "triggered": true,
+          "evidence": {
+            "detailsCount": 21,
+            "hasFaqHeading": false,
+            "triggered": true
+          }
+        },
+        {
+          "id": "gradient_letter_avatars",
+          "label": "Gradient-letter avatars (testimonial slop)",
+          "short": "Letter avatars",
+          "category": "images",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "bento_grid",
+          "label": "Bento-grid wall — mixed-span rounded card grid",
+          "short": "Bento grid",
+          "category": "layout",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "children": 0,
+            "spanVariety": 0,
+            "rounded": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "aurora_mesh_gradient",
+          "label": "Aurora / mesh gradient blobs (blurred glowing backdrop)",
+          "short": "Aurora blobs",
+          "category": "css",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "blobs": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "ai_sparkle_badges",
+          "label": "AI-sparkle badges (✨ / Sparkles \"magic\" tells)",
+          "short": "AI sparkles",
+          "category": "images",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "emojiHits": 0,
+            "svgHits": 0.5,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "cream_default_bg",
+          "label": "Cream / beige default page background",
+          "short": "Cream bg",
+          "category": "colors",
+          "weight": 7,
+          "triggered": false,
+          "evidence": {
+            "surface": "#f2f6f8",
+            "triggered": false
+          }
+        },
+        {
+          "id": "low_contrast_text",
+          "label": "Washed-out grey body text (below WCAG AA on a light background)",
+          "short": "Low contrast",
+          "category": "colors",
+          "weight": 7,
+          "triggered": false,
+          "evidence": {
+            "fails": 0,
+            "checked": 68,
+            "ratioFail": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "crushed_tracking",
+          "label": "Crushed letter-spacing on display type",
+          "short": "Crushed tracking",
+          "category": "fonts",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "gray_on_color",
+          "label": "Gray text on a colored background",
+          "short": "Gray-on-color",
+          "category": "colors",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "oversized_hero_h1",
+          "label": "Oversized hero headline (long sentence at display size)",
+          "short": "Oversized H1",
+          "category": "fonts",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "fontSize": 38,
+            "chars": 66,
+            "text": "Stop forwarding listings. Start sending deals that already p",
+            "triggered": false
+          }
+        },
+        {
+          "id": "nested_cards",
+          "label": "Cards nested inside cards",
+          "short": "Nested cards",
+          "category": "layout",
+          "weight": 4,
+          "triggered": true,
+          "evidence": {
+            "nested": 4,
+            "samples": [
+              "border-b border-border bg-muted/30",
+              "flex flex-col rounded-2xl border-2 borde",
+              "mt-4 flex flex-col gap-3 rounded-2xl bor"
+            ],
+            "triggered": true
+          }
+        },
+        {
+          "id": "wide_body_tracking",
+          "label": "Wide letter-spacing on body text",
+          "short": "Wide tracking",
+          "category": "fonts",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "flat_type_hierarchy",
+          "label": "Flat type hierarchy (sizes too close together)",
+          "short": "Flat hierarchy",
+          "category": "fonts",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "distinct": 11,
+            "ratio": 3.8,
+            "min": 10,
+            "max": 38,
+            "triggered": false
+          }
+        }
+      ]
+    },
+    "copy": {
+      "axis": "copy",
+      "score": 4,
+      "tier": "Clean",
+      "grade": "A",
+      "patternsFlagged": 1,
+      "patternsTotal": 9,
+      "wordCount": 1774,
+      "thin": false,
+      "patterns": [
+        {
+          "id": "buzzword_density",
+          "label": "AI buzzword density (leverage / seamless / robust / elevate …)",
+          "short": "Buzzwords",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 7,
+          "triggered": false,
+          "evidence": {
+            "total": 0,
+            "distinct": 0,
+            "density": 0,
+            "topWords": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "em_dash_overload",
+          "label": "Em-dash overload (— used as the default connective)",
+          "short": "Em-dashes",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "emDashes": 2,
+            "enDashAsDash": 0,
+            "total": 2,
+            "density": 1.1,
+            "triggered": false
+          }
+        },
+        {
+          "id": "antithesis_construction",
+          "label": "\"It's not just X — it's Y\" / \"not only … but also\" antithesis",
+          "short": "Not-just-X",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 6,
+          "triggered": false,
+          "evidence": {
+            "total": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "filler_openers",
+          "label": "Generic filler openers (\"In today's fast-paced world …\")",
+          "short": "Filler opener",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 5,
+          "triggered": false,
+          "evidence": {
+            "total": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "formulaic_closers",
+          "label": "Essay-style closers (\"In conclusion\", \"In summary\", \"Ultimately\")",
+          "short": "Closers",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "total": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "rule_of_three",
+          "label": "Rule-of-three adjective tricolons (\"fast, reliable, and scalable\")",
+          "short": "Rule of three",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 4,
+          "triggered": true,
+          "evidence": {
+            "total": 3,
+            "samples": [
+              "email, phone, and website",
+              "checks, comparisons, and reports",
+              "financing, expenses, and growth"
+            ],
+            "triggered": true
+          }
+        },
+        {
+          "id": "whether_youre",
+          "label": "\"Whether you're X or Y\" audience-spanning construction",
+          "short": "Whether-you",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "total": 0,
+            "samples": [],
+            "triggered": false
+          }
+        },
+        {
+          "id": "unicode_artifacts",
+          "label": "Invisible Unicode + smart-quote artifacts (copy-pasted from an LLM)",
+          "short": "Unicode tells",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 4,
+          "triggered": false,
+          "evidence": {
+            "zeroWidth": 0,
+            "narrowNbsp": 0,
+            "nbsp": 0,
+            "triggered": false
+          }
+        },
+        {
+          "id": "emoji_bullet_headers",
+          "label": "Emoji-prefixed bullet/headers (🚀 ✅ ✨ as list markers)",
+          "short": "Emoji bullets",
+          "axis": "copy",
+          "category": "copy",
+          "weight": 3,
+          "triggered": false,
+          "evidence": {
+            "count": 0,
+            "samples": [],
+            "triggered": false
+          }
+        }
+      ]
+    }
+  },
+  "unifiedScore": 25,
+  "unifiedTier": "Mild",
+  "unifiedGrade": "C",
+  "axesScored": [
+    "design",
+    "copy"
+  ],
+  "dirtyAxes": 1
+}

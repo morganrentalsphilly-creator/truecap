@@ -1,0 +1,61 @@
+{
+  "url": "http://127.0.0.1:3140/",
+  "measuredAt": "2026-09-30T12:13:49.194Z",
+  "note": "Lab measurement: Playwright Chromium, web-vitals attribution build, 3 runs per profile; mobile profile throttles CPU 4x (no network throttling).",
+  "results": [
+    {
+      "profile": "desktop-1440",
+      "run": 1,
+      "INP_ms": 48,
+      "INP_target": "#_R_lhj2nllb_",
+      "LCP_ms": 96,
+      "LCP_element": null,
+      "CLS": 0.0019
+    },
+    {
+      "profile": "desktop-1440",
+      "run": 2,
+      "INP_ms": 56,
+      "INP_target": "#_R_lhj2nllb_",
+      "LCP_ms": 64,
+      "LCP_element": null,
+      "CLS": 0.0019
+    },
+    {
+      "profile": "desktop-1440",
+      "run": 3,
+      "INP_ms": 56,
+      "INP_target": "#_R_lhj2nllb_",
+      "LCP_ms": 60,
+      "LCP_element": null,
+      "CLS": 0.0019
+    },
+    {
+      "profile": "mobile-390",
+      "run": 1,
+      "INP_ms": 88,
+      "INP_target": "svg.lucide.lucide-menu.size-5>path",
+      "LCP_ms": 280,
+      "LCP_element": null,
+      "CLS": 0
+    },
+    {
+      "profile": "mobile-390",
+      "run": 2,
+      "INP_ms": 80,
+      "INP_target": "svg.lucide.lucide-menu.size-5>path",
+      "LCP_ms": 200,
+      "LCP_element": null,
+      "CLS": 0
+    },
+    {
+      "profile": "mobile-390",
+      "run": 3,
+      "INP_ms": 72,
+      "INP_target": "svg.lucide.lucide-menu.size-5>path",
+      "LCP_ms": 136,
+      "LCP_element": null,
+      "CLS": 0
+    }
+  ]
+}
