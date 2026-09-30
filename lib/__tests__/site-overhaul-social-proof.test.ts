@@ -83,7 +83,11 @@ describe("social proof renders nothing it cannot substantiate", () => {
     // removal link to the person quoted.
     expect(reviews).not.toContain("the person named gets");
     expect(reviews).not.toContain("one-click link");
-    expect(reviews).toContain("contact hello@usetruecap.com");
+    // The removal route is the contact address, set as a working mailto
+    // link (as the footer sets it), not a promised self-service link.
+    expect(reviews).toMatch(
+      /contact\s*(?:\{" "\})?\s*<a href="mailto:hello@usetruecap\.com"[^>]*>\s*hello@usetruecap\.com\s*<\/a>/,
+    );
   });
 
   it("keeps the usage counter computed, never seeded", () => {
