@@ -1,0 +1,1366 @@
+[
+  {
+    "label": "before",
+    "page": "/for-agents",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 11551,
+    "arrowLinks": 4,
+    "upperSmall": 11,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 2
+  },
+  {
+    "label": "before",
+    "page": "/pricing",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 13635,
+    "arrowLinks": 4,
+    "upperSmall": 81,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-investors",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 6387,
+    "arrowLinks": 4,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-buy-and-hold",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 5678,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-house-hackers",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-house-hackers",
+    "title": "For House Hackers | TrueCap",
+    "h1": "Live in one, rent the others. Do the math first.",
+    "overflowX": false,
+    "docHeight": 5628,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-brrrr",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-brrrr",
+    "title": "BRRRR planning resources | TrueCap",
+    "h1": "Research each stage without pretending it is one finished model.",
+    "overflowX": false,
+    "docHeight": 3586,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-flippers",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-flippers",
+    "title": "Fix-and-flip planning resources | TrueCap",
+    "h1": "Build the inputs before you trust a project return.",
+    "overflowX": false,
+    "docHeight": 3420,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/why-truecap",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/why-truecap",
+    "title": "Why TrueCap for Rental Property Analysis",
+    "h1": "Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets",
+    "overflowX": false,
+    "docHeight": 5857,
+    "arrowLinks": 0,
+    "upperSmall": 8,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs",
+    "title": "Rental Property Calculator Comparisons | TrueCap",
+    "h1": "TrueCap vs every rental tool that matters.",
+    "overflowX": false,
+    "docHeight": 11014,
+    "arrowLinks": 1,
+    "upperSmall": 46,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/dealcheck",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/dealcheck",
+    "title": "DealCheck Alternative for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs DealCheck: which rental analyzer fits you?",
+    "overflowX": false,
+    "docHeight": 8260,
+    "arrowLinks": 2,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/airdna",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/airdna",
+    "title": "AirDNA vs TrueCap (2026): STR Data vs Deal Math | TrueCap",
+    "h1": "TrueCap vs AirDNA: STR revenue data vs full underwriting",
+    "overflowX": false,
+    "docHeight": 7839,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/excel",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/excel",
+    "title": "Excel vs TrueCap for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs Excel: when is a spreadsheet still the right tool?",
+    "overflowX": false,
+    "docHeight": 8859,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/sample-decision-memo",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 4135,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/embed",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/embed",
+    "title": "Embed TrueCap Calculators on Your Site (Free) | TrueCap",
+    "h1": "Embed our calculators on your site",
+    "overflowX": false,
+    "docHeight": 5929,
+    "arrowLinks": 0,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/about",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 3808,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/reviews",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/reviews",
+    "title": "Proof & methodology | TrueCap",
+    "h1": "Proof, not praise.",
+    "overflowX": false,
+    "docHeight": 4465,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/tools",
+    "title": "Free Real Estate Calculators | TrueCap",
+    "h1": "Free real estate calculators",
+    "overflowX": false,
+    "docHeight": 4707,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools/cap-rate-calculator",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 9698,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog",
+    "title": "Rental Property Investing Blog | TrueCap",
+    "h1": "Blog",
+    "overflowX": false,
+    "docHeight": 23300,
+    "arrowLinks": 10,
+    "upperSmall": 79,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 14082,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-agents",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 8940,
+    "arrowLinks": 4,
+    "upperSmall": 11,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 2
+  },
+  {
+    "label": "before",
+    "page": "/pricing",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 8556,
+    "arrowLinks": 4,
+    "upperSmall": 81,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-investors",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 5497,
+    "arrowLinks": 4,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-buy-and-hold",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4658,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-house-hackers",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-house-hackers",
+    "title": "For House Hackers | TrueCap",
+    "h1": "Live in one, rent the others. Do the math first.",
+    "overflowX": false,
+    "docHeight": 4386,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-brrrr",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-brrrr",
+    "title": "BRRRR planning resources | TrueCap",
+    "h1": "Research each stage without pretending it is one finished model.",
+    "overflowX": false,
+    "docHeight": 2662,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-flippers",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-flippers",
+    "title": "Fix-and-flip planning resources | TrueCap",
+    "h1": "Build the inputs before you trust a project return.",
+    "overflowX": false,
+    "docHeight": 2573,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/why-truecap",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/why-truecap",
+    "title": "Why TrueCap for Rental Property Analysis",
+    "h1": "Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets",
+    "overflowX": false,
+    "docHeight": 5391,
+    "arrowLinks": 0,
+    "upperSmall": 8,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs",
+    "title": "Rental Property Calculator Comparisons | TrueCap",
+    "h1": "TrueCap vs every rental tool that matters.",
+    "overflowX": false,
+    "docHeight": 7037,
+    "arrowLinks": 1,
+    "upperSmall": 46,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/dealcheck",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/dealcheck",
+    "title": "DealCheck Alternative for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs DealCheck: which rental analyzer fits you?",
+    "overflowX": false,
+    "docHeight": 6472,
+    "arrowLinks": 2,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/airdna",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/airdna",
+    "title": "AirDNA vs TrueCap (2026): STR Data vs Deal Math | TrueCap",
+    "h1": "TrueCap vs AirDNA: STR revenue data vs full underwriting",
+    "overflowX": false,
+    "docHeight": 6410,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/excel",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/excel",
+    "title": "Excel vs TrueCap for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs Excel: when is a spreadsheet still the right tool?",
+    "overflowX": false,
+    "docHeight": 6576,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/sample-decision-memo",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 3142,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/embed",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/embed",
+    "title": "Embed TrueCap Calculators on Your Site (Free) | TrueCap",
+    "h1": "Embed our calculators on your site",
+    "overflowX": false,
+    "docHeight": 4691,
+    "arrowLinks": 0,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/about",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 2645,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/reviews",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/reviews",
+    "title": "Proof & methodology | TrueCap",
+    "h1": "Proof, not praise.",
+    "overflowX": false,
+    "docHeight": 3341,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/tools",
+    "title": "Free Real Estate Calculators | TrueCap",
+    "h1": "Free real estate calculators",
+    "overflowX": false,
+    "docHeight": 3440,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools/cap-rate-calculator",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 6989,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog",
+    "title": "Rental Property Investing Blog | TrueCap",
+    "h1": "Blog",
+    "overflowX": false,
+    "docHeight": 14496,
+    "arrowLinks": 10,
+    "upperSmall": 79,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 8538,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-agents",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 7186,
+    "arrowLinks": 4,
+    "upperSmall": 11,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 2
+  },
+  {
+    "label": "before",
+    "page": "/pricing",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6836,
+    "arrowLinks": 4,
+    "upperSmall": 81,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-investors",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 4352,
+    "arrowLinks": 4,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-buy-and-hold",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4272,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-house-hackers",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-house-hackers",
+    "title": "For House Hackers | TrueCap",
+    "h1": "Live in one, rent the others. Do the math first.",
+    "overflowX": false,
+    "docHeight": 3780,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-brrrr",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-brrrr",
+    "title": "BRRRR planning resources | TrueCap",
+    "h1": "Research each stage without pretending it is one finished model.",
+    "overflowX": false,
+    "docHeight": 2198,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-flippers",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-flippers",
+    "title": "Fix-and-flip planning resources | TrueCap",
+    "h1": "Build the inputs before you trust a project return.",
+    "overflowX": false,
+    "docHeight": 2138,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/why-truecap",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/why-truecap",
+    "title": "Why TrueCap for Rental Property Analysis",
+    "h1": "Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets",
+    "overflowX": false,
+    "docHeight": 4579,
+    "arrowLinks": 0,
+    "upperSmall": 8,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs",
+    "title": "Rental Property Calculator Comparisons | TrueCap",
+    "h1": "TrueCap vs every rental tool that matters.",
+    "overflowX": false,
+    "docHeight": 5675,
+    "arrowLinks": 1,
+    "upperSmall": 46,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/dealcheck",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/dealcheck",
+    "title": "DealCheck Alternative for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs DealCheck: which rental analyzer fits you?",
+    "overflowX": false,
+    "docHeight": 5931,
+    "arrowLinks": 2,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/airdna",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/airdna",
+    "title": "AirDNA vs TrueCap (2026): STR Data vs Deal Math | TrueCap",
+    "h1": "TrueCap vs AirDNA: STR revenue data vs full underwriting",
+    "overflowX": false,
+    "docHeight": 5840,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/excel",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/excel",
+    "title": "Excel vs TrueCap for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs Excel: when is a spreadsheet still the right tool?",
+    "overflowX": false,
+    "docHeight": 6086,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/sample-decision-memo",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 2291,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/embed",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/embed",
+    "title": "Embed TrueCap Calculators on Your Site (Free) | TrueCap",
+    "h1": "Embed our calculators on your site",
+    "overflowX": false,
+    "docHeight": 3595,
+    "arrowLinks": 0,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/about",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 2278,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/reviews",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/reviews",
+    "title": "Proof & methodology | TrueCap",
+    "h1": "Proof, not praise.",
+    "overflowX": false,
+    "docHeight": 2882,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/tools",
+    "title": "Free Real Estate Calculators | TrueCap",
+    "h1": "Free real estate calculators",
+    "overflowX": false,
+    "docHeight": 2960,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools/cap-rate-calculator",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 6605,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog",
+    "title": "Rental Property Investing Blog | TrueCap",
+    "h1": "Blog",
+    "overflowX": false,
+    "docHeight": 14129,
+    "arrowLinks": 10,
+    "upperSmall": 79,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 8154,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-agents",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 7186,
+    "arrowLinks": 4,
+    "upperSmall": 11,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 2
+  },
+  {
+    "label": "before",
+    "page": "/pricing",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6836,
+    "arrowLinks": 4,
+    "upperSmall": 81,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-investors",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 4352,
+    "arrowLinks": 4,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-buy-and-hold",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-buy-and-hold",
+    "title": "For Buy-and-Hold Investors | TrueCap",
+    "h1": "The numbers that decide whether to hold — in one screen.",
+    "overflowX": false,
+    "docHeight": 4272,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-house-hackers",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-house-hackers",
+    "title": "For House Hackers | TrueCap",
+    "h1": "Live in one, rent the others. Do the math first.",
+    "overflowX": false,
+    "docHeight": 3780,
+    "arrowLinks": 2,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-brrrr",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-brrrr",
+    "title": "BRRRR planning resources | TrueCap",
+    "h1": "Research each stage without pretending it is one finished model.",
+    "overflowX": false,
+    "docHeight": 2198,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/for-flippers",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/for-flippers",
+    "title": "Fix-and-flip planning resources | TrueCap",
+    "h1": "Build the inputs before you trust a project return.",
+    "overflowX": false,
+    "docHeight": 2138,
+    "arrowLinks": 1,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/why-truecap",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/why-truecap",
+    "title": "Why TrueCap for Rental Property Analysis",
+    "h1": "Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets",
+    "overflowX": false,
+    "docHeight": 4579,
+    "arrowLinks": 0,
+    "upperSmall": 8,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs",
+    "title": "Rental Property Calculator Comparisons | TrueCap",
+    "h1": "TrueCap vs every rental tool that matters.",
+    "overflowX": false,
+    "docHeight": 5675,
+    "arrowLinks": 1,
+    "upperSmall": 46,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/dealcheck",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/dealcheck",
+    "title": "DealCheck Alternative for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs DealCheck: which rental analyzer fits you?",
+    "overflowX": false,
+    "docHeight": 5931,
+    "arrowLinks": 2,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/airdna",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/airdna",
+    "title": "AirDNA vs TrueCap (2026): STR Data vs Deal Math | TrueCap",
+    "h1": "TrueCap vs AirDNA: STR revenue data vs full underwriting",
+    "overflowX": false,
+    "docHeight": 5840,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/vs/excel",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/vs/excel",
+    "title": "Excel vs TrueCap for Rental Analysis (2026) | TrueCap",
+    "h1": "TrueCap vs Excel: when is a spreadsheet still the right tool?",
+    "overflowX": false,
+    "docHeight": 6086,
+    "arrowLinks": 1,
+    "upperSmall": 16,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/sample-decision-memo",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/sample-decision-memo",
+    "title": "Sample Rental Decision Memo | TrueCap",
+    "h1": "Doesn't meet your targets at asking.",
+    "overflowX": false,
+    "docHeight": 2291,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\"",
+      "\"DM Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/embed",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/embed",
+    "title": "Embed TrueCap Calculators on Your Site (Free) | TrueCap",
+    "h1": "Embed our calculators on your site",
+    "overflowX": false,
+    "docHeight": 3595,
+    "arrowLinks": 0,
+    "upperSmall": 6,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/about",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 2278,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/reviews",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/reviews",
+    "title": "Proof & methodology | TrueCap",
+    "h1": "Proof, not praise.",
+    "overflowX": false,
+    "docHeight": 2882,
+    "arrowLinks": 0,
+    "upperSmall": 5,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/tools",
+    "title": "Free Real Estate Calculators | TrueCap",
+    "h1": "Free real estate calculators",
+    "overflowX": false,
+    "docHeight": 2960,
+    "arrowLinks": 0,
+    "upperSmall": 10,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/tools/cap-rate-calculator",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 6605,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog",
+    "title": "Rental Property Investing Blog | TrueCap",
+    "h1": "Blog",
+    "overflowX": false,
+    "docHeight": 14129,
+    "arrowLinks": 10,
+    "upperSmall": 79,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "before",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3141/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 8154,
+    "arrowLinks": 0,
+    "upperSmall": 17,
+    "fonts": [
+      "\"Plus Jakarta Sans\""
+    ],
+    "disclaimers": 1
+  }
+]
