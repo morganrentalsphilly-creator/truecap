@@ -1,0 +1,646 @@
+<title>TrueCap Ledger Specimens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Besley:wght@400..800&family=DM+Mono:wght@400;500&family=Public+Sans:wght@400..700&family=Source+Sans+3:wght@400..700&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap">
+<style>
+/* Layout: a decision document. Neutral chrome (system face) so it cannot bias the
+   type choice; every TrueCap sample is a .spec block that carries its own light
+   "paper" palette, because the product is light-only by decision. */
+:root {
+  --bg: #f3f3f1;
+  --fg: #1b1b1b;
+  --muted: #5b5b58;
+  --rule: #d4d4cf;
+  --panel: #fbfbfa;
+  --pick: #0066ba;
+  --pick-fg: #ffffff;
+  --chrome: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+  --chrome-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #151515; --fg: #ececea; --muted: #a4a4a0; --rule: #2f2f2d; --panel: #1c1c1b; --pick: #5aa7ff; --pick-fg: #0b0b0b; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #151515; --fg: #ececea; --muted: #a4a4a0; --rule: #2f2f2d; --panel: #1c1c1b; --pick: #5aa7ff; --pick-fg: #0b0b0b; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--chrome); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 72px; }
+h1.doc { font-size: clamp(26px, 3.2vw, 36px); line-height: 1.12; margin: 0 0 10px; letter-spacing: -0.01em; text-wrap: balance; }
+.intro { max-width: 72ch; color: var(--muted); margin: 0; }
+.intro strong { color: var(--fg); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 20px 0 8px; padding: 12px 0; border-block: 1px solid var(--rule); font-size: 14px; }
+nav.toc a { color: var(--fg); text-underline-offset: 3px; }
+section.block { padding-block: 44px 8px; border-top: 1px solid var(--rule); margin-top: 36px; }
+section.block > h2 { font-size: 22px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.005em; }
+section.block > p.sub { color: var(--muted); max-width: 74ch; margin: 0 0 22px; }
+.choices { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center; margin: 4px 0 18px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg span.lbl { font-size: 13px; color: var(--muted); padding: 0 10px; display: inline-flex; align-items: center; border-right: 1px solid var(--rule); }
+.seg button { font: 500 14px/1 var(--chrome); color: var(--fg); background: transparent; border: 0; border-right: 1px solid var(--rule); padding: 0 14px; min-height: 44px; cursor: pointer; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--pick); color: var(--pick-fg); }
+.seg button:focus-visible, .plainbtn:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+.plainbtn { font: 500 14px/1 var(--chrome); color: var(--fg); background: transparent; border: 1px solid var(--rule); border-radius: 6px; padding: 0 14px; min-height: 44px; cursor: pointer; }
+.note { font-size: 13px; color: var(--muted); }
+.kv { font-family: var(--chrome-mono); font-size: 12.5px; }
+
+/* Stage: the hero mock is drawn at real size and scaled to fit. */
+.stages { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .stages { grid-template-columns: minmax(0, 1fr); } }
+.stagebox { position: relative; overflow: hidden; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+.stage { transform-origin: top left; position: absolute; top: 0; left: 0; }
+.stagecap { font-size: 13px; color: var(--muted); margin: 8px 2px 0; }
+
+/* ---------- TrueCap specimen system (light by decision) ---------- */
+.spec {
+  --field: #ffffff;
+  --blue: oklch(0.49 0.18 240);
+  --blue-deep: oklch(0.42 0.16 242);
+  --pos: oklch(0.46 0.14 155);
+  --neg: oklch(0.5 0.2 15);
+  --caut: oklch(0.5 0.16 42);
+  --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: var(--body-size); line-height: 1.55;
+  font-weight: 400;
+}
+/* Papers */
+.p-ledger { --paper: oklch(0.946 0.024 125); --raised: oklch(0.972 0.013 125); --band: oklch(0.925 0.032 125); --rule: oklch(0.78 0.042 128); --rule-soft: oklch(0.875 0.03 126); --ink: oklch(0.23 0 0); --ink2: oklch(0.43 0.008 125); }
+.p-news   { --paper: oklch(0.945 0.006 85);  --raised: oklch(0.97 0.004 85);  --band: oklch(0.925 0.008 85);  --rule: oklch(0.78 0.01 85);   --rule-soft: oklch(0.875 0.008 85); --ink: oklch(0.22 0 0);  --ink2: oklch(0.43 0.006 85); }
+.p-bond   { --paper: oklch(0.945 0.011 235); --raised: oklch(0.972 0.007 235); --band: oklch(0.925 0.014 235); --rule: oklch(0.78 0.02 236);  --rule-soft: oklch(0.875 0.012 236); --ink: oklch(0.22 0 0); --ink2: oklch(0.43 0.012 240); }
+/* Type sets */
+.t-a { --display: "Archivo", "Arial Narrow", sans-serif; --display-weight: 750; --display-stretch: 82%; --display-track: -0.012em; --display-lh: 1.02;
+       --body: "Archivo", ui-sans-serif, system-ui, sans-serif; --body-stretch: 100%; --body-size: 18px; --label-weight: 600; }
+.t-b { --display: "Source Serif 4", Georgia, serif; --display-weight: 600; --display-stretch: 100%; --display-track: -0.012em; --display-lh: 1.04;
+       --body: "Source Sans 3", ui-sans-serif, system-ui, sans-serif; --body-stretch: 100%; --body-size: 19px; --label-weight: 600; }
+.t-c { --display: "Besley", Georgia, serif; --display-weight: 700; --display-stretch: 100%; --display-track: -0.014em; --display-lh: 1.03;
+       --body: "Public Sans", ui-sans-serif, system-ui, sans-serif; --body-stretch: 100%; --body-size: 18px; --label-weight: 600; }
+
+.spec .disp { font-family: var(--display); font-weight: var(--display-weight); font-stretch: var(--display-stretch); letter-spacing: var(--display-track); line-height: var(--display-lh); text-wrap: balance; margin: 0; }
+.spec p, .spec li, .spec dd, .spec td, .spec th { font-stretch: var(--body-stretch); }
+.spec a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.spec a:hover { color: var(--blue-deep); }
+.spec .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 4px; background: var(--blue); color: #fff; font-family: var(--body); font-weight: 600; font-size: 16px; text-decoration: none; border: 0; white-space: nowrap; }
+.spec .btn:hover { background: var(--blue-deep); color: #fff; }
+.spec .field { display: flex; align-items: center; min-height: 48px; padding: 0 14px; background: var(--field); border: 1px solid var(--ink2); border-radius: 4px; color: var(--ink2); font-size: 16px; }
+.spec .fig { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* The Verdict Ledger (static sample of the markup the hero would render) */
+.ledger { margin: 0; }
+.ledger .lg-cap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+.ledger .lg-cap b { font-family: var(--body); font-weight: 600; font-size: 15px; }
+.ledger .lg-cap span { font-size: 13px; color: var(--ink2); }
+.ledger table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.ledger thead th { font-weight: var(--label-weight); font-size: 13.5px; color: var(--ink2); text-align: right; padding: 10px 0 8px 14px; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
+.ledger thead th:first-child { text-align: left; padding-left: 0; }
+.ledger tbody th { text-align: left; font-weight: 500; padding: 11px 12px 11px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+.ledger tbody th small { display: block; font-weight: 400; font-size: 13px; color: var(--ink2); margin-top: 1px; }
+.ledger td { text-align: right; padding: 11px 0 11px 14px; border-bottom: 1px solid var(--rule-soft); font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 16px; white-space: nowrap; vertical-align: top; }
+.ledger tr.binding th, .ledger tr.binding td { background: var(--band); }
+.ledger tr.binding th { box-shadow: -8px 0 0 var(--band); }
+.ledger tr.binding td:last-child { box-shadow: 8px 0 0 var(--band); }
+.ledger td .tag { display: block; font-family: var(--body); font-size: 12.5px; color: var(--ink2); margin-top: 2px; }
+.ledger .no { color: var(--caut); font-family: var(--body); font-weight: 600; }
+.ledger .yes { color: var(--pos); font-family: var(--body); font-weight: 600; }
+.ledger tfoot th { text-align: left; font-family: var(--display); font-weight: var(--display-weight); font-stretch: var(--display-stretch); font-size: 20px; padding: 14px 0 12px; border-top: 1px solid var(--ink); }
+.ledger tfoot td { font-size: 30px; font-weight: 500; padding: 10px 0 12px; border-top: 1px solid var(--ink); position: relative; }
+.ledger tfoot td::after { content: ""; position: absolute; right: 0; bottom: 3px; width: 8.2ch; height: 5px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); transform-origin: right center; }
+.ledger .lg-note { margin: 12px 0 0; font-size: 14px; color: var(--ink2); }
+.ledger .lg-src { margin: 6px 0 0; font-size: 12.5px; color: var(--ink2); }
+.anim .ledger tfoot td::after { animation: rule-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) 240ms both; }
+@keyframes rule-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .anim .ledger tfoot td::after { animation: none; } }
+
+/* Plan card: the one place a card is allowed */
+.plan { background: var(--raised); border: 1px solid var(--rule); border-radius: 6px; padding: 22px 22px 20px; max-width: 360px; }
+.plan h3 { font-family: var(--display); font-weight: var(--display-weight); font-stretch: var(--display-stretch); letter-spacing: var(--display-track); font-size: 26px; line-height: 1.05; margin: 0; }
+.plan .aud { margin: 4px 0 0; font-size: 14px; color: var(--ink2); }
+.plan .price { margin: 16px 0 0; display: flex; align-items: baseline; gap: 6px; }
+.plan .price .fig { font-size: 34px; font-weight: 500; letter-spacing: -0.02em; }
+.plan .price span.per { font-size: 14px; color: var(--ink2); }
+.plan .alt { margin: 2px 0 0; font-size: 13.5px; color: var(--ink2); }
+.plan .lede { margin: 14px 0 0; font-size: 15px; }
+.plan dl { margin: 14px 0 16px; border-top: 1px solid var(--rule); }
+.plan dl div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px; }
+.plan dt { font-weight: 600; }
+.plan dd { margin: 0; color: var(--ink2); text-align: right; }
+.plan .btn { width: 100%; }
+.plan .fine { margin: 10px 0 0; font-size: 12.5px; color: var(--ink2); }
+
+/* Type specimen cards */
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; gap: 0 16px; }
+@supports (grid-template-rows: subgrid) { .trio .tcard { display: grid; grid-template-rows: subgrid; grid-row: span 2; } }
+@media (max-width: 1050px) { .trio { grid-template-columns: minmax(0, 1fr); } }
+.tcard { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--panel); display: flex; flex-direction: column; margin-bottom: 16px; }
+.tcard .meta { padding: 14px 16px; }
+.tcard .meta h3 { margin: 0; font-size: 17px; }
+.tcard .meta p { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+.tcard .meta dl { margin: 10px 0 0; display: grid; grid-template-columns: 88px minmax(0,1fr); gap: 4px 10px; font-size: 13px; }
+.tcard .meta dt { color: var(--muted); }
+.tcard .meta dd { margin: 0; }
+.tcard .spec { padding: 22px 20px 24px; border-top: 1px solid var(--rule); flex: 1; display: grid; gap: 22px; align-content: start; }
+.tcard .spec .disp { font-size: 38px; }
+.tcard .spec p.lead { margin: 0; max-width: 46ch; }
+
+/* Paper swatches */
+.papers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1050px) { .papers { grid-template-columns: minmax(0, 1fr); } }
+.pcard { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.pcard .meta { padding: 14px 16px; }
+.pcard .meta h3 { margin: 0; font-size: 17px; }
+.pcard .meta p { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+.sw { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+.sw div { padding: 8px 8px 7px; min-height: 64px; font-size: 11.5px; line-height: 1.3; display: flex; flex-direction: column; justify-content: flex-end; }
+.sw b { font-weight: 600; font-size: 12px; }
+.sw .kv { font-size: 11px; }
+.pcard .spec { padding: 20px 18px 22px; border-top: 1px solid var(--rule); display: grid; gap: 16px; }
+.contrast { font-size: 12.5px; color: var(--muted); padding: 10px 16px 14px; border-top: 1px solid var(--rule); }
+.contrast span { display: inline-block; margin-right: 12px; }
+
+/* Hero mock (desktop stage, 1280 wide) */
+.hero-d { width: 1280px; }
+.hero-d .hdr, .hero-m .hdr { display: flex; align-items: center; gap: 28px; border-bottom: 1px solid var(--rule); }
+.hero-d .hdr { height: 68px; padding: 0 48px; }
+.hdr .mark { font-family: var(--display); font-weight: var(--display-weight); font-stretch: var(--display-stretch); font-size: 24px; letter-spacing: -0.01em; color: var(--ink); }
+.hdr nav { display: flex; gap: 26px; font-size: 15px; }
+.hdr nav a { color: var(--ink); text-decoration: none; }
+.hdr .sp { flex: 1; }
+.hdr .signin { color: var(--ink); text-decoration: none; font-size: 15px; }
+.hdr .btn { min-height: 40px; font-size: 15px; padding: 0 16px; }
+.hero-d .body { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; padding: 56px 48px 64px; align-items: start; }
+.hero-d h1 { font-size: 52px; }
+.t-a .hero-d h1 { font-size: 55px; }
+.t-c .hero-d h1 { font-size: 48px; }
+.hero-d .lead, .hero-m .lead { margin: 20px 0 0; max-width: 46ch; }
+.hero-d .form { display: flex; gap: 8px; margin-top: 28px; }
+.hero-d .form .field { flex: 1; }
+.hero-d .under, .hero-m .under { margin: 14px 0 0; font-size: 15px; }
+.hero-d .risk, .hero-m .risk { margin: 8px 0 0; font-size: 14.5px; color: var(--ink2); }
+.hero-d .cue, .hero-m .cue { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--rule-soft); font-size: 15px; }
+.hero-d .ledger { margin-top: 6px; }
+.hero-d .ledger .lg-cap b { font-size: 16px; }
+.hero-d .ledger table { font-size: 17px; }
+.hero-d .ledger thead th { font-size: 15px; padding: 12px 0 10px 18px; }
+.hero-d .ledger tbody th { padding: 15px 14px 15px 0; }
+.hero-d .ledger tbody th small { font-size: 14px; }
+.hero-d .ledger td { font-size: 21px; padding: 15px 0 15px 18px; }
+.hero-d .ledger tfoot td { font-size: 54px; letter-spacing: -0.02em; padding-top: 12px; }
+.hero-d .ledger tfoot th { font-size: 28px; padding-top: 22px; }
+.hero-d .ledger .lg-note { font-size: 15.5px; margin-top: 16px; }
+.hero-d .ledger .lg-src { font-size: 13.5px; }
+.hero-d .tail { border-top: 1px solid var(--rule); padding: 20px 48px; display: flex; gap: 40px; font-size: 14px; color: var(--ink2); }
+
+/* Hero mock (phone stage, 375 wide) */
+.hero-m { width: 375px; }
+.hero-m .hdr { height: 56px; padding: 0 16px; gap: 10px; }
+.hero-m .hdr .mark { font-size: 21px; }
+.hero-m .hdr .btn { min-height: 40px; padding: 0 14px; font-size: 14.5px; }
+.hero-m .menu { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.hero-m .menu svg { width: 22px; height: 22px; }
+.hero-m .body { padding: 22px 16px 28px; }
+.hero-m h1 { font-size: 36px; }
+.t-a .hero-m h1 { font-size: 38px; }
+.t-c .hero-m h1 { font-size: 33px; }
+.hero-m .lead { font-size: calc(var(--body-size) - 1px); margin-top: 14px; }
+.hero-m .form { display: grid; gap: 8px; margin-top: 18px; }
+.hero-m .form .btn { width: 100%; }
+.hero-m .ledger { margin-top: 22px; }
+.hero-m .ledger table { font-size: 14px; }
+.hero-m .ledger td { font-size: 14.5px; padding-left: 10px; }
+.hero-m .ledger thead th { font-size: 12.5px; padding-left: 10px; }
+.hero-m .ledger tfoot td { font-size: 26px; }
+.hero-m .ledger tfoot th { font-size: 18px; }
+.foldline { position: absolute; left: 0; right: 0; border-top: 2px dashed #d23; pointer-events: none; }
+.foldline span { position: absolute; left: 6px; top: 2px; font: 600 11px var(--chrome); color: #d23; background: #fff; padding: 0 4px; }
+
+/* Chrome decisions */
+.rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .rules { grid-template-columns: minmax(0, 1fr); } }
+.rule { border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); padding: 16px; }
+.rule h3 { margin: 0 0 6px; font-size: 16px; }
+.rule.wide { grid-column: 1 / -1; }
+.rule p { margin: 0; font-size: 14px; color: var(--muted); }
+.rule .spec { margin-top: 12px; padding: 16px; border-radius: 4px; }
+.radii { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.radii div { width: 104px; height: 58px; background: var(--raised); border: 1px solid var(--ink2); display: flex; align-items: flex-end; padding: 5px; font: 11px/1.2 var(--chrome); color: var(--ink); }
+.cmp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 12px; }
+@media (max-width: 760px) { .cmp { grid-template-columns: minmax(0, 1fr); } }
+.cmp .ledger thead th.up { text-transform: uppercase; letter-spacing: 0.06em; font-size: 11.5px; }
+pre.wire { font: 12.5px/1.35 var(--chrome-mono); background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 0; }
+table.plainlist { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.plainlist th, table.plainlist td { text-align: left; vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); }
+table.plainlist th { font-weight: 600; white-space: nowrap; }
+table.plainlist td.k { color: var(--muted); }
+.scroll { overflow-x: auto; }
+.wires { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .wires { grid-template-columns: minmax(0, 1fr); } }
+.twocol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 900px) { .twocol { grid-template-columns: minmax(0, 1fr); } }
+ol.order, ul.plain { margin: 0; padding-left: 20px; }
+ol.order li, ul.plain li { margin: 4px 0; }
+.drop { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+
+<div class="wrap">
+  <h1 class="doc">TrueCap design pass, checkpoint 1: pick a typeface and a paper</h1>
+  <p class="intro">Three decisions are yours: <strong>a type set (A, B or C)</strong>, <strong>a paper (Ledger, Newsprint or Bond)</strong>, and <strong>approval of the ledger hero and the homepage structure</strong>. Every sample below uses the real agent-first copy from the copy pass and the real numbers the engine computes for the synthetic sample deal. Signal Blue, the semantic colors and DM Mono figures are fixed. Nothing here is built into the site yet.</p>
+  <nav class="toc" aria-label="Sections">
+    <a href="#combine">Try combinations</a><a href="#type">Type sets</a><a href="#paper">Papers</a><a href="#chrome">Chrome rules</a><a href="#hero">Ledger hero</a><a href="#structure">Structure</a><a href="#refs">References</a><a href="#tokens">Token strategy</a>
+  </nav>
+
+  <section class="block" id="combine" aria-labelledby="h-combine">
+    <h2 id="h-combine">Try combinations</h2>
+    <p class="sub">The homepage first screen at 1280px and at 375px, rendered with the chosen type set and paper. The red dashed line on the phone marks the fold at 812px. Numbers come from <span class="kv">calculateSampleDealOutcome()</span>: asking $265,000, Offer Ceiling $236,000.</p>
+    <div class="choices">
+      <div class="seg" role="group" aria-label="Type set"><span class="lbl">Type</span>
+        <button type="button" data-type="t-a" aria-pressed="true">A · Archivo</button>
+        <button type="button" data-type="t-b" aria-pressed="false">B · Source Serif</button>
+        <button type="button" data-type="t-c" aria-pressed="false">C · Besley</button>
+      </div>
+      <div class="seg" role="group" aria-label="Paper"><span class="lbl">Paper</span>
+        <button type="button" data-paper="p-ledger" aria-pressed="false">Ledger</button>
+        <button type="button" data-paper="p-news" aria-pressed="true">Newsprint</button>
+        <button type="button" data-paper="p-bond" aria-pressed="false">Bond</button>
+      </div>
+      <button type="button" class="plainbtn" id="replay">Replay the one motion</button>
+    </div>
+    <div class="stages">
+      <div>
+        <div class="stagebox" id="box-d" data-w="1280"><div class="stage" id="stage-d"></div></div>
+        <p class="stagecap">Desktop, 1280px wide. Headline left, the ledger in the wider column.</p>
+      </div>
+      <div>
+        <div class="stagebox" id="box-m" data-w="375"><div class="stage" id="stage-m"></div></div>
+        <p class="stagecap">Phone, 375px. The investor cue sits above the fold; the ledger starts right under it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="type" aria-labelledby="h-type">
+    <h2 id="h-type">Type sets</h2>
+    <p class="sub">Each set is shown on the same Newsprint paper so only the letters change. Each card shows the homepage H1, the hero paragraph, a ledger block and the Pro plan card. None of these faces is in the second-generation vibe-code set (Plus Jakarta, Manrope, DM Sans, Sora, Space Grotesk, Inter, Geist) or on Impeccable's overused list; all three are open-license Google Fonts served through <span class="kv">next/font/google</span>.</p>
+    <div class="trio" id="trio"></div>
+  </section>
+
+  <section class="block" id="paper" aria-labelledby="h-paper">
+    <h2 id="h-paper">Papers</h2>
+    <p class="sub">One neutral system per paper: the page tone, a raised tone for the few objects that sit on it, the rules, a band for the row that decides, and a neutral graphite ink instead of today's blue-tinted near-black. White is kept for one job: <strong>white means write</strong>. Only the fields a person types into (the address box, editable cells in the analyzer) are white. Signal Blue stays exactly as it is today (#0066ba) and clears AA on every paper and band. Green, red and orange keep their hues and meanings; each is a little deeper so it still clears 5:1 on the band. The ledger below uses type set A.</p>
+    <div class="papers" id="papers"></div>
+  </section>
+
+  <section class="block" id="chrome" aria-labelledby="h-chrome">
+    <h2 id="h-chrome">Chrome rules</h2>
+    <p class="sub">These are decided, not options. Each one maps to a grep that must come back empty at the end of the pass.</p>
+    <div class="rules">
+      <div class="rule"><h3>No eyebrows</h3><p>No label above a heading anywhere: "For agents", "Common questions", "What Pro actually buys" and the pill-above-H1 on the persona pages all go. A heading carries its own weight. Plan names become the card's heading.</p></div>
+      <div class="rule"><h3>No arrow suffixes</h3><p>Link text never ends in "→" and buttons carry no trailing arrow icon. A link is blue and underlined; that is enough. "See the sample deal", "For investors", "Live sample".</p></div>
+      <div class="rule wide"><h3>Sentence case, including the ledger</h3><p>Labels, column heads and table heads are sentence case. Acronyms stay acronyms (DSCR, NOI, CoC). Compare below: the uppercase head does not scan faster, because the figures already differ from the labels by face and alignment. The uppercase head is also what slop-detect flags.</p>
+        <div class="cmp" id="casecmp"></div></div>
+      <div class="rule"><h3>Cards only for objects you compare</h3><p>Plan cards stay cards. Feature grids, source blocks, the FAQ and the proof blocks use rules, columns and space. No shadow at rest anywhere on marketing pages; shadows are for things that float (menus, dialogs, the sticky bar).</p></div>
+      <div class="rule"><h3>Radius is a hierarchy</h3><p>Printed things are square; things you hold are softer.</p>
+        <div class="spec t-a p-news" style="padding:14px"><div class="radii"><div style="border-radius:0">0 · rules, tables, ledger</div><div style="border-radius:2px">2 · chips, tags</div><div style="border-radius:4px">4 · buttons, fields</div><div style="border-radius:6px">6 · plan cards</div><div style="border-radius:10px">10 · menus, dialogs</div></div></div></div>
+      <div class="rule"><h3>One motion, on the ledger</h3><p>The double rule under the Offer Ceiling draws in once, 520ms ease-out, after the figures are already painted (no layout shift, no delay to the largest paint). Nothing else fades or slides in. <span class="kv">prefers-reduced-motion</span> shows the rule static. <span class="kv">transition: all</span> is removed from the button primitive.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="hero" aria-labelledby="h-hero">
+    <h2 id="h-hero">The ledger as the hero</h2>
+    <p class="sub">The screenshot in a rounded browser frame is replaced by the Verdict Ledger itself, as HTML. It is a server render of the real sample-deal calculation: the page calls the same engine the app calls (<span class="kv">calculateAnalysis</span>, <span class="kv">calculateMaxAllowableOffer</span> through <span class="kv">calculateSampleDealOutcome</span>) at build time and renders it through a new presentational ledger primitive that the app's decision summary will also use. No hand-typed figures and no image, so nothing can drift from the engine, and it adds no client JavaScript. The existing sample-deal consistency test already pins $236,000.</p>
+    <div class="wires">
+<pre class="wire" aria-label="Desktop wireframe">1280px ─────────────────────────────────────────────────────────────
+ TrueCap   Analyze  For agents  For investors  Pricing  Learn   Sign in [Create account]
+────────────────────────────────────────────────────────────────────
+ Stop forwarding listings.      │ Philadelphia rental example   Synthetic sample
+ Start sending deals that       │═══════════════════════════════════════════════
+ already pencil.                │                       At asking   At the Offer
+                                │                                     Ceiling
+ Paste the rental listing. In   │ Price                $265,000       $236,000
+ about 60 seconds, see whether  │───────────────────────────────────────────────
+ it clears your client's Buy    │▒Cash flow after reserves  $554/mo  $750/mo ▒
+ Box, the highest price that    │▒ Target ≥ $750/mo            binding target▒
+ still does (the Offer Ceiling) │ DSCR  Target ≥ 1.25       1.52        1.75
+ and what could break the deal. │ Meets the Buy Box          No          Yes
+ Send it co-branded, with every │───────────────────────────────────────────────
+ assumption visible and editable│ Offer Ceiling                    $236,000
+                                │                                  ════════
+ [ Address or listing link  ][Analyze a deal free]  $29,000 below asking.
+ See the sample deal               Binding target: cash flow ≥ $750/mo.
+ Free. No account. Your first full decision is included.
+ ─────────────────────────────
+ Buying for your own portfolio? Same analyzer,
+ your own Buy Box. For investors
+────────────────────────────────────────────────────────────────────</pre>
+<pre class="wire" aria-label="Phone wireframe">375px ──────────────────────
+ TrueCap      [Analyze]   ≡
+────────────────────────────
+ Stop forwarding
+ listings. Start
+ sending deals that
+ already pencil.
+
+ Paste the rental listing…
+ (hero paragraph, 6 lines)
+
+ [ Address or listing link ]
+ [   Analyze a deal free   ]
+ See the sample deal
+ Free. No account. …
+ ──────────────────────────
+ Buying for your own
+ portfolio? … For investors
+ ───────── fold at 812 ────
+ Philadelphia rental example
+ ══════════════════════════
+            At asking  At OC
+ Price       $265,000 $236,000
+ ▒Cash flow  $554/mo  $750/mo▒
+ DSCR            1.52     1.75
+ Meets Buy Box     No      Yes
+ ──────────────────────────
+ Offer Ceiling    $236,000
+                  ════════</pre>
+    </div>
+    <p class="note" style="margin-top:12px">Guardrails from the copy pass stay intact: the primary action is "Analyze a deal free", the investor cue is in the first screen at desktop and at 390px, "For investors" stays in the header, and the H1, subhead, URL and title tag do not change.</p>
+  </section>
+
+  <section class="block" id="structure" aria-labelledby="h-structure">
+    <h2 id="h-structure">Homepage structure</h2>
+    <p class="sub">The waterfall breaks at the top. The artifact leads, the three steps fold into one annotated walkthrough of that same ledger, and section rhythm varies with what each section holds. The FAQ keeps only questions the page does not already answer; the rest remain on /for-agents and /for-investors, where they already live.</p>
+    <div class="twocol">
+      <div>
+        <h3 style="margin:0 0 8px;font-size:16px">Today (copy-pass branch)</h3>
+        <ol class="order">
+          <li>Hero: H1 and form, screenshot in a browser frame</li>
+          <li>"The calculator isn't the hard part": three question cards</li>
+          <li>"From listing to offer in three steps": icons on a dashed rail</li>
+          <li>Free vs Pro table, Pro card, Agent Pro card</li>
+          <li>Sources: three rows with uppercase labels</li>
+          <li>Built by a rental investor</li>
+          <li>Proof blocks (render nothing today)</li>
+          <li>FAQ: 13 agent + 8 investor questions in bordered boxes</li>
+          <li>Final CTA</li>
+        </ol>
+      </div>
+      <div>
+        <h3 style="margin:0 0 8px;font-size:16px">Proposed</h3>
+        <ol class="order">
+          <li><strong>Hero</strong>: headline and form left, the live ledger right. Tight rhythm.</li>
+          <li><strong>How the ledger is built</strong>: the same ledger, full width, with notes set against the rows they explain (the listing you pasted, the client's Buy Box, the price solved from it, what the client receives). This replaces both the question cards and the three steps. Generous rhythm.</li>
+          <li><strong>Where the numbers come from</strong>: a source table in the FRED manner (value, source, date, how to replace it). Dense rhythm.</li>
+          <li><strong>What the client receives</strong>: the real memo screenshot as a document, no browser frame, with the co-branding facts beside it.</li>
+          <li><strong>Plans</strong>: Free, Pro and Agent Pro as the page's only cards, prices from the catalog, the comparison table under them.</li>
+          <li><strong>Built by a rental investor</strong>: kept, set as a narrow column between rules.</li>
+          <li><strong>Questions</strong>: 8 questions as a ruled list, one FAQPage node.</li>
+          <li><strong>Close</strong>: the address form again, not a button that scrolls back up.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="scroll" style="margin-top:22px">
+      <table class="plainlist" aria-label="FAQ keep and drop list">
+        <thead><tr><th scope="col">Question</th><th scope="col">Decision</th><th scope="col">Why</th></tr></thead>
+        <tbody>
+          <tr><td>My investor clients run their own numbers. Why would I need this?</td><td>Keep</td><td class="k">The agent's first objection; nothing else on the page answers it.</td></tr>
+          <tr><td>Am I giving investment advice?</td><td>Keep</td><td class="k">The product's stance: screen, present, set the ceiling, don't advise.</td></tr>
+          <tr><td>Do my clients need a TrueCap account to view what I send?</td><td>Keep</td><td class="k">Unique fact.</td></tr>
+          <tr><td>What does the client see? Is it my branding or TrueCap's?</td><td>Keep</td><td class="k">Unique fact (co-branded, not white-label).</td></tr>
+          <tr><td>Can I keep different criteria for different investor clients?</td><td>Keep</td><td class="k">Roster fact.</td></tr>
+          <tr><td>Does it work on my phone at a showing?</td><td>Keep</td><td class="k">The showing is the agent's scene.</td></tr>
+          <tr><td>My brokerage already gives me tools.</td><td>Keep</td><td class="k">Positioning the page does not state elsewhere.</td></tr>
+          <tr><td>Is TrueCap really free? (investor set)</td><td>Keep</td><td class="k">Answers both audiences; merges "Do I need a credit card?".</td></tr>
+          <tr><td class="drop">Where do the starting numbers come from?</td><td>Drop here</td><td class="k">Paraphrases the sources section. Stays on /for-agents.</td></tr>
+          <tr><td class="drop">Will clients trust software numbers?</td><td>Drop here</td><td class="k">Paraphrases the sources section and the walkthrough.</td></tr>
+          <tr><td class="drop">Can I run one listing against several clients at once?</td><td>Drop here</td><td class="k">A "not yet" limitation; stays on /for-agents.</td></tr>
+          <tr><td class="drop">I only get a few investor clients a year. Is it worth it?</td><td>Drop here</td><td class="k">Pricing objection; stays on /for-agents and /pricing.</td></tr>
+          <tr><td class="drop">What does the Agent Pro trial include, and do I need a card?</td><td>Drop here</td><td class="k">Paraphrases the plan cards' trial line.</td></tr>
+          <tr><td class="drop">Can I cancel?</td><td>Drop here</td><td class="k">Lives on /pricing.</td></tr>
+          <tr><td class="drop">Investor set: why not a free calculator, auto-fill, credit card, edit assumptions, when to upgrade, the trial, financial advice</td><td>Drop here</td><td class="k">Each paraphrases a section of this page; the full investor set stays on /for-investors.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="refs" aria-labelledby="h-refs">
+    <h2 id="h-refs">References</h2>
+    <p class="sub">Five sites from underwriting, finance data and data journalism, measured in the browser (computed styles and screenshots), not remembered.</p>
+    <div class="scroll">
+      <table class="plainlist" aria-label="References">
+        <thead><tr><th scope="col">Site</th><th scope="col">Take</th><th scope="col">Leave</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">CFPB Loan Estimate<br><span class="note">consumerfinance.gov/owning-a-home/loan-estimate</span></th><td>A section head is a bold sentence-case label on a heavy black rule, not a label above a heading; "Can this amount increase after closing?" is a question used as a column head, answered in bold. The ledger borrows both: "Meets the Buy Box" answered No / Yes.</td><td class="k">The form's density, its all-caps label block and its fine print.</td></tr>
+          <tr><th scope="row">FRED, 30-year mortgage series<br><span class="note">fred.stlouisfed.org/series/MORTGAGE30US</span></th><td>Every figure carries its metadata strip: the value in bold, then units, frequency, updated date and next release, divided by hairline rules. That is the source table's grammar.</td><td class="k">The Bootstrap chrome, the button clutter and the chart toolbar.</td></tr>
+          <tr><th scope="row">FT markets data<br><span class="note">markets.ft.com/data/bonds</span></th><td>The page is a tinted paper (#FFF1E5) with dark-grey heads (#333), white almost absent. Each module opens on an 8px black bar over a faint full-width band; section heads are regular weight at 26px, not bold.</td><td class="k">The salmon itself (it is the FT's) and the broadsheet density.</td></tr>
+          <tr><th scope="row">Federal Reserve H.15<br><span class="note">federalreserve.gov/releases/h15</span></th><td>Grouped rows by indentation, footnote numerals that point to the source of a series, "n.a." instead of a blank, right-aligned figures in fixed columns. The ledger's assumption rows follow this.</td><td class="k">The navy header band, blue zebra striping and 12px Arial.</td></tr>
+          <tr><th scope="row">Our World in Data grapher<br><span class="note">ourworldindata.org/grapher/life-expectancy</span></th><td>Labels sit on the data at the line's end, never in a legend; one "Data source:" line under every figure; a defined term gets a dotted underline (2px offset) that opens its definition. This is how the walkthrough annotates the ledger.</td><td class="k">Playfair Display headings and the chart-tool tabs.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="tokens" aria-labelledby="h-tokens">
+    <h2 id="h-tokens">Token strategy</h2>
+    <p class="sub">Marketing and the app read one stylesheet, <span class="kv">app/globals.css</span>. The dashboard adds its own overrides under <span class="kv">.dashboard-shell</span> (lighter paper, softer rules, 14px radius, the navy rail). The plan is one system, so the change is global and reviewed on the app's key screens before rollout.</p>
+    <div class="twocol">
+      <div>
+        <h3 style="margin:0 0 8px;font-size:16px">What changes, where</h3>
+        <ul class="plain">
+          <li>Fonts: <span class="kv">app/layout.tsx</span> plus the three family declarations in globals.css (root, dashboard shell, mobile sheet).</li>
+          <li>Paper, ink, rules, band, field and radius tokens in <span class="kv">:root</span>; <span class="kv">--card</span> becomes the raised paper, and fields get their own white token.</li>
+          <li>The dashboard shell stops overriding paper, rules and radius; the rail moves from navy to graphite ink (your call, listed under held decisions).</li>
+          <li>Shared components only: header, footer, a new Section wrapper, FaqSection, the plan card, the ledger primitive, Button (drops <span class="kv">transition-all</span>).</li>
+          <li>Out of token reach today, fixed during rollout: 70 hard-coded blue glows, 88 arbitrary shadows, the auth screen's hex colors, OG images (they load no font at all).</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin:0 0 8px;font-size:16px">App screens the change touches</h3>
+        <ul class="plain">
+          <li>/analyze: address input, the form, the Verdict Ledger results</li>
+          <li>/dashboard/new: the same analyzer under the dashboard scope</li>
+          <li>/dashboard: home, stat cards, portfolio chart</li>
+          <li>/dashboard/saved-analyses and the deal workspace</li>
+          <li>/dashboard/compare, templates, clients, triage</li>
+          <li>/settings and /profile (the only users of the shadcn Card)</li>
+          <li>Sign-in, sign-up, password screens</li>
+          <li>Share viewer /s/[token] and the client portal</li>
+          <li>/sample-decision-memo</li>
+        </ul>
+        <p class="note">Marketing screenshots in <span class="kv">public/product/</span> are regenerated at the end with <span class="kv">scripts/capture-screenshots.ts</span> (1280×800 and 390×844, DPR 2), then the OG routes are redrawn with the chosen faces loaded.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<template id="tpl-ledger">
+  <figure class="ledger">
+    <figcaption class="lg-cap"><b>Philadelphia rental example</b><span>Synthetic sample · every input editable</span></figcaption>
+    <table>
+      <thead><tr><th scope="col"><span class="sr">Line item</span></th><th scope="col" class="h1">At asking</th><th scope="col" class="h2">At the Offer Ceiling</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Price</th><td>$265,000</td><td>$236,000</td></tr>
+        <tr class="binding"><th scope="row">Cash flow after reserves<small>Target ≥ $750/mo</small></th><td>$554/mo</td><td>$750/mo<span class="tag">binding target</span></td></tr>
+        <tr><th scope="row">DSCR<small>Target ≥ 1.25</small></th><td>1.52</td><td>1.75</td></tr>
+        <tr><th scope="row">Meets the Buy Box</th><td><span class="no">No</span></td><td><span class="yes">Yes</span></td></tr>
+      </tbody>
+      <tfoot><tr><th scope="row">Offer Ceiling</th><td colspan="2">$236,000</td></tr></tfoot>
+    </table>
+    <p class="lg-note">$29,000 below asking. Binding target: cash flow ≥ $750/mo.</p>
+    <p class="lg-src">Rent $3,050 and rate 6.6% are sample inputs; reserves are 5% maintenance, 5% capex, 5% vacancy, 8% management.</p>
+  </figure>
+</template>
+
+<template id="tpl-plan">
+  <article class="plan">
+    <h3>Pro</h3>
+    <p class="aud">For your own deals</p>
+    <p class="price"><span class="fig">$29.99</span><span class="per">/month</span></p>
+    <p class="alt">or <span class="fig">$300</span> a year, billed annually</p>
+    <p class="lede">Know what to offer. See whether the deal meets your targets, find your Offer Ceiling, stress-test the assumptions, and document the decision.</p>
+    <dl>
+      <div><dt>Buy Box fit</dt><dd>At asking price</dd></div>
+      <div><dt>Offer Ceiling</dt><dd>Solved from your targets</dd></div>
+      <div><dt>What could break</dt><dd>Downside stress test</dd></div>
+      <div><dt>How to document it</dt><dd>Review report</dd></div>
+    </dl>
+    <a class="btn" href="#plan">Start Pro evaluation — no card</a>
+    <p class="fine">New account: $0 today, no card. The 21-day free trial includes three complete Pro deals and one comparison.</p>
+  </article>
+</template>
+
+<template id="tpl-hero-d">
+  <div class="hero-d">
+    <header class="hdr"><span class="mark">TrueCap</span><nav aria-label="Primary (mock)"><a href="#n">Analyze</a><a href="#n">For agents</a><a href="#n">For investors</a><a href="#n">Pricing</a><a href="#n">Learn</a></nav><span class="sp"></span><a class="signin" href="#n">Sign in</a><a class="btn" href="#n">Create account</a></header>
+    <div class="body">
+      <div>
+        <h1 class="disp">Stop forwarding listings. Start sending deals that already pencil.</h1>
+        <p class="lead">Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable.</p>
+        <div class="form"><span class="field">Address or listing link</span><a class="btn" href="#n">Analyze a deal free</a></div>
+        <p class="under"><a href="#n">See the sample deal</a></p>
+        <p class="risk">Free. No account. Your first full decision is included.</p>
+        <p class="cue">Buying for your own portfolio? Same analyzer, your own Buy Box. <a href="#n">For investors</a></p>
+      </div>
+      <div class="slot-ledger"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-hero-m">
+  <div class="hero-m">
+    <header class="hdr"><span class="mark">TrueCap</span><span class="sp"></span><a class="btn" href="#n">Analyze</a><span class="menu" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span></header>
+    <div class="body">
+      <h1 class="disp">Stop forwarding listings. Start sending deals that already pencil.</h1>
+      <p class="lead">Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable.</p>
+      <div class="form"><span class="field">Address or listing link</span><a class="btn" href="#n">Analyze a deal free</a></div>
+      <p class="under"><a href="#n">See the sample deal</a></p>
+      <p class="risk">Free. No account. Your first full decision is included.</p>
+      <p class="cue">Buying for your own portfolio? Same analyzer, your own Buy Box. <a href="#n">For investors</a></p>
+      <div class="slot-ledger"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+(function () {
+  var TYPES = {
+    "t-a": { name: "A · Archivo", faces: "Archivo, semi-condensed (width 82) for display at 750; Archivo at normal width, 400 for text; DM Mono for figures.", why: "A grotesk from the rate-sheet and stock-table tradition. The narrow display cut keeps the long headline to three lines in the narrow column, so the ledger gets the width. Reads as a tool.", risk: "Heavy condensed type can tip into tabloid if it spreads beyond headlines; it stays on H1–H3 and the plan names only.", scale: "H1 55/38px, H2 34/28, H3 24/21, body 18px, small 14px; 1.25 ratio below H2.", measure: "Body 62–66ch; hero paragraph 46ch.", weights: "750 display, 600 labels and plan names, 400 text, DM Mono 500 key figures and 400 table figures." },
+    "t-b": { name: "B · Source Serif", faces: "Source Serif 4 at optical size 60 for display at 600; Source Sans 3, 400 for text (its designed companion); DM Mono for figures.", why: "The prospectus and the loan disclosure: a transitional serif with sharp display contrast over a plain, highly readable sans. The calmest of the three; the most trust-coded for an investor reader.", risk: "A serif headline is one step from the editorial look the audit warns about. It stays roman (never italic), sits on tinted paper, not cream, and the page carries no terracotta or tracked mono labels.", scale: "H1 52/36px, H2 34/28, H3 24/21, body 19px (Source Sans sets small), small 14px.", measure: "Body 64–68ch; hero paragraph 46ch.", weights: "600 display, 600 labels, 400 text, DM Mono 500 key figures." },
+    "t-c": { name: "C · Besley", faces: "Besley (a Clarendon revival) for display at 700; Public Sans, 400 for text; DM Mono for figures.", why: "Clarendon is the type of American commercial paper: auction bills, deed books, bank ledgers' ruled heads. Public Sans is the plain civic sans descended from Franklin Gothic. The most distinctive of the three.", risk: "Clarendon at weight turns quaint or western if it is overused or set too black. It stays at 700, sentence case, headlines only; the wider face costs a fourth headline line at desktop.", scale: "H1 48/33px, H2 34/28, H3 24/21, body 18px, small 14px.", measure: "Body 60–64ch (Public Sans runs wide); hero paragraph 44ch.", weights: "700 display, 600 labels, 400 text, DM Mono 500 key figures." }
+  };
+  var PAPERS = {
+    "p-ledger": { name: "Ledger", note: "The accountant's columnar pad: a yellow-green paper with green rules, and the green-bar band for the row that decides. The most on-concept; the positive green has to work harder against a green page.", sw: [["Paper", "#e9f0df", "oklch(0.946 0.024 125)"], ["Raised", "#f4f7ee", "oklch(0.972 0.013 125)"], ["Band", "#e1ead3", "oklch(0.925 0.032 125)"], ["Field", "#ffffff", "white, fields only"], ["Rule", "#b0bda1", "oklch(0.78 0.042 128)"], ["Ink", "#1d1d1d", "oklch(0.23 0 0)"], ["Ink 2", "#4f514c", "oklch(0.43 0.008 125)"], ["Signal Blue", "#0066ba", "unchanged"]], c: "Ink 14.5:1 · Ink 2 6.9:1 · Blue 5.0:1 · Blue on band 4.7:1 · Positive 5.6:1 · Negative 5.8:1 · Caution 5.5:1" },
+    "p-news": { name: "Newsprint", note: "A warm grey stock with almost no chroma, so it reads as paper and not as cream. The most neutral of the three: every semantic color reads cleanly on it.", sw: [["Paper", "#efece8", "oklch(0.945 0.006 85)"], ["Raised", "#f6f5f2", "oklch(0.97 0.004 85)"], ["Band", "#e9e6e0", "oklch(0.925 0.008 85)"], ["Field", "#ffffff", "white, fields only"], ["Rule", "#bab7b0", "oklch(0.78 0.01 85)"], ["Ink", "#1b1b1b", "oklch(0.22 0 0)"], ["Ink 2", "#51504c", "oklch(0.43 0.006 85)"], ["Signal Blue", "#0066ba", "unchanged"]], c: "Ink 14.7:1 · Ink 2 6.9:1 · Blue 4.9:1 · Blue on band 4.6:1 · Positive 5.5:1 · Negative 5.7:1 · Caution 5.5:1" },
+    "p-bond": { name: "Bond", note: "A cool grey-blue bond paper that sits in the same family as Signal Blue. Closest to today's look, darker and deliberate instead of near-white; the least new.", sw: [["Paper", "#e6eef3", "oklch(0.945 0.011 235)"], ["Raised", "#f1f7fa", "oklch(0.972 0.007 235)"], ["Band", "#dee8ee", "oklch(0.925 0.014 235)"], ["Field", "#ffffff", "white, fields only"], ["Rule", "#acbac3", "oklch(0.78 0.02 236)"], ["Ink", "#1b1b1b", "oklch(0.22 0 0)"], ["Ink 2", "#4a5156", "oklch(0.43 0.012 240)"], ["Signal Blue", "#0066ba", "unchanged"]], c: "Ink 14.8:1 · Ink 2 6.9:1 · Blue 4.9:1 · Blue on band 4.7:1 · Positive 5.5:1 · Negative 5.7:1 · Caution 5.5:1" }
+  };
+  var state = { type: "t-a", paper: "p-news" };
+  try { var s = JSON.parse(localStorage.getItem("tc-spec-choice") || "null"); if (s && TYPES[s.type] && PAPERS[s.paper]) state = s; } catch (e) {}
+
+  function frag(id) { return document.getElementById(id).content.cloneNode(true); }
+  function withLedger(node) { node.querySelectorAll(".slot-ledger").forEach(function (slot) { slot.appendChild(frag("tpl-ledger")); }); return node; }
+
+  function renderStages() {
+    ["d", "m"].forEach(function (k) {
+      var stage = document.getElementById("stage-" + k);
+      stage.innerHTML = "";
+      var spec = document.createElement("div");
+      spec.className = "spec anim " + state.type + " " + state.paper;
+      spec.appendChild(withLedger(frag(k === "d" ? "tpl-hero-d" : "tpl-hero-m")));
+      stage.appendChild(spec);
+      if (k === "m") { var f = document.createElement("div"); f.className = "foldline"; f.style.top = "812px"; f.innerHTML = "<span>fold · 812px</span>"; spec.style.position = "relative"; spec.appendChild(f); }
+    });
+    fit();
+  }
+  function fit() {
+    ["d", "m"].forEach(function (k) {
+      var box = document.getElementById("box-" + k), stage = document.getElementById("stage-" + k);
+      var w = +box.getAttribute("data-w"), avail = box.clientWidth, sc = Math.min(1, avail / w);
+      stage.style.transform = "scale(" + sc + ")";
+      var h = stage.firstChild ? stage.firstChild.offsetHeight : 600;
+      if (k === "m") h = Math.max(h, 812);
+      box.style.height = Math.ceil(h * sc) + "px";
+    });
+  }
+  function renderTrio() {
+    var trio = document.getElementById("trio");
+    Object.keys(TYPES).forEach(function (key) {
+      var t = TYPES[key], card = document.createElement("article");
+      card.className = "tcard";
+      card.innerHTML = '<div class="meta"><h3>' + t.name + '</h3><p>' + t.why + '</p><dl><dt>Faces</dt><dd>' + t.faces + '</dd><dt>Scale</dt><dd>' + t.scale + '</dd><dt>Measure</dt><dd>' + t.measure + '</dd><dt>Weights</dt><dd>' + t.weights + '</dd><dt>Risk</dt><dd>' + t.risk + '</dd></dl></div>';
+      var spec = document.createElement("div");
+      spec.className = "spec " + key + " p-news";
+      spec.innerHTML = '<h2 class="disp">Stop forwarding listings. Start sending deals that already pencil.</h2><p class="lead">Paste the rental listing. In about 60 seconds, see whether it clears your client\'s Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable.</p>';
+      spec.appendChild(frag("tpl-ledger"));
+      spec.appendChild(frag("tpl-plan"));
+      card.appendChild(spec);
+      trio.appendChild(card);
+    });
+  }
+  function renderPapers() {
+    var host = document.getElementById("papers");
+    Object.keys(PAPERS).forEach(function (key) {
+      var p = PAPERS[key], card = document.createElement("article");
+      card.className = "pcard";
+      var sw = p.sw.map(function (s) { var dark = /Ink|Blue/.test(s[0]); return '<div style="background:' + s[1] + ';color:' + (dark ? "#fff" : "#1b1b1b") + '"><b>' + s[0] + '</b><span class="kv">' + s[1] + '</span></div>'; }).join("");
+      card.innerHTML = '<div class="meta"><h3>' + p.name + '</h3><p>' + p.note + '</p></div><div class="sw">' + sw + '</div>';
+      var spec = document.createElement("div");
+      spec.className = "spec t-a " + key;
+      spec.appendChild(frag("tpl-ledger"));
+      var w = document.createElement("div");
+      w.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px"><span class="field" style="flex:1 1 13rem">Address or listing link</span><a class="btn" href="#w">Analyze a deal free</a></div><p style="margin:8px 0 0;font-size:13px;color:var(--ink2)">The one white surface: the field you write in.</p>';
+      spec.appendChild(w);
+      card.appendChild(spec);
+      var c = document.createElement("p"); c.className = "contrast"; c.textContent = "Contrast on paper: " + p.c; card.appendChild(c);
+      host.appendChild(card);
+    });
+  }
+  function renderCase() {
+    var host = document.getElementById("casecmp");
+    [["Sentence case (decided)", false], ["Uppercase, tracked", true]].forEach(function (v) {
+      var spec = document.createElement("div");
+      spec.className = "spec t-a p-news";
+      spec.style.padding = "12px";
+      spec.appendChild(frag("tpl-ledger"));
+      if (v[1]) spec.querySelectorAll("thead th").forEach(function (th) { th.classList.add("up"); });
+      spec.querySelectorAll(".lg-src, .lg-note").forEach(function (n) { n.remove(); });
+      var cap = document.createElement("p"); cap.className = "note"; cap.style.margin = "0 0 6px"; cap.textContent = v[0];
+      var wrap = document.createElement("div"); wrap.appendChild(cap); wrap.appendChild(spec); host.appendChild(wrap);
+    });
+  }
+  function syncButtons() {
+    document.querySelectorAll("[data-type]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-type") === state.type)); });
+    document.querySelectorAll("[data-paper]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-paper") === state.paper)); });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-type],[data-paper],#replay");
+    if (!b) return;
+    if (b.id === "replay") { renderStages(); return; }
+    if (b.hasAttribute("data-type")) state.type = b.getAttribute("data-type");
+    if (b.hasAttribute("data-paper")) state.paper = b.getAttribute("data-paper");
+    try { localStorage.setItem("tc-spec-choice", JSON.stringify(state)); } catch (err) {}
+    syncButtons(); renderStages();
+  });
+  document.addEventListener("click", function (e) { var a = e.target.closest(".spec a"); if (a) e.preventDefault(); });
+  syncButtons(); renderStages(); renderTrio(); renderPapers(); renderCase();
+  if (window.ResizeObserver) { new ResizeObserver(fit).observe(document.body); } else { window.addEventListener("resize", fit); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+})();
+</script>
