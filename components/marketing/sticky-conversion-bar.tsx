@@ -12,7 +12,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, Calculator, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { trackEvent } from "@/lib/analytics";
 
@@ -91,14 +91,14 @@ export function StickyConversionBar() {
     <div
       data-conversion-bar-root=""
       data-sticky-bottom-bar=""
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
     >
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-bold text-foreground sm:text-sm">
+          <p className="truncate text-[13px] font-semibold text-foreground sm:text-[15px]">
             Have a rental in mind? See whether the numbers work.
           </p>
-          <p className="hidden truncate text-2xs text-muted-foreground sm:block">
+          <p className="hidden truncate text-[13px] text-muted-foreground sm:block">
             No card · No signup · Editable assumptions
           </p>
         </div>
@@ -106,15 +106,13 @@ export function StickyConversionBar() {
           href="/analyze"
           prefetch={false}
           onClick={() => trackEvent("homepage_primary_cta", { source: "sticky_bar" })}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:px-4 sm:text-sm"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-[15px]"
         >
-          <Calculator className="size-3.5 sm:size-4" />
-          {/* Standardized to match the homepage's primary CTA verb.
-              Sub-380px tiny phones fall back to "Try it" because the
-              full label wraps. */}
-          <span className="hidden min-[380px]:inline">Start analysis</span>
-          <span className="min-[380px]:hidden">Start</span>
-          <ArrowRight className="size-3.5 sm:size-4" />
+          {/* The primary CTA's wording, as everywhere on the site. Phones
+              under 380px fall back to the short form because the full
+              label wraps. */}
+          <span className="hidden min-[380px]:inline">Analyze a deal free</span>
+          <span className="min-[380px]:hidden">Analyze free</span>
         </Link>
         <button
           type="button"
@@ -127,7 +125,7 @@ export function StickyConversionBar() {
             }
           }}
           aria-label="Dismiss"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <X className="size-4" />
         </button>

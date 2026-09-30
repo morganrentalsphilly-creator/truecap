@@ -52,7 +52,8 @@ describe("public funnel and trust guards", () => {
       'HERO_EMPTY_HELPER = "Paste an address or a Zillow/Redfin link"',
     );
     expect(form).toContain('role="alert"');
-    expect(form).toContain('errorId="hero-address-error"');
+    expect(form).toContain('const errorId = isHero ? "hero-address-error" : "close-address-error";');
+    expect(form).toContain("errorId={errorId}");
     expect(form).toContain("required");
     // The primary action is NEVER disabled and never dimmed — it hands off
     // to /analyze (a plain GET before hydration, a router push after).
@@ -64,12 +65,15 @@ describe("public funnel and trust guards", () => {
     expect(form).toContain('router.push("/analyze")');
   });
 
-  it("keeps the homepage tail to problem, how-it-works, offer, trust, founder, proof, FAQ, and final CTA blocks", () => {
+  // 2026-09 design pass (DESIGN.md "Homepage structure", approved at
+  // checkpoint 1): the opened ledger replaced the problem block's three
+  // question cards, and "What your client receives" joined the page.
+  it("keeps the homepage tail to how-it-works, sources, client, offer, founder, proof, FAQ, and final CTA blocks", () => {
     for (const path of ["app/page.tsx", "app/home-authed/page.tsx"]) {
       const page = read(path);
       for (const component of [
-        "ProblemBlock",
         "HowTrueCapWorks",
+        "ClientReceivesSection",
         "PdfProUpsell",
         "DataSourcesSection",
         "BuiltByInvestor",
@@ -81,6 +85,7 @@ describe("public funnel and trust guards", () => {
         expect(page, path).toContain(`<${component}`);
       }
       for (const redundant of [
+        "ProblemBlock",
         "OfferEngineSection",
         "Personas",
       ]) {

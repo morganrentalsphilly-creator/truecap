@@ -5,12 +5,10 @@ import Link from "next/link";
 import {
   Crown,
   LayoutDashboard,
-  LogIn,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { User } from "@supabase/supabase-js";
-import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
 import { UserMenu } from "@/components/auth/user-menu";
 import { MarketingMobileMenu, MarketingNav } from "@/components/marketing/marketing-nav";
@@ -390,8 +388,10 @@ export function Header({
         `sticky top-0` here or the white header background overlays the
         primary-colored announcement bar (visible on mobile as a white box
         blocking the top banner). */}
-    <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
+    {/* DESIGN.md "Header": paper and a single bottom rule. No blur, no
+        shadow; the gutter is the marketing page container's. */}
+    <header className="border-b border-border bg-background">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-12">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
           <AppLogo priority subtitleClassName="hidden sm:block" />
           {/* Primary nav — anon visitors only. Signed-in users navigate via the
@@ -485,21 +485,15 @@ export function Header({
             <>
               {/* Desktop (lg+): Sign in + Create account beside the marketing nav. */}
               <Button variant="ghost"
-              className="hidden lg:inline-flex h-9 px-4 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              className="hidden lg:inline-flex h-9 px-4 text-[15px] font-medium text-foreground hover:bg-accent"
              asChild>
-                <Link href="/auth/login">
-                  <LogIn className="w-4 h-4 mr-1" />
-                  Sign in
-                </Link>
+                <Link href="/auth/login">Sign in</Link>
               </Button>
+              {/* "Create account" is a primary button at the control radius,
+                  not a pill, and carries no glow (DESIGN.md "Header"). */}
               <Button
                 asChild
-                className={cn(
-                  "hidden lg:inline-flex h-9 px-5 rounded-full text-[13px] font-semibold",
-                  "bg-primary hover:bg-primary/90 text-primary-foreground",
-                  "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)] hover:shadow-[0_4px_12px_0_rgba(0,112,196,0.45)]",
-                  "transition-all duration-200 active:scale-[0.98]",
-                )}
+                className="hidden lg:inline-flex h-9 px-4 text-[15px] font-semibold"
               >
                 <Link href="/auth/sign-up">Create account</Link>
               </Button>
@@ -508,12 +502,7 @@ export function Header({
               <Button
                 asChild
                 data-header-analyze-cta=""
-                className={cn(
-                  "lg:hidden h-11 px-4 rounded-full text-[13px] font-bold",
-                  "bg-primary hover:bg-primary/90 text-primary-foreground",
-                  "shadow-[0_2px_8px_0_rgba(0,112,196,0.35)]",
-                  "transition-all duration-200 active:scale-[0.98]",
-                )}
+                className="lg:hidden h-11 px-4 text-[15px] font-semibold"
               >
                 <Link href="/analyze" prefetch={false}>Analyze</Link>
               </Button>

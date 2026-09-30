@@ -17,7 +17,7 @@
 import Link from "next/link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { Disclaimer } from "@/components/marketing/disclaimer";
-import { Lock, ShieldCheck, CreditCard } from "lucide-react";
+import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 
 const FOOTER_COLS: Array<{
@@ -154,11 +154,13 @@ export function SiteFooter({
     // data-site-footer: globals.css pads the footer's bottom while a sticky
     // bottom bar is mounted, so the legal row below stays tappable instead of
     // sitting permanently under the bar at maximum scroll.
+    // DESIGN.md "Footer": paper, rules over the column groups, sentence-case
+    // column heads, one Disclaimer with unchanged text.
     <footer
       data-site-footer=""
-      className="mt-12 border-t border-border bg-card/40"
+      className="mt-12 border-t border-border bg-background"
     >
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+      <div className={`${PAGE_CONTAINER} py-12 sm:py-16`}>
         {/* The newsletter band used to live here. The newsletter was
             canceled (founder decision, 2026-07-15) and NewsletterSignup
             now returns null — but the WRAPPER stayed, so every page on
@@ -181,10 +183,10 @@ export function SiteFooter({
             under the brand on desktop. */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
           {/* Brand block — intentionally short. Logo + one-line tagline. */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+          <div className="col-span-2 border-t border-foreground pt-2 sm:col-span-3 lg:col-span-1">
             <Link
               href="/"
-              className="inline-flex min-h-11 min-w-11 items-center text-xl font-extrabold tracking-tight text-foreground"
+              className="font-display inline-flex min-h-11 min-w-11 items-center text-xl text-foreground"
             >
               TrueCap<span className="text-primary">.</span>
             </Link>
@@ -197,16 +199,16 @@ export function SiteFooter({
           {footerColumns()
             .filter((col) => !(hideAccountLinks && col.title === "Account"))
             .map((col) => (
-            <div key={col.title}>
-              <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div key={col.title} className="border-t border-border pt-2">
+              <h2 className="flex h-11 items-center text-[15px] font-semibold text-foreground">
                 {col.title}
               </h2>
-              <ul className="mt-3">
+              <ul>
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="inline-flex min-h-11 min-w-11 items-center text-sm text-foreground/80 transition-colors hover:text-primary"
+                      className="inline-flex min-h-11 min-w-11 items-center text-[15px] text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -221,33 +223,24 @@ export function SiteFooter({
             Pages whose results view carries its own copy pass
             disclaimer={false} (docs/voice.md rule 3). */}
         {disclaimer ? (
-          <Disclaimer className="mx-auto mt-10 max-w-3xl text-center sm:text-xs" />
+          <Disclaimer className="mt-12 max-w-3xl sm:text-xs" />
         ) : null}
 
         {/* Bottom strip — copyright, trust badges, legal links + email,
             all on the same horizontal band so the footer ends with a
             single visually-balanced row instead of trailing dead space. */}
-        <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-4 text-[13px] text-muted-foreground sm:flex-row sm:items-center">
           <p className="order-2 sm:order-1">
             © {year} TrueCap. All rights reserved.
           </p>
           {/* Trust badges — moved here so the brand column stays compact
               and the badges are still visible on every page. */}
-          <ul className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-2xs font-semibold sm:order-2">
-            <li className="inline-flex items-center gap-1.5">
-              <Lock className="size-3.5 text-primary/70" />
-              <span>SSL encrypted</span>
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5 text-primary/70" />
-              <span>No card to start</span>
-            </li>
-            <li className="inline-flex items-center gap-1.5">
-              <CreditCard className="size-3.5 text-primary/70" />
-              <span>Stripe for paid upgrades</span>
-            </li>
+          <ul className="order-1 flex flex-wrap items-center gap-x-4 gap-y-1.5 sm:order-2">
+            <li>SSL encrypted</li>
+            <li>No card to start</li>
+            <li>Stripe for paid upgrades</li>
           </ul>
-          <p className="order-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end">
+          <p className="order-3 flex flex-wrap items-center gap-x-3 gap-y-1 sm:justify-end">
             {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
                 strip only, per the no-new-top-level-nav principle; the
                 blog bylines are the other inbound path. */}

@@ -26,7 +26,7 @@ test("empty hero submit focuses the field, shows the helper, and stays put", asy
   await expect(
     form.getByRole("alert").filter({ hasText: "Paste an address or a Zillow/Redfin link" }),
   ).toBeVisible();
-  await expect(form.getByRole("link", { name: "try the sample deal →" })).toBeVisible();
+  await expect(form.getByRole("link", { name: "try the sample deal", exact: true })).toBeVisible();
   await expect(
     form.getByLabel("Property address or listing link", { exact: true }),
   ).toBeFocused();
@@ -60,7 +60,7 @@ test("the sample link produces a full decision on /analyze with no sign-in", asy
   page,
 }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.getByRole("link", { name: "See the sample deal →", exact: true }).click();
+  await page.getByRole("link", { name: "See the sample deal", exact: true }).click();
   await page.waitForURL(/\/analyze/);
   await expect(page.locator('[data-result-next-action=""]')).toBeVisible({
     timeout: 45_000,
@@ -180,18 +180,21 @@ test("at 375px the header is one row and the hero CTA is in the first viewport",
   await expect(signIn).toHaveAttribute("href", "/auth/login");
 });
 
-test("the hero's LCP element is the real product screenshot, preloaded", async ({ page }) => {
+// 2026-09 design pass (DESIGN.md "The ledger as the hero"): the hero is the
+// sample deal's Verdict Ledger set as HTML from the engine, so the largest
+// paint is text and no hero image is preloaded.
+test("the hero's sample deal is an HTML ledger, not a preloaded screenshot", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const shot = page.locator('[data-hero-product-shot=""] img').first();
-  await expect(shot).toBeVisible();
-  // next/image `priority`: the optimized WebP is preloaded from <head>.
-  await expect(shot).toHaveAttribute("src", /verdict-desktop\.webp/);
+  const ledger = page.locator('[data-hero-ledger=""]');
+  await expect(ledger).toBeVisible();
+  await expect(ledger.getByRole("table")).toBeVisible();
+  await expect(ledger).toContainText("Offer Ceiling");
+  await expect(ledger.locator("img")).toHaveCount(0);
+  // The header logo keeps its own preload; no product screenshot is preloaded.
   await expect(
-    page.locator('link[rel="preload"][as="image"][imagesrcset*="verdict-desktop.webp"]'),
-  ).toHaveCount(1);
-  const alt = await shot.getAttribute("alt");
-  expect(alt ?? "").toMatch(/Offer Ceiling/);
-  await expect(page.getByRole("link", { name: "Live sample →", exact: true })).toHaveAttribute(
+    page.locator('link[rel="preload"][as="image"][imagesrcset*="verdict-desktop"]'),
+  ).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "See the sample deal", exact: true })).toHaveAttribute(
     "href",
     "/analyze?sample=1",
   );

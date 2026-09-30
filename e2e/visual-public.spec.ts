@@ -38,12 +38,9 @@ test("capture public product evidence without entering checkout", async ({
       animations: "disabled",
     });
 
-    // The hero renders the real product shot when one exists and falls back
-    // to the illustrative sample card only until the shot is produced
-    // (components/marketing/marketing-hero.tsx); capture whichever mounted.
-    const sampleCard = page
-      .locator('[data-hero-product-shot=""], [data-hero-sample-card=""]')
-      .first();
+    // The hero renders the sample deal's Verdict Ledger (2026-09 design
+    // pass, components/ledger/verdict-ledger.tsx).
+    const sampleCard = page.locator('[data-hero-ledger=""]').first();
     await expect(sampleCard).toBeVisible();
     await sampleCard.screenshot({
       path: `${evidenceDirectory}/homepage-sample-${width}.png`,

@@ -44,13 +44,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 import { TrackedMarketingLink } from "@/components/marketing/tracked-marketing-link";
 import { AGENT_FAQS } from "@/lib/agent-faqs";
+import { CLIENT_RECEIVES, type ClientReceivesItem } from "@/lib/client-receives";
 import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
 import {
   PRODUCT_EVALUATION_COMPARISON_LIMIT,
   PRODUCT_EVALUATION_DAYS,
   PRODUCT_EVALUATION_DEAL_LIMIT,
 } from "@/lib/product-access";
-import { PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import {
   formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
@@ -119,28 +119,13 @@ const PROMISES: { icon: typeof Clock; title: string; body: string }[] = [
   },
 ];
 
-const CLIENT_RECEIVES: { icon: typeof Link2; title: string; body: string }[] = [
-  {
-    icon: Link2,
-    title: "A share link that opens without an account",
-    body: "Read-only, expiring, and revocable from your dashboard. The exact address stays hidden unless you choose to include it. Your client needs an account only to save a private copy.",
-  },
-  {
-    icon: FileText,
-    title: "The decision memo, co-branded",
-    body: "With branding set up, the share page carries your logo, your brand color, and “Shared by” your name or company, with a form the client can use to message you. The PDF adds your tagline and a “Prepared by” block with your name, email, phone, and website. TrueCap's name stays on both as the methodology behind the numbers: co-branded, not white-label.",
-  },
-  {
-    icon: Tags,
-    title: "Every number labeled: benchmark or entered",
-    body: `Rent shows as a HUD area benchmark and the rate as a FRED benchmark until you replace them. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
-  },
-  {
-    icon: Calculator,
-    title: "The disclaimer, and their own rerun",
-    body: "The share page states that it is a screening record, not a decision, and that every material assumption should be verified. One click copies the deal into the free analyzer so your client can change any assumption and rerun it themselves.",
-  },
-];
+// The list itself is shared with the homepage (lib/client-receives.ts).
+const CLIENT_RECEIVES_ICONS: Record<ClientReceivesItem["key"], typeof Link2> = {
+  "share-link": Link2,
+  memo: FileText,
+  labels: Tags,
+  rerun: Calculator,
+};
 
 const WORKFLOW_STEPS = [
   "Open TrueCap on your phone or laptop at the showing.",
@@ -306,7 +291,9 @@ export default async function ForAgentsPage() {
             up once in your profile and applies to every link and report.
           </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {CLIENT_RECEIVES.map(({ icon: Icon, title, body }) => (
+            {CLIENT_RECEIVES.map(({ key, title, body }) => {
+              const Icon = CLIENT_RECEIVES_ICONS[key];
+              return (
               <article key={title} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
                 <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="size-5" aria-hidden />
@@ -314,7 +301,8 @@ export default async function ForAgentsPage() {
                 <h3 className="mt-3 text-base font-extrabold text-foreground">{title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
               </article>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -405,7 +393,6 @@ export default async function ForAgentsPage() {
         <div className="-mx-4 sm:-mx-6">
           <FaqSection
             id="honest-answers"
-            eyebrow="Honest answers for agents"
             heading="The objections, answered plainly."
             intro="Every answer below describes what TrueCap does today, not a roadmap. Where a limit exists, it is stated."
             items={AGENT_FAQS}

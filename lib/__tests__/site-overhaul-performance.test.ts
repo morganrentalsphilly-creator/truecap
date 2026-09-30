@@ -110,10 +110,11 @@ describe("performance contract", () => {
     expect(read(".github/workflows/ci.yml")).toContain("@lhci/cli");
   });
 
-  it("keeps priority on the hero image only", () => {
+  // The homepage's largest paint is the ledger's text since the 2026-09
+  // design pass, so nothing on these pages preloads an image ahead of it.
+  it("preloads no image ahead of the text hero", () => {
     const shots = ["components/marketing/marketing-hero.tsx", "app/pricing/page.tsx", "app/blog/page.tsx", "app/for-buy-and-hold/page.tsx"]
       .map((p) => read(p));
-    expect(shots[0]).toContain("priority");
-    for (const source of shots.slice(1)) expect(source).not.toMatch(/\bpriority\b/);
+    for (const source of shots) expect(source).not.toMatch(/\bpriority\b/);
   });
 });
