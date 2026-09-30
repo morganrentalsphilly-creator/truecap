@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formatUsageCount } from "@/lib/testimonials/rules";
 import { getUsageCounts } from "@/lib/testimonials/store";
+import { cn } from "@/lib/utils";
 
 /**
  * Computed usage counter (docs/site-overhaul.md Phase 5.6). Counts REAL rows
@@ -28,11 +29,14 @@ export async function loadUsageLabel(): Promise<string | null> {
   return formatted ? `${formatted} deals saved` : null;
 }
 
-export async function UsageCounter({ className = "" }: { className?: string }) {
+export async function UsageCounter({ className }: { className?: string }) {
   const label = await loadUsageLabel();
   if (!label) return null;
+  // cn() so a caller's size replaces the default text-sm: concatenated, both
+  // classes reached the element and the built CSS let text-sm win, so the
+  // /reviews figure rendered at 14px on phones.
   return (
-    <p data-usage-counter="" className={`text-sm font-semibold text-foreground ${className}`.trim()}>
+    <p data-usage-counter="" className={cn("text-sm font-semibold text-foreground", className)}>
       {label}
     </p>
   );
