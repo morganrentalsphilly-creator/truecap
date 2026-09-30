@@ -6,6 +6,14 @@ import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
+/**
+ * One self-closing <BlogStickyCta … /> mount. A post on the ledger article
+ * frame passes `inArticleColumn` (it sits in <ArticleEnd>); an unconverted
+ * post mounts the bare `<BlogStickyCta />`. Both count once; a second mount
+ * of either form, or none, fails.
+ */
+const BLOG_CTA_MOUNT = /<BlogStickyCta\b[^>]*\/>/g;
+
 describe("sitewide passive-conversion CTA", () => {
   it("has one privacy-safe analyzer destination and one tracked link", () => {
     const shared = read("components/marketing/seo-analyzer-cta.tsx");
@@ -37,12 +45,12 @@ describe("sitewide passive-conversion CTA", () => {
     const sourceFirstArticle = read(
       "components/marketing/source-first-article.tsx",
     );
-    expect(sourceFirstArticle.match(/<BlogStickyCta\s*\/>/g)).toHaveLength(1);
+    expect(sourceFirstArticle.match(BLOG_CTA_MOUNT)).toHaveLength(1);
 
     for (const post of BLOG_POSTS.filter((entry) => entry.available)) {
       const path = `app/blog/${post.slug}/page.tsx`;
       const source = read(path);
-      const directWrappers = source.match(/<BlogStickyCta\s*\/>/g) ?? [];
+      const directWrappers = source.match(BLOG_CTA_MOUNT) ?? [];
       const sharedWrappers = source.match(/<SourceFirstArticle\b/g) ?? [];
       expect(
         directWrappers.length + sharedWrappers.length,

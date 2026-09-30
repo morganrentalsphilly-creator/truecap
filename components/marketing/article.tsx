@@ -21,13 +21,14 @@
  *         </header>
  *         <ArticleBody>…</ArticleBody>          prose prose-ledger (app/globals.css)
  *         <FaqSection variant="inline" structuredData={false} … />
- *         <ArticleBody>…</ArticleBody>
+ *         <ArticleBody className="mt-16">…</ArticleBody>
  *       </article>
  *       <PostSources … />
+ *       <RelatedContent … />
  *       <RelatedBlogPosts currentSlug={SLUG} />
  *     </ArticleMain>
  *     <ArticleEnd>                             after </main>, before the footer
- *       <BlogStickyCta />
+ *       <BlogStickyCta inArticleColumn />      the column is ArticleEnd's, not the CTA's
  *     </ArticleEnd>
  *     <SiteFooter />
  *     <ScrollDepthTracker />
@@ -38,12 +39,15 @@
  *   · the page file keeps mounting what tests and the SEO skills read from
  *     page sources: the Header, the literal <h1>{TITLE}</h1> inside a
  *     <header>, the date line with <BlogByline /> directly after it
- *     (author-byline-bio.test.tsx), exactly one <BlogStickyCta /> and one
+ *     (author-byline-bio.test.tsx), exactly one <BlogStickyCta … /> mount
+ *     (<BlogStickyCta inArticleColumn /> inside <ArticleEnd>) and one
  *     <RelatedBlogPosts /> (passive-conversion-cta.test.ts), the page's own
  *     JSON-LD with the literal "FAQPage" (seo-guards.test.ts);
  *   · source order stays render order, so a post still reads top to bottom;
  *   · converting a post is a swap of its wrappers, not a restructure.
  * The one Disclaimer stays SiteFooter's: nothing here renders another.
+ * app/blog/1-percent-rule-rental-property/page.tsx is the reference post on
+ * this frame; the SEO loop writes new posts in its shape.
  *
  * ArticleBody's link rule outranks a utility class on any link inside it
  * (app/globals.css, prose-ledger): it sets the weight, the underline and the
