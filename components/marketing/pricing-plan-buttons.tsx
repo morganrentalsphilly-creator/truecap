@@ -98,7 +98,10 @@ export function PricingPlanButtons({
         href={`/auth/sign-up?plan=${plan}&billing=${billing}&next=${encodeURIComponent("/dashboard/new")}`}
         className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
       >
-        <Sparkles aria-hidden className="size-4" /> Start {tierName} evaluation — no card
+        <Sparkles aria-hidden className="size-4" />{" "}
+        {tierName === "Agent Pro"
+          ? "Create a free account — no card"
+          : `Start ${tierName} evaluation — no card`}
       </Link>
     );
   }

@@ -89,6 +89,24 @@ const AGENT_PRO_FEATURES: string[] = [
 ];
 
 /**
+ * What the one agent-only entitlement (client_buy_box) does in practice, so
+ * the card lists the workflow, not one catalog label. Each line is a runtime
+ * fact: rosters cap at 100 (app/actions/agent-clients.ts), a Buy Box can be
+ * scoped to a client and a saved deal assigned to one (lib/buy-box.ts,
+ * app/actions/saved-analyses.ts), the client-report share mode hides the
+ * address unless included (share-link-button.tsx), and a miss names the
+ * criterion (buy-box-verdict-card.tsx). Nothing here is a portal or a
+ * white-label embed — those stay unshipped.
+ */
+const AGENT_PRO_WORKFLOW = [
+  "A client roster, up to 100 clients",
+  "A Buy Box assigned to each client (up to 12 Buy Boxes per account)",
+  "Assign a saved deal to a client; it is screened against that client's targets",
+  "Client-report share links: no account needed, address hidden unless you include it",
+  "A miss names the criterion and the gap, so “this one doesn't fit” comes with a reason",
+] as const;
+
+/**
  * Pro sold as OUTCOMES, not a pile of upgrades.
  *
  * This was eighteen flat bullets, which made Pro read as a feature dump and
@@ -495,6 +513,7 @@ export function PricingTogglePlans({
               <PricingTrialTerms
                 isAuthenticated={isAuthenticated}
                 evaluation={evaluation}
+                tier="agent_pro"
               />
             ) : null}
             <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/[0.04] p-4">
@@ -506,7 +525,17 @@ export function PricingTogglePlans({
                     <span className="text-foreground">{f}</span>
                   </li>
                 ))}
+                {AGENT_PRO_WORKFLOW.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span className="text-foreground">{f}</span>
+                  </li>
+                ))}
               </ul>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                Plus everything in {proOfferName}, including co-branded share
+                pages and PDFs.
+              </p>
             </div>
           </div>
         ) : null}
@@ -518,9 +547,14 @@ export function PricingTogglePlans({
 function PricingTrialTerms({
   isAuthenticated,
   evaluation,
+  tier = "pro",
 }: {
   isAuthenticated: boolean;
   evaluation: PricingEvaluationSummary;
+  /** The no-card trial grants Pro deal analyses only — never the client
+   *  roster (lib/entitlements.ts evaluationFeatures) — so the Agent Pro card
+   *  says so instead of repeating the Pro card's terms. */
+  tier?: "pro" | "agent_pro";
 }) {
   if (!isAuthenticated) {
     return (
@@ -528,7 +562,11 @@ function PricingTrialTerms({
         <p className="mt-2.5 text-center text-xs text-muted-foreground">
           <strong className="text-foreground">New account: $0 today, no card.</strong>{" "}
           The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
-          comparison. Nothing auto-renews; subscribe only if you choose to later.
+          comparison.
+          {tier === "agent_pro"
+            ? " The client roster and client Buy Boxes start with an Agent Pro subscription, not the trial."
+            : ""}{" "}
+          Nothing auto-renews; subscribe only if you choose to later.
         </p>
       </>
     );
