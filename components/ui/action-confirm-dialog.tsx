@@ -287,7 +287,7 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
               maxLength={rendered.options.maxLength ?? 500}
               rows={3}
               aria-label={options?.title}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-base outline-none focus-visible:border-ring md:text-sm"
             />
           ) : null}
           <DialogFooter className="gap-2 sm:gap-2">

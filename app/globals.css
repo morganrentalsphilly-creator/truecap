@@ -8,22 +8,32 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.97 0.005 240);
-  --foreground: oklch(0.15 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 250);
+  /* The Underwriter's Ledger (DESIGN.md, decided 2026-09-30): Newsprint
+     paper, graphite ink, a raised paper for the few objects that sit on it.
+     White is reserved for fields a person types into (--field). */
+  --background: oklch(0.945 0.006 85);
+  --foreground: oklch(0.22 0 0);
+  --card: oklch(0.97 0.004 85);
+  --card-foreground: oklch(0.22 0 0);
+  --popover: oklch(0.97 0.004 85);
+  --popover-foreground: oklch(0.22 0 0);
+  --field: oklch(1 0 0);
+  /* The row that decides (the ledger's binding row), selection, hover. */
+  --band: oklch(0.925 0.008 85);
+  /* Rules between rows; --border is the heavier rule under table heads. */
+  --rule-soft: oklch(0.875 0.008 85);
   /* Dark enough to keep white text AA-safe on primary actions. */
   --primary: oklch(0.49 0.18 240);
+  /* Signal Blue Deep: hover and pressed states of links and buttons. */
+  --primary-deep: oklch(0.42 0.16 242);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.94 0.01 240);
-  --secondary-foreground: oklch(0.3 0.04 255);
-  --muted: oklch(0.94 0.01 240);
-  /* Clears AA even when muted copy sits on --brand-blue-light. */
-  --muted-foreground: oklch(0.51 0.03 250);
-  --accent: oklch(0.94 0.01 240);
-  --accent-foreground: oklch(0.3 0.04 255);
+  --secondary: oklch(0.925 0.008 85);
+  --secondary-foreground: oklch(0.22 0 0);
+  --muted: oklch(0.925 0.008 85);
+  /* Ink 2: 6.9:1 on paper, 6.5:1 on the band, 5.9:1 on --brand-blue-light. */
+  --muted-foreground: oklch(0.43 0.006 85);
+  --accent: oklch(0.925 0.008 85);
+  --accent-foreground: oklch(0.22 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
   /* Text-safe red for small error copy on tinted marketing surfaces: the
@@ -33,21 +43,25 @@
   --destructive-text: oklch(0.5 0.22 27);
   /* Semantic status colors must exist outside `.dashboard-shell` too: auth,
      public, and portal surfaces use the corresponding Tailwind utilities. */
-  --success: oklch(0.5 0.16 158);
+  --success: oklch(0.46 0.14 155);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.2 0.05 60);
   --gold: oklch(0.56 0.13 85);
-  /* 3.22:1 against white so input/card boundaries remain perceivable. */
-  --border: oklch(0.65 0.02 240);
-  --input: oklch(0.65 0.02 240);
-  --ring: oklch(0.52 0.18 240);
+  /* Rules carry the structure; they are drawn, not UI boundaries. Field
+     boundaries use --input (Ink 2), 8.1:1 against the white field and 6.9:1
+     against the paper, so every input edge is perceivable (WCAG 1.4.11). */
+  --border: oklch(0.78 0.01 85);
+  --input: oklch(0.43 0.006 85);
+  --ring: oklch(0.49 0.18 240);
   --chart-1: oklch(0.52 0.18 240);
   --chart-2: oklch(0.6 0.16 155);
   --chart-3: oklch(0.65 0.18 42);
   --chart-4: oklch(0.62 0.13 195);
   --chart-5: oklch(0.58 0.22 15);
-  --radius: 0.75rem;
+  /* Radius by role: 6px is the object radius (plan cards). The scale in
+     @theme below derives controls (4px), tags (2px) and floats (8-10px). */
+  --radius: 6px;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.15 0.02 250);
   --sidebar-primary: oklch(0.49 0.18 240);
@@ -64,7 +78,7 @@
   /* Text-safe blue for small labels on --brand-blue-light (4.73:1).
      Keep --brand-blue/--primary unchanged for buttons, icons, and larger type. */
   --brand-blue-text: oklch(0.49 0.18 240);
-  --brand-green: oklch(0.5 0.15 155);
+  --brand-green: oklch(0.46 0.14 155);
   --brand-green-light: oklch(0.95 0.04 155);
   /* One AA-safe orange: 4.63:1 against white for both text and badges. */
   --brand-orange: oklch(0.58 0.18 42);
@@ -72,10 +86,12 @@
   /* The display orange is intentionally bright, but it cannot carry small
      text. These two narrowly scoped variants clear WCAG AA: orange text on
      the light tint is 4.69:1; white on the solid badge is 4.63:1. */
-  --brand-orange-text: oklch(0.54 0.18 42);
+  /* Deepened for the tinted paper: 5.5:1 on paper, 5.2:1 on the band. */
+  --brand-orange-text: oklch(0.5 0.16 42);
   --brand-orange-solid: oklch(0.58 0.18 42);
-  --metric-positive: oklch(0.5 0.16 155);
-  --metric-negative: oklch(0.55 0.22 15);
+  /* Same hues, deepened so figures clear 5:1 on the paper and the band. */
+  --metric-positive: oklch(0.46 0.14 155);
+  --metric-negative: oklch(0.5 0.2 15);
 }
 
 .dark {
@@ -119,7 +135,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-variable), "DM Mono", ui-monospace, monospace;
   /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
      "Label-2xs"). Defined as font-size only so they behave exactly like the
@@ -127,6 +143,19 @@
      keeps coming from the leading-* utility or inherits). 10px is the floor. */
   --text-2xs: 0.6875rem;
   --text-3xs: 0.625rem;
+  /* Display steps (DESIGN.md typography). The rest of the scale is Tailwind's. */
+  --text-display: 3.4375rem;
+  --text-display--line-height: 1.02;
+  --text-display-sm: 2.375rem;
+  --text-display-sm--line-height: 1.02;
+  --text-section: 2.5rem;
+  --text-section--line-height: 1.05;
+  --text-section-sm: 1.875rem;
+  --text-section-sm--line-height: 1.05;
+  --text-key: 3.375rem;
+  --text-key--line-height: 1;
+  --text-key-sm: 2rem;
+  --text-key-sm--line-height: 1;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -135,6 +164,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -163,16 +193,34 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-field: var(--field);
+  --color-band: var(--band);
+  --color-rule-soft: var(--rule-soft);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  /* Radius by role (DESIGN.md): 2px tags, 4px controls, 6px objects, 8-12px
+     things that float. The 2xl/3xl steps are pulled into the same tight scale
+     so no surface on the site keeps the old 16-24px pillow corners. */
+  --radius-sm: 2px;
+  --radius-md: 4px;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+  --radius-3xl: 12px;
+  /* No shadow at rest: the resting steps render nothing, so a hairline card
+     never also floats. Menus, dialogs and sticky bars keep shadow-md/lg,
+     which are both the one float shadow (DESIGN.md components.menu). */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: 0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08);
+  --shadow-lg: 0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08);
+  /* The same float, cast upward, for bars fixed to the bottom edge. */
+  --shadow-float-up: 0 -12px 32px -12px oklch(0.2 0 0 / 0.18), 0 -2px 6px -2px oklch(0.2 0 0 / 0.08);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -194,7 +242,54 @@
 input,
 textarea,
 [contenteditable="true"] {
-  caret-color: auto;
+  caret-color: var(--primary);
+}
+
+/* The display voice: Archivo's semi-condensed cut for H1–H3 and plan names
+   only (DESIGN.md). Everything else sets Archivo at its normal width. */
+@utility font-display {
+  font-family: var(--font-sans);
+  font-weight: 750;
+  font-stretch: 82%;
+  letter-spacing: -0.012em;
+}
+
+/* A link in running text: Signal Blue, underlined, no arrow (DESIGN.md
+   chrome rules). Inline links that stand alone add min-h-11 for the target. */
+@utility tc-link {
+  color: var(--primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  &:hover {
+    color: var(--primary-deep);
+  }
+}
+
+/* The ledger's one total sits over a double rule (accounting convention for a
+   final total). It is the homepage's only motion: the rule draws in once, from
+   the right, after the figure has painted. Reduced motion shows it static. */
+.ledger-rule {
+  position: relative;
+  padding-bottom: 0.3em;
+}
+.ledger-rule::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 4px;
+  border-block: 1px solid currentColor;
+  transform-origin: right center;
+}
+@keyframes ledger-rule-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ledger-rule-draw::after {
+    animation: ledger-rule-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms both;
+  }
 }
 
 @layer base {
@@ -210,6 +305,10 @@ textarea,
      without `clip` support (pre-iOS 16). */
   html {
     overflow-x: clip;
+  }
+  ::selection {
+    background-color: var(--band);
+    color: var(--foreground);
   }
   body {
     @apply bg-background text-foreground;
@@ -266,9 +365,17 @@ textarea,
   :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
     min-block-size: 2.75rem;
   }
-  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: 3px solid var(--ring);
-    outline-offset: 2px;
+  /* Focus (DESIGN.md "Chrome"): a 3px Signal Blue outline, 2px out, on every
+     control. !important makes it a floor. The shadcn primitives and older
+     components set `outline-none` and drew a half-transparent ring instead,
+     about 2.1:1 on paper where a focus indicator needs 3:1, and a normal
+     utility in any layer loses to an important declaration. Menu items and
+     listbox options show focus with the band highlight instead; a -1
+     tabindex marks a programmatic target (the skip link's <main>, a dialog
+     panel), not a control. */
+  :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):where(:not([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"])):focus-visible {
+    outline: 3px solid var(--ring) !important;
+    outline-offset: 2px !important;
   }
   /* The homepage's phone/tablet StickyCalculateBar and StickyConversionBar are
      both fixed bottom-0. PRIORITY: the product bar wins — while the user is
@@ -452,36 +559,10 @@ textarea,
    app has no theme toggle.
    ============================================================ */
 .dashboard-shell {
-  --radius: 0.875rem;
-  --background: oklch(0.985 0.005 240);
-  --foreground: oklch(0.18 0.03 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 250);
-  --primary: oklch(0.54 0.18 240);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 250);
-  --secondary-foreground: oklch(0.22 0.04 260);
-  --muted: oklch(0.965 0.008 250);
-  --muted-foreground: oklch(0.52 0.03 256);
-  --accent: oklch(0.95 0.04 260);
-  --accent-foreground: oklch(0.22 0.04 260);
-  /* Darkened from 0.68 → 0.50 lightness so text-success (positive cash flow,
-     "Strong Buy/Buy" pills) clears 4.5:1 on the white dashboard cards (was
-     ~2.5:1). Matches the proven-accessible --metric-positive; the only non-text
-     uses are faint /30 and /5 tints, so the shift there is imperceptible. */
-  --success: oklch(0.5 0.16 158);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.78 0.16 75);
-  --warning-foreground: oklch(0.2 0.05 60);
-  /* Darkened from 0.78 → 0.56 so text-gold (AIInsights "tip" tone) is readable
-     on its light tinted card (was well under 4.5:1). The gold gradient/badge
-     and the StatCard gold tone use their own values, so they're unaffected. */
-  --gold: oklch(0.56 0.13 85);
-  --border: oklch(0.92 0.012 255);
-  --input: oklch(0.92 0.012 255);
-  --ring: oklch(0.54 0.18 240);
+  /* One system (DESIGN.md, 2026-09-30): the dashboard reads the same paper,
+     ink, rules, radius and Signal Blue as the analyzer and the marketing
+     site; only the navy rail below is its own (kept by the founder).
+     Status colors come from :root too. */
   --sidebar: oklch(0.18 0.04 260);
   --sidebar-foreground: oklch(0.85 0.02 250);
   --sidebar-primary: oklch(0.62 0.18 240);
@@ -502,19 +583,18 @@ textarea,
   --ai-insights-bg: linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280));
   /* Compare page xl background (previously a hardcoded light gradient). */
   --compare-surface: radial-gradient(circle at top right, rgba(0, 112, 196, 0.08), transparent 32%), linear-gradient(180deg, #f8fbff, #eef4f8);
-  font-family: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
    inherit the tokens above — re-declare the subset the sidebar needs. */
 .dashboard-mobile-sheet {
-  --primary: oklch(0.54 0.18 240);
   --sidebar-foreground: oklch(0.85 0.02 250);
   --sidebar-accent: oklch(0.24 0.05 262);
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(0.28 0.04 262);
   --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260));
-  font-family: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The dashboard is intentionally ALWAYS LIGHT. It shares the marketing /

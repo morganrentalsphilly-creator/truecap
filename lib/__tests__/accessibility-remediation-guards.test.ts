@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { WHITE, contrast, cssToken } from "./helpers/oklch-contrast";
 
 function read(relativePath: string): string {
   return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
@@ -74,12 +75,42 @@ describe("WCAG 2.1 AA remediation guards", () => {
     expect(savedSelectionTargets).toHaveLength(3);
   });
 
+  // Measured, not pinned (2026-09 design pass): the paper, band and raised
+  // surfaces changed, so the guard computes each ratio from the tokens.
+  // Control boundaries use --input (Ink 2). --border is the printed rule
+  // between rows and sections, a separator rather than a control boundary,
+  // so it is deliberately below 3:1 and the primitives must not draw a
+  // control with it.
   it("keeps text and control boundaries at AA contrast and focus baselines", () => {
-    expect(css).toContain("--border: oklch(0.65 0.02 240)");
-    expect(css).toContain("--input: oklch(0.65 0.02 240)");
+    const paper = cssToken(css, "background");
+    const surfaces = {
+      paper,
+      band: cssToken(css, "band"),
+      raised: cssToken(css, "card"),
+      field: cssToken(css, "field"),
+    };
+    for (const [name, surface] of Object.entries(surfaces)) {
+      expect(contrast(cssToken(css, "foreground"), surface), `ink on ${name}`).toBeGreaterThanOrEqual(7);
+      expect(contrast(cssToken(css, "muted-foreground"), surface), `Ink 2 on ${name}`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(cssToken(css, "primary"), surface), `link on ${name}`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(cssToken(css, "input"), surface), `control boundary on ${name}`).toBeGreaterThanOrEqual(3);
+      expect(contrast(cssToken(css, "ring"), surface), `focus ring on ${name}`).toBeGreaterThanOrEqual(3);
+    }
+    for (const token of ["metric-positive", "metric-negative", "brand-orange-text", "destructive-text"]) {
+      expect(contrast(cssToken(css, token), paper), `${token} on paper`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(cssToken(css, token), surfaces.band), `${token} on band`).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(WHITE, cssToken(css, "primary")), "button label").toBeGreaterThanOrEqual(4.5);
+    expect(contrast(WHITE, cssToken(css, "primary-deep")), "button label, hover").toBeGreaterThanOrEqual(4.5);
     expect(css).toContain("--brand-orange: oklch(0.58 0.18 42)");
-    expect(css).toContain("outline: 3px solid var(--ring)");
-    expect(css).toContain("outline-offset: 2px");
+    expect(css).toContain("outline: 3px solid var(--ring) !important");
+    expect(css).toContain("outline-offset: 2px !important");
+
+    for (const primitive of ["input", "select", "checkbox"]) {
+      const source = read(`../../components/ui/${primitive}.tsx`);
+      expect(source, primitive).toContain("border-input");
+    }
+    expect(read("../../components/ui/button.tsx")).toContain("outline:\n          'border border-input");
   });
 
   it("uses grouped pressed controls instead of incomplete tab semantics", () => {

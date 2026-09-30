@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
+import { Archivo, DM_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { CookieConsentBanner } from "@/components/marketing/cookie-consent-banner";
@@ -15,37 +15,30 @@ import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
 import "./globals.css";
 import { JsonLd } from "@/components/seo/json-ld";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const archivo = Archivo({
   subsets: ["latin"],
   variable: "--font-sans-variable",
-  // Plus Jakarta Sans tops out at weight 800. Any `font-extrabold` (900)
-  // usage gets faux-bolded by the browser, which causes a visible
-  // restitch on LCP. We've migrated those to `font-extrabold` (800)
-  // to match the font's real max weight. Don't add "900" here — it's
-  // not a valid weight for this font and TypeScript will reject it.
-  weight: ["300", "400", "500", "600", "700", "800"],
-  // Explicit display: "swap" — text renders immediately with the system
-  // fallback (set by adjustFontFallback's font-metric matching), then
-  // swaps to Plus Jakarta when it arrives. Prevents FOIT (Flash of
-  // Invisible Text) which kills LCP on slow connections.
+  // Variable font with the width axis: the design system sets H1–H3 and plan
+  // names in Archivo's semi-condensed cut (font-stretch: 82%, the
+  // `font-display` utility in globals.css) and everything else at normal
+  // width, from this one file. With `axes`, next/font loads the full weight
+  // range, so no `weight` list here.
+  axes: ["wdth"],
+  // Text renders at once in the metric-matched fallback, then swaps: no
+  // invisible text on slow connections, no layout shift on swap.
   display: "swap",
-  // Generate the system-font-metric fallback so the layout doesn't shift
-  // when the real font loads (cumulative layout shift / CLS).
   adjustFontFallback: true,
-  // next/font auto-injects <link rel="preload"> for fonts declared at
-  // this scope. Explicit `preload: true` documents the intent.
+  // The homepage H1 is the LCP element; preload the face that draws it.
   preload: true,
 });
 const dmMono = DM_Mono({
   subsets: ["latin"],
   variable: "--font-mono-variable",
   weight: ["400", "500"],
-  // Mono is non-critical (used for numeric output in tables/cards, never
-  // for above-the-fold hero text). Skip the preload to save a request
-  // on first paint — it loads on-demand when text using `font-mono`
-  // first renders.
+  // The homepage hero is the sample deal's ledger, set in DM Mono in the
+  // first viewport, so the figures' face is preloaded like the headline's.
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 export const viewport = {
@@ -157,7 +150,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}
+      className={`${archivo.variable} ${dmMono.variable} font-sans`}
     >
       <head>
         {/* Runs before every analytics/error-reporting script. It removes the
