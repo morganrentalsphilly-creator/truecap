@@ -63,7 +63,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
         <ul className="mt-5 border-t-2 border-foreground">
           {related.map((post) => (
             <li key={post.slug} className="border-b border-rule-soft py-4">
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-balance text-lg font-semibold">
                 <Link
                   href={`/blog/${post.slug}`}
                   prefetch={false}
@@ -84,8 +84,11 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
         {/* Lead magnet + exit-intent capture (2026-08 offer rollout): this
             module renders on all 75 posts, so mounting here reaches the whole
             blog family in one edit. Client islands inside this server
-            component; both self-cap via localStorage. */}
-        <div className="mt-8">
+            component; both self-cap via localStorage.
+            The list above already ends on its rule, so the capture block's
+            own top rule gives way here (one rule per boundary). mt-12: the
+            one gap between the blocks after an article (AuthorBio's). */}
+        <div className="mt-12 [&>section:first-child]:border-t-0">
           <LeadMagnetInline source="blog" />
         </div>
         <LeadMagnetExitIntent />

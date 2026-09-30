@@ -20,6 +20,15 @@ const RHYTHM = {
 /** The page container every marketing section, the header and the footer share. */
 export const PAGE_CONTAINER = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-12";
 
+/**
+ * A page hero (PageHero, MarketingHero) carries data-page-hero, and its
+ * bottom rule is the one rule between the hero and what follows. A ruled
+ * section drops its own top rule when it directly follows one: as the hero's
+ * next sibling, or as the first child of that sibling (the homepage wraps its
+ * sections in a display:contents div). Pages need no rule="none" for it.
+ */
+const HERO_ADJACENT = "[[data-page-hero]+&]:border-t-0 [[data-page-hero]+*>&:first-child]:border-t-0";
+
 export function Section({
   rhythm = "default",
   rule = "rule",
@@ -29,7 +38,12 @@ export function Section({
   ...props
 }: {
   rhythm?: keyof typeof RHYTHM;
-  /** "rule": the section rule. "heavy": the 2px ink rule that opens a close. */
+  /**
+   * "rule": the section rule. "heavy": the 2px ink rule that opens a close.
+   * The section rule gives way to a page hero's bottom rule when the section
+   * comes straight after the hero (see HERO_ADJACENT), so the page shows one
+   * rule there, not two stacked 1px rules that read as a stray 2px weight.
+   */
   rule?: "rule" | "heavy" | "none";
   className?: string;
   containerClassName?: string;
@@ -41,7 +55,7 @@ export function Section({
         // No scroll margin of its own: the html scroll padding in globals.css
         // already keeps a fragment target clear of the sticky header.
         "bg-background",
-        rule === "rule" && "border-t border-border",
+        rule === "rule" && `border-t border-border ${HERO_ADJACENT}`,
         rule === "heavy" && "border-t-2 border-foreground",
         className,
       )}

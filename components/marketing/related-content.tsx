@@ -20,6 +20,11 @@ const KIND_LABEL: Record<string, string> = {
  * each with its kind as a 2px tag. It stays a <nav>: the link-graph test
  * reads the block up to its closing </nav>. `not-prose`, because the three
  * SourceFirstArticle posts render it inside their prose article.
+ *
+ * The label takes the display H3 step that the other blocks after an article
+ * use (Sources, About TrueCap, Keep reading), so the end matter speaks in one
+ * heading voice. It stays a <p>: the <nav>'s aria-label names the landmark,
+ * and the pages' heading outline is left as it was.
  */
 export function RelatedContent({
   kind,
@@ -38,8 +43,8 @@ export function RelatedContent({
   if (links.length === 0) return null;
   return (
     <nav aria-label={heading} data-related-content="" className={cn("not-prose border-t border-border pt-6", className)}>
-      <p className="text-lg font-semibold">{heading}</p>
-      <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+      <p className="font-display text-balance text-h3-sm sm:text-2xl">{heading}</p>
+      <ul className="mt-3 grid gap-x-8 sm:grid-cols-2">
         {links.map((link) => (
           <li key={link.href} className="min-w-0">
             <Link

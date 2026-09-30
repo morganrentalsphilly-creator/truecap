@@ -32,7 +32,9 @@ export function MarketingHero() {
     getMarketingOfferConfig();
   const ledger = buildSampleDealLedger();
   return (
-    <section className="truecap-marketing-shell border-b border-border bg-background">
+    // data-page-hero: this bottom rule is the one rule under the hero; the
+    // walkthrough Section after it drops its own (components/marketing/section.tsx).
+    <section data-page-hero="" className="truecap-marketing-shell border-b border-border bg-background">
       <div
         className={cn(
           PAGE_CONTAINER,
