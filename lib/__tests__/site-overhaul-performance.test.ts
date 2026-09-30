@@ -7,7 +7,10 @@ const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
 /** Phase 7 (docs/site-overhaul.md): the structural performance rules. */
 describe("performance contract", () => {
-  it("keeps the analyzer bundle off the homepage and prefetches /analyze only on hover", () => {
+  // Next 16's App Router never prefetches a prefetch={false} link, not even on
+  // hover or touch (next/dist/client/app-dir/link.js), so these links fetch
+  // /analyze on click only. Hover prefetch needs IntentPrefetchLink.
+  it("keeps the analyzer bundle off the homepage and never prefetches /analyze", () => {
     for (const path of ["app/page.tsx", "app/home-authed/page.tsx"]) {
       expect(read(path), path).not.toContain("components/investcalc/investcalc-page");
     }
