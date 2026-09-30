@@ -22,6 +22,7 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
@@ -624,6 +625,7 @@ export function FaqSection({
   id,
   compact = false,
   layout = "stack",
+  contact: contactOverride,
 }: {
   heading: string;
   intro?: string;
@@ -634,9 +636,11 @@ export function FaqSection({
   compact?: boolean;
   /** "split": the heading beside the list from 1024px (the homepage). */
   layout?: "stack" | "split";
+  /** Replaces the default contact line; null drops it. */
+  contact?: ReactNode;
 }) {
   const headingId = id ? `${id}-heading` : undefined;
-  const contact = (
+  const contact = contactOverride !== undefined ? contactOverride : (
     <p className="mt-4 text-base text-muted-foreground">
       Still have a question?{" "}
       <a href="mailto:hello@usetruecap.com" className="tc-link inline-flex min-h-11 items-center">
