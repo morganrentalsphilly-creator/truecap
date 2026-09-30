@@ -24,6 +24,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's actions keep next/link's default; /analyze never
+// prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
@@ -157,12 +161,12 @@ export default function ForBrrrrPage() {
           lede="The educational guide explains the sequence, key inputs, and failure modes. It is not a substitute for a lender quote, appraisal, scope of work, or project-level cash-flow model."
           actions={
             <ActionRow>
-              <Link
+              <IntentPrefetchLink
                 href="/blog/brrrr-method-explained"
                 className={buttonVariants({ size: "cta" })}
               >
                 Read the BRRRR guide
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         >
@@ -171,9 +175,9 @@ export default function ForBrrrrPage() {
           {isAgentProConfigured() ? (
             <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Are you an agent working with investor clients?{" "}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </CloseSection>
