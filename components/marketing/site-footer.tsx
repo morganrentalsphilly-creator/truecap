@@ -12,17 +12,25 @@
  *
  * Renders nothing if `hide` is passed (we use this to keep the auth
  * pages clean).
+ *
+ * Every internal link is an IntentPrefetchLink: it prefetches on hover or
+ * keyboard focus, never because it scrolled into view. A default next/link
+ * here made each phone visitor who reached the footer download ~30 routes
+ * they did not open (see components/marketing/intent-prefetch-link.tsx).
  */
 
-import Link from "next/link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { Disclaimer } from "@/components/marketing/disclaimer";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+
+/** prefetch: false opts a link out of IntentPrefetchLink's hover/focus prefetch. */
+type FooterLink = { label: string; href: string; external?: boolean; prefetch?: false };
 
 const FOOTER_COLS: Array<{
   title: string;
-  links: Array<{ label: string; href: string; external?: boolean }>;
+  links: FooterLink[];
 }> = [
   // The Product column used to carry ELEVEN links doing three unrelated
   // jobs — the product itself, the content library, and trust pages — which
@@ -37,7 +45,10 @@ const FOOTER_COLS: Array<{
   {
     title: "Product",
     links: [
-      { label: "Free analyzer", href: "/analyze" },
+      // Never prefetched, not even on hover: the analyzer bundle stays off
+      // marketing pages (docs/site-overhaul.md, Phase 7). Before this flag
+      // the footer prefetched /analyze on every page it scrolled into view.
+      { label: "Free analyzer", href: "/analyze", prefetch: false },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
       { label: "Proof & methodology", href: "/reviews" },
@@ -126,7 +137,7 @@ const FOOTER_COLS: Array<{
  * comment above): the persona page when Agent Pro is sold here, otherwise the
  * plan cards. Server component, so the env read is safe.
  */
-function whoItsForLinks(links: readonly { label: string; href: string }[]) {
+function whoItsForLinks(links: readonly FooterLink[]): FooterLink[] {
   return [
     {
       label: "Real estate agents",
@@ -182,12 +193,12 @@ export function SiteFooter({
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
           {/* Brand block — intentionally short. Logo + one-line tagline. */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Link
+            <IntentPrefetchLink
               href="/"
               className="inline-flex min-h-11 min-w-11 items-center text-xl font-extrabold tracking-tight text-foreground"
             >
               TrueCap<span className="text-primary">.</span>
-            </Link>
+            </IntentPrefetchLink>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
@@ -204,12 +215,13 @@ export function SiteFooter({
               <ul className="mt-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <Link
+                    <IntentPrefetchLink
                       href={link.href}
+                      prefetch={link.prefetch}
                       className="inline-flex min-h-11 min-w-11 items-center text-sm text-foreground/80 transition-colors hover:text-primary"
                     >
                       {link.label}
-                    </Link>
+                    </IntentPrefetchLink>
                   </li>
                 ))}
               </ul>
@@ -251,30 +263,30 @@ export function SiteFooter({
             {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
                 strip only, per the no-new-top-level-nav principle; the
                 blog bylines are the other inbound path. */}
-            <Link
+            <IntentPrefetchLink
               href="/about"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               About
-            </Link>
+            </IntentPrefetchLink>
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
-            <Link
+            <IntentPrefetchLink
               href="/privacy"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Privacy
-            </Link>
+            </IntentPrefetchLink>
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
-            <Link
+            <IntentPrefetchLink
               href="/terms"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Terms
-            </Link>
+            </IntentPrefetchLink>
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
