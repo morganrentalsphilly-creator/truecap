@@ -49,6 +49,18 @@
  * app/blog/1-percent-rule-rental-property/page.tsx is the reference post on
  * this frame; the SEO loop writes new posts in its shape.
  *
+ * Links: the reference post's internal links, its date line's included, go
+ * through IntentPrefetchLink (@/components/marketing/intent-prefetch-link),
+ * which prefetches on hover or keyboard focus, not as the reader scrolls; its
+ * /analyze links stay next/link with prefetch={false}, which never prefetches
+ * the analyzer. The SEO loop's skills still write plain <Link> (the date line
+ * above, as seo-gap-article prescribes it, and seo-internal-links' one added
+ * link, which verify-static's tier 0 reads only as <Link> or <a>), so a
+ * loop-written post or a loop-added link stays next/link until those skills
+ * and verify-static learn IntentPrefetchLink.
+ * lib/__tests__/intent-prefetch-shared.test.ts pins only the reference post's
+ * converted links.
+ *
  * ArticleBody's link rule outranks a utility class on any link inside it
  * (app/globals.css, prose-ledger): it sets the weight, the underline and the
  * hover color. A component mounted inside an ArticleBody that styles its own

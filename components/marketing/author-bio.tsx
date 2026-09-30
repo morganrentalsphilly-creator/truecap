@@ -15,9 +15,12 @@
  * lib/__tests__/author-byline-bio.test.tsx renders all of them and fails
  * when one loses the block or renders it twice. It stays a <section>
  * (never a <footer> or <nav>, which the SEO loop's main text strips).
+ *
+ * Always below the fold, so its links prefetch on hover or keyboard focus
+ * (IntentPrefetchLink), not on scroll (lib/__tests__/intent-prefetch-shared.test.ts).
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AUTHOR_BIO } from "@/lib/author";
 import { cn } from "@/lib/utils";
 
@@ -54,12 +57,12 @@ export function AuthorBio({ className = "" }: { className?: string }) {
         </h2>
         <p className="mt-3 text-base leading-relaxed">{AUTHOR_BIO}</p>
         <p className="mt-2 flex flex-wrap gap-x-6 text-base">
-          <Link href="/about" className={LINK_CLASS}>
+          <IntentPrefetchLink href="/about" className={LINK_CLASS}>
             More about TrueCap
-          </Link>
-          <Link href="/methodology" className={LINK_CLASS}>
+          </IntentPrefetchLink>
+          <IntentPrefetchLink href="/methodology" className={LINK_CLASS}>
             How the numbers are built
-          </Link>
+          </IntentPrefetchLink>
         </p>
       </div>
     </section>

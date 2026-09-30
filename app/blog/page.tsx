@@ -22,6 +22,10 @@
 import type { Metadata } from "next";
 import { findProductShot, ProductShot } from "@/components/marketing/product-shot";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
@@ -162,20 +166,20 @@ export default function BlogIndexPage() {
             </p>
             <div className="grid grid-cols-2 gap-x-6 break-words sm:flex sm:flex-wrap sm:gap-2">
               {BLOG_TOPICS.map((t) => (
-                <Link
+                <IntentPrefetchLink
                   key={t.slug}
                   href={`/blog/topics/${t.slug}`}
                   className="block min-h-11 min-w-11 border-b border-rule-soft py-3 text-sm text-foreground transition-colors hover:bg-band sm:inline-flex sm:items-center sm:rounded-sm sm:border sm:border-border sm:px-3 sm:py-2"
                 >
                   {t.title}
-                </Link>
+                </IntentPrefetchLink>
               ))}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/topics"
                 className="tc-link block min-h-11 py-3 text-sm sm:inline-flex sm:items-center sm:py-2"
               >
                 All topics
-              </Link>
+              </IntentPrefetchLink>
             </div>
           </nav>
         </PageHero>
@@ -209,12 +213,12 @@ export default function BlogIndexPage() {
                     </p>
                     {topic ? (
                       <p className="mt-3">
-                        <Link
+                        <IntentPrefetchLink
                           href={`/blog/topics/${topic.slug}`}
                           className="tc-link inline-flex min-h-11 items-center text-base"
                         >
                           Topic guide
-                        </Link>
+                        </IntentPrefetchLink>
                       </p>
                     ) : null}
                   </div>
@@ -230,13 +234,13 @@ export default function BlogIndexPage() {
                             column, where text-balance split titles into two
                             half-width lines. */}
                         <h3 className="text-pretty text-lg font-semibold">
-                          <Link
+                          <IntentPrefetchLink
                             href={`/blog/${post.slug}`}
                             data-blog-post-link=""
                             className="tc-link -my-2 inline-block max-w-full py-2"
                           >
                             {post.title}
-                          </Link>
+                          </IntentPrefetchLink>
                         </h3>
                         <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
                           {compactExcerpt(post.excerpt)}

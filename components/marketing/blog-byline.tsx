@@ -21,18 +21,22 @@
  * A meta line: 14px Ink 2 in sentence case, as lib/author.ts writes it, with
  * the one link in the site's link style. One element, so nothing can sit
  * between it and the H1 on the /vs pages.
+ *
+ * The /about link prefetches on hover or keyboard focus (IntentPrefetchLink),
+ * not as soon as the header renders: it is on every post and /vs page and is
+ * not the page's primary action (lib/__tests__/intent-prefetch-shared.test.ts).
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AUTHOR_BYLINE_SUFFIX } from "@/lib/author";
 
 export function BlogByline() {
   return (
     <p className="mt-2 text-sm text-muted-foreground">
       By{" "}
-      <Link href="/about" className="tc-link">
+      <IntentPrefetchLink href="/about" className="tc-link">
         TrueCap
-      </Link>{" "}
+      </IntentPrefetchLink>{" "}
       · {AUTHOR_BYLINE_SUFFIX}
     </p>
   );

@@ -21,6 +21,10 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -270,13 +274,13 @@ export default function EmbedHubPage() {
                   </h3>
                   {/* Nine links share the name "Preview"; the title tells
                       them apart without changing the label. */}
-                  <Link
+                  <IntentPrefetchLink
                     href={entry.toolUrl}
                     aria-describedby={`embed-${entry.slug}-title`}
                     className="tc-link inline-flex min-h-11 shrink-0 items-center text-base"
                   >
                     Preview
-                  </Link>
+                  </IntentPrefetchLink>
                 </div>
                 <p
                   className={cn(
@@ -326,13 +330,13 @@ export default function EmbedHubPage() {
               it beside your contact details, not instead of them. When a client
               is real, run their deals against their own Buy Box with{" "}
               {agentProConfigured ? (
-                <Link href="/for-agents" className="tc-link">
+                <IntentPrefetchLink href="/for-agents" className="tc-link">
                   TrueCap for agents
-                </Link>
+                </IntentPrefetchLink>
               ) : (
-                <Link href="/pricing#plans" className="tc-link">
+                <IntentPrefetchLink href="/pricing#plans" className="tc-link">
                   Agent Pro
-                </Link>
+                </IntentPrefetchLink>
               )}
               .
             </p>

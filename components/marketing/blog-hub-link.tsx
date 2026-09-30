@@ -12,9 +12,13 @@
  *
  * One <p> with exactly one link: the link-graph test reads the line up to
  * its </p> and expects only the hub.
+ *
+ * Below the fold, so the link is IntentPrefetchLink, never a plain next/link
+ * (lib/__tests__/intent-prefetch-shared.test.ts); it keeps F9's
+ * prefetch={false}.
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { blogTopicForPost, isLinkablePath } from "@/lib/seo/link-policy";
 
 export function BlogHubLink({ postSlug }: { postSlug: string }) {
@@ -25,9 +29,9 @@ export function BlogHubLink({ postSlug }: { postSlug: string }) {
   return (
     <p data-blog-hub-link="" className="mt-3 text-base text-muted-foreground">
       Part of:{" "}
-      <Link href={href} prefetch={false} className="tc-link">
+      <IntentPrefetchLink href={href} prefetch={false} className="tc-link">
         {topic.title}
-      </Link>
+      </IntentPrefetchLink>
     </p>
   );
 }

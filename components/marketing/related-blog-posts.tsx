@@ -19,10 +19,16 @@
  * plans): the list opens on the 2px ink rule, each row gives the title as a
  * link, its excerpt, then its reading time, on soft rules.
  *
+ * All of it sits below the fold, so its links (here, in AuthorBio and in
+ * BlogHubLink) are IntentPrefetchLink, never a plain next/link that
+ * prefetches on scroll (lib/__tests__/intent-prefetch-shared.test.ts). The
+ * post titles keep F9's prefetch={false}; without it they would prefetch on
+ * hover or focus.
+ *
  * Server component — no client state needed, just data + links.
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogHubLink } from "@/components/marketing/blog-hub-link";
 import { relatedBlogPosts } from "@/lib/seo/link-policy";
@@ -64,13 +70,13 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
           {related.map((post) => (
             <li key={post.slug} className="border-b border-rule-soft py-4">
               <h3 className="text-balance text-lg font-semibold">
-                <Link
+                <IntentPrefetchLink
                   href={`/blog/${post.slug}`}
                   prefetch={false}
                   className="tc-link -my-2 inline-block py-2"
                 >
                   {post.title}
-                </Link>
+                </IntentPrefetchLink>
               </h3>
               <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
                 {post.excerpt}
