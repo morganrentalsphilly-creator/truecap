@@ -148,7 +148,7 @@ export default function BlogIndexPage() {
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
           title="Blog"
-          lede="Deep dives on rental property analysis, real estate math, and underwriting best practices from the team behind TrueCap."
+          lede="Deep dives on rental property analysis, real estate math, and underwriting best practices from TrueCap."
         >
           {/* Browse by topic — hubs that group the posts by investor journey
               (P2-4) and pair each with the relevant calculators. From 640px

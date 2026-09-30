@@ -381,7 +381,7 @@ export function Header({
         <div className={cn(PAGE_CONTAINER, "flex min-h-9 items-center gap-3")}>
           <p className="min-w-0 flex-1 py-1 text-sm text-foreground">
             <span className="hidden sm:inline">
-              Unlock 10-Year Projections, Offer Ceiling and Deal Comparison with
+              Unlock 10-year projections, Offer Ceiling and deal comparison with
             </span>
             <span className="sm:hidden">Upgrade to</span>{" "}
             <Link href="/pricing" className="tc-link">
