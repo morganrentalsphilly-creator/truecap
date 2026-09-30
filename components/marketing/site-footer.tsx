@@ -12,18 +12,26 @@
  *
  * Renders nothing if `hide` is passed (we use this to keep the auth
  * pages clean).
+ *
+ * Every internal link is an IntentPrefetchLink: it prefetches on hover or
+ * keyboard focus, never because it scrolled into view. A default next/link
+ * here made each phone visitor who reached the footer download ~30 routes
+ * they did not open (see components/marketing/intent-prefetch-link.tsx).
  */
 
-import Link from "next/link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { Disclaimer } from "@/components/marketing/disclaimer";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { AppLogo } from "@/components/brand/app-logo";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+
+/** prefetch: false opts a link out of IntentPrefetchLink's hover/focus prefetch. */
+type FooterLink = { label: string; href: string; external?: boolean; prefetch?: false };
 
 const FOOTER_COLS: Array<{
   title: string;
-  links: Array<{ label: string; href: string; external?: boolean }>;
+  links: FooterLink[];
 }> = [
   // The Product column used to carry ELEVEN links doing three unrelated
   // jobs — the product itself, the content library, and trust pages — which
@@ -38,7 +46,10 @@ const FOOTER_COLS: Array<{
   {
     title: "Product",
     links: [
-      { label: "Free analyzer", href: "/analyze" },
+      // Never prefetched, not even on hover: the analyzer bundle stays off
+      // marketing pages (docs/site-overhaul.md, Phase 7). Before this flag
+      // the footer prefetched /analyze on every page it scrolled into view.
+      { label: "Free analyzer", href: "/analyze", prefetch: false },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
       { label: "Proof & methodology", href: "/reviews" },
@@ -127,7 +138,7 @@ const FOOTER_COLS: Array<{
  * comment above): the persona page when Agent Pro is sold here, otherwise the
  * plan cards. Server component, so the env read is safe.
  */
-function whoItsForLinks(links: readonly { label: string; href: string }[]) {
+function whoItsForLinks(links: readonly FooterLink[]): FooterLink[] {
   return [
     {
       label: "Real estate agents",
@@ -187,9 +198,9 @@ export function SiteFooter({
           <div className="col-span-full border-t border-foreground pt-2 lg:col-span-1">
             {/* The same mark as the header (components/brand/app-logo), so the
                 page carries one wordmark; the link stays the footer's own. */}
-            <Link href="/" className="inline-flex min-h-11 min-w-11 items-center">
+            <IntentPrefetchLink href="/" className="inline-flex min-h-11 min-w-11 items-center">
               <AppLogo href="" subtitle="" />
-            </Link>
+            </IntentPrefetchLink>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
@@ -206,12 +217,13 @@ export function SiteFooter({
               <ul>
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <Link
+                    <IntentPrefetchLink
                       href={link.href}
+                      prefetch={link.prefetch}
                       className="inline-flex min-h-11 min-w-11 items-center text-base text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
-                    </Link>
+                    </IntentPrefetchLink>
                   </li>
                 ))}
               </ul>
@@ -244,24 +256,24 @@ export function SiteFooter({
             {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
                 strip only, per the no-new-top-level-nav principle; the
                 blog bylines are the other inbound path. */}
-            <Link
+            <IntentPrefetchLink
               href="/about"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               About
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/privacy"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Privacy
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/terms"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Terms
-            </Link>
+            </IntentPrefetchLink>
             {/* NOTE: llms.txt footer link intentionally removed — it
                 looked like a technical artifact to regular visitors
                 ("what is that?"). The /llms.txt URL still resolves

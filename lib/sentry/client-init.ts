@@ -9,7 +9,20 @@
 
 let initialized = false;
 
-import * as Sentry from "@sentry/nextjs";
+// Named imports. The package root re-exports every integration the SDK ships
+// (Replay + rrweb, Feedback, profiling, the AI and feature-flag integrations)
+// and webpack drops the unused ones only while it can see which names are
+// used. A namespace import read only as `Sentry.x` still shakes (measured
+// 2026-09-30); what kept the whole barrel on every page was a dynamic import
+// of the SDK in lib/analytics.ts. Named imports keep one `Sentry[key]` or a
+// passed-around namespace from silently undoing that. Client code that needs
+// the SDK lazily goes through lib/sentry/lazy.ts.
+import {
+  captureException,
+  captureMessage,
+  captureRouterTransitionStart,
+  init,
+} from "@sentry/nextjs";
 import {
   scrubSentryBreadcrumbUrl,
   scrubSentryEventSensitiveData,
@@ -21,7 +34,7 @@ import {
 export function initSentryClient(): void {
   if (initialized) return;
   initialized = true;
-  Sentry.init({
+  init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
   // Local audits and CI browser runs used to report every page view (100%
   // tracing) to the production project — enough to hit its rate limit
@@ -147,10 +160,10 @@ export function initSentryClient(): void {
 }
 
 export function captureBufferedError(error: unknown, kind: "error" | "unhandledrejection"): void {
-  Sentry.captureException(error, { tags: { buffered_before_init: "true", kind } });
+  captureException(error, { tags: { buffered_before_init: "true", kind } });
 }
 
-export const routerTransitionStart = Sentry.captureRouterTransitionStart;
+export const routerTransitionStart = captureRouterTransitionStart;
 
 /**
  * captureMessage behind the lazy loader (lib/sentry/lazy.ts) so modules that
@@ -158,7 +171,7 @@ export const routerTransitionStart = Sentry.captureRouterTransitionStart;
  */
 export function captureMessageLazyTarget(
   message: string,
-  context?: Parameters<typeof Sentry.captureMessage>[1],
+  context?: Parameters<typeof captureMessage>[1],
 ): void {
-  Sentry.captureMessage(message, context);
+  captureMessage(message, context);
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 /**
  * The ONE disclaimer. Rendered once per marketing page (near the bottom, via
@@ -11,6 +11,9 @@ import Link from "next/link";
  * and legal statements, and the text said only "not ... investment advice".
  * The rendered copy and DISCLAIMER_TEXT are built from the same strings, so
  * the two cannot drift.
+ *
+ * The Methodology link always sits at the bottom of a page, so it prefetches
+ * on hover or focus rather than on scroll (IntentPrefetchLink).
  */
 const DISCLAIMER_LEAD =
   "TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. Our articles and guides are general information, not tax, legal or investment advice; confirm the specifics with a qualified professional.";
@@ -32,12 +35,12 @@ export function Disclaimer({
   return (
     <p data-disclaimer="" className={`${base} ${className}`.trim()}>
       {DISCLAIMER_LEAD} The math is published in our{" "}
-      <Link
+      <IntentPrefetchLink
         href="/methodology"
         className="tc-link font-medium"
       >
         Methodology
-      </Link>
+      </IntentPrefetchLink>
       .
     </p>
   );

@@ -518,6 +518,8 @@ Measurement notes: "before" is the live site on 2026-09-06 (pre-overhaul, curl +
 | Budgets + Lighthouse CI: `lighthouserc.json` (mobile, simulated) asserts accessibility ≥ 95 and CLS ≤ 0.05 as ERRORS and homepage JS ≤ 250 KB, LCP ≤ 2.5 s, TBT ≤ 200 ms, `/analyze` LCP ≤ 3 s as WARNINGS; a `lighthouse` CI job builds, serves, and runs `@lhci/cli autorun` | `lighthouserc.json`, `.github/workflows/ci.yml`, `package.json` (`perf:lighthouse`) |
 | Guard test for the structural rules (no analyzer import on the homepage, hover-only prefetch, consent-gated GTM, browserslist, lazy Sentry with the full config, budgets as configured) | `lib/__tests__/site-overhaul-performance.test.ts` |
 
+> **Correction (2026-09-30):** "hover prefetch only" above is wrong for Next 16. The App Router skips a `prefetch={false}` link entirely: no viewport, hover or touch prefetch (`next/dist/client/app-dir/link.js` returns early). So `/analyze` links fetch on click, which still keeps the analyzer bundle off marketing pages. The footer's "Free analyzer" link was a plain `<Link>` fed from a data array, so it did prefetch `/analyze` until then. Footer, disclaimer and below-the-fold homepage links now use `components/marketing/intent-prefetch-link.tsx`, which prefetches on hover or keyboard focus only (guard: `lib/__tests__/marketing-link-prefetch.test.tsx`).
+
 ### Decisions made in the founder's absence (Phase 7)
 
 1. **Sentry is deferred, not trimmed.** Dropping client tracing (`excludeTracing`) would have cut the SDK further but removes performance monitoring the founder configured; loading it after interaction keeps every feature and takes it off the critical path (TBT 430 → 120 ms, LCP 4.6 → 3.8 s). Early errors are buffered so nothing is lost.

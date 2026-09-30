@@ -23,7 +23,9 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
-import Link from "next/link";
+// Section and plan-card links sit below the fold: they prefetch on hover or
+// focus, not on scroll (see the component's doc comment).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
@@ -179,12 +181,12 @@ export function BuiltByInvestor() {
           editable, and every formula is published.
         </p>
         <p className="mt-3 flex flex-wrap gap-x-6 text-base">
-          <Link href="/about" className="tc-link inline-flex min-h-11 items-center">
+          <IntentPrefetchLink href="/about" className="tc-link inline-flex min-h-11 items-center">
             About TrueCap
-          </Link>
-          <Link href="/methodology" className="tc-link inline-flex min-h-11 items-center">
+          </IntentPrefetchLink>
+          <IntentPrefetchLink href="/methodology" className="tc-link inline-flex min-h-11 items-center">
             Read the methodology
-          </Link>
+          </IntentPrefetchLink>
         </p>
       </div>
     </Section>
@@ -216,9 +218,9 @@ export function FinalCta() {
           <HeroAddressForm placement="close" className="max-w-none lg:mt-0" />
           <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
             Buying for your own portfolio?{" "}
-            <Link href="/for-investors" className="tc-link -my-3 inline-block py-3">
+            <IntentPrefetchLink href="/for-investors" className="tc-link -my-3 inline-block py-3">
               See TrueCap for investors
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </div>
       </div>
@@ -275,9 +277,9 @@ export function SocialProof() {
         </div>
       </div>
       <p className="mt-8 text-base">
-        <Link href="/reviews" className="tc-link inline-flex min-h-11 items-center font-medium">
+        <IntentPrefetchLink href="/reviews" className="tc-link inline-flex min-h-11 items-center font-medium">
           See verified proof &amp; methodology
-        </Link>
+        </IntentPrefetchLink>
       </p>
     </Section>
   );
@@ -754,9 +756,9 @@ export function ClientReceivesSection() {
           caption={
             <>
               The decision memo, generated from the free sample deal.{" "}
-              <Link href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
+              <IntentPrefetchLink href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
                 Read the full sample memo
-              </Link>
+              </IntentPrefetchLink>
             </>
           }
           className="lg:pt-2"
@@ -928,9 +930,9 @@ export async function PdfProUpsell() {
           priceNote={<>or {price.proAnnual}&nbsp;a&nbsp;year</>}
           answers={proAnswers}
           action={
-            <Link href="/pricing" className={ctaSecondary}>
+            <IntentPrefetchLink href="/pricing" className={ctaSecondary}>
               See Pro pricing
-            </Link>
+            </IntentPrefetchLink>
           }
           footnote={
             <>
@@ -958,9 +960,9 @@ export async function PdfProUpsell() {
               { term: "A co-branded memo", detail: "Your client opens it without an account." },
             ]}
             action={
-              <Link href="/for-agents" className={ctaSecondary}>
+              <IntentPrefetchLink href="/for-agents" className={ctaSecondary}>
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             }
           />
         ) : null}
