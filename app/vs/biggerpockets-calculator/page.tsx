@@ -9,7 +9,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -21,8 +20,27 @@ import {
   ComparisonFaq,
   type FaqItem,
 } from "@/components/marketing/comparison-faq";
+import { ActionRow, CloseSection } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  VS_ACTIONS,
+  VS_FOOTNOTE,
+  VS_H1,
+  VS_INTRO,
+  VS_LEDE,
+  VS_LINK_ROW,
+  VS_NOTE,
+  VS_PROSE,
+  VS_SOURCES,
+  VS_TLDR_GRID,
+  VS_TLDR_LABEL,
+  VS_TLDR_LIST,
+  VsHero,
+  VsMatrixTable,
+} from "@/components/marketing/vs-page";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -113,31 +131,23 @@ export default function VsBiggerPocketsCalculatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage and the /vs hub: no
+    // descendant can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema
         vsPath="/vs/biggerpockets-calculator"
         pageName="TrueCap vs BiggerPockets Calculator"
       />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-        </div>
-
-        {/* Hero */}
-        <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            Honest comparison
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <VsHero>
+          <h1 className={VS_H1}>
             TrueCap vs BiggerPockets Calculator:{" "}
-            <span className="text-primary">
-              which one fits how you actually work?
-            </span>
+            which one fits how you actually work?
           </h1>
           <BlogByline />
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <p className={VS_LEDE}>
             BiggerPockets has been the default real estate analysis tool for two
             decades. Their calculator is solid. We built TrueCap because we
             wanted an address-first workflow that connects the initial screen to
@@ -146,44 +156,46 @@ export default function VsBiggerPocketsCalculatorPage() {
             education ecosystem are part of what you value. Here is the workflow
             comparison.
           </p>
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
-              <Calculator className="size-4" />
+          <ActionRow className={VS_ACTIONS}>
+            <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
               Try the TrueCap free analyzer
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </AnalyzeCtaLink>
             <Link
               href="/pricing"
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+              className={buttonVariants({ variant: "outline", size: "cta" })}
             >
               See TrueCap pricing
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          </ActionRow>
+          <p className={VS_NOTE}>
             Free analyzer: no card or signup
           </p>
-        </section>
+        </VsHero>
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+        {/* Real product screenshot from the free sample deal, set as a
+            document (no fake browser frame). */}
+        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
           <ProductShot
             shot="verdict"
+            frame="document"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link">Run it yourself</Link></>}
           />
-        </section>
+        </Section>
 
         {/* TL;DR */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+        <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
+          <SectionHeading id="vs-tldr-heading">
             TL;DR — which to pick
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
+          </SectionHeading>
+          <div className={VS_TLDR_GRID}>
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Pick TrueCap if
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>
                   You want a fully usable free tier with no per-analysis limits.
                 </li>
@@ -197,11 +209,11 @@ export default function VsBiggerPocketsCalculatorPage() {
                 <li>You want a portfolio rollup across saved deals.</li>
               </ul>
             </div>
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Pick BiggerPockets if
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>
                   You&apos;re already deep in the BiggerPockets ecosystem
                   (forums, podcast, books, courses).
@@ -224,62 +236,37 @@ export default function VsBiggerPocketsCalculatorPage() {
               </ul>
             </div>
           </div>
-          <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+          <p className={VS_FOOTNOTE}>
             Only need a free calculator? Full list:{" "}
             <Link
               href="/blog/free-biggerpockets-calculator-alternatives"
-              className="font-bold text-primary hover:underline"
+              className="tc-link"
             >
-              free BiggerPockets calculator alternatives →
+              free BiggerPockets calculator alternatives
             </Link>
           </p>
-        </section>
+        </Section>
 
         {/* Matrix */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
+        <Section aria-labelledby="vs-matrix-heading">
+          <SectionHeading id="vs-matrix-heading">
             Workflow-by-workflow
-          </h2>
-          <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+          </SectionHeading>
+          <p className={VS_INTRO}>
             Both tools analyze rentals. The difference is how the analysis
             becomes a decision.
           </p>
-          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Workflow
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
-                    TrueCap
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    BiggerPockets Calculator
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATRIX.map((row) => (
-                  <tr
-                    key={row.workflow}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      {row.workflow}
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      {row.truecap}
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      {row.bp}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
+            <VsMatrixTable
+              head={["Workflow", "TrueCap", "BiggerPockets Calculator"]}
+              rows={MATRIX.map((row) => ({
+                label: row.workflow,
+                truecap: row.truecap,
+                competitor: row.bp,
+              }))}
+            />
           </ScrollX>
-          <p className="mt-3 text-2xs text-muted-foreground">
+          <p className={VS_SOURCES}>
             Pricing and feature availability change. BiggerPockets Calculator
             details were reviewed against its official product pages on August
             15, 2026. See{" "}
@@ -287,124 +274,128 @@ export default function VsBiggerPocketsCalculatorPage() {
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
+              className="tc-link"
             >
               BiggerPockets Rental Property Calculator
             </a>{" "}
             for its current state.
           </p>
-        </section>
+        </Section>
 
         {/* Workflow fit */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
+        <Section aria-labelledby="vs-fit-heading">
+          <SectionHeading id="vs-fit-heading">
             Choose TrueCap when you want a focused decision workflow
-          </h2>
-          <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li>
-              <strong>Screen before creating an account.</strong> TrueCap&apos;s
-              core analyzer is available before signup.
-            </li>
-            <li>
-              <strong>Start from labeled assumptions.</strong> TrueCap can
-              pre-fill editable HUD area rent and the FRED owner-occupied
-              mortgage-rate benchmark; property tax is a manual local input.
-            </li>
-            <li>
-              <strong>Keep the product focused.</strong> TrueCap centers on
-              screening, offer price, downside, and presenting the decision;
-              BiggerPockets pairs its calculator with a much broader investor
-              ecosystem.
-            </li>
-            <li>
-              <strong>Connect the outputs.</strong> TrueCap&apos;s Buy Box fit
-              leads into the Offer Ceiling, downside, and reporting instead of
-              treating each as a separate destination.
-            </li>
-          </ul>
-        </section>
+          </SectionHeading>
+          <div className={VS_PROSE}>
+            <ul>
+              <li>
+                <strong>Screen before creating an account.</strong> TrueCap&apos;s
+                core analyzer is available before signup.
+              </li>
+              <li>
+                <strong>Start from labeled assumptions.</strong> TrueCap can
+                pre-fill editable HUD area rent and the FRED owner-occupied
+                mortgage-rate benchmark; property tax is a manual local input.
+              </li>
+              <li>
+                <strong>Keep the product focused.</strong> TrueCap centers on
+                screening, offer price, downside, and presenting the decision;
+                BiggerPockets pairs its calculator with a much broader investor
+                ecosystem.
+              </li>
+              <li>
+                <strong>Connect the outputs.</strong> TrueCap&apos;s Buy Box fit
+                leads into the Offer Ceiling, downside, and reporting instead of
+                treating each as a separate destination.
+              </li>
+            </ul>
+          </div>
+        </Section>
 
         {/* When NOT to switch */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-muted/40 p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+        <Section aria-labelledby="vs-choice-heading">
+          <SectionHeading id="vs-choice-heading">
             When BiggerPockets is the right choice
-          </h2>
-          <p className="text-sm sm:text-base leading-relaxed text-foreground mb-3">
-            Be honest: not every investor should switch. Stay with BiggerPockets
-            if any of these apply:
-          </p>
-          <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
-            <li>
-              You actively use the forums for partner / lender / contractor
-              introductions in your market.
-            </li>
-            <li>You&apos;re working through a BP course or bootcamp.</li>
-            <li>
-              You need an established brand-name for credibility (if you&apos;re
-              using output in client presentations to investors).
-            </li>
-            <li>
-              You already have all your historical deals in BP and don&apos;t
-              want to migrate.
-            </li>
-          </ul>
-          <p className="mt-4 text-sm leading-relaxed text-foreground">
-            If you only need one number — not a full calculator suite —
-            TrueCap&apos;s free single-purpose tools cover the screening end
-            for free: the{" "}
-            <Link
-              href="/tools/1-percent-rule-calculator"
-              className="font-semibold text-primary hover:underline"
-            >
-              1% rule calculator
-            </Link>
-            , the{" "}
-            <Link
-              href="/tools/gross-rent-multiplier-calculator"
-              className="font-semibold text-primary hover:underline"
-            >
-              gross rent multiplier calculator
-            </Link>
-            , and the{" "}
-            <Link
-              href="/tools/mortgage-payment-calculator"
-              className="font-semibold text-primary hover:underline"
-            >
-              mortgage payment calculator
-            </Link>
-            . Cap rate, cash-on-cash and DSCR are not separate pages here — they
-            come out of the{" "}
-            <Link
-              href="/analyze" prefetch={false}
-              className="font-semibold text-primary hover:underline"
-            >
-              full analyzer
-            </Link>
-            , and if you would rather run the arithmetic yourself, the
-            walkthroughs on{" "}
-            <Link
-              href="/blog/how-to-calculate-cap-rate"
-              className="font-semibold text-primary hover:underline"
-            >
-              how to calculate cap rate
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/blog/how-to-calculate-dscr"
-              className="font-semibold text-primary hover:underline"
-            >
-              how to calculate DSCR
-            </Link>{" "}
-            show every step. For the rehab side, start with{" "}
-            <Link
-              href="/blog/brrrr-method-explained"
-              className="font-semibold text-primary hover:underline"
-            >
-              the BRRRR workflow guide
-            </Link>
-            .
-          </p>
-        </section>
+          </SectionHeading>
+          <div className={VS_PROSE}>
+            <p>
+              Be honest: not every investor should switch. Stay with BiggerPockets
+              if any of these apply:
+            </p>
+            <ul>
+              <li>
+                You actively use the forums for partner / lender / contractor
+                introductions in your market.
+              </li>
+              <li>You&apos;re working through a BP course or bootcamp.</li>
+              <li>
+                You need an established brand-name for credibility (if you&apos;re
+                using output in client presentations to investors).
+              </li>
+              <li>
+                You already have all your historical deals in BP and don&apos;t
+                want to migrate.
+              </li>
+            </ul>
+            <p>
+              If you only need one number — not a full calculator suite —
+              TrueCap&apos;s free single-purpose tools cover the screening end
+              for free: the{" "}
+              <Link
+                href="/tools/1-percent-rule-calculator"
+                className="tc-link"
+              >
+                1% rule calculator
+              </Link>
+              , the{" "}
+              <Link
+                href="/tools/gross-rent-multiplier-calculator"
+                className="tc-link"
+              >
+                gross rent multiplier calculator
+              </Link>
+              , and the{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="tc-link"
+              >
+                mortgage payment calculator
+              </Link>
+              . Cap rate, cash-on-cash and DSCR are not separate pages here — they
+              come out of the{" "}
+              <Link
+                href="/analyze" prefetch={false}
+                className="tc-link"
+              >
+                full analyzer
+              </Link>
+              , and if you would rather run the arithmetic yourself, the
+              walkthroughs on{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="tc-link"
+              >
+                how to calculate cap rate
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/blog/how-to-calculate-dscr"
+                className="tc-link"
+              >
+                how to calculate DSCR
+              </Link>{" "}
+              show every step. For the rehab side, start with{" "}
+              <Link
+                href="/blog/brrrr-method-explained"
+                className="tc-link"
+              >
+                the BRRRR workflow guide
+              </Link>
+              .
+            </p>
+          </div>
+        </Section>
 
         <ComparisonFaq
           competitorName="BiggerPockets Calculator"
@@ -413,60 +404,71 @@ export default function VsBiggerPocketsCalculatorPage() {
         />
 
         {/* Pricing CTA */}
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Try TrueCap free — see if the address-to-underwrite workflow fits.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Screen a property without a card, inspect the assumptions and core
-            economics, then decide whether TrueCap&apos;s connected Buy Box,
-            Offer Ceiling, downside, and reporting workflow fits how you acquire
-            rentals.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              See Pro pricing
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a deal now
-            </Link>
+        <CloseSection
+          headingId="vs-close-heading"
+          heading={<>Try TrueCap free — see if the address-to-underwrite workflow fits.</>}
+          lede={
+            <>
+              Screen a property without a card, inspect the assumptions and core
+              economics, then decide whether TrueCap&apos;s connected Buy Box,
+              Offer Ceiling, downside, and reporting workflow fits how you acquire
+              rentals.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Run a deal now
+              </Link>
+              <Link
+                href="/pricing"
+                className={buttonVariants({ variant: "outline", size: "cta" })}
+              >
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+        />
+
+        <Section rule="none" rhythm="tight">
+          <div className="max-w-5xl">
+            <RelatedContent kind="vs" slug="biggerpockets-calculator" />
+            <AuthorBio />
+
+            <footer className="mt-10 border-t border-border pt-6">
+              <p className="text-lg font-semibold">Other comparisons:</p>
+              <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+                <li>
+                  <Link
+                    href="/vs/dealcheck"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs DealCheck
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/stessa"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs Stessa
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/mashvisor"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs Mashvisor
+                  </Link>
+                </li>
+              </ul>
+            </footer>
           </div>
-        </section>
-
-        <RelatedContent kind="vs" slug="biggerpockets-calculator" className="mt-10" />
-        <AuthorBio className="mb-10" />
-
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Other comparisons:{" "}
-          <Link
-            href="/vs/dealcheck"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs DealCheck
-          </Link>{" "}
-          ·{" "}
-          <Link
-            href="/vs/stessa"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs Stessa
-          </Link>{" "}
-          ·{" "}
-          <Link
-            href="/vs/mashvisor"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs Mashvisor
-          </Link>
-        </footer>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
@@ -485,7 +487,7 @@ const BP_FAQ: FaqItem[] = [
           href="https://www.biggerpockets.com/rental-property-calculator"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline"
+          className="tc-link"
         >
           calculator page
         </a>{" "}
@@ -513,7 +515,7 @@ const BP_FAQ: FaqItem[] = [
     answer: (
       <>
         See TrueCap&apos;s{" "}
-        <Link href="/pricing" className="underline">
+        <Link href="/pricing" className="tc-link">
           live pricing page
         </Link>{" "}
         and BiggerPockets&apos; official membership and calculator pages for

@@ -7,15 +7,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Calculator,
-  Check,
-  Minus,
-  Sparkles,
-  X,
-} from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -27,8 +18,26 @@ import {
   ComparisonFaq,
   type FaqItem,
 } from "@/components/marketing/comparison-faq";
+import { ActionRow, CloseSection } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  VS_ACTIONS,
+  VS_H1,
+  VS_INTRO,
+  VS_LEDE,
+  VS_LINK_ROW,
+  VS_NOTE,
+  VS_PROSE,
+  VS_SOURCES,
+  VS_TLDR_GRID,
+  VS_TLDR_LABEL,
+  VS_TLDR_LIST,
+  VsHero,
+  VsMatrixTable,
+} from "@/components/marketing/vs-page";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -153,72 +162,66 @@ export default function VsLodgifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage and the /vs hub: no
+    // descendant can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema vsPath="/vs/lodgify" pageName="TrueCap vs Lodgify" />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-        </div>
-
-        {/* Hero */}
-        <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            Honest comparison
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <VsHero>
+          <h1 className={VS_H1}>
             TrueCap vs Lodgify:{" "}
-            <span className="text-primary">
-              underwrite the STR, then run it
-            </span>
+            underwrite the STR, then run it
           </h1>
           <BlogByline />
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <p className={VS_LEDE}>
             Lodgify is short-term rental software for hosts and property
             managers — direct-booking website, channel manager across Airbnb /
             Vrbo / Booking, and reservation tools. TrueCap is a pre-purchase
             underwriting calculator that helps investors screen an STR
             acquisition. Different stages, potentially complementary tools.
           </p>
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
-              <Calculator className="size-4" />
+          <ActionRow className={VS_ACTIONS}>
+            <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
               Run a deal — 60 seconds
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </AnalyzeCtaLink>
             <Link
               href="/pricing"
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+              className={buttonVariants({ variant: "outline", size: "cta" })}
             >
               See TrueCap pricing
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          </ActionRow>
+          <p className={VS_NOTE}>
             Free analyzer: no card or signup
           </p>
-        </section>
+        </VsHero>
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+        {/* Real product screenshot from the free sample deal, set as a
+            document (no fake browser frame). */}
+        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
           <ProductShot
             shot="verdict"
+            frame="document"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link">Run it yourself</Link></>}
           />
-        </section>
+        </Section>
 
         {/* TL;DR */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+        <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
+          <SectionHeading id="vs-tldr-heading">
             TL;DR
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
+          </SectionHeading>
+          <div className={VS_TLDR_GRID}>
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Use TrueCap when
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>You&apos;re evaluating a property as a potential STR.</li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
                 <li>
@@ -227,11 +230,11 @@ export default function VsLodgifyPage() {
                 <li>You&apos;re not yet hosting guests.</li>
               </ul>
             </div>
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Use Lodgify when
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>You operate STRs and need a website + channel manager.</li>
                 <li>You want to add a direct-booking channel.</li>
                 <li>
@@ -242,189 +245,169 @@ export default function VsLodgifyPage() {
               </ul>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* Matrix */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
+        <Section aria-labelledby="vs-matrix-heading">
+          <SectionHeading id="vs-matrix-heading">
             Feature-by-feature
-          </h2>
-          <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+          </SectionHeading>
+          <p className={VS_INTRO}>
             Side-by-side on every dimension that matters for a
             comparison-shopping investor.
           </p>
-          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Feature
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
-                    TrueCap
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Lodgify
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATRIX.map((row) => (
-                  <tr
-                    key={row.feature}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      <div className="flex items-center gap-2">
-                        <WinnerBadge winner={row.winner} side="row" />
-                        {row.feature}
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="truecap" />
-                        <span>{row.truecap}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="lodgify" />
-                        <span>{row.lodgify}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
+            <VsMatrixTable
+              head={["Feature", "TrueCap", "Lodgify"]}
+              rows={MATRIX.map((row) => ({
+                label: row.feature,
+                truecap: row.truecap,
+                competitor: row.lodgify,
+                winner: row.winner === "lodgify" ? "competitor" : row.winner,
+              }))}
+            />
           </ScrollX>
-          <p className="mt-3 text-2xs text-muted-foreground">
+          <p className={VS_SOURCES}>
             Lodgify plan and trial details can change. See{" "}
             <a
               href="https://www.lodgify.com/pricing/"
               target="_blank"
               rel="noopener"
-              className="underline"
+              className="tc-link"
             >
               Lodgify&apos;s official pricing page
             </a>{" "}
             for current terms.
           </p>
-        </section>
+        </Section>
 
         {/* Complementary workflow */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
+        <Section aria-labelledby="vs-fit-heading">
+          <SectionHeading id="vs-fit-heading">
             How solo STR hosts use both
-          </h2>
-          <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
-            <li>
-              <strong>Find an STR-friendly property.</strong> MLS, off-market,
-              or existing STR for sale.
-            </li>
-            <li>
-              <strong>Build an STR revenue range.</strong> Use current market
-              evidence or a third-party STR data source, then verify the
-              assumptions.
-            </li>
-            <li>
-              <strong>Underwrite in TrueCap.</strong> Plug AirDNA&apos;s monthly
-              revenue into the rent field. Run cap rate, DSCR, cash flow.
-            </li>
-            <li>
-              <strong>Continue due diligence.</strong> Verify local STR rules,
-              insurance, financing, taxes, expenses, and revenue evidence before
-              deciding.
-            </li>
-            <li>
-              <strong>Set up Lodgify.</strong> Build your direct-booking site,
-              connect Airbnb / Vrbo / Booking, configure your calendar.
-            </li>
-          </ol>
-          <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want the underwriting half on its own? The free{" "}
-            <Link
-              href="/tools/vacancy-rate-calculator"
-              className="font-semibold text-primary hover:underline"
-            >
-              vacancy rate calculator
-            </Link>{" "}
-            turns vacant nights and turnover cost into the occupancy haircut an
-            STR pro forma actually needs, and our{" "}
-            <Link
-              href="/blog/short-term-rental-underwriting-playbook"
-              className="font-semibold text-primary hover:underline"
-            >
-              short-term rental underwriting playbook
-            </Link>{" "}
-            walks through the rest of the assumptions. Then hand the address to
-            the full{" "}
-            <Link
-              href="/analyze" prefetch={false}
-              className="font-semibold text-primary hover:underline"
-            >
-              TrueCap analyzer
-            </Link>{" "}
-            for cap rate, DSCR and cash flow in one pass.
-          </p>
-        </section>
+          </SectionHeading>
+          <div className={VS_PROSE}>
+            <ol>
+              <li>
+                <strong>Find an STR-friendly property.</strong> MLS, off-market,
+                or existing STR for sale.
+              </li>
+              <li>
+                <strong>Build an STR revenue range.</strong> Use current market
+                evidence or a third-party STR data source, then verify the
+                assumptions.
+              </li>
+              <li>
+                <strong>Underwrite in TrueCap.</strong> Plug AirDNA&apos;s monthly
+                revenue into the rent field. Run cap rate, DSCR, cash flow.
+              </li>
+              <li>
+                <strong>Continue due diligence.</strong> Verify local STR rules,
+                insurance, financing, taxes, expenses, and revenue evidence before
+                deciding.
+              </li>
+              <li>
+                <strong>Set up Lodgify.</strong> Build your direct-booking site,
+                connect Airbnb / Vrbo / Booking, configure your calendar.
+              </li>
+            </ol>
+            <p>
+              Want the underwriting half on its own? The free{" "}
+              <Link
+                href="/tools/vacancy-rate-calculator"
+                className="tc-link"
+              >
+                vacancy rate calculator
+              </Link>{" "}
+              turns vacant nights and turnover cost into the occupancy haircut an
+              STR pro forma actually needs, and our{" "}
+              <Link
+                href="/blog/short-term-rental-underwriting-playbook"
+                className="tc-link"
+              >
+                short-term rental underwriting playbook
+              </Link>{" "}
+              walks through the rest of the assumptions. Then hand the address to
+              the full{" "}
+              <Link
+                href="/analyze" prefetch={false}
+                className="tc-link"
+              >
+                TrueCap analyzer
+              </Link>{" "}
+              for cap rate, DSCR and cash flow in one pass.
+            </p>
+          </div>
+        </Section>
 
         <ComparisonFaq competitorName="Lodgify" items={LODGIFY_FAQ} />
 
         {/* Pricing CTA */}
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Underwrite the next deal — free.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-            live pricing for current terms. No card to start.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              See Pro pricing
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a deal now
-            </Link>
+        <CloseSection
+          headingId="vs-close-heading"
+          heading={<>Underwrite the next deal — free.</>}
+          lede={
+            <>
+              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity,
+              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              live pricing for current terms. No card to start.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Run a deal now
+              </Link>
+              <Link
+                href="/pricing"
+                className={buttonVariants({ variant: "outline", size: "cta" })}
+              >
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+        />
+
+        <Section rule="none" rhythm="tight">
+          <div className="max-w-5xl">
+            <RelatedContent kind="vs" slug="lodgify" />
+            <AuthorBio />
+
+            <footer className="mt-10 border-t border-border pt-6">
+              <p className="text-lg font-semibold">Other comparisons:</p>
+              <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+                <li>
+                  <Link
+                    href="/vs/hostfully"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs Hostfully
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/hostaway"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs Hostaway
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/airdna"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs AirDNA
+                  </Link>
+                </li>
+              </ul>
+            </footer>
           </div>
-        </section>
-
-        <RelatedContent kind="vs" slug="lodgify" className="mt-10" />
-        <AuthorBio className="mb-10" />
-
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Other comparisons:{" "}
-          <Link
-            href="/vs/hostfully"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs Hostfully
-          </Link>
-          {" · "}
-          <Link
-            href="/vs/hostaway"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs Hostaway
-          </Link>
-          {" · "}
-          <Link
-            href="/vs/airdna"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs AirDNA
-          </Link>
-        </footer>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
@@ -489,7 +472,7 @@ const LODGIFY_FAQ: FaqItem[] = [
           href="https://www.airbnb.com/help/article/1857"
           target="_blank"
           rel="noopener"
-          className="underline"
+          className="tc-link"
         >
           Airbnb publishes multiple service-fee structures
         </a>
@@ -500,23 +483,3 @@ const LODGIFY_FAQ: FaqItem[] = [
   },
 ];
 
-function WinnerBadge({
-  winner,
-  side,
-}: {
-  winner: Verdict;
-  side: "row" | "truecap" | "lodgify";
-}) {
-  if (side === "row") return null;
-  if (winner === "tie") {
-    return (
-      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-    );
-  }
-  if (winner === side) {
-    return (
-      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
-    );
-  }
-  return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
-}
