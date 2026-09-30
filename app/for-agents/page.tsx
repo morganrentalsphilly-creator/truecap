@@ -67,9 +67,6 @@ import {
 } from "@/lib/public-pricing";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
-// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
-// scroll; hero and primary CTA links keep the default (see the component).
-import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
 const PAGE_DESCRIPTION =

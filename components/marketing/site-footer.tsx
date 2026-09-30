@@ -198,9 +198,9 @@ export function SiteFooter({
           <div className="col-span-full border-t border-foreground pt-2 lg:col-span-1">
             {/* The same mark as the header (components/brand/app-logo), so the
                 page carries one wordmark; the link stays the footer's own. */}
-            <Link href="/" className="inline-flex min-h-11 min-w-11 items-center">
+            <IntentPrefetchLink href="/" className="inline-flex min-h-11 min-w-11 items-center">
               <AppLogo href="" subtitle="" />
-            </Link>
+            </IntentPrefetchLink>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Underwrite rentals in 60 seconds.
             </p>
@@ -219,6 +219,7 @@ export function SiteFooter({
                   <li key={link.label}>
                     <IntentPrefetchLink
                       href={link.href}
+                      prefetch={link.prefetch}
                       className="inline-flex min-h-11 min-w-11 items-center text-base text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
@@ -260,19 +261,19 @@ export function SiteFooter({
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               About
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/privacy"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Privacy
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/terms"
               className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               Terms
-            </Link>
+            </IntentPrefetchLink>
             {/* NOTE: llms.txt footer link intentionally removed — it
                 looked like a technical artifact to regular visitors
                 ("what is that?"). The /llms.txt URL still resolves
