@@ -1,9 +1,14 @@
 "use client";
 
 /**
- * The site's primary navigation — four destinations, in the order of the
- * story: Analyze | Pricing | Learn. Agent Pro stays out of public navigation
- * until its complete workflow is explicitly released.
+ * The site's primary navigation, agent-first (2026-09 pass):
+ * Analyze | For agents | For investors | Pricing | Learn.
+ *
+ * Both audiences get a named destination because a visitor decides "is this
+ * for me?" from the first screen; the homepage hero speaks to agents, so the
+ * investor entry point has to be unmissable in the header. "For agents"
+ * resolves through agentsHref(): the persona page where Agent Pro is sold,
+ * the plan cards otherwise (see components/marketing/agent-pro-config.tsx).
  *
  * Why this exists: the header carried NO marketing nav at all. A visitor on the
  * homepage could reach /pricing (via the Pro pill) and nothing else — every
@@ -23,6 +28,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { agentsHref, useAgentProConfigured } from "@/components/marketing/agent-pro-config";
 import { ChevronDown, Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -50,11 +56,18 @@ const linkClass =
   "inline-flex min-h-11 min-w-11 items-center justify-center text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground";
 
 export function MarketingNav() {
+  const forAgents = agentsHref(useAgentProConfigured());
   return (
     <nav aria-label="Main" className="hidden items-center gap-5 lg:flex">
       {/* "Analyze" is the product itself — the public analyzer at /analyze. */}
       <Link href="/analyze" prefetch={false} className={linkClass}>
         Analyze
+      </Link>
+      <Link href={forAgents} className={linkClass}>
+        For agents
+      </Link>
+      <Link href="/for-investors" className={linkClass}>
+        For investors
       </Link>
       <Link href="/pricing" className={linkClass}>
         Pricing
@@ -87,6 +100,7 @@ export function MarketingNav() {
  */
 export function MarketingMobileMenu() {
   const [open, setOpen] = useState(false);
+  const forAgents = agentsHref(useAgentProConfigured());
   const itemClass =
     "flex min-h-12 flex-col justify-center rounded-lg px-3 py-2 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   return (
@@ -108,6 +122,12 @@ export function MarketingMobileMenu() {
         <nav aria-label="Main" data-marketing-mobile-nav="" className="mt-4 flex flex-col gap-1">
           <Link href="/analyze" prefetch={false} className={itemClass} onClick={() => setOpen(false)}>
             Analyze a deal
+          </Link>
+          <Link href={forAgents} className={itemClass} onClick={() => setOpen(false)}>
+            For agents
+          </Link>
+          <Link href="/for-investors" className={itemClass} onClick={() => setOpen(false)}>
+            For investors
           </Link>
           <Link href="/pricing" className={itemClass} onClick={() => setOpen(false)}>
             Pricing
