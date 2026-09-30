@@ -23,6 +23,11 @@ export function AnalyzerHandoffLink({
   handoffHref,
   onClick,
   target,
+  // Every handoff goes to /analyze, whose bundle stays off marketing pages
+  // (docs/site-overhaul.md, Phase 7): never prefetched, not even on hover.
+  // 20 callers (the calculator widgets, the content CTA) set no prefetch, so
+  // each one prefetched the analyzer as soon as it rendered.
+  prefetch = false,
   ...props
 }: AnalyzerHandoffLinkProps) {
   const renderedHref = scrubAnalyzerHandoffHref(handoffHref);
@@ -30,6 +35,7 @@ export function AnalyzerHandoffLink({
   return (
     <Link
       {...props}
+      prefetch={prefetch}
       href={renderedHref}
       target={target}
       onClick={(event) => {
