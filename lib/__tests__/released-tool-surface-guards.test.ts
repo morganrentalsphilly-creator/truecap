@@ -19,8 +19,13 @@ describe("released public-tool surfaces", () => {
       .map(read)
       .join("\n");
 
+    // The CTA's label, and the caption line set right under the link when a
+    // widget splits what the analysis adds out of the button (the 1% rule
+    // widget: "Run the full analysis with these numbers", then "cap rate,
+    // CoC, DSCR, and cash flow — free in TrueCap"). Either half naming an
+    // unreleased capability fails.
     expect(source).not.toMatch(
-      /(?:Run the full analysis|Screen the full deal)[^<]{0,220}\b(?:tax|exit|refi|BRRRR|flip)\b/i,
+      /(?:Run the full analysis|Screen the full deal)[^<]{0,220}(?:<\/[A-Za-z.]+>\s*<p\b[^>]*>[^<]{0,220})?\b(?:tax|exit|refi|BRRRR|flip)\b/i,
     );
     expect(source).not.toContain("rehab, refi");
   });

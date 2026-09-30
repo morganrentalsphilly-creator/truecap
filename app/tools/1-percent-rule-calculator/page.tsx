@@ -4,12 +4,15 @@
  * screen: PageHero's 5/7 grid, the H1 and the lede on the left, the widget in
  * the wider column from 1024px (under the lede on phones). Then the guide in
  * a 68ch reading column (ArticleBody, prose-ledger) with the rule printed on
- * rules (ToolFormula) and the FAQ as ruled rows under its one FAQPage node
- * (FaqSection emits it), the close on the heavy rule (CloseSection), and the
- * embed invite, the analyzer CTA and the related links in the same column.
- * Copy stays here, in the page, where the copy guards read it.
+ * rules (ToolFormula), the term-and-detail lists on rules (RuledList), the
+ * next steps as a numbered sequence (StepList), the analyzer CTA where the
+ * guide hands off to TrueCap, and the FAQ as ruled rows under its one
+ * FAQPage node (FaqSection emits it). The page closes once, on the heavy rule
+ * (CloseSection); the embed invite and the related links follow in the same
+ * column. Copy stays here, in the page, where the copy guards read it.
  */
 
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
@@ -23,7 +26,13 @@ import {
   ArticleBody,
 } from "@/components/marketing/article";
 import { FaqSection } from "@/components/marketing/faq-section";
-import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+  RuledList,
+  StepList,
+} from "@/components/marketing/page-parts";
 import { Section } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -125,7 +134,7 @@ export default function OnePercentRulePage() {
             hub link is the visible half of the breadcrumb schema; like the
             blog's hub link it sits under the H1, never above it. */}
         <PageHero
-          title="1% Rule Calculator"
+          title="1% rule calculator"
           lede="The 5-second filter for whether a rental property is worth a deeper underwrite. Pass means run the full analysis; fail means either an appreciation market or an overpriced deal."
           aside={<OnePercentRuleWidget />}
         >
@@ -186,74 +195,83 @@ export default function OnePercentRulePage() {
                 .
               </p>
 
+              {/* Term-and-detail rows on rules (the lead-in is the term), not
+                  bullets; not-prose, so they keep RuledList's own type. */}
               <h2>When the 1% rule works</h2>
-              <ul>
-                <li>
-                  <strong>Cash-flow markets.</strong> Midwest cities (Cleveland,
-                  Detroit, Memphis), Sun Belt suburbs, and rural areas where
-                  prices are low enough that the math works.
-                </li>
-                <li>
-                  <strong>Buy-and-hold investors.</strong> If your strategy
-                  depends on monthly cash flow rather than appreciation, you need
-                  rent that significantly exceeds expenses.
-                </li>
-                <li>
-                  <strong>Triage when looking at many properties.</strong> A
-                  weekend of scrolling listings is exhausting; the 1% rule makes
-                  the scroll productive.
-                </li>
-              </ul>
+              <RuledList
+                className="not-prose my-8"
+                items={[
+                  {
+                    term: "Cash-flow markets.",
+                    detail:
+                      "Midwest cities (Cleveland, Detroit, Memphis), Sun Belt suburbs, and rural areas where prices are low enough that the math works.",
+                  },
+                  {
+                    term: "Buy-and-hold investors.",
+                    detail:
+                      "If your strategy depends on monthly cash flow rather than appreciation, you need rent that significantly exceeds expenses.",
+                  },
+                  {
+                    term: "Triage when looking at many properties.",
+                    detail:
+                      "A weekend of scrolling listings is exhausting; the 1% rule makes the scroll productive.",
+                  },
+                ]}
+              />
 
               <h2>When the 1% rule misleads</h2>
-              <ul>
-                <li>
-                  <strong>Coastal / Tier-1 markets.</strong> Almost nothing in SF,
-                  NYC, Seattle, or Boston passes the 1% rule. That doesn&apos;t
-                  mean the deals are bad — it means cash flow isn&apos;t the goal
-                  in those markets. Investors accept lower rent-to-price ratios in
-                  exchange for higher long-term appreciation.
-                </li>
-                <li>
-                  <strong>Properties with unusual expenses.</strong> A high-HOA
-                  condo, a property with $20k annual property taxes, or a house
-                  needing $60k of rehab can pass the 1% rule and still be a
-                  money-loser.
-                </li>
-                <li>
-                  <strong>Properties with above-market rent.</strong> If the
-                  current tenant is paying more than what a new lease would fetch,
-                  the 1% rule overstates the real return. Confirm rents are
-                  sustainable.
-                </li>
-              </ul>
+              <RuledList
+                className="not-prose my-8"
+                items={[
+                  {
+                    term: "Coastal / Tier-1 markets.",
+                    detail:
+                      "Almost nothing in SF, NYC, Seattle, or Boston passes the 1% rule. That doesn't mean the deals are bad — it means cash flow isn't the goal in those markets. Investors accept lower rent-to-price ratios in exchange for higher long-term appreciation.",
+                  },
+                  {
+                    term: "Properties with unusual expenses.",
+                    detail:
+                      "A high-HOA condo, a property with $20k annual property taxes, or a house needing $60k of rehab can pass the 1% rule and still be a money-loser.",
+                  },
+                  {
+                    term: "Properties with above-market rent.",
+                    detail:
+                      "If the current tenant is paying more than what a new lease would fetch, the 1% rule overstates the real return. Confirm rents are sustainable.",
+                  },
+                ]}
+              />
 
               <h2>After the 1% rule: what to check</h2>
               <p>
                 A property that passes the 1% rule has earned a closer look. Next
                 steps:
               </p>
-              <ol>
-                <li>Pull the actual property tax bill (not estimate)</li>
-                <li>Get an insurance quote from a real broker</li>
-                <li>Walk the comps — what do similar units actually rent for?</li>
-                <li>Get a rough rehab estimate if the property needs work</li>
-                <li>
-                  Run the full underwrite —{" "}
-                  <Link href="/analyze" prefetch={false} className="tc-link">
-                    cap rate
-                  </Link>
-                  ,{" "}
-                  <Link href="/analyze" prefetch={false} className="tc-link">
-                    CoC
-                  </Link>
-                  ,{" "}
-                  <Link href="/analyze" prefetch={false} className="tc-link">
-                    DSCR
-                  </Link>
-                  , cash flow
-                </li>
-              </ol>
+              {/* A real sequence (the paragraph below names steps 4 and 5):
+                  DM Mono numerals on rules. */}
+              <StepList
+                className="not-prose my-8"
+                steps={[
+                  "Pull the actual property tax bill (not estimate)",
+                  "Get an insurance quote from a real broker",
+                  "Walk the comps — what do similar units actually rent for?",
+                  "Get a rough rehab estimate if the property needs work",
+                  <Fragment key="underwrite">
+                    Run the full underwrite —{" "}
+                    <Link href="/analyze" prefetch={false} className="tc-link">
+                      cap rate
+                    </Link>
+                    ,{" "}
+                    <Link href="/analyze" prefetch={false} className="tc-link">
+                      CoC
+                    </Link>
+                    ,{" "}
+                    <Link href="/analyze" prefetch={false} className="tc-link">
+                      DSCR
+                    </Link>
+                    , cash flow
+                  </Fragment>,
+                ]}
+              />
               <p>
                 TrueCap handles steps 4 and 5 in about four minutes once you have
                 the inputs. Two sibling screens are worth knowing too: our{" "}
@@ -269,6 +287,14 @@ export default function OnePercentRulePage() {
                 in 2026 deserves suspicion before celebration.
               </p>
             </ArticleBody>
+
+            {/* The analyzer CTA where the guide hands off ("TrueCap handles
+                steps 4 and 5"), inside the article, so the page closes once,
+                on the CloseSection below. */}
+            <ToolsConversionCta
+              calculatorName="1% rule calculator"
+              hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Projections appear when your free trial or plan includes them."
+            />
 
             {/* FaqSection emits the page's one FAQPage node for these rows. */}
             <FaqSection
@@ -316,19 +342,14 @@ export default function OnePercentRulePage() {
 
         {/* The tail shares the reading column. Each block spaces itself from
             the one above (mt-12); the first one, directly under the close,
-            takes the close's own bottom space instead. */}
+            takes the close's own bottom space instead: the embed invite on
+            the canonical host, the related links wherever the invite
+            renders nothing. */}
         <Section rule="none" rhythm="tight" containerClassName="pt-0 sm:pt-0">
           <div className="max-w-[68ch] [&>*:first-child]:mt-0">
             {/* Backlink engine — quiet, collapsed, renders nothing if this
-
                 tool has no embeddable widget. See the component header. */}
-
             <ToolEmbedInvite slug="1-percent-rule-calculator" />
-
-            <ToolsConversionCta
-              calculatorName="1% rule calculator"
-              hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Projections appear when your free trial or plan includes them."
-            />
 
             <RelatedContent kind="tool" slug="1-percent-rule-calculator" title="1% Rule Calculator" className="mt-12" />
           </div>
