@@ -12,11 +12,13 @@
  * normal SiteFooter + nav.
  *
  * Layout (DESIGN.md, 2026-09 design pass): PageHero with the four facts as
- * a ruled strip, the steps as a StepList, each calculator as a ruled row
- * (not a card) holding its printed code block, the questions through
- * FaqSection (the page's one FAQPage node), and the close on the heavy rule.
+ * a ruled strip and the steps as a StepList in its wider column (the
+ * homepage's 5/7 grid from 1024px), each calculator as a ruled row (not a
+ * card) holding its printed code block, the questions through FaqSection on
+ * the same 5/7 grid, and the close on the heavy rule.
  */
 
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -40,6 +42,7 @@ import {
 } from "@/lib/calculator-registry";
 import { CANONICAL_HOST, CANONICAL_SITE_URL, getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Embed TrueCap Calculators on Your Site (Free)",
@@ -96,12 +99,31 @@ const EMBED_FAQS: { q: string; a: string }[] = [
   },
 ];
 
-/** One cell of the facts strip: two cells a row on phones, four from 640px.
- *  The dl's top Rule opens the strip; soft rules run between rows and
- *  between columns (DESIGN.md: "Soft rule between rows"). The single row
- *  from 640px drops its bottom rule, so the hero's own Rule closes it. */
+/** One cell of the facts strip: two cells a row on phones, four from 640px,
+ *  and two again from 1024px, where the strip sits in the hero's 5/12
+ *  column. The dl's top Rule opens the strip; soft rules run between rows
+ *  and between columns (DESIGN.md: "Soft rule between rows"). From 640px the
+ *  last row drops its soft rule and the dl's own bottom Rule closes the
+ *  strip; from 1024px the first row keeps a soft rule under it, and the
+ *  left-hand cells (odd) lose their column rule. */
 const FACT_CELL =
-  "min-w-0 border-b border-rule-soft py-3 pr-4 even:border-l even:pl-4 sm:border-b-0 sm:border-l sm:pl-4 sm:first:border-l-0 sm:first:pl-0";
+  "min-w-0 border-b border-rule-soft py-3 pr-4 even:border-l even:pl-4 sm:border-b-0 sm:border-l sm:pl-4 sm:first:border-l-0 sm:first:pl-0 lg:nth-[-n+2]:border-b lg:odd:border-l-0 lg:odd:pl-0";
+
+/** A display title with each hyphenated compound held on one line, so a
+ *  heading line never ends on "(After-". The spans only stop the break: the
+ *  text itself is the registry title, byte for byte, so the h3 (and the
+ *  Preview link that is described by it) reads exactly as before. */
+function holdCompounds(title: string): ReactNode {
+  return title.split(/(\S+-\S+)/).map((part, index) =>
+    index % 2 === 1 ? (
+      <span key={index} className="whitespace-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
 
 export default function EmbedHubPage() {
   const agentProConfigured = isAgentProConfigured();
@@ -125,7 +147,12 @@ export default function EmbedHubPage() {
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
-          title="Embed our calculators on your site"
+          // In the hero's 5/12 column from 1024px "Embed our calculators" is
+          // wider than the line (about 417px at 1095 against 396px), and the
+          // H1's hyphens-auto may then split "calculators" to keep two lines.
+          // Manual hyphens here, so it wraps to three whole-word lines. The
+          // text is unchanged.
+          title={<span className="hyphens-manual">Embed our calculators on your site</span>}
           lede={
             <p>
               Real estate bloggers, agents, course creators, and finance writers:
@@ -145,11 +172,31 @@ export default function EmbedHubPage() {
               TrueCap, so you get a free calculator and we get a link back.
             </p>
           }
+          aside={
+            // Quick-start instructions: a real sequence (pick, copy, paste,
+            // save), so numbered. They sit in the hero's wider column from
+            // 1024px (the homepage ledger's slot), so the procedure is on
+            // the first screen and the calculator list starts a section
+            // sooner; on phones they follow the facts strip.
+            <section aria-labelledby="how-to-embed-heading">
+              <SectionHeading id="how-to-embed-heading">How to embed</SectionHeading>
+              <StepList
+                className="mt-8"
+                steps={[
+                  "Pick the calculator below that fits your post or page.",
+                  'Click "Copy" on the embed code.',
+                  "Paste the HTML into a custom-code or embed block in a CMS that permits third-party iframes. Platform and security settings vary, so preview the published page before relying on it.",
+                  "Save. The calculator renders on your page with auto-sized height.",
+                ]}
+              />
+            </section>
+          }
         >
           {/* The four facts as one ruled strip, FRED's metadata grammar: the
               fact at 600, its detail under it in Ink 2, hairline column
-              rules. Each count stays in one text run with its word. */}
-          <dl className="mt-8 grid grid-cols-2 border-t border-border sm:grid-cols-4">
+              rules, closed by its own Rule from 640px. Each count stays in
+              one text run with its word. */}
+          <dl className="mt-8 grid grid-cols-2 border-t border-border sm:grid-cols-4 sm:border-b lg:grid-cols-2">
             <div className={FACT_CELL}>
               <dt className="text-base font-semibold">
                 {EMBEDDABLE_COUNT} embeddable
@@ -179,57 +226,47 @@ export default function EmbedHubPage() {
           </dl>
         </PageHero>
 
-        {/* Quick-start instructions: a real sequence (pick, copy, paste,
-            save), so numbered. The hero's bottom rule opens it, so the
-            section draws no rule of its own (two adjacent rules read as one
-            heavy one). */}
-        <Section rhythm="tight" rule="none" aria-labelledby="how-to-embed-heading">
-          <SectionHeading id="how-to-embed-heading">How to embed</SectionHeading>
-          <StepList
-            className="mt-8"
-            steps={[
-              "Pick the calculator below that fits your post or page.",
-              'Click "Copy" on the embed code.',
-              "Paste the HTML into a custom-code or embed block in a CMS that permits third-party iframes. Platform and security settings vary, so preview the published page before relying on it.",
-              "Save. The calculator renders on your page with auto-sized height.",
-            ]}
-          />
-          <p className="mt-4 max-w-[68ch] text-pretty text-base text-muted-foreground">
-            Want a calculator we don&apos;t have here?{" "}
-            <a
-              href="mailto:hello@usetruecap.com?subject=Embed%20request"
-              className="tc-link -my-3 inline-block py-3"
-            >
-              Send us a note
-            </a>{" "}
-            — we&apos;ll consider adding it.
-          </p>
-        </Section>
-
         {/* The calculators: ruled rows opened by the heavy rule, two columns
-            from 1024px. minmax(0,1fr) and min-w-0 let a snippet's long lines
-            scroll inside its code block instead of widening the page. */}
-        <Section aria-labelledby="pick-heading">
+            from 1024px. The hero's bottom rule opens the section, so it
+            draws no rule of its own (two adjacent rules read as one heavy
+            one). Each row is ruled from the top (the first row, and the
+            second from 1024px, sit on the heavy rule) and the grid's own
+            Rule closes the table, so an odd last row still ends on a rule
+            across the full width. minmax(0,1fr) and min-w-0 let a
+            snippet's long lines scroll inside its code block instead of
+            widening the page. */}
+        <Section rule="none" aria-labelledby="pick-heading">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <SectionHeading id="pick-heading">Pick a calculator</SectionHeading>
             <p className="text-base text-muted-foreground">
               {EMBEDDABLE_COUNT} available
             </p>
           </div>
+          {/* Off the canonical host there is no snippet to hand out; say so
+              once for the list, not once per calculator. */}
+          {snippetsAvailable ? null : (
+            <p className="mt-4 max-w-[68ch] text-pretty text-base text-muted-foreground">
+              Embed code is issued from{" "}
+              <a href={`${CANONICAL_SITE_URL}/embed`} className="tc-link">
+                {CANONICAL_HOST}/embed
+              </a>{" "}
+              so partner snippets always point at the live site.
+            </p>
+          )}
 
-          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-x-12 border-t-2 border-foreground lg:grid-cols-2">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-x-12 border-b border-t-2 border-b-border border-t-foreground lg:grid-cols-2">
             {EMBED_LIST.map((entry) => (
               <article
                 key={entry.slug}
                 aria-labelledby={`embed-${entry.slug}-title`}
-                className="min-w-0 border-b border-border py-6"
+                className="min-w-0 border-t border-border py-6 first:border-t-0 lg:nth-2:border-t-0"
               >
                 <div className="flex items-baseline justify-between gap-4">
                   <h3
                     id={`embed-${entry.slug}-title`}
                     className="font-display text-balance text-h3-sm text-foreground sm:text-2xl"
                   >
-                    {entry.title}
+                    {holdCompounds(entry.title)}
                   </h3>
                   {/* Nine links share the name "Preview"; the title tells
                       them apart without changing the label. */}
@@ -241,7 +278,12 @@ export default function EmbedHubPage() {
                     Preview
                   </Link>
                 </div>
-                <p className="mb-5 mt-2 max-w-[62ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                <p
+                  className={cn(
+                    "mt-2 max-w-[62ch] text-pretty text-base leading-relaxed text-muted-foreground",
+                    snippetsAvailable && "mb-5",
+                  )}
+                >
                   {entry.description}
                 </p>
                 {snippetsAvailable ? (
@@ -251,18 +293,21 @@ export default function EmbedHubPage() {
                     siteUrl={siteUrl}
                     defaultHeight={entry.defaultHeight}
                   />
-                ) : (
-                  <p className="border-t border-rule-soft pt-3 text-pretty text-base text-muted-foreground">
-                    Embed code is issued from{" "}
-                    <a href={`${CANONICAL_SITE_URL}/embed`} className="tc-link">
-                      {CANONICAL_HOST}/embed
-                    </a>{" "}
-                    so partner snippets always point at the live site.
-                  </p>
-                )}
+                ) : null}
               </article>
             ))}
           </div>
+          {/* Answers "not in this list", so it follows the list. */}
+          <p className="mt-6 max-w-[68ch] text-pretty text-base text-muted-foreground">
+            Want a calculator we don&apos;t have here?{" "}
+            <a
+              href="mailto:hello@usetruecap.com?subject=Embed%20request"
+              className="tc-link -my-3 inline-block py-3"
+            >
+              Send us a note
+            </a>{" "}
+            — we&apos;ll consider adding it.
+          </p>
         </Section>
 
         {/* Agents (2026-09 agent-first pass): a working calculator on an
@@ -296,20 +341,29 @@ export default function EmbedHubPage() {
 
         {/* The page's one FAQPage node comes from FaqSection and mirrors
             these rows exactly. The hub already offers a mailto above, so the
-            shared contact line is left off. */}
+            shared contact line is left off. layout="split": the heading
+            beside the ruled rows from 1024px, as on the homepage, /pricing
+            and /for-agents, so the rows run to the calculator grid's edge. */}
         <FaqSection
           id="questions"
           heading="Questions"
           items={EMBED_FAQS}
           contact={null}
+          layout="split"
           // The hub never carried FAQPage markup; the restyle keeps its
           // structured data as it was (a new rich-result claim is an SEO
           // decision, not a design one).
           structuredData={false}
         />
 
+        {/* "real estate" held on one line: in the 5/12 cell at 1095px the
+            balanced break otherwise splits the compound. */}
         <CloseSection
-          heading="Have a real estate audience?"
+          heading={
+            <>
+              Have a <span className="whitespace-nowrap">real estate</span> audience?
+            </>
+          }
           headingId="embed-close-heading"
           lede="Embed a calculator and write a short post around it. Your readers get a working tool without leaving your page, and we get a credit link back."
           actions={
