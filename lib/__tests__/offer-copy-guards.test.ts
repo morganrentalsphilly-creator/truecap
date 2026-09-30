@@ -23,6 +23,7 @@ describe("public Pro calls to action", () => {
       "app/for-buy-and-hold/page.tsx",
       "app/for-house-hackers/page.tsx",
       "components/marketing/landing-sections.tsx",
+      "components/marketing/faq-section.tsx",
     ];
 
     expect(files.length).toBeGreaterThan(40);
@@ -121,7 +122,8 @@ describe("offer trust language", () => {
     const auth = read("components/auth/auth-shell.tsx");
     const logo = read("components/brand/app-logo.tsx");
     const hero = read("components/marketing/marketing-hero.tsx");
-    const landing = read("components/marketing/landing-sections.tsx");
+    // FaqSection moved to its own module; its rows still render on "/".
+    const landing = `${read("components/marketing/landing-sections.tsx")}\n${read("components/marketing/faq-section.tsx")}`;
     const config = read("lib/marketing-offer-config.ts");
 
     expect(auth).not.toMatch(/real-time data and investment trends/i);

@@ -45,6 +45,7 @@ describe("social proof renders nothing it cannot substantiate", () => {
       "components/marketing/testimonials.tsx",
       "components/marketing/usage-counter.tsx",
       "components/marketing/landing-sections.tsx",
+      "components/marketing/faq-section.tsx",
     ]) {
       const source = read(path);
       for (const pattern of forbidden) {

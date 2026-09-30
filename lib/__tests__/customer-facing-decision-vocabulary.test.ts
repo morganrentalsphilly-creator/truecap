@@ -101,6 +101,7 @@ describe("customer-facing decision vocabulary", () => {
       "components/marketing/comparison-faq.tsx",
       "components/marketing/seo-analyzer-cta.tsx",
       "components/marketing/landing-sections.tsx",
+      "components/marketing/faq-section.tsx",
       "lib/marketing-offer-config.ts",
       "emails/lifecycle-content/pro-nudge.json",
     ]) {

@@ -4,8 +4,9 @@
  * numbers come from (DataSourcesSection), what the client receives
  * (ClientReceivesSection), the plans (PdfProUpsell), who builds it
  * (BuiltByInvestor), verified proof (SocialProof, empty until real records
- * exist), the questions (HomepageFaq) and the close (FinalCta). FaqSection,
- * HomepageFaq and VsCompetitors are shared with other marketing pages.
+ * exist), the questions (HomepageFaq) and the close (FinalCta). FaqSection
+ * (defined in faq-section.tsx, re-exported here), HomepageFaq and
+ * VsCompetitors are shared with other marketing pages.
  */
 
 // NOTE: this module is intentionally a SERVER component (no "use client").
@@ -22,7 +23,6 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
@@ -30,9 +30,9 @@ import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
 import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
 import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { OpenLedger } from "@/components/ledger/open-ledger";
-import { DisclosureMark } from "@/components/ledger/ledger-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { CLIENT_RECEIVES } from "@/lib/client-receives";
 import {
@@ -51,6 +51,10 @@ import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { JsonLd } from "@/components/seo/json-ld";
 import { AGENT_FAQS } from "@/lib/agent-faqs";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+
+// FaqSection lives in its own module so an article can import it without
+// this file's client islands; the pages that import it from here keep working.
+export { FaqSection };
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -597,104 +601,6 @@ export function HomepageFaq({
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: allItems.map((f) => ({
-              "@type": "Question",
-              name: f.q,
-              acceptedAnswer: { "@type": "Answer", text: f.a },
-            })),
-          }}
-        />
-      ) : null}
-    </>
-  );
-}
-
-/**
- * One FAQ block, any audience (DESIGN.md "Components": FAQ). A ruled list of
- * native <details> rows: no JS, every row reachable by keyboard, answers
- * capped at 64ch. HomepageFaq and the /for-agents objection section render
- * through it so the markup, the a11y pattern and the optional FAQPage JSON-LD
- * stay identical. Only one URL should claim a given FAQ set in structured
- * data (structuredData=false on the copies).
- */
-export function FaqSection({
-  heading,
-  intro,
-  items,
-  structuredData = true,
-  id,
-  compact = false,
-  layout = "stack",
-  contact: contactOverride,
-}: {
-  heading: string;
-  intro?: string;
-  items: readonly { q: string; a: string }[];
-  structuredData?: boolean;
-  id?: string;
-  /** Stacked directly under another FaqSection: no top rule, no top space. */
-  compact?: boolean;
-  /** "split": the heading beside the list from 1024px (the homepage). */
-  layout?: "stack" | "split";
-  /** Replaces the default contact line; null drops it. */
-  contact?: ReactNode;
-}) {
-  const headingId = id ? `${id}-heading` : undefined;
-  const contact = contactOverride !== undefined ? contactOverride : (
-    <p className="mt-4 text-base text-muted-foreground">
-      Still have a question?{" "}
-      <a href="mailto:hello@usetruecap.com" className="tc-link inline-flex min-h-11 items-center">
-        Email us
-      </a>
-      .
-    </p>
-  );
-  return (
-    <>
-      <Section
-        id={id}
-        rule={compact ? "none" : "rule"}
-        containerClassName={compact ? "pt-0 sm:pt-0" : undefined}
-        aria-labelledby={headingId}
-      >
-        <div
-          className={
-            layout === "split"
-              ? "grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
-              : "max-w-3xl"
-          }
-        >
-          <div>
-            <SectionHeading id={headingId}>{heading}</SectionHeading>
-            {intro ? (
-              <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
-                {intro}
-              </p>
-            ) : null}
-            {layout === "split" ? contact : null}
-          </div>
-          <div className={layout === "split" ? "border-t-2 border-foreground" : "mt-8 border-t-2 border-foreground"}>
-            {items.map((faq) => (
-              <details key={faq.q} className="group border-b border-border">
-                <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
-                  <span className="text-lg font-semibold">{faq.q}</span>
-                  <DisclosureMark className="mt-1.5" />
-                </summary>
-                <p className="max-w-[64ch] pb-5 text-base leading-relaxed text-muted-foreground">
-                  {faq.a}
-                </p>
-              </details>
-            ))}
-          </div>
-          {layout === "split" ? null : contact}
-        </div>
-      </Section>
-      {/* Only one URL should claim this exact FAQ block in structured data. */}
-      {structuredData ? (
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: items.map((f) => ({
               "@type": "Question",
               name: f.q,
               acceptedAnswer: { "@type": "Answer", text: f.a },

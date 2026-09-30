@@ -16,6 +16,7 @@ const PUBLIC_FILES = [
   "app/for-agents/page.tsx",
   "components/marketing/marketing-hero.tsx",
   "components/marketing/landing-sections.tsx",
+  "components/marketing/faq-section.tsx",
   "emails/lifecycle-content/trial-day1.json",
   "emails/lifecycle-content/welcome.json",
   "lib/product-facts.ts",

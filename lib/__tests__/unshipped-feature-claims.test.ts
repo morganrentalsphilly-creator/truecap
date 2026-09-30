@@ -102,7 +102,8 @@ describe("no marketing surface sells an unshipped feature", () => {
   it("the retired spreadsheet comparison rows stay deleted", () => {
     // They contained a "Tax / depreciation math -> truecap: true" row. Dead
     // code that asserts something untrue is one re-render from being live.
-    const source = read("components/marketing/landing-sections.tsx");
+    // FaqSection moved to its own module, out of landing-sections.tsx.
+    const source = `${read("components/marketing/landing-sections.tsx")}\n${read("components/marketing/faq-section.tsx")}`;
     expect(source).not.toContain("COMPARISON_ROWS");
     expect(source).not.toMatch(/Tax \/ depreciation math/i);
   });
