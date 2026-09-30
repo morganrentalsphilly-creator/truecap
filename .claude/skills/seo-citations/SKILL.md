@@ -100,7 +100,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
 - **Repo guard tests.** You cannot run them, so read them:
   - `customer-facing-decision-vocabulary.test.ts` and `public-underwriting-claims-guard.test.ts`: no banned phrase in an added line (e.g. "worth buying", "TrueCap recommends", "HUD Fair Market Rent for the exact address"). FMR is never called "average rent".
   - `trust-language-guards`, `public-funnel-trust-guards`, `comparison-claim-guards`: the step-1 pins are still present. For example, `app/vs/zillow-rent-estimate` keeps its huduser.gov link, comparison copy keeps "see live pricing", and no TrueCap price such as "$29.99" appears on comparison surfaces.
-  - `vs-page-copy-integrity`: the sentence just before a /vs page's first `<Link href="/tools/` is unchanged.
+  - `vs-page-copy-integrity`: the sentence just before a /vs page's first `<IntentPrefetchLink href="/tools/` (or `<Link href="/tools/`) is unchanged.
   - `seo-guards.test.ts`: `FAQS`/FAQPage are still present and no internal link was removed (the link ratchet).
   - `blog-title-length.test.ts`: the title consts are untouched.
   - `internal-links.test.ts`: add no internal links; those belong to seo-internal-links.

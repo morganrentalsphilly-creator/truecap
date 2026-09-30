@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -251,12 +252,12 @@ export default function VsDealCheckPage() {
           </div>
           <p className={VS_FOOTNOTE}>
             Weighing more than these two? Full list:{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/best-dealcheck-alternatives"
               className="tc-link"
             >
               7 best DealCheck alternatives
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </Section>
 
@@ -340,34 +341,34 @@ export default function VsDealCheckPage() {
             <p>
               Prefer to get your head around a single metric first? Our
               walkthroughs on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 how to calculate cap rate
-              </Link>
+              </IntentPrefetchLink>
               ,{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>
+              </IntentPrefetchLink>
               , and the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/brrrr-method-explained"
                 className="tc-link"
               >
                 BRRRR workflow guide
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               each walk the math end to end before you commit to a full
               underwrite. For the workflow itself, our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               shows exactly how a TrueCap user moves from listing to a reviewed
               underwrite.
             </p>
@@ -400,12 +401,12 @@ export default function VsDealCheckPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -419,20 +420,20 @@ export default function VsDealCheckPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>
@@ -479,9 +480,9 @@ const DEALCHECK_FAQ: FaqItem[] = [
     answer: (
       <>
         See TrueCap&apos;s{" "}
-        <Link href="/pricing" className="tc-link">
+        <IntentPrefetchLink href="/pricing" className="tc-link">
           live pricing page
-        </Link>{" "}
+        </IntentPrefetchLink>{" "}
         and DealCheck&apos;s official{" "}
         <a
           href="https://dealcheck.io/pricing/"
@@ -545,9 +546,9 @@ const DEALCHECK_FAQ: FaqItem[] = [
         showing that client&apos;s Offer Ceiling, and sending a co-branded
         decision memo the client can open without an account and rerun with
         their own assumptions. See{" "}
-        <Link href={AGENTS_HREF} className="tc-link">
+        <IntentPrefetchLink href={AGENTS_HREF} className="tc-link">
           TrueCap for agents
-        </Link>{" "}
+        </IntentPrefetchLink>{" "}
         for what the client receives.
       </>
     ),

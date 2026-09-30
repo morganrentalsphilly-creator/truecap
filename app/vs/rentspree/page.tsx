@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -338,12 +339,12 @@ export default function VsRentspreePage() {
             </ol>
             <p>
               Need only the underwriting half to send a client?{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
                 className="tc-link"
               >
                 Cap rate vs cash-on-cash vs DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               explains in plain language which number answers which question —
               handy when a buyer asks why the deal works. The full{" "}
               <Link
@@ -379,12 +380,12 @@ export default function VsRentspreePage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -398,28 +399,28 @@ export default function VsRentspreePage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/turbotenant"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs TurboTenant
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/avail"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Avail
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentredi"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs RentRedi
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

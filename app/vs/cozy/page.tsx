@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -310,12 +311,12 @@ export default function VsCozyPage() {
             </ol>
             <p>
               Only need the underwriting piece? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/break-even-calculator"
                 className="tc-link"
               >
                 break-even calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               tells you how long a property takes to return your cash, and the
               full{" "}
               <Link
@@ -325,19 +326,19 @@ export default function VsCozyPage() {
                 TrueCap analyzer
               </Link>{" "}
               turns an address into cap rate,{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/glossary/cash-on-cash-return"
                 className="tc-link"
               >
                 cash-on-cash return
-              </Link>
+              </IntentPrefetchLink>
               , and DSCR — all free, the way Cozy used to be. Our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -365,12 +366,12 @@ export default function VsCozyPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -384,28 +385,28 @@ export default function VsCozyPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/turbotenant"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs TurboTenant
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/avail"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Avail
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentredi"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs RentRedi
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

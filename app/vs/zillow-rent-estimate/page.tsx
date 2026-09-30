@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -370,12 +371,12 @@ export default function VsZillowRentPage() {
                 free deal analyzer
               </Link>{" "}
               to turn it into a cap rate and a cash-on-cash return. Our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 underwriting a rental in 60 seconds
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               shows the whole path from address to a reviewed underwrite.
             </p>
           </div>
@@ -405,12 +406,12 @@ export default function VsZillowRentPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -424,28 +425,28 @@ export default function VsZillowRentPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentometer"
                     className={VS_LINK_ROW}
                   >
                     vs Rentometer
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/biggerpockets-calculator"
                     className={VS_LINK_ROW}
                   >
                     vs BiggerPockets
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

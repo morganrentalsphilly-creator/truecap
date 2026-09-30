@@ -13,6 +13,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -374,27 +375,27 @@ export default function VsRentRediPage() {
             </ol>
             <p>
               Want to see the underwriting step in action? The walkthroughs on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 how to calculate cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               show the math a lender checks long before RentRedi ever collects a
               dollar of rent, and the guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               runs the whole sequence on a real address.
             </p>
           </div>
@@ -423,12 +424,12 @@ export default function VsRentRediPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -442,28 +443,28 @@ export default function VsRentRediPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/avail"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Avail
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

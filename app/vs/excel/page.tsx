@@ -9,6 +9,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -159,12 +160,12 @@ const MATRIX: Row[] = [
     truecap: (
       <>
         Inline tooltips + a{" "}
-        <Link
+        <IntentPrefetchLink
           href="/glossary"
           className="tc-link"
         >
           real estate glossary
-        </Link>{" "}
+        </IntentPrefetchLink>{" "}
         with full definitions per term
       </>
     ),
@@ -354,27 +355,27 @@ export default function VsExcelPage() {
             <p>
               Want to sanity-check one formula before you trust a whole sheet?
               Check your payment row against the released{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/mortgage-payment-calculator"
                 className="tc-link"
               >
                 mortgage payment calculator
-              </Link>
+              </IntentPrefetchLink>
               , then read your sheet&apos;s cap rate and coverage ratio back
               against the worked examples in{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 how to calculate cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>
+              </IntentPrefetchLink>
               . When you want those numbers produced from an address instead of
               typed in, the{" "}
               <Link
@@ -385,12 +386,12 @@ export default function VsExcelPage() {
               </Link>{" "}
               computes them on one documented engine. And if you&apos;re building
               the income statement by hand, our guide to a{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/rental-property-pro-forma-explained"
                 className="tc-link"
               >
                 rental property pro forma
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through every line a spreadsheet should have.
             </p>
           </div>
@@ -416,12 +417,12 @@ export default function VsExcelPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -435,28 +436,28 @@ export default function VsExcelPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/biggerpockets-calculator"
                     className={VS_LINK_ROW}
                   >
                     vs BiggerPockets
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

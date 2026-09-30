@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -314,12 +315,12 @@ export default function VsCrexiPage() {
             </ul>
             <p>
               Want the residential underwriting half on its own? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/closing-cost-calculator"
                 className="tc-link"
               >
                 closing cost calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               sizes the cash you actually need at the table, and the full{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -328,20 +329,20 @@ export default function VsCrexiPage() {
                 TrueCap analyzer
               </Link>{" "}
               returns{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/glossary/cap-rate"
                 className="tc-link"
               >
                 cap rate
-              </Link>
+              </IntentPrefetchLink>
               , DSCR, and cash flow from an address — no CRE model required. Our
               guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -369,12 +370,12 @@ export default function VsCrexiPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -388,28 +389,28 @@ export default function VsCrexiPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/roofstock"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Roofstock
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/propstream"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs PropStream
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

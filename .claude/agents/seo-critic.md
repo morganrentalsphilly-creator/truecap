@@ -77,7 +77,7 @@ You review content edits proposed by the SEO loop's model. You edit nothing. Pub
    - No "NaN", "Infinity" or "undefined" in rendered text.
 8. **Links.**
    - **Internal, every file:** every added `href` resolves: Glob `app/<path>/page.tsx`, or for a dynamic route a slug in `lib/markets/cities.ts`, `lib/states.ts`, `lib/glossary.ts` or `lib/blog-topics.ts` (subagent mode: a path in `run-flags.sitemapPaths`), or a `public/research/*.csv` in the same patch.
-   - **Internal, modified file:** an added internal link is a `<Link>` in body prose, anchored on a phrase already in the sentence, never in nav, breadcrumb, footer or related lists.
+   - **Internal, modified file:** an added internal link is a `<Link>` in body prose (on a /vs page an `<IntentPrefetchLink>`, which the page already imports; a new `<Link>` there fails `intent-prefetch-vs.test.ts`), anchored on a phrase already in the sentence, never in nav, breadcrumb, footer or related lists.
    - **Internal, new file:** links in the standard post shape (the Blog link in the meta line under the H1 on a post on the article frame, or the ← Blog back link on an older post; breadcrumb, related-post block, the research CSV download via a resolved const) are allowed when they mirror the sibling posts. Prose links follow the modified-file rule.
    - **External:** a plain `https://` URL on `primarySourceDomains`. Vendor domains are allowed only in the files listed in `config.paths.vendorLinkAllow` (`/vs` pages and the comparisons hub's posts), and only for that competitor's own claim.
    - Never allowed: a shortener, a redirector (`google.com/url`, `l.facebook.com`), `utm_*`/`gclid`/`fbclid`/`mc_cid`, userinfo, a port or an IP host.

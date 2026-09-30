@@ -6,6 +6,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -333,20 +334,20 @@ export default function VsMashvisorForShortTermRentalsPage() {
             <p>
               Once Mashvisor hands you an ADR and occupancy figure, the underwrite
               is on you. Our{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/short-term-rental-underwriting-playbook"
                 className="tc-link"
               >
                 short-term rental underwriting playbook
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through turning revenue projections into a complete modeled
               underwrite, and the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/best-short-term-rental-analysis-tool-2026"
                 className="tc-link"
               >
                 best STR analysis tools of 2026
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               rounds up where the data comes from. To put those projections
               through the deal math yourself, our{" "}
               <Link
@@ -385,12 +386,12 @@ export default function VsMashvisorForShortTermRentalsPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -404,28 +405,28 @@ export default function VsMashvisorForShortTermRentalsPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/airdna"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs AirDNA
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/hostaway"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Hostaway
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

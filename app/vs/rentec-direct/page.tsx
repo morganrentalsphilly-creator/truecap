@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -328,26 +329,26 @@ export default function VsRentecDirectPage() {
             </ol>
             <p>
               Only here for the acquisition math? Our walkthroughs on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 how to calculate cap rate
-              </Link>
+              </IntentPrefetchLink>
               ,{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>
+              </IntentPrefetchLink>
               , and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-noi-rental-property"
                 className="tc-link"
               >
                 how to calculate NOI
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               each work an example end to end, so the actuals Rentec Direct
               reports later have something to be measured against. To skip the
               arithmetic, run the address through the full{" "}
@@ -387,12 +388,12 @@ export default function VsRentecDirectPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -406,28 +407,28 @@ export default function VsRentecDirectPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/buildium"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Buildium
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/turbotenant"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs TurboTenant
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/avail"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Avail
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

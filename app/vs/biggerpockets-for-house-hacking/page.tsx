@@ -10,6 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -363,12 +364,12 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <div className={VS_PROSE}>
             <p>
               New to running an owner-occupant deal? Our{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/house-hack-underwriting-guide"
                 className="tc-link"
               >
                 house hack underwriting guide
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through counting only the rental units&apos; income. To
               pressure-test the numbers on your own deal, our{" "}
               <Link
@@ -410,12 +411,12 @@ export default function VsBiggerPocketsForHouseHackingPage() {
               >
                 Run a deal — 60 seconds
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/for-house-hackers"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 For house hackers
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -429,20 +430,20 @@ export default function VsBiggerPocketsForHouseHackingPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/biggerpockets-calculator"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs BiggerPockets
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

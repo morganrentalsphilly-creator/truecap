@@ -44,10 +44,15 @@ function vsPages(): string[] {
     });
 }
 
-/** Text of the CTA lead-in: the prose right before the first /tools/ link. */
+/**
+ * Text of the CTA lead-in: the prose right before the first /tools/ link.
+ * Below the hero a /vs page writes its internal links as IntentPrefetchLink
+ * (intent-prefetch-vs.test.ts), so the link is found under either name; a
+ * page that still had a next/link <Link> there reads the same.
+ */
 function toolLeadIn(source: string): string | null {
   const flat = source.replace(/\{"\s*"\}/g, " ").replace(/\s+/g, " ");
-  const linkAt = flat.indexOf('<Link href="/tools/');
+  const linkAt = flat.search(/<(?:Link|IntentPrefetchLink) href="\/tools\//);
   if (linkAt === -1) return null;
   const before = flat
     .slice(0, linkAt)
