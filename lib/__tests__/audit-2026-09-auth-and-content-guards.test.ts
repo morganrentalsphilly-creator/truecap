@@ -131,7 +131,15 @@ describe("article tables survive a 375px viewport", () => {
 
   it("ScrollX renders the cue only while the region overflows", () => {
     const scrollX = read("components/ui/scroll-x.tsx");
-    expect(scrollX).toMatch(/\{scrollable \? \(\s*<p className="mt-1 text-2xs text-muted-foreground sm:hidden">\s*Scroll for more/);
+    // Design pass (2026-09-30): the caption is 14px Ink 2 (text-2xs is retired),
+    // reads "Scroll for more" with no arrow suffix, and no gradient fade sits
+    // over the figures. With the fade gone the caption is the only cue, so no
+    // breakpoint hides it: it shows at any width where the region overflows,
+    // and still only then. The ban covers Tailwind v4's gradient spellings
+    // (bg-linear-*, bg-radial-*, bg-conic-*) and color stops, not only v3's
+    // bg-gradient-*.
+    expect(scrollX).toMatch(/\{scrollable \? \(\s*<p className="mt-1 text-sm text-muted-foreground">\s*Scroll for more\s*<\/p>/);
+    expect(scrollX).not.toMatch(/bg-(?:gradient|linear|radial|conic)-|\bfrom-|text-2xs|→/);
     expect(scrollX).toContain("[&_table_td:first-child]:sticky");
   });
 });

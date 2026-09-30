@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 const normalizeSource = (source: string) =>
@@ -220,12 +223,16 @@ describe("conversion touch targets", () => {
     );
   });
 
-  it.each(["components/marketing/seo-analyzer-cta.tsx"])(
-    "keeps audited links at least 44 CSS pixels tall in %s",
-    (path) => {
-      expect(read(path), path).toContain("min-h-11");
-    },
-  );
+  it("keeps the shared analyzer CTA link at least 44 CSS pixels tall", () => {
+    // The link takes the marketing button (buttonVariants({ size: "cta" })),
+    // whose min-height lives in components/ui/button.tsx, so the rendered
+    // class is what carries the rule, not a literal in the CTA's source.
+    const html = renderToStaticMarkup(createElement(SeoAnalyzerCta));
+    const links = html.match(/<a\b[^>]*>/g) ?? [];
+    expect(links).toHaveLength(1);
+    // Only an unprefixed utility counts: "sm:min-h-11" leaves phones short.
+    expect(links[0]).toMatch(/\bclass="(?:[^"]*\s)?min-h-1[12](?:\s|")/);
+  });
 
   it.each([
     "components/marketing/blog-sticky-cta.tsx",

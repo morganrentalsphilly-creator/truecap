@@ -15,10 +15,13 @@ import { cn } from "@/lib/utils";
  * screens it stays a plain container. The `overflow-x-auto` class is kept
  * so the global containment rule in app/globals.css still applies.
  *
- * `cue` adds a right-edge fade and a "Scroll for more →" caption while the
- * content overflows, and `stickyFirstColumn` pins a table's first column so
- * a phone reader always sees which row a number belongs to (the same audit
- * found article tables showing only their label column at 375px).
+ * `cue` adds a "Scroll for more" caption while the content overflows, at
+ * any width (a wide table in a tablet-width column overflows too, and
+ * overlay scrollbars stay hidden there), and `stickyFirstColumn` pins a
+ * table's first column so a phone reader always sees which row a number
+ * belongs to (the same audit found article tables showing only their label
+ * column at 375px). The caption is plain 14px Ink 2 under the region: no
+ * gradient fade over the figures and no arrow (DESIGN.md chrome).
  */
 export function ScrollX({
   label,
@@ -29,7 +32,7 @@ export function ScrollX({
   ...rest
 }: ComponentProps<"div"> & {
   label: string;
-  /** Fade + caption while the content overflows. */
+  /** A "Scroll for more" caption while the content overflows. */
   cue?: boolean;
   /** Pin `th:first-child` / `td:first-child` of a wrapped table. */
   stickyFirstColumn?: boolean;
@@ -71,18 +74,10 @@ export function ScrollX({
 
   return (
     <>
-      <div className="relative">
-        {region}
-        {scrollable ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-xl bg-gradient-to-l from-card to-transparent"
-          />
-        ) : null}
-      </div>
+      {region}
       {scrollable ? (
-        <p className="mt-1 text-2xs text-muted-foreground sm:hidden">
-          Scroll for more →
+        <p className="mt-1 text-sm text-muted-foreground">
+          Scroll for more
         </p>
       ) : null}
     </>
