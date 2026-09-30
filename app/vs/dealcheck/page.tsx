@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { ArrowRight, ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -99,6 +100,13 @@ const MATRIX: Row[] = [
     workflow: "Mobile",
     truecap: "Responsive web app that can be installed as a PWA.",
     dealcheck: "Native iOS and Android apps plus web access.",
+  },
+  {
+    workflow: "Investor clients (agents)",
+    truecap:
+      "Agent Pro adds a client roster with a Buy Box per client, deal assignment, and client-report share links that open without an account; co-branded share pages and PDFs are in Pro and Agent Pro, with TrueCap's name kept.",
+    dealcheck:
+      "Branded PDF reports are published on its plans, including the free one; check its site for how client criteria and sharing work.",
   },
   {
     workflow: "Best fit",
@@ -438,6 +446,13 @@ export default function VsDealCheckPage() {
   );
 }
 
+/**
+ * /for-agents permanently redirects to /pricing while Agent Pro's Stripe
+ * Price is absent on a deployment; the link-graph guard forbids linking a
+ * redirect, so that deployment links the plan cards instead.
+ */
+const AGENTS_HREF = isAgentProConfigured() ? "/for-agents" : "/pricing#plans";
+
 const DEALCHECK_FAQ: FaqItem[] = [
   {
     question: "Is TrueCap a free alternative to DealCheck?",
@@ -517,6 +532,24 @@ const DEALCHECK_FAQ: FaqItem[] = [
         DealCheck&apos;s full property-detail import is deeper there. The
         trade-off is deliberate: TrueCap labels the source beside each starting
         value so you can review and replace it.
+      </>
+    ),
+  },
+  {
+    question: "Which is better for an agent with investor clients?",
+    answer: (
+      <>
+        It depends on the job. DealCheck gives you a branded PDF report on its
+        plans, including the free one, so if all you need is a branded
+        calculator PDF for a client, DealCheck is fine. TrueCap Agent Pro is
+        for screening each listing against a specific client&apos;s Buy Box,
+        showing that client&apos;s Offer Ceiling, and sending a co-branded
+        decision memo the client can open without an account and rerun with
+        their own assumptions. See{" "}
+        <Link href={AGENTS_HREF} className="underline">
+          TrueCap for agents
+        </Link>{" "}
+        for what the client receives.
       </>
     ),
   },
