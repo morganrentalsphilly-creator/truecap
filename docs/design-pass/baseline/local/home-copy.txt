@@ -1,0 +1,255 @@
+Stop forwarding listings. Start sending deals that already pencil.
+
+Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable.
+
+Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable assumptions
+
+Analyze a deal free
+
+See the sample deal →
+
+Free. No account. Your first full decision is included.
+
+Buying for your own portfolio? Same analyzer, your own Buy Box. For investors →
+
+Real output from the free sample deal.
+Live sample →
+
+The calculator isn't the hard part. The offer is.
+
+Traditional calculators tell you what a property's returns look like. Before an investor client writes an offer, they ask their agent three other things:
+
+Does this fit my criteria?
+What's the highest price that still works?
+What could go wrong?
+From listing to offer in three steps.
+ANALYZE
+Paste the listing at the showing
+
+Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.
+
+SCREEN
+Screen it against the client's Buy Box
+
+Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.
+
+CEILING
+Send the Offer Ceiling, co-branded
+
+The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers.
+
+Included in your first complete decision
+
+Analyze a property free
+
+Free · no card · no signup
+
+Free screens the deal. Pro tells you what to offer.
+
+Free shows the economics before you spend more time on a property. Pro answers four questions on every deal: does it meet my criteria, what is my Offer Ceiling, what could make it fail, and can I defend the analysis? Agent Pro answers them per client, with a roster.
+
+Features included with Free and Pro
+Feature
+	Free
+FIRST DECISION
+	Pro
+PAID PLAN
+
+Complete decision workflow	1 decision	
+Included
+
+Cap rate · CoC · DSCR · cash flow	
+Included
+	
+Included
+
+0–100 Deal score + context	
+Included
+	
+Included
+
+Decision memo/report	One exact deal	Unlimited
+Offer Ceiling + Buy Box targets	One exact deal	
+Included
+
+Save & revisit deals	Up to 5	Unlimited
+Compare deals side-by-side	
+Not included
+	Up to 4
+Buy Box fit on every deal	
+Not included
+	
+Included
+
+10-year cash-flow projection	
+Not included
+	
+Included
+
+Downside sensitivity checks	One exact deal	
+Included
+PRO
+Know what to offer.
+
+See whether each deal meets your Buy Box, find your Offer Ceiling, stress-test the assumptions, and document the decision in a report you can hand to a partner or lender.
+
+See Pro pricing
+
+Create an account for a 21-day free trial: up to 3 Pro deals and 1 comparison. No card and no automatic subscription.
+
+AGENT PRO
+Win investor clients.
+
+A Buy Box per client, deals assigned and screened to their targets, and a co-branded memo they open without an account.
+
+See TrueCap for agents →
+Visible sources. Editable assumptions.
+
+TrueCap labels sourced benchmarks and manual fallbacks, and keeps every assumption editable. Start fast, then replace starting values with verified property facts, local comps, and lender terms.
+
+HUD Fair Market Rent
+RENT
+
+HUD Fair Market Rent by county or ZIP when available—a starting benchmark to compare with local rent comps.
+
+FRED 30-year fixed
+MORTGAGE RATE
+
+FRED 30-year fixed mortgage series, with its date shown. Replace it with an actual investor lender quote before deciding.
+
+Manual local input
+PROPERTY TAX
+
+TrueCap does not auto-fill property tax from a state average or parcel source. Enter a local annual bill or reviewed effective rate. A blank property-tax field uses a TrueCap default of 1.1% of purchase price — replace it with your local number.
+
+Fast starting point. Transparent assumptions. Final control stays with you. This is what you show a client who asks where a number came from.
+
+Built by a rental investor. Now built for the agents who serve them, too.
+
+TrueCap is built by one person, a rental investor in Philadelphia. It started as a way to answer one practical question before every offer: what price actually makes this property work? The same analyzer now serves agents who screen and present deals for investor clients. The defaults lean conservative, every assumption is editable, and every formula is published.
+
+About TrueCap
+Read the methodology
+
+FOR AGENTS
+
+The questions agents ask first.
+My investor clients run their own numbers. Why would I need this?
++
+
+They will, and they should. Agent Pro is for screening and presenting against their criteria, so what you send already fits. The client gets the whole model with every assumption labeled, and can rerun it with their own numbers in the free analyzer.
+
+Am I giving investment advice?
++
+
+No. TrueCap applies published formulas to labeled inputs. You supply the property facts; the client sees the sources, can change every assumption, and makes the decision. Every share page and report carries the not-investment-advice disclaimer.
+
+Do my clients need a TrueCap account to view what I send?
++
+
+No. A share link opens without signing in. It is read-only, it expires, you can revoke it, and it hides the exact address unless you choose to include it. A client only needs an account to save a private copy.
+
+What does the client see? Is it my branding or TrueCap's?
++
+
+Co-branded, not white-label. With branding set up (included in Pro and Agent Pro), the share page carries your logo, your brand color, and “Shared by” your name or company, plus a form the client can use to message you. The PDF adds your tagline and a “Prepared by” block with your name, email, phone, and website. TrueCap's name stays on the page and in the report as the methodology behind the numbers.
+
+Can I keep different criteria for different investor clients?
++
+
+Yes. Your roster holds up to 100 clients, and a Buy Box can be assigned to one client so that client's deals are screened against their targets, not yours. An account keeps up to 12 Buy Boxes in total, your own and your clients' combined.
+
+Can I run one listing against several clients at once?
++
+
+Not yet. A saved deal is assigned to one client and screened against that client's Buy Box; to check the same listing for another client, reassign it or save it again. Each client's roster card shows how many of their assigned deals meet their criteria.
+
+Where do the starting numbers come from?
++
+
+Rent starts from HUD Fair Market Rent and the rate from a FRED 30-year benchmark, both labeled. Property tax is your local input: until you enter the bill or a reviewed rate, the model labels its 1.1% assumption as a default to replace. Replace every starting value with the client's financing and property facts before you send.
+
+I only get a few investor clients a year. Is it worth it?
++
+
+Start free. The first decision needs no account, and a free account gets a 21-day trial with 3 Pro deals and 1 comparison, no card. Subscribe to Agent Pro when a client is worth a roster entry, monthly or annually, and cancel from your profile when the season ends.
+
+My brokerage already gives me tools.
++
+
+Brokerage stacks are CRM, transaction management, and e-signature. None of them screen a listing against a client's Buy Box or compute the client's Offer Ceiling, the highest price that still meets that client's targets.
+
+Will clients trust software numbers?
++
+
+The output shows which criterion the decision hinges on (the biggest gap or the tightest margin against the client's targets) and what has to be true for the deal to work, so it starts the conversation rather than ending it. Every source is labeled and every assumption is theirs to change.
+
+Does it work on my phone at a showing?
++
+
+Yes. TrueCap is a responsive web app you can add to your phone's home screen; there is no native iOS or Android app. Share links and reports open on any phone.
+
+What does the Agent Pro trial include, and do I need a card?
++
+
+Creating an account never asks for a card. The 21-day trial covers 3 complete Pro deals and 1 comparison, enough to see the memo and the Offer Ceiling on your own listings. Client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.
+
+Can I cancel?
++
+
+Yes. Cancel from your profile in one click. Agent Pro stays active until the end of the period you've paid for, then the account downgrades to Free and your saved work stays readable.
+
+Still have a question? Email us.
+
+FOR INVESTORS
+
+…and the ones investors ask.
+Why not just use a free calculator?
++
+
+Most free calculators stop at metrics. Your first TrueCap decision also shows Buy Box fit, the Offer Ceiling (the highest price that still meets your targets), downside checks, and next steps.
+
+What does the auto-fill provide?
++
+
+Rent starts from a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate starts from FRED's national 30-year benchmark, not an investor lender quote. Property tax is a local number: enter the annual bill or a reviewed rate. Until you do, the model labels its 1.1% tax assumption as a default to replace. Swap every starting assumption for property-specific evidence before you act on a decision.
+
+Is TrueCap really free?
++
+
+Yes. Your first complete decision needs no account or card. Create an account for a 21-day free trial with no card: up to 3 Pro deals and 1 comparison. Pro is for knowing what to offer on every deal: Buy Box fit, the Offer Ceiling, downside checks, comparisons, and reports.
+
+Do I need a credit card?
++
+
+No. The first complete decision needs no signup or card. Creating an account starts a 21-day free trial with no payment method and no automatic subscription.
+
+Can I edit the assumptions?
++
+
+Yes. Every number is editable. TrueCap starts rent and rate from labeled HUD and FRED benchmarks, keeps property tax as your local input, and marks every default so you can replace it. Change financing, expenses, and growth under “Improve accuracy,” then rerun.
+
+When should I upgrade to Pro?
++
+
+Upgrade when you want the Offer Ceiling and downside checks on every deal after the free trial, plus saved deals you can edit, comparisons, your Buy Box, and reports. Monthly Pro can be cancelled anytime.
+
+How does the free trial work?
++
+
+Create an account and you get 21 days, up to 3 completed Pro deals and 1 comparison. No card is collected, nothing auto-renews, and checkout shows the amount before a paid subscription begins.
+
+Is this financial advice?
++
+
+No. TrueCap applies documented formulas to your inputs and labeled benchmarks. Every assumption is editable, every output is an estimate, and the decision is yours.
+
+Still have a question? Email us.
+
+Paste the listing. Send the deal that already pencils.
+
+Your first complete decision includes cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps. No account or card required.
+
+Analyze a property free
+
+Buying for your own portfolio? See TrueCap for investors →

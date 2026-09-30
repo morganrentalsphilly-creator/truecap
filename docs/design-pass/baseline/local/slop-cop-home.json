@@ -1,0 +1,112 @@
+{
+  "url": "http://127.0.0.1:3140/",
+  "slug": "127.0.0.1",
+  "score": 7,
+  "tier": "clean",
+  "tierLabel": "Clean",
+  "patternsFlagged": 1,
+  "patternsTotal": 14,
+  "patterns": [
+    {
+      "id": "slop_fonts",
+      "label": "Templated font",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "hero_font_mix",
+      "label": "Hero font mix",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "purple_accent",
+      "label": "Vibe purple",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "gradients",
+      "label": "Gradients",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "accent_stripe",
+      "label": "Accent stripe",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "glassmorphism",
+      "label": "Glassmorphism",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "colored_glows",
+      "label": "Colored glow",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "sidebar_emoji",
+      "label": "Emoji nav",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "center_aligned_hero",
+      "label": "Centered + Inter",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "perma_dark_mode",
+      "label": "Perma dark",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "numbered_steps",
+      "label": "1·2·3 steps",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "stat_banner_row",
+      "label": "Stat banner",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "hero_eyebrow_pill",
+      "label": "Headline badge",
+      "triggered": false,
+      "evidence": null
+    },
+    {
+      "id": "faq_accordion",
+      "label": "FAQ",
+      "triggered": true,
+      "evidence": {
+        "mode": "details",
+        "count": 21,
+        "samples": [
+          {
+            "kind": "details",
+            "text": "My investor clients run their own numbers. Why would I need this?+"
+          },
+          {
+            "kind": "details",
+            "text": "Am I giving investment advice?+"
+          },
+          {
+            "kind": "details",
+            "text": "Do my clients need a TrueCap account to view what I send?+"
+          }
+        ]
+      }
+    }
+  ]
+}
