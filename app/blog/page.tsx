@@ -123,7 +123,7 @@ export default function BlogIndexPage() {
                 <Link
                   key={t.slug}
                   href={`/blog/topics/${t.slug}`}
-                  className="inline-flex min-h-11 min-w-11 items-center rounded-sm border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-band"
+                  className="inline-flex min-h-11 min-w-11 items-center rounded-sm border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-band"
                 >
                   {t.title}
                 </Link>
@@ -158,7 +158,9 @@ export default function BlogIndexPage() {
                     so an unbreakable token in a registry title or excerpt
                     (agent-writable) wraps instead of widening the page. */}
                 <div className="grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-6 break-words lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-                  <div className="min-w-0">
+                  {/* From 1024px the group's heading holds its place while the
+                      longer post list beside it scrolls. */}
+                  <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
                     <SectionHeading id={headingId}>{group.title}</SectionHeading>
                     <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
                       {group.description}
