@@ -120,9 +120,8 @@ describe("content hub touch targets", () => {
       return source.slice(start, end);
     };
 
-    const toolEmbed = summaryOf("components/marketing/tool-embed-invite.tsx");
-    expect(toolEmbed).toContain("min-h-11");
-    expect(toolEmbed).toContain("focus-visible:ring-[3px]");
+    // The embed invite's summary has its own test below (it moved to the
+    // global outline floor in the tools shared-furniture commit).
 
     // ComparisonFaq's rows are the homepage FAQ's (DESIGN.md "Components":
     // FAQ; FaqSection): 48px tall, and focus is the global 3px Signal Blue
@@ -160,6 +159,38 @@ describe("content hub touch targets", () => {
     }
     controls.push(item.trim());
     expect(controls).toContain("summary");
+  });
+
+  it("keeps the embed invite summary touch-sized and on the global focus outline", () => {
+    // The invite's <summary> takes its focus indicator from the global 3px
+    // outline in app/globals.css, an !important floor whose selector lists
+    // summary. A local ring would draw a second indicator inside it, and
+    // outline-none would fight the floor, so the summary carries neither.
+    const path = "components/marketing/tool-embed-invite.tsx";
+    const source = read(path);
+    const start = source.indexOf("<summary");
+    const end = source.indexOf("</summary>");
+    expect(start, path).toBeGreaterThan(-1);
+    expect(end, path).toBeGreaterThan(start);
+    const summaryTag = source.slice(start, source.indexOf(">", start));
+    expect(summaryTag, path).toContain("min-h-11");
+    expect(summaryTag, path).not.toContain("outline-none");
+    expect(summaryTag, path).not.toMatch(/focus(-visible)?:ring/);
+
+    const css = read("app/globals.css");
+    const floor = css.indexOf("outline: 3px solid var(--ring) !important");
+    expect(floor, "global focus outline").toBeGreaterThan(-1);
+    const selector = css
+      .slice(css.lastIndexOf("}", floor) + 1, css.lastIndexOf("{", floor))
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(selector).toContain(":focus-visible");
+    const targets = selector.slice(
+      selector.indexOf(":where(") + ":where(".length,
+      selector.indexOf("):where("),
+    );
+    expect(targets.split(",").map((target) => target.trim())).toContain(
+      "summary",
+    );
   });
 });
 
