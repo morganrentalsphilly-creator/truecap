@@ -87,13 +87,15 @@ describe("content hub touch targets", () => {
       );
     }
 
-    // The /blog topic chips are tags since the 2026 design pass (DESIGN.md
-    // radius by role: 2px), so the pin carries the tag radius; the 44px
-    // floor (min-h-11 min-w-11) is what it guards.
+    // The /blog topic links are a two-column ruled list below 640px and tags
+    // from 640px (DESIGN.md radius by role: 2px), one set of links either
+    // way. The 44px floor (min-h-11 min-w-11) holds at every width and is
+    // what this guards; the second pin carries the tag radius from 640px.
     const blog = read("app/blog/page.tsx");
     expect(blog).toContain(
-      "inline-flex min-h-11 min-w-11 items-center rounded-sm",
+      "block min-h-11 min-w-11 border-b border-rule-soft",
     );
+    expect(blog).toContain("sm:inline-flex sm:items-center sm:rounded-sm");
 
     const markets = read("app/markets/page.tsx");
     expect(markets).toContain(
