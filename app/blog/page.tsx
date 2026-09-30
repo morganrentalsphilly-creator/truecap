@@ -13,8 +13,8 @@
  *
  * Layout (DESIGN.md): the page hero with the topic tags, then one section
  * per topic on the homepage FAQ's 5/7 split (the topic on the left, its
- * posts as ruled rows on the right), the product screenshot as a document,
- * and the close on the heavy rule. Each post keeps exactly one
+ * posts as ruled rows on the right), and the close on the heavy rule with the
+ * product screenshot as a document above its action. Each post keeps exactly one
  * server-rendered data-blog-post-link, on its title
  * (e2e/content-hubs.spec.ts compares them with the registry).
  */
@@ -61,9 +61,47 @@ export const metadata: Metadata = {
   },
 };
 
-function compactExcerpt(excerpt: string, maxCharacters = 190): string {
+/**
+ * The last cut in `text` matched by `pattern` (at the match's index plus
+ * `offset`) that keeps at least `minCharacters` and leaves no parenthesis
+ * open, or -1.
+ */
+function lastCut(
+  text: string,
+  pattern: RegExp,
+  offset: number,
+  minCharacters: number,
+): number {
+  let cut = -1;
+  for (const match of text.matchAll(pattern)) {
+    const end = (match.index ?? 0) + offset;
+    const kept = text.slice(0, end);
+    const open = kept.split("(").length - kept.split(")").length;
+    if (end >= minCharacters && open === 0) cut = end;
+  }
+  return cut;
+}
+
+/**
+ * A registry excerpt shortened for a post row without ending on a fragment
+ * ("…on top of the loan. How…"). Inside the limit it ends on the last whole
+ * sentence that keeps at least `minCharacters` (no ellipsis: the row reads
+ * finished); failing that, on the last clause break (", " "; " ": " " — "),
+ * then on a word, each with an ellipsis. The registry copy is never edited;
+ * only where it stops changes.
+ */
+function compactExcerpt(
+  excerpt: string,
+  maxCharacters = 190,
+  minCharacters = 100,
+): string {
   if (excerpt.length <= maxCharacters) return excerpt;
   const candidate = excerpt.slice(0, maxCharacters + 1);
+  // A sentence ends where the next word starts a new one ("vs. renting" does not).
+  const sentence = lastCut(candidate, /[.?!](?=\s+["“(]?[A-Z0-9$])/g, 1, minCharacters);
+  if (sentence > 0) return candidate.slice(0, sentence);
+  const clause = lastCut(candidate, /[,;:](?=\s)|\s[—–](?=\s)/g, 0, minCharacters);
+  if (clause > 0) return `${candidate.slice(0, clause).trimEnd()}…`;
   const lastWordBoundary = candidate.lastIndexOf(" ");
   return `${candidate.slice(0, lastWordBoundary > 0 ? lastWordBoundary : maxCharacters).trimEnd()}…`;
 }
@@ -82,6 +120,7 @@ export default function BlogIndexPage() {
   // Published posts a block may link: a noindexed post drops out (lib/seo/link-policy.ts).
   const availablePosts = linkablePosts(BLOG_POSTS);
   const postGroups = groupBlogPostsByTopic(availablePosts, BLOG_TOPICS);
+  const hasVerdictShot = findProductShot("verdict") !== null;
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
@@ -112,25 +151,28 @@ export default function BlogIndexPage() {
           lede="Deep dives on rental property analysis, real estate math, and underwriting best practices from the team behind TrueCap."
         >
           {/* Browse by topic — hubs that group the posts by investor journey
-              (P2-4) and pair each with the relevant calculators. The topics
-              are tags (2px radius); "All topics" is a plain link. */}
+              (P2-4) and pair each with the relevant calculators. From 640px
+              the topics are tags (2px radius); below it, where eight bordered
+              tags wrapped into six ragged rows and filled the first screen,
+              the same links are a two-column ruled list. "All topics" is a
+              plain link, flush with the list. One set of links either way. */}
           <nav aria-label="Browse by topic" className="mt-8">
             <p className="mb-2 text-sm font-semibold text-muted-foreground">
               Browse by topic
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-x-6 break-words sm:flex sm:flex-wrap sm:gap-2">
               {BLOG_TOPICS.map((t) => (
                 <Link
                   key={t.slug}
                   href={`/blog/topics/${t.slug}`}
-                  className="inline-flex min-h-11 min-w-11 items-center rounded-sm border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-band"
+                  className="block min-h-11 min-w-11 border-b border-rule-soft py-3 text-sm text-foreground transition-colors hover:bg-band sm:inline-flex sm:items-center sm:rounded-sm sm:border sm:border-border sm:px-3 sm:py-2"
                 >
                   {t.title}
                 </Link>
               ))}
               <Link
                 href="/blog/topics"
-                className="tc-link inline-flex min-h-11 items-center px-1 text-sm"
+                className="tc-link block min-h-11 py-3 text-sm sm:inline-flex sm:items-center sm:py-2"
               >
                 All topics
               </Link>
@@ -184,7 +226,10 @@ export default function BlogIndexPage() {
                   <ul className="min-w-0 border-t-2 border-foreground">
                     {group.posts.map((post) => (
                       <li key={post.slug} className="border-b border-rule-soft py-4">
-                        <h3 className="text-balance text-lg font-semibold">
+                        {/* A row term (RuledList's dt): text-pretty fills the
+                            column, where text-balance split titles into two
+                            half-width lines. */}
+                        <h3 className="text-pretty text-lg font-semibold">
                           <Link
                             href={`/blog/${post.slug}`}
                             data-blog-post-link=""
@@ -221,26 +266,6 @@ export default function BlogIndexPage() {
             from internal navigation. */}
 
 
-        {/* Real product screenshot (Phase 4): the writing is about
-            underwriting; this is what the underwriting looks like. Shown as
-            a document (no browser frame), in the posts' column. The section
-            only mounts when the shot has been captured, so a missing shot
-            never leaves an empty ruled band. */}
-        {findProductShot("verdict") ? (
-          <Section rhythm="tight">
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-x-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-              <ProductShot
-                shot="verdict"
-                frame="document"
-                sizes="(min-width: 1024px) 660px, 100vw"
-                alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-                caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">Run your own numbers</Link></>}
-                className="lg:col-start-2"
-              />
-            </div>
-          </Section>
-        ) : null}
-
         <CloseSection
           heading="Want the calculator that powers these guides?"
           headingId="blog-cta-heading"
@@ -253,14 +278,46 @@ export default function BlogIndexPage() {
             </>
           }
           actions={
-            <ActionRow>
-              <Link
-                href="/analyze" prefetch={false}
-                className={buttonVariants({ size: "cta" })}
-              >
-                Open TrueCap
-              </Link>
-            </ActionRow>
+            <>
+              {/* Real product screenshot (Phase 4): the writing is about
+                  underwriting; this is what the underwriting looks like. Set
+                  as a document (no browser frame) above the action, so the
+                  close carries the case on the left and the evidence and the
+                  action on the right. The desktop capture at every width: the
+                  phone capture is 358 x 1339 CSS px, over a phone and a half
+                  of screenshot between this case and its button. The caption
+                  link takes a 44px target from padding its negative margin
+                  takes back out of the line box. Renders nothing until the
+                  shot is captured. */}
+              {hasVerdictShot ? (
+                <ProductShot
+                  shot="verdict"
+                  frame="document"
+                  sizes="(min-width: 1024px) 660px, 100vw"
+                  alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+                  caption={
+                    <>
+                      Real output from the free sample deal.{" "}
+                      <Link
+                        href="/analyze?sample=1"
+                        prefetch={false}
+                        className="tc-link -my-3 inline-block py-3"
+                      >
+                        Run your own numbers
+                      </Link>
+                    </>
+                  }
+                />
+              ) : null}
+              <ActionRow className={hasVerdictShot ? "mt-6" : undefined}>
+                <Link
+                  href="/analyze" prefetch={false}
+                  className={buttonVariants({ size: "cta" })}
+                >
+                  Open TrueCap
+                </Link>
+              </ActionRow>
+            </>
           }
         />
       </main>
