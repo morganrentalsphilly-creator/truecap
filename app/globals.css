@@ -625,11 +625,13 @@ textarea,
   #main {
     scroll-margin-top: 0rem;
   }
-  /* Signed-in free users also carry the h-9 (36px) upgrade bar above the
-     header: 2.5rem on top of the scroll padding. Excluded on .dashboard-shell
-     because :has() on an attribute outranks that override. */
-  body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
-    scroll-margin-top: 2.5rem;
+  /* Signed-in free users also carry the upgrade strip above the header. It
+     is one line (36px) at most widths and wraps to two (about 52px) between
+     640px and the width where its sentence fits, so every focus and fragment
+     target gets the header's 72px plus the two-line strip, not only #main.
+     Excluded on .dashboard-shell, which has its own Topbar rules below. */
+  html:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) {
+    scroll-padding-top: calc(4.5rem + 3.25rem);
   }
   /* "Skip to content" (root layout + DashboardShell) targets <main id="main">,
      and fragment navigation aligns the target's block-start with the viewport
