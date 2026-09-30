@@ -60,29 +60,37 @@ export default async function WhitelabelEmbedPage({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={branding.logoUrl} alt={brandName} className="h-7 w-auto max-w-[140px] object-contain" />
           ) : (
-            <span className="text-base font-extrabold tracking-tight text-foreground">{brandName}</span>
+            <span className="text-base font-semibold text-foreground">{brandName}</span>
           )}
-          <h1 className="ml-auto text-sm font-bold text-muted-foreground sm:text-base">{entry.title}</h1>
+          {/* Subordinate to the agent's brand by design: the text face at
+              600, not the display voice. */}
+          <h1 className="ml-auto text-base font-semibold text-muted-foreground">{entry.title}</h1>
         </header>
 
         <Widget />
 
         {/* The agent's brand replaces "Powered by TrueCap". Their contact,
-            when set, is the call to action — this is their lead surface. */}
-        <footer className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+            when set, is the call to action — this is their lead surface.
+            The links keep the agent's own color (agent data, not a token),
+            underlined at rest like every link, 44px tall for the target. */}
+        <footer className="mt-4 flex flex-wrap items-center justify-between gap-x-3 border-t border-border pt-3 text-sm text-muted-foreground">
           <span className="font-semibold" style={{ color: brandColor }}>{brandName}</span>
           {branding.contactWebsite ? (
             <a
               href={branding.contactWebsite}
               target="_top"
               rel="noopener"
-              className="font-semibold hover:underline"
+              className="inline-flex min-h-11 items-center font-semibold underline decoration-1 underline-offset-3"
               style={{ color: brandColor }}
             >
               {branding.contactName ?? "Get in touch"}
             </a>
           ) : branding.contactEmail ? (
-            <a href={`mailto:${branding.contactEmail}`} className="font-semibold hover:underline" style={{ color: brandColor }}>
+            <a
+              href={`mailto:${branding.contactEmail}`}
+              className="inline-flex min-h-11 items-center font-semibold underline decoration-1 underline-offset-3"
+              style={{ color: brandColor }}
+            >
               {branding.contactName ?? branding.contactEmail}
             </a>
           ) : null}
