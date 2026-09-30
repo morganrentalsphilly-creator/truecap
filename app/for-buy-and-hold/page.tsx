@@ -27,6 +27,9 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "For Buy-and-Hold Investors",
@@ -239,26 +242,26 @@ export default function ForBuyAndHoldPage() {
           <p className="text-sm leading-relaxed text-foreground">
             The handful of guides and calculators long-term investors return to
             most often: the{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
               className="text-primary font-semibold hover:underline"
             >
               60-second underwriting workflow
-            </Link>
+            </IntentPrefetchLink>
             , the deep-dive on{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
               className="text-primary font-semibold hover:underline"
             >
               cap rate vs cash-on-cash vs DSCR
-            </Link>
+            </IntentPrefetchLink>
             , the breakdown of{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/rental-property-tax-deductions"
               className="text-primary font-semibold hover:underline"
             >
               every deductible expense
-            </Link>
+            </IntentPrefetchLink>
             , and the{" "}
             <Link
               href="/analyze" prefetch={false}
@@ -307,12 +310,12 @@ export default function ForBuyAndHoldPage() {
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           <Building2 className="inline-block mr-2 size-4 align-text-bottom" />
           Also evaluating an owner-occupied rental? See TrueCap for{" "}
-          <Link
+          <IntentPrefetchLink
             href="/for-house-hackers"
             className="font-bold text-foreground hover:underline"
           >
             house hackers
-          </Link>
+          </IntentPrefetchLink>
           .
         </footer>
 
@@ -321,9 +324,9 @@ export default function ForBuyAndHoldPage() {
         {isAgentProConfigured() ? (
           <p className="mt-6 border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
             Are you an agent working with investor clients?{" "}
-            <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+            <IntentPrefetchLink href="/for-agents" className="font-bold text-foreground hover:underline">
               See TrueCap for agents →
-            </Link>
+            </IntentPrefetchLink>
           </p>
         ) : null}
       </main>

@@ -51,6 +51,9 @@ import {
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -374,12 +377,12 @@ export default async function PricingPage() {
                 ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
                 : ""}
             </p>
-            <Link
+            <IntentPrefetchLink
               href={DEALCHECK_COMPARISON.href}
               className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
             >
               Read the full DealCheck comparison
-            </Link>
+            </IntentPrefetchLink>
           </div>
 
           {/* Consented quotes from the in-product prompt (Phase 5); renders
@@ -409,12 +412,12 @@ export default async function PricingPage() {
               <strong className="text-foreground">Payments handled by Stripe</strong>
             </li>
             <li>
-              <Link
+              <IntentPrefetchLink
                 href="/methodology"
                 className="font-bold text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
               >
                 Methodology is public
-              </Link>
+              </IntentPrefetchLink>
             </li>
           </ul>
         </section>

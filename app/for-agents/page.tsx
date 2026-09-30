@@ -58,6 +58,9 @@ import {
 } from "@/lib/public-pricing";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
 const PAGE_DESCRIPTION =
@@ -263,9 +266,9 @@ export default async function ForAgentsPage() {
                 caption={
                   <>
                     What your client receives: the decision memo, generated from the free sample deal.{" "}
-                    <Link href="/sample-decision-memo" className="font-semibold text-primary underline underline-offset-4">
+                    <IntentPrefetchLink href="/sample-decision-memo" className="font-semibold text-primary underline underline-offset-4">
                       Read the full sample memo →
-                    </Link>
+                    </IntentPrefetchLink>
                   </>
                 }
               />
@@ -392,9 +395,9 @@ export default async function ForAgentsPage() {
               ["/reviews", "Proof & methodology", "How quotes get published here: real account activity, consent, first name and market."],
             ].map(([href, title, body]) => (
               <li key={href}>
-                <Link href={href} className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
+                <IntentPrefetchLink href={href} className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
                   {title} →
-                </Link>
+                </IntentPrefetchLink>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -420,16 +423,16 @@ export default async function ForAgentsPage() {
           <p className="text-sm leading-relaxed text-foreground">
             When a client asks &ldquo;is this a good deal?&rdquo; the cleanest
             answer cites the math: send them the{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
               className="font-semibold text-primary hover:underline"
             >
               60-second underwriting workflow
-            </Link>
+            </IntentPrefetchLink>
             , the explainer on{" "}
-            <Link href="/blog/what-is-a-good-cap-rate" className="font-semibold text-primary hover:underline">
+            <IntentPrefetchLink href="/blog/what-is-a-good-cap-rate" className="font-semibold text-primary hover:underline">
               what counts as a good cap rate in 2026
-            </Link>
+            </IntentPrefetchLink>
             , or the{" "}
             <Link href="/analyze" prefetch={false} className="font-semibold text-primary hover:underline">
               TrueCap analyzer
@@ -453,9 +456,9 @@ export default async function ForAgentsPage() {
             working calculator on your agent site is a credibility piece for
             investor visitors; it collects no leads and reports nothing back.
             Copy a snippet from the{" "}
-            <Link href="/embed" className="font-semibold text-primary hover:underline">
+            <IntentPrefetchLink href="/embed" className="font-semibold text-primary hover:underline">
               embed page
-            </Link>
+            </IntentPrefetchLink>
             .
           </p>
         </section>
@@ -513,9 +516,9 @@ export default async function ForAgentsPage() {
             showing that client&apos;s Offer Ceiling, and sending a co-branded
             decision memo with the assumptions and the risks intact. Check
             DealCheck&apos;s current pricing on its own site; the{" "}
-            <Link href="/vs/dealcheck" className="font-semibold text-primary underline underline-offset-4">
+            <IntentPrefetchLink href="/vs/dealcheck" className="font-semibold text-primary underline underline-offset-4">
               full comparison
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             is kept deliberately fair.
           </p>
         </section>
@@ -580,9 +583,9 @@ export default async function ForAgentsPage() {
               <Calculator className="size-4" />
               Try the free analyzer
             </Link>
-            <Link href="/pricing#plans" className="text-sm font-semibold underline underline-offset-4 opacity-90 hover:opacity-100">
+            <IntentPrefetchLink href="/pricing#plans" className="text-sm font-semibold underline underline-offset-4 opacity-90 hover:opacity-100">
               Compare all plans
-            </Link>
+            </IntentPrefetchLink>
           </div>
           <p className="mt-4 max-w-2xl text-xs leading-relaxed opacity-90">
             A new account gets a {PRODUCT_EVALUATION_DAYS}-day free trial with{" "}
@@ -595,21 +598,21 @@ export default async function ForAgentsPage() {
 
         <footer className="border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
           Investing yourself as well? See TrueCap for{" "}
-          <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
+          <IntentPrefetchLink href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
             buy-and-hold
-          </Link>
+          </IntentPrefetchLink>
           ,{" "}
-          <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
+          <IntentPrefetchLink href="/for-house-hackers" className="font-bold text-foreground hover:underline">
             house hackers
-          </Link>
+          </IntentPrefetchLink>
           ,{" "}
-          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
+          <IntentPrefetchLink href="/for-brrrr" className="font-bold text-foreground hover:underline">
             BRRRR operators
-          </Link>
+          </IntentPrefetchLink>
           , and{" "}
-          <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
+          <IntentPrefetchLink href="/for-flippers" className="font-bold text-foreground hover:underline">
             fix-and-flippers
-          </Link>
+          </IntentPrefetchLink>
           .
         </footer>
       </main>

@@ -26,6 +26,9 @@ import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 import { VS_HUB_CRUMB } from "@/components/marketing/vs-breadcrumb-schema";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
@@ -456,7 +459,7 @@ export default function VsHubPage() {
             </div>
             <div className="tc-reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {group.items.map((c) => (
-                <Link
+                <IntentPrefetchLink
                   key={c.slug}
                   href={`/vs/${c.slug}`}
                   className="group flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
@@ -477,7 +480,7 @@ export default function VsHubPage() {
                     Read the comparison
                     <ArrowUpRight className="size-3" />
                   </span>
-                </Link>
+                </IntentPrefetchLink>
               ))}
             </div>
           </section>
