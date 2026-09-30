@@ -4,8 +4,9 @@
  * that are released. Twin of /for-brrrr: keep the two identical in structure.
  *
  * Set on the persona family's grammar (2026-09 design pass), shared with
- * /for-buy-and-hold and /for-house-hackers: PageHero, ruled sections, then
- * CloseSection with the audience cue on its soft rule.
+ * /for-buy-and-hold and /for-house-hackers: PageHero, with the released tools
+ * as its aside (the homepage ledger's slot), then CloseSection with the
+ * audience cue on its soft rule.
  */
 
 import type { Metadata } from "next";
@@ -19,7 +20,7 @@ import {
   PageHero,
   RuledList,
 } from "@/components/marketing/page-parts";
-import { Section, SectionHeading } from "@/components/marketing/section";
+import { SectionHeading } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -83,17 +84,55 @@ export default function ForFlippersPage() {
     <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* border-b-0: the hero now meets the close directly, and the close
+            opens on the 2px ink rule; the hero's own 1px rule would double it
+            (the rule="none" reason on /tools, /reviews and /blog). */}
         <PageHero
+          className="border-b-0"
           title="Build the inputs before you trust a project return."
           lede="TrueCap currently offers separate rehab, ARV, and 70% rule tools. Its integrated fix-and-flip analysis—including a dated project ledger, financing draws, holding costs, sale proceeds, and profit—isn't offered right now."
+          aside={
+            // The released tools are what the page points to, so they sit
+            // in the wider column beside the H1 from 1024px (the homepage
+            // ledger's slot) and the "Open …" links are on the first screen;
+            // on phones they follow the boundary note. One column: the 7/12
+            // column is too narrow for RuledList's two.
+            <section aria-labelledby="released-flip-resources">
+              <SectionHeading id="released-flip-resources">Resources you can use now</SectionHeading>
+              <RuledList
+                className="mt-8"
+                items={RESOURCES.map(({ title, body, href, cta }) => ({
+                  key: title,
+                  term: title,
+                  detail: (
+                    <>
+                      <p>{body}</p>
+                      {/* prefetch={false}: the rental row opens /analyze, and the
+                          analyzer bundle must not prefetch onto a marketing page. */}
+                      <Link
+                        href={href}
+                        prefetch={false}
+                        className="tc-link mt-1 inline-flex min-h-11 items-center"
+                      >
+                        {cta}
+                      </Link>
+                    </>
+                  ),
+                }))}
+              />
+            </section>
+          }
         >
           {/* The scope boundary, in ink on the rule directly under the lede:
               it is the page's reason to exist, not a disclaimer. Note sets a
               caveat's body in Ink 2; this body stays in ink (as it was in the
-              removed box), so the boundary is not demoted. */}
+              removed box), so the boundary is not demoted. max-w-[58ch] at
+              16px is the lede's 52ch at 18px, so the rule ends at the lede's
+              measure instead of running past it (from 1024px the 5/12 column
+              is narrower than both, and the rule is the column's width). */}
           <Note
             title="Steady-state rental analysis — use after renovation is complete."
-            className="mt-8"
+            className="mt-8 max-w-[58ch]"
           >
             <span className="text-foreground">
               The core rental analyzer is not a flip-profit calculator. Model the full
@@ -101,32 +140,6 @@ export default function ForFlippersPage() {
             </span>
           </Note>
         </PageHero>
-
-        <Section aria-labelledby="released-flip-resources">
-          <SectionHeading id="released-flip-resources">Resources you can use now</SectionHeading>
-          <RuledList
-            columns={2}
-            className="mt-8"
-            items={RESOURCES.map(({ title, body, href, cta }) => ({
-              key: title,
-              term: title,
-              detail: (
-                <>
-                  <p>{body}</p>
-                  {/* prefetch={false}: the rental row opens /analyze, and the
-                      analyzer bundle must not prefetch onto a marketing page. */}
-                  <Link
-                    href={href}
-                    prefetch={false}
-                    className="tc-link mt-1 inline-flex min-h-11 items-center"
-                  >
-                    {cta}
-                  </Link>
-                </>
-              ),
-            }))}
-          />
-        </Section>
 
         <CloseSection
           heading="Learn the screening math"
