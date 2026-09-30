@@ -27,6 +27,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
+import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
@@ -101,6 +102,9 @@ export const metadata: Metadata = {
 
 /** The same sign-up URL PricingPlanButtons uses for an anonymous Agent Pro CTA. */
 const AGENT_PRO_SIGNUP_HREF = `/auth/sign-up?plan=agent-pro&billing=annual&next=${encodeURIComponent("/dashboard/new")}`;
+
+/** The hero's capability line, one term per unbreakable run. */
+const HERO_TERMS = ["Cash flow", "Cap rate", "Cash-on-cash", "DSCR", "Buy Box fit", "Offer Ceiling"] as const;
 
 /** NAR's order of what agents buy software for: time, client experience, closings. */
 const PROMISES: { title: string; body: string }[] = [
@@ -208,8 +212,17 @@ export default async function ForAgentsPage() {
                 (the Offer Ceiling), and what could break it. Send it
                 co-branded, with every assumption visible and editable.
               </p>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">
-                Cash flow · Cap rate · Cash-on-cash · DSCR · Buy Box fit · Offer Ceiling
+              {/* Each term keeps its separator and never splits ("Buy Box" /
+                  "fit"), so the line only breaks after a "·". */}
+              <p className="mt-2 text-pretty text-sm font-medium text-muted-foreground">
+                {HERO_TERMS.map((term, index) => (
+                  <Fragment key={term}>
+                    {index > 0 ? " " : null}
+                    <span className="whitespace-nowrap">
+                      {index < HERO_TERMS.length - 1 ? `${term} ·` : term}
+                    </span>
+                  </Fragment>
+                ))}
               </p>
             </>
           }
@@ -243,7 +256,7 @@ export default async function ForAgentsPage() {
               caption={
                 <>
                   What your client receives: the decision memo, generated from the free sample deal.{" "}
-                  <Link href="/sample-decision-memo" className="tc-link font-medium">
+                  <Link href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
                     Read the full sample memo
                   </Link>
                 </>
@@ -252,14 +265,17 @@ export default async function ForAgentsPage() {
           }
         >
           {/* The price strip on a soft rule, the homepage investor cue's
-              form: labels in the text face, amounts in DM Mono. */}
-          <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule-soft pt-2.5 text-base sm:flex sm:flex-wrap sm:gap-x-8">
+              form: labels in the text face, amounts in DM Mono. A grid at
+              every width: the two prices side by side (packed left from
+              640px), the roster on its own row. */}
+          <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule-soft pt-2.5 text-base sm:grid-cols-[auto_auto] sm:justify-start sm:gap-x-8">
             <div>
               <dt className="text-sm font-semibold text-muted-foreground">Agent Pro</dt>
               <dd>
                 {agentProConfigured ? (
                   <>
-                    <LedgerFigure className="font-medium">{annualPerMonth}</LedgerFigure>/month billed annually
+                    <LedgerFigure className="font-medium">{annualPerMonth}</LedgerFigure>/month{" "}
+                    <span className="whitespace-nowrap">billed annually</span>
                   </>
                 ) : (
                   "Waitlist open"
@@ -279,16 +295,17 @@ export default async function ForAgentsPage() {
           </dl>
         </PageHero>
 
-        {/* The three things agents buy software for, in NAR's order. */}
+        {/* The three things agents buy software for, in NAR's order. The
+            heading sits over its list, as the homepage stacks every section
+            but the FAQ (the 5/7 split is kept for a left column with content). */}
         <Section aria-labelledby="agent-promises">
-          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <SectionHeading id="agent-promises">
-              Investors answer the agent who already did the math.
-            </SectionHeading>
-            <RuledList
-              items={PROMISES.map(({ title, body }) => ({ key: title, term: title, detail: body }))}
-            />
-          </div>
+          <SectionHeading id="agent-promises">
+            Investors answer the agent who already did the math.
+          </SectionHeading>
+          <RuledList
+            className="mt-8 max-w-[68ch]"
+            items={PROMISES.map(({ title, body }) => ({ key: title, term: title, detail: body }))}
+          />
         </Section>
 
         {/* Verified agent proof — self-hides until records pass the
@@ -314,10 +331,11 @@ export default async function ForAgentsPage() {
 
         {/* How the client roster works */}
         <Section aria-labelledby="roster-heading">
-          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <SectionHeading id="roster-heading">How the client roster works</SectionHeading>
-            <RuledList items={ROSTER.map(([title, body]) => ({ key: title, term: title, detail: body }))} />
-          </div>
+          <SectionHeading id="roster-heading">How the client roster works</SectionHeading>
+          <RuledList
+            className="mt-8 max-w-[68ch]"
+            items={ROSTER.map(([title, body]) => ({ key: title, term: title, detail: body }))}
+          />
         </Section>
 
         {/* The agent workflow: a real sequence, showing to send. */}
@@ -333,26 +351,26 @@ export default async function ForAgentsPage() {
         </Section>
 
         {/* Proof you can check — no counts, no logos, no quotes we can't source. */}
-        <Section rhythm="tight" aria-labelledby="proof-heading">
-          <div className="max-w-3xl">
-            <SectionHeading id="proof-heading">Proof you can check</SectionHeading>
-            <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
-              No customer counts, no brokerage logos, no quotes we cannot source.
-              What you can verify before you pay:
-            </p>
-            <RuledList
-              className="mt-8"
-              items={PROOF_LINKS.map(([href, title, body]) => ({
-                key: href,
-                term: (
-                  <Link href={href} className="tc-link inline-flex min-h-11 items-center">
-                    {title}
-                  </Link>
-                ),
-                detail: body,
-              }))}
-            />
-          </div>
+        <Section aria-labelledby="proof-heading">
+          <SectionHeading id="proof-heading">Proof you can check</SectionHeading>
+          <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
+            No customer counts, no brokerage logos, no quotes we cannot source.
+            What you can verify before you pay:
+          </p>
+          <RuledList
+            className="mt-8 max-w-[68ch]"
+            items={PROOF_LINKS.map(([href, title, body]) => ({
+              key: href,
+              // A 44px tap target from padding the negative margin takes back
+              // out of the line box, so the term keeps the list's spacing.
+              term: (
+                <Link href={href} className="tc-link -my-3 inline-block py-3">
+                  {title}
+                </Link>
+              ),
+              detail: body,
+            }))}
+          />
         </Section>
 
         {/* Objections, answered from the code — same tone as /reviews. This
@@ -365,97 +383,117 @@ export default async function ForAgentsPage() {
           layout="split"
         />
 
-        {/* Share-ready resources, and the embeds beside them. */}
-        <Section rhythm="tight">
-          <div className="grid gap-x-16 gap-y-10 lg:grid-cols-2">
-            <div>
-              <SectionHeading id="share-resources-heading">
-                Share-ready resources for investor clients
-              </SectionHeading>
-              <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed">
-                When a client asks &ldquo;is this a good deal?&rdquo; the cleanest
-                answer cites the math: send them the{" "}
-                <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
-                  60-second underwriting workflow
-                </Link>
-                , the explainer on{" "}
-                <Link href="/blog/what-is-a-good-cap-rate" className="tc-link">
-                  what counts as a good cap rate in 2026
-                </Link>
-                , or the{" "}
-                <Link href="/analyze" prefetch={false} className="tc-link">
-                  TrueCap analyzer
-                </Link>{" "}
-                for cap rate and DSCR from one address. They land on a single,
-                well-cited page instead of a long email reply.
-              </p>
-            </div>
+        {/* Share-ready resources, then the embeds: one idea per section, each
+            a heading over its paragraph in the reading column. */}
+        <Section aria-labelledby="share-resources-heading">
+          <SectionHeading id="share-resources-heading">
+            Share-ready resources for investor clients
+          </SectionHeading>
+          <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed">
+            When a client asks &ldquo;is this a good deal?&rdquo; the cleanest
+            answer cites the math: send them the{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
+              60-second underwriting workflow
+            </Link>
+            , the explainer on{" "}
+            <Link href="/blog/what-is-a-good-cap-rate" className="tc-link">
+              what counts as a good cap rate in 2026
+            </Link>
+            , or the{" "}
+            <Link href="/analyze" prefetch={false} className="tc-link">
+              TrueCap analyzer
+            </Link>{" "}
+            for cap rate and DSCR from one address. They land on a single,
+            well-cited page instead of a long email reply.
+          </p>
+        </Section>
 
-            {/* Embed — the EXISTING attributed embeds as a credibility piece.
-                Deliberately NOT white-label: embed_whitelabel is shipped:false for
-                a legal reason (Terms) and must not be marketed. */}
-            <div>
-              <SectionHeading id="embed-heading">Put the calculators on your own website</SectionHeading>
-              <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed">
-                {EMBEDDABLE_COUNT} of TrueCap&apos;s {CALCULATOR_COUNT} free
-                calculators can be embedded on your site with a copy-and-paste
-                snippet that carries a &ldquo;Powered by TrueCap&rdquo; credit. A
-                working calculator on your agent site is a credibility piece for
-                investor visitors; it collects no leads and reports nothing back.
-                Copy a snippet from the{" "}
-                <Link href="/embed" className="tc-link">
-                  embed page
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
+        {/* Embed — the EXISTING attributed embeds as a credibility piece.
+            Deliberately NOT white-label: embed_whitelabel is shipped:false for
+            a legal reason (Terms) and must not be marketed. */}
+        <Section aria-labelledby="embed-heading">
+          <SectionHeading id="embed-heading">Put the calculators on your own website</SectionHeading>
+          <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed">
+            {EMBEDDABLE_COUNT} of TrueCap&apos;s {CALCULATOR_COUNT} free
+            calculators can be embedded on your site with a copy-and-paste
+            snippet that carries a &ldquo;Powered by TrueCap&rdquo; credit. A
+            working calculator on your agent site is a credibility piece for
+            investor visitors; it collects no leads and reports nothing back.
+            Copy a snippet from the{" "}
+            <Link href="/embed" className="tc-link">
+              embed page
+            </Link>
+            .
+          </p>
         </Section>
 
         {/* "Land the Investor Client" scripts — published in full, same
             transparency stance as /playbook. */}
         <Section aria-labelledby="scripts-heading">
-          <SectionHeading id="scripts-heading">
-            Land the investor client: three scripts that work with an analysis
-            attached
-          </SectionHeading>
-          <ol className="mt-8 max-w-[68ch] border-t-2 border-foreground">
-            <li className="border-b border-rule-soft py-5 text-base leading-relaxed sm:text-lg">
-              <strong className="font-semibold">1 · Reactivate a cold investor lead.</strong>{" "}
-              &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
-              screens better than most of what we looked at in [month].
-              I&apos;ve attached my underwrite: rent benchmark, cash flow, and
-              the highest price that still meets your targets. Worth 15
-              minutes this week?&rdquo;
-            </li>
-            <li className="border-b border-rule-soft py-5 text-base leading-relaxed sm:text-lg">
-              <strong className="font-semibold">2 · Follow up after a showing, same day.</strong>{" "}
-              &ldquo;Before you get ten opinions from the internet: here&apos;s
-              the analysis for [address] — every assumption is labeled and you
-              can change any of them. At asking it [meets / misses] your
-              targets; the Offer Ceiling shows the highest price that still
-              does. Tell me which assumption you&apos;d challenge.&rdquo;
-            </li>
-            <li className="border-b border-rule-soft py-5 text-base leading-relaxed sm:text-lg">
-              <strong className="font-semibold">3 · Introduce yourself to an investor you want.</strong>{" "}
-              &ldquo;I work with rental investors in [market] and I run the
-              numbers on every property before I send it — attached is a
-              sample analysis so you can see exactly how I evaluate deals. If
-              you tell me your buy criteria, everything I send you will already
-              be screened against them.&rdquo;
-            </li>
-          </ol>
-          <p className="mt-5 max-w-[68ch] text-sm text-muted-foreground">
-            All three work because the attachment does the arguing. The analysis
-            is the asset; the message is just the handshake.
-          </p>
+          {/* Heading, scripts and note share one reading column (68ch of the
+              16px body face, the StepList's edge), so the H2 breaks to the
+              list it heads instead of running the container. */}
+          <div className="max-w-[68ch]">
+            <SectionHeading id="scripts-heading">
+              Land the investor client: three scripts that work with an analysis
+              attached
+            </SectionHeading>
+            <RuledList
+              className="mt-8"
+              items={[
+                {
+                  key: "reactivate",
+                  term: "1 · Reactivate a cold investor lead.",
+                  detail: (
+                    <>
+                      &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
+                      screens better than most of what we looked at in [month].
+                      I&apos;ve attached my underwrite: rent benchmark, cash flow, and
+                      the highest price that still meets your targets. Worth 15
+                      minutes this week?&rdquo;
+                    </>
+                  ),
+                },
+                {
+                  key: "follow-up",
+                  term: "2 · Follow up after a showing, same day.",
+                  detail: (
+                    <>
+                      &ldquo;Before you get ten opinions from the internet: here&apos;s
+                      the analysis for [address] — every assumption is labeled and you
+                      can change any of them. At asking it [meets / misses] your
+                      targets; the Offer Ceiling shows the highest price that still
+                      does. Tell me which assumption you&apos;d challenge.&rdquo;
+                    </>
+                  ),
+                },
+                {
+                  key: "introduce",
+                  term: "3 · Introduce yourself to an investor you want.",
+                  detail: (
+                    <>
+                      &ldquo;I work with rental investors in [market] and I run the
+                      numbers on every property before I send it — attached is a
+                      sample analysis so you can see exactly how I evaluate deals. If
+                      you tell me your buy criteria, everything I send you will already
+                      be screened against them.&rdquo;
+                    </>
+                  ),
+                },
+              ]}
+            />
+            <p className="mt-5 text-pretty text-base leading-relaxed text-muted-foreground">
+              All three work because the attachment does the arguing. The analysis
+              is the asset; the message is just the handshake.
+            </p>
+          </div>
         </Section>
 
         {/* DealCheck, plainly. Its branded PDF on every tier is a real
             advantage and is acknowledged. */}
-        <Section rhythm="tight" aria-labelledby="dealcheck-heading">
+        <Section aria-labelledby="dealcheck-heading">
           <SectionHeading id="dealcheck-heading">If you are comparing this with DealCheck</SectionHeading>
-          <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed text-foreground">
             DealCheck gives you a branded PDF report on its plans, including
             its free tier, for a lower yearly price; if all you need is a
             branded calculator PDF, DealCheck is fine. Agent Pro is for
@@ -555,24 +593,35 @@ export default async function ForAgentsPage() {
             {/* The other personas, on the close's soft rule (FinalCta's
                 investor cue). /for-brrrr and /for-flippers are reachable
                 only from here; keep them out of shared chrome. */}
+            {/* Each link holds its trailing punctuation (nowrap), so a line
+                never starts with ", and". */}
             <p className="mt-6 border-t border-rule-soft pt-2.5 text-base text-muted-foreground">
               Investing yourself as well? See TrueCap for{" "}
-              <Link href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
-                buy-and-hold
-              </Link>
-              ,{" "}
-              <Link href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
-                house hackers
-              </Link>
-              ,{" "}
-              <Link href="/for-brrrr" className="tc-link -my-3 inline-block py-3">
-                BRRRR operators
-              </Link>
-              , and{" "}
-              <Link href="/for-flippers" className="tc-link -my-3 inline-block py-3">
-                fix-and-flippers
-              </Link>
-              .
+              <span className="whitespace-nowrap">
+                <Link href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
+                  buy-and-hold
+                </Link>
+                ,
+              </span>{" "}
+              <span className="whitespace-nowrap">
+                <Link href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
+                  house hackers
+                </Link>
+                ,
+              </span>{" "}
+              <span className="whitespace-nowrap">
+                <Link href="/for-brrrr" className="tc-link -my-3 inline-block py-3">
+                  BRRRR operators
+                </Link>
+                ,
+              </span>{" "}
+              and{" "}
+              <span className="whitespace-nowrap">
+                <Link href="/for-flippers" className="tc-link -my-3 inline-block py-3">
+                  fix-and-flippers
+                </Link>
+                .
+              </span>
             </p>
           </CloseSection>
         </div>
