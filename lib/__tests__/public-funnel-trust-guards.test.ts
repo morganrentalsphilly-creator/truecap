@@ -11,13 +11,17 @@ describe("public funnel and trust guards", () => {
     const hero = read("components/marketing/marketing-hero.tsx");
     const form = read("components/marketing/hero-address-form.tsx");
 
+    // 2026-09-29 agent-first pass: the headline is the agent's outcome, the
+    // subhead keeps the product's topical nouns (rental, Buy Box, Offer
+    // Ceiling, 60 seconds), and an investor cue sits under the primary action.
     expect(config).toContain(
-      'decision_system: "Know your walk-away price before you make the offer."',
+      'decision_system: "Stop forwarding listings. Start sending deals that already pencil."',
     );
-    // 2026-09 positioning pass: decision → price → risk, math underneath.
     expect(hero).toContain(
-      "Paste any rental listing. In about 60 seconds, see whether it works at the asking price, what price makes it work, and what could break the deal.",
+      "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal.",
     );
+    expect(hero).toContain('href="/for-investors"');
+    expect(hero).toContain("data-hero-investor-cue");
     expect(hero).toContain("Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable");
     expect(hero).toContain(
       "Free. No account. Your first full decision is included.",

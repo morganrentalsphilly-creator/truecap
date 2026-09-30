@@ -13,7 +13,9 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  decision_system: "Know your walk-away price before you make the offer.",
+  // Agent-first (2026-09 pass): the homepage headline is the agent's outcome;
+  // the subhead (marketing-hero.tsx) keeps the product's topical nouns.
+  decision_system: "Stop forwarding listings. Start sending deals that already pencil.",
   a: "Screen a rental and compare asking with its Offer Ceiling.",
   b: "See how a rental models under the assumptions shown.",
   walkaway: "Review the Offer Ceiling and the targets that produced it.",
