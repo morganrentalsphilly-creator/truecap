@@ -43,47 +43,87 @@ type OgFont = {
 };
 
 /**
- * One face, one weight, subset to `text`. Google serves a static TTF
- * instance to a non-browser client when every axis is pinned to one value,
- * which is what next/og can read. Returns null on any failure.
+ * One face at one weight, fetched ONCE per server process and cached: a
+ * build prerenders ~60 cards, and a request per card (the old `text=`
+ * subsetting) was rate-limited on CI and Vercel, which failed the build.
+ * Google serves a static TTF instance to a non-browser client when every
+ * axis is pinned to one value; with several unicode-range subsets, the one
+ * covering Basic Latin is used. Retries twice with a short backoff; null on
+ * failure (the card then renders in next/og's built-in face).
  */
-async function loadGoogleFont(
-  family: string,
-  axes: string,
-  text: string,
-): Promise<ArrayBuffer | null> {
-  try {
-    const url = `https://fonts.googleapis.com/css2?family=${family}:${axes}&text=${encodeURIComponent(text)}`;
-    const css = await (await fetch(url)).text();
-    const src = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
-    if (!src) return null;
-    const response = await fetch(src);
-    return response.ok ? await response.arrayBuffer() : null;
-  } catch {
-    return null;
+const fontCache = new Map<string, Promise<ArrayBuffer | null>>();
+
+function latinSource(css: string): string | null {
+  const faces = css.split("@font-face").slice(1);
+  const coversLatin = (face: string) => {
+    const range = /unicode-range:\s*([^;]+);/.exec(face)?.[1];
+    if (!range) return true;
+    return range.split(",").some((part) => {
+      const [lo, hi] = part.trim().replace(/^U\+/i, "").split("-");
+      const from = parseInt(lo, 16);
+      const to = hi ? parseInt(hi, 16) : from;
+      return from <= 0x41 && 0x7a <= to;
+    });
+  };
+  const face = faces.find(coversLatin) ?? faces[0];
+  return face ? /src: url\((.+?)\) format\('(?:opentype|truetype)'\)/.exec(face)?.[1] ?? null : null;
+}
+
+async function fetchFont(family: string, axes: string): Promise<ArrayBuffer | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      if (attempt) await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+      const css = await (await fetch(`https://fonts.googleapis.com/css2?family=${family}:${axes}`)).text();
+      const src = latinSource(css);
+      if (!src) continue;
+      const response = await fetch(src);
+      if (response.ok) return await response.arrayBuffer();
+    } catch {
+      // next attempt
+    }
   }
+  return null;
+}
+
+function loadGoogleFont(family: string, axes: string): Promise<ArrayBuffer | null> {
+  const key = `${family}:${axes}`;
+  let pending = fontCache.get(key);
+  if (!pending) {
+    pending = fetchFont(family, axes).then((font) => {
+      // Don't pin a failure for the life of the process: the next card retries.
+      if (!font) fontCache.delete(key);
+      return font;
+    });
+    fontCache.set(key, pending);
+  }
+  return pending;
 }
 
 /**
- * The three faces a card uses, each subset to the characters it draws:
- * Archivo at 82% width and 750 for the display voice, Archivo 400 for text,
- * DM Mono 500 for figures.
+ * The three faces a card uses: Archivo at 82% width and 750 for the display
+ * voice, Archivo 400 for text, DM Mono 500 for figures. The `parts` say which
+ * faces the card draws (a card with no figures skips the mono face).
+ *
+ * Returns undefined, never an empty list, when no face loads: next/og reads
+ * `options.fonts || defaultFonts`, so an empty array is truthy, replaces its
+ * built-in face and throws "No fonts are loaded" at render, which fails a
+ * build that prerenders the card.
  */
 export async function loadNewsprintFonts(parts: {
   display: string;
   text: string;
   mono?: string;
-}): Promise<OgFont[]> {
+}): Promise<OgFont[] | undefined> {
   const [display, text, mono] = await Promise.all([
-    loadGoogleFont("Archivo", "wdth,wght@82,750", parts.display),
-    loadGoogleFont("Archivo", "wdth,wght@100,400", parts.text),
-    parts.mono ? loadGoogleFont("DM+Mono", "wght@500", parts.mono) : Promise.resolve(null),
+    loadGoogleFont("Archivo", "wdth,wght@82,750"),
+    loadGoogleFont("Archivo", "wdth,wght@100,400"),
+    parts.mono ? loadGoogleFont("DM+Mono", "wght@500") : Promise.resolve(null),
   ]);
   const fonts: OgFont[] = [];
   if (display) fonts.push({ name: OG_FONT.display, data: display, weight: 700, style: "normal" });
   if (text) fonts.push({ name: OG_FONT.text, data: text, weight: 400, style: "normal" });
   if (mono) fonts.push({ name: OG_FONT.mono, data: mono, weight: 500, style: "normal" });
-  return fonts;
+  return fonts.length ? fonts : undefined;
 }
 
 /** The font-family stack a card element uses, with next/og's sans behind it. */
