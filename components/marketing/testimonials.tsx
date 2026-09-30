@@ -1,4 +1,4 @@
-import { Quote } from "lucide-react";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formatPublishedMonth, ROLE_LABELS, type PublicTestimonial } from "@/lib/testimonials/rules";
 import { listPublishedTestimonials } from "@/lib/testimonials/store";
@@ -8,6 +8,9 @@ import { listPublishedTestimonials } from "@/lib/testimonials/store";
  * role, market, quote, month/year. With zero rows it renders NOTHING: no
  * placeholders, no teaser text, no empty stars. Any read failure (env
  * missing at build, table not applied yet) also renders nothing.
+ *
+ * Set as quotations on rules (DESIGN.md "Components": cards only for things
+ * a visitor compares), with the attribution in the figcaption.
  */
 export async function loadPublishedTestimonials(limit: number): Promise<PublicTestimonial[]> {
   try {
@@ -29,12 +32,11 @@ export function TestimonialFigure({ testimonial }: { testimonial: PublicTestimon
   const who = attribution(testimonial);
   const when = formatPublishedMonth(testimonial.publishedAt);
   return (
-    <figure className="flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-      <Quote aria-hidden className="size-5 text-primary/40" />
-      <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
+    <figure className="flex h-full flex-col border-t-2 border-foreground pt-4">
+      <blockquote className="flex-1 text-pretty text-lg leading-relaxed text-foreground">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>
-      <figcaption className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
+      <figcaption className="mt-4 text-sm text-muted-foreground">
         {who ? <span className="font-semibold text-foreground">{who}</span> : null}
         {who && when ? " · " : null}
         {when ? <time dateTime={testimonial.publishedAt}>{when}</time> : null}
@@ -55,23 +57,16 @@ export async function Testimonials({
   const rows = await loadPublishedTestimonials(limit);
   if (rows.length === 0) return null;
   return (
-    <section aria-labelledby="testimonials-title" data-testimonials="" className={className}>
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2
-          id="testimonials-title"
-          className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-        >
-          {heading}
-        </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
-          Each quote came from a signed-in user through the in-product prompt, with permission to publish their first name, role, and market.
-        </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((t) => (
-            <TestimonialFigure key={t.id} testimonial={t} />
-          ))}
-        </div>
+    <Section aria-labelledby="testimonials-title" data-testimonials="" className={className}>
+      <SectionHeading id="testimonials-title">{heading}</SectionHeading>
+      <p className="mt-3 max-w-[60ch] text-base text-muted-foreground">
+        Each quote came from a signed-in user through the in-product prompt, with permission to publish their first name, role, and market.
+      </p>
+      <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        {rows.map((t) => (
+          <TestimonialFigure key={t.id} testimonial={t} />
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }
