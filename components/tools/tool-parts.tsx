@@ -18,8 +18,13 @@
  *   The figure is in ink; green and orange belong to the verdict, and only
  *   when it is a pass or miss against a rule (LedgerVerdict).
  * - ToolFormula: a formula printed between rules (2px ink above, the rule
- *   below), DM Mono at 500, left-aligned, with an optional worked example.
- *   `not-prose`, so it keeps its own type inside an article body.
+ *   below), in the text face at 600, left-aligned, with an optional worked
+ *   example. A formula written in words ("Monthly rent ≥ 1% of purchase
+ *   price") is a sentence, not a figure to compare, so it stays out of DM
+ *   Mono (DESIGN.md "The Ledger Rule"), where it read as code; and neither
+ *   loaded latin subset carries "≥", so in the mono line the sign fell back
+ *   to a face of another width and weight. `not-prose`, so it keeps its own
+ *   type inside an article body.
  */
 
 import type { ComponentProps, ReactNode } from "react";
@@ -101,7 +106,7 @@ export function ToolFormula({
   example,
   className,
 }: {
-  /** The rule or formula itself, set in DM Mono. */
+  /** The rule or formula itself, in the text face at 600. */
   formula: ReactNode;
   /** A worked example under it, in the text face. */
   example?: ReactNode;
@@ -114,7 +119,7 @@ export function ToolFormula({
         className,
       )}
     >
-      <p className="font-mono text-base font-medium sm:text-lg">{formula}</p>
+      <p className="text-pretty text-lg font-semibold leading-snug">{formula}</p>
       {example ? (
         <p className="mt-2 text-pretty text-base leading-relaxed text-muted-foreground">
           {example}
