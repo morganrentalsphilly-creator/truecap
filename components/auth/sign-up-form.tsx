@@ -286,6 +286,13 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           Complete three Pro deal analyses and one full comparison.{" "}
+          {/* An agent who arrives from an Agent Pro CTA is told, before the
+              account exists, what the trial leaves out: the same sentence
+              /for-agents puts beside that CTA (lib/entitlements.ts: the
+              trial never grants custom_branding or client_buy_box). */}
+          {selectedPlan === "agent-pro"
+            ? "Co-branding, the client roster and client Buy Boxes are part of the Agent Pro subscription, not the trial. "
+            : null}
           {
             "Nothing auto-renews and no subscription starts when you create the account."
           }

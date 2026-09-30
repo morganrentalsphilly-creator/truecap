@@ -99,7 +99,13 @@ const SPINE_STEPS = [
     label: "Ceiling",
     title: "Send the Offer Ceiling, co-branded",
     body: "The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers.",
-    proNote: "Included in your first complete decision",
+    // The Offer Ceiling and the memo PDF have an anonymous first-decision
+    // allowance (FEATURE_CATALOG mao, pdf_export); co-branding
+    // (custom_branding) has none and is not in the no-card trial either
+    // (lib/entitlements.ts evaluationFeatures), so the note scopes the free
+    // part and names the plans that carry the rest.
+    proNote:
+      "The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro",
   },
 ] as const;
 
@@ -951,14 +957,30 @@ export async function PdfProUpsell() {
             price={price.agentMonthly}
             period="/mo"
             priceNote={<>or {price.agentAnnual}&nbsp;a&nbsp;year</>}
+            // Only what Agent Pro adds, with the caps the code enforces: 100
+            // clients (app/actions/agent-clients.ts MAX_CLIENTS) and 12 Buy
+            // Boxes per account (app/actions/user-buy-boxes.ts MAX_BUY_BOXES).
+            // Co-branding is Pro too, so it is the note, not a row.
             answers={[
-              { term: "A Buy Box per client", detail: "Up to 100 clients on your roster." },
+              {
+                term: "Client Buy Boxes",
+                detail: "Up to 100 clients on your roster; up to 12 Buy Boxes per account.",
+              },
               {
                 term: "Deals screened to their targets",
                 detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
               },
-              { term: "A co-branded memo", detail: "Your client opens it without an account." },
+              {
+                term: "Client-report share links",
+                detail: "Open without an account; the address stays hidden unless you include it.",
+              },
             ]}
+            note={
+              <>
+                Plus everything in {proOfferName}, including co-branded share
+                pages and PDFs.
+              </>
+            }
             action={
               <IntentPrefetchLink href="/for-agents" className={ctaSecondary}>
                 See TrueCap for agents

@@ -11,10 +11,12 @@ import { describe, expect, it, vi } from "vitest";
  * Before this rule a 390px visitor scrolling /for-agents pulled 24 JS chunks
  * and 27 RSC payloads for routes almost nobody opened (PR #152). Links below
  * the first screen now go through IntentPrefetchLink (hover or keyboard
- * focus); only the first screen's actions and the page's primary conversion
- * route (the Agent Pro sign-up, the /pricing checkout actions) keep
- * next/link's default. /analyze never prefetches (its bundle stays off
- * marketing pages).
+ * focus); only the first screen's actions and the /pricing checkout actions
+ * keep next/link's default. The sign-up links (/for-agents' close, the
+ * /pricing cards for a visitor) are plain <a> elements, a full-document
+ * navigation, so Back from the auth page restores the marketing page's
+ * scroll (a client-side hop clamped it to the auth page's height). /analyze
+ * never prefetches (its bundle stays off marketing pages).
  *
  * Two layers:
  * - Source: every <Link> (and tracked link island) either carries
@@ -125,8 +127,10 @@ type Allow = [href: string | RegExp, count: number];
  * layer cannot reach).
  */
 const SOURCE_RULES: Record<string, { allow: Allow[]; intent: boolean; hero?: true }> = {
-  // The hero's jump to #pricing and the close's Agent Pro sign-up (the page's
-  // conversion route) are tracked islands; everything else is on intent.
+  // The hero's jump to #pricing and the close's Agent Pro sign-up are tracked
+  // islands (the source cannot tell; TrackedMarketingLink renders the /auth/
+  // one as a plain <a>, held by the rendered layer); everything else is on
+  // intent.
   "app/for-agents/page.tsx": {
     allow: [
       ['"#pricing"', 1],
@@ -149,15 +153,14 @@ const SOURCE_RULES: Record<string, { allow: Allow[]; intent: boolean; hero?: tru
   "components/marketing/pricing-value-stack.tsx": { allow: [], intent: true },
   // The plan cards' actions are the checkout: sign-up for a visitor, billing
   // for a subscriber or a recovery. The Free card's /analyze is prefetch={false}.
+  // A visitor's sign-up is a plain <a> (full-document navigation), not a
+  // Link: see "sign-up links are full-document navigations" below.
   "components/marketing/pricing-toggle-plans.tsx": {
     allow: [['"/profile#billing"', 2]],
     intent: false,
   },
   "components/marketing/pricing-plan-buttons.tsx": {
-    allow: [
-      ['"/profile#billing"', 1],
-      [/^\{`\/auth\/sign-up\?/, 1],
-    ],
+    allow: [['"/profile#billing"', 1]],
     intent: false,
   },
   // The hero's secondary action; the close's repeat goes on intent.
@@ -300,6 +303,27 @@ describe("paid landing pages: intent-only prefetch (source)", () => {
       }
     },
   );
+
+  it("sign-up links are full-document navigations", () => {
+    // A client-side hop into /auth/sign-up made Back restore the marketing
+    // page's scroll while the short auth page was still mounted: /for-agents
+    // reopened at 483px (1095 wide) instead of the pricing close it left, and
+    // /pricing at its hero. A plain <a> gives Back the browser's own restore.
+    const buttons = read("components/marketing/pricing-plan-buttons.tsx");
+    const signUpHref = /^\{`\/auth\/sign-up\?/;
+    const anchors = openingTags(buttons, ["a"]).filter(({ tag }) =>
+      signUpHref.test(hrefSource(tag) ?? ""),
+    );
+    expect(anchors, "the /pricing cards' visitor sign-up is an <a>").toHaveLength(1);
+    expect(
+      openingTags(buttons, ["Link"]).filter(({ tag }) => signUpHref.test(hrefSource(tag) ?? "")),
+      "no next/link to /auth/sign-up on the /pricing cards",
+    ).toEqual([]);
+    // /for-agents' close goes through TrackedMarketingLink, which renders an
+    // /auth/ href as an <a> (the rendered layer checks the close's link).
+    const tracked = read("components/marketing/tracked-marketing-link.tsx");
+    expect(tracked).toMatch(/href\.startsWith\("\/auth\/"\)/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -343,21 +367,30 @@ function heroSpan(main: string): [number, number] {
 /**
  * Per page: the routes the hero may prefetch on scroll (href → count); the
  * page's conversion route, which may prefetch on scroll wherever it sits
- * (default none); and a few below-the-fold links that must be on intent, so
+ * (default none); a few below-the-fold links that must be on intent, so
  * an empty render, a dropped section or a switch to prefetch={false} (no
- * hover prefetch at all) can't pass.
+ * hover prefetch at all) can't pass; and the links that must render as a
+ * plain <a>, which a switch back to next/link fails.
  */
 const RENDERED: Record<
   string,
-  { eager: Record<string, number>; conversion?: Record<string, number>; intent: string[] }
+  {
+    eager: Record<string, number>;
+    conversion?: Record<string, number>;
+    intent: string[];
+    /** Rendered as a plain <a> (a full-document navigation), not next/link. */
+    document?: string[];
+  }
 > = {
-  // The target from main's measurements: only /auth/sign-up on scroll. The
-  // hero's #pricing jump is a same-page fragment; the close's Agent Pro
-  // sign-up is the page's conversion route.
+  // Nothing below the hero prefetches on scroll. The hero's #pricing jump is
+  // a same-page fragment (repeated on intent under the roster); the close's
+  // Agent Pro sign-up is a plain <a>, so Back from sign-up returns to the
+  // close.
   "app/for-agents/page.tsx": {
     eager: { "#pricing": 1 },
-    conversion: { [AGENT_PRO_SIGNUP]: 1 },
+    document: [AGENT_PRO_SIGNUP],
     intent: [
+      "#pricing",
       "/sample-decision-memo",
       "/methodology",
       "/reviews",
@@ -413,7 +446,7 @@ function eagerTally(html: string): Record<string, number> {
 describe("paid landing pages: intent-only prefetch (rendered)", () => {
   it.each(Object.entries(RENDERED))(
     "%s prefetches on scroll only its first-screen routes",
-    async (path, { eager, conversion = {}, intent }) => {
+    async (path, { eager, conversion = {}, intent, document = [] }) => {
       const html = await renderPage(path);
       const main = mainOf(html);
       const inMain = anchors(main);
@@ -436,6 +469,15 @@ describe("paid landing pages: intent-only prefetch (rendered)", () => {
           inMain.some((a) => a.href === href && a.prefetch === "intent"),
           `${path}: ${href} prefetches on intent`,
         ).toBe(true);
+      }
+
+      // Neither mocked component rendered these: no data-prefetch at all.
+      for (const href of document) {
+        const matches = inMain.filter((a) => a.href === href);
+        expect(matches.length, `${path}: ${href} rendered in <main>`).toBeGreaterThan(0);
+        for (const a of matches) {
+          expect(a.prefetch, `${path}: ${href} is a plain <a>`).toBe("(external)");
+        }
       }
 
       // /analyze never prefetches anywhere on the page, header and footer included.

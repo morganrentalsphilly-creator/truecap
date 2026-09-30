@@ -33,8 +33,12 @@ const PRO_STACK = [
   ["Co-branded share pages + PDFs", "Your logo, brand color, and contact details on what you send; TrueCap's methodology stays named."],
 ] as const;
 
+// The roster caps at 100 clients (app/actions/agent-clients.ts MAX_CLIENTS)
+// but an account at 12 Buy Boxes, client-scoped ones included
+// (app/actions/user-buy-boxes.ts MAX_BUY_BOXES): "each of 100 clients with a
+// Buy Box" is more than the product holds, so both caps are stated.
 const AGENT_PRO_STACK = [
-  ["Client rosters", "Up to 100 clients, each with a Buy Box assigned to them and deals screened against it."],
+  ["Client rosters", "Up to 100 clients on your roster. Assign a Buy Box to a client (up to 12 per account) and their deals are screened against it."],
   ["Client-report share links", "Open without an account, address hidden unless you include it, and a miss names the criterion."],
 ] as const;
 

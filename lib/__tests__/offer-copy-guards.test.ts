@@ -87,6 +87,39 @@ describe("offer trust language", () => {
     expect(actions).toContain("const MAX_CLIENTS = 100");
   });
 
+  it("states the 12-Buy-Box account cap wherever Agent Pro ties a Buy Box to each client", () => {
+    // An account holds 12 Buy Boxes, client-scoped ones included, while the
+    // roster holds 100 clients. The homepage card ("A Buy Box per client /
+    // Up to 100 clients"), /pricing's value stack ("Up to 100 clients, each
+    // with a Buy Box") and the catalog label ("buy boxes per buyer") promised
+    // more than the product holds.
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = 12");
+
+    const home = read("components/marketing/landing-sections.tsx");
+    // The homepage Agent Pro PlanCard: its data attribute to its action.
+    const agentCardAt = home.indexOf("data-homepage-agent-pro");
+    const agentActionAt = home.indexOf("See TrueCap for agents", agentCardAt);
+    expect(agentCardAt).toBeGreaterThan(-1);
+    expect(agentActionAt).toBeGreaterThan(agentCardAt);
+    const agentCard = home.slice(agentCardAt, agentActionAt);
+    expect(agentCard).toContain("up to 12 Buy Boxes per account");
+    expect(agentCard).not.toContain("A Buy Box per client");
+    // Every row sells something only Agent Pro has: co-branding is in Pro too.
+    expect(agentCard).not.toContain('term: "A co-branded memo"');
+    expect(agentCard).toContain('term: "Client-report share links"');
+
+    const stack = read("components/marketing/pricing-value-stack.tsx");
+    expect(stack).toContain("(up to 12 per account)");
+    expect(stack).not.toMatch(/each with a Buy Box/i);
+
+    const catalog = read("lib/entitlements-catalog.ts");
+    expect(catalog).toContain("Buy Boxes assigned to clients (up to 12 per account)");
+    expect(catalog).not.toMatch(/buy boxes per buyer/i);
+
+    const agentPage = read("app/for-agents/page.tsx");
+    expect(agentPage).toContain("An account keeps up to 12 Buy Boxes in total");
+  });
+
   it("discloses every live data processor and optional third-party client data", () => {
     const privacy = read("app/privacy/page.tsx");
     for (const disclosure of [
