@@ -1,0 +1,193 @@
+{
+  "generated": "2026-09-30",
+  "lighthouse": {
+    "live /  mobile": {
+      "perf": 0.83,
+      "a11y": 1,
+      "bestPractices": 1,
+      "seo": 1,
+      "LCP_ms": 4244,
+      "CLS": 0.003,
+      "TBT_ms": 160,
+      "FCP_ms": 1394,
+      "lighthouseVersion": "12.8.2",
+      "url": "https://usetruecap.com/"
+    },
+    "live /  desktop": {
+      "perf": 1,
+      "a11y": 1,
+      "bestPractices": 1,
+      "seo": 1,
+      "LCP_ms": 595,
+      "CLS": 0.014,
+      "TBT_ms": 0,
+      "FCP_ms": 355,
+      "lighthouseVersion": "12.8.2",
+      "url": "https://usetruecap.com/"
+    },
+    "local for-agents-mobile": {
+      "perf": 0.91,
+      "a11y": 0.97,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 3461,
+      "CLS": 0.003,
+      "TBT_ms": 38,
+      "FCP_ms": 1210,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/for-agents"
+    },
+    "local for-buy-and-hold-mobile": {
+      "perf": 0.91,
+      "a11y": 1,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 3465,
+      "CLS": 0.003,
+      "TBT_ms": 13,
+      "FCP_ms": 1211,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/for-buy-and-hold"
+    },
+    "local home-desktop": {
+      "perf": 0.99,
+      "a11y": 1,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 835,
+      "CLS": 0.002,
+      "TBT_ms": 0,
+      "FCP_ms": 331,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/"
+    },
+    "local home-mobile": {
+      "perf": 0.88,
+      "a11y": 1,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 3869,
+      "CLS": 0.003,
+      "TBT_ms": 38,
+      "FCP_ms": 1359,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/"
+    },
+    "local pricing-mobile": {
+      "perf": 0.8,
+      "a11y": 1,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 3621,
+      "CLS": 0.003,
+      "TBT_ms": 37,
+      "FCP_ms": 1358,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/pricing"
+    },
+    "local sample-decision-memo-mobile": {
+      "perf": 0.9,
+      "a11y": 1,
+      "bestPractices": 0.96,
+      "seo": 1,
+      "LCP_ms": 3580,
+      "CLS": 0.003,
+      "TBT_ms": 38,
+      "FCP_ms": 1357,
+      "lighthouseVersion": "12.8.2",
+      "url": "http://127.0.0.1:3140/sample-decision-memo"
+    }
+  },
+  "slop": {
+    "live": {
+      "slop-detect@0.5.2": {
+        "design": 25,
+        "designTier": "Mild",
+        "grade": "C",
+        "flagged": [
+          "slop_fonts",
+          "colored_glows",
+          "centered_hero",
+          "all_caps_labels",
+          "faq_accordion",
+          "nested_cards"
+        ],
+        "copy": 0,
+        "copyFlagged": []
+      },
+      "design-slop-cop (ai-design-checker)": {
+        "score": 7,
+        "tier": "Clean",
+        "flagged": [
+          "faq_accordion"
+        ]
+      }
+    },
+    "local": {
+      "slop-detect@0.5.2": {
+        "design": 25,
+        "designTier": "Mild",
+        "grade": "C",
+        "flagged": [
+          "slop_fonts",
+          "colored_glows",
+          "centered_hero",
+          "all_caps_labels",
+          "faq_accordion",
+          "nested_cards"
+        ],
+        "copy": 4,
+        "copyFlagged": [
+          "rule_of_three"
+        ]
+      },
+      "design-slop-cop (ai-design-checker)": {
+        "score": 7,
+        "tier": "Clean",
+        "flagged": [
+          "faq_accordion"
+        ]
+      }
+    }
+  },
+  "detector": {
+    "impeccable-detect-source": {
+      "primary": 0,
+      "advisory": 8,
+      "byRule": {
+        "design-system-font-size (advisory)": 8
+      }
+    },
+    "local/impeccable-detect-home-1440": {
+      "primary": 50,
+      "advisory": 1,
+      "byRule": {
+        "ai-color-palette": 1,
+        "gpt-thin-border-wide-shadow (advisory)": 1,
+        "tiny-text": 1,
+        "cramped-padding": 3,
+        "nested-cards": 5,
+        "undersized-ui-text": 7,
+        "line-length": 28,
+        "overused-font": 1,
+        "kicker-above-heading": 2,
+        "low-contrast": 2
+      }
+    },
+    "local/impeccable-detect-home-390": {
+      "primary": 21,
+      "advisory": 1,
+      "byRule": {
+        "ai-color-palette": 1,
+        "gpt-thin-border-wide-shadow (advisory)": 1,
+        "tiny-text": 1,
+        "cramped-padding": 3,
+        "nested-cards": 5,
+        "undersized-ui-text": 7,
+        "overused-font": 1,
+        "kicker-above-heading": 2,
+        "low-contrast": 1
+      }
+    }
+  }
+}

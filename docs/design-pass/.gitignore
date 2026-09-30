@@ -1,0 +1,6 @@
+# Raw Lighthouse and tool reports stay on disk for inspection; the numbers that
+# matter are summarized in baseline/README.md and baseline/summary.json.
+*.report.html
+*.report.json
+*.log
+*.err
