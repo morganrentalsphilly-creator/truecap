@@ -38,7 +38,9 @@ export function Section({
   return (
     <section
       className={cn(
-        "scroll-mt-24 bg-background",
+        // No scroll margin of its own: the html scroll padding in globals.css
+        // already keeps a fragment target clear of the sticky header.
+        "bg-background",
         rule === "rule" && "border-t border-border",
         rule === "heavy" && "border-t-2 border-foreground",
         className,
