@@ -90,10 +90,13 @@ export default function ForBrrrrPage() {
           {/* The scope boundary, in ink on the rule directly under the lede:
               it is the page's reason to exist, not a disclaimer. Note sets a
               caveat's body in Ink 2; this body stays in ink (as it was in the
-              removed box), so the boundary is not demoted. */}
+              removed box), so the boundary is not demoted. Inside the hero it
+              sits on the 1px rule, not Note's 2px ink rule (that opens a
+              section, and would outweigh the rule that closes the hero), and
+              58ch at 16px ends the rule with the lede's 52ch at 18px. */}
           <Note
             title="Steady-state rental analysis — use after renovation is complete."
-            className="mt-8"
+            className="mt-8 max-w-[58ch] border-t border-border"
           >
             <span className="text-foreground">
               The core analyzer does not join a construction-period cash-flow ledger to
@@ -101,6 +104,25 @@ export default function ForBrrrrPage() {
               separately before making an investment decision.
             </span>
           </Note>
+          {/* The first screen's actions, after the boundary so the analyzer is
+              offered with its scope already stated (the close repeats the
+              guide, as the homepage repeats its CTA). No ?strategy= seed: the
+              BRRRR strategy model is dark. */}
+          <ActionRow className="mt-8">
+            <Link
+              href="/blog/brrrr-method-explained"
+              className={buttonVariants({ size: "cta" })}
+            >
+              Read the BRRRR guide
+            </Link>
+            <Link
+              href="/analyze"
+              prefetch={false}
+              className={buttonVariants({ size: "cta", variant: "outline" })}
+            >
+              Open rental analyzer
+            </Link>
+          </ActionRow>
         </PageHero>
 
         <Section aria-labelledby="released-resources">
