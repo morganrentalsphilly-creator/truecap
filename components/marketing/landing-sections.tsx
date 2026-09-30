@@ -29,7 +29,6 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
-import Link from "next/link";
 import {
   Activity,
   ArrowRight,
@@ -54,6 +53,9 @@ import {
   X,
 } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
+// Section and plan-card links sit below the fold: they prefetch on hover or
+// focus, not on scroll (see the component's doc comment).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
 import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
@@ -365,18 +367,18 @@ export function BuiltByInvestor() {
           published.
         </p>
         <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-          <Link
+          <IntentPrefetchLink
             href="/about"
             className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
             About TrueCap
-          </Link>
-          <Link
+          </IntentPrefetchLink>
+          <IntentPrefetchLink
             href="/methodology"
             className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
             Read the methodology
-          </Link>
+          </IntentPrefetchLink>
         </p>
       </div>
     </section>
@@ -476,12 +478,12 @@ export function SocialProof() {
           </div>
         </div>
         <div className="mt-6 text-center">
-          <Link
+          <IntentPrefetchLink
             href="/reviews"
             className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
             See verified proof &amp; methodology →
-          </Link>
+          </IntentPrefetchLink>
         </div>
       </div>
     </section>
@@ -1086,7 +1088,7 @@ export function PdfProUpsell() {
               in a report you can hand to a partner or lender.
             </p>
             <div className="mt-5">
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
               >
@@ -1095,7 +1097,7 @@ export function PdfProUpsell() {
                   aria-hidden
                   className="size-4 transition-transform group-hover:translate-x-0.5"
                 />
-              </Link>
+              </IntentPrefetchLink>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:
                 up to {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
@@ -1217,12 +1219,12 @@ export function Personas() {
                 />
               ) : null}
               {p.pagePath ? (
-                <Link
+                <IntentPrefetchLink
                   href={p.pagePath.href}
                   className={`mt-2 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${i === 0 ? "lg:justify-center" : ""}`}
                 >
                   {p.pagePath.label} <ArrowRight className="size-3.5" />
-                </Link>
+                </IntentPrefetchLink>
               ) : null}
             </div>
           ))}
