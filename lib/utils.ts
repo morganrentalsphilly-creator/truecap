@@ -1,5 +1,22 @@
 import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { extendTailwindMerge } from 'tailwind-merge'
+
+/**
+ * tailwind-merge only knows Tailwind's default scales. The type ramp in
+ * app/globals.css adds its own `--text-*` sizes, and without them here
+ * tailwind-merge reads `text-key-sm` as a text COLOR: `cn("text-key-sm",
+ * "text-foreground")` silently dropped the size (the calculator's key figure
+ * fell to 16px on phones). Every custom size and shadow token is listed so a
+ * color class never evicts a size, and a size never evicts a color.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: ['3xs', '2xs', 'h3-sm', 'section-sm', 'section', 'key-sm', 'key', 'display-sm', 'display'],
+      shadow: ['float-up', 'glow', 'gold-glow'],
+    },
+  },
+})
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
