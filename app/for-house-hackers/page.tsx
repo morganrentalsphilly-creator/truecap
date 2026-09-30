@@ -152,6 +152,9 @@ export default function ForHouseHackersPage() {
             </>
           }
           note="Free screen: no card or signup"
+          // The capture is a narrow phone shot: the aside column fits it
+          // instead of leaving empty paper beside it in the 7fr column.
+          asideWidth="shot"
           aside={
             // Real product screenshot from the free sample deal (Phase 4),
             // set as a document: a rule, no browser chrome. The phone capture
