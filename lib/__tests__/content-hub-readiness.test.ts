@@ -111,18 +111,55 @@ describe("content hub touch targets", () => {
   });
 
   it("keeps native disclosure summaries touch-sized and focus-visible", () => {
-    for (const path of [
-      "components/marketing/comparison-faq.tsx",
-      "components/marketing/tool-embed-invite.tsx",
-    ]) {
+    const summaryOf = (path: string) => {
       const source = read(path);
-      const summary = source.slice(
-        source.indexOf("<summary"),
-        source.indexOf("</summary>"),
-      );
-      expect(summary, path).toContain("min-h-11");
-      expect(summary, path).toContain("focus-visible:ring-[3px]");
+      const start = source.indexOf("<summary");
+      const end = source.indexOf("</summary>");
+      expect(start, path).toBeGreaterThan(-1);
+      expect(end, path).toBeGreaterThan(start);
+      return source.slice(start, end);
+    };
+
+    const toolEmbed = summaryOf("components/marketing/tool-embed-invite.tsx");
+    expect(toolEmbed).toContain("min-h-11");
+    expect(toolEmbed).toContain("focus-visible:ring-[3px]");
+
+    // ComparisonFaq's rows are the homepage FAQ's (DESIGN.md "Components":
+    // FAQ; FaqSection): 48px tall, and focus is the global 3px Signal Blue
+    // outline floor, not a per-row ring. So the row must stay at least
+    // 44px, must not try to suppress the outline, and the floor in
+    // app/globals.css must keep covering summary.
+    const comparison = summaryOf("components/marketing/comparison-faq.tsx");
+    expect(comparison).toMatch(/\bmin-h-1[12]\b/);
+    expect(comparison).not.toMatch(/\boutline-(?:none|hidden|0)\b/);
+
+    // The floor's selector is `:where(<controls>):where(:not(<menu roles>))
+    // :focus-visible`. summary must be one of the FIRST list's own items: a
+    // summary moved into a :not(...) (either list) is excluded from the
+    // floor, and a match anywhere in the selector would still pass.
+    const floor = /([^{}]*)\{\s*outline:\s*3px solid var\(--ring\) !important;/.exec(
+      read("app/globals.css"),
+    );
+    expect(floor, "the 3px focus outline floor in app/globals.css").not.toBeNull();
+    const selector = (floor?.[1] ?? "").split("*/").pop()!.trim();
+    expect(selector.startsWith(":where(")).toBe(true);
+    expect(selector.endsWith(":focus-visible")).toBe(true);
+    const controls: string[] = [];
+    let depth = 1;
+    let item = "";
+    for (const ch of selector.slice(":where(".length)) {
+      if (ch === "(") depth += 1;
+      if (ch === ")") depth -= 1;
+      if (depth === 0) break;
+      if (depth === 1 && ch === ",") {
+        controls.push(item.trim());
+        item = "";
+      } else {
+        item += ch;
+      }
     }
+    controls.push(item.trim());
+    expect(controls).toContain("summary");
   });
 });
 
