@@ -26,6 +26,7 @@ import Link from "next/link";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import {
+  ActionRow,
   CloseSection,
   PageHero,
   RuledList,
@@ -103,19 +104,35 @@ export default async function ReviewsPage() {
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="bg-background outline-none">
-        {/* (a) Hero */}
+        {/* (a) Hero, with the page's primary action in the first screen.
+            A plain link, not AnalyzeCtaLink: that island fires the
+            homepage's CTA event, and a new source value for it would be an
+            analytics change. */}
         <PageHero
           title="Proof, not praise."
           lede="Everything on this page is something you can check yourself."
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze"
+                prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Analyze a deal free
+              </Link>
+            </ActionRow>
+          }
         />
 
         {/* (b) Three facts a visitor can verify by clicking — always renders.
             Each column states something true today and links to where it
             can be checked; none of them depends on a database row. PageHero
-            already draws the rule under the head, so this Section adds none.
-            Three columns only from 1024px: narrower, the columns fall to
-            19-24ch and the headings wrap unevenly, so tablets get full rows. */}
-        <Section rule="none" aria-labelledby="verify-title">
+            already draws the rule under the head, so this Section adds none,
+            and it runs the tight rhythm so the facts sit close under the
+            hero. Three columns only from 1024px: narrower, the columns fall
+            to 19-24ch and the headings wrap unevenly, so tablets get full
+            rows. */}
+        <Section rhythm="tight" rule="none" aria-labelledby="verify-title">
           <SectionHeading id="verify-title">
             Three things you can check right now
           </SectionHeading>
@@ -151,8 +168,11 @@ export default async function ReviewsPage() {
                 A quote is held for {PUBLISH_DELAY_HOURS} hours before it
                 appears, publishes only after {MIN_SAVED_DEALS_FOR_PUBLISH}{" "}
                 saved deals or an exported report. The founder can remove
-                a quote; contact hello@usetruecap.com if you want yours
-                taken down.
+                a quote; contact{" "}
+                <a href="mailto:hello@usetruecap.com" className="tc-link">
+                  hello@usetruecap.com
+                </a>{" "}
+                if you want yours taken down.
               </p>
               <a href="#quotes-flow-title" className={COLUMN_LINK_CLASS}>
                 See how quotes get here
@@ -162,10 +182,15 @@ export default async function ReviewsPage() {
         </Section>
 
         {/* (c) How quotes get here — the real flow, stated plainly. The id
-            is the target of the "See how quotes get here" link above. */}
+            is the target of the "See how quotes get here" link above. On
+            the homepage FAQ's 5/7 grid from 1024px, so the 68ch step list
+            fills the row instead of leaving an empty right column between
+            two full-width ruled grids. */}
         <Section rhythm="tight" aria-labelledby="quotes-flow-title">
-          <SectionHeading id="quotes-flow-title">How quotes get here</SectionHeading>
-          <StepList className="mt-8" steps={QUOTE_FLOW_STEPS} />
+          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <SectionHeading id="quotes-flow-title">How quotes get here</SectionHeading>
+            <StepList steps={QUOTE_FLOW_STEPS} />
+          </div>
         </Section>
 
         {/* (d) Published quotes — renders nothing at zero rows, by design. */}
@@ -226,18 +251,21 @@ export default async function ReviewsPage() {
           </ul>
         </Section>
 
-        {/* (h) Final CTA: the close on the heavy rule, the page's one filled button. */}
+        {/* (h) Final CTA: the close on the heavy rule. ActionRow runs the
+            button full width on phones, as on the sibling pages' closes. */}
         <CloseSection
           headingId="cta-title"
           heading="The best proof is your own deal."
           lede="Paste an address. Every assumption is labeled and editable."
           actions={
-            <AnalyzeCtaLink
-              analyticsSource="reviews"
-              className={buttonVariants({ size: "cta" })}
-            >
-              Analyze a deal free
-            </AnalyzeCtaLink>
+            <ActionRow>
+              <AnalyzeCtaLink
+                analyticsSource="reviews"
+                className={buttonVariants({ size: "cta" })}
+              >
+                Analyze a deal free
+              </AnalyzeCtaLink>
+            </ActionRow>
           }
         />
       </main>
