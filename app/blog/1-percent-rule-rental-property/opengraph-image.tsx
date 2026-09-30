@@ -1,112 +1,25 @@
 /**
- * Dynamic OG image for the 1% rule post. Same design language as the
- * other anchor posts (brand bar, badge, headline, footer rail).
+ * Dynamic OG image for /blog/1-percent-rule-rental-property. Auto-detected by
+ * the Next.js App Router convention; overrides the images: [...] fallback in
+ * the route's metadata.
+ *
+ * Implementation lives in the shared template at
+ * lib/og/blog-og-template.tsx (the Newsprint frame) — this file is just the
+ * per-post config wrapper so all blog OG images stay visually consistent. The
+ * title string mirrors the post's own metadata title (SERP_TITLE).
  */
 
-import { ImageResponse } from "next/og";
+import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
 export const alt = "The 1% rule for rental property — TrueCap";
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = "image/png";
 
-const BRAND_BLUE = "#0070c4";
-const TEXT_INK = "#0F172A";
-const TEXT_SUB = "#475569";
-
 export default function Image() {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          background: "#F8FAFC",
-          fontFamily: "system-ui",
-          color: TEXT_INK,
-        }}
-      >
-        <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
-
-        <div
-          style={{
-            padding: "40px 64px 0 64px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.01em", display: "flex" }}>
-            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
-          </div>
-          <div
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: TEXT_SUB,
-              display: "flex",
-            }}
-          >
-            Blog · Metrics
-          </div>
-        </div>
-
-        <div style={{ padding: "48px 64px 0 64px", display: "flex" }}>
-          <div
-            style={{
-              background: BRAND_BLUE,
-              color: "#FFFFFF",
-              fontSize: 22,
-              fontWeight: 800,
-              padding: "12px 22px",
-              borderRadius: 999,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              display: "flex",
-            }}
-          >
-            The 1% Rule
-          </div>
-        </div>
-
-        <div style={{ padding: "26px 64px 0 64px", display: "flex" }}>
-          <div
-            style={{
-              fontSize: 64,
-              fontWeight: 800,
-              lineHeight: 1.06,
-              letterSpacing: "-0.025em",
-              maxWidth: 1072,
-              display: "flex",
-            }}
-          >
-            The 1% rule: does it still work in 2026?
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: "auto",
-            padding: "0 64px 40px 64px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            color: TEXT_SUB,
-            fontSize: 20,
-          }}
-        >
-          <div style={{ display: "flex" }}>
-            Rent-to-price · GRM · break-even · cash-on-cash
-          </div>
-          <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
-            usetruecap.com/blog
-          </div>
-        </div>
-      </div>
-    ),
-    { ...size }
-  );
+  return renderBlogOgImage({
+    section: "Metrics",
+    tag: "1% rule",
+    title: "The 1% rule for rental property in 2026",
+    subline: "Rent-to-price · GRM · break-even · cash-on-cash",
+  });
 }

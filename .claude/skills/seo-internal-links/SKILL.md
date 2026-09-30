@@ -88,10 +88,10 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
    - Inside each group, sources with no edge at all to the target come before those that reach it only through navigation or footer links.
    - Take at most 5.
 7. **Pick the anchor** in each source: the first occurrence in reading order that passes every rule below.
-   - Find it in one message: Grep the chosen sources (content, `-n`, case-insensitive, `-C 2`, glob such as `app/{vs/privy,blog/x}/page.tsx`) for the head-term alternation, and Grep them for `className="[^"]*text-primary[^"]*hover:underline"` to learn each file's in-prose link class.
+   - Find it in one message: Grep the chosen sources (content, `-n`, case-insensitive, `-C 2`, glob such as `app/{vs/privy,blog/x}/page.tsx`) for the head-term alternation, and Grep them for `className="(?:tc-link|[^"]*text-primary[^"]*hover:underline)"` to learn each file's in-prose link class (`tc-link` on a post on the article frame, `components/marketing/article.tsx`; posts not yet on the frame and most /vs pages still carry a `text-primary … hover:underline` class).
    - It is JSX text inside a `<p>` or `<li>` of the article body, all on one line, within one element, and not already inside a `<Link>`/`<a>`.
    - It is not in:
-     - headings, the header back-link or the byline;
+     - headings, the post header's meta line (its Blog link) or the byline;
      - `FAQS` or the FAQ section;
      - JSON-LD objects, metadata, or the `TITLE`/`DESCRIPTION` consts;
      - component props or data arrays (comparison matrices, `ComparisonFaq`);
@@ -103,7 +103,7 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
    - In the same message as the pin Grep, Read about 15 lines around each chosen occurrence (`offset`/`limit`). The Read confirms the enclosing element, and Edit refuses a file you have not Read.
 8. **Edit the lines**, one Edit per source, all in one message. `old_string` is the whole line; add a neighbouring line if it is not unique. The only change is the wrapper. Format example, `app/vs/privy/page.tsx` (indexed, crawled 2026-09-18, routed to no other skill on 2026-09-27):
    `by cap rate threshold, <Link href="/glossary/rehab" className="font-semibold text-primary hover:underline">rehab</Link> condition, DOM, price reductions,`
-   - `className` copies the file's existing in-prose link class. Omit it if the file has none.
+   - `className` copies the file's existing in-prose link class (`className="tc-link"` on a post on the article frame). Omit it if the file has none; never bring `text-primary font-semibold hover:underline` into a file that does not already use it.
    - Add no other attribute (`prefetch`, `title`, `target`) and no `{…}`.
    - The link text keeps its original bytes: case and entities such as `&apos;`.
    - Do not reflow the line. Add no import, date or whitespace.

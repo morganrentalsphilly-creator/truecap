@@ -14,13 +14,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -112,14 +123,14 @@ function FaqAnswer({ answer }: { answer: string }) {
       {answer.slice(0, at)}
       <a
         href={STATE_TAX_SOURCE_URL}
-        className="text-primary font-semibold hover:underline"
+        className="tc-link"
       >
         {STATE_TAX_LINK_TEXT}
       </a>
       {phrase.slice(STATE_TAX_LINK_TEXT.length, valueAt)}
       <a
         href={STATE_VALUE_SOURCE_URL}
-        className="text-primary font-semibold hover:underline"
+        className="tc-link"
       >
         {STATE_VALUE_LINK_TEXT}
       </a>
@@ -177,27 +188,21 @@ export default function OnePercentRulePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
@@ -206,7 +211,7 @@ export default function OnePercentRulePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <p className={ARTICLE_LEDE}>
               Glance at a listing price and a rent figure and you can screen a
               rental in about three seconds: is the monthly rent at least 1% of
               the purchase price? That is the 1% rule — one of the best-known
@@ -217,14 +222,14 @@ export default function OnePercentRulePost() {
               average was{" "}
               <a
                 href="https://www.freddiemac.com/pmms"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 7.03% on Sept. 24, 2026
               </a>
               , more than double its{" "}
               <a
                 href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fam=avg"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2.96% average for 2021
               </a>
@@ -233,10 +238,8 @@ export default function OnePercentRulePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the 1% rule actually says
-            </h2>
+          <ArticleBody>
+            <h2>What the 1% rule actually says</h2>
             <p>
               The rule is one division: take the gross monthly rent, divide by
               the purchase price, and check whether the result is 1% or more.
@@ -255,16 +258,14 @@ export default function OnePercentRulePost() {
               through the{" "}
               <Link
                 href="/tools/1-percent-rule-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1% rule calculator
               </Link>{" "}
               and you&apos;ll feel how brutally fast the filter is.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A 60-second screen: three listings
-            </h2>
+            <h2>A 60-second screen: three listings</h2>
             <p>
               Say you pull three properties off the MLS on a Saturday morning:
             </p>
@@ -293,16 +294,14 @@ export default function OnePercentRulePost() {
               entire personality. The 1% rule is the opening move in the{" "}
               <Link
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 60-second underwrite
               </Link>
               , not the closing argument.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where the 1% comes from — it&apos;s really a rent-to-price ratio
-            </h2>
+            <h2>Where the 1% comes from — it&apos;s really a rent-to-price ratio</h2>
             <p>
               The 1% threshold isn&apos;t magic; it&apos;s a proxy. The idea is
               that if gross rent is about 1% of price each month — 12% of price
@@ -315,7 +314,7 @@ export default function OnePercentRulePost() {
               That makes it a cousin of the{" "}
               <Link
                 href="/blog/gross-rent-multiplier-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 gross rent multiplier
               </Link>
@@ -329,16 +328,14 @@ export default function OnePercentRulePost() {
               If you prefer thinking in GRM, the{" "}
               <Link
                 href="/tools/gross-rent-multiplier-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 GRM calculator
               </Link>{" "}
               gets you to the same screen from the other direction.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The 2026 problem: the bar quietly moved
-            </h2>
+            <h2>The 2026 problem: the bar quietly moved</h2>
             <p>
               Here is the part most &quot;1% rule&quot; articles skip. The rule
               uses a fixed yardstick — 1% — to measure something that moves with
@@ -366,7 +363,7 @@ export default function OnePercentRulePost() {
                 loans also carry{" "}
                 <a
                   href="https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   an extra Freddie Mac credit fee, 2.125% of the loan at 70–75%
                   LTV
@@ -387,7 +384,7 @@ export default function OnePercentRulePost() {
               This is the same negative-leverage trap that makes a once-safe{" "}
               <Link
                 href="/blog/what-is-a-good-cap-rate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cap rate look fine and still lose to the loan constant
               </Link>
@@ -395,9 +392,7 @@ export default function OnePercentRulePost() {
               moved, and the rule, being a fixed number, didn&apos;t notice.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Passing the 1% rule is not the same as a good return
-            </h2>
+            <h2>Passing the 1% rule is not the same as a good return</h2>
             <p>
               Even when a property clears 1%, the rule says nothing about how
               good the return is — because it never looks at the costs that vary
@@ -441,7 +436,7 @@ export default function OnePercentRulePost() {
               the job with the metric that actually accounts for your cash:{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash
               </Link>
@@ -449,16 +444,14 @@ export default function OnePercentRulePost() {
               guide on{" "}
               <Link
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cap rate vs cash-on-cash vs DSCR
               </Link>{" "}
               draws the lines.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the rule ignores — both halves of the fraction
-            </h2>
+            <h2>What the rule ignores — both halves of the fraction</h2>
             <p>The numerator and the denominator both hide traps.</p>
             <p>
               <strong>
@@ -467,7 +460,7 @@ export default function OnePercentRulePost() {
               On a fixer or a{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BRRRR deal
               </Link>
@@ -491,9 +484,7 @@ export default function OnePercentRulePost() {
               and how much you put down. A ratio can&apos;t see any of that.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              1% vs 2% rule, and what&apos;s realistic in 2026
-            </h2>
+            <h2>1% vs 2% rule, and what&apos;s realistic in 2026</h2>
             <p>
               The 2% rule is the same test with the bar doubled: monthly rent of
               at least 2% of price — a $100,000 house renting for $2,000. In
@@ -511,14 +502,14 @@ export default function OnePercentRulePost() {
               median home value (Census ACS 2024{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25064&g=010XX00US$3100000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median gross rent
               </a>{" "}
               divided by{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$3100000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median value
               </a>
@@ -529,9 +520,7 @@ export default function OnePercentRulePost() {
               failing ratio isn&apos;t a verdict.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to use the 1% rule without getting burned
-            </h2>
+            <h2>How to use the 1% rule without getting burned</h2>
             <p>
               Treat it as the first gate, not the decision. A practical
               workflow:
@@ -561,7 +550,7 @@ export default function OnePercentRulePost() {
               and a rent and the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 free analyzer
               </Link>{" "}
@@ -572,24 +561,21 @@ export default function OnePercentRulePost() {
               the 1% rule was only ever pretending to be a stand-in for. The
               rule is the napkin; this is the spreadsheet.
             </p>
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>
-                  <FaqAnswer answer={f.a} />
-                </p>
-              </div>
-            ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            renderAnswer={(item) => <FaqAnswer answer={item.a} />}
+            structuredData={false}
+            contact={null}
+          />
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               The 1% rule earns its fame: it&apos;s the fastest honest screen in
               real estate, and on a cheap, cash-flow-market rental it still
@@ -603,14 +589,14 @@ export default function OnePercentRulePost() {
               survivors through a full underwrite — PITI, reserves,{" "}
               <Link
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash, and DSCR
               </Link>{" "}
               — and the 1% rule goes back to doing the one job it&apos;s good
               at: getting you to a &quot;maybe&quot; fast.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -646,13 +632,12 @@ export default function OnePercentRulePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
