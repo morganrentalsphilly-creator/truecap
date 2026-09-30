@@ -67,28 +67,22 @@ describe("/embed hub design pass", () => {
     }
   });
 
-  it("mirrors the visible questions in exactly one FAQPage node", () => {
+  it("keeps the hub's structured data as it was: visible Q&A, no FAQPage node", () => {
+    // The base hub showed these questions with no JSON-LD at all. The restyle
+    // moved them into FaqSection; adding a FAQPage claim is an SEO decision
+    // the design pass does not make, so FaqSection is told not to emit one.
     const html = renderHub();
     const visible = [
-      ...html.matchAll(
-        /<details\b[^>]*><summary\b[^>]*>([\s\S]*?)<\/summary><p\b[^>]*>([\s\S]*?)<\/p><\/details>/g,
-      ),
-    ].map((match) => ({ q: textOf(match[1]), a: textOf(match[2]) }));
+      ...html.matchAll(/<details\b[^>]*><summary\b[^>]*>([\s\S]*?)<\/summary>/g),
+    ].map((match) => textOf(match[1]));
     expect(visible.length).toBeGreaterThan(0);
-    for (const row of visible) expect(row.q.endsWith("?"), row.q).toBe(true);
-
+    for (const q of visible) expect(q.endsWith("?"), q).toBe(true);
     const faqPages = [
       ...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
     ]
       .map((match) => JSON.parse(match[1]))
       .filter((node) => node["@type"] === "FAQPage");
-    expect(faqPages).toHaveLength(1);
-    expect(
-      faqPages[0].mainEntity.map((entity: { name: string; acceptedAnswer: { text: string } }) => ({
-        q: entity.name,
-        a: entity.acceptedAnswer.text,
-      })),
-    ).toEqual(visible);
+    expect(faqPages).toHaveLength(0);
   });
 
   it("puts no icon inside any link of the page body and keeps one H1", () => {

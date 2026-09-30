@@ -302,6 +302,10 @@ export default function EmbedHubPage() {
           heading="Questions"
           items={EMBED_FAQS}
           contact={null}
+          // The hub never carried FAQPage markup; the restyle keeps its
+          // structured data as it was (a new rich-result claim is an SEO
+          // decision, not a design one).
+          structuredData={false}
         />
 
         <CloseSection
