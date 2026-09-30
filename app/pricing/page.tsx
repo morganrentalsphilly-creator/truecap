@@ -76,6 +76,12 @@ export const metadata: Metadata = {
 
 const FAQS: { q: string; a: string }[] = [
   {
+    // Agent-first (2026-09): the audience question leads, and its answer
+    // leads with the agent workflow. Facts per lib/agent-faqs.ts.
+    q: "Is this for agents, investors, or both?",
+    a: "Both, and the analyzer is the same. Agents with investor clients use Agent Pro to keep a Buy Box per client, screen each listing against it, and send a co-branded decision memo the client can open without an account and rerun with their own assumptions. Investors use the same analyzer, with Pro, for deals they are buying themselves.",
+  },
+  {
     q: "Is TrueCap really free?",
     // Keep this answer in lockstep with the homepage FAQ
     // (components/marketing/landing-sections.tsx), the plan cards
@@ -112,10 +118,6 @@ const FAQS: { q: string; a: string }[] = [
     q: "How accurate is the auto-fill?",
     a: `Rent uses a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior} Replace every screening assumption with property-specific evidence before relying on the result.`,
   },
-  {
-    q: "Is this for agents, investors, or both?",
-    a: "Both. Investors use TrueCap to screen their own deals. Agents can share a reviewable analysis with a client, with the entered assumptions and verification caveats intact. The shared-link feature was built for that hand-off.",
-  },
 ];
 
 const FEATURE_COMPARISON: Array<
@@ -138,8 +140,28 @@ const FEATURE_COMPARISON: Array<
   ["Lender · partner report modes", false, true],
   ["Save deals", PRODUCT_PLAN_FACTS.free.savedDealLimit, "Unlimited"],
   ["Compare deals side-by-side", false, "Up to 4"],
+  ["Co-branded share pages + PDFs", false, true],
   ["Priority support", false, true],
+  // Agent Pro only (lib/entitlements-catalog.ts client_buy_box). These rows
+  // keep the [label, free, pro] shape the catalog guard parses; the Agent Pro
+  // cell comes from AGENT_PRO_CELLS below.
+  ["Client roster (up to 100 clients)", false, false],
+  ["Buy Boxes assigned to clients", false, false],
+  ["Client-report share links", false, false],
 ];
+
+/**
+ * The Agent Pro column: everything in Pro, plus the client-roster rows. Rows
+ * absent from this map inherit the Pro cell. Rendered only when the tier is
+ * configured on this deployment.
+ */
+const AGENT_PRO_CELLS: Record<string, boolean | string> = {
+  "Client roster (up to 100 clients)": true,
+  "Buy Boxes assigned to clients": "Up to 12 per account",
+  "Client-report share links": true,
+};
+const agentProCell = (label: string, pro: boolean | string) =>
+  AGENT_PRO_CELLS[label] ?? pro;
 
 export default async function PricingPage() {
   const { proOfferName } = getMarketingOfferConfig();
@@ -348,6 +370,9 @@ export default async function PricingPage() {
               DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
               Box fit, downside stress test, and a memo. If you only need metrics,
               DealCheck or a spreadsheet is fine.
+              {agentProConfigured
+                ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
+                : ""}
             </p>
             <Link
               href={DEALCHECK_COMPARISON.href}
@@ -410,6 +435,16 @@ export default async function PricingPage() {
             className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
           >
             {[
+              // Agent stage first (2026-09 agent-first pass); investor stages follow.
+              ...(agentProConfigured
+                ? [
+                    {
+                      job: "Win investor clients",
+                      product: "Agent Pro",
+                      answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
+                    },
+                  ]
+                : []),
               {
                 job: "Screen the deal",
                 product: "Free",
@@ -420,15 +455,6 @@ export default async function PricingPage() {
                 product: proOfferName,
                 answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
               },
-              ...(agentProConfigured
-                ? [
-                    {
-                      job: "Win investor clients",
-                      product: "Agent Pro",
-                      answer: "Send clients a property with the investment analysis already done.",
-                    },
-                  ]
-                : []),
             ].map((item) => (
               <div
                 key={item.job}
@@ -499,6 +525,9 @@ export default async function PricingPage() {
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
             Free answers whether the deal deserves attention. Pro shows the
             Offer Ceiling, what could break, and what to verify next.
+            {agentProConfigured
+              ? " Agent Pro does all of that per client, with a roster."
+              : ""}
           </p>
           {/* Phones use stacked comparison cards; tablet and desktop keep the
               denser semantic table. No narrow viewport has to pan sideways. */}
@@ -528,6 +557,16 @@ export default async function PricingPage() {
                         <MobileFeatureValue value={pro} pro />
                       </dd>
                     </div>
+                    {agentProConfigured ? (
+                      <div className="col-span-2 rounded-xl bg-primary/5 p-3">
+                        <dt className="text-3xs font-bold uppercase tracking-wider text-primary">
+                          Agent Pro
+                        </dt>
+                        <dd className="mt-1">
+                          <MobileFeatureValue value={agentProCell(label, pro)} pro />
+                        </dd>
+                      </div>
+                    ) : null}
                   </dl>
                 </article>
               ),
@@ -536,7 +575,8 @@ export default async function PricingPage() {
           <ScrollX label="Table" className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full text-sm">
               <caption className="sr-only">
-                Features included with Free and {proOfferName}
+                Features included with Free, {proOfferName}
+                {agentProConfigured ? ", and Agent Pro" : ""}
               </caption>
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -549,6 +589,11 @@ export default async function PricingPage() {
                   <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
                     {proOfferName}
                   </th>
+                  {agentProConfigured ? (
+                    <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
+                      Agent Pro
+                    </th>
+                  ) : null}
                 </tr>
               </thead>
               <tbody>
@@ -564,6 +609,9 @@ export default async function PricingPage() {
                       </td>
                       <Cell value={free} />
                       <Cell value={pro} pro />
+                      {agentProConfigured ? (
+                        <Cell value={agentProCell(label, pro)} pro />
+                      ) : null}
                     </tr>
                   ),
                 )}

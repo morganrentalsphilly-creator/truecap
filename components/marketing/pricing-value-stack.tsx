@@ -20,11 +20,15 @@ const PRO_STACK = [
   [BarChart3, "10-Year Wealth View", "Modeled cash flow and equity across a decade of ownership."],
   [GitCompareArrows, "Comparison + Pipeline", "Every candidate ranked side by side, and nothing slips between research and offer."],
   [FileText, "Lender-Facing Review Reports", "Bring a transparent input summary for your lender to review."],
+  // custom_branding is a Pro feature (lib/entitlements-catalog.ts), not an
+  // Agent Pro exclusive — an earlier version of this stack sold it under
+  // "Agent Pro adds", which the catalog does not support.
+  [Handshake, "Co-Branded Share Pages + PDFs", "Your logo, brand color, and contact details on what you send; TrueCap's methodology stays named."],
 ] as const;
 
 const AGENT_PRO_STACK = [
-  [Users, "Client Rosters", "Up to 100 clients, each screened against their own Buy Box."],
-  [Handshake, "Co-Branded Reports", "Every analysis you send carries your name — and comes back to you."],
+  [Users, "Client Rosters", "Up to 100 clients, each with a Buy Box assigned to them and deals screened against it."],
+  [FileText, "Client-Report Share Links", "Open without an account, address hidden unless you include it, and a miss names the criterion."],
 ] as const;
 
 export function PricingValueStack({

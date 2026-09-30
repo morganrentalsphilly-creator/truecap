@@ -103,7 +103,11 @@ describe("no-card product evaluation", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
     const signup = read("../../components/auth/sign-up-form.tsx");
-    expect(buttons).toContain("Start {tierName} evaluation — no card");
+    // The Pro card's anonymous CTA starts the no-card evaluation. The Agent
+    // Pro card's cannot claim to (the evaluation never includes the client
+    // roster — lib/entitlements.ts), so it promises only the free account.
+    expect(buttons).toContain("`Start ${tierName} evaluation — no card`");
+    expect(buttons).toContain('"Create a free account — no card"');
     expect(buttons).toContain("plan=${plan}&billing=${billing}");
     expect(buttons).not.toContain("resolveCheckoutResumeForSlot");
     // The allowance is stated once, under the CTA, in every trial state
