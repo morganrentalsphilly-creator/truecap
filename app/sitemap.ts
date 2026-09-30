@@ -51,6 +51,7 @@ const CORE_PATHS = [
   "/why-truecap",
   "/reviews",
   "/playbook",
+  "/for-investors",
   "/for-buy-and-hold",
   "/for-house-hackers",
   "/markets",
