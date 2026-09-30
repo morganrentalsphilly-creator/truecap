@@ -415,12 +415,12 @@ export function FinalCta() {
         </AnalyzeCtaLink>
         <p className="mt-4 text-sm text-muted-foreground">
           Buying for your own portfolio?{" "}
-          <IntentPrefetchLink
+          <Link
             href="/for-investors"
             className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
             See TrueCap for investors →
-          </IntentPrefetchLink>
+          </Link>
         </p>
       </div>
     </section>
@@ -1187,12 +1187,12 @@ export function PdfProUpsell() {
                   targets, and a co-branded memo they open without an account.
                 </p>
               </div>
-              <IntentPrefetchLink
+              <Link
                 href="/for-agents"
                 className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
               >
                 See TrueCap for agents →
-              </IntentPrefetchLink>
+              </Link>
             </div>
           ) : null}
         </div>
