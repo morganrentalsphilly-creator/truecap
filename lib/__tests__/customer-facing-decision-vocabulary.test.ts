@@ -62,6 +62,9 @@ describe("customer-facing decision vocabulary", () => {
     // which the founder keeps; it is the same exception the config file
     // (lib/marketing-offer-config.ts) already enjoys by living outside the
     // customer-surface roots.
+    // 2026-09-29 agent-first pass: the homepage hero, OG card, problem block,
+    // step 3 and final CTA no longer say "walk-away price"; the remaining
+    // allowed mentions are the ones below.
     // 2026-09-18 positioning pass (founder brief): Offer Ceiling may be
     // explained in one line as "your walk-away price based on your targets",
     // and the Pro tier's outcome tagline is "Know what to offer" (Free —
@@ -72,12 +75,10 @@ describe("customer-facing decision vocabulary", () => {
       "app/about/page.tsx: walk-away price",
       "app/auth/sign-up/page.tsx: walk-away price",
       "app/home-authed/page.tsx: Max Offer",
-      "app/og/home/route.tsx: walk-away price",
       "app/page.tsx: Max Offer",
       "app/pricing/page.tsx: what to offer",
       "app/pricing/page.tsx: walk-away price",
       "components/marketing/landing-sections.tsx: what to offer",
-      "components/marketing/landing-sections.tsx: walk-away price",
       "components/marketing/pricing-toggle-plans.tsx: what to offer",
       "components/marketing/pricing-toggle-plans.tsx: walk-away price",
     ]);

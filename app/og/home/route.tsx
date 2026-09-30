@@ -59,10 +59,10 @@ export async function GET() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: shotSrc ? 44 : 64, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>
-              Know your walk-away price before you make the offer.
+              Stop forwarding listings. Start sending deals that already pencil.
             </div>
             <div style={{ marginTop: 20, fontSize: shotSrc ? 20 : 26, color: "#475569", lineHeight: 1.35 }}>
-              Paste a listing. See the cash flow, DSCR, and the highest price that still hits your targets.
+              Paste a listing. See whether it clears the client&apos;s Buy Box, the highest price that still does, and what could break it.
             </div>
           </div>
           <div style={{ display: "flex", fontSize: 18, color: BLUE, fontWeight: 700 }}>
