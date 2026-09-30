@@ -1,0 +1,462 @@
+{
+ "date": "2026-09-30",
+ "branch": "design/ledger-pass",
+ "renderedChecks": {
+  "pages": 25,
+  "widths": [
+   375,
+   1095,
+   1440
+  ],
+  "axeViolations": 0,
+  "overflowX": 0,
+  "pagesWithoutOneH1": []
+ },
+ "facts375": {
+  "pairedPages": 19,
+  "arrowLinks": {
+   "before": 33,
+   "after": 0
+  },
+  "upperSmallLabels": {
+   "before": 353,
+   "after": 0
+  }
+ },
+ "scrollPrefetch390": {
+  "before": {
+   "/": {
+    "js": 38,
+    "jsKB": 1081,
+    "rsc": 50,
+    "rscKB": 1121
+   },
+   "/for-agents": {
+    "js": 39,
+    "jsKB": 1076,
+    "rsc": 59,
+    "rscKB": 1245
+   },
+   "/pricing": {
+    "js": 37,
+    "jsKB": 1074,
+    "rsc": 49,
+    "rscKB": 1110
+   },
+   "/for-investors": {
+    "js": 41,
+    "jsKB": 1085,
+    "rsc": 52,
+    "rscKB": 1237
+   },
+   "/for-buy-and-hold": {
+    "js": 39,
+    "jsKB": 1081,
+    "rsc": 54,
+    "rscKB": 1284
+   },
+   "/for-house-hackers": {
+    "js": 37,
+    "jsKB": 1078,
+    "rsc": 54,
+    "rscKB": 1270
+   },
+   "/for-brrrr": {
+    "js": 34,
+    "jsKB": 1062,
+    "rsc": 50,
+    "rscKB": 1121
+   },
+   "/for-flippers": {
+    "js": 38,
+    "jsKB": 1079,
+    "rsc": 52,
+    "rscKB": 1181
+   },
+   "/why-truecap": {
+    "js": 38,
+    "jsKB": 1076,
+    "rsc": 50,
+    "rscKB": 1121
+   },
+   "/vs": {
+    "js": 35,
+    "jsKB": 1071,
+    "rsc": 120,
+    "rscKB": 3486
+   },
+   "/sample-decision-memo": {
+    "js": 34,
+    "jsKB": 1026,
+    "rsc": 48,
+    "rscKB": 1121
+   },
+   "/about": {
+    "js": 36,
+    "jsKB": 1077,
+    "rsc": 50,
+    "rscKB": 1121
+   },
+   "/reviews": {
+    "js": 35,
+    "jsKB": 1076,
+    "rsc": 48,
+    "rscKB": 1072
+   },
+   "/tools": {
+    "js": 40,
+    "jsKB": 861,
+    "rsc": 70,
+    "rscKB": 1624
+   },
+   "/blog": {
+    "js": 59,
+    "jsKB": 1069,
+    "rsc": 194,
+    "rscKB": 5244
+   },
+   "/blog/1-percent-rule-rental-property": {
+    "js": 38,
+    "jsKB": 1067,
+    "rsc": 58,
+    "rscKB": 1266
+   },
+   "/tools/1-percent-rule-calculator": {
+    "js": 21,
+    "jsKB": 344,
+    "rsc": 56,
+    "rscKB": 1274
+   },
+   "/embed": {
+    "js": 39,
+    "jsKB": 850,
+    "rsc": 66,
+    "rscKB": 1442
+   }
+  },
+  "after": {
+   "/": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/for-agents": {
+    "js": 6,
+    "jsKB": 331,
+    "rsc": 3,
+    "rscKB": 16,
+    "rscTargets": [
+     "/auth/sign-up"
+    ]
+   },
+   "/pricing": {
+    "js": 6,
+    "jsKB": 331,
+    "rsc": 3,
+    "rscKB": 16,
+    "rscTargets": [
+     "/auth/sign-up"
+    ]
+   },
+   "/for-investors": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/for-buy-and-hold": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/for-house-hackers": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/for-brrrr": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/for-flippers": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/why-truecap": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs/dealcheck": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs/stessa": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs/excel": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs/airdna": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/vs/biggerpockets-for-house-hacking": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/sample-decision-memo": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/embed": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/embed/1-percent-rule-calculator": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/about": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/reviews": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/tools": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/tools/1-percent-rule-calculator": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/blog": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/blog/1-percent-rule-rental-property": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   },
+   "/blog/what-is-a-good-cap-rate": {
+    "js": 0,
+    "jsKB": 0,
+    "rsc": 0,
+    "rscKB": 0,
+    "rscTargets": []
+   }
+  }
+ },
+ "slop": {
+  "slopDetectDesign": {
+   "/": {
+    "before": "25 C",
+    "after": "16 B"
+   },
+   "/for-agents": {
+    "before": "32 D+ (live)",
+    "after": "15 B"
+   },
+   "/pricing": {
+    "before": "27 C (live)",
+    "after": "12 B+"
+   }
+  },
+  "designSlopCop": {
+   "/": {
+    "before": 7,
+    "after": 7
+   },
+   "/for-agents": {
+    "before": 14,
+    "after": 14
+   },
+   "/pricing": {
+    "before": 7,
+    "after": 7
+   }
+  }
+ },
+ "detectRendered": {
+  "1440x900": {
+   "total": 39,
+   "creamPalette": 25
+  },
+  "390x844": {
+   "total": 38,
+   "creamPalette": 25
+  }
+ },
+ "detectSource": {
+  "files": 106,
+  "findings": 0
+ },
+ "lighthouse": {
+  "home mobile": {
+   "med": {
+    "perf": 0.9,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 3.6065616,
+    "cls": 0,
+    "tbt": 23.5
+   },
+   "runs": 3,
+   "perfRange": [
+    0.87,
+    0.9
+   ]
+  },
+  "home desktop": {
+   "med": {
+    "perf": 1,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 0.7389722499999998,
+    "cls": 0,
+    "tbt": 0
+   },
+   "runs": 3,
+   "perfRange": [
+    0.99,
+    1
+   ]
+  },
+  "for-agents mobile": {
+   "med": {
+    "perf": 0.89,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 3.7595205,
+    "cls": 0.002167333340982835,
+    "tbt": 17
+   },
+   "runs": 3,
+   "perfRange": [
+    0.86,
+    0.89
+   ]
+  },
+  "for-agents desktop": {
+   "med": {
+    "perf": 1,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 0.7989158750000003,
+    "cls": 0.001187248270729358,
+    "tbt": 0
+   },
+   "runs": 3,
+   "perfRange": [
+    1,
+    1
+   ]
+  },
+  "pricing mobile": {
+   "med": {
+    "perf": 0.81,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 3.608942999999999,
+    "cls": 0.002167333340982835,
+    "tbt": 27
+   },
+   "runs": 3,
+   "perfRange": [
+    0.77,
+    0.81
+   ]
+  },
+  "pricing desktop": {
+   "med": {
+    "perf": 0.9,
+    "a11y": 1,
+    "bp": 0.96,
+    "seo": 1,
+    "lcp": 0.716053,
+    "cls": 0.001219094744108712,
+    "tbt": 0
+   },
+   "runs": 3,
+   "perfRange": [
+    0.9,
+    0.9
+   ]
+  },
+  "_note": "medians of 3 runs, Lighthouse 12.8.2, local production build (isolated env)"
+ }
+}
