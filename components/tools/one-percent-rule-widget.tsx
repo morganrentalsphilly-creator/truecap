@@ -59,7 +59,7 @@ export function OnePercentRuleWidget() {
     // so the widget's own heading is for the outline only.
     <ToolFrame aria-labelledby="onepct-heading">
       <h2 id="onepct-heading" className="sr-only">
-        1% Rule Calculator
+        1% rule calculator
       </h2>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-6 @lg:grid-cols-2">
         <div className="min-w-0 space-y-5">
@@ -79,12 +79,6 @@ export function OnePercentRuleWidget() {
             onChange={(e) => setRent(e.target.value)}
             error={null}
           />
-          <p className="max-w-[46ch] text-pretty text-sm text-muted-foreground">
-            The 1% rule is a screening filter, not an investment decision. A
-            property that passes is worth a deeper underwrite. A property that
-            fails isn&apos;t necessarily a bad deal — appreciation markets often
-            fail the 1% rule for good reason.
-          </p>
         </div>
 
         {/* On one column the result opens on the rule under the fields. */}
@@ -114,14 +108,31 @@ export function OnePercentRuleWidget() {
         />
       </div>
 
+      {/* The action is one line, sized to its label from 640px and full
+          width on phones; what the analysis adds is the line under it, which
+          aria-describedby reads with the link. */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className={cn(buttonVariants({ size: "cta" }), "mt-6")}
+        aria-describedby="onepct-handoff-note"
+        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
       >
-        Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash
-        flow — free in TrueCap
+        Run the full analysis with these numbers
       </AnalyzerHandoffLink>
+      <p id="onepct-handoff-note" className="mt-2 text-pretty text-sm text-muted-foreground">
+        cap rate, CoC, DSCR, and cash flow — free in TrueCap
+      </p>
+
+      {/* The caveat closes the widget at the reading measure, after the
+          action, so the fields lead straight to the result (on phones too)
+          and the two columns end together. It stays in the widget, so the
+          /embed iframe keeps it. */}
+      <p className="mt-6 max-w-[68ch] text-pretty text-sm text-muted-foreground">
+        The 1% rule is a screening filter, not an investment decision. A
+        property that passes is worth a deeper underwrite. A property that
+        fails isn&apos;t necessarily a bad deal — appreciation markets often
+        fail the 1% rule for good reason.
+      </p>
     </ToolFrame>
   );
 }
