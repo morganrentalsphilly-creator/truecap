@@ -10,15 +10,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Calculator,
-  Check,
-  Minus,
-  Sparkles,
-  X,
-} from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -30,8 +21,23 @@ import {
   ComparisonFaq,
   type FaqItem,
 } from "@/components/marketing/comparison-faq";
+import { ActionRow, CloseSection } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  VS_ACTIONS,
+  VS_H1,
+  VS_INTRO,
+  VS_LEDE,
+  VS_LINK_ROW,
+  VS_NOTE,
+  VS_PROSE,
+  VS_SOURCES,
+  VsHero,
+  VsMatrixTable,
+} from "@/components/marketing/vs-page";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -248,178 +254,134 @@ export default function VsBiggerPocketsForHouseHackingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage and the /vs hub: no
+    // descendant can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema
         vsPath="/vs/biggerpockets-for-house-hacking"
         pageName="TrueCap vs BiggerPockets for House Hacking"
       />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-        </div>
-
-        {/* Hero */}
-        <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            House-hack-specific comparison
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <VsHero>
+          <h1 className={VS_H1}>
             TrueCap vs BiggerPockets for House Hacking:{" "}
-            <span className="text-primary">
-              which calculator handles owner-occupant deals correctly?
-            </span>
+            which calculator handles owner-occupant deals correctly?
           </h1>
           <BlogByline />
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <p className={VS_LEDE}>
             Both run house-hack underwriting. This is the house-hacker cut:
             which one models owner-occupant unit usage cleanly, FHA 3.5%-down
             financing, and surfaces &quot;effective rent saved&quot; — the
             metric that actually decides whether the deal beats just renting an
             apartment.
           </p>
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
-              <Calculator className="size-4" />
+          <ActionRow className={VS_ACTIONS}>
+            <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
               Underwrite a house hack
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </AnalyzeCtaLink>
             <Link
               href="/for-house-hackers"
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+              className={buttonVariants({ variant: "outline", size: "cta" })}
             >
               For house hackers
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          </ActionRow>
+          <p className={VS_NOTE}>
             No card · Free analyzer covers house-hack underwriting
           </p>
-        </section>
+        </VsHero>
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+        {/* Real product screenshot from the free sample deal, set as a
+            document (no fake browser frame). */}
+        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
           <ProductShot
             shot="verdict"
+            frame="document"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link">Run it yourself</Link></>}
           />
-        </section>
+        </Section>
 
         {/* TL;DR */}
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+        <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
+          <SectionHeading id="vs-tldr-heading">
             TL;DR for house hackers
-          </h2>
-          <p className="text-sm sm:text-base leading-relaxed text-foreground">
-            <strong>TrueCap</strong> wins for house-hacking specifically — the
-            explicit &quot;owner-occupant&quot; property type auto-excludes your
-            unit from the rent income side, surfaces an &quot;effective rent
-            saved&quot; metric, while keeping every rent and expense input
-            editable.
-            <strong> BiggerPockets&apos;</strong> calculator treats the property
-            as generic multifamily and requires you to mentally adjust the math
-            for your owner-occupied unit. For TrueCap has a free core
-            owner-occupant workflow, while BiggerPockets currently presents
-            calculator results as a Pro membership feature. Compare both live
-            pricing pages.
-          </p>
-        </section>
+          </SectionHeading>
+          <div className={VS_PROSE}>
+            <p>
+              <strong>TrueCap</strong> wins for house-hacking specifically — the
+              explicit &quot;owner-occupant&quot; property type auto-excludes your
+              unit from the rent income side, surfaces an &quot;effective rent
+              saved&quot; metric, while keeping every rent and expense input
+              editable.
+              <strong> BiggerPockets&apos;</strong> calculator treats the property
+              as generic multifamily and requires you to mentally adjust the math
+              for your owner-occupied unit. For TrueCap has a free core
+              owner-occupant workflow, while BiggerPockets currently presents
+              calculator results as a Pro membership feature. Compare both live
+              pricing pages.
+            </p>
+          </div>
+        </Section>
 
         {/* Matrix */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
+        <Section aria-labelledby="vs-matrix-heading">
+          <SectionHeading id="vs-matrix-heading">
             House-hack feature-by-feature
-          </h2>
-          <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+          </SectionHeading>
+          <p className={VS_INTRO}>
             Where each tool wins on the house-hack-specific workflow.
           </p>
-          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Feature
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
-                    TrueCap
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    BiggerPockets
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATRIX.map((row) => (
-                  <tr
-                    key={row.feature}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      {row.feature}
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        {row.winner === "tie" ? (
-                          <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-                        ) : row.winner === "truecap" ? (
-                          <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
-                        ) : (
-                          <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />
-                        )}
-                        <span>{row.truecap}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        {row.winner === "tie" ? (
-                          <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-                        ) : row.winner === "biggerpockets" ? (
-                          <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
-                        ) : (
-                          <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />
-                        )}
-                        <span>{row.biggerpockets}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
+            <VsMatrixTable
+              head={["Feature", "TrueCap", "BiggerPockets"]}
+              rows={MATRIX.map((row) => ({
+                label: row.feature,
+                truecap: row.truecap,
+                competitor: row.biggerpockets,
+                winner: row.winner === "biggerpockets" ? "competitor" : row.winner,
+              }))}
+            />
           </ScrollX>
-          <p className="mt-3 text-2xs text-muted-foreground">
+          <p className={VS_SOURCES}>
             BiggerPockets calculator details based on publicly available product
             info as of 2026. See{" "}
             <a
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
               rel="noopener"
-              className="underline"
+              className="tc-link"
             >
               BiggerPockets&apos; official rental calculator page
             </a>{" "}
             for their current state.
           </p>
-          <p className="mt-4 text-sm leading-relaxed text-foreground">
-            New to running an owner-occupant deal? Our{" "}
-            <Link
-              href="/blog/house-hack-underwriting-guide"
-              className="font-semibold text-primary hover:underline"
-            >
-              house hack underwriting guide
-            </Link>{" "}
-            walks through counting only the rental units&apos; income. To
-            pressure-test the numbers on your own deal, our{" "}
-            <Link
-              href="/analyze" prefetch={false}
-              className="font-semibold text-primary hover:underline"
-            >
-              free deal analyzer
-            </Link>{" "}
-            returns cap rate and cash-on-cash return for the same owner-occupant
-            setup.
-          </p>
-        </section>
+          <div className={VS_PROSE}>
+            <p>
+              New to running an owner-occupant deal? Our{" "}
+              <Link
+                href="/blog/house-hack-underwriting-guide"
+                className="tc-link"
+              >
+                house hack underwriting guide
+              </Link>{" "}
+              walks through counting only the rental units&apos; income. To
+              pressure-test the numbers on your own deal, our{" "}
+              <Link
+                href="/analyze" prefetch={false}
+                className="tc-link"
+              >
+                free deal analyzer
+              </Link>{" "}
+              returns cap rate and cash-on-cash return for the same owner-occupant
+              setup.
+            </p>
+          </div>
+        </Section>
 
         <ComparisonFaq
           competitorName="BiggerPockets (House Hacking)"
@@ -427,55 +389,65 @@ export default function VsBiggerPocketsForHouseHackingPage() {
         />
 
         {/* Pricing CTA */}
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Underwrite your first house hack — free.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap&apos;s free tier covers owner-occupant property types,
-            per-unit rent + status, FHA financing, and effective-rent-saved
-            math. Pro adds a 10-year cash-flow and equity planning view,
-            sensitivity, Offer Ceiling, and saved-deal comparison. Model
-            post-move-out as a separate fully rented scenario; see live pricing
-            and check trial eligibility.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a deal — 60 seconds
-            </Link>
-            <Link
-              href="/for-house-hackers"
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
-            >
-              For house hackers
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
+        <CloseSection
+          headingId="vs-close-heading"
+          heading={<>Underwrite your first house hack — free.</>}
+          lede={
+            <>
+              TrueCap&apos;s free tier covers owner-occupant property types,
+              per-unit rent + status, FHA financing, and effective-rent-saved
+              math. Pro adds a 10-year cash-flow and equity planning view,
+              sensitivity, Offer Ceiling, and saved-deal comparison. Model
+              post-move-out as a separate fully rented scenario; see live pricing
+              and check trial eligibility.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Run a deal — 60 seconds
+              </Link>
+              <Link
+                href="/for-house-hackers"
+                className={buttonVariants({ variant: "outline", size: "cta" })}
+              >
+                For house hackers
+              </Link>
+            </ActionRow>
+          }
+        />
+
+        <Section rule="none" rhythm="tight">
+          <div className="max-w-5xl">
+            <RelatedContent kind="vs" slug="biggerpockets-for-house-hacking" />
+            <AuthorBio />
+
+            <footer className="mt-10 border-t border-border pt-6">
+              <p className="text-lg font-semibold">Other comparisons:</p>
+              <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+                <li>
+                  <Link
+                    href="/vs/biggerpockets-calculator"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs BiggerPockets
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/dealcheck"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs DealCheck
+                  </Link>
+                </li>
+              </ul>
+            </footer>
           </div>
-        </section>
-
-        <RelatedContent kind="vs" slug="biggerpockets-for-house-hacking" className="mt-10" />
-        <AuthorBio className="mb-10" />
-
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Other comparisons:{" "}
-          <Link
-            href="/vs/biggerpockets-calculator"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs BiggerPockets
-          </Link>
-          {" · "}
-          <Link
-            href="/vs/dealcheck"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs DealCheck
-          </Link>
-        </footer>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

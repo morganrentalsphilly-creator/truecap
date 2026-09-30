@@ -9,15 +9,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Calculator,
-  Check,
-  Minus,
-  Sparkles,
-  X,
-} from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -29,8 +20,26 @@ import {
   ComparisonFaq,
   type FaqItem,
 } from "@/components/marketing/comparison-faq";
+import { ActionRow, CloseSection } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  VS_ACTIONS,
+  VS_H1,
+  VS_INTRO,
+  VS_LEDE,
+  VS_LINK_ROW,
+  VS_NOTE,
+  VS_PROSE,
+  VS_SOURCES,
+  VS_TLDR_GRID,
+  VS_TLDR_LABEL,
+  VS_TLDR_LIST,
+  VsHero,
+  VsMatrixTable,
+} from "@/components/marketing/vs-page";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -187,70 +196,67 @@ export default function VsMashvisorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage and the /vs hub: no
+    // descendant can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema
         vsPath="/vs/mashvisor"
         pageName="TrueCap vs Mashvisor"
       />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-        </div>
-
-        <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            Honest comparison
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <VsHero>
+          <h1 className={VS_H1}>
             TrueCap vs Mashvisor:{" "}
-            <span className="text-primary">per-deal math vs market data.</span>
+            per-deal math vs market data.
           </h1>
           <BlogByline />
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <p className={VS_LEDE}>
             Mashvisor is built around market-level data — heatmaps, ZIP-code
             Airbnb occupancy, comps. TrueCap is built around per-deal math —
             should I actually buy this specific property? Different jobs,
             different price points. Here&apos;s when to pick which.
           </p>
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
-              <Calculator className="size-4" />
+          <ActionRow className={VS_ACTIONS}>
+            <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
               Try the TrueCap free analyzer
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </AnalyzeCtaLink>
             <Link
               href="/pricing"
-              className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+              className={buttonVariants({ variant: "outline", size: "cta" })}
             >
               See TrueCap pricing
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          </ActionRow>
+          <p className={VS_NOTE}>
             Free analyzer: no card or signup
           </p>
-        </section>
+        </VsHero>
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+        {/* Real product screenshot from the free sample deal, set as a
+            document (no fake browser frame). */}
+        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
           <ProductShot
             shot="verdict"
+            frame="document"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link">Run it yourself</Link></>}
           />
-        </section>
+        </Section>
 
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+        <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
+          <SectionHeading id="vs-tldr-heading">
             TL;DR
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">
+          </SectionHeading>
+          <div className={VS_TLDR_GRID}>
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Pick TrueCap if
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>
                   You&apos;ve found a specific property and need to decide if it
                   pencils.
@@ -273,11 +279,11 @@ export default function VsMashvisorPage() {
                 </li>
               </ul>
             </div>
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>
                 Pick Mashvisor if
-              </p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+              </h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>
                   You&apos;re still deciding WHICH market to invest in (heatmaps
                   help).
@@ -291,160 +297,142 @@ export default function VsMashvisorPage() {
               </ul>
             </div>
           </div>
-        </section>
+        </Section>
 
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
+        <Section aria-labelledby="vs-matrix-heading">
+          <SectionHeading id="vs-matrix-heading">
             Feature-by-feature
-          </h2>
-          <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+          </SectionHeading>
+          <p className={VS_INTRO}>
             Where each tool earns its keep.
           </p>
-          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Feature
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">
-                    TrueCap
-                  </th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Mashvisor
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATRIX.map((row) => (
-                  <tr
-                    key={row.feature}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="py-3 px-3 text-sm font-semibold text-foreground">
-                      {row.feature}
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="truecap" />
-                        <span>{row.truecap}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2">
-                        <WinnerBadge winner={row.winner} side="mashvisor" />
-                        <span>{row.mashvisor}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
+            <VsMatrixTable
+              head={["Feature", "TrueCap", "Mashvisor"]}
+              rows={MATRIX.map((row) => ({
+                label: row.feature,
+                truecap: row.truecap,
+                competitor: row.mashvisor,
+                winner: row.winner === "mashvisor" ? "competitor" : row.winner,
+              }))}
+            />
           </ScrollX>
-          <p className="mt-3 text-2xs text-muted-foreground">
+          <p className={VS_SOURCES}>
             Mashvisor details based on publicly available product info as of
             2026. See{" "}
             <a
               href="https://mashvisor.com"
               target="_blank"
               rel="noopener"
-              className="underline"
+              className="tc-link"
             >
               mashvisor.com
             </a>{" "}
             for their current state.
           </p>
-        </section>
+        </Section>
 
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
+        <Section aria-labelledby="vs-fit-heading">
+          <SectionHeading id="vs-fit-heading">
             The honest take
-          </h2>
-          <p className="text-sm sm:text-base leading-relaxed text-foreground">
-            Mashvisor is a great tool for market research and STR-focused
-            strategies. The trade-off is price (their data is expensive to
-            license, so the subscription has to cover that) and depth on the
-            per-deal math (heatmaps tell you which neighborhood; they don&apos;t
-            tell you whether THIS specific 3-bed off Market St clears your DSCR
-            target with the lender you&apos;re actually talking to).
-          </p>
-          <p className="mt-3 text-sm sm:text-base leading-relaxed text-foreground">
-            TrueCap is built for the moment you have an address and need to
-            decide. Free analyzer, no signup wall, real depth on the Pro tier.
-            For long-term rentals especially, the per-deal math is what
-            determines whether you&apos;re making money — the heatmaps just told
-            you to look.
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Once the heatmap points you somewhere, the per-deal math is one
-            address away: our{" "}
-            <Link
-              href="/analyze" prefetch={false}
-              className="font-semibold text-primary hover:underline"
-            >
-              free deal analyzer
-            </Link>{" "}
-            returns cap rate, cash-on-cash return, and DSCR on the first screen.
-            Our walkthrough on{" "}
-            <Link
-              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-              className="font-semibold text-primary hover:underline"
-            >
-              underwriting a rental in 60 seconds
-            </Link>{" "}
-            shows the full move from listing to a reviewed underwrite.
-          </p>
-        </section>
+          </SectionHeading>
+          <div className={VS_PROSE}>
+            <p>
+              Mashvisor is a great tool for market research and STR-focused
+              strategies. The trade-off is price (their data is expensive to
+              license, so the subscription has to cover that) and depth on the
+              per-deal math (heatmaps tell you which neighborhood; they don&apos;t
+              tell you whether THIS specific 3-bed off Market St clears your DSCR
+              target with the lender you&apos;re actually talking to).
+            </p>
+            <p>
+              TrueCap is built for the moment you have an address and need to
+              decide. Free analyzer, no signup wall, real depth on the Pro tier.
+              For long-term rentals especially, the per-deal math is what
+              determines whether you&apos;re making money — the heatmaps just told
+              you to look.
+            </p>
+            <p>
+              Once the heatmap points you somewhere, the per-deal math is one
+              address away: our{" "}
+              <Link
+                href="/analyze" prefetch={false}
+                className="tc-link"
+              >
+                free deal analyzer
+              </Link>{" "}
+              returns cap rate, cash-on-cash return, and DSCR on the first screen.
+              Our walkthrough on{" "}
+              <Link
+                href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+                className="tc-link"
+              >
+                underwriting a rental in 60 seconds
+              </Link>{" "}
+              shows the full move from listing to a reviewed underwrite.
+            </p>
+          </div>
+        </Section>
 
         <ComparisonFaq competitorName="Mashvisor" items={MASHVISOR_FAQ} />
 
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Underwriting the next deal? Start free.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and
-            plain read-only share links. Pro adds co-branding, 10-year cash-flow
-            and equity projections, sensitivity, Offer Ceiling, saved-deal
-            comparison, and included PDFs. No card to start.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              See Pro pricing
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a deal now
-            </Link>
+        <CloseSection
+          headingId="vs-close-heading"
+          heading={<>Underwriting the next deal? Start free.</>}
+          lede={
+            <>
+              TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and
+              plain read-only share links. Pro adds co-branding, 10-year cash-flow
+              and equity projections, sensitivity, Offer Ceiling, saved-deal
+              comparison, and included PDFs. No card to start.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Run a deal now
+              </Link>
+              <Link
+                href="/pricing"
+                className={buttonVariants({ variant: "outline", size: "cta" })}
+              >
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+        />
+
+        <Section rule="none" rhythm="tight">
+          <div className="max-w-5xl">
+            <RelatedContent kind="vs" slug="mashvisor" />
+            <AuthorBio />
+
+            <footer className="mt-10 border-t border-border pt-6">
+              <p className="text-lg font-semibold">Other comparisons:</p>
+              <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+                <li>
+                  <Link
+                    href="/vs/dealcheck"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs DealCheck
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/stessa"
+                    className={VS_LINK_ROW}
+                  >
+                    TrueCap vs Stessa
+                  </Link>
+                </li>
+              </ul>
+            </footer>
           </div>
-        </section>
-
-        <RelatedContent kind="vs" slug="mashvisor" className="mt-10" />
-        <AuthorBio className="mb-10" />
-
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Other comparisons:{" "}
-          <Link
-            href="/vs/dealcheck"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs DealCheck
-          </Link>{" "}
-          ·{" "}
-          <Link
-            href="/vs/stessa"
-            className="font-bold text-foreground hover:underline"
-          >
-            TrueCap vs Stessa
-          </Link>
-        </footer>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
@@ -515,20 +503,3 @@ const MASHVISOR_FAQ: FaqItem[] = [
   },
 ];
 
-function WinnerBadge({
-  winner,
-  side,
-}: {
-  winner: Verdict;
-  side: "truecap" | "mashvisor";
-}) {
-  if (winner === "tie")
-    return (
-      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-    );
-  return winner === side ? (
-    <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
-  ) : (
-    <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />
-  );
-}
