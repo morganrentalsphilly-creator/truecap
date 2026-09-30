@@ -24,6 +24,8 @@ import {
   ArticleEnd,
   ArticleMain,
   ArticlePage,
+  LedgerFigure,
+  LedgerVerdict,
 } from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { FaqSection } from "@/components/marketing/faq-section";
@@ -203,7 +205,9 @@ export default function OnePercentRulePost() {
                 Blog
               </Link>{" "}
               ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -248,7 +252,7 @@ export default function OnePercentRulePost() {
               <strong>Monthly rent ÷ purchase price ≥ 1%.</strong>
             </p>
             <p>
-              Flip it around and it becomes a rule-of-thumb Offer Ceiling:
+              Flip it around and it becomes a rule-of-thumb Offer Ceiling:{" "}
               <strong>100 × the monthly rent</strong>. A house that rents for
               $1,800/month &quot;passes&quot; at any price up to $180,000; one
               that rents for $2,500 passes up to $250,000. That is the whole
@@ -273,16 +277,20 @@ export default function OnePercentRulePost() {
               <li>
                 <strong>Listing A</strong> — a $220,000 single-family home
                 renting for $2,200/month. Ratio: $2,200 ÷ $220,000 ={" "}
-                <strong>1.00%</strong>. Passes.
+                <strong><LedgerFigure>1.00%</LedgerFigure></strong>.{" "}
+                <LedgerVerdict pass>Passes</LedgerVerdict>.
               </li>
               <li>
                 <strong>Listing B</strong> — a $250,000 duplex pulling
-                $2,600/month across both units. Ratio: <strong>1.04%</strong>.
-                Passes.
+                $2,600/month across both units. Ratio:{" "}
+                <strong><LedgerFigure>1.04%</LedgerFigure></strong>.{" "}
+                <LedgerVerdict pass>Passes</LedgerVerdict>.
               </li>
               <li>
                 <strong>Listing C</strong> — a $350,000 house in a nicer suburb
-                renting for $2,400/month. Ratio: <strong>0.69%</strong>. Fails.
+                renting for $2,400/month. Ratio:{" "}
+                <strong><LedgerFigure>0.69%</LedgerFigure></strong>.{" "}
+                <LedgerVerdict pass={false}>Fails</LedgerVerdict>.
               </li>
             </ul>
             <p>
@@ -355,7 +363,10 @@ export default function OnePercentRulePost() {
                 interest on the $75,000 borrowed run about $337/month, plus $150
                 of taxes and insurance — roughly $487 of fixed carry. Cover that
                 plus reserves and you break even at about{" "}
-                <strong>0.57% rent-to-price</strong>.
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>0.57%</LedgerFigure> rent-to-price
+                </strong>
+                .
               </li>
               <li>
                 <strong>At a 7% loan</strong> (about Freddie Mac&apos;s 7.03%
@@ -371,7 +382,11 @@ export default function OnePercentRulePost() {
                 , so they cost more): P&amp;I on the same $75,000 jumps to about
                 $499/month,
                 plus the same $150 — about $649 of fixed carry. Break-even
-                climbs to roughly <strong>0.76% rent-to-price</strong>.
+                climbs to roughly{" "}
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>0.76%</LedgerFigure> rent-to-price
+                </strong>
+                .
               </li>
             </ul>
             <p>
@@ -418,16 +433,28 @@ export default function OnePercentRulePost() {
                 <strong>Property X</strong> carries about $954 of PITI ($748
                 P&amp;I + $106 taxes + $100 insurance) plus $225 of reserves —
                 roughly $1,179 against $1,500 rent, or{" "}
-                <strong>+$321/month</strong>. On about $42,000 all-in (down
-                payment plus closing), that&apos;s a{" "}
-                <strong>~9% cash-on-cash return</strong>.
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>+$321</LedgerFigure>/month
+                </strong>
+                . On about $42,000 all-in (down payment plus closing),
+                that&apos;s a{" "}
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>~9%</LedgerFigure> cash-on-cash return
+                </strong>
+                .
               </li>
               <li>
                 <strong>Property Y</strong> carries about $2,097 of PITI ($1,497
                 P&amp;I + $450 taxes + $150 insurance) plus $450 of reserves —
                 roughly $2,547 against $3,000 rent, or{" "}
-                <strong>+$453/month</strong>. But on about $84,000 all-in, that
-                is only a <strong>~6.5% cash-on-cash return</strong>.
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>+$453</LedgerFigure>/month
+                </strong>
+                . But on about $84,000 all-in, that is only a{" "}
+                <strong className="whitespace-nowrap">
+                  <LedgerFigure>~6.5%</LedgerFigure> cash-on-cash return
+                </strong>
+                .
               </li>
             </ul>
             <p>
