@@ -515,8 +515,9 @@ export default async function ForAgentsPage() {
             same sign-up URL, "no card" beside the CTA, and the trial
             described as it is. The wrapper carries the #pricing fragment the
             hero's secondary action jumps to (CloseSection takes no id). The
-            trial terms sit under the case on the left, which keeps the two
-            columns about level: CloseSection aligns them at the bottom. */}
+            trial terms sit under the case on the left. A fragment of actions
+            gives CloseSection's "split" layout: both columns hang from the
+            heavy rule, so the heading is level with the price table. */}
         <div id="pricing">
           <CloseSection
             heading="Agent Pro"
