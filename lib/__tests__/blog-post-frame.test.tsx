@@ -66,7 +66,8 @@ describe("/blog/1-percent-rule-rental-property renders in the article frame", ()
     expect(html.slice(mainStart, h1)).toMatch(/^<main [^>]*><div class="max-w-\[68ch\]"><article><header class="[^"]*">$/);
     expect(html.slice(h1, html.indexOf("</h1>", h1))).toMatch(/^<h1 class="font-display [^"]*text-display-sm[^"]*lg:text-display[^"]*">/);
     const meta = html.slice(html.indexOf("</h1>", h1), html.indexOf("</p>", h1));
-    expect(meta).toMatch(/<a [^>]*href="\/blog"[^>]*>Blog<\/a> · [A-Z][a-z]{2} \d{1,2}, 2026 · 10 min read$/);
+    // PUBLISHED_AT is 2026-06-23, formatted in UTC: a render west of UTC printed Jun 22.
+    expect(meta).toMatch(/<a [^>]*href="\/blog"[^>]*>Blog<\/a> · Jun 23, 2026 · 10 min read$/);
     expect(main).not.toContain("←");
   });
 
@@ -79,6 +80,27 @@ describe("/blog/1-percent-rule-rental-property renders in the article frame", ()
     );
     expect(main).toContain("<h2>What the 1% rule actually says</h2>");
     expect(main).toContain("<h2>The bottom line</h2>");
+  });
+
+  it("sets the compared figures in DM Mono, held with their term, and pass/fail in the verdict colors", () => {
+    // JSX dropped the space at the line break after the colon ("Offer Ceiling:100").
+    expect(main).toContain("Offer Ceiling: <strong>100 × the monthly rent</strong>");
+    const figure = (value: string) => `<span class="font-mono tabular-nums">${value}</span>`;
+    for (const ratio of ["1.00%", "1.04%", "0.69%"]) expect(main).toContain(`<strong>${figure(ratio)}</strong>`);
+    expect(count(main, '<span class="font-semibold text-positive">Passes</span>.')).toBe(2);
+    expect(count(main, '<span class="font-semibold text-caution-text">Fails</span>.')).toBe(1);
+    for (const [value, term] of [
+      ["0.57%", " rent-to-price"],
+      ["0.76%", " rent-to-price"],
+      ["+$321", "/month"],
+      ["~9%", " cash-on-cash return"],
+      ["+$453", "/month"],
+      ["~6.5%", " cash-on-cash return"],
+    ]) {
+      expect(main).toContain(`<strong class="whitespace-nowrap">${figure(value)}${term}</strong>.`);
+    }
+    // The page takes the ledger parts from the frame: the SEO loop's import allow-list has no @/components/ledger/*.
+    expect(source).not.toMatch(/from "@\/components\/ledger\//);
   });
 
   it("renders the FAQ as ruled rows between the body and the bottom line, with the Census links, under one FAQPage", () => {

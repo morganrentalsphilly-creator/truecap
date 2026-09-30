@@ -61,6 +61,16 @@ import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { cn } from "@/lib/utils";
 
 /**
+ * The ledger's figure and verdict, for a post's prose (DESIGN.md "Do and
+ * don't": compared figures in DM Mono tabular; green and orange only for a
+ * pass or a miss against a target). A post takes them from the frame: the SEO
+ * loop's import allow-list (seo/config.json paths.importAllow) covers
+ * @/components/marketing/* but not @/components/ledger/*, so a direct import
+ * would make verify-static refuse every later loop edit to the post.
+ */
+export { LedgerFigure, LedgerVerdict } from "@/components/ledger/ledger-parts";
+
+/**
  * The reading column. 68ch of the 16px base is about 60ch of the 18px body,
  * inside the 60-68ch measure; the header and the footer share its left edge
  * through PAGE_CONTAINER.
@@ -80,8 +90,12 @@ export const ARTICLE_META = "mt-4 text-sm text-muted-foreground";
 /** The hub link inside the meta line: a tc-link with a 44px target that keeps the line's height. */
 export const ARTICLE_META_LINK = "tc-link -my-3 inline-block py-3";
 
-/** The lede under the byline. */
-export const ARTICLE_LEDE = "mt-6 max-w-[62ch] text-pretty text-lg text-muted-foreground";
+/**
+ * The lede under the byline: in ink, as PageHero's lede and the homepage
+ * hero's paragraph are, across the whole reading column so it shares the
+ * body's right edge. Ink 2 stays on the meta and byline lines above it.
+ */
+export const ARTICLE_LEDE = "mt-6 text-pretty text-lg text-foreground";
 
 /** The page root: paper, and a clip for any sideways bleed (app/page.tsx's root). */
 export function ArticlePage({
