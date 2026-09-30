@@ -14,7 +14,9 @@ seconds: cash flow, cap rate, cash-on-cash, DSCR, 10-year projections,
 tax strategy, exit scenarios, plus a plain-English verdict and a
 shareable read-only link.
 
-- **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
+- **Audience**: real estate agents who work with investor clients (primary)
+  and solo / small-portfolio buy-and-hold investors and house hackers
+  (secondary). See `PRODUCT.md`; for any UI work read §9 and `DESIGN.md`.
 - **Business model**: free tier (run analyses, save up to 5 deals;
   Deal Score is FREE for every user — see `app/actions/deal-score.ts`)
   - Pro at **$29.99/mo** or **$300/yr** (editing + unlimited saved
@@ -208,7 +210,8 @@ final_source_code/
 │   └── README-daily-campaign.md
 ├── supabase/migrations/          # Timestamped SQL migrations
 ├── public/                       # Static assets (logos, placeholders, icons)
-├── styles/globals.css            # Tailwind v4 entry
+├── styles/globals.css            # Dead: imported by nothing. The live Tailwind v4
+│                                 # entry and every design token is app/globals.css
 ├── hooks/                        # use-mobile, use-toast
 ├── types/                        # Ambient declarations (jspdf-esm.d.ts)
 ├── proxy.ts                      # Next 16 request boundary (replaces middleware.ts)
@@ -813,6 +816,57 @@ and let the founder say yes.
 8. **Modify `lib/share-link.ts` payload format** (`v: 1`, base64 URL
    encoding). Existing links in the wild break instantly. If a v2 is
    needed, keep the v1 decoder alongside it.
+
+---
+
+## 9. Design workflow (any UI change)
+
+TrueCap's look is decided in `DESIGN.md`, not inferred from whatever the code
+does today. Sessions that skip this section drift back to shadcn defaults.
+
+1. **Load the Impeccable skill** (`.claude/skills/impeccable`, v4.3.1) for any
+   UI work and run its setup once:
+   `.claude/skills/impeccable/scripts/impeccable context`. Do not use
+   ui-ux-pro-max, frontend-design, taste-skill, Hallmark or interface-design
+   as standing skills; overlapping design rule sets degrade the output.
+2. **Read `DESIGN.md` first.** It records decisions (paper, ink, type, radius
+   by role, the chrome rules). When code and `DESIGN.md` disagree, the code is
+   wrong unless the founder changed the decision. `PRODUCT.md` holds the
+   audience, constraints and copy guardrails.
+3. **Tokens over raw Tailwind.** Colors, fonts, radii and shadows come from the
+   tokens in `app/globals.css`, the one stylesheet the marketing site and the
+   app share (`styles/globals.css` is dead and imported by nothing). No raw
+   palette classes, no hex, no arbitrary `shadow-[…]` or `rgba(…)` glows. A fix
+   lands in a token or a shared component (header, footer, section wrapper,
+   FAQ, plan card, ledger primitives, `components/ui/*`), never as a page-local
+   override.
+4. **Chrome rules.** No eyebrow or kicker above a heading. No "→" in link text
+   and no trailing arrow icon on buttons. Sentence case everywhere, table heads
+   included (acronyms stay acronyms). Cards only for objects the user compares
+   (plan cards); feature lists, sources and FAQs use rules and space. Radius
+   follows the role scale in `DESIGN.md`. No shadow at rest. No
+   `transition-all`. At most one motion moment per page, and
+   `prefers-reduced-motion` always wins.
+5. **Detect before committing.**
+   `.claude/skills/impeccable/scripts/impeccable detect --json <changed files>`
+   must report no primary findings. For a page change, also scan the rendered
+   page from a local production build at `--viewport 1440x900` and
+   `--viewport 390x844`: most tells live in computed layout, and the source
+   scan cannot see them.
+6. **Look at the real widths.** 375, 768, 1095 (the founder's laptop window)
+   and 1440: no horizontal scroll, controls at least 44px, the homepage
+   investor cue visible in the first screen at 390px. The capture harness is
+   `docs/design-pass/tools/capture.mjs`.
+7. **Guards pin markup.** Many tests assert marketing class strings and copy
+   (`lib/__tests__/*guards*`, `public-funnel-trust-guards`,
+   `site-overhaul-*`, `structured-data-f4`, `internal-link-graph`,
+   `e2e/site-overhaul-conversion.spec.ts`). When a design change moves them,
+   re-anchor them in the same commit and say so in the message.
+8. **Checkpoints of the 2026 design pass** (`docs/design-pass/`): (1) the brief,
+   where `DESIGN.md` becomes decisions and the founder picks type and paper;
+   (2) three homepage directions, chosen by looking; (3) the homepage before
+   rollout, with before/after screenshots, scores and the app's key screens at
+   the new tokens. Do not build past a checkpoint that has not been approved.
 
 ---
 
