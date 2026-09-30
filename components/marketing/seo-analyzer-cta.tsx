@@ -9,10 +9,17 @@
  * Mounted once per
  * TEMPLATE (glossary/states/markets/combos) and once per shared component
  * for the hand-written families (tools via tools-conversion-cta, blog via
- * related-blog-posts, vs via comparison-faq).
+ * blog-sticky-cta, vs via comparison-faq).
+ *
+ * Set in the FinalCta grammar (DESIGN.md "Components"): it opens on the 2px
+ * ink rule, the question in the display voice at the H3 step, the supporting
+ * line in Ink 2, one marketing button, and no card, icon or glow. It carries
+ * no Section or page container of its own: every mount places it inside its
+ * page's column, so it fits a 3xl article column as well as a wider page.
  */
 
-import { ArrowRight, Calculator } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   ANALYZER_ROUTE,
   buildAnalyzerHandoffUrl,
@@ -65,13 +72,13 @@ export function SeoAnalyzerCta({
   return (
     <aside
       aria-label="Analyze your own deal"
-      className="rounded-2xl border border-border bg-card p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
+      className="border-t-2 border-foreground pt-6 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-x-8"
     >
-      <div>
-        <p className="text-sm font-bold text-foreground">
+      <div className="min-w-0">
+        <p className="font-display text-balance text-h3-sm sm:text-2xl">
           Ready to run {context ?? "a real deal"}?
         </p>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-2 max-w-[56ch] text-pretty text-base leading-relaxed text-muted-foreground">
           {supportingText ??
             "Free 60-second analysis with labeled starting assumptions and no signup. Pro calculates your Offer Ceiling: the highest price that still meets your targets under the assumptions shown."}
         </p>
@@ -80,11 +87,9 @@ export function SeoAnalyzerCta({
         handoffHref={href}
         contentType={contentType}
         referralSource="inline_cta"
-        className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] hover:bg-primary/95 sm:mt-0"
+        className={cn(buttonVariants({ size: "cta" }), "mt-5 sm:mt-0")}
       >
-        <Calculator className="size-4" />
         Analyze a property free
-        <ArrowRight className="size-4" />
       </TrackedContentCtaLink>
     </aside>
   );

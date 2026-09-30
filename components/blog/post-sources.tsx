@@ -25,7 +25,15 @@
  *
  * Renders nothing for an empty list. Plain server component: links open in
  * the same tab, like the inline links they repeat.
+ *
+ * Set in FRED's grammar (DESIGN.md "Source table"): the section rule, the
+ * heading in the display voice at the H3 step (its id stays the h2's first
+ * attribute), then numbered rows on soft rules, each the source's title as
+ * the link and its host in Ink 2. The numbers are the list's own markers, so
+ * the text the SEO loop measures is unchanged.
  */
+
+import { cn } from "@/lib/utils";
 
 export type PostSource = {
   /** What the source is: "IRS Publication 946 (2025), How To Depreciate Property". */
@@ -34,8 +42,11 @@ export type PostSource = {
   url: string;
 };
 
-const LINK_CLASS =
-  "rounded-sm py-1 font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+// Inline, so a long title wraps with its host after it. Vertical padding on
+// an inline link grows its hit box without moving the text: at 16px Archivo
+// the content box is 17.5px, so 14px each side gives a 45.5px target (44px
+// floor), measured in Chrome, and it stays inside the row's 10px padding.
+const LINK_CLASS = "tc-link py-3.5";
 
 /** "https://www.irs.gov/publications/p527" → "irs.gov" (shown beside the title). */
 function publisherHost(url: string): string {
@@ -65,19 +76,20 @@ export function PostSources({
     <section
       aria-labelledby="post-sources-heading"
       data-post-sources=""
-      className={`not-prose mt-10 border-t border-border pt-6 ${className}`.trim()}
+      className={cn("not-prose mt-10 border-t border-border pt-6", className)}
     >
       <h2
         id="post-sources-heading"
-        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground"
+        className="font-display text-balance text-h3-sm sm:text-2xl"
       >
         Sources
       </h2>
-      <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground marker:text-muted-foreground">
+      {/* The numbers hang left of the rows; each row's rule starts at its text. */}
+      <ol className="mt-4 list-decimal pl-6 text-base leading-relaxed text-foreground marker:text-muted-foreground">
         {unique.map((source) => {
           const host = publisherHost(source.url);
           return (
-            <li key={source.url}>
+            <li key={source.url} className="border-b border-rule-soft py-2.5 pl-1 first:border-t">
               <a href={source.url} className={LINK_CLASS}>
                 {source.title}
               </a>

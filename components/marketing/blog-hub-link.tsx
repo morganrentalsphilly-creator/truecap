@@ -9,6 +9,9 @@
  *
  * Boilerplate for dating purposes: it is the same line on every post of a
  * hub, so adding or moving it changes no post's lastmod.
+ *
+ * One <p> with exactly one link: the link-graph test reads the line up to
+ * its </p> and expects only the hub.
  */
 
 import Link from "next/link";
@@ -20,13 +23,9 @@ export function BlogHubLink({ postSlug }: { postSlug: string }) {
   const href = `/blog/topics/${topic.slug}`;
   if (!isLinkablePath(href)) return null;
   return (
-    <p data-blog-hub-link="" className="mb-4 text-sm text-muted-foreground">
+    <p data-blog-hub-link="" className="mt-3 text-base text-muted-foreground">
       Part of:{" "}
-      <Link
-        href={href}
-        prefetch={false}
-        className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      >
+      <Link href={href} prefetch={false} className="tc-link">
         {topic.title}
       </Link>
     </p>
