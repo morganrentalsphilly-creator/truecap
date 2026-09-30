@@ -1326,13 +1326,19 @@ function metadataMask(file: string, source: string): string {
 }
 
 /** True when `post` is `pre` plus exactly one internal <Link>/<a> element and nothing else. */
+const INTERNAL_LINK_TAGS = new Set(["Link", "IntentPrefetchLink", "a"]);
+
 function isSingleInternalLinkAddition(file: string, pre: string, post: string): boolean {
   const sf = parseTs(file, post);
   const candidates: ts.JsxElement[] = [];
   walk(sf, (node) => {
     if (!ts.isJsxElement(node)) return;
     const tag = node.openingElement.tagName;
-    if (!ts.isIdentifier(tag) || (tag.text !== "Link" && tag.text !== "a")) return;
+    // IntentPrefetchLink is next/link with prefetch held until hover or
+    // focus (components/marketing/intent-prefetch-link.tsx); /vs pages and
+    // converted posts write it for internal links below the fold, so an
+    // added one is the same one-link change as an added <Link>.
+    if (!ts.isIdentifier(tag) || !INTERNAL_LINK_TAGS.has(tag.text)) return;
     let href: string | null = null;
     for (const attr of node.openingElement.attributes.properties) {
       if (!ts.isJsxAttribute(attr)) return;
