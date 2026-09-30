@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { ArrowUpRight, Code } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -58,6 +59,7 @@ function joinTitles(titles: string[]): string {
 }
 
 export default function EmbedHubPage() {
+  const agentProConfigured = isAgentProConfigured();
   const siteUrl = getSiteUrl();
   // A partner pastes a snippet once and never updates it, so the hub must
   // never hand out an iframe src on a non-canonical origin (a stale-env build
@@ -213,6 +215,33 @@ export default function EmbedHubPage() {
               </article>
             ))}
           </div>
+        </section>
+
+        {/* Agents (2026-09 agent-first pass): a working calculator on an
+            agent site is a credibility piece, not a lead machine — the FAQ
+            below is explicit that there is no per-site tracking or lead
+            capture, and that stays true. */}
+        <section className="mt-12 rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="text-xl font-extrabold text-foreground">
+            For agents who work with investors
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            A calculator on your own site shows investor visitors you speak
+            their language before they ever call. It is a credibility piece:
+            the embed collects nothing and reports nothing back to you, so use
+            it beside your contact details, not instead of them. When a client
+            is real, run their deals against their own Buy Box with{" "}
+            {agentProConfigured ? (
+              <Link href="/for-agents" className="font-semibold text-primary underline underline-offset-4">
+                TrueCap for agents
+              </Link>
+            ) : (
+              <Link href="/pricing#plans" className="font-semibold text-primary underline underline-offset-4">
+                Agent Pro
+              </Link>
+            )}
+            .
+          </p>
         </section>
 
         {/* Tips / FAQ */}

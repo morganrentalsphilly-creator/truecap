@@ -150,7 +150,9 @@ export default function AboutPage() {
               core analyzer
             </Link>{" "}
             is free with no signup, and your first complete decision is
-            included. A{" "}
+            included. It is built for real estate agents who screen and
+            present deals for investor clients, and for investors buying for
+            their own portfolio; both use the same analyzer. A{" "}
             <Link
               href="/pricing"
               className="font-bold text-foreground hover:underline"
