@@ -1,37 +1,35 @@
 /**
- * Shared template for per-post /blog/<slug>/opengraph-image.tsx dynamic
- * OG cards.
+ * Shared template for per-post /blog/<slug>/opengraph-image.tsx dynamic OG
+ * cards, on the Newsprint frame (lib/og/newsprint.tsx). Wrappers pass the
+ * title string from the post's own metadata so the card and the page never
+ * drift apart. The SEO loop writes new wrappers against this interface, so
+ * BlogOgConfig and the function name stay stable.
  *
- * Same constraints + visual conventions as lib/og/tool-og-template.tsx
- * and lib/og/vs-og-template.tsx:
- *   - edge runtime
- *   - next/og JSX subset (basic divs + inline styles + text)
- *   - No Tailwind, no custom fonts, no server-only imports
+ * Constraints (CLAUDE.md §3.6): the next/og JSX subset only, no Tailwind, no
+ * server-only imports. Fail-safe: fonts fall back to next/og's sans and a
+ * render error returns the plain frame, so a bad config string never surfaces
+ * a 500 on a social crawler fetch.
  *
- * Layout matches the hand-built anchor-post OG images (e.g.
- * app/blog/how-to-refinance-a-rental-property/opengraph-image.tsx):
- * brand bar, "Blog · <Section>" header label, a topic pill, the post
- * title as the headline, and a footer subline. Wrappers pass the title
- * string from the post's own metadata so the card and the page never
- * drift apart.
- *
- * Fail-safe (CLAUDE.md §3.6): rendering is wrapped in try/catch and
- * falls back to a minimal branded card — a bad config string must never
- * surface a 500 on a social crawler fetch.
+ * Layout: the wordmark over a heavy rule with "Blog · <Section>", the topic
+ * as a 2px chip, the post title in the display voice (stepping down for long
+ * titles), and the subline and the blog URL over a soft rule.
  */
 
 import { ImageResponse } from "next/og";
+import {
+  loadNewsprintFonts,
+  NEWSPRINT,
+  NewsprintFrame,
+  OG_SIZE,
+  ogFamily,
+} from "@/lib/og/newsprint";
 
-export const OG_SIZE = { width: 1200, height: 630 } as const;
-
-const BRAND_BLUE = "#0070c4";
-const TEXT_INK = "#0F172A";
-const TEXT_SUB = "#475569";
+export { OG_SIZE };
 
 export type BlogOgConfig = {
   /** Header label after "Blog · " (e.g. "Financing", "Comparisons"). */
   section: string;
-  /** Short uppercase topic pill above the headline (e.g. "DSCR"). */
+  /** Short topic shown as a chip above the headline (e.g. "DSCR"). */
   tag: string;
   /** Post title — pass the page's metadata title verbatim. */
   title: string;
@@ -39,169 +37,57 @@ export type BlogOgConfig = {
   subline: string;
 };
 
-/** Minimal branded card returned when the main render throws. */
-function fallbackImage(): ImageResponse {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          background: "#F8FAFC",
-          fontFamily: "system-ui",
-          color: TEXT_INK,
-        }}
-      >
-        <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            padding: "0 64px",
-          }}
-        >
-          <div style={{ fontSize: 64, fontWeight: 800, letterSpacing: "-0.02em", display: "flex" }}>
-            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
-          </div>
-          <div style={{ fontSize: 28, color: TEXT_SUB, marginTop: 16, display: "flex" }}>
-            The rental property investing blog
-          </div>
-        </div>
-        <div
-          style={{
-            padding: "0 64px 40px 64px",
-            display: "flex",
-            justifyContent: "flex-end",
-            fontWeight: 700,
-            color: BRAND_BLUE,
-            fontSize: 20,
-          }}
-        >
-          usetruecap.com/blog
-        </div>
-      </div>
-    ),
-    { ...OG_SIZE }
-  );
-}
+const URL_TEXT = "usetruecap.com/blog";
 
-export function renderBlogOgImage(config: BlogOgConfig): ImageResponse {
+export async function renderBlogOgImage(config: BlogOgConfig): Promise<ImageResponse> {
+  const { section, tag, title, subline } = config;
+  const label = `Blog · ${section}`;
+  const fonts = await loadNewsprintFonts({
+    display: `TrueCap. ${title}`,
+    text: `${label} ${tag} ${subline}`,
+    mono: URL_TEXT,
+  });
+  // Long titles step down so they still fit the 1072px column in three lines.
+  const headlineSize = title.length > 84 ? 54 : title.length > 64 ? 60 : 68;
   try {
-    const { section, tag, title, subline } = config;
-
-    // Long titles step down so they still fit the 1072px column at ~3 lines.
-    const headlineSize = title.length > 84 ? 52 : title.length > 64 ? 58 : 64;
-
     return new ImageResponse(
       (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            background: "#F8FAFC",
-            fontFamily: "system-ui",
-            color: TEXT_INK,
-          }}
-        >
-          {/* top accent bar */}
-          <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
-
-          {/* header row: brand + section label */}
-          <div
-            style={{
-              padding: "40px 64px 0 64px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+        <NewsprintFrame label={label} footerLeft={subline} footerRight={URL_TEXT}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexGrow: 1 }}>
+            {tag ? (
+              <div style={{ display: "flex", marginBottom: 24 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    padding: "6px 12px",
+                    border: `1px solid ${NEWSPRINT.rule}`,
+                    borderRadius: 2,
+                    fontSize: 22,
+                    color: NEWSPRINT.ink2,
+                  }}
+                >
+                  {tag}
+                </div>
+              </div>
+            ) : null}
             <div
               style={{
-                fontSize: 32,
-                fontWeight: 800,
-                letterSpacing: "-0.01em",
                 display: "flex",
-              }}
-            >
-              TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
-            </div>
-            <div
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: TEXT_SUB,
-                display: "flex",
-              }}
-            >
-              {`Blog · ${section}`}
-            </div>
-          </div>
-
-          {/* topic pill */}
-          <div style={{ padding: "48px 64px 0 64px", display: "flex" }}>
-            <div
-              style={{
-                background: BRAND_BLUE,
-                color: "#FFFFFF",
-                fontSize: 22,
-                fontWeight: 800,
-                padding: "12px 22px",
-                borderRadius: 999,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                display: "flex",
-              }}
-            >
-              {tag}
-            </div>
-          </div>
-
-          {/* headline — the post's own metadata title */}
-          <div style={{ padding: "26px 64px 0 64px", display: "flex" }}>
-            <div
-              style={{
+                fontFamily: ogFamily("display"),
                 fontSize: headlineSize,
-                fontWeight: 800,
-                lineHeight: 1.06,
-                letterSpacing: "-0.025em",
+                lineHeight: 1.04,
+                letterSpacing: "-0.012em",
                 maxWidth: 1072,
-                display: "flex",
               }}
             >
               {title}
             </div>
           </div>
-
-          {/* footer */}
-          <div
-            style={{
-              marginTop: "auto",
-              padding: "0 64px 40px 64px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              color: TEXT_SUB,
-              fontSize: 20,
-            }}
-          >
-            <div style={{ display: "flex" }}>{subline}</div>
-            <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
-              usetruecap.com/blog
-            </div>
-          </div>
-        </div>
+        </NewsprintFrame>
       ),
-      { ...OG_SIZE }
+      { ...OG_SIZE, fonts },
     );
   } catch {
-    return fallbackImage();
+    return new ImageResponse(<NewsprintFrame label={label}>{null}</NewsprintFrame>, { ...OG_SIZE, fonts });
   }
 }
