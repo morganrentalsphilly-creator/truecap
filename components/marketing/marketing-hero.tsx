@@ -50,12 +50,17 @@ export function MarketingHero() {
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
                 not runaway scale. Left-aligned (anti-center bias). */}
-            <h1 className="text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.4rem]">
+            {/* break-words + hyphens-auto: at zoom-sensitive widths (a 195px
+                column) a ten-letter word like "forwarding" is wider than the
+                line; the browser may then break or hyphenate it rather than
+                overflow (e2e/public-product.spec.ts "reading order"). No
+                effect at any width where the words fit. */}
+            <h1 className="hyphens-auto break-words text-balance text-4xl font-extrabold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-[2.4rem]">
               {homepageHeadline}
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable."
+                ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
             {/* The math supports the decision; it is not the headline. */}
