@@ -77,7 +77,16 @@ async function openAdvancedExpenses(page: Page, form: ReturnType<Page["locator"]
 
 async function openFinancing(page: Page) {
   const toggle = page.getByRole("button", { name: /down.*interest/i });
-  if (await toggle.isVisible().catch(() => false)) await toggle.click();
+  if (await toggle.isVisible().catch(() => false)) {
+    await toggle.click();
+    // This is the assumptions-strip chip ("20% down · 6.42% interest"). It
+    // opens the panel, then one frame plus 70 ms later moves focus to
+    // #downPaymentPct (handleChipNavigate in investcalc-page.tsx). A fill
+    // issued before that timer fires loses its keystrokes to the field: CI
+    // saw "2400" meant for rent land in Down Payment as "202400". Wait for
+    // the chip's focus to settle before the caller types anywhere.
+    await expect(page.locator("#downPaymentPct")).toBeFocused();
+  }
 }
 
 test("FRED timeout: the rate keeps its default, HUD rent still fills, nothing sticks", async ({ page }) => {
