@@ -4,7 +4,7 @@
  * The page has to make sense WITH or WITHOUT quotes. Everything it renders
  * unconditionally is something a visitor can check: three facts with a link
  * to verify each, the rules a quote must pass, the sourced-assumption and
- * public-methodology cards, and a real link to the analyzer. (The founder
+ * public-methodology rows, and a real link to the analyzer. (The founder
  * card and the proof strip were retired on 2026-09-07.) The two data-backed
  * blocks — <Testimonials /> and the usage counter — render NOTHING at zero
  * rows: no placeholders, no placeholder text, no stars, no empty boxes.
@@ -16,19 +16,29 @@
  * or Next silently renders it dynamically on every request and the declared
  * `revalidate` is a lie. The footer shows its account column like every
  * other prerendered marketing page; the Header self-corrects client-side.
+ *
+ * Set on the ledger grammar (DESIGN.md, 2026-09 design pass): paper, rules
+ * instead of cards, the shared hero, step list and close from page-parts.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Database, FileCheck2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
+import {
+  CloseSection,
+  PageHero,
+  RuledList,
+  StepList,
+} from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Testimonials } from "@/components/marketing/testimonials";
 import {
   UsageCounter,
   loadUsageLabel,
 } from "@/components/marketing/usage-counter";
+import { buttonVariants } from "@/components/ui/button";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   MIN_SAVED_DEALS_FOR_PUBLISH,
@@ -58,8 +68,17 @@ export function generateMetadata(): Metadata {
   };
 }
 
-const LINK_CLASS =
-  "inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ";
+/** A standalone link under a column: the link style, with a 44px target. */
+const COLUMN_LINK_CLASS =
+  "tc-link mt-3 inline-flex min-h-11 items-center self-start text-base";
+
+/** The real flow a quote takes, in order (StepList: a true sequence). */
+const QUOTE_FLOW_STEPS = [
+  "After you export a report or save a third deal, TrueCap asks you one question. Once.",
+  "You decide whether TrueCap may publish your answer with your first name, role, and market. If you say no, it stays private.",
+  `A quote goes live only after a ${PUBLISH_DELAY_HOURS}-hour hold, and only if the account has real activity: at least ${MIN_SAVED_DEALS_FOR_PUBLISH} saved deals or an exported report.`,
+  "Nothing is edited, purchased, or invented. The founder can take any quote down.",
+] as const;
 
 export default async function ReviewsPage() {
   // Decide whether the "Real usage" block exists at all, so an empty
@@ -85,248 +104,142 @@ export default async function ReviewsPage() {
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="bg-background outline-none">
         {/* (a) Hero */}
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
-          <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-            <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              Proof, not praise.
-            </h1>
-            <p className="mx-auto mt-4 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Everything on this page is something you can check yourself.
-            </p>
-          </div>
-        </section>
-
-        {/* (b) Three facts a visitor can verify by clicking — always renders.
-            Each card states something true today and links to where it can
-            be checked; none of them depends on a database row. */}
-        <section aria-labelledby="verify-title" className="border-b border-border">
-          <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-            <h2
-              id="verify-title"
-              className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-            >
-              Three things you can check right now
-            </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="font-extrabold text-foreground">The math is public</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Every formula behind a verdict is written down with its
-                  limits: cash flow, cap rate, DSCR, and the Offer Ceiling.
-                  Nothing is hidden inside a model you cannot read.
-                </p>
-                <Link href="/methodology" className={`${LINK_CLASS} mt-3 text-sm`}>
-                  Read the methodology
-                </Link>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="font-extrabold text-foreground">Every assumption is labeled</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  In the analyzer, each input says where it came from: HUD Fair
-                  Market Rent, the FRED mortgage rate, or a labeled local
-                  default you can replace with your own number.
-                </p>
-                <AnalyzeCtaLink
-                  analyticsSource="reviews-verify"
-                  className={`${LINK_CLASS} mt-3 text-sm`}
-                >
-                  Open the analyzer
-                </AnalyzeCtaLink>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="font-extrabold text-foreground">Any quote can come down</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  A quote is held for {PUBLISH_DELAY_HOURS} hours before it
-                  appears, publishes only after {MIN_SAVED_DEALS_FOR_PUBLISH}{" "}
-                  saved deals or an exported report. The founder can remove
-                  a quote; contact hello@usetruecap.com if you want yours
-                  taken down.
-                </p>
-                <a href="#quotes-flow-title" className={`${LINK_CLASS} mt-3 text-sm`}>
-                  See how quotes get here
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* (c) How quotes get here — the real flow, stated plainly. */}
-        <section aria-labelledby="quotes-flow-title">
-          <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-            <h2
-              id="quotes-flow-title"
-              className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-            >
-              How quotes get here
-            </h2>
-            <ol className="mt-8 space-y-4 text-base leading-relaxed text-foreground">
-              <li className="flex gap-4">
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary"
-                >
-                  1
-                </span>
-                <p>
-                  After you export a report or save a third deal, TrueCap asks
-                  you one question. Once.
-                </p>
-              </li>
-              <li className="flex gap-4">
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary"
-                >
-                  2
-                </span>
-                <p>
-                  You decide whether TrueCap may publish your answer with your
-                  first name, role, and market. If you say no, it stays
-                  private.
-                </p>
-              </li>
-              <li className="flex gap-4">
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary"
-                >
-                  3
-                </span>
-                <p>
-                  A quote goes live only after a {PUBLISH_DELAY_HOURS}-hour
-                  hold, and only if the account has real activity: at least{" "}
-                  {MIN_SAVED_DEALS_FOR_PUBLISH} saved deals or an exported
-                  report.
-                </p>
-              </li>
-              <li className="flex gap-4">
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary"
-                >
-                  4
-                </span>
-                <p>
-                  Nothing is edited, purchased, or invented. The founder can
-                  take any quote down.
-                </p>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        {/* (d) Published quotes — renders nothing at zero rows, by design. */}
-        <Testimonials
-          limit={100}
-          heading="What people said"
-          className="border-t border-border bg-card/40"
+        <PageHero
+          title="Proof, not praise."
+          lede="Everything on this page is something you can check yourself."
         />
 
-        {/* (e) Methodology proof */}
-        <section
-          aria-labelledby="check-title"
-          className="border-t border-border"
-        >
-          <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-            <h2
-              id="check-title"
-              className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-            >
-              Proof you can check yourself
-            </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Database aria-hidden className="size-5" />
-                </span>
-                <h3 className="mt-4 font-extrabold text-foreground">
-                  Sourced assumptions
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Rent can start from HUD Fair Market Rent and the rate from
-                  FRED. Property tax is your local number; leave it blank and a
-                  labeled default fills in. Every field says where it came
-                  from, and you can edit every one.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <FileCheck2 aria-hidden className="size-5" />
-                </span>
-                <h3 className="mt-4 font-extrabold text-foreground">
-                  Public methodology
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Every formula is published, with its limits. Read it at{" "}
-                  <Link href="/methodology" className={LINK_CLASS}>
-                    /methodology
-                  </Link>
-                  .
-                </p>
-              </div>
+        {/* (b) Three facts a visitor can verify by clicking — always renders.
+            Each column states something true today and links to where it
+            can be checked; none of them depends on a database row. PageHero
+            already draws the rule under the head, so this Section adds none.
+            Three columns only from 1024px: narrower, the columns fall to
+            19-24ch and the headings wrap unevenly, so tablets get full rows. */}
+        <Section rule="none" aria-labelledby="verify-title">
+          <SectionHeading id="verify-title">
+            Three things you can check right now
+          </SectionHeading>
+          <div className="mt-8 grid border-t-2 border-foreground lg:grid-cols-3 lg:gap-x-12">
+            <div className="flex flex-col border-b border-rule-soft py-4">
+              <h3 className="text-lg font-semibold">The math is public</h3>
+              <p className="mt-1 max-w-[64ch] flex-1 text-pretty text-base leading-relaxed text-muted-foreground">
+                Every formula behind a verdict is written down with its
+                limits: cash flow, cap rate, DSCR, and the Offer Ceiling.
+                Nothing is hidden inside a model you cannot read.
+              </p>
+              <Link href="/methodology" className={COLUMN_LINK_CLASS}>
+                Read the methodology
+              </Link>
+            </div>
+            <div className="flex flex-col border-b border-rule-soft py-4">
+              <h3 className="text-lg font-semibold">Every assumption is labeled</h3>
+              <p className="mt-1 max-w-[64ch] flex-1 text-pretty text-base leading-relaxed text-muted-foreground">
+                In the analyzer, each input says where it came from: HUD Fair
+                Market Rent, the FRED mortgage rate, or a labeled local
+                default you can replace with your own number.
+              </p>
+              <AnalyzeCtaLink
+                analyticsSource="reviews-verify"
+                className={COLUMN_LINK_CLASS}
+              >
+                Open the analyzer
+              </AnalyzeCtaLink>
+            </div>
+            <div className="flex flex-col border-b border-rule-soft py-4">
+              <h3 className="text-lg font-semibold">Any quote can come down</h3>
+              <p className="mt-1 max-w-[64ch] flex-1 text-pretty text-base leading-relaxed text-muted-foreground">
+                A quote is held for {PUBLISH_DELAY_HOURS} hours before it
+                appears, publishes only after {MIN_SAVED_DEALS_FOR_PUBLISH}{" "}
+                saved deals or an exported report. The founder can remove
+                a quote; contact hello@usetruecap.com if you want yours
+                taken down.
+              </p>
+              <a href="#quotes-flow-title" className={COLUMN_LINK_CLASS}>
+                See how quotes get here
+              </a>
             </div>
           </div>
-        </section>
+        </Section>
+
+        {/* (c) How quotes get here — the real flow, stated plainly. The id
+            is the target of the "See how quotes get here" link above. */}
+        <Section rhythm="tight" aria-labelledby="quotes-flow-title">
+          <SectionHeading id="quotes-flow-title">How quotes get here</SectionHeading>
+          <StepList className="mt-8" steps={QUOTE_FLOW_STEPS} />
+        </Section>
+
+        {/* (d) Published quotes — renders nothing at zero rows, by design. */}
+        <Testimonials limit={100} heading="What people said" />
+
+        {/* (e) Methodology proof */}
+        <Section rhythm="tight" aria-labelledby="check-title">
+          <SectionHeading id="check-title">Proof you can check yourself</SectionHeading>
+          <RuledList
+            columns={2}
+            className="mt-8"
+            items={[
+              {
+                key: "sourced-assumptions",
+                term: "Sourced assumptions",
+                detail:
+                  "Rent can start from HUD Fair Market Rent and the rate from FRED. Property tax is your local number; leave it blank and a labeled default fills in. Every field says where it came from, and you can edit every one.",
+              },
+              {
+                key: "public-methodology",
+                term: "Public methodology",
+                detail: (
+                  <>
+                    Every formula is published, with its limits. Read it at{" "}
+                    <Link href="/methodology" className="tc-link">
+                      /methodology
+                    </Link>
+                    .
+                  </>
+                ),
+              },
+            ]}
+          />
+        </Section>
 
         {/* (f) Real usage — the whole block is absent when the counter is null. */}
         {usageLabel ? (
-          <section
-            aria-labelledby="usage-title"
-            className="border-t border-border bg-card/40"
-          >
-            <div className="mx-auto max-w-3xl px-4 py-10 text-center sm:px-6 sm:py-12">
-              <h2
-                id="usage-title"
-                className="text-sm font-bold uppercase tracking-widest text-primary"
-              >
-                Real usage
-              </h2>
-              <UsageCounter className="mt-3 text-2xl sm:text-3xl" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                Deals saved by real accounts. Counted, not typed in.
-              </p>
-            </div>
-          </section>
+          <Section rhythm="tight" aria-labelledby="usage-title">
+            <SectionHeading id="usage-title">Real usage</SectionHeading>
+            <UsageCounter className="mt-3 text-2xl" />
+            <p className="mt-2 text-pretty text-base text-muted-foreground">
+              Deals saved by real accounts. Counted, not typed in.
+            </p>
+          </Section>
         ) : null}
 
         {/* What this page will never show — stated so the absence of quotes
-            reads as a policy, not a gap. */}
-        <section aria-labelledby="not-published-title" className="border-t border-border">
-          <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-            <h2 id="not-published-title" className="text-xl font-extrabold tracking-tight text-foreground">
-              What you will not find here
-            </h2>
-            <ul className="mt-3 grid gap-2 text-sm leading-relaxed text-muted-foreground sm:grid-cols-2">
-              <li>Star ratings or an average score. No one is asked to rate anything.</li>
-              <li>Logos, badges, or press strips.</li>
-              <li>User counts or &ldquo;deals analyzed&rdquo; figures that are not computed from the database.</li>
-              <li>Quotes edited for effect, paid for, or written by anyone but the person named.</li>
-              <li>Case studies without the customer&apos;s written approval of every number.</li>
-              <li>Stock photos of &ldquo;customers.&rdquo; If there is a face on this site, it is a real person who agreed to it.</li>
-            </ul>
-          </div>
-        </section>
+            reads as a policy, not a gap. Set in ink: it is the policy. */}
+        <Section rhythm="tight" aria-labelledby="not-published-title">
+          <SectionHeading id="not-published-title">What you will not find here</SectionHeading>
+          <ul className="mt-8 grid border-t-2 border-foreground text-pretty text-base leading-relaxed sm:grid-cols-2 sm:gap-x-12">
+            <li className="border-b border-rule-soft py-3">Star ratings or an average score. No one is asked to rate anything.</li>
+            <li className="border-b border-rule-soft py-3">Logos, badges, or press strips.</li>
+            <li className="border-b border-rule-soft py-3">User counts or &ldquo;deals analyzed&rdquo; figures that are not computed from the database.</li>
+            <li className="border-b border-rule-soft py-3">Quotes edited for effect, paid for, or written by anyone but the person named.</li>
+            <li className="border-b border-rule-soft py-3">Case studies without the customer&apos;s written approval of every number.</li>
+            <li className="border-b border-rule-soft py-3">Stock photos of &ldquo;customers.&rdquo; If there is a face on this site, it is a real person who agreed to it.</li>
+          </ul>
+        </Section>
 
-        {/* (h) Final CTA */}
-        <section aria-labelledby="cta-title" className="border-t border-border">
-          <div className="mx-auto max-w-3xl px-4 py-12 text-center sm:px-6 sm:py-16">
-            <h2
-              id="cta-title"
-              className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-            >
-              The best proof is your own deal.
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-balance text-base text-muted-foreground">
-              Paste an address. Every assumption is labeled and editable.
-            </p>
+        {/* (h) Final CTA: the close on the heavy rule, the page's one filled button. */}
+        <CloseSection
+          headingId="cta-title"
+          heading="The best proof is your own deal."
+          lede="Paste an address. Every assumption is labeled and editable."
+          actions={
             <AnalyzeCtaLink
               analyticsSource="reviews"
-              className="mt-6 inline-flex min-h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+              className={buttonVariants({ size: "cta" })}
             >
               Analyze a deal free
             </AnalyzeCtaLink>
-          </div>
-        </section>
+          }
+        />
       </main>
       <SiteFooter />
       <JsonLd data={reviewsLd} />
