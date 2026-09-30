@@ -82,9 +82,19 @@ const FREE_FEATURES = [
 ] as const;
 
 /**
+ * Agent-only entitlements the card already spells out, row by row, in
+ * AGENT_PRO_WORKFLOW below. Their one-line catalog label would repeat those
+ * rows (the card read "Client rosters — …" and then "A client roster, up to
+ * 100 clients"), so the workflow stands in for it.
+ */
+const AGENT_PRO_WORKFLOW_FEATURES = new Set<string>(["client_buy_box"]);
+
+/**
  * Derived from the entitlement catalog — the labels of exactly the features
- * only agent_pro includes. Hand-typing this list is how pricing surfaces
- * historically drifted from the gates (see lib/entitlements-catalog.ts).
+ * only agent_pro includes, less the ones the workflow rows explain. Hand-typing
+ * this list is how pricing surfaces historically drifted from the gates (see
+ * lib/entitlements-catalog.ts); a newly shipped agent-only feature still
+ * appears here without an edit.
  */
 const AGENT_PRO_FEATURES: string[] = [
   ...featuresForTier("agent_pro")
@@ -93,6 +103,7 @@ const AGENT_PRO_FEATURES: string[] = [
     // implementation readiness as well as legal/operational approval; the
     // runtime entitlement can remain forward-compatible without being sold.
     .filter((f) => f.shipped !== false)
+    .filter((f) => !AGENT_PRO_WORKFLOW_FEATURES.has(f.key))
     .map((f) => f.label),
 ];
 
@@ -232,8 +243,13 @@ export function PricingTogglePlans({
   const agentMonthlyAmount = parsePriceAmount(agentMonthly);
   const agentAnnualAmount = parsePriceAmount(agentAnnual);
   const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
+  // The toggle alone picks the branch, as for the Pro card: a Stripe read
+  // that fails this request falls back to the catalog amounts, never to the
+  // other billing period (Annual pressed over a "billed monthly" card, with a
+  // monthly sign-up link, contradicted /for-agents' annual price). Checkout
+  // stays gated on the resolved price through checkoutReady below.
   const agentCard =
-    period === "monthly" || agentAnnual == null
+    period === "monthly"
       ? {
           priceTop: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
           priceSub: agentMonthly ? `/${agentMonthly.period}` : "/month",
@@ -246,7 +262,7 @@ export function PricingTogglePlans({
               ? `$${agentAnnualMonthlyEquivalent.toFixed(agentAnnualMonthlyEquivalent % 1 === 0 ? 0 : 2)}`
               : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12),
           priceSub: "/month",
-          subline: agentAnnual?.amountLabel ? `billed annually (${agentAnnual.amountLabel})` : "billed annually",
+          subline: `billed annually (${agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`,
           slot: "agent_pro_annual" as const,
         };
   void agentMonthlyAmount;
@@ -422,11 +438,15 @@ export function PricingTogglePlans({
         {/* AGENT PRO — rendered only when its Stripe price is configured.
             Feature list derives from lib/entitlements-catalog (the SSOT):
             "Everything in Pro" + exactly the agent_pro-only feature labels,
-            so this card can never promise something the tier doesn't gate. */}
+            so this card can never promise something the tier doesn't gate.
+            The hero's stage chooser jumps to #agent-pro: from 768px the card
+            sits in the row under the toggle, so it takes the Pro card's
+            scroll margin and lands with the toggle that sets its price in
+            view. On phones it is the third card down and lands at its top. */}
         {showAgentPro ? (
           <PlanCard
             id="agent-pro"
-            className="order-3"
+            className="order-3 md:scroll-mt-28"
             name="Agent Pro"
             tag={agentCardDecision.kind === "current" ? "Current" : undefined}
             audience="For agents with investor clients"
@@ -502,9 +522,10 @@ function PricingTrialTerms({
 }: {
   isAuthenticated: boolean;
   evaluation: PricingEvaluationSummary;
-  /** The no-card trial grants Pro deal analyses only — never the client
-   *  roster (lib/entitlements.ts evaluationFeatures) — so with Agent Pro on
-   *  the page the terms say so after the Pro allowance. */
+  /** The no-card trial grants Pro deal analyses only — never co-branding
+   *  (custom_branding) or the client roster (lib/entitlements.ts
+   *  evaluationFeatures) — so the terms say so after the Pro allowance, and
+   *  name the roster when Agent Pro is on the page. */
   tier?: "pro" | "agent_pro";
 }) {
   if (!isAuthenticated) {
@@ -514,8 +535,8 @@ function PricingTrialTerms({
         The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
         comparison.
         {tier === "agent_pro"
-          ? " The client roster and client Buy Boxes start with an Agent Pro subscription, not the trial."
-          : ""}{" "}
+          ? " Co-branded share pages and PDFs start with a Pro or Agent Pro subscription, and the client roster and client Buy Boxes with Agent Pro, not the trial."
+          : " Co-branded share pages and PDFs start with a Pro subscription, not the trial."}{" "}
         Nothing auto-renews; subscribe only if you choose to later.
       </p>
     );

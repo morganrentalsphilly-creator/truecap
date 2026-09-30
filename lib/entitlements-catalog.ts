@@ -273,10 +273,13 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
     category: "pipeline",
     gate: "flag",
   },
+  // The label carries the account cap (app/actions/user-buy-boxes.ts
+  // MAX_BUY_BOXES = 12): the earlier wording read as a Buy Box for each of
+  // the roster's 100 clients. /profile's plan switcher renders it.
   client_buy_box: {
     key: "client_buy_box",
     label:
-      "Client rosters — buy boxes per buyer, deals screened to each client's criteria",
+      "Client rosters — Buy Boxes assigned to clients (up to 12 per account), deals screened to each client's criteria",
     tiers: ["agent_pro"],
     category: "pipeline",
     gate: "flag",
