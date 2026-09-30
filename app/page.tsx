@@ -150,7 +150,7 @@ export default function Home() {
           client-side. (A cookie-gated getUser→reload self-heal is possible but
           deliberately omitted — not worth a reload-loop risk on the highest-
           traffic page for a rare edge.) */}
-      <Header initialUser={null} initialEntitlements={null} />
+      <Header initialUser={null} initialEntitlements={null} anonymousByDefault />
       {/* Legacy post-checkout compatibility mount. New subscription Checkout
           Sessions return to /dashboard/new; keeping this fail-closed client
           reader preserves conversion recovery for older return URLs without

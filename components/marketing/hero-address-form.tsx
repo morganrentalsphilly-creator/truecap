@@ -180,7 +180,7 @@ export function HeroAddressForm({
   };
 
   return (
-    <div className={cn("mt-6 w-full max-w-xl sm:mt-7", className)}>
+    <div className={cn("mt-5 w-full max-w-xl sm:mt-7", className)}>
       <form
         {...(isHero ? { "data-hero-address-form": "" } : { "data-close-address-form": "" })}
         data-hero-form-ready={ready ? "true" : "false"}
