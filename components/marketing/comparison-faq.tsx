@@ -25,9 +25,21 @@
  *
  * Schema pattern follows schema.org/FAQPage with mainEntity = array of
  * Question, each with an acceptedAnswer of type Answer.
+ *
+ * Set in the homepage FAQ's grammar (DESIGN.md "Components": FAQ, and
+ * FaqSection in landing-sections.tsx): a Section with the display-voice H2,
+ * the list opening on the 2px ink rule, each question a native details row
+ * on a rule with the SVG plus/minus (DisclosureMark), the answer capped at
+ * 64ch. Nothing but the answer follows the summary inside a details row:
+ * lib/__tests__/structured-data-f4.test.tsx reads that text as the visible
+ * answer. The sources note is a Note, the price answer a ruled block (no
+ * card), and the analyzer bridge follows them.
  */
 
 import { Fragment, isValidElement, type ReactNode } from "react";
+import { DisclosureMark } from "@/components/ledger/ledger-parts";
+import { Note } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { JsonLd } from "@/components/seo/json-ld";
 
@@ -96,6 +108,9 @@ export function plainTextOf(node: ReactNode): string {
   return parts.join("").replace(/\s+/g, " ").trim();
 }
 
+/** The FAQ heading's id (aria-labelledby); ComparisonFaq renders once per page. */
+const HEADING_ID = "comparison-faq-heading";
+
 export function ComparisonFaq({
   competitorName,
   items,
@@ -121,81 +136,82 @@ export function ComparisonFaq({
   };
 
   return (
-    <section className="mb-12 sm:mb-16">
+    <Section aria-labelledby={HEADING_ID}>
       <JsonLd data={schema} />
-      <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-2">
-        Common questions about TrueCap vs {competitorName}
-      </h2>
-      <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
-        Quick answers to the questions investors comparison-shopping these tools
-        actually ask.
-      </p>
-      <div className="tc-reveal space-y-3">
-        {items.map((item) => (
-          <details
-            key={item.question}
-            className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 sm:p-5"
-          >
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-bold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:text-base">
-              <span>{item.question}</span>
-              <span
-                aria-hidden
-                className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
-              >
-                +
-              </span>
-            </summary>
-            <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              {item.answer}
-            </div>
-          </details>
-        ))}
-      </div>
-
-      {/* Sources & methodology — transparency note attached to every
-          /vs comparison. Keeps the matrix defensible: we don't claim a
-          competitor lacks a capability they publicly offer, and we date
-          the review so stale claims are obvious. */}
-      <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted-foreground">
-        <span className="font-semibold text-foreground/80">
-          Sources &amp; methodology:
-        </span>{" "}
-        Feature and pricing rows reflect {competitorName}&apos;s publicly listed
-        information, last reviewed {reviewedDate}. Vendors change features and
-        prices often — verify current details on {competitorName}&apos;s own
-        site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
-        specifically to an editable HUD area-rent benchmark and the FRED
-        owner-occupied 30-year mortgage-rate benchmark. Property tax is a manual
-        local input with a disclosed generic fallback, not a state-data
-        auto-fill.
-      </p>
-
-      {/* Price objection, answered directly (2026-08 rollout) — honest
-          tone, keeps the "check their live pricing" convention, closes
-          with the guarantee. Reaches all 40 /vs pages. */}
-      <div className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
-        <h3 className="text-base font-extrabold text-foreground">
-          On price, plainly
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Tools in this space run from free to well above TrueCap — check{" "}
-          {competitorName}&apos;s live pricing for their current number. What
-          TrueCap&apos;s price buys is the decision layer, not more calculation:
-          an Offer Ceiling for your targets, Buy Box fit with reasons, the downside stress test, and assumptions
-          that are source-labeled instead of silently defaulted. Whether that
-          workflow justifies the price depends on your volume, verification
-          process, and existing tools.
+      <div className="max-w-3xl">
+        <SectionHeading id={HEADING_ID}>
+          Common questions about TrueCap vs {competitorName}
+        </SectionHeading>
+        <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+          Quick answers to the questions investors comparison-shopping these tools
+          actually ask.
         </p>
-      </div>
+        <div className="mt-8 border-t-2 border-foreground">
+          {items.map((item) => (
+            <details key={item.question} className="group border-b border-border">
+              {/* Touch-sized (48px) and focus-visible through the global 3px
+                  outline floor in app/globals.css, whose selector lists
+                  summary: the row sets no focus style of its own. */}
+              <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
+                <span className="text-lg font-semibold">{item.question}</span>
+                <DisclosureMark className="mt-1.5" />
+              </summary>
+              <p className="max-w-[64ch] pb-5 text-pretty text-base leading-relaxed text-muted-foreground">
+                {item.answer}
+              </p>
+            </details>
+          ))}
+        </div>
 
-      {/* Analyzer bridge (2026-08 offer rollout) — the comparison's real
-          answer is running your own deal; this reaches all 40 /vs pages. */}
-      <div className="mt-8">
-        <SeoAnalyzerCta
-          context="a real deal and compare the screening results yourself"
-          utmSource="vs-page"
-        />
+        {/* Sources & methodology — transparency note attached to every
+            /vs comparison. Keeps the matrix defensible: we don't claim a
+            competitor lacks a capability they publicly offer, and we date
+            the review so stale claims are obvious. */}
+        <Note className="mt-10">
+          <span className="font-semibold text-foreground">
+            Sources &amp; methodology:
+          </span>{" "}
+          Feature and pricing rows reflect {competitorName}&apos;s publicly listed
+          information, last reviewed {reviewedDate}. Vendors change features and
+          prices often — verify current details on {competitorName}&apos;s own
+          site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
+          specifically to an editable HUD area-rent benchmark and the FRED
+          owner-occupied 30-year mortgage-rate benchmark. Property tax is a manual
+          local input with a disclosed generic fallback, not a state-data
+          auto-fill.
+        </Note>
+
+        {/* Price objection, answered directly (2026-08 rollout) — honest
+            tone, keeps the "check their live pricing" convention, closes
+            with the guarantee. Reaches all 40 /vs pages. On a rule, not in
+            a card: plan cards are the only cards on marketing pages. The
+            rule spans the column like the FAQ list's; only the text is
+            capped at the reading measure. */}
+        <div className="mt-10 border-t border-border pt-6">
+          <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
+            On price, plainly
+          </h3>
+          <p className="mt-3 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground">
+            Tools in this space run from free to well above TrueCap — check{" "}
+            {competitorName}&apos;s live pricing for their current number. What
+            TrueCap&apos;s price buys is the decision layer, not more calculation:
+            an Offer Ceiling for your targets, Buy Box fit with reasons, the downside stress test, and assumptions
+            that are source-labeled instead of silently defaulted. Whether that
+            workflow justifies the price depends on your volume, verification
+            process, and existing tools.
+          </p>
+        </div>
+
+        {/* Analyzer bridge (2026-08 offer rollout) — the comparison's real
+            answer is running your own deal; this reaches all 40 /vs pages.
+            SeoAnalyzerCta sets its own chrome; this wrapper only spaces it. */}
+        <div className="mt-10">
+          <SeoAnalyzerCta
+            context="a real deal and compare the screening results yourself"
+            utmSource="vs-page"
+          />
+        </div>
       </div>
-    </section>
+    </Section>
   );
 }
