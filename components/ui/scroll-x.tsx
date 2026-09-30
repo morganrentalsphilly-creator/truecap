@@ -56,7 +56,7 @@ export function ScrollX({
       aria-label={scrollable ? label : undefined}
       tabIndex={scrollable ? 0 : undefined}
       className={cn(
-        "overflow-x-auto focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "overflow-x-auto focus-visible:outline-none",
         stickyFirstColumn &&
           "[&_table_td:first-child]:sticky [&_table_td:first-child]:left-0 [&_table_td:first-child]:z-10 [&_table_td:first-child]:bg-card [&_table_th:first-child]:sticky [&_table_th:first-child]:left-0 [&_table_th:first-child]:z-10 [&_table_th:first-child]:bg-muted",
         className,
