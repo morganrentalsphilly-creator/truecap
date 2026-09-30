@@ -17,6 +17,10 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -121,12 +125,12 @@ export default function ToolsLandingPage() {
                   {group.items.map((tool) => (
                     <li key={tool.slug} className="min-w-0 border-b border-rule-soft pb-4 pt-2">
                       <h3 className="text-lg font-semibold">
-                        <Link
+                        <IntentPrefetchLink
                           href={`/tools/${tool.slug}`}
                           className="tc-link inline-flex min-h-11 py-2"
                         >
                           {tool.title}
-                        </Link>
+                        </IntentPrefetchLink>
                       </h3>
                       <p className="max-w-[62ch] text-pretty text-base leading-relaxed text-muted-foreground">
                         {tool.description}
@@ -163,12 +167,12 @@ export default function ToolsLandingPage() {
             <p className="mt-4 text-pretty text-lg leading-relaxed">
               Want to understand what these tools are actually computing? Our
               step-by-step guides walk through{" "}
-              <Link href="/blog/how-to-calculate-cap-rate" className="tc-link">how to calculate cap rate</Link>,{" "}
-              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="tc-link">how to calculate cash-on-cash return</Link>,{" "}
-              <Link href="/blog/how-to-calculate-dscr" className="tc-link">how to calculate DSCR</Link>, and{" "}
-              <Link href="/blog/how-to-calculate-noi-rental-property" className="tc-link">how to calculate NOI</Link>{" "}
+              <IntentPrefetchLink href="/blog/how-to-calculate-cap-rate" className="tc-link">how to calculate cap rate</IntentPrefetchLink>,{" "}
+              <IntentPrefetchLink href="/blog/how-to-calculate-cash-on-cash-return" className="tc-link">how to calculate cash-on-cash return</IntentPrefetchLink>,{" "}
+              <IntentPrefetchLink href="/blog/how-to-calculate-dscr" className="tc-link">how to calculate DSCR</IntentPrefetchLink>, and{" "}
+              <IntentPrefetchLink href="/blog/how-to-calculate-noi-rental-property" className="tc-link">how to calculate NOI</IntentPrefetchLink>{" "}
               — or see all the pieces come together in{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">how to underwrite a rental property in 60 seconds</Link>.
+              <IntentPrefetchLink href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">how to underwrite a rental property in 60 seconds</IntentPrefetchLink>.
             </p>
           </section>
         </Section>
