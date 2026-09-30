@@ -1,9 +1,10 @@
 /**
  * Pricing value stack — the paid tiers presented as outcomes, not features.
  *
- * Sits ABOVE the feature-comparison table on /pricing (2026-08 offer
- * rollout): the stack sells repeatable underwriting, the table below stays as
- * the exhaustive reference. Every line here must stay truthful against
+ * Sits after the feature-comparison table on /pricing, which moved up under
+ * the plan cards (DESIGN.md "Homepage structure": the table under the
+ * plans): the table is the exhaustive reference, and the stack sells
+ * repeatable underwriting. Every line here must stay truthful against
  * lib/entitlements-catalog.ts — outcome phrasing is fine, invented dollar
  * anchors and unverifiable claims are not (trust-language-guards.test.ts).
  *
@@ -45,8 +46,10 @@ export function PricingValueStack({
       <SectionHeading id="pricing-value-title" className="max-w-3xl">
         Repeatable underwriting, not another spreadsheet.
       </SectionHeading>
+      {/* Seven rows in two columns: the odd last row spans both from 640px,
+          so its rule closes the list instead of leaving an empty cell. */}
       <RuledList
-        className="mt-8"
+        className="mt-8 sm:[&>div:last-child:nth-child(odd)]:col-span-2"
         columns={2}
         items={PRO_STACK.map(([name, outcome]) => ({ key: name, term: name, detail: outcome }))}
       />
