@@ -15,6 +15,7 @@
  */
 
 import Link from "next/link";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { Disclaimer } from "@/components/marketing/disclaimer";
 import { Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
@@ -78,14 +79,19 @@ const FOOTER_COLS: Array<{
   },
   {
     title: "Who it's for",
+    // Agents first (2026-09 agent-first pass): the site now speaks to agents
+    // with investor clients before investors buying for themselves. The
+    // agent link is resolved at render time (whoItsForLinks): /for-agents
+    // permanently redirects to /pricing while Agent Pro's Stripe Price is
+    // absent, and a sitewide link to a redirect fails the link-graph guard
+    // (lib/__tests__/internal-link-graph.test.tsx), so that deployment links
+    // the plan cards instead.
+    // /for-brrrr and /for-flippers are deliberately noindexed planning stubs
+    // (robots index:false, outside the sitemap); the same guard forbids
+    // linking them sitewide, so they stay reachable from /for-agents only.
     links: [
       { label: "Buy-and-hold investors", href: "/for-buy-and-hold" },
       { label: "House hackers", href: "/for-house-hackers" },
-      // Agent Pro is deployment-configured. The pricing page always returns
-      // 200 and reveals the tier only when its catalog-verified Stripe Price
-      // exists; linking straight to /for-agents while that Price is absent
-      // creates a sitewide redirect hop to this same destination.
-      { label: "Agents", href: "/pricing#plans" },
     ],
   },
   {
@@ -114,6 +120,27 @@ const FOOTER_COLS: Array<{
     ],
   },
 ];
+
+/**
+ * The agent entry in "Who it's for" resolves per deployment (see the column
+ * comment above): the persona page when Agent Pro is sold here, otherwise the
+ * plan cards. Server component, so the env read is safe.
+ */
+function whoItsForLinks(links: readonly { label: string; href: string }[]) {
+  return [
+    {
+      label: "Real estate agents",
+      href: isAgentProConfigured() ? "/for-agents" : "/pricing#plans",
+    },
+    ...links,
+  ];
+}
+
+function footerColumns() {
+  return FOOTER_COLS.map((col) =>
+    col.title === "Who it's for" ? { ...col, links: whoItsForLinks(col.links) } : col,
+  );
+}
 
 export function SiteFooter({
   hideAccountLinks = false,
@@ -167,9 +194,9 @@ export function SiteFooter({
           </div>
 
           {/* Sitemap columns */}
-          {FOOTER_COLS.filter(
-            (col) => !(hideAccountLinks && col.title === "Account"),
-          ).map((col) => (
+          {footerColumns()
+            .filter((col) => !(hideAccountLinks && col.title === "Account"))
+            .map((col) => (
             <div key={col.title}>
               <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}
