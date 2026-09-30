@@ -141,7 +141,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   await expect(
     hero.getByRole("heading", {
       level: 1,
-      name: "Know your walk-away price before you make the offer.",
+      name: "Stop forwarding listings. Start sending deals that already pencil.",
     }),
   ).toBeVisible();
 
