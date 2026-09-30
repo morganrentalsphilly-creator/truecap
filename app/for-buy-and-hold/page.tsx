@@ -148,35 +148,36 @@ export default function ForBuyAndHoldPage() {
             </ActionRow>
           }
           note="Free screen: no card or signup"
+          aside={
+            // Real product screenshot from the free sample deal (Phase 4),
+            // set as a document: a rule, no browser chrome. It is the hero's
+            // aside on the 5/7 grid, as on /for-investors, so the first
+            // screen pairs the claim with the output: across the container
+            // it left the hero's right half empty and set a raster taller
+            // than the window. `sizes` follows the 7/12 column (about 555px
+            // at 1095, 653px from 1280); the image stays lazy. The caption
+            // link takes a 44px target from padding the negative margin
+            // takes back out of the line box (the cue-line technique).
+            <ProductShot
+              shot={DECISION_SHOT}
+              frame="document"
+              sizes="(min-width: 1280px) 660px, (min-width: 1024px) 52vw, 100vw"
+              alt="TrueCap's decision view for the sample buy-and-hold deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+              caption={
+                <>
+                  Real output from the free sample deal.{" "}
+                  <Link
+                    href="/analyze?sample=1"
+                    prefetch={false}
+                    className="tc-link -my-3 inline-block py-3 font-medium"
+                  >
+                    Run the sample yourself
+                  </Link>
+                </>
+              }
+            />
+          }
         />
-
-        {/* Real product screenshot from the free sample deal (Phase 4), set
-            as a document: a rule, no browser chrome. It spans the container
-            under the hero, not the hero's 7/12 aside: the capture is 1232 CSS
-            px wide, so the aside (about 555px at 1095) set its text near 7px,
-            while the container keeps it at 80-96% of its own size. The
-            caption link takes a 44px target from padding the negative margin
-            takes back out of the line box (the cue-line technique). */}
-        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
-          <ProductShot
-            shot={DECISION_SHOT}
-            frame="document"
-            sizes="(min-width: 1280px) 1184px, 100vw"
-            alt="TrueCap's decision view for the sample buy-and-hold deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-            caption={
-              <>
-                Real output from the free sample deal.{" "}
-                <Link
-                  href="/analyze?sample=1"
-                  prefetch={false}
-                  className="tc-link -my-3 inline-block py-3 font-medium"
-                >
-                  Run the sample yourself
-                </Link>
-              </>
-            }
-          />
-        </Section>
 
         <Section id="use-cases" aria-labelledby="use-cases-heading">
           <SectionHeading id="use-cases-heading">Built for the hold strategy</SectionHeading>
@@ -187,18 +188,27 @@ export default function ForBuyAndHoldPage() {
           <RuledList items={USE_CASES} columns={2} className="mt-8" />
         </Section>
 
+        {/* The heading left and the ruled list right, on the homepage FAQ's
+            5/7 grid, so these two sections fill the container like the hero
+            and the close. Below 1024px the grid is one column and gap-y-8
+            keeps the heading-to-list space. From 1024px the step list drops
+            its 68ch cap so its rules end where the next list's do. */}
         <Section aria-labelledby="workflow-heading">
-          <SectionHeading id="workflow-heading">
-            How a buy-and-hold investor uses TrueCap
-          </SectionHeading>
-          <StepList steps={WORKFLOW_STEPS} className="mt-8" />
+          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <SectionHeading id="workflow-heading">
+              How a buy-and-hold investor uses TrueCap
+            </SectionHeading>
+            <StepList steps={WORKFLOW_STEPS} className="lg:max-w-none" />
+          </div>
         </Section>
 
         <Section aria-labelledby="spreadsheet-heading">
-          <SectionHeading id="spreadsheet-heading">
-            Why long-term investors pick TrueCap over a spreadsheet
-          </SectionHeading>
-          <RuledList items={OVER_A_SPREADSHEET} className="mt-8 max-w-[68ch]" />
+          <div className="grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <SectionHeading id="spreadsheet-heading">
+              Why long-term investors pick TrueCap over a spreadsheet
+            </SectionHeading>
+            <RuledList items={OVER_A_SPREADSHEET} />
+          </div>
         </Section>
 
         {/* Recommended reading + tools */}
@@ -243,10 +253,29 @@ export default function ForBuyAndHoldPage() {
           </div>
         </Section>
 
+        {/* whitespace-nowrap holds the compounds a line would otherwise split
+            at their hyphen or dash ("stress- / tests", "10- / year",
+            "first- / pass"); the text is unchanged. */}
         <CloseSection
-          heading="Free screens the purchase. Pro solves and stress-tests the offer and hold."
+          heading={
+            <>
+              Free screens the purchase. Pro solves and{" "}
+              <span className="whitespace-nowrap">stress-tests</span> the offer
+              and hold.
+            </>
+          }
           headingId="close-heading"
-          lede="Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Deal score, and read-only share links for a first-pass screen. Pro adds 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, PDF exports, and co-branded share links."
+          lede={
+            <>
+              Free gives you cap rate, CoC, DSCR, monthly cash flow, the{" "}
+              <span className="whitespace-nowrap">0–100</span> Deal score, and
+              read-only share links for a{" "}
+              <span className="whitespace-nowrap">first-pass</span> screen. Pro
+              adds <span className="whitespace-nowrap">10-year</span> cash-flow
+              and equity projections, sensitivity, Offer Ceiling, saved-deal
+              comparison, PDF exports, and co-branded share links.
+            </>
+          }
           actions={
             <ActionRow>
               <Link
