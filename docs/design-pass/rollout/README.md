@@ -52,6 +52,33 @@ eyebrows, pills, sentence-cased chrome labels) or where it was untrue or
 broken (f09c3c7, 05c803c). Each commit message lists its copy changes and
 the guards it re-anchored.
 
+## The agent journey (commit "Agent journey: conversion fixes")
+
+Two reviewers walked the agent path on the final build (homepage → /for-agents
+→ /pricing#agent-pro → sign-up, at 390×844 and 1095×760, banner up and
+answered). Navigation held: every CTA goes where its label says, every anchor
+lands visibly, and the Agent Pro price is in the first screen of /for-agents
+at both widths. What they found were claims an agent who checks would catch,
+all verified against the code and fixed (these are content changes, so the
+commit deliberately has no `Lastmod-Sweep` trailer):
+
+- "A Buy Box per client, up to 100 clients" (homepage, /pricing) against the
+  real cap of 12 Buy Boxes per account (`MAX_BUY_BOXES`): now "up to 100
+  clients on your roster; up to 12 Buy Boxes per account".
+- Co-branding sold as part of the free first decision and as Agent Pro-only:
+  `custom_branding` is Pro and Agent Pro and not in the trial; the copy now
+  says so wherever the trial is described.
+- /for-agents' Agent Pro table had a "$0 to start" column; it is labelled
+  "Free trial: 21 days, 3 Pro deals, no card. The roster starts with Agent Pro."
+- /pricing's Agent Pro card showed a monthly price under a pressed "Annual"
+  toggle whenever the Stripe annual display price was unavailable; it now
+  falls back to the catalog annual amount like the Pro card (no price change).
+- Back from sign-up dropped the agent thousands of pixels from the pricing
+  they were reading; the sign-up CTAs are now full-page navigations, so Back
+  restores the place (analytics unchanged).
+- /for-agents gained a mid-page "See Agent Pro pricing" action after the
+  roster section.
+
 ## Numbers
 
 ### Rendered checks, final build (25 pages × 375 / 1095 / 1440)
