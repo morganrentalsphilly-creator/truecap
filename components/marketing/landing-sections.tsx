@@ -1,25 +1,18 @@
 /**
- * Mid-page landing sections that fire BELOW the hero and ABOVE the
- * calculator. Each section is built to convert paid traffic by
- * directly addressing the highest-frequency objections:
- *
- *  - WhyNotSpreadsheet   → "I already use a spreadsheet"
- *  - HowItWorks          → "I don't know what this thing actually does"
- *  - SocialProof         → "Who else is using this?"
- *  - PreCalculatorCta    → "I want to try it but where do I click?"
- *
- * Each section anchor-scrolls to #main (the calculator) on its primary
- * CTA, so the visitor never has to hunt for where to convert.
+ * The homepage sections below the hero, in page order (DESIGN.md "Homepage
+ * structure"): the ledger opened row by row (HowTrueCapWorks), where the
+ * numbers come from (DataSourcesSection), what the client receives
+ * (ClientReceivesSection), the plans (PdfProUpsell), who builds it
+ * (BuiltByInvestor), verified proof (SocialProof, empty until real records
+ * exist), the questions (HomepageFaq) and the close (FinalCta). FaqSection,
+ * HomepageFaq and VsCompetitors are shared with other marketing pages.
  */
 
 // NOTE: this module is intentionally a SERVER component (no "use client").
-// It's 500+ lines of mostly-static marketing prose (objection-killers, the
-// HowItWorks 3-step, social proof, pre-calc CTA). The only interactive
-// behavior is the 3 "scroll to the calculator" buttons, which have been
-// extracted into the <ScrollToFormButton> client island so we don't pay
-// the hydration cost for all the static markup. Keep it that way - any
-// new interactive piece should be its own small island, not a reason to
-// flip this whole file back to client.
+// It is mostly static marketing prose. The interactive pieces are small
+// client islands (<AnalyzeCtaLink>, <HeroAddressForm>) so the static markup
+// ships no hydration cost. Keep it that way: any new interactive piece should
+// be its own small island, not a reason to flip this whole file to client.
 import {
   PRODUCT_EVALUATION_COMPARISON_LIMIT,
   PRODUCT_EVALUATION_DAYS,
@@ -29,36 +22,27 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Building2,
-  Check,
-  Clock,
-  FileText,
-  Gauge,
-  GitCompareArrows,
-  HelpCircle,
-  Home,
-  ListChecks,
-  Percent,
-  Quote,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Users,
-  X,
-} from "lucide-react";
+import Link from "next/link";
+import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
-// Section and plan-card links sit below the fold: they prefetch on hover or
-// focus, not on scroll (see the component's doc comment).
-import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
-import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
+import { HeroAddressForm } from "@/components/marketing/hero-address-form";
+import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
+import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
+import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { OpenLedger } from "@/components/ledger/open-ledger";
+import { buttonVariants } from "@/components/ui/button";
+import { CLIENT_RECEIVES } from "@/lib/client-receives";
+import {
+  formatPublicUsd,
+  PUBLIC_AGENT_PRO_ANNUAL_USD,
+  PUBLIC_AGENT_PRO_MONTHLY_USD,
+  PUBLIC_PRO_ANNUAL_USD,
+  PUBLIC_PRO_MONTHLY_USD,
+} from "@/lib/public-pricing";
+import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
+import { cn } from "@/lib/utils";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
@@ -82,269 +66,89 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 /**
  * THE SPINE — "Analyze the deal. Know your number. Make the offer."
  *
- * Replaces three sections that each explained a slice of the same progression
- * (HowItWorks, WhyNotSpreadsheet, AcquisitionPipeline). The site kept selling
- * capabilities individually — a calculator here, an underwriting suite there,
- * deal management somewhere else — so a visitor had to assemble the story
- * themselves. One section, three steps, in the order the work actually happens.
+ * Set as the expandable ledger (DESIGN.md "Homepage structure" 2): the hero's
+ * sample deal opened row by row, with the three steps as notes against the
+ * rows they explain. It replaces the three step cards and the problem block's
+ * three question cards, which told the same progression a slice at a time.
+ * The step copy is unchanged.
  */
 const SPINE_STEPS = [
   {
     key: "analyze",
     label: "Analyze",
-    icon: Search,
     title: "Paste the listing at the showing",
     body: "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.",
   },
   {
     key: "decide",
     label: "Screen",
-    icon: Gauge,
     title: "Screen it against the client's Buy Box",
     body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.",
   },
   {
     key: "offer",
     label: "Ceiling",
-    icon: Target,
     title: "Send the Offer Ceiling, co-branded",
     body: "The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers.",
     proNote: "Included in your first complete decision",
   },
 ] as const;
 
+function spineNote(step: (typeof SPINE_STEPS)[number]) {
+  return {
+    lead: `${step.title}.`,
+    body: "proNote" in step ? `${step.body} ${step.proNote}.` : step.body,
+  };
+}
+
 export function HowTrueCapWorks() {
+  const ledger = buildSampleDealLedger();
+  const [analyze, screen, ceiling] = SPINE_STEPS;
   return (
-    <section
-      id="how-it-works"
-      className="scroll-mt-24 border-t border-border bg-card/40"
-    >
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            From listing to offer{" "}
-            in three steps.
-          </h2>
-        </div>
-        <ol className="tc-reveal relative grid gap-10 sm:grid-cols-3 sm:gap-8">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-6 hidden border-t border-dashed border-border sm:block"
+    <Section id={HOMEPAGE_WALKTHROUGH_ID} rhythm="open" aria-labelledby="how-it-works-heading">
+      <SectionHeading id="how-it-works-heading">
+        From listing to offer in three steps.
+      </SectionHeading>
+      {ledger ? (
+        <div className="mt-8 sm:mt-12">
+          <OpenLedger
+            ledger={ledger}
+            notes={{
+              price: spineNote(analyze),
+              cashFlow: spineNote(screen),
+              ceiling: spineNote(ceiling),
+            }}
           />
+        </div>
+      ) : (
+        // The sample deal failed to compute: the steps still read in order.
+        <ol className="mt-8 border-t-2 border-foreground">
           {SPINE_STEPS.map((step) => (
-            <li key={step.key} className="relative flex gap-4 sm:block">
-              <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-card text-primary shadow-sm">
-                <step.icon className="size-5" strokeWidth={2} />
-              </span>
-              <div className="min-w-0">
-                <span className="font-mono text-2xs font-bold uppercase tracking-widest text-primary sm:mt-4 sm:block">
-                  {step.label}
-                </span>
-                <h3 className="mt-1 text-lg font-bold tracking-tight text-foreground">
-                  {step.title}
-                </h3>
-                <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">
-                  {step.body}
-                </p>
-                {"proNote" in step && step.proNote ? (
-                  <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--brand-orange)]/30 bg-[var(--brand-orange)]/10 px-2 py-0.5 text-2xs font-semibold text-[var(--brand-orange-text)]">
-                    {step.proNote}
-                  </p>
-                ) : null}
-              </div>
+            <li key={step.key} className="border-b border-border py-5">
+              <h3 className="text-lg font-semibold">{step.title}</h3>
+              <p className="mt-1 max-w-[62ch] leading-relaxed text-muted-foreground">
+                {spineNote(step).body}
+              </p>
             </li>
           ))}
         </ol>
-        <div className="mt-10 text-center">
-          <ScrollToFormButton analyticsSource="how_it_works" className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a property free
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Free · no card · no signup
-          </p>
-        </div>
+      )}
+      <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <AnalyzeCtaLink analyticsSource="how_it_works" className={buttonVariants({ size: "cta" })}>
+          Analyze a deal free
+        </AnalyzeCtaLink>
+        <p className="text-sm text-muted-foreground">Free · no card · no signup</p>
       </div>
-    </section>
+    </Section>
   );
 }
 
-// ───────────────────────────────────────── The real problem
-/**
- * Problem block (2026-09 positioning pass): TrueCap is sold as the offer
- * decision, not as a calculator. Three questions, stated once — the /pricing
- * hero still carries the checkable overpay arithmetic.
- */
-const PROBLEM_QUESTIONS = [
-  "Does this fit my criteria?",
-  "What's the highest price that still works?",
-  "What could go wrong?",
-] as const;
-
-export function ProblemBlock() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-        <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          The calculator isn&apos;t the hard part.{" "}
-          The offer is.
-        </h2>
-        <p className="mx-auto mt-4 max-w-[58ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Traditional calculators tell you what a property&apos;s returns look
-          like. Before an investor client writes an offer, they ask their
-          agent three other things:
-        </p>
-        <ul className="mx-auto mt-6 grid max-w-2xl gap-3 text-left sm:grid-cols-3">
-          {PROBLEM_QUESTIONS.map((question) => (
-            <li
-              key={question}
-              className="flex items-start gap-2 rounded-xl border border-border bg-card p-4 text-sm font-semibold text-foreground"
-            >
-              <Check
-                aria-hidden
-                className="mt-0.5 size-4 shrink-0 text-primary"
-              />
-              <span>{question}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-// ───────────────────────────────────────── The decision-system offer
-const OFFER_MODULES = [
-  [
-    Clock,
-    "60-Second Underwriter",
-    "Turn an address into a reviewable first-pass underwrite without rebuilding a spreadsheet.",
-  ],
-  [
-    ShieldCheck,
-    "Target Profiles",
-    "Save reviewed criteria and evaluate each opportunity against the same user-defined rules.",
-  ],
-  [
-    Target,
-    "Offer Ceiling",
-    "Calculate the highest modeled price that still meets your return targets under the assumptions shown.",
-  ],
-  [
-    Activity,
-    "Downside Stress Test",
-    "See how lower rent, higher vacancy, price, and rate changes affect the decision.",
-  ],
-  [
-    GitCompareArrows,
-    "Deal Comparison",
-    "Put saved opportunities side by side to review their modeled tradeoffs consistently.",
-  ],
-  [
-    BarChart3,
-    "Long-Term Wealth View",
-    "Model cash flow, debt paydown, and equity over a 10-year holding period.",
-  ],
-  [
-    ListChecks,
-    "Acquisition Pipeline",
-    "Move saved deals from research to offer, under contract, closed, or passed.",
-  ],
-  [
-    FileText,
-    "Lender & Partner Reports",
-    "Package the underwrite for lenders, partners, clients, or internal review.",
-  ],
-] as const;
-
-export function OfferEngineSection() {
-  const { proOfferName } = getMarketingOfferConfig();
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="max-w-3xl">
-          <p className="text-2xs font-bold uppercase tracking-widest text-primary">
-            {proOfferName}
-          </p>
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Focused first-pass rental{" "}
-            underwriting.
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Free shows the core economics. Pro adds reusable assumptions,
-            explicit target pricing, comparison, deeper scenarios, and durable
-            reports.
-          </p>
-        </div>
-
-        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {OFFER_MODULES.map(([Icon, name, outcome]) => {
-            const featured = name === "Offer Ceiling";
-            return (
-              <article
-                key={name}
-                className={
-                  featured
-                    ? "rounded-2xl border-2 border-primary/35 bg-[var(--brand-blue-light)] p-5 sm:col-span-2"
-                    : "rounded-2xl border border-border bg-card p-5"
-                }
-              >
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="size-5" />
-                </span>
-                <h3 className="mt-4 font-extrabold text-foreground">{name}</h3>
-                <p
-                  className={`mt-1.5 text-sm leading-relaxed ${featured ? "text-foreground/80" : "text-muted-foreground"}`}
-                >
-                  {outcome}
-                </p>
-                {featured ? (
-                  <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-[var(--brand-blue-text)]">
-                    Review the highest modeled price that still clears the
-                    targets you explicitly adopted.
-                  </p>
-                ) : null}
-              </article>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <p className="text-2xs font-bold uppercase tracking-widest text-primary">
-            Everything you get
-          </p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              [
-                "Buy Box Builder",
-                "Set the cash flow, CoC, DSCR, cap rate, price, strategy, property type, and market criteria that matter.",
-              ],
-              [
-                "Due Diligence Checklist",
-                "Keep property-specific verification tasks and supporting documents with the saved deal.",
-              ],
-              [
-                "Offer Prep Report",
-                "Package the asking price, decision, assumptions, projections, and downside analysis for review.",
-              ],
-              [
-                "Financing Scenarios",
-                "Compare mortgage structures and reuse saved assumptions without changing the base deal.",
-              ],
-            ].map(([title, body]) => (
-              <div key={title}>
-                <h3 className="text-sm font-bold text-foreground">{title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+// ───────────────────────────────────────── Retired: the module grid
+// OfferEngineSection (eight feature tiles) and Personas (three persona cards)
+// were unmounted before the 2026-09 design pass and deleted in it. Dead
+// sections that describe features are a live claim waiting to be re-rendered
+// (see the note at the top of this file), and both were built from the icon
+// tiles and card grids DESIGN.md retires.
 
 /**
  * Founder/trust block (2026-09 positioning pass). Facts come from /about only:
@@ -354,15 +158,12 @@ export function OfferEngineSection() {
  */
 export function BuiltByInvestor() {
   return (
-    <section
-      data-homepage-block="built-by-investor"
-      className="border-t border-border bg-card/40"
-    >
-      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-16">
-        <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+    <Section rhythm="tight" data-homepage-block="built-by-investor">
+      <div className="max-w-[68ch]">
+        <SectionHeading className="text-[1.625rem] sm:text-[2rem]">
           Built by a rental investor. Now built for the agents who serve them, too.
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+        </SectionHeading>
+        <p className="mt-4 text-[17px] leading-relaxed">
           TrueCap is built by one person, a rental investor in Philadelphia. It
           started as a way to answer one practical question before every
           offer: what price actually makes this property work? The same
@@ -370,60 +171,45 @@ export function BuiltByInvestor() {
           clients. The defaults lean conservative, every assumption is
           editable, and every formula is published.
         </p>
-        <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-          <IntentPrefetchLink
-            href="/about"
-            className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-          >
+        <p className="mt-3 flex flex-wrap gap-x-6 text-[15px]">
+          <Link href="/about" className="tc-link inline-flex min-h-11 items-center">
             About TrueCap
-          </IntentPrefetchLink>
-          <IntentPrefetchLink
-            href="/methodology"
-            className="inline-flex min-h-11 items-center text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-          >
+          </Link>
+          <Link href="/methodology" className="tc-link inline-flex min-h-11 items-center">
             Read the methodology
           </IntentPrefetchLink>
         </p>
       </div>
-    </section>
+    </Section>
   );
 }
 
 /**
- * Closing ask. The page has made its case by here; this is the one job left —
- * send them back to the address field they scrolled past.
+ * Closing ask. The page has made its case by here; the one job left is the
+ * address field again (DESIGN.md "Homepage structure" 8), not a button that
+ * scrolls back up to it.
  */
 export function FinalCta() {
   return (
-    <section className="border-t border-border">
-      <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-        <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Paste the listing.{" "}
-          Send the deal that already pencils.
-        </h2>
-        <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
+    <Section rule="heavy" aria-labelledby="final-cta-heading">
+      <div className="max-w-2xl">
+        <SectionHeading id="final-cta-heading">
+          Paste the listing. Send the deal that already pencils.
+        </SectionHeading>
+        <p className="mt-4 max-w-[56ch] text-[17px] leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
           Buy Box fit, the Offer Ceiling, downside checks, and next
           steps. No account or card required.
         </p>
-        <AnalyzeCtaLink
-          analyticsSource="final_cta"
-          className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
-        >
-          Analyze a property free
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </AnalyzeCtaLink>
-        <p className="mt-4 text-sm text-muted-foreground">
+        <HeroAddressForm placement="close" />
+        <p className="mt-4 border-t border-rule-soft pt-2.5 text-[15px]">
           Buying for your own portfolio?{" "}
-          <Link
-            href="/for-investors"
-            className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-          >
-            See TrueCap for investors →
+          <Link href="/for-investors" className="tc-link inline-flex min-h-11 items-center">
+            See TrueCap for investors
           </Link>
         </p>
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -442,64 +228,45 @@ export function SocialProof() {
   );
   const rest = proof.filter((p) => p !== featured);
   return (
-    <section className="border-t border-border bg-card/40">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Built for people who actually close deals.
-          </h2>
-        </div>
-        <div className="tc-reveal grid gap-4 sm:gap-5 lg:grid-cols-5">
-          {/* Featured quote - the most detailed, given the most room. */}
-          <figure className="flex flex-col rounded-2xl border border-border bg-card p-7 sm:p-8 lg:col-span-3">
-            <Quote className="size-7 text-primary/30" />
-            <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-foreground sm:text-xl">
-              &ldquo;{featured.quote}&rdquo;
-            </blockquote>
-            <figcaption className="mt-5 border-t border-border pt-4 text-sm">
-              <div className="font-bold text-foreground">
-                {featured.customerName}
-              </div>
-              <div className="mt-0.5 font-semibold text-muted-foreground">
-                {featured.customerType}
-                {featured.portfolioSize ? ` · ${featured.portfolioSize}` : ""}
-              </div>
-            </figcaption>
-          </figure>
-          {/* Supporting quotes - stacked beside the feature. */}
-          <div className="grid gap-4 sm:gap-5 lg:col-span-2">
-            {rest.map((p) => (
-              <figure
-                key={p.id}
-                className="flex h-full flex-col rounded-2xl border border-border bg-card p-6"
-              >
-                <Quote className="size-5 text-primary/30" />
-                <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
-                  &ldquo;{p.quote}&rdquo;
-                </blockquote>
-                <figcaption className="mt-4 border-t border-border pt-3 text-xs">
-                  <div className="font-bold text-foreground">
-                    {p.customerName}
-                  </div>
-                  <div className="mt-0.5 font-semibold text-muted-foreground">
-                    {p.customerType}
-                    {p.portfolioSize ? ` · ${p.portfolioSize}` : ""}
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-        <div className="mt-6 text-center">
-          <IntentPrefetchLink
-            href="/reviews"
-            className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-          >
-            See verified proof &amp; methodology →
-          </IntentPrefetchLink>
+    <Section aria-labelledby="social-proof-heading">
+      <SectionHeading id="social-proof-heading">
+        Built for people who actually close deals.
+      </SectionHeading>
+      <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-5">
+        {/* The most detailed quote gets the most room; the rest sit beside it. */}
+        <figure className="border-t-2 border-foreground pt-5 lg:col-span-3">
+          <blockquote className="text-xl leading-relaxed sm:text-2xl">
+            &ldquo;{featured.quote}&rdquo;
+          </blockquote>
+          <figcaption className="mt-4 text-sm">
+            <span className="font-semibold">{featured.customerName}</span>
+            <span className="block text-muted-foreground">
+              {featured.customerType}
+              {featured.portfolioSize ? ` · ${featured.portfolioSize}` : ""}
+            </span>
+          </figcaption>
+        </figure>
+        <div className="grid content-start gap-8 lg:col-span-2">
+          {rest.map((p) => (
+            <figure key={p.id} className="border-t border-border pt-5">
+              <blockquote className="text-[15.5px] leading-relaxed">&ldquo;{p.quote}&rdquo;</blockquote>
+              <figcaption className="mt-3 text-[13px]">
+                <span className="font-semibold">{p.customerName}</span>
+                <span className="block text-muted-foreground">
+                  {p.customerType}
+                  {p.portfolioSize ? ` · ${p.portfolioSize}` : ""}
+                </span>
+              </figcaption>
+            </figure>
+          ))}
         </div>
       </div>
-    </section>
+      <p className="mt-8 text-[15px]">
+        <Link href="/reviews" className="tc-link inline-flex min-h-11 items-center font-medium">
+          See verified proof &amp; methodology
+        </Link>
+      </p>
+    </Section>
   );
 }
 
@@ -729,41 +496,94 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
 ];
 
+/**
+ * The homepage's eight (DESIGN.md "Homepage structure" 7): the agent
+ * questions that no section above already answers, plus the price question.
+ * Every other question stays on /for-agents or /for-investors.
+ */
+export const HOMEPAGE_AGENT_FAQ_QUESTIONS = [
+  "My investor clients run their own numbers. Why would I need this?",
+  "Am I giving investment advice?",
+  "Do my clients need a TrueCap account to view what I send?",
+  "What does the client see? Is it my branding or TrueCap's?",
+  "Can I keep different criteria for different investor clients?",
+  "Does it work on my phone at a showing?",
+  "My brokerage already gives me tools.",
+] as const;
+export const HOMEPAGE_INVESTOR_FAQ_QUESTIONS = ["Is TrueCap really free?"] as const;
+
+function pickFaqs(
+  source: readonly { q: string; a: string }[],
+  questions: readonly string[],
+): { q: string; a: string }[] {
+  // A renamed question drops out rather than breaking the static page;
+  // homepage-faq.test.ts fails on it instead.
+  return questions.flatMap((q) => source.filter((faq) => faq.q === q));
+}
+
+/** The questions HomepageFaq shows for an audience, in order. */
+export function homepageFaqItems(
+  audience: "home" | "both" | "investors",
+): { q: string; a: string }[] {
+  if (audience === "home") {
+    return [
+      ...pickFaqs(AGENT_FAQS, HOMEPAGE_AGENT_FAQ_QUESTIONS),
+      ...pickFaqs(HOMEPAGE_FAQS, HOMEPAGE_INVESTOR_FAQ_QUESTIONS),
+    ];
+  }
+  return audience === "both" ? [...AGENT_FAQS, ...HOMEPAGE_FAQS] : [...HOMEPAGE_FAQS];
+}
+
 export function HomepageFaq({
   structuredData = true,
   audience = "both",
 }: {
   structuredData?: boolean;
   /**
-   * "both" (default, the homepage): the agent objection set first, then the
-   * investor set, and ONE FAQPage node carrying every visible question —
+   * "home" (the homepage): the curated eight under one heading.
+   * "both" (/why-truecap): the agent set, then the investor set.
+   * "investors" (/for-investors): the investor set alone.
+   * Whatever shows, ONE FAQPage node carries exactly the visible questions:
    * Google requires FAQ markup to mirror the visible FAQ, and
    * lib/__tests__/structured-data-f4.test.tsx enforces it per page.
-   * "investors": the investor set alone (/for-investors).
    */
-  audience?: "both" | "investors";
+  audience?: "home" | "both" | "investors";
 } = {}) {
-  const agentFirst = audience === "both";
-  const allItems = agentFirst ? [...AGENT_FAQS, ...HOMEPAGE_FAQS] : HOMEPAGE_FAQS;
+  const allItems = homepageFaqItems(audience);
   return (
     <>
-      {agentFirst ? (
+      {audience === "home" ? (
         <FaqSection
-          eyebrow="For agents"
+          id="questions"
           heading="The questions agents ask first."
-          items={AGENT_FAQS}
+          items={allItems}
+          structuredData={false}
+          layout="split"
+        />
+      ) : null}
+      {audience === "both" ? (
+        <>
+          <FaqSection
+            heading="The questions agents ask first."
+            items={AGENT_FAQS}
+            structuredData={false}
+          />
+          <FaqSection
+            heading="…and the ones investors ask."
+            items={HOMEPAGE_FAQS}
+            structuredData={false}
+            compact
+          />
+        </>
+      ) : null}
+      {audience === "investors" ? (
+        <FaqSection
+          heading="The questions investors ask first."
+          items={HOMEPAGE_FAQS}
           structuredData={false}
         />
       ) : null}
-      <FaqSection
-        eyebrow={agentFirst ? "For investors" : "Common questions"}
-        heading={agentFirst ? "…and the ones investors ask." : "The questions investors ask first."}
-        items={HOMEPAGE_FAQS}
-        structuredData={false}
-        compact={agentFirst}
-      />
-      {/* Only one URL should claim a given FAQ block in structured data; the
-          homepage's node lists every question it shows, both sets. */}
+      {/* Only one URL should claim a given FAQ block in structured data. */}
       {structuredData ? (
         <JsonLd
           data={{
@@ -781,84 +601,100 @@ export function HomepageFaq({
   );
 }
 
+/** Plus when closed, minus when open: one stroke, drawn to the text size. */
+function FaqMark() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className="mt-1 size-4 shrink-0 text-foreground"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path d="M2 8h12" />
+      <path d="M8 2v12" className="group-open:hidden" />
+    </svg>
+  );
+}
+
 /**
- * One FAQ block, any audience. HomepageFaq (investor set) and the /for-agents
- * objection section (lib/agent-faqs.ts) render through this so the markup,
- * the a11y pattern and the optional FAQPage JSON-LD stay identical. Only one
- * URL should claim a given FAQ set in structured data (structuredData=false
- * on the copies).
+ * One FAQ block, any audience (DESIGN.md "Components": FAQ). A ruled list of
+ * native <details> rows: no JS, every row reachable by keyboard, answers
+ * capped at 64ch. HomepageFaq and the /for-agents objection section render
+ * through it so the markup, the a11y pattern and the optional FAQPage JSON-LD
+ * stay identical. Only one URL should claim a given FAQ set in structured
+ * data (structuredData=false on the copies).
  */
 export function FaqSection({
-  eyebrow = "Common questions",
   heading,
   intro,
   items,
   structuredData = true,
   id,
   compact = false,
+  layout = "stack",
 }: {
-  eyebrow?: string;
   heading: string;
   intro?: string;
   items: readonly { q: string; a: string }[];
   structuredData?: boolean;
   id?: string;
-  /** Stacked directly under another FaqSection: no top rule, less padding. */
+  /** Stacked directly under another FaqSection: no top rule, no top space. */
   compact?: boolean;
+  /** "split": the heading beside the list from 1024px (the homepage). */
+  layout?: "stack" | "split";
 }) {
+  const headingId = id ? `${id}-heading` : undefined;
+  const contact = (
+    <p className="mt-4 text-[15px] text-muted-foreground">
+      Still have a question?{" "}
+      <a href="mailto:hello@usetruecap.com" className="tc-link inline-flex min-h-11 items-center">
+        Email us
+      </a>
+      .
+    </p>
+  );
   return (
     <>
-      <section
+      <Section
         id={id}
-        className={compact ? "scroll-mt-24 bg-background" : "scroll-mt-24 border-t border-border bg-background"}
+        rule={compact ? "none" : "rule"}
+        containerClassName={compact ? "pt-0 sm:pt-0" : undefined}
+        aria-labelledby={headingId}
       >
-        <div className={compact ? "mx-auto max-w-3xl px-4 pb-14 sm:px-6 sm:pb-20" : "mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20"}>
-          <div className="mb-10 text-center sm:mb-12">
-            <p className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
-              <HelpCircle className="size-3" />
-              {eyebrow}
-            </p>
-            <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              {heading}
-            </h2>
+        <div
+          className={
+            layout === "split"
+              ? "grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+              : "max-w-3xl"
+          }
+        >
+          <div>
+            <SectionHeading id={headingId}>{heading}</SectionHeading>
             {intro ? (
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted-foreground">
                 {intro}
               </p>
             ) : null}
+            {layout === "split" ? contact : null}
           </div>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+          <div className={layout === "split" ? "border-t-2 border-foreground" : "mt-8 border-t-2 border-foreground"}>
             {items.map((faq) => (
-              <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                  <span className="text-left font-semibold text-foreground">
-                    {faq.q}
-                  </span>
-                  <span
-                    aria-hidden
-                    className="text-2xl font-light text-muted-foreground transition-transform group-open:rotate-45"
-                  >
-                    +
-                  </span>
+              <details key={faq.q} className="group border-b border-border">
+                <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
+                  <span className="text-[17px] font-semibold">{faq.q}</span>
+                  <FaqMark />
                 </summary>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="max-w-[64ch] pb-5 text-[15.5px] leading-relaxed text-muted-foreground">
                   {faq.a}
                 </p>
               </details>
             ))}
           </div>
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Still have a question?{" "}
-            <a
-              href="mailto:hello@usetruecap.com"
-              className="inline-flex min-h-11 items-center rounded px-1 font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Email us
-            </a>
-            .
-          </p>
+          {layout === "split" ? null : contact}
         </div>
-      </section>
+      </Section>
       {/* Only one URL should claim this exact FAQ block in structured data. */}
       {structuredData ? (
         <JsonLd
@@ -880,104 +716,148 @@ export function FaqSection({
 // ───────────────────────────────────────── Final pre-calculator CTA
 // ───────────────────────────────────────── Data sources / accuracy
 /**
- * #6 - investors care deeply about where the numbers come from. This
- * section names the source or input policy behind each starting field and
- * hammers the "everything is editable" point, so the starting values read as
- * a credible starting baseline rather than a black box. Kept tight (3
- * cards) so it reinforces the hero's data-source line without repeating
- * the How-It-Works step.
+ * Where the numbers come from, set as a source table in FRED's grammar
+ * (DESIGN.md "Components"): each row gives the starting value's name, where it
+ * comes from and on what basis, and what to replace it with. It answers the
+ * question a client asks about any number, and the rows read from
+ * lib/product-facts.ts so the claims cannot drift from the product.
  */
 const DATA_SOURCES: {
-  icon: typeof Home;
   label: string;
   source: string;
-  body: string;
+  basis: string;
+  /** Rendered as the row's flag: the default the model uses until replaced. */
+  flag?: string;
+  replace: string;
 }[] = [
   {
-    icon: Home,
     label: "Rent",
     source: "HUD Fair Market Rent",
-    body: `${DATA_SOURCE_FACTS.rent}—a starting benchmark to compare with local rent comps.`,
+    basis: `${DATA_SOURCE_FACTS.rent}: a starting benchmark, not a rent comp.`,
+    replace: "Local rent comps",
   },
   {
-    icon: Percent,
     label: "Mortgage rate",
     source: "FRED 30-year fixed",
-    body: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown. Replace it with an actual investor lender quote before deciding.`,
+    basis: `The ${DATA_SOURCE_FACTS.mortgageRate}, with its date shown: a benchmark, not a lender quote.`,
+    replace: "An investor lender quote, before deciding",
   },
   {
-    icon: Building2,
     label: "Property tax",
     source: "Manual local input",
-    body: `${PROPERTY_TAX_FACTS.notAutoFilled} Enter a local annual bill or reviewed effective rate. ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
+    basis: PROPERTY_TAX_FACTS.notAutoFilled,
+    flag: PROPERTY_TAX_FACTS.blankFieldBehavior,
+    replace: "A local annual bill or reviewed effective rate",
   },
 ];
 
+const SOURCE_TABLE_GRID =
+  "grid gap-x-8 gap-y-1 sm:grid-cols-[9rem_minmax(0,1fr)] lg:grid-cols-[11rem_minmax(0,1fr)_16rem]";
+
 export function DataSourcesSection() {
   return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Visible sources.{" "}
-            Editable assumptions.
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            TrueCap labels sourced benchmarks and manual fallbacks, and keeps
-            every assumption editable. Start fast, then replace starting values
-            with verified property facts, local comps, and lender terms.
-          </p>
-        </div>
-        {/* Divided list - one surface with internal rules (Rule 4)
-            instead of three boxed cards. Each row pairs a field with the
-            primary source behind it. */}
-        <div className="tc-reveal mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
-          {DATA_SOURCES.map((s) => (
-            <div
-              key={s.label}
-              className="flex items-start gap-4 p-5 sm:gap-5 sm:p-6"
-            >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <s.icon className="size-5" strokeWidth={2} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                  <h3 className="text-base font-bold text-foreground">
-                    {s.source}
-                  </h3>
-                  <span className="font-mono text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    {s.label}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Fast starting point. Transparent assumptions. Final control stays with
-          you. This is what you show a client who asks where a number came from.
+    <Section rhythm="tight" aria-labelledby="data-sources-heading">
+      <div className="max-w-3xl">
+        <SectionHeading id="data-sources-heading">
+          Visible sources. Editable assumptions.
+        </SectionHeading>
+        <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+          TrueCap labels sourced benchmarks and manual fallbacks, and keeps
+          every assumption editable. Start fast, then replace starting values
+          with verified property facts, local comps, and lender terms.
         </p>
       </div>
-    </section>
+      <div className="mt-8 border-t-2 border-foreground">
+        <div
+          aria-hidden
+          className={cn(
+            SOURCE_TABLE_GRID,
+            "hidden border-b border-border py-2.5 text-[13px] font-semibold text-muted-foreground sm:grid sm:text-sm",
+          )}
+        >
+          <span>Starting value</span>
+          <span>Source and basis</span>
+          <span className="hidden lg:block">Replace it with</span>
+        </div>
+        <dl>
+          {DATA_SOURCES.map((s) => (
+            <div key={s.label} className={cn(SOURCE_TABLE_GRID, "border-b border-rule-soft py-4")}>
+              <dt className="font-semibold">{s.label}</dt>
+              <dd className="min-w-0 text-[15.5px] leading-relaxed">
+                <span className="font-semibold">{s.source}.</span>{" "}
+                <span className="text-muted-foreground">{s.basis}</span>
+                {s.flag ? (
+                  <span className="mt-1 block text-caution-text">{s.flag}</span>
+                ) : null}
+              </dd>
+              <dd className="text-[15.5px] leading-relaxed sm:col-start-2 lg:col-start-auto">
+                <span className="lg:sr-only">Replace it with: </span>
+                {s.replace}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <p className="mt-5 max-w-[68ch] text-sm text-muted-foreground">
+        Fast starting point. Transparent assumptions. Final control stays with
+        you. This is what you show a client who asks where a number came from.
+      </p>
+    </Section>
   );
 }
 
-// ───────────────────────────────────────── PDF / Pro upsell
+// ───────────────────────────────────────── What the client receives
 /**
- * #7 - a low-friction paid path for non-subscribers, surfaced AFTER the
- * calculator (i.e. after the visitor has felt the value). New one-time
- * report checkout is temporarily disabled;
- * we deliberately do NOT hardcode the Pro monthly price here - it's loaded
- * live from Stripe on /pricing, and duplicating it risks drift.
+ * What the agent's client receives (DESIGN.md "Homepage structure" 4): the
+ * real memo screenshot shown as a document, with the co-branding facts
+ * beside it. The facts are the /for-agents list (lib/client-receives.ts).
  */
+export function ClientReceivesSection() {
+  return (
+    <Section id="what-your-client-receives" aria-labelledby="client-receives-heading">
+      <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div>
+          <SectionHeading id="client-receives-heading">What your client receives</SectionHeading>
+          <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted-foreground">
+            No account on their side, nothing hidden on yours. Branding is set
+            up once in your profile and applies to every link and report.
+          </p>
+          <dl className="mt-8 border-t-2 border-foreground">
+            {CLIENT_RECEIVES.map((item) => (
+              <div key={item.key} className="border-b border-rule-soft py-4">
+                <dt className="text-[17px] font-semibold">{item.title}</dt>
+                <dd className="mt-1 max-w-[64ch] text-[15.5px] leading-relaxed text-muted-foreground">
+                  {item.body}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <ProductShot
+          shot={MEMO_SHOT}
+          frame="document"
+          sizes="(min-width: 1024px) 480px, 100vw"
+          alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+          caption={
+            <>
+              The decision memo, generated from the free sample deal.{" "}
+              <Link href="/sample-decision-memo" className="tc-link font-medium">
+                Read the full sample memo
+              </Link>
+            </>
+          }
+          className="lg:pt-2"
+        />
+      </div>
+    </Section>
+  );
+}
+
+// ───────────────────────────────────────── Plans
 // Honest value ladder - what each path actually unlocks. Mirrors the
-// entitlements bag (lib/entitlements.ts).
-// Pro's monthly price is deliberately NOT printed here (it's loaded live
-// from Stripe on /pricing); the Pro card below links out so the two can
-// never drift. "true" → included, "false" → not, string → a qualifier.
+// entitlements bag (lib/entitlements.ts). New one-time report checkout is
+// temporarily disabled. "true" → included, "false" → not, string → a
+// qualifier.
 const LADDER_SUBHEADERS = ["First decision", "Paid plan"] as const;
 /**
  * The Free / Pro ladder. Historical one-time Pack checkout is disabled.
@@ -1016,315 +896,222 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
   return { label, cells: [fullCells[0], fullCells[2]] };
 });
 
-export function PdfProUpsell() {
+/** A tier's cell from the catalog: the free column is index 0, Pro index 2. */
+function freeCell(key: FeatureKey) {
+  return ladderCellsForFeature(key)[0];
+}
+function proCell(key: FeatureKey) {
+  return ladderCellsForFeature(key)[2];
+}
+
+/**
+ * The plans (DESIGN.md "Homepage structure" 5): Free, Pro and, where the
+ * deployment sells it, Agent Pro as the page's only cards, then the Free/Pro
+ * ladder under them. Amounts come from the Stripe display price with the
+ * public catalog as the documented fallback (the /for-agents pattern), and
+ * what each tier includes comes from lib/entitlements-catalog.
+ */
+export async function PdfProUpsell() {
   const { proOfferName } = getMarketingOfferConfig();
   const ladderHeaders = ["Free", proOfferName] as const;
   // Agent Pro is deployment-configured; its card and link render only where
   // the tier is sold (the persona route redirects otherwise).
   const agentProConfigured = isAgentProConfigured();
-  return (
-    <section className="border-t border-border bg-card/40">
-      <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-8 text-center sm:mb-10">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Free screens the deal.{" "}
-            {proOfferName} tells you what
-            to offer.
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Free shows the economics before you spend more time on a property.{" "}
-            {proOfferName} answers four questions on every deal: does it meet
-            my criteria, what is my Offer Ceiling, what could make it fail, and
-            can I defend the analysis?
-            {agentProConfigured
-              ? " Agent Pro answers them per client, with a roster."
-              : ""}
-          </p>
-        </div>
+  const [proMonthly, proAnnual, agentMonthly, agentAnnual] = await Promise.all([
+    loadStripeDisplayPrice("pro_monthly"),
+    loadStripeDisplayPrice("pro_annual"),
+    agentProConfigured ? loadStripeDisplayPrice("agent_pro_monthly") : Promise.resolve(null),
+    agentProConfigured ? loadStripeDisplayPrice("agent_pro_annual") : Promise.resolve(null),
+  ]);
+  const price = {
+    proMonthly: proMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
+    proAnnual: proAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_ANNUAL_USD),
+    agentMonthly: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
+    agentAnnual: agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD),
+  };
 
-        {/* Value ladder - answers "what exactly do I get free?" at a glance,
-            so the visitor isn't guessing where the line is. */}
-        <div
-          role="region"
-          aria-label="Free and Pro comparison"
-          className="mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:mb-10"
-        >
-          <table className="w-full table-fixed text-xs sm:text-sm">
-            <colgroup>
-              <col className="w-1/2" />
-              <col className="w-1/4" />
-              <col className="w-1/4" />
-            </colgroup>
-            <caption className="sr-only">
-              Features included with Free and Pro
-            </caption>
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-2 py-3 text-left font-bold text-muted-foreground sm:px-6">
-                  <span className="sr-only">Feature</span>
+  const freeSaves = freeCell("save_deal");
+  const proCompares = proCell("compare_deals");
+  const freeAnswers: PlanCardAnswer[] = [
+    {
+      term: "Your first decision",
+      detail:
+        "Complete: cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps.",
+    },
+    ...(freeCell("cash_flow") === true && freeCell("deal_score") === true
+      ? [{ term: "Every deal after that", detail: "Cash flow, cap rate, cash-on-cash, DSCR, and the 0–100 Deal score." }]
+      : []),
+    ...(typeof freeSaves === "string" ? [{ term: "Saved deals", detail: `${freeSaves}.` }] : []),
+  ];
+  const proAnswers: PlanCardAnswer[] = [
+    ...(proCell("buy_box") === true
+      ? [{ term: "Does it meet my criteria?", detail: "Buy Box fit on every deal." }]
+      : []),
+    ...(proCell("mao") === true
+      ? [{ term: "What is my Offer Ceiling?", detail: "The highest price that still meets your targets, on every deal." }]
+      : []),
+    ...(proCell("sensitivity") === true
+      ? [{ term: "What could make it fail?", detail: "Downside sensitivity checks." }]
+      : []),
+    {
+      term: "Can I defend the analysis?",
+      detail:
+        typeof proCompares === "string"
+          ? `The decision memo, and deals side by side (${proCompares.toLowerCase()}).`
+          : "The decision memo.",
+    },
+  ];
+  const cta = buttonVariants({ size: "cta", className: "w-full" });
+
+  return (
+    <Section aria-labelledby="plans-heading">
+      <div className="max-w-3xl">
+        <SectionHeading id="plans-heading">
+          Free screens the deal.{" "}
+          {proOfferName} tells you what
+          to offer.
+        </SectionHeading>
+        <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+          Free shows the economics before you spend more time on a property.{" "}
+          {proOfferName} answers four questions on every deal: does it meet
+          my criteria, what is my Offer Ceiling, what could make it fail, and
+          can I defend the analysis?
+          {agentProConfigured
+            ? " Agent Pro answers them per client, with a roster."
+            : ""}
+        </p>
+      </div>
+
+      <div
+        className={cn(
+          "mt-10 grid gap-4 sm:gap-5",
+          agentProConfigured ? "md:grid-cols-3" : "md:grid-cols-2 lg:max-w-4xl",
+        )}
+      >
+        <PlanCard
+          name="Free"
+          audience="See the economics before you spend more time on a property."
+          price="$0"
+          priceNote="No account or card required."
+          answers={freeAnswers}
+          action={
+            <AnalyzeCtaLink analyticsSource="plans_free" className={cta}>
+              Analyze a deal free
+            </AnalyzeCtaLink>
+          }
+        />
+        <PlanCard
+          name={proOfferName}
+          audience="Know what to offer on every deal."
+          price={price.proMonthly}
+          period="/mo"
+          priceNote={<>or {price.proAnnual} a year</>}
+          answers={proAnswers}
+          action={
+            <Link href="/pricing" className={cta}>
+              See Pro pricing
+            </Link>
+          }
+          footnote={
+            <>
+              Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:
+              up to {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
+              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card and no
+              automatic subscription.
+            </>
+          }
+        />
+        {agentProConfigured ? (
+          <PlanCard
+            data-homepage-agent-pro=""
+            name="Agent Pro"
+            audience="Win investor clients."
+            price={price.agentMonthly}
+            period="/mo"
+            priceNote={<>or {price.agentAnnual} a year</>}
+            answers={[
+              { term: "A Buy Box per client", detail: "Up to 100 clients on your roster." },
+              {
+                term: "Deals screened to their targets",
+                detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
+              },
+              { term: "A co-branded memo", detail: "Your client opens it without an account." },
+            ]}
+            action={
+              <Link href="/for-agents" className={cta}>
+                See TrueCap for agents
+              </Link>
+            }
+          />
+        ) : null}
+      </div>
+
+      {/* The ladder under the cards: what exactly each tier includes, from
+          the catalog, so no visitor guesses where the line is. */}
+      <div
+        role="region"
+        aria-label="Free and Pro comparison"
+        className="mt-12 max-w-4xl border-t-2 border-foreground"
+      >
+        <table className="w-full table-fixed border-collapse text-sm sm:text-[15px]">
+          <colgroup>
+            <col className="w-1/2" />
+            <col className="w-1/4" />
+            <col className="w-1/4" />
+          </colgroup>
+          <caption className="sr-only">
+            Features included with Free and Pro
+          </caption>
+          <thead>
+            <tr className="border-b border-border">
+              <th scope="col" className="py-2.5 pr-2 text-left">
+                <span className="sr-only">Feature</span>
+              </th>
+              {ladderHeaders.map((h, i) => (
+                <th key={h} scope="col" className="px-1 py-2.5 text-center font-semibold">
+                  {h}
+                  <span className="block text-[13px] font-normal text-muted-foreground">
+                    {LADDER_SUBHEADERS[i]}
+                  </span>
                 </th>
-                {ladderHeaders.map((h, i) => (
-                  <th
-                    key={h}
-                    className={
-                      i === 1
-                        ? "px-1 py-3 text-center font-extrabold text-primary sm:px-6"
-                        : "px-1 py-3 text-center font-bold text-foreground sm:px-6"
-                    }
-                  >
-                    {h}
-                    <span className="mt-0.5 block text-3xs font-medium uppercase tracking-wider text-muted-foreground">
-                      {LADDER_SUBHEADERS[i]}
-                    </span>
-                  </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {LADDER_ROWS.map((row) => (
+              <tr key={row.label} className="border-b border-rule-soft">
+                <th scope="row" className="py-2.5 pr-2 text-left font-normal">
+                  {row.label}
+                </th>
+                {row.cells.map((cell, ci) => (
+                  <td key={`${row.label}-${ci}`} className="px-1 py-2.5 text-center">
+                    {/* sr-only labels so the matrix is legible to screen
+                        readers / crawlers, not a wall of blank cells. */}
+                    {cell === true ? (
+                      <>
+                        <Check aria-hidden className="mx-auto size-4 text-positive" />
+                        <span className="sr-only">Included</span>
+                      </>
+                    ) : cell === false ? (
+                      <>
+                        <span aria-hidden className="text-muted-foreground">–</span>
+                        <span className="sr-only">Not included</span>
+                      </>
+                    ) : (
+                      <span className="text-[13.5px]">{cell}</span>
+                    )}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {LADDER_ROWS.map((row, ri) => (
-                <tr
-                  key={row.label}
-                  className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}
-                >
-                  <td className="px-2 py-3 font-medium text-foreground sm:px-6">
-                    {row.label}
-                  </td>
-                  {row.cells.map((cell, ci) => (
-                    <td
-                      key={`${row.label}-${ci}`}
-                      className="px-1 py-3 text-center sm:px-6"
-                    >
-                      {/* sr-only labels so the matrix is legible to screen
-                          readers / crawlers, not a wall of blank cells. */}
-                      {cell === true ? (
-                        <>
-                          <Check
-                            aria-hidden
-                            className={
-                              ci === 1
-                                ? "mx-auto size-4 text-[var(--metric-positive)]"
-                                : "mx-auto size-4 text-[var(--metric-positive)]/80"
-                            }
-                          />
-                          <span className="sr-only">Included</span>
-                        </>
-                      ) : cell === false ? (
-                        <>
-                          <X
-                            aria-hidden
-                            className="mx-auto size-4 text-muted-foreground"
-                          />
-                          <span className="sr-only">Not included</span>
-                        </>
-                      ) : (
-                        <span
-                          className={
-                            ci === 1
-                              ? "text-xs font-semibold text-primary"
-                              : "text-xs font-medium text-foreground"
-                          }
-                        >
-                          {cell}
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mx-auto max-w-xl">
-          <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)]">
-            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Sparkles aria-hidden className="size-5" />
-            </div>
-            <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-              {proOfferName}
-            </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">
-              Know what to offer.
-            </h3>
-            <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              See whether each deal meets your Buy Box, find your Offer
-              Ceiling, stress-test the assumptions, and document the decision
-              in a report you can hand to a partner or lender.
-            </p>
-            <div className="mt-5">
-              <IntentPrefetchLink
-                href="/pricing"
-                className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform"
-              >
-                See Pro pricing
-                <ArrowRight
-                  aria-hidden
-                  className="size-4 transition-transform group-hover:translate-x-0.5"
-                />
-              </IntentPrefetchLink>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:
-                up to {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
-                {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card and no
-                automatic subscription.
-              </p>
-            </div>
-          </div>
-          {agentProConfigured ? (
-            <div
-              data-homepage-agent-pro=""
-              className="mt-4 flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-                  Agent Pro
-                </span>
-                <h3 className="mt-2 text-base font-bold text-foreground">
-                  Win investor clients.
-                </h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  A Buy Box per client, deals assigned and screened to their
-                  targets, and a co-branded memo they open without an account.
-                </p>
-              </div>
-              <Link
-                href="/for-agents"
-                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-              >
-                See TrueCap for agents →
-              </Link>
-            </div>
-          ) : null}
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </section>
+    </Section>
   );
 }
 
 /** Retired placement retained as a no-op for import compatibility. */
 export function NeverOverpayGuarantee() {
   return null;
-}
-
-// ───────────────────────────────────────── Personas
-/**
- * #9 - the homepage leads with ONE universal action (analyze a rental).
- * Persona cards live LOWER, after intent is captured, so they help a
- * visitor self-identify without diluting the single above-the-fold CTA.
- */
-const PERSONAS: {
-  icon: typeof Home;
-  title: string;
-  body: string;
-  seed?: { href: string; label: string; strategy: HandoffStrategyKey };
-  /** Segmented path (2026-08 rollout): the persona's dedicated page. */
-  pagePath?: { href: string; label: string };
-}[] = [
-  {
-    icon: TrendingUp,
-    title: "For investors",
-    body: "Screen buy-and-hold assumptions with cash flow, cap rate, CoC, DSCR, a 10-year view, and Buy Box fit against your Buy Box.",
-    // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
-    // ?strategy=) so long-term-rental defaults are already applied.
-    seed: {
-      href: "/analyze?strategy=buy-hold",
-      label: "Start a buy-and-hold analysis",
-      strategy: "buy-hold",
-    },
-    pagePath: { href: "/for-buy-and-hold", label: "The buy-and-hold workflow" },
-  },
-  {
-    icon: Users,
-    title: "For agents",
-    body: "Share a labeled analysis or Pro report with investor clients and lenders, every assumption visible.",
-    // Agent Pro is unreleased. Keep this persona limited to the released
-    // analyzer/share workflow and do not link to the gated sales page.
-  },
-  {
-    icon: Home,
-    title: "For house hackers",
-    body: "Model owner-occupied units and see what's left of your mortgage payment after rent.",
-    // Deep-link with the House Hack play pre-selected (analyzer handoff
-    // ?strategy=, upgraded from ?type=) — same owner-occupant form, now with
-    // FHA-style starter assumptions applied too.
-    seed: {
-      href: "/analyze?strategy=house-hack",
-      label: "Start a house-hack analysis",
-      strategy: "house-hack",
-    },
-    pagePath: { href: "/for-house-hackers", label: "The house-hack workflow" },
-  },
-];
-
-export function Personas() {
-  return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            One tool, whatever you&apos;re underwriting.
-          </h2>
-        </div>
-        {/* Bento - asymmetric tiles (lead persona featured large, the
-            other two stacked) instead of three equal cards. */}
-        <div className="tc-reveal grid gap-4 sm:gap-5 lg:grid-cols-2">
-          {PERSONAS.map((p, i) => (
-            <div
-              key={p.title}
-              className={`group flex flex-col rounded-2xl border border-border bg-card p-6 transition-transform hover:-translate-y-0.5 sm:p-7 ${
-                i === 0
-                  ? "lg:col-span-2 lg:items-center lg:p-9 lg:text-center"
-                  : ""
-              }`}
-            >
-              <div
-                className={`mb-4 flex items-center justify-center rounded-xl bg-primary/10 text-primary ${
-                  i === 0 ? "size-14" : "size-11"
-                }`}
-              >
-                <p.icon
-                  className={i === 0 ? "size-7" : "size-5"}
-                  strokeWidth={2}
-                />
-              </div>
-              <h3
-                className={`font-bold tracking-tight text-foreground ${i === 0 ? "text-2xl" : "text-lg"}`}
-              >
-                {p.title}
-              </h3>
-              <p
-                className={`mt-2 leading-relaxed text-muted-foreground ${i === 0 ? "max-w-md text-base lg:mx-auto" : "text-sm"}`}
-              >
-                {p.body}
-              </p>
-              {p.seed ? (
-                // Client component: same-page soft navs need the strategy
-                // delivered by event, not just the URL param — see the
-                // component's doc comment.
-                <PersonaSeedLink
-                  href={p.seed.href}
-                  label={p.seed.label}
-                  strategy={p.seed.strategy}
-                />
-              ) : null}
-              {p.pagePath ? (
-                <IntentPrefetchLink
-                  href={p.pagePath.href}
-                  className={`mt-2 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${i === 0 ? "lg:justify-center" : ""}`}
-                >
-                  {p.pagePath.label} <ArrowRight className="size-3.5" />
-                </IntentPrefetchLink>
-              ) : null}
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Analyze a property free
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </ScrollToFormButton>
-        </div>
-      </div>
-    </section>
-  );
 }

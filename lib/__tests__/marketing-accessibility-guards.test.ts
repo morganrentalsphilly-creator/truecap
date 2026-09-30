@@ -77,9 +77,12 @@ describe("marketing small-text contrast", () => {
     expect(header).toContain("bg-[var(--brand-orange-solid)]");
     expect(header).toContain("text-[var(--brand-orange-text)]");
 
+    // The homepage sections lost their tinted pills in the 2026-09 design
+    // pass; the one colored note left (the property-tax default) uses the
+    // AA caution token, and nothing sets raw brand orange as text.
     const landing = read("components/marketing/landing-sections.tsx");
-    expect(landing).toContain("text-[var(--brand-orange-text)]");
-    expect(landing).toContain("text-[var(--brand-blue-text)]");
+    expect(landing).toContain("text-caution-text");
+    expect(landing).not.toMatch(/text-\[var\(--brand-orange\)\]|text-caution(?![-\w])/);
 
     expect(read("components/investcalc/investcalc-page.tsx")).toContain(
       "text-[var(--brand-blue-text)] underline-offset-2"
@@ -136,11 +139,12 @@ describe("marketing landmarks and mobile targets", () => {
 
     const header = read("components/investcalc/header.tsx");
     // Desktop auth buttons are lg+ only; phones get ONE header row with a
-    // 44px primary Analyze button and a 44px hamburger.
+    // 44px primary Analyze button and a 44px hamburger, both at the control
+    // radius since the 2026-09 design pass (DESIGN.md "Header": no pills).
     expect(header).toContain('className="hidden lg:inline-flex h-9 px-4');
-    expect(header).toContain('"lg:hidden h-11 px-4 rounded-full');
+    expect(header).toContain('"lg:hidden h-11 px-4');
     expect(read("components/marketing/marketing-nav.tsx")).toContain(
-      "inline-flex size-11 shrink-0 items-center justify-center rounded-full",
+      "inline-flex size-11 shrink-0 items-center justify-center rounded-md",
     );
   });
 });

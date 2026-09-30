@@ -272,10 +272,15 @@ describe("canonical decision output parity across safe adapters", () => {
   });
 
   it("keeps rendered sample surfaces on the synthetic fixture and Offer Ceiling vocabulary", () => {
+    // The hero renders lib/sample-deal-ledger.ts's model of the fixture
+    // (2026-09 design pass); the hero file itself holds no figures.
     const sampleSurfacePaths = [
-      "components/marketing/marketing-hero.tsx",
+      "lib/sample-deal-ledger.ts",
       "app/sample-decision-memo/page.tsx",
     ];
+    expect(
+      readFileSync(resolve(process.cwd(), "components/marketing/marketing-hero.tsx"), "utf8"),
+    ).toContain("buildSampleDealLedger()");
 
     for (const path of sampleSurfacePaths) {
       const source = readFileSync(resolve(process.cwd(), path), "utf8");

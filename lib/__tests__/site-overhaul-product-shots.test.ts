@@ -38,12 +38,15 @@ describe("product screenshots are real and wired", () => {
     expect(source).not.toMatch(/placeholder\.(?:jpg|svg|png)/);
   });
 
-  it("uses the hero screenshot as the preloaded LCP image with a live-sample link", () => {
+  // The 2026-09 design pass replaced the hero screenshot with the sample
+  // deal's Verdict Ledger set as HTML (DESIGN.md "The ledger as the hero"):
+  // the LCP is text, no image ships, and the live sample stays one link away
+  // in the hero form. homepage-ledger.test.tsx renders the ledger itself.
+  it("sets the hero's sample deal as an HTML ledger with a live-sample link", () => {
     const hero = read("components/marketing/marketing-hero.tsx");
-    expect(hero).toContain('findProductShot("verdict", "desktop")');
-    expect(hero).toContain("priority");
-    expect(hero).toContain('href="/analyze?sample=1"');
-    expect(hero).toContain("Live sample →");
+    expect(hero).toContain("<VerdictLedger");
+    expect(hero).not.toContain("findProductShot");
+    expect(read("components/marketing/hero-address-form.tsx")).toContain('href="/analyze?sample=1"');
   });
 
   it("places a product shot on every listed marketing surface", () => {

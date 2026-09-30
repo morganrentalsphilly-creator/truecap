@@ -28,7 +28,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cookie, X } from "lucide-react";
+import { X } from "lucide-react";
 import {
   setAnalyticsConsent,
   syncFirstTouchCookieWithConsent,
@@ -180,22 +180,21 @@ export function CookieConsentBanner() {
         handleReject();
       }}
       data-cookie-consent-banner=""
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] outline-none backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
       {/* Compact single row on phones: text + buttons side by side (~60px
           tall), so the bar never reaches the hero's primary action in a
           375×667 first viewport. Full copy from sm:. */}
       <div className="mx-auto flex max-w-5xl flex-row items-center gap-2 sm:gap-4">
-        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
-          <Cookie className="hidden size-4 shrink-0 text-primary sm:block" />
-          <p className="text-xs leading-snug text-foreground sm:text-sm sm:leading-relaxed">
-            <strong>We use cookies</strong>
+        <div className="flex min-w-0 flex-1 items-center">
+          <p className="text-[13px] leading-snug text-foreground sm:text-[15px] sm:leading-relaxed">
+            <strong className="font-semibold">We use cookies</strong>
             <span className="sm:hidden">
               {" for analytics & ads. "}
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="tc-link inline-flex min-h-11 min-w-11 items-center font-medium"
               >
                 Privacy
               </Link>
@@ -207,7 +206,7 @@ export function CookieConsentBanner() {
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="tc-link inline-flex min-h-11 min-w-11 items-center font-medium"
               >
                 privacy policy
               </Link>
@@ -219,14 +218,14 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-4 sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-4 sm:text-[15px]"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-4 sm:text-sm"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-[15px]"
           >
             <span className="sm:hidden">Accept</span>
             <span className="hidden sm:inline">Accept all</span>
@@ -240,7 +239,7 @@ export function CookieConsentBanner() {
             type="button"
             onClick={handleReject}
             aria-label="Dismiss (counts as reject)"
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <X className="size-4" />
           </button>
