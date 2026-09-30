@@ -9,15 +9,15 @@
  * and the OG image can never disagree on how many calculators exist.
  *
  * Layout (DESIGN.md, 2026-09 design pass): the page head is the shared
- * PageHero, the directory is one ruled list per category on the FAQ's 5/7
- * split grid, the two explanations sit in a reading column between rules, and
- * the page closes on the heavy rule (CloseSection). No cards, icon tiles or
- * trailing arrows.
+ * PageHero, the directory is one ruled list per category (its H2 above a heavy
+ * rule, the rows two-up from 640px in RuledList's columns={2} grammar), the two
+ * explanations share one reading column in one ruled band, and the page closes
+ * on the heavy rule (CloseSection). No cards, icon tiles or trailing arrows.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -93,8 +93,10 @@ export default function ToolsLandingPage() {
       <JsonLd data={collectionLd} />
       <BreadcrumbSchema items={[{ name: "Free Tools", path: "/tools" }]} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The no-break space binds "real estate": at 375px text-balance
+            otherwise broke the H1 as "Free real / estate calculators". */}
         <PageHero
-          title="Free real estate calculators"
+          title={<>Free real&nbsp;estate calculators</>}
           lede="No signup. These are narrow educational screens and input utilities, not substitutes for the full TrueCap underwrite. Use the analyzer when a decision depends on cash flow, NOI, DSCR, or returns."
         />
 
@@ -102,29 +104,22 @@ export default function ToolsLandingPage() {
             calculator for the question they're answering: screen a deal,
             finance it, model income and expenses, check returns (once a
             returns calculator is released), set an offer.
-            Each group is a ruled list on the FAQ's 5/7 split grid: the
-            category beside its rows from 1024px, above them on phones.
-            rule="none": PageHero's bottom rule already separates the head. */}
-        <Section rule="none">
+            Each group is its H2 on a heavy rule across the full container,
+            the rows two-up from 640px (RuledList's columns={2} grammar), so
+            the directory starts on the same left edge as the prose below.
+            rule="none": PageHero's bottom rule already separates the head;
+            the tight rhythm keeps the first group in the first screen. */}
+        <Section rule="none" rhythm="tight">
           <div className="flex flex-col gap-12 sm:gap-16">
             {groups.map((group) => (
-              <section
-                key={group.category}
-                aria-labelledby={`cat-${group.category}`}
-                className="grid gap-x-16 gap-y-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
-              >
-                <h2
-                  id={`cat-${group.category}`}
-                  className="font-display text-balance text-h3-sm sm:text-2xl"
-                >
-                  {group.label}
-                </h2>
-                <ul className="border-t-2 border-foreground">
+              <section key={group.category} aria-labelledby={`cat-${group.category}`}>
+                <SectionHeading id={`cat-${group.category}`}>{group.label}</SectionHeading>
+                <ul className="mt-8 grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
                   {/* The title sits 16px below the rule (row pt-2 + link py-2)
                       however many lines it wraps to; py-2 around one 28px line
                       is the 44px target, and min-h-11 keeps that floor. */}
                   {group.items.map((tool) => (
-                    <li key={tool.slug} className="border-b border-rule-soft pb-4 pt-2">
+                    <li key={tool.slug} className="min-w-0 border-b border-rule-soft pb-4 pt-2">
                       <h3 className="text-lg font-semibold">
                         <Link
                           href={`/tools/${tool.slug}`}
@@ -144,8 +139,10 @@ export default function ToolsLandingPage() {
           </div>
         </Section>
 
-        <Section rhythm="tight" aria-labelledby="tools-how">
-          <div className="max-w-[68ch]">
+        {/* The two explanations share one ruled band, stacked in one reading
+            column (side by side they would drop under the 60ch floor at 1095). */}
+        <Section rhythm="tight">
+          <section aria-labelledby="tools-how" className="max-w-[68ch]">
             <SectionHeading id="tools-how">How these fit the full analysis</SectionHeading>
             <p className="mt-4 text-pretty text-lg leading-relaxed">
               Each calculator answers one question with one formula: is the rent
@@ -160,11 +157,8 @@ export default function ToolsLandingPage() {
               Every formula is the same one the analyzer uses and is published on
               the methodology page.
             </p>
-          </div>
-        </Section>
-
-        <Section rhythm="tight" aria-labelledby="learn-the-math">
-          <div className="max-w-[68ch]">
+          </section>
+          <section aria-labelledby="learn-the-math" className="mt-12 max-w-[68ch] sm:mt-16">
             <SectionHeading id="learn-the-math">Learn the math behind the calculators</SectionHeading>
             <p className="mt-4 text-pretty text-lg leading-relaxed">
               Want to understand what these tools are actually computing? Our
@@ -176,7 +170,7 @@ export default function ToolsLandingPage() {
               — or see all the pieces come together in{" "}
               <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">how to underwrite a rental property in 60 seconds</Link>.
             </p>
-          </div>
+          </section>
         </Section>
 
         {/* The close on the heavy rule. A plain Link, not AnalyzeCtaLink:
@@ -195,9 +189,11 @@ export default function ToolsLandingPage() {
             </>
           }
           actions={
-            <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
-              Open TrueCap
-            </Link>
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Open TrueCap
+              </Link>
+            </ActionRow>
           }
         />
       </main>
