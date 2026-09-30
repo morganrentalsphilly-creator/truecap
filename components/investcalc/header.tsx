@@ -361,7 +361,7 @@ export function Header({
         data-analyzer-announcement-bar=""
         className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative"
       >
-        <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium">
+        <div className="flex items-center gap-2 text-[12px] sm:text-sm font-medium">
           <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
           <span className="hidden sm:inline">
             Unlock 10-Year Projections, Offer Ceiling and Deal Comparison with
@@ -452,7 +452,7 @@ export function Header({
                   asChild
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5 transition-all"
+                  className="h-8 w-8 sm:w-auto sm:h-9 sm:px-3.5 rounded-md text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent gap-1.5 transition-colors"
                 >
                   <Link
                     href={hasDashboardInsights ? "/dashboard" : "/dashboard/saved-analyses"}
@@ -485,7 +485,7 @@ export function Header({
             <>
               {/* Desktop (lg+): Sign in + Create account beside the marketing nav. */}
               <Button variant="ghost"
-              className="hidden lg:inline-flex h-9 px-4 text-[15px] font-medium text-foreground hover:bg-accent"
+              className="hidden lg:inline-flex h-9 px-4 text-base font-medium text-foreground hover:bg-accent"
              asChild>
                 <Link href="/auth/login">Sign in</Link>
               </Button>
@@ -493,7 +493,7 @@ export function Header({
                   not a pill, and carries no glow (DESIGN.md "Header"). */}
               <Button
                 asChild
-                className="hidden lg:inline-flex h-9 px-4 text-[15px] font-semibold"
+                className="hidden lg:inline-flex h-9 px-4 text-base font-semibold"
               >
                 <Link href="/auth/sign-up">Create account</Link>
               </Button>
@@ -502,7 +502,7 @@ export function Header({
               <Button
                 asChild
                 data-header-analyze-cta=""
-                className="lg:hidden h-11 px-4 text-[15px] font-semibold"
+                className="lg:hidden h-11 px-4 text-base font-semibold"
               >
                 <Link href="/analyze" prefetch={false}>Analyze</Link>
               </Button>

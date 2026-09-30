@@ -202,7 +202,7 @@ test("homepage hero keeps its reading order at zoom-sensitive widths", async ({
     const heading = page.locator("h1").first();
     const form = page.locator('form[action="/analyze"]').first();
     const shot = page.locator("[data-hero-ledger='']");
-    const liveSample = shot.getByRole("link", { name: /open every row/i });
+    const liveSample = shot.getByRole("link", { name: /where every figure comes from/i });
     for (const element of [heading, form, shot]) {
       await expect(element).toBeVisible();
       await expectContainedInViewport(page, element, 100);

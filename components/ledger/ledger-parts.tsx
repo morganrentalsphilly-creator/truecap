@@ -13,7 +13,14 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** Figure column widths, shared by every ledger grid and table on a page. */
-export const LEDGER_FIGURE_COLUMN = "w-[5.5rem] sm:w-40 lg:w-52";
+// The hero ledger sits in half the page between 1024 and 1279px, so its
+// figure columns step down to 9rem there and return to 13rem from xl, where
+// it gets 7/12.
+export const LEDGER_FIGURE_COLUMN = "w-[5.5rem] sm:w-40 lg:w-36 xl:w-52";
+// The walkthrough runs the full page width, so it keeps 13rem from lg. Its
+// group rows (a grid) and their sub-rows (tables) share these widths so the
+// figures line up.
+export const LEDGER_WIDE_FIGURE_COLUMN = "w-[5.5rem] sm:w-40 lg:w-52";
 export const LEDGER_GRID =
   "grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] sm:grid-cols-[minmax(0,1fr)_10rem_10rem] lg:grid-cols-[minmax(0,1fr)_13rem_13rem]";
 
@@ -76,6 +83,27 @@ export function LedgerTotal({
   );
 }
 
+/**
+ * The disclosure mark for <details> rows, shared by the ledger and the FAQ:
+ * a plus when closed, a minus when open, one stroke, sized to the text. The
+ * parent <details> needs the `group` class.
+ */
+export function DisclosureMark({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className={cn("size-4 shrink-0", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path d="M2 8h12" />
+      <path d="M8 2v12" className="group-open:hidden" />
+    </svg>
+  );
+}
+
 /** Caption row on the heavy rule that opens a ledger. */
 export function LedgerCaption({
   id,
@@ -96,9 +124,9 @@ export function LedgerCaption({
         className,
       )}
     >
-      <span className="text-[15px] font-semibold sm:text-base">{title}</span>
+      <span className="text-base font-semibold">{title}</span>
       {note ? (
-        <span className="text-[13px] text-muted-foreground sm:text-sm">
+        <span className="text-sm text-muted-foreground">
           {note}
         </span>
       ) : null}

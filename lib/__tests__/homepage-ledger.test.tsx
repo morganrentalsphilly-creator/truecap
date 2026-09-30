@@ -108,8 +108,8 @@ describe("the walkthrough ledger", () => {
     <OpenLedger
       ledger={ledger}
       notes={{
-        price: { lead: "Price note.", body: "Body." },
-        cashFlow: { lead: "Cash flow note.", body: "Body." },
+        cashFlow: { lead: "Inputs note.", body: "Body." },
+        buyBox: { lead: "Screen note.", body: "Body." },
         ceiling: { lead: "Ceiling note.", body: "Body." },
       }}
     />,
@@ -119,6 +119,22 @@ describe("the walkthrough ledger", () => {
     const details = html.match(/<details[^>]*>/g) ?? [];
     expect(details.length).toBe(5);
     for (const tag of details) expect(tag).toContain("open");
+  });
+
+  it("sets each step note on the row it explains", () => {
+    const visible = text(html);
+    const at = (fragment: string) => {
+      const index = visible.indexOf(fragment);
+      expect(index, fragment).toBeGreaterThan(-1);
+      return index;
+    };
+    // Inputs over the monthly arithmetic, the screen over the targets, the
+    // ceiling over its total.
+    expect(at("Cash flow after reserves")).toBeLessThan(at("Inputs note."));
+    expect(at("Inputs note.")).toBeLessThan(at("Rent"));
+    expect(at("Meets the Buy Box")).toBeLessThan(at("Screen note."));
+    expect(at("Screen note.")).toBeLessThan(at("Misses by"));
+    expect(visible.lastIndexOf("Offer Ceiling")).toBeLessThan(at("Ceiling note."));
   });
 
   it("shows the monthly arithmetic down to cash flow after reserves", () => {

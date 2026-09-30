@@ -49,13 +49,13 @@ export function PlanCard({
       {...props}
     >
       <h3 className="font-display text-2xl">{name}</h3>
-      <p className="mt-1 text-[15px] text-muted-foreground">{audience}</p>
+      <p className="mt-1 text-base text-muted-foreground">{audience}</p>
       <p className="mt-4 flex items-baseline gap-1">
-        <span className="font-mono text-[2rem] font-medium leading-none tracking-[-0.02em] tabular-nums">
+        <span className="font-mono text-key-sm font-medium tracking-[-0.02em] tabular-nums">
           {price}
         </span>
         {period ? (
-          <span className="text-[15px] text-muted-foreground">{period}</span>
+          <span className="text-base text-muted-foreground">{period}</span>
         ) : null}
       </p>
       {/* Every card reserves the same height here, so the definition lists
@@ -63,7 +63,7 @@ export function PlanCard({
       <p className="mt-1.5 min-h-[2.75rem] text-sm text-muted-foreground">
         {priceNote}
       </p>
-      <dl className="mt-3 flex-1 border-t border-border text-[15px]">
+      <dl className="mt-3 flex-1 border-t border-border text-base">
         {answers.map((answer) => (
           <div key={answer.term} className="border-b border-rule-soft py-2.5">
             <dt className="font-semibold">{answer.term}</dt>
@@ -74,7 +74,7 @@ export function PlanCard({
       {/* Fine print sits above the action, so the actions of a row of
           cards stay on one line whichever card carries it. */}
       {footnote ? (
-        <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {footnote}
         </p>
       ) : null}

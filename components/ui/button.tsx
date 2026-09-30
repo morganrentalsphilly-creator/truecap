@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
-const buttonVariants = cva(
+const buttonVariantsBase = cva(
   "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
@@ -38,6 +38,19 @@ const buttonVariants = cva(
   },
 )
 
+/**
+ * The variant classes, merged. cva concatenates without resolving conflicts,
+ * so the base `text-sm` and the cta size's `text-base` both reached the class
+ * list and `text-sm` won wherever buttonVariants() styled a link directly
+ * (the homepage's walkthrough and plan-card actions rendered at 14px beside
+ * a 16px hero button). Merging here fixes every such call site at once.
+ */
+function buttonVariants(
+  props?: Parameters<typeof buttonVariantsBase>[0],
+): string {
+  return cn(buttonVariantsBase(props))
+}
+
 function Button({
   className,
   variant,
@@ -45,7 +58,7 @@ function Button({
   asChild = false,
   ...props
 }: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
+  VariantProps<typeof buttonVariantsBase> & {
     asChild?: boolean
   }) {
   const Comp = asChild ? Slot : 'button'

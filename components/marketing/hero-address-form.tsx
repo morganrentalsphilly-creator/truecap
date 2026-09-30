@@ -252,7 +252,7 @@ export function HeroAddressForm({
           and for crawlers. /analyze?sample=1 runs the sample deal in the
           analyzer (the memo page stays linked from the footer). */}
       {isHero ? (
-        <p className="mt-1 text-[15px]">
+        <p className="mt-1 text-base">
           <Link
             href="/analyze?sample=1"
             prefetch={false}
