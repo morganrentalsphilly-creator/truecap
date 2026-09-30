@@ -14,15 +14,19 @@
  * underwriter, NOT a marketplace, accounting tool, or rent-collection
  * platform, so each row frames the comparison correctly.
  *
- * Layout (DESIGN.md, 2026-09 design pass): PageHero on the homepage's
- * 5/7 grid with the sample-deal screenshot as the aside, then one
- * Section per group holding a ruled directory (no cards), then the close
- * on the heavy rule. Every row is a plain server-rendered <a href>: this
- * page is the in-graph inbound link for the whole /vs library
- * (internal-link-graph.test.tsx "no orphans"), so no client filtering,
- * tabs or pagination.
+ * Layout (DESIGN.md, 2026-09 design pass): PageHero in its single
+ * column, then one Section per group holding a ruled directory (no
+ * cards), then the sample-deal screenshot across the container, then the
+ * close on the heavy rule. The list is the object of an index page, so it
+ * starts in the first screen at 1095px; the screenshot sat in the hero's
+ * 7/12 aside before, where the 1232px capture drew at about 45% (5px UI
+ * text) and pushed the first group under the fold. Every row is a plain
+ * server-rendered <a href>: this page is the in-graph inbound link for
+ * the whole /vs library (internal-link-graph.test.tsx "no orphans"), so
+ * no client filtering, tabs or pagination.
  */
 
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/investcalc/header";
@@ -230,19 +234,23 @@ const COMPARISONS: ComparisonCard[] = [
       "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full underwriting workflow.",
     group: "Specialized tool",
   },
+  // Short-term-rental operations software (Hostfully, Hostaway, Lodgify,
+  // Guesty) runs the property after closing, as each tagline says: the
+  // complementary group's "different stage of the rental lifecycle", not
+  // one of the specialized group's slices.
   {
     slug: "hostfully",
     competitor: "Hostfully",
     tagline:
       "Hostfully manages short-term rentals after closing. TrueCap underwrites the STR deal before.",
-    group: "Specialized tool",
+    group: "Complementary tool",
   },
   {
     slug: "hostaway",
     competitor: "Hostaway",
     tagline:
       "Hostaway manages STRs at scale (3-100 properties). TrueCap underwrites the STR deal before.",
-    group: "Specialized tool",
+    group: "Complementary tool",
   },
   {
     slug: "airdna",
@@ -292,14 +300,14 @@ const COMPARISONS: ComparisonCard[] = [
     competitor: "Lodgify",
     tagline:
       "Lodgify is small-operator STR software (1-10 STRs). TrueCap underwrites the STR deal before.",
-    group: "Specialized tool",
+    group: "Complementary tool",
   },
   {
     slug: "guesty",
     competitor: "Guesty",
     tagline:
       "Guesty manages STR operations across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
-    group: "Specialized tool",
+    group: "Complementary tool",
   },
   {
     slug: "crexi",
@@ -360,29 +368,89 @@ const COMPARISONS: ComparisonCard[] = [
   },
 ];
 
+/** A use-case slice ("dealcheck-for-short-term-rentals") names the product it
+ *  slices by the slug before "-for-"; a plain comparison has none. */
+function slicedSlug(slug: string): string | null {
+  const index = slug.indexOf("-for-");
+  return index > 0 ? slug.slice(0, index) : null;
+}
+
+/**
+ * A group's rows in COMPARISONS order, except that each use-case slice
+ * follows the product it slices ("DealCheck for STRs" right after
+ * DealCheck), so a reader scanning for one product finds its rows
+ * together. COMPARISONS itself keeps its order: the ItemList in the
+ * JSON-LD follows it. A slice whose product sits in another group keeps
+ * its own place.
+ */
+function inGroup(group: ComparisonCard["group"]): ComparisonCard[] {
+  const items = COMPARISONS.filter((c) => c.group === group);
+  const rank = (c: ComparisonCard, index: number) => {
+    const sliced = slicedSlug(c.slug);
+    if (!sliced) return index;
+    const parent = items.findIndex(
+      (p) => !slicedSlug(p.slug) && (p.slug === sliced || p.slug.startsWith(`${sliced}-`)),
+    );
+    // Half a step after the product; slices of one product keep their
+    // order because the sort is stable.
+    return parent === -1 ? index : parent + 0.5;
+  };
+  return items
+    .map((c, index) => ({ c, key: rank(c, index) }))
+    .sort((a, b) => a.key - b.key)
+    .map(({ c }) => c);
+}
+
 const GROUPS = [
   {
     id: "vs-direct-alternatives",
     label: "Direct alternatives",
     description:
       "Tools whose acquisition-analysis workflow overlaps with TrueCap. Compare scope, assumptions, pricing, and free access directly.",
-    items: COMPARISONS.filter((c) => c.group === "Direct alternative"),
+    items: inGroup("Direct alternative"),
   },
   {
     id: "vs-complementary-tools",
     label: "Complementary tools",
     description:
       "Tools that solve a different stage of the rental lifecycle. We don't compete — most landlords use TrueCap + one of these together.",
-    items: COMPARISONS.filter((c) => c.group === "Complementary tool"),
+    items: inGroup("Complementary tool"),
   },
   {
     id: "vs-specialized-tools",
     label: "Specialized tools",
     description:
       "Tools that handle one slice (rent estimates, market discovery, turnkey listings). TrueCap can replace or complement depending on your workflow.",
-    items: COMPARISONS.filter((c) => c.group === "Specialized tool"),
+    items: inGroup("Specialized tool"),
   },
 ];
+
+const NBSP = String.fromCharCode(0xa0);
+
+/**
+ * Sets a line of directory copy so it breaks between ideas. The characters
+ * render as written; only where a line may break changes:
+ * - a hyphenated compound or range ("pre-purchase", "(1-10") never splits
+ *   at its hyphen;
+ * - a number stays with the word after it ("60 seconds", "5-100 unit");
+ * - a "+" or "—" stays on the line of the word before it instead of
+ *   opening the next line.
+ */
+function keepTogether(text: string): ReactNode[] {
+  return text
+    .replace(/(\d) (?=[A-Za-z])/g, `$1${NBSP}`)
+    .replace(/ ([+—])/g, `${NBSP}$1`)
+    .split(/(\S+-\S+)/)
+    .map((part, index) =>
+      index % 2 === 1 ? (
+        <span key={index} className="whitespace-nowrap">
+          {part}
+        </span>
+      ) : (
+        part
+      ),
+    );
+}
 
 export default function VsHubPage() {
   const siteUrl = getSiteUrl();
@@ -427,33 +495,15 @@ export default function VsHubPage() {
               </Link>
             </ActionRow>
           }
-          aside={
-            // Real product screenshot from the free sample deal, set as a
-            // document (no fake browser frame; frame={false} would drop the
-            // caption).
-            <div role="group" aria-label="What the decision looks like">
-              <ProductShot
-                shot="verdict"
-                frame="document"
-                sizes="(min-width: 1024px) 680px, 100vw"
-                alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-                caption={
-                  <>
-                    Real output from the free sample deal.{" "}
-                    <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">
-                      Run it yourself
-                    </Link>
-                  </>
-                }
-              />
-            </div>
-          }
         />
 
         {/* The directory: one section per group, each a ruled list of
             whole-row links. The hero's bottom rule opens the first group.
-            Two columns at most, as RuledList offers (the groups hold 6, 12
-            and 20 rows today; three columns left a ragged last row). */}
+            Two columns at most, as RuledList offers (the groups hold 6, 16
+            and 16 rows today; three columns left a ragged last row). Each
+            link fills its grid cell and the cue sits at the cell's foot, so
+            two rows side by side end on one line when one tagline runs a
+            line longer than the other. */}
         {GROUPS.map((group, index) => (
           <Section
             key={group.id}
@@ -467,8 +517,8 @@ export default function VsHubPage() {
             </p>
             <ul className="mt-8 grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
               {group.items.map((c) => (
-                <li key={c.slug} className="min-w-0 border-b border-rule-soft">
-                  <Link href={`/vs/${c.slug}`} className="group block py-4">
+                <li key={c.slug} className="flex min-w-0 flex-col border-b border-rule-soft">
+                  <Link href={`/vs/${c.slug}`} className="group flex flex-1 flex-col py-4">
                     <h3 className="text-balance text-lg font-semibold text-foreground">
                       {/* Keeps the link's name in step with the ItemList
                           names ("TrueCap vs …") without a visible kicker. */}
@@ -476,9 +526,9 @@ export default function VsHubPage() {
                       {c.competitor}
                     </h3>
                     <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
-                      {c.tagline}
+                      {keepTogether(c.tagline)}
                     </p>
-                    <span className="tc-link mt-2 inline-block text-base font-medium group-hover:text-primary-deep">
+                    <span className="tc-link mt-auto self-start pt-2 text-base font-medium group-hover:text-primary-deep">
                       Read the comparison
                     </span>
                   </Link>
@@ -488,10 +538,41 @@ export default function VsHubPage() {
           </Section>
         ))}
 
+        {/* Real product screenshot from the free sample deal, set as a
+            document (a rule, no browser chrome; frame={false} would drop the
+            caption). It spans the container after the directory, as on
+            /for-buy-and-hold: the capture is 1232 CSS px wide, so the
+            container keeps its text at 80-96% of its own size where the
+            hero's 7/12 aside set it near 5px. The caption link takes a 44px
+            target from padding the negative margin takes back out of the
+            line box. */}
+        <Section rhythm="tight" aria-label="What the decision looks like">
+          <ProductShot
+            shot="verdict"
+            frame="document"
+            sizes="(min-width: 1280px) 1184px, 100vw"
+            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+            caption={
+              <>
+                Real output from the free sample deal.{" "}
+                <Link
+                  href="/analyze?sample=1"
+                  prefetch={false}
+                  className="tc-link -my-3 inline-block py-3 font-medium"
+                >
+                  Run it yourself
+                </Link>
+              </>
+            }
+          />
+        </Section>
+
         <CloseSection
           heading="Stop comparison-shopping. Run your next deal."
           headingId="vs-close-heading"
-          lede="The fastest way to know whether TrueCap fits your workflow is to paste an address and see the analysis. 60 seconds, no signup, no card."
+          lede={keepTogether(
+            "The fastest way to know whether TrueCap fits your workflow is to paste an address and see the analysis. 60 seconds, no signup, no card.",
+          )}
           actions={
             <ActionRow>
               <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
