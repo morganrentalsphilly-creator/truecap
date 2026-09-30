@@ -15,8 +15,9 @@ const foundingPricingBanner = readFileSync(
   join(process.cwd(), "components/marketing/founding-pricing-banner.tsx"),
   "utf8"
 );
+// The pricing card actions (components/marketing/pricing-plan-buttons.tsx)
+// take the shared 48px marketing button; their own test is below.
 const primaryLinkSurfaces = [
-  "components/marketing/pricing-plan-buttons.tsx",
   "components/marketing/hero-address-form.tsx",
   "components/auth/login-form.tsx",
   "components/auth/sign-up-form.tsx",
@@ -46,7 +47,26 @@ describe("global interaction accessibility baseline", () => {
     for (const source of primaryLinkSurfaces) {
       expect(source).toContain("min-h-11");
     }
-    expect(primaryLinkSurfaces[4]).toContain("min-w-11");
+    // components/marketing/marketing-nav.tsx
+    expect(primaryLinkSurfaces[3]).toContain("min-w-11");
+  });
+
+  it("keeps every pricing card action on the 48px marketing button", () => {
+    const buttons = readFileSync(
+      join(process.cwd(), "components/marketing/pricing-plan-buttons.tsx"),
+      "utf8"
+    );
+    const primitive = readFileSync(join(process.cwd(), "components/ui/button.tsx"), "utf8");
+    // The primitive: a 44px floor on every size, 48px for the cta size.
+    expect(primitive).toMatch(/cva\(\s*"[^"]*\bmin-h-11\b/);
+    expect(primitive).toMatch(/cta: '[^']*\bmin-h-12\b/);
+    // The pricing actions build one class from the cta size...
+    expect(buttons).toMatch(/const actionClass = buttonVariants\(\{\s*size: "cta"/);
+    // ...and every link and button they render takes it, so none can fall
+    // back to a hand-rolled class below 44px.
+    const actions = buttons.match(/<(?:Link|button)\b/g) ?? [];
+    expect(actions.length).toBeGreaterThanOrEqual(4);
+    expect(buttons.match(/className=\{actionClass\}/g) ?? []).toHaveLength(actions.length);
   });
 
   it("keeps shared footer links at least 44px and the retired pricing banner inert", () => {

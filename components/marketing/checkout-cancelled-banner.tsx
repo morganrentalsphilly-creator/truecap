@@ -38,13 +38,15 @@ export function CheckoutCancelledBanner({
     return null;
   }
 
+  // A status strip on the heavy rule (DESIGN.md "Chrome": rules, not tinted
+  // boxes). The icon is ink: blue is reserved for actions.
   return (
     <div
       role="status"
-      className="mx-auto mb-5 flex max-w-2xl items-start gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground"
+      className="mb-6 flex items-start gap-2.5 border-t-2 border-foreground py-3 text-base text-foreground"
     >
-      <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
-      <p className="flex-1 leading-relaxed">
+      <Info aria-hidden className="mt-1 size-4 shrink-0 text-foreground" />
+      <p className="max-w-[68ch] flex-1 text-pretty leading-relaxed">
         <strong className="font-semibold">Checkout cancelled — no charge was made.</strong>{" "}
         <span className="text-muted-foreground">
           {/* One template string, not `{TRIAL_LABEL} is…` JSX segments — the
@@ -65,9 +67,9 @@ export function CheckoutCancelledBanner({
         type="button"
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="-my-2 -mr-2 ml-auto flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-band hover:text-foreground"
       >
-        <X className="size-4" />
+        <X aria-hidden className="size-4" />
       </button>
     </div>
   );
