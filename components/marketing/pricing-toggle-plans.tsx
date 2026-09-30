@@ -145,17 +145,6 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   },
 ];
 
-/**
- * The four answers by name, set under the Pro card's questions as a caption
- * on the list's last rule (it was a tinted box inside the card).
- */
-const PRO_DECISION_ANSWERS = [
-  { answer: "Buy Box fit", proof: "At asking price" },
-  { answer: "Offer Ceiling", proof: "Solved from your targets" },
-  { answer: "What could break", proof: "Downside stress test" },
-  { answer: "How to document it", proof: "Review report" },
-] as const;
-
 /** The billing-period segments: 44px controls, 2px radius inside the 4px group. */
 const PERIOD_BUTTON =
   "inline-flex min-h-11 items-center gap-1.5 rounded-sm border px-4 text-base font-semibold transition-colors";
@@ -409,21 +398,6 @@ export function PricingTogglePlans({
             term: group.outcome,
             detail: group.detail,
           }))}
-          note={
-            <>
-              <span className="block font-semibold text-foreground">
-                One address. Four answers.
-              </span>
-              <span className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
-                {PRO_DECISION_ANSWERS.map((item) => (
-                  <span key={item.answer} className="block min-w-0">
-                    <span className="block font-semibold text-foreground">{item.answer}</span>
-                    <span className="block">{item.proof}</span>
-                  </span>
-                ))}
-              </span>
-            </>
-          }
           action={
             billingRecoveryRequired ? (
               <Link
