@@ -32,6 +32,7 @@
 import { getEmbedEntry } from "@/lib/embed-registry";
 import { CANONICAL_HOST, getSiteUrl } from "@/lib/site-url";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
+import { DisclosureMark } from "@/components/ledger/ledger-parts";
 
 export function ToolEmbedInvite({ slug }: { slug: string }) {
   const entry = getEmbedEntry(slug);
@@ -62,33 +63,34 @@ export function ToolEmbedInvite({ slug }: { slug: string }) {
   }
   if (host !== CANONICAL_HOST) return null;
 
+  // One ruled disclosure row, the FAQ's grammar (DESIGN.md "FAQ"): a rule
+  // above and below, the label in the text face at 600, the SVG plus/minus
+  // on the right, no card. It sits inside the tool page's own column, so it
+  // brings no page container or section padding of its own. Focus is the
+  // global 3px outline in app/globals.css (summary is in its selector); a
+  // local ring would draw a second indicator inside it.
   return (
-    <section className="mt-12 border-t border-border pt-6">
+    <section className="mt-12 border-y border-border">
       <details className="group">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md text-sm font-bold text-foreground/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              aria-hidden
-              className="text-muted-foreground transition-transform group-open:rotate-90"
-            >
-              ›
-            </span>
-            Embed this calculator on your site — free
-          </span>
+        <summary className="flex min-h-11 cursor-pointer list-none items-start justify-between gap-4 py-3 text-base font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+          <span>Embed this calculator on your site — free</span>
+          <DisclosureMark className="mt-1" />
         </summary>
-        <div className="mt-4">
-          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+        <div className="pb-6 pt-1">
+          <p className="max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
             Paste this into a blog post, CMS or WordPress page that allows
             embedded HTML. It resizes itself, needs no script tag of yours, and
             costs nothing. A small &ldquo;Powered by TrueCap&rdquo; credit sits
             under it.
           </p>
-          <EmbedCodeBlock
-            slug={entry.slug}
-            title={entry.title}
-            siteUrl={siteUrl}
-            defaultHeight={entry.defaultHeight}
-          />
+          <div className="mt-5">
+            <EmbedCodeBlock
+              slug={entry.slug}
+              title={entry.title}
+              siteUrl={siteUrl}
+              defaultHeight={entry.defaultHeight}
+            />
+          </div>
         </div>
       </details>
     </section>
