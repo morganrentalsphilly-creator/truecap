@@ -17,8 +17,9 @@
  *   - a saved deal is assigned to ONE client and screened against that
  *     client's Buy Box (lib/buy-box.ts); multi-client matching is not released
  *     (lib/feature-flags.ts agent_client_matching)
- *   - the no-card trial grants Pro deal analyses and a comparison, never the
- *     client roster (lib/entitlements.ts evaluationFeatures, lib/product-access)
+ *   - the no-card trial grants Pro deal analyses and a comparison, never
+ *     co-branding or the client roster (lib/entitlements.ts
+ *     evaluationFeatures, lib/product-access)
  *   - no native app: a responsive web app with a manifest (app/manifest.ts)
  *
  * Vocabulary: the number is the Offer Ceiling (customer-facing-decision-
@@ -79,8 +80,10 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
     a: "Yes. TrueCap is a responsive web app you can add to your phone's home screen; there is no native iOS or Android app. Share links and reports open on any phone.",
   },
   {
-    q: "What does the Agent Pro trial include, and do I need a card?",
-    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings. Client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
+    // "The free trial", not a trial of Agent Pro: the trial is Pro deal
+    // analyses, and Agent Pro's roster is never part of it.
+    q: "What does the free trial include, and do I need a card?",
+    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings. Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
   },
   {
     q: "Can I cancel?",

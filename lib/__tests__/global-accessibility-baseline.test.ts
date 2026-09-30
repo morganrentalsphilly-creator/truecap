@@ -63,8 +63,9 @@ describe("global interaction accessibility baseline", () => {
     // The pricing actions build one class from the cta size...
     expect(buttons).toMatch(/const actionClass = buttonVariants\(\{\s*size: "cta"/);
     // ...and every link and button they render takes it, so none can fall
-    // back to a hand-rolled class below 44px.
-    const actions = buttons.match(/<(?:Link|button)\b/g) ?? [];
+    // back to a hand-rolled class below 44px. The visitor's sign-up is a
+    // plain <a> (a full-document navigation), so anchors count too.
+    const actions = buttons.match(/<(?:Link|button|a)\b/g) ?? [];
     expect(actions.length).toBeGreaterThanOrEqual(4);
     expect(buttons.match(/className=\{actionClass\}/g) ?? []).toHaveLength(actions.length);
   });

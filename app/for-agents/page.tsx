@@ -32,9 +32,10 @@ import { Header } from "@/components/investcalc/header";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
 // Links below the first screen prefetch on hover or keyboard focus, not on
-// scroll. The hero's actions and the close's Agent Pro sign-up keep
-// next/link's default; /analyze never prefetches. Guarded by
-// lib/__tests__/intent-prefetch-landing.test.ts.
+// scroll. The hero's actions keep next/link's default; the close's Agent Pro
+// sign-up is a full-document link (TrackedMarketingLink renders /auth/ hrefs
+// as a plain <a>, so Back returns to the close); /analyze never prefetches.
+// Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import {
@@ -337,13 +338,24 @@ export default async function ForAgentsPage() {
           />
         </Section>
 
-        {/* How the client roster works */}
+        {/* How the client roster works. The roster is what Agent Pro sells,
+            and the page's next action was thousands of pixels away (the
+            close), so the hero's pricing jump repeats under it: one outline
+            button, on intent like every link below the first screen. */}
         <Section aria-labelledby="roster-heading">
           <SectionHeading id="roster-heading">How the client roster works</SectionHeading>
           <RuledList
             className="mt-8 max-w-[68ch]"
             items={ROSTER.map(([title, body]) => ({ key: title, term: title, detail: body }))}
           />
+          <ActionRow className="mt-8">
+            <IntentPrefetchLink
+              href="#pricing"
+              className={buttonVariants({ size: "cta", variant: "outline" })}
+            >
+              See Agent Pro pricing
+            </IntentPrefetchLink>
+          </ActionRow>
         </Section>
 
         {/* The agent workflow: a real sequence, showing to send. */}
@@ -536,9 +548,9 @@ export default async function ForAgentsPage() {
                 <span className="mt-4 block text-pretty text-sm">
                   A new account gets a {PRODUCT_EVALUATION_DAYS}-day free trial with{" "}
                   {PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and{" "}
-                  {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. The client
-                  roster and client Buy Boxes are part of the Agent Pro subscription,
-                  not the trial.
+                  {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Co-branding,
+                  the client roster and client Buy Boxes are part of the Agent Pro
+                  subscription, not the trial.
                 </span>
               </>
             }
@@ -562,12 +574,18 @@ export default async function ForAgentsPage() {
                       </dd>
                       <dd className="mt-1 text-sm text-muted-foreground">Cancel from your profile anytime</dd>
                     </div>
+                    {/* The $0 is the no-card trial, which never includes the
+                        roster (lib/entitlements.ts): labeled as what it is,
+                        not as a way to start Agent Pro. */}
                     <div className="border-b border-rule-soft py-3">
-                      <dt className="text-base font-semibold">To start</dt>
+                      <dt className="text-base font-semibold">Free trial</dt>
                       <dd className="mt-1">
                         <LedgerFigure className={CLOSE_PRICE_FIGURE}>$0</LedgerFigure>
                       </dd>
-                      <dd className="mt-1 text-sm text-muted-foreground">No card. Checkout shows the exact charge before you confirm.</dd>
+                      <dd className="mt-1 text-sm text-muted-foreground">
+                        {PRODUCT_EVALUATION_DAYS} days, {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals, no
+                        card. The roster starts with Agent Pro.
+                      </dd>
                     </div>
                   </dl>
                 ) : (

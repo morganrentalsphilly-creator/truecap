@@ -104,15 +104,20 @@ export function PricingPlanButtons({
     const tierName = slot.startsWith("agent_pro_") ? "Agent Pro" : "Pro";
     const plan = slot.startsWith("agent_pro_") ? "agent-pro" : "investor-pro";
     const billing = slot.endsWith("_annual") ? "annual" : "monthly";
+    // A full-document navigation, not next/link: a visitor who backs out of
+    // sign-up returns to the card they were reading. After a client-side
+    // hop, Back restored the scroll while the short auth page was still
+    // mounted, so the position was clamped to its height (483px at 1095,
+    // 415px at 390) and /pricing reopened at its hero.
     return (
-      <Link
+      <a
         href={`/auth/sign-up?plan=${plan}&billing=${billing}&next=${encodeURIComponent("/dashboard/new")}`}
         className={actionClass}
       >
         {tierName === "Agent Pro"
           ? "Create a free account — no card"
           : `Start ${tierName} evaluation — no card`}
-      </Link>
+      </a>
     );
   }
 

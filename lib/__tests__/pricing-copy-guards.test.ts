@@ -119,6 +119,51 @@ describe("no-card product evaluation", () => {
     expect(signup).toContain("No card is requested and no subscription starts today");
   });
 
+  it("names what the trial leaves out: co-branding and, for Agent Pro, the roster", () => {
+    // Runtime truth: the evaluation grants neither custom_branding nor
+    // client_buy_box. The homepage once said the co-branded send was
+    // "included in your first complete decision", and the trial sentences
+    // excluded only the roster, so an agent could sign up to try the
+    // co-branded memo and find it locked.
+    const entitlements = read("../../lib/entitlements.ts");
+    const evaluation = entitlements.slice(
+      entitlements.indexOf("const evaluationFeatures = ["),
+      entitlements.indexOf("] as const;", entitlements.indexOf("const evaluationFeatures = [")),
+    );
+    expect(evaluation).toContain('"cash_flow"');
+    expect(evaluation).not.toContain("custom_branding");
+    expect(evaluation).not.toContain("client_buy_box");
+    expect(FEATURE_CATALOG.custom_branding.anonymousLimit).toBeUndefined();
+
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    const agentPage = read("../../app/for-agents/page.tsx");
+    const faqs = read("../../lib/agent-faqs.ts");
+    const signup = read("../../components/auth/sign-up-form.tsx");
+    const home = read("../../components/marketing/landing-sections.tsx");
+    expect(plans).toContain(
+      "Co-branded share pages and PDFs start with a Pro or Agent Pro subscription, and the client roster and client Buy Boxes with Agent Pro, not the trial.",
+    );
+    expect(plans).toContain("Co-branded share pages and PDFs start with a Pro subscription, not the trial.");
+    expect(agentPage).toMatch(/Co-branding,\s+the client roster and client Buy Boxes are part of the Agent Pro\s+subscription, not the trial\./);
+    expect(faqs).toContain(
+      "Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial",
+    );
+    expect(signup).toMatch(
+      /selectedPlan === "agent-pro"\s*\?\s*"Co-branding, the client roster and client Buy Boxes are part of the Agent Pro subscription, not the trial\. "/,
+    );
+    expect(home).toContain("co-branding comes with Pro and Agent Pro");
+    expect(home).not.toContain('proNote: "Included in your first complete decision"');
+  });
+
+  it("does not sell the no-card trial as an Agent Pro trial", () => {
+    const agentPage = read("../../app/for-agents/page.tsx");
+    const faqs = read("../../lib/agent-faqs.ts");
+    // The close's third price column is the trial, labeled as the trial.
+    expect(agentPage).not.toMatch(/<dt[^>]*>To start<\/dt>/);
+    expect(agentPage).toMatch(/<dt[^>]*>Free trial<\/dt>/);
+    expect(faqs).not.toMatch(/Agent Pro trial/i);
+  });
+
   it("shows the immediate charge only when the user explicitly subscribes", () => {
     const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
@@ -168,7 +213,7 @@ describe("pricing offer hierarchy", () => {
     // third; from 768px the row reads Free, Pro, Agent Pro.
     expect(plans).toMatch(/<PlanCard\s+id="pro"\s+className="order-1 md:order-2[\s"]/);
     expect(plans).toMatch(/<PlanCard\s+className="order-2 md:order-1"\s+name="Free"/);
-    expect(plans).toMatch(/<PlanCard\s+id="agent-pro"\s+className="order-3"/);
+    expect(plans).toMatch(/<PlanCard\s+id="agent-pro"\s+className="order-3[\s"]/);
   });
 
   it("does not advertise the temporarily disabled Decision Pack", () => {
