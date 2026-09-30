@@ -12,5 +12,6 @@
       "lib/pdf-generator.ts"
     ],
     "ignoreValues": []
-  }
+  },
+  "buildPath": "comp"
 }
