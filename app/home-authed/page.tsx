@@ -24,12 +24,12 @@ import { AnalyzePageContent } from "@/components/marketing/analyze-page-content"
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   BuiltByInvestor,
+  ClientReceivesSection,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
   HowTrueCapWorks,
   PdfProUpsell,
-  ProblemBlock,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -256,17 +256,17 @@ export default async function AuthedHome({
       {!user && <MarketingHero />}
       {!user && (
         <div className="truecap-marketing-tail contents">
-          <ProblemBlock />
           <HowTrueCapWorks />
-          <PdfProUpsell />
           <DataSourcesSection />
+          <ClientReceivesSection />
+          <PdfProUpsell />
           <BuiltByInvestor />
           <div data-homepage-block="real-proof" className="contents">
             <SocialProof />
             <Testimonials limit={3} />
             <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           </div>
-            <HomepageFaq />
+          <HomepageFaq audience="home" />
           <FinalCta />
           <StickyConversionBar />
         </div>

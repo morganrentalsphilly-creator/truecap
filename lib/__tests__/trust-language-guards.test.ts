@@ -227,13 +227,12 @@ describe("trust-language guards", () => {
     const combined = `${signup}\n${landing}\n${purchase}\n${changelog}`;
 
     expect(combined).not.toMatch(/lender-ready/i);
-    expect(landing).toContain(
-      "Package the underwrite for lenders, partners, clients, or internal review.",
-    );
-    // One page-level <Disclaimer /> carries the not-an-appraisal statement
-    // (docs/voice.md rule 3); the agent persona no longer repeats it, and it
-    // still makes no approval or "lender-ready" promise.
-    expect(landing).toContain("every assumption visible");
+    // The two positive pins that stood here (the module grid's "Package the
+    // underwrite for lenders…" and the agent persona's "every assumption
+    // visible") went with those unmounted sections in the 2026-09 design
+    // pass. One page-level <Disclaimer /> carries the not-an-appraisal
+    // statement (docs/voice.md rule 3), and the homepage still makes no
+    // approval or "lender-ready" promise.
     expect(landing).not.toMatch(/lender-approved|pre-approved/i);
     expect(changelog).not.toMatch(/tax strategy/i);
     expect(changelog).toContain("Historical tax-impact projection (retired)");

@@ -159,7 +159,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   });
   await expect(submit).toBeEnabled();
   await expect(
-    hero.getByRole("link", { name: "See the sample deal →", exact: true }),
+    hero.getByRole("link", { name: "See the sample deal", exact: true }),
   ).toHaveAttribute("href", "/analyze?sample=1");
   await expect(
     hero.getByRole("link", { name: "Read the written memo", exact: true }),
@@ -173,7 +173,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
     }),
   ).toBeVisible();
   await expect(
-    form.getByRole("link", { name: "try the sample deal →", exact: true }),
+    form.getByRole("link", { name: "try the sample deal", exact: true }),
   ).toBeVisible();
   await expect(address).toBeFocused();
   await expect
@@ -189,19 +189,20 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
 test("homepage hero keeps its reading order at zoom-sensitive widths", async ({
   page,
 }) => {
-  // Phase 4 replaced the illustrative sample card with the real product
-  // screenshot (`HeroProductShot`) and its "Live sample" link. The hero's
-  // headline, the address form, the shot, and the link must all stay inside
-  // the viewport and read top-to-bottom at every width, including the very
-  // narrow ones a zoomed-in phone produces.
+  // The 2026-09 design pass replaced the product screenshot with the sample
+  // deal's Verdict Ledger (`data-hero-ledger`) and its link into the opened
+  // walkthrough. The hero's headline, the address form, the ledger, and the
+  // link must all stay inside the viewport and read top-to-bottom at every
+  // width, including the very narrow ones a zoomed-in phone produces (there
+  // the ledger's table scrolls inside its own region).
   for (const width of [195, 640, 768, 1023]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     const heading = page.locator("h1").first();
     const form = page.locator('form[action="/analyze"]').first();
-    const shot = page.locator("[data-hero-product-shot='']");
-    const liveSample = shot.getByRole("link", { name: /live sample/i });
+    const shot = page.locator("[data-hero-ledger='']");
+    const liveSample = shot.getByRole("link", { name: /open every row/i });
     for (const element of [heading, form, shot]) {
       await expect(element).toBeVisible();
       await expectContainedInViewport(page, element, 100);

@@ -15,6 +15,11 @@
  *
  * The submit button is NEVER disabled. An empty submit focuses the field,
  * shows an inline helper, and reveals the sample-deal path instead.
+ *
+ * The homepage renders it twice: in the hero, and again as the page's close
+ * (DESIGN.md "Homepage structure" 8). `placement` keeps the two apart in
+ * analytics and gives each its own element ids. Only the hero carries the
+ * sample-deal link, so the page has one link by that name.
  */
 
 import Link from "next/link";
@@ -22,7 +27,7 @@ import { track } from "@/lib/analytics/site-events";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
-import { ArrowRight, Calculator, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   AddressAutocomplete,
   type SelectedAddress,
@@ -35,6 +40,7 @@ import {
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
 import { parseListingUrl } from "@/lib/listing-url";
+import { cn } from "@/lib/utils";
 
 export const HERO_EMPTY_HELPER = "Paste an address or a Zillow/Redfin link";
 export const HERO_LISTING_ERROR =
@@ -69,7 +75,16 @@ function newToken() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function HeroAddressForm() {
+export function HeroAddressForm({
+  placement = "hero",
+  className,
+}: {
+  /** "hero": the first screen. "close": the same form at the page's end. */
+  placement?: "hero" | "close";
+  className?: string;
+} = {}) {
+  const isHero = placement === "hero";
+  const errorId = isHero ? "hero-address-error" : "close-address-error";
   const router = useRouter();
   // Throwaway form instance purely to satisfy <AddressAutocomplete>'s
   // react-hook-form API; the value is read on submit.
@@ -113,16 +128,20 @@ export function HeroAddressForm() {
       setAddressError(null);
       // Privacy: only coarse entry/source signals are captured. The listing
       // URL and parsed address never leave the underwriting handoff.
-      trackEvent("hero_address_submit", {
-        has_components: Boolean(parsed.state),
-        entry_kind: "listing_url",
-        listing_source: parsed.source,
-      });
+      if (isHero) {
+        trackEvent("hero_address_submit", {
+          has_components: Boolean(parsed.state),
+          entry_kind: "listing_url",
+          listing_source: parsed.source,
+        });
+      }
       trackEvent("address_submitted", {
         has_components: Boolean(parsed.state),
         entry_kind: "listing_url",
       });
-      trackEvent("homepage_primary_cta", { source: "hero_listing" });
+      trackEvent("homepage_primary_cta", {
+        source: isHero ? "hero_listing" : "final_listing",
+      });
       dispatchHeroAnalyze({
         token: `listing:${newToken()}`,
         address: parsed.address,
@@ -137,15 +156,19 @@ export function HeroAddressForm() {
     const picked = selectedRef.current;
     const sameAsPicked = picked && picked.formattedAddress.trim() === raw;
     // Funnel: top of the hero-start path. No address string sent (PII).
-    trackEvent("hero_address_submit", {
-      has_components: Boolean(sameAsPicked),
-      entry_kind: "address",
-    });
+    if (isHero) {
+      trackEvent("hero_address_submit", {
+        has_components: Boolean(sameAsPicked),
+        entry_kind: "address",
+      });
+    }
     trackEvent("address_submitted", {
       has_components: Boolean(sameAsPicked),
       entry_kind: "address",
     });
-    trackEvent("homepage_primary_cta", { source: "hero_address" });
+    trackEvent("homepage_primary_cta", {
+      source: isHero ? "hero_address" : "final_address",
+    });
     dispatchHeroAnalyze({
       token: newToken(),
       address: raw,
@@ -157,9 +180,9 @@ export function HeroAddressForm() {
   };
 
   return (
-    <div className="mt-6 w-full max-w-xl sm:mt-7">
+    <div className={cn("mt-6 w-full max-w-xl sm:mt-7", className)}>
       <form
-        data-hero-address-form=""
+        {...(isHero ? { "data-hero-address-form": "" } : { "data-close-address-form": "" })}
         data-hero-form-ready={ready ? "true" : "false"}
         action="/analyze"
         method="get"
@@ -172,21 +195,23 @@ export function HeroAddressForm() {
           }
         }}
         onFocusCapture={() => {
-          if (addressStartedRef.current) return;
+          if (addressStartedRef.current || !isHero) return;
           addressStartedRef.current = true;
           trackEvent("hero_address_started");
         }}
         className="flex flex-col items-stretch gap-2.5 sm:flex-row"
       >
         <div className="min-w-0 flex-1">
+          {/* DESIGN.md "Field": white, a 1px Ink 2 border, 4px radius, 48px
+              tall, 16px text so iOS does not zoom. */}
           <AddressAutocomplete
             form={form}
             placeholder="Address or listing link"
             ariaLabel="Property address or listing link"
             hasError={Boolean(addressError)}
-            errorId="hero-address-error"
+            errorId={errorId}
             required
-            inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
+            inputClassName="h-12 rounded-md bg-field px-4 text-base md:text-base"
             onPlaceSelected={(place) => {
               // Capture the picked suggestion's parsed components so the
               // analyzer's enrichment (HUD/FRED) has state/county/zip.
@@ -196,19 +221,15 @@ export function HeroAddressForm() {
           />
           {addressError ? (
             <p
-              id="hero-address-error"
+              id={errorId}
               role="alert"
               className="mt-2 text-sm font-medium text-destructive-text"
             >
               {addressError}
               <span className="block font-normal text-muted-foreground">
                 or{" "}
-                <Link
-                  href="/analyze?sample=1"
-                  prefetch={false}
-                  className="font-semibold text-primary underline underline-offset-4"
-                >
-                  try the sample deal →
+                <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">
+                  try the sample deal
                 </Link>
               </span>
             </p>
@@ -217,15 +238,10 @@ export function HeroAddressForm() {
         <button
           type="submit"
           aria-busy={opening || undefined}
-          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 active:translate-y-0 active:scale-[0.98] sm:h-14"
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-5 text-base font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-deep"
         >
-          {opening ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Calculator className="size-4" aria-hidden="true" />
-          )}
+          {opening ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {opening ? "Opening the analyzer…" : "Analyze a deal free"}
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -235,21 +251,23 @@ export function HeroAddressForm() {
       {/* The one secondary action: a real link, so it works before hydration
           and for crawlers. /analyze?sample=1 runs the sample deal in the
           analyzer (the memo page stays linked from the footer). */}
-      <p className="mt-2.5 text-sm">
-        <Link
-          href="/analyze?sample=1"
-          prefetch={false}
-          data-hero-sample-link=""
-          onClick={() => {
-            trackEvent("hero_sample_clicked");
-            trackEvent("hero_sample_opened");
-            track("sample_viewed", { source: "hero" });
-          }}
-          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          See the sample deal →
-        </Link>
-      </p>
+      {isHero ? (
+        <p className="mt-1 text-[15px]">
+          <Link
+            href="/analyze?sample=1"
+            prefetch={false}
+            data-hero-sample-link=""
+            onClick={() => {
+              trackEvent("hero_sample_clicked");
+              trackEvent("hero_sample_opened");
+              track("sample_viewed", { source: "hero" });
+            }}
+            className="tc-link inline-flex min-h-11 items-center font-medium"
+          >
+            See the sample deal
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }

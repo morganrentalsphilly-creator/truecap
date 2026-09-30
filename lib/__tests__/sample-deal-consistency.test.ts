@@ -109,14 +109,15 @@ describe("versioned synthetic shared sample", () => {
   });
 
   it("reconciles the homepage verdict with the sample price ceiling", () => {
+    // The hero's verdict line lives in the Verdict Ledger since the 2026-09
+    // design pass; homepage-ledger.test.tsx renders it with the engine's
+    // figures. It states the gap in dollars when the asking price is above
+    // the ceiling (docs/voice.md), never a vague "misses".
     const hero = readFileSync(
-      resolve(process.cwd(), "components/marketing/marketing-hero.tsx"),
+      resolve(process.cwd(), "components/ledger/verdict-ledger.tsx"),
       "utf8"
     );
-
-    // The sample card states the gap in dollars when the asking price is
-    // above the ceiling (docs/voice.md), never a vague "misses".
-    expect(hero).toContain('"Asking price clears the sample targets"');
+    expect(hero).toContain('"Asking price clears the sample targets."');
     expect(hero).toContain("above the ceiling");
     expect(hero).not.toContain("Asking misses the sample targets");
     expect(hero).not.toContain("Screening Index {Math.round(score.score)}/100");

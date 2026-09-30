@@ -114,8 +114,11 @@ describe("calculator control accessibility guards", () => {
 
     expect(hero).toContain("looksLikeListingLink(raw)");
     expect(hero).toContain("setAddressError(HERO_LISTING_ERROR)");
-    expect(hero).toContain('errorId="hero-address-error"');
-    expect(hero).toContain('id="hero-address-error"');
+    // The form renders twice on the homepage (hero and close), so the ids
+    // come from one expression: the hero keeps "hero-address-error".
+    expect(hero).toContain('const errorId = isHero ? "hero-address-error" : "close-address-error";');
+    expect(hero).toContain("errorId={errorId}");
+    expect(hero).toContain("id={errorId}");
     expect(hero).toContain('role="alert"');
   });
 });

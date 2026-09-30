@@ -30,12 +30,12 @@ import { BillingSuccessBanner } from "@/components/marketing/billing-success-ban
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   BuiltByInvestor,
+  ClientReceivesSection,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
   HowTrueCapWorks,
   PdfProUpsell,
-  ProblemBlock,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -182,17 +182,18 @@ export default function Home() {
           page ships NO calculator JS. Keep it that way — Phase 7's homepage
           budget depends on it, and lib/__tests__/homepage-lockstep.test.ts
           pins that neither homepage imports the analyzer. */}
-      {/* Decision-first story (2026-09 positioning pass):
-          1 hero + real sample output, 2 the problem (the offer, not the
-          calculator), 3 how it works, 4 Free vs Pro, 5 methodology/data,
-          6 who builds it + verified proof when records exist, 7 FAQ,
-          8 final CTA. (The live analyzer is one click away at /analyze.)
+      {/* The ledger story (DESIGN.md "Homepage structure", 2026-09 design
+          pass): 1 the hero's Verdict Ledger, 2 the same ledger opened row
+          by row, 3 where the numbers come from, 4 what the client
+          receives, 5 the plans, 6 who builds it + verified proof when
+          records exist, 7 the eight questions, 8 the address form again.
+          (The live analyzer is one click away at /analyze.)
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
-        <ProblemBlock />
         <HowTrueCapWorks />
-        <PdfProUpsell />
         <DataSourcesSection />
+        <ClientReceivesSection />
+        <PdfProUpsell />
         <BuiltByInvestor />
         <div data-homepage-block="real-proof" className="contents">
           <SocialProof />
@@ -201,7 +202,7 @@ export default function Home() {
           <Testimonials limit={3} />
           <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
         </div>
-        <HomepageFaq />
+        <HomepageFaq audience="home" />
         <FinalCta />
         {/* Sticky scroll-activated CTA bar — cold visitors only, and this
             page only serves cold visitors. */}
