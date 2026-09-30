@@ -60,7 +60,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable."
+                ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
             {/* The math supports the decision; it is not the headline. */}
