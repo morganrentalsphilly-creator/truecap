@@ -179,7 +179,7 @@ export function SourceFirstArticle({
         <RelatedBlogPosts currentSlug={article.slug} />
       </ArticleMain>
       <ArticleEnd>
-        <BlogStickyCta />
+        <BlogStickyCta inArticleColumn />
       </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
