@@ -595,6 +595,7 @@ export function VsCompetitors() {
                 <li>
                   Its Offer Calculator and custom purchase-criteria workflow.
                 </li>
+                <li>A branded PDF report on every plan, including free.</li>
               </ul>
               <p className="mt-3 text-xs text-muted-foreground">
                 Verify on DealCheck&apos;s official{" "}
@@ -640,6 +641,11 @@ export function VsCompetitors() {
                 <li>
                   Offer Ceiling, downside, and a decision-review package in one
                   sequence.
+                </li>
+                <li>
+                  Screening for investor clients: a Buy Box per client,
+                  client-report links that open without an account, and a
+                  co-branded decision memo.
                 </li>
               </ul>
               <p className="mt-3 text-xs text-muted-foreground">
@@ -711,22 +717,58 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
 export function HomepageFaq({
   structuredData = true,
 }: { structuredData?: boolean } = {}) {
-  const faqs = HOMEPAGE_FAQS;
+  return (
+    <FaqSection
+      eyebrow="Common questions"
+      heading="The questions every investor asks first."
+      items={HOMEPAGE_FAQS}
+      structuredData={structuredData}
+    />
+  );
+}
+
+/**
+ * One FAQ block, any audience. HomepageFaq (investor set) and the /for-agents
+ * objection section (lib/agent-faqs.ts) render through this so the markup,
+ * the a11y pattern and the optional FAQPage JSON-LD stay identical. Only one
+ * URL should claim a given FAQ set in structured data (structuredData=false
+ * on the copies).
+ */
+export function FaqSection({
+  eyebrow = "Common questions",
+  heading,
+  intro,
+  items,
+  structuredData = true,
+  id,
+}: {
+  eyebrow?: string;
+  heading: string;
+  intro?: string;
+  items: readonly { q: string; a: string }[];
+  structuredData?: boolean;
+  id?: string;
+}) {
   return (
     <>
-      <section className="border-t border-border bg-background">
+      <section id={id} className="scroll-mt-24 border-t border-border bg-background">
         <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="mb-10 text-center sm:mb-12">
             <p className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
               <HelpCircle className="size-3" />
-              Common questions
+              {eyebrow}
             </p>
             <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              The questions every investor asks first.
+              {heading}
             </h2>
+            {intro ? (
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {intro}
+              </p>
+            ) : null}
           </div>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
-            {faqs.map((faq) => (
+            {items.map((faq) => (
               <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                   <span className="text-left font-semibold text-foreground">
@@ -763,7 +805,7 @@ export function HomepageFaq({
           data={{
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: faqs.map((f) => ({
+            mainEntity: items.map((f) => ({
               "@type": "Question",
               name: f.q,
               acceptedAnswer: { "@type": "Answer", text: f.a },
