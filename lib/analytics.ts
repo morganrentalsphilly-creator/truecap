@@ -28,6 +28,7 @@
  */
 
 import type { PostHog } from "posthog-js";
+import { captureMessageLazy } from "@/lib/sentry/lazy";
 import {
   redactSensitiveQueryValuesInText,
   sanitizeAnalyticsUrlProperties,
@@ -637,16 +638,18 @@ export function initAnalytics(): Promise<PostHog | null> {
       // and Stripe-price incidents. In production this is a config bug,
       // not a valid state: page once per session via Sentry (identical
       // messages dedupe into one issue with a counter).
+      //
+      // Through lib/sentry/lazy.ts, never a dynamic import of the SDK itself:
+      // webpack cannot see which members a dynamically imported namespace
+      // uses, so that one line kept the SDK's ENTIRE barrel (Replay, rrweb,
+      // Feedback, every AI / feature-flag integration) in the chunks every
+      // page loads on idle. The lazy helper also inits the SDK first, so the
+      // message is no longer dropped when it fires before the idle loader.
       if (process.env.NODE_ENV === "production") {
-        try {
-          const Sentry = await import("@sentry/nextjs");
-          Sentry.captureMessage(
-            "[analytics] NEXT_PUBLIC_POSTHOG_KEY missing from the production build — funnel is blind",
-            { level: "warning", tags: { feature: "analytics" } },
-          );
-        } catch {
-          /* Sentry unavailable — nothing more we can do quietly */
-        }
+        void captureMessageLazy(
+          "[analytics] NEXT_PUBLIC_POSTHOG_KEY missing from the production build — funnel is blind",
+          { level: "warning", tags: { feature: "analytics" } },
+        );
       }
       return null;
     }

@@ -1,9 +1,19 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
+
+function walk(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(join(ROOT, dir))) {
+    if (entry === "node_modules" || entry === ".next" || entry === "__tests__") continue;
+    const rel = join(dir, entry);
+    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out);
+    else if (/\.(tsx?|mjs|js)$/.test(rel)) out.push(rel);
+  }
+  return out;
+}
 
 /** Phase 7 (docs/site-overhaul.md): the structural performance rules. */
 describe("performance contract", () => {
@@ -67,7 +77,7 @@ describe("performance contract", () => {
     expect(entry).toContain('window.addEventListener("error", onError)');
     expect(entry).toContain("export function onRouterTransitionStart");
     const init = read("lib/sentry/client-init.ts");
-    expect(init).toContain("Sentry.init(");
+    expect(init).toMatch(/^\s+init\(\{$/m);
     expect(init).toContain("replaysSessionSampleRate: 0");
     expect(init).toContain("scrubSentryEventSensitiveData(event)");
     expect(init).toContain("captureRouterTransitionStart");
@@ -88,6 +98,26 @@ describe("performance contract", () => {
     expect(lazy).not.toContain('from "@sentry/nextjs"');
     expect(lazy).toContain('import("@/lib/sentry/client-init")');
     expect(lazy).toContain("m.initSentryClient()");
+  });
+
+  it("lets webpack tree-shake the Sentry SDK (no Replay, rrweb or Feedback on idle)", () => {
+    // The package root re-exports every integration the SDK ships. Webpack
+    // keeps only the names it can see being used, so a namespace import it
+    // cannot follow keeps them ALL. One `await import("@sentry/nextjs")` in
+    // lib/analytics.ts did exactly that: the homepage's idle Sentry load was
+    // 202 KB on the wire, 112 KB of it rrweb, Feedback, profiling and the AI
+    // and feature-flag integrations, none of which the config uses.
+    const init = read("lib/sentry/client-init.ts");
+    expect(init).not.toMatch(/import\s+\*\s+as\s+\w+\s+from\s+"@sentry\/nextjs"/);
+    expect(init).toMatch(/import\s*\{[^}]*\binit\b[^}]*\}\s*from\s+"@sentry\/nextjs"/);
+    const dynamicSdkImports = ["app", "components", "hooks", "lib"]
+      .flatMap((dir) => walk(dir))
+      .concat(["instrumentation-client.ts"])
+      .filter((path) => /import\(\s*["']@sentry\/nextjs["']\s*\)/.test(read(path)));
+    expect(dynamicSdkImports).toEqual([]);
+    const analytics = read("lib/analytics.ts");
+    expect(analytics).toContain('import { captureMessageLazy } from "@/lib/sentry/lazy";');
+    expect(analytics).toContain("void captureMessageLazy(");
   });
 
   it("keeps the Supabase browser client out of the anonymous /analyze first load", () => {
