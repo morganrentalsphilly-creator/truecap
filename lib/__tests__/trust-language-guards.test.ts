@@ -220,11 +220,12 @@ describe("trust-language guards", () => {
   it("uses review-oriented public report and tax-impact labels", () => {
     const signup = read("../../components/marketing/signup-prompt-card.tsx");
     const landing = read("../../components/marketing/landing-sections.tsx");
+    const faq = read("../../components/marketing/faq-section.tsx");
     const purchase = read(
       "../../components/investcalc/pdf-purchase-dialog.tsx",
     );
     const changelog = read("../../app/changelog/page.tsx");
-    const combined = `${signup}\n${landing}\n${purchase}\n${changelog}`;
+    const combined = `${signup}\n${landing}\n${faq}\n${purchase}\n${changelog}`;
 
     expect(combined).not.toMatch(/lender-ready/i);
     // The two positive pins that stood here (the module grid's "Package the
@@ -320,7 +321,8 @@ describe("trust-language guards", () => {
   });
 
   it("keeps the retired refund guarantee fail-closed", () => {
-    const landing = read("../../components/marketing/landing-sections.tsx");
+    // FaqSection moved to its own module; its rows still render on "/".
+    const landing = `${read("../../components/marketing/landing-sections.tsx")}\n${read("../../components/marketing/faq-section.tsx")}`;
     const config = read("../../lib/marketing-offer-config.ts");
     const guaranteePage = read("../../app/guarantee/page.tsx");
     const reviewsPage = read("../../app/reviews/page.tsx");

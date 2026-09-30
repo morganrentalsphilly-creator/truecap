@@ -96,7 +96,8 @@ describe("marketing small-text contrast", () => {
     // pass. Orange now means a miss and nothing else (DESIGN.md color): it
     // lives in the ledger's verdict, on the AA caution token, and the
     // sections set no orange text of their own.
-    const landing = read("components/marketing/landing-sections.tsx");
+    // FaqSection moved to its own module; its rows still render on "/".
+    const landing = `${read("components/marketing/landing-sections.tsx")}\n${read("components/marketing/faq-section.tsx")}`;
     expect(landing).not.toMatch(/text-\[var\(--brand-orange\)\]|text-caution/);
     expect(read("components/ledger/ledger-parts.tsx")).toContain(
       'pass ? "text-positive" : "text-caution-text"',
