@@ -1,20 +1,23 @@
 /**
- * The /vs hub prefetches on intent, not on scroll.
+ * The /vs hub and the /vs comparison pages prefetch on intent, not on scroll.
  *
  * A default next/link prefetches its route's RSC payload as soon as it
  * scrolls into view. Measured at 390x844 before this rule came back on the
  * design pass's rebuilt markup, one scroll of /vs pulled 120 RSC payloads
  * (3.5 MB), one or more per directory row, before the visitor clicked
- * anything. Below the first screen, internal links go through
+ * anything; each comparison page carries 5 to 10 more body links (TL;DR
+ * roundups, guides, tools, glossary terms, "Other comparisons", the close's
+ * secondary). Below the first screen, internal links go through
  * IntentPrefetchLink (components/marketing/intent-prefetch-link.tsx), which
  * prefetches on hover or keyboard focus only. The hero's links keep next's
  * default (the first screen, the likeliest clicks), and every /analyze link
  * keeps prefetch={false} so the analyzer bundle stays off marketing pages.
  *
- * Read from the source (the file later edits touch) and, for the hub, from
- * the rendered page.
+ * The SEO loop edits app/vs/<slug>/page.tsx on autopilot, so the rule is read
+ * from every rendered page's source, the file the loop writes: a link it adds
+ * as a plain <Link> fails here. The hub is also rendered.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -126,4 +129,116 @@ describe("the /vs hub (app/vs/page.tsx)", () => {
       else expect(link.prefetch, link.href).toBeUndefined();
     }
   }, 30_000);
+});
+
+/** A /vs slug whose page.tsx only redirects (it renders no page of its own). */
+const isRedirectStub = (source: string) =>
+  /\b(?:permanentRedirect|redirect)\(/.test(source) && !/<main\b/.test(source);
+
+const PAGES = readdirSync(join(ROOT, "app", "vs"))
+  .filter((slug) => existsSync(join(ROOT, "app", "vs", slug, "page.tsx")))
+  .map((slug) => ({ slug, file: `app/vs/${slug}/page.tsx`, source: read(`app/vs/${slug}/page.tsx`) }))
+  .filter((page) => !isRedirectStub(page.source));
+
+describe("the /vs comparison pages", () => {
+  it("finds every rendered comparison page", () => {
+    expect(PAGES.length).toBeGreaterThanOrEqual(38);
+  });
+
+  it("stay editable by the SEO loop: verify-static allows the IntentPrefetchLink import and its links", async () => {
+    const { checkImports, wholeFileViolations } = await import("../../seo/scripts/verify-static.ts");
+    // An edit to a page is refused when the page fails a whole-file rule, so
+    // the import must pass them (it is on paths.importAllow as
+    // @/components/marketing/*). Only violations this rule could cause are
+    // read: a page's other imports are not this guard's business.
+    expect(checkImports("app/vs/example/page.tsx", `${IMPORT}\n`)).toEqual([]);
+    const failures = PAGES.flatMap(({ file, source }) =>
+      wholeFileViolations(file, source)
+        .filter((v) => /intent-prefetch-link|IntentPrefetchLink/.test(v.detail))
+        .map((v) => `${file}: ${v.rule} ${v.detail}`),
+    );
+    expect(failures).toEqual([]);
+  }, 60_000);
+
+  it("seo-internal-links admits /vs sources exactly when verify-static derives tier 0 for an added IntentPrefetchLink", async () => {
+    // Its step 0g reads verify-static's tag check with a Grep; this ties the
+    // Grep to the tier the rule really derives, so a comment or self-test that
+    // names IntentPrefetchLink cannot re-admit /vs sources while the rule still
+    // makes them tier 1, and teaching the rule the element (a founder call, held
+    // 2026-09-30) cannot leave the skill excluding them.
+    const { deriveTier } = await import("../../seo/scripts/verify-static.ts");
+    const skill = read(".claude/skills/seo-internal-links/SKILL.md");
+    const gate = /- g\. Grep `seo\/scripts\/verify-static\.ts` \(content\) for `([^`]+)`/.exec(skill);
+    expect(gate, "seo-internal-links step 0g").not.toBeNull();
+    const pattern = new RegExp(gate![1]);
+    const admitsVs = read("seo/scripts/verify-static.ts").split("\n").some((line) => pattern.test(line));
+
+    const page = (link: string) =>
+      `${IMPORT}\n\nexport default function Page() {\n  return <p>Screen by cap rate threshold, ${link} condition and DOM.</p>;\n}\n`;
+    const pre = page("rehab");
+    // The control: the rule does derive tier 0 for the blog shape, so a tier 1
+    // below means the element, not a broken fixture.
+    const blog = deriveTier("app/blog/example/page.tsx", pre, page('<Link href="/glossary/rehab" className="tc-link">rehab</Link>'), { calibrating: false });
+    expect(blog).toEqual({ tier: 0, reason: "one internal link added" });
+    const vs = deriveTier(
+      "app/vs/example/page.tsx",
+      pre,
+      page('<IntentPrefetchLink href="/glossary/rehab" className="tc-link">rehab</IntentPrefetchLink>'),
+      { calibrating: false },
+    );
+    expect(vs.tier === 0, `0g ${admitsVs ? "admits" : "excludes"} /vs sources; verify-static derives tier ${vs.tier} (${vs.reason})`).toBe(admitsVs);
+  }, 60_000);
+
+  it("renders no next/link from the /vs frame components, so their links cannot prefetch on scroll", () => {
+    // VsHero, VsMatrixTable and ComparisonFaq render on every comparison page
+    // but live outside the page files the checks below read. Neither module
+    // imports next/link today; a link added to one goes through
+    // IntentPrefetchLink. (AuthorBio, BlogByline and RelatedContent, which
+    // the blog shares, belong to the content-pages prefetch unit and its
+    // intent-prefetch-shared.test.ts.)
+    for (const file of ["components/marketing/vs-page.tsx", "components/marketing/comparison-faq.tsx"]) {
+      expect(read(file), file).not.toMatch(/from ["']next\/link["']/);
+    }
+    const rendered = PAGES.filter(({ source }) => source.includes("<VsMatrixTable") && source.includes("<ComparisonFaq"));
+    expect(rendered.length, "pages that render both frame components").toBe(PAGES.length);
+  });
+});
+
+describe.each(PAGES)("/vs/$slug", ({ source }) => {
+  const hero = between(source, "<VsHero>", "</VsHero>");
+  // Data arrays (MATRIX cells, the FAQ answers) sit above and below the
+  // component; everything but the hero renders below the first screen.
+  const outsideHero = source.replace(hero, "");
+
+  it("imports IntentPrefetchLink on a line of its own, so a link the SEO loop adds needs no import", () => {
+    expect(source.split("\n")).toContain(IMPORT);
+  });
+
+  it("keeps the hero's links on next's default: the AnalyzeCtaLink island and a <Link>", () => {
+    expect(hero, "VsHero opens the page").not.toBe("");
+    expect(hero).toContain('<AnalyzeCtaLink analyticsSource="vs_hero"');
+    expect(openingTags(hero, "IntentPrefetchLink")).toEqual([]);
+    expect(openingTags(hero, "Link").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("uses no default-prefetch <Link> outside the hero", () => {
+    expect(scrollPrefetchingLinks(outsideHero)).toEqual([]);
+  });
+
+  it("never prefetches /analyze, through either link", () => {
+    expect(analyzerIntentLinks(source)).toEqual([]);
+    const analyzer = openingTags(source, "Link").filter((tag) => ANALYZE_HREF.test(tag));
+    // The screenshot caption's sample run and the close's primary, at least.
+    expect(analyzer.length).toBeGreaterThanOrEqual(2);
+    for (const tag of analyzer) expect(tag).toMatch(NO_PREFETCH);
+  });
+
+  it("writes the close's secondary and the Other comparisons rows as IntentPrefetchLink", () => {
+    const close = between(outsideHero, "<CloseSection", "</ActionRow>");
+    expect(close, "CloseSection with an ActionRow").toContain("<ActionRow>");
+    expect(openingTags(close, "IntentPrefetchLink").length).toBeGreaterThanOrEqual(1);
+    const others = between(source, "Other comparisons:", "</ul>");
+    expect(others, "the Other comparisons list").not.toBe("");
+    expect(openingTags(others, "IntentPrefetchLink").length).toBeGreaterThanOrEqual(2);
+  });
 });

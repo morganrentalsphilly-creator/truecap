@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -218,22 +219,22 @@ export default function VsArrivedPage() {
             </ul>
             <p>
               Prefer to underwrite a whole property yourself? The free{" "}
-              <Link href="/tools/1-percent-rule-calculator" className="tc-link">
+              <IntentPrefetchLink href="/tools/1-percent-rule-calculator" className="tc-link">
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               gives you a pass/fail read on a single listing; when you want the{" "}
-              <Link href="/glossary/cap-rate" className="tc-link">
+              <IntentPrefetchLink href="/glossary/cap-rate" className="tc-link">
                 cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and monthly cash flow behind that screen — the numbers Arrived
               abstracts away — the full{" "}
               <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               derives them from an address. Our guide on{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
+              <IntentPrefetchLink href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -261,12 +262,12 @@ export default function VsArrivedPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -280,28 +281,28 @@ export default function VsArrivedPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/roofstock"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Roofstock
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

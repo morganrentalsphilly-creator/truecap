@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -181,7 +182,7 @@ export default function VsRentometerPage() {
               A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
               <Link href="/analyze" prefetch={false} className="tc-link">free deal analyzer</Link>
               {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
-              <Link href="/blog/rental-property-pro-forma-explained" className="tc-link">rental property pro forma guide</Link>
+              <IntentPrefetchLink href="/blog/rental-property-pro-forma-explained" className="tc-link">rental property pro forma guide</IntentPrefetchLink>
               {" "}lays out every line.
             </p>
           </div>
@@ -205,12 +206,12 @@ export default function VsRentometerPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -224,28 +225,28 @@ export default function VsRentometerPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/biggerpockets-calculator"
                     className={VS_LINK_ROW}
                   >
                     vs BiggerPockets
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/excel"
                     className={VS_LINK_ROW}
                   >
                     vs Excel
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

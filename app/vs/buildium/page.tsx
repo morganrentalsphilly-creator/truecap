@@ -8,6 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -345,12 +346,12 @@ export default function VsBuildiumPage() {
             </ol>
             <p>
               Underwriting a purchase rather than managing one? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/vacancy-rate-calculator"
                 className="tc-link"
               >
                 vacancy rate calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               puts a number on the downtime you would be administering here; the
               full{" "}
               <Link
@@ -361,12 +362,12 @@ export default function VsBuildiumPage() {
               </Link>{" "}
               goes further and computes cap rate, cash-on-cash, and DSCR from an
               address. Our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -394,12 +395,12 @@ export default function VsBuildiumPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -413,28 +414,28 @@ export default function VsBuildiumPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/appfolio"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs AppFolio
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentec-direct"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Rentec Direct
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/turbotenant"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs TurboTenant
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -354,12 +355,12 @@ export default function VsBaselanePage() {
             </ol>
             <p>
               Curious about the underwriting half on its own? Start with the free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/mortgage-payment-calculator"
                 className="tc-link"
               >
                 mortgage payment calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               to size the PITI that Baselane&apos;s bank feed will later
               categorize, then run the full{" "}
               <Link
@@ -370,12 +371,12 @@ export default function VsBaselanePage() {
               </Link>{" "}
               for the cap rate, DSCR, and cash flow that sit on top of it. Our
               guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -403,12 +404,12 @@ export default function VsBaselanePage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -422,28 +423,28 @@ export default function VsBaselanePage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/avail"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Avail
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentredi"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs RentRedi
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

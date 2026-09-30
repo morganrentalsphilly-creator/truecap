@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -319,19 +320,19 @@ export default function VsPrivyPage() {
             </ol>
             <p>
               Curious how TrueCap lands on a different number than Privy?{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 How to calculate cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               shows the formula line by line, and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/what-is-a-good-cap-rate"
                 className="tc-link"
               >
                 what counts as a good cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               puts the result in context for your market. Once you want that math
               run against HUD rent and a live rate, paste the address into the{" "}
               <Link
@@ -367,12 +368,12 @@ export default function VsPrivyPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -386,28 +387,28 @@ export default function VsPrivyPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/propstream"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs PropStream
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealmachine"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealMachine
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

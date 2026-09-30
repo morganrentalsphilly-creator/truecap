@@ -10,6 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -396,12 +397,12 @@ export default function VsRoofstockPage() {
             </ol>
             <p>
               Want a faster read on a Roofstock listing? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
               >
                 gross rent multiplier calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               triages one in seconds, and when the listing survives that screen
               the full{" "}
               <Link
@@ -411,26 +412,26 @@ export default function VsRoofstockPage() {
                 TrueCap analyzer
               </Link>{" "}
               computes{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/glossary/cap-rate"
                 className="tc-link"
               >
                 cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/glossary/cash-on-cash-return"
                 className="tc-link"
               >
                 cash-on-cash return
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               from the address. For the full workflow, our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through exactly the steps above.
             </p>
           </div>
@@ -458,12 +459,12 @@ export default function VsRoofstockPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -477,28 +478,28 @@ export default function VsRoofstockPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

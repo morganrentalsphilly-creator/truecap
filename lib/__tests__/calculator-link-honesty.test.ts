@@ -23,9 +23,17 @@ import { unusableToolRoutes } from "./unreleased-tool-routes";
  *
  * This test flattens JSX whitespace expressions first, which is what makes the
  * split shape visible at all.
+ *
+ * An anchor is a <Link> or an <IntentPrefetchLink>: below the first screen,
+ * marketing pages write internal links through the second
+ * (components/marketing/intent-prefetch-link.tsx; every body link on the 38
+ * /vs pages, intent-prefetch-vs.test.ts).
  */
 
 const ROOTS = ["app", "components"];
+
+/** An internal anchor on flattened source: href (group 2), inner text (3), the 90 characters after it (4). */
+const anchors = () => /<(Link|IntentPrefetchLink) href="([^"]+)"[^>]*>(.*?)<\/\1>(.{0,90})/g;
 
 /**
  * /tools slugs a visitor cannot actually use — derived from the pages rather
@@ -80,10 +88,10 @@ function findOffenders(): Offender[] {
         .replace(/\{"\s*"\}/g, " ")
         .replace(/\s+/g, " ");
 
-      const anchor = /<Link href="([^"]+)"[^>]*>(.*?)<\/Link>(.{0,90})/g;
+      const anchor = anchors();
       let match: RegExpExecArray | null;
       while ((match = anchor.exec(flat)) != null) {
-        const [, href, inner, trailing] = match;
+        const [, , href, inner, trailing] = match;
         // The analyzer moved from "/#main" to "/analyze" (site overhaul
         // Phase 2); both spellings are analyzer links for this guard.
         if (!href.startsWith("/#main") && !href.startsWith("/analyze") && !gatedToolHref(href)) continue;
@@ -119,8 +127,21 @@ describe("links do not promise calculators the site does not ship", () => {
     // and the suite would go quietly green on a real regression.
     const fixture = '<Link href="/#main">DSCR</Link>{" "}calculators before you commit.';
     const flat = fixture.replace(/\{"\s*"\}/g, " ").replace(/\s+/g, " ");
-    const match = /<Link href="([^"]+)"[^>]*>(.*?)<\/Link>(.{0,90})/.exec(flat);
+    const match = anchors().exec(flat);
     expect(match).not.toBeNull();
-    expect(/^\s*(and\s+)?[A-Za-z ]{0,12}calculators?\b/.test(match![3])).toBe(true);
+    expect(/^\s*(and\s+)?[A-Za-z ]{0,12}calculators?\b/.test(match![4])).toBe(true);
+  });
+
+  it("reads an IntentPrefetchLink as an anchor too", () => {
+    // Both shapes, through the link a /vs page now writes below its hero.
+    const inside = '<IntentPrefetchLink href="/analyze" prefetch={false} className="tc-link">DSCR calculator</IntentPrefetchLink>';
+    const split = '<IntentPrefetchLink href="/analyze" prefetch={false}>cap rate</IntentPrefetchLink>{" "}calculators on one page.';
+    const [a] = [...inside.matchAll(anchors())];
+    expect(a?.[2]).toBe("/analyze");
+    expect(METRIC.test(a![3]) && /calculator/i.test(a![3])).toBe(true);
+    const flat = split.replace(/\{"\s*"\}/g, " ").replace(/\s+/g, " ");
+    const [b] = [...flat.matchAll(anchors())];
+    expect(b?.[3]).toBe("cap rate");
+    expect(/^\s*(and\s+)?[A-Za-z ]{0,12}calculators?\b/.test(b![4])).toBe(true);
   });
 });
