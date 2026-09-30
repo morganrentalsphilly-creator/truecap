@@ -280,6 +280,128 @@ textarea,
   }
 }
 
+/* The article body (DESIGN.md "Typography" and "Chrome"), opt-in: always
+   written `prose prose-ledger` (ArticleBody in
+   components/marketing/article.tsx sets both). It maps the typography
+   plugin's --tw-prose-* colors to the tokens and sets the article rhythm:
+   body at text-lg with its 1.55 leading, H2 in the display voice at the
+   SectionHeading sizes with generous space above, H3 at the H3 step, links
+   in the tc-link look, strong at the plugin's 600 in ink, tables with
+   sentence-case heads on rules, a blockquote as a ruled aside (no italic,
+   no quote marks), code in DM Mono. `.prose` itself is NOT redefined: the
+   methodology, about and calculator pages that use plain `prose` keep the
+   plugin's look until they opt in.
+   Every rule is scoped to `.prose-ledger.prose` (two classes), so it wins
+   over prose-slate, prose-neutral and prose-lg on the same element however
+   Tailwind sorts them. It also wins over a utility class on an element
+   inside the body for the properties it sets: that is the point (the
+   per-H2 class strings the posts repeat stop mattering), and a component
+   that brings its own styling into an article body opts out with
+   `not-prose`, which every element rule below honours as the plugin does. */
+@utility prose-ledger {
+  &.prose {
+    --tw-prose-body: var(--foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted-foreground);
+    --tw-prose-links: var(--primary);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted-foreground);
+    --tw-prose-bullets: var(--muted-foreground);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--muted-foreground);
+    --tw-prose-quote-borders: var(--foreground);
+    --tw-prose-captions: var(--muted-foreground);
+    --tw-prose-kbd: var(--foreground);
+    --tw-prose-kbd-shadows: var(--border);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--foreground);
+    --tw-prose-pre-bg: var(--card);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--rule-soft);
+    font-size: var(--text-lg);
+    line-height: var(--text-lg--line-height);
+  }
+  &.prose :where(p, li):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    text-wrap: pretty;
+  }
+  /* H2: SectionHeading's voice and sizes, 64px above, 16px below. */
+  &.prose :where(h2):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-top: calc(var(--spacing) * 16);
+    margin-bottom: calc(var(--spacing) * 4);
+    @apply font-display text-balance text-section-sm sm:text-section;
+  }
+  /* H3: the H3 step (21px on phones, 24px from 640px) in the display voice. */
+  &.prose :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-top: calc(var(--spacing) * 10);
+    margin-bottom: calc(var(--spacing) * 2);
+    @apply font-display text-balance text-h3-sm sm:text-2xl;
+  }
+  /* The plugin's own resets, restated at this specificity so the heading
+     margins above do not reopen space at the top of the body or under a
+     heading. */
+  &.prose :where(h2 + *, h3 + *, h4 + *, hr + *):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-top: 0;
+  }
+  &.prose > :where(:first-child):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-top: 0;
+  }
+  &.prose > :where(:last-child):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    margin-bottom: 0;
+  }
+  /* Links: the tc-link look. The color comes from --tw-prose-links. */
+  &.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-weight: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    &:hover {
+      color: var(--primary-deep);
+    }
+  }
+  /* Tables: the ruled table (a 2px ink rule opens it, sentence-case heads in
+     Ink 2 on the rule, rows on soft rules, the last one too). */
+  &.prose :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-top: 2px solid var(--foreground);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+  &.prose :where(thead th):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    color: var(--muted-foreground);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+  &.prose :where(tbody tr:last-child):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-bottom-width: 1px;
+  }
+  /* Blockquote: a ruled aside in Note's grammar, not an italic pull quote. */
+  &.prose :where(blockquote):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-inline-start-width: 0;
+    border-top: 2px solid var(--tw-prose-quote-borders);
+    padding-inline-start: 0;
+    padding-top: calc(var(--spacing) * 3);
+    font-size: var(--text-base);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--leading-relaxed);
+    quotes: none;
+  }
+  /* Code: DM Mono at its 500 face (never a synthesized bold), no backticks. */
+  &.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-synthesis-weight: none;
+  }
+  &.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+  &.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+    content: none;
+  }
+  &.prose :where(pre):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-radius: 0;
+  }
+}
+
 /* The ledger's one total sits over a double rule (accounting convention for a
    final total). It is the homepage's only motion: the rule draws in once, from
    the right, after the figure has painted. Reduced motion shows it static. */

@@ -116,6 +116,12 @@ export type SourceSpec =
   | { file: string; kind: "json"; path: readonly string[]; omit?: readonly string[] };
 
 const LANDING_SECTIONS = "components/marketing/landing-sections.tsx";
+/**
+ * FaqSection, which HomepageFaq renders. It lived in landing-sections.tsx,
+ * where the decls walk reached it through HomepageFaq; it moved to its own
+ * module, which that walk cannot follow, so it is listed beside it.
+ */
+const FAQ_SECTION: SourceSpec = { file: "components/marketing/faq-section.tsx", kind: "decls", names: ["FaqSection"] };
 
 /** The landing-section components app/page.tsx renders (the homepage is a composition shell). */
 const HOME_SECTIONS = ["ProblemBlock", "HowTrueCapWorks", "PdfProUpsell", "DataSourcesSection", "BuiltByInvestor", "SocialProof", "HomepageFaq", "FinalCta"];
@@ -126,10 +132,12 @@ const CORE_SOURCES: Record<string, SourceSpec[]> = {
     { file: "app/page.tsx", kind: "file" },
     { file: "components/marketing/marketing-hero.tsx", kind: "file" },
     { file: LANDING_SECTIONS, kind: "decls", names: HOME_SECTIONS },
+    FAQ_SECTION,
   ],
   "/why-truecap": [
     { file: "app/why-truecap/page.tsx", kind: "file" },
     { file: LANDING_SECTIONS, kind: "decls", names: ["VsCompetitors", "HomepageFaq"] },
+    FAQ_SECTION,
   ],
   "/analyze": [
     { file: "app/analyze/page.tsx", kind: "file" },

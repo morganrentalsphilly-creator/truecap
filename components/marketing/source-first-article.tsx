@@ -1,9 +1,34 @@
+/**
+ * The source-first post template (3 posts: what-is-a-good-cap-rate,
+ * what-is-a-good-rental-yield, how-to-estimate-rehab-costs). The post file
+ * passes an ARTICLE object and its prose as children; this renders them in
+ * the shared article frame (components/marketing/article.tsx): the site
+ * header, the post header under the H1, the body in `prose prose-ledger`,
+ * the FAQ as ruled rows, the sources, the bio and related posts, then the
+ * analyzer CTA before the footer. The metadata, the three JSON-LD objects
+ * and the date wiring are this file's contract with the SEO guards: keep
+ * them as they are.
+ */
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PostSources, type PostSource } from "@/components/blog/post-sources";
+import { Header } from "@/components/investcalc/header";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -112,22 +137,20 @@ export function SourceFirstArticle({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
+      {/* The site header, as on every other post (it was missing here). */}
+      <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
-      <main id="main" className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
-          >
-            ← TrueCap Blog
-          </Link>
-          <h1 className="mt-2 text-balance text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
-            {article.title}
-          </h1>
-          <p className="mt-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <ArticleMain>
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{article.title}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              TrueCap Blog
+            </Link>{" "}
+            ·{" "}
             {new Date(article.publishedAt).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -135,31 +158,31 @@ export function SourceFirstArticle({
             })}
           </p>
           <BlogByline />
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            {article.description}
-          </p>
+          <p className={ARTICLE_LEDE}>{article.description}</p>
         </header>
 
-        <article className="prose prose-slate max-w-none [&_h2]:mt-10 [&_h2]:font-extrabold [&_h2]:text-foreground [&_h3]:font-bold [&_h3]:text-foreground [&_li]:leading-relaxed [&_li]:text-foreground [&_p]:leading-relaxed [&_p]:text-foreground">
-          {children}
+        <article>
+          <ArticleBody>{children}</ArticleBody>
 
-          <section aria-labelledby="source-first-faq-heading">
-            <h2 id="source-first-faq-heading">Frequently asked questions</h2>
-            {article.faqs.map((faq) => (
-              <div key={faq.question}>
-                <h3>{faq.question}</h3>
-                <p>{faq.answer}</p>
-              </div>
-            ))}
-          </section>
+          {/* faqLd above stays the one FAQPage node for these rows. */}
+          <FaqSection
+            id="source-first-faq"
+            variant="inline"
+            heading="Frequently asked questions"
+            items={article.faqs.map((faq) => ({ q: faq.question, a: faq.answer }))}
+            structuredData={false}
+            contact={null}
+          />
         </article>
 
         <PostSources sources={sources} />
         <RelatedBlogPosts currentSlug={article.slug} />
-      </main>
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-      <BlogStickyCta />
-    </div>
+    </ArticlePage>
   );
 }

@@ -49,7 +49,8 @@ describe("saved-deal copy — surfaces stay aligned with the runtime gates", () 
   });
 
   it("homepage FAQ no longer claims saving is Pro-only", () => {
-    const source = read("../../components/marketing/landing-sections.tsx");
+    // FaqSection moved to its own module; the homepage FAQ renders through it.
+    const source = `${read("../../components/marketing/landing-sections.tsx")}\n${read("../../components/marketing/faq-section.tsx")}`;
     // "Pro adds save/compare deals" contradicted both the pricing card and
     // the runtime (free plan grants save_deal with a cap of 5).
     expect(source).not.toContain("Pro adds save/compare deals");

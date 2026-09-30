@@ -1,0 +1,133 @@
+/**
+ * The article frame (DESIGN.md "Components" and "Typography"): the shell a
+ * blog post renders through, so the posts stop hand-rolling their own root,
+ * container, header classes and prose wrapper. Server components and class
+ * strings only; nothing here reads cookies or headers, so a static post stays
+ * static.
+ *
+ *   <ArticlePage>                              root: paper, clips sideways bleed
+ *     <Header initialUser={null} initialEntitlements={null} />
+ *     (the page's own JSON-LD objects via JsonLd)
+ *     <ArticleMain>                           <main id="main">: container + 68ch column
+ *       <article>
+ *         <header className={ARTICLE_HEADER}>
+ *           <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+ *           <p className={ARTICLE_META}>
+ *             <Link href="/blog" className={ARTICLE_META_LINK}>Blog</Link> ·{" "}
+ *             {new Date(PUBLISHED_AT).toLocaleDateString(…)} · {READING_TIME} min read
+ *           </p>
+ *           <BlogByline />
+ *           <p className={ARTICLE_LEDE}>…</p>
+ *         </header>
+ *         <ArticleBody>…</ArticleBody>          prose prose-ledger (app/globals.css)
+ *         <FaqSection variant="inline" structuredData={false} … />
+ *         <ArticleBody>…</ArticleBody>
+ *       </article>
+ *       <PostSources … />
+ *       <RelatedBlogPosts currentSlug={SLUG} />
+ *     </ArticleMain>
+ *     <ArticleEnd>                             after </main>, before the footer
+ *       <BlogStickyCta />
+ *     </ArticleEnd>
+ *     <SiteFooter />
+ *     <ScrollDepthTracker />
+ *   </ArticlePage>
+ *
+ * The frame is a set of wrappers rather than one component with slots, on
+ * purpose:
+ *   · the page file keeps mounting what tests and the SEO skills read from
+ *     page sources: the Header, the literal <h1>{TITLE}</h1> inside a
+ *     <header>, the date line with <BlogByline /> directly after it
+ *     (author-byline-bio.test.tsx), exactly one <BlogStickyCta /> and one
+ *     <RelatedBlogPosts /> (passive-conversion-cta.test.ts), the page's own
+ *     JSON-LD with the literal "FAQPage" (seo-guards.test.ts);
+ *   · source order stays render order, so a post still reads top to bottom;
+ *   · converting a post is a swap of its wrappers, not a restructure.
+ * The one Disclaimer stays SiteFooter's: nothing here renders another.
+ *
+ * ArticleBody's link rule outranks a utility class on any link inside it
+ * (app/globals.css, prose-ledger): it sets the weight, the underline and the
+ * hover color. A component mounted inside an ArticleBody that styles its own
+ * links (a related-links nav, a button-styled link on a bg-primary fill) must
+ * carry `not-prose` on its root, or it takes the article's link look.
+ */
+
+import type { ComponentProps, ReactNode } from "react";
+import { PAGE_CONTAINER } from "@/components/marketing/section";
+import { cn } from "@/lib/utils";
+
+/**
+ * The reading column. 68ch of the 16px base is about 60ch of the 18px body,
+ * inside the 60-68ch measure; the header and the footer share its left edge
+ * through PAGE_CONTAINER.
+ */
+const ARTICLE_COLUMN = "max-w-[68ch]";
+
+/** The post header: space, not a rule, between it and the body. */
+export const ARTICLE_HEADER = "mb-10 sm:mb-12";
+
+/** The post's H1: the display voice at the page-H1 sizes (PageHero's H1). */
+export const ARTICLE_TITLE =
+  "font-display hyphens-auto break-words text-balance text-display-sm text-foreground lg:text-display";
+
+/** The meta line under the H1: "Blog · Jun 23, 2026 · 10 min read". Nothing sits above the H1. */
+export const ARTICLE_META = "mt-4 text-sm text-muted-foreground";
+
+/** The hub link inside the meta line: a tc-link with a 44px target that keeps the line's height. */
+export const ARTICLE_META_LINK = "tc-link -my-3 inline-block py-3";
+
+/** The lede under the byline. */
+export const ARTICLE_LEDE = "mt-6 max-w-[62ch] text-pretty text-lg text-muted-foreground";
+
+/** The page root: paper, and a clip for any sideways bleed (app/page.tsx's root). */
+export function ArticlePage({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={cn("relative overflow-x-clip bg-background", className)}>{children}</div>;
+}
+
+/**
+ * The skip link's target: <main id="main"> in the page container, the
+ * content in a left-aligned reading column, at the tight rhythm.
+ */
+export function ArticleMain({
+  children,
+  className,
+  ...props
+}: {
+  children: ReactNode;
+  className?: string;
+} & Omit<ComponentProps<"main">, "id" | "tabIndex" | "className" | "children">) {
+  return (
+    <main
+      id="main"
+      tabIndex={-1}
+      className={cn(PAGE_CONTAINER, "min-w-0 py-12 outline-none sm:py-16", className)}
+      {...props}
+    >
+      <div className={ARTICLE_COLUMN}>{children}</div>
+    </main>
+  );
+}
+
+/**
+ * What follows the article outside <main> (its analyzer CTA), in the same
+ * column so it lines up with the text above it instead of running full bleed.
+ * Kept outside <main> so the SEO loop's main text does not count it.
+ */
+export function ArticleEnd({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn(PAGE_CONTAINER, className)}>
+      <div className={ARTICLE_COLUMN}>{children}</div>
+    </div>
+  );
+}
+
+/** The article's running text: the typography plugin with the ledger mapping (app/globals.css). */
+export function ArticleBody({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("prose prose-ledger max-w-none", className)}>{children}</div>;
+}
