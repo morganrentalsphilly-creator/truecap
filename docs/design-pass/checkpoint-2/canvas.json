@@ -1,0 +1,112 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-30T13:36:50Z"
+  },
+  "title": "TrueCap Homepage Directions",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 7830,
+      "title": "The expandable ledger \u00b7 1280"
+    },
+    "Expandable-phone-1.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 375,
+      "h": 4040,
+      "title": "The expandable ledger \u00b7 375, top half"
+    },
+    "Expandable-phone-2.dc.html": {
+      "x": 1815,
+      "y": 0,
+      "w": 375,
+      "h": 5900,
+      "title": "The expandable ledger \u00b7 375, bottom half"
+    },
+    "Pinned-desktop.dc.html": {
+      "x": 2430,
+      "y": 0,
+      "w": 1280,
+      "h": 7460,
+      "title": "Pinned ledger, moving notes \u00b7 1280"
+    },
+    "Pinned-phone-1.dc.html": {
+      "x": 3790,
+      "y": 0,
+      "w": 375,
+      "h": 3440,
+      "title": "Pinned ledger, moving notes \u00b7 375, top half"
+    },
+    "Pinned-phone-2.dc.html": {
+      "x": 4245,
+      "y": 0,
+      "w": 375,
+      "h": 6850,
+      "title": "Pinned ledger, moving notes \u00b7 375, bottom half"
+    },
+    "Memo-desktop.dc.html": {
+      "x": 4860,
+      "y": 0,
+      "w": 1280,
+      "h": 7700,
+      "title": "The memo as the spine \u00b7 1280"
+    },
+    "Memo-phone-1.dc.html": {
+      "x": 6220,
+      "y": 0,
+      "w": 375,
+      "h": 3230,
+      "title": "The memo as the spine \u00b7 375, top half"
+    },
+    "Memo-phone-2.dc.html": {
+      "x": 6675,
+      "y": 0,
+      "w": 375,
+      "h": 6630,
+      "title": "The memo as the spine \u00b7 375, bottom half"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Expandable-phone-1.dc.html",
+    "Expandable-phone-2.dc.html",
+    "Pinned-desktop.dc.html",
+    "Pinned-phone-1.dc.html",
+    "Pinned-phone-2.dc.html",
+    "Memo-desktop.dc.html",
+    "Memo-phone-1.dc.html",
+    "Memo-phone-2.dc.html"
+  ],
+  "notes": {
+    "d1": {
+      "x": 0,
+      "y": -300,
+      "text": "The expandable ledger",
+      "kind": "title1",
+      "maxW": 2190
+    },
+    "d2": {
+      "x": 2430,
+      "y": -300,
+      "text": "Pinned ledger, moving notes",
+      "kind": "title1",
+      "maxW": 2190
+    },
+    "d3": {
+      "x": 4860,
+      "y": -300,
+      "text": "The memo as the spine",
+      "kind": "title1",
+      "maxW": 2190
+    }
+  },
+  "designSystems": []
+}
