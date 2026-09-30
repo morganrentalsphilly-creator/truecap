@@ -20,11 +20,11 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "shot": "verdict",
     "viewport": "desktop",
     "width": 2464,
-    "height": 1962,
+    "height": 2018,
     "png": "/product/verdict-desktop.png",
     "webp": "/product/verdict-desktop.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T19:01:07.748Z"
+    "captured_at": "2026-09-30T23:06:08.419Z"
   },
   {
     "shot": "where-the-rent-goes",
@@ -34,27 +34,27 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/where-the-rent-goes-desktop.png",
     "webp": "/product/where-the-rent-goes-desktop.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T19:01:08.348Z"
+    "captured_at": "2026-09-30T23:06:09.007Z"
   },
   {
     "shot": "memo",
     "viewport": "desktop",
     "width": 2560,
-    "height": 3044,
+    "height": 4110,
     "png": "/product/memo-desktop.png",
     "webp": "/product/memo-desktop.webp",
     "source": "http://127.0.0.1:3100/sample-decision-memo",
-    "captured_at": "2026-09-06T19:01:13.508Z"
+    "captured_at": "2026-09-30T23:06:14.413Z"
   },
   {
     "shot": "verdict",
     "viewport": "mobile",
     "width": 716,
-    "height": 2678,
+    "height": 2554,
     "png": "/product/verdict-mobile.png",
     "webp": "/product/verdict-mobile.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T19:01:15.428Z"
+    "captured_at": "2026-09-30T23:06:16.274Z"
   },
   {
     "shot": "where-the-rent-goes",
@@ -64,17 +64,17 @@ export const PRODUCT_SHOTS: readonly ProductShotEntry[] = [
     "png": "/product/where-the-rent-goes-mobile.png",
     "webp": "/product/where-the-rent-goes-mobile.webp",
     "source": "http://127.0.0.1:3100/analyze?sample=1",
-    "captured_at": "2026-09-06T19:01:16.008Z"
+    "captured_at": "2026-09-30T23:06:16.835Z"
   },
   {
     "shot": "memo",
     "viewport": "mobile",
     "width": 780,
-    "height": 5022,
+    "height": 6514,
     "png": "/product/memo-mobile.png",
     "webp": "/product/memo-mobile.webp",
     "source": "http://127.0.0.1:3100/sample-decision-memo",
-    "captured_at": "2026-09-06T19:01:21.006Z"
+    "captured_at": "2026-09-30T23:06:21.951Z"
   }
 ];
-export const PRODUCT_SHOTS_GENERATED_AT: string | null = "2026-09-06T19:01:21.019Z";
+export const PRODUCT_SHOTS_GENERATED_AT: string | null = "2026-09-30T23:06:21.964Z";
