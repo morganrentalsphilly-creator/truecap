@@ -44,15 +44,19 @@ export function EmbedPoweredByLink({ slug }: { slug: string }) {
     window.open(href, "_top");
   }
 
+  // A plain link line (DESIGN.md chrome rules): Signal Blue, underlined at
+  // rest, 44px tall for the target, no pill and no logo. Focus is the global
+  // 3px outline in app/globals.css. The <a> stays the root element, with no
+  // hooks, so embed-powered-by-click.test.ts can read its props directly.
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener"
       onClick={handleClick}
-      className="inline-flex min-h-11 items-center gap-1 rounded-md hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      className="tc-link inline-flex min-h-11 items-center"
     >
-      Powered by <span className="font-semibold text-foreground">TrueCap</span>
+      Powered by TrueCap
     </a>
   );
 }

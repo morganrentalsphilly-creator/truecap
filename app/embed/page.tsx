@@ -10,14 +10,27 @@
  *
  * This page is on TrueCap proper (not the iframe), so it gets the
  * normal SiteFooter + nav.
+ *
+ * Layout (DESIGN.md, 2026-09 design pass): PageHero with the four facts as
+ * a ruled strip, the steps as a StepList, each calculator as a ruled row
+ * (not a card) holding its printed code block, the questions through
+ * FaqSection (the page's one FAQPage node), and the close on the heavy rule.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
-import { ArrowUpRight, Code } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { FaqSection } from "@/components/marketing/landing-sections";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+  StepList,
+} from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 import { EmbedCodeBlock } from "@/components/embed/embed-code-block";
 import { EMBED_LIST } from "@/lib/embed-registry";
 import {
@@ -58,6 +71,38 @@ function joinTitles(titles: string[]): string {
   return `${titles.slice(0, -1).join(", ")}, and ${titles[titles.length - 1]}`;
 }
 
+/** The hub's questions, verbatim. FaqSection renders them as ruled details
+ *  rows and emits the one FAQPage node that mirrors them. */
+const EMBED_FAQS: { q: string; a: string }[] = [
+  {
+    q: "Can I customize the calculator's look?",
+    a: "No. Inside the frame the calculator uses TrueCap's own styling, and the embed has no color, font, or branding settings. On your page, the snippet's inline styles only lay out the frame (full width up to 640px, a starting height that then adjusts to the calculator, no border, on its own line) and set the small gray text of the credit line under it.",
+  },
+  {
+    q: "Do I have to keep the 'Powered by TrueCap' credit?",
+    a: "The credit inside the calculator's footer is part of the embedded page, so it always shows. The snippet also puts a one-line 'Powered by TrueCap' credit under the frame, linking to that calculator's page on TrueCap. Keeping that line is the one thing we ask in return for a free, hosted calculator.",
+  },
+  {
+    q: "How does the embed affect page loading?",
+    a: 'The iframe uses loading="lazy" and renders in its own document, which limits initial work in supporting browsers. Actual performance depends on the host page, browser, placement, and content-security settings, so measure the published page.',
+  },
+  {
+    q: "Can I track conversions from my embed?",
+    a: "Not through TrueCap: there are no per-site reports. Snippets copied from this page load the frame with no referrer, so loading the calculator does not tell TrueCap which page it sits on. The 'Underwrite a full property in TrueCap' link inside the calculator carries utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign, so TrueCap can count embed traffic in aggregate. No link carries your site's identity or anything a visitor enters.",
+  },
+  {
+    q: "What if the calculator changes?",
+    a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet. Snippets for the calculators listed on this page keep working. If we withdraw a calculator, a frame that still points at it shows TrueCap's 'page not found' page instead. Keep the credit line intact and check the embed as part of your own site checks.",
+  },
+];
+
+/** One cell of the facts strip: two cells a row on phones, four from 640px.
+ *  The dl's top Rule opens the strip; soft rules run between rows and
+ *  between columns (DESIGN.md: "Soft rule between rows"). The single row
+ *  from 640px drops its bottom rule, so the hero's own Rule closes it. */
+const FACT_CELL =
+  "min-w-0 border-b border-rule-soft py-3 pr-4 even:border-l even:pl-4 sm:border-b-0 sm:border-l sm:pl-4 sm:first:border-l-0 sm:first:pl-0";
+
 export default function EmbedHubPage() {
   const agentProConfigured = isAgentProConfigured();
   const siteUrl = getSiteUrl();
@@ -74,123 +119,129 @@ export default function EmbedHubPage() {
   const snippetsAvailable = snippetHost === CANONICAL_HOST;
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: no descendant (a long
+    // snippet line included) can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight tracking-tight">
-            Embed our calculators on your site
-          </h1>
-          <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
-            Real estate bloggers, agents, course creators, and finance writers:
-            grab the iframe code below and put any of our {EMBEDDABLE_COUNT}{" "}
-            embeddable calculators on your site
-            {PAGE_ONLY_CALCULATORS.length > 0 ? (
-              <>
-                {" "}— {EMBEDDABLE_COUNT} of our {CALCULATOR_COUNT} free
-                calculators (the{" "}
-                {joinTitles(PAGE_ONLY_CALCULATORS.map((c) => c.title))}{" "}
-                {PAGE_ONLY_CALCULATORS.length === 1 ? "runs" : "run"} on
-                TrueCap only)
-              </>
-            ) : null}
-            . Free to use, no signup. Each one shows a small &ldquo;Powered by
-            TrueCap&rdquo; credit that links to that calculator&apos;s page on
-            TrueCap, so you get a free calculator and we get a link back.
-          </p>
-
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="Embed our calculators on your site"
+          lede={
+            <p>
+              Real estate bloggers, agents, course creators, and finance writers:
+              grab the iframe code below and put any of our {EMBEDDABLE_COUNT}{" "}
+              embeddable calculators on your site
+              {PAGE_ONLY_CALCULATORS.length > 0 ? (
+                <>
+                  {" "}— {EMBEDDABLE_COUNT} of our {CALCULATOR_COUNT} free
+                  calculators (the{" "}
+                  {joinTitles(PAGE_ONLY_CALCULATORS.map((c) => c.title))}{" "}
+                  {PAGE_ONLY_CALCULATORS.length === 1 ? "runs" : "run"} on
+                  TrueCap only)
+                </>
+              ) : null}
+              . Free to use, no signup. Each one shows a small &ldquo;Powered by
+              TrueCap&rdquo; credit that links to that calculator&apos;s page on
+              TrueCap, so you get a free calculator and we get a link back.
+            </p>
+          }
+        >
+          {/* The four facts as one ruled strip, FRED's metadata grammar: the
+              fact at 600, its detail under it in Ink 2, hairline column
+              rules. Each count stays in one text run with its word. */}
+          <dl className="mt-8 grid grid-cols-2 border-t border-border sm:grid-cols-4">
+            <div className={FACT_CELL}>
+              <dt className="text-base font-semibold">
                 {EMBEDDABLE_COUNT} embeddable
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              </dt>
+              <dd className="mt-0.5 text-sm text-muted-foreground">
                 Of {CALCULATOR_COUNT} TrueCap calculators
-              </p>
+              </dd>
             </div>
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">Auto-resizing</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+            <div className={FACT_CELL}>
+              <dt className="text-base font-semibold">Auto-resizing</dt>
+              <dd className="mt-0.5 text-sm text-muted-foreground">
                 No nested scrollbars on your page
-              </p>
+              </dd>
             </div>
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">Mobile-friendly</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+            <div className={FACT_CELL}>
+              <dt className="text-base font-semibold">Mobile-friendly</dt>
+              <dd className="mt-0.5 text-sm text-muted-foreground">
                 Fills your content column, up to 640px wide
-              </p>
+              </dd>
             </div>
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">No account needed</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+            <div className={FACT_CELL}>
+              <dt className="text-base font-semibold">No account needed</dt>
+              <dd className="mt-0.5 text-sm text-muted-foreground">
                 No API key or signup for the published embeds
-              </p>
+              </dd>
             </div>
-          </div>
-        </header>
+          </dl>
+        </PageHero>
 
-        {/* Quick-start instructions */}
-        <section className="mb-10 rounded-2xl border border-border bg-muted/30 p-5 sm:p-6">
-          <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-            How to embed
-          </p>
-          <ol className="mt-3 space-y-2 text-sm text-foreground list-decimal list-inside">
-            <li>Pick the calculator below that fits your post or page.</li>
-            <li>Click &quot;Copy&quot; on the embed code.</li>
-            <li>
-              Paste the HTML into a custom-code or embed block in a CMS that
-              permits third-party iframes. Platform and security settings vary,
-              so preview the published page before relying on it.
-            </li>
-            <li>
-              Save. The calculator renders on your page with auto-sized height.
-            </li>
-          </ol>
-          <p className="mt-3 text-xs text-muted-foreground">
+        {/* Quick-start instructions: a real sequence (pick, copy, paste,
+            save), so numbered. The hero's bottom rule opens it, so the
+            section draws no rule of its own (two adjacent rules read as one
+            heavy one). */}
+        <Section rhythm="tight" rule="none" aria-labelledby="how-to-embed-heading">
+          <SectionHeading id="how-to-embed-heading">How to embed</SectionHeading>
+          <StepList
+            className="mt-8"
+            steps={[
+              "Pick the calculator below that fits your post or page.",
+              'Click "Copy" on the embed code.',
+              "Paste the HTML into a custom-code or embed block in a CMS that permits third-party iframes. Platform and security settings vary, so preview the published page before relying on it.",
+              "Save. The calculator renders on your page with auto-sized height.",
+            ]}
+          />
+          <p className="mt-4 max-w-[68ch] text-pretty text-base text-muted-foreground">
             Want a calculator we don&apos;t have here?{" "}
             <a
               href="mailto:hello@usetruecap.com?subject=Embed%20request"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link -my-3 inline-block py-3"
             >
               Send us a note
             </a>{" "}
             — we&apos;ll consider adding it.
           </p>
-        </section>
+        </Section>
 
-        {/* Calculator grid */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-extrabold text-foreground">
-              Pick a calculator
-            </h2>
-            <p className="text-xs text-muted-foreground">
+        {/* The calculators: ruled rows opened by the heavy rule, two columns
+            from 1024px. minmax(0,1fr) and min-w-0 let a snippet's long lines
+            scroll inside its code block instead of widening the page. */}
+        <Section aria-labelledby="pick-heading">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+            <SectionHeading id="pick-heading">Pick a calculator</SectionHeading>
+            <p className="text-base text-muted-foreground">
               {EMBEDDABLE_COUNT} available
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-x-12 border-t-2 border-foreground lg:grid-cols-2">
             {EMBED_LIST.map((entry) => (
               <article
                 key={entry.slug}
-                className="rounded-2xl border border-border bg-card p-5"
+                aria-labelledby={`embed-${entry.slug}-title`}
+                className="min-w-0 border-b border-border py-6"
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Code className="w-4 h-4 text-primary" />
-                    <h3 className="font-extrabold text-foreground text-base">
-                      {entry.title}
-                    </h3>
-                  </div>
+                <div className="flex items-baseline justify-between gap-4">
+                  <h3
+                    id={`embed-${entry.slug}-title`}
+                    className="font-display text-balance text-h3-sm text-foreground sm:text-2xl"
+                  >
+                    {entry.title}
+                  </h3>
+                  {/* Nine links share the name "Preview"; the title tells
+                      them apart without changing the label. */}
                   <Link
                     href={entry.toolUrl}
-                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    aria-describedby={`embed-${entry.slug}-title`}
+                    className="tc-link inline-flex min-h-11 shrink-0 items-center text-base"
                   >
                     Preview
-                    <ArrowUpRight className="w-3 h-3" />
                   </Link>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                <p className="mb-5 mt-2 max-w-[62ch] text-pretty text-base leading-relaxed text-muted-foreground">
                   {entry.description}
                 </p>
                 {snippetsAvailable ? (
@@ -201,12 +252,9 @@ export default function EmbedHubPage() {
                     defaultHeight={entry.defaultHeight}
                   />
                 ) : (
-                  <p className="rounded-xl border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                  <p className="border-t border-rule-soft pt-3 text-pretty text-base text-muted-foreground">
                     Embed code is issued from{" "}
-                    <a
-                      href={`${CANONICAL_SITE_URL}/embed`}
-                      className="font-semibold text-foreground underline underline-offset-4"
-                    >
+                    <a href={`${CANONICAL_SITE_URL}/embed`} className="tc-link">
                       {CANONICAL_HOST}/embed
                     </a>{" "}
                     so partner snippets always point at the live site.
@@ -215,93 +263,63 @@ export default function EmbedHubPage() {
               </article>
             ))}
           </div>
-        </section>
+        </Section>
 
         {/* Agents (2026-09 agent-first pass): a working calculator on an
             agent site is a credibility piece, not a lead machine — the FAQ
             below is explicit that there is no per-site tracking or lead
             capture, and that stays true. */}
-        <section className="mt-12 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl font-extrabold text-foreground">
-            For agents who work with investors
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            A calculator on your own site shows investor visitors you speak
-            their language before they ever call. It is a credibility piece:
-            the embed collects nothing and reports nothing back to you, so use
-            it beside your contact details, not instead of them. When a client
-            is real, run their deals against their own Buy Box with{" "}
-            {agentProConfigured ? (
-              <Link href="/for-agents" className="font-semibold text-primary underline underline-offset-4">
-                TrueCap for agents
-              </Link>
-            ) : (
-              <Link href="/pricing#plans" className="font-semibold text-primary underline underline-offset-4">
-                Agent Pro
-              </Link>
-            )}
-            .
-          </p>
-        </section>
-
-        {/* Tips / FAQ */}
-        <section className="mt-12">
-          <h2 className="text-xl font-extrabold text-foreground mb-4">
-            Questions
-          </h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-            {[
-              {
-                q: "Can I customize the calculator's look?",
-                a: "No. Inside the frame the calculator uses TrueCap's own styling, and the embed has no color, font, or branding settings. On your page, the snippet's inline styles only lay out the frame (full width up to 640px, a starting height that then adjusts to the calculator, no border, on its own line) and set the small gray text of the credit line under it.",
-              },
-              {
-                q: "Do I have to keep the 'Powered by TrueCap' credit?",
-                a: "The credit inside the calculator's footer is part of the embedded page, so it always shows. The snippet also puts a one-line 'Powered by TrueCap' credit under the frame, linking to that calculator's page on TrueCap. Keeping that line is the one thing we ask in return for a free, hosted calculator.",
-              },
-              {
-                q: "How does the embed affect page loading?",
-                a: 'The iframe uses loading="lazy" and renders in its own document, which limits initial work in supporting browsers. Actual performance depends on the host page, browser, placement, and content-security settings, so measure the published page.',
-              },
-              {
-                q: "Can I track conversions from my embed?",
-                a: "Not through TrueCap: there are no per-site reports. Snippets copied from this page load the frame with no referrer, so loading the calculator does not tell TrueCap which page it sits on. The 'Underwrite a full property in TrueCap' link inside the calculator carries utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign, so TrueCap can count embed traffic in aggregate. No link carries your site's identity or anything a visitor enters.",
-              },
-              {
-                q: "What if the calculator changes?",
-                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet. Snippets for the calculators listed on this page keep working. If we withdraw a calculator, a frame that still points at it shows TrueCap's 'page not found' page instead. Keep the credit line intact and check the embed as part of your own site checks.",
-              },
-            ].map((f) => (
-              <details key={f.q} className="group p-5">
-                <summary className="cursor-pointer text-sm font-bold text-foreground group-open:text-primary">
-                  {f.q}
-                </summary>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {f.a}
-                </p>
-              </details>
-            ))}
+        <Section rhythm="tight" aria-labelledby="agents-heading">
+          <div className="max-w-[68ch]">
+            <SectionHeading id="agents-heading">
+              For agents who work with investors
+            </SectionHeading>
+            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
+              A calculator on your own site shows investor visitors you speak
+              their language before they ever call. It is a credibility piece:
+              the embed collects nothing and reports nothing back to you, so use
+              it beside your contact details, not instead of them. When a client
+              is real, run their deals against their own Buy Box with{" "}
+              {agentProConfigured ? (
+                <Link href="/for-agents" className="tc-link">
+                  TrueCap for agents
+                </Link>
+              ) : (
+                <Link href="/pricing#plans" className="tc-link">
+                  Agent Pro
+                </Link>
+              )}
+              .
+            </p>
           </div>
-        </section>
+        </Section>
 
-        <section className="mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-            Have a real estate audience?
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4">
-            Embed a calculator and write a short post around it. Your readers
-            get a working tool without leaving your page, and we get a credit
-            link back.
-          </p>
-          <Link
-            href="/analyze?utm_source=embed-hub-cta"
-            prefetch={false}
-            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-          >
-            Try the full TrueCap analyzer
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </section>
+        {/* The page's one FAQPage node comes from FaqSection and mirrors
+            these rows exactly. The hub already offers a mailto above, so the
+            shared contact line is left off. */}
+        <FaqSection
+          id="questions"
+          heading="Questions"
+          items={EMBED_FAQS}
+          contact={null}
+        />
+
+        <CloseSection
+          heading="Have a real estate audience?"
+          headingId="embed-close-heading"
+          lede="Embed a calculator and write a short post around it. Your readers get a working tool without leaving your page, and we get a credit link back."
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze?utm_source=embed-hub-cta"
+                prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Try the full TrueCap analyzer
+              </Link>
+            </ActionRow>
+          }
+        />
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

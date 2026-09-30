@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ArrowUpRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export function EmbedReferralTracker({ calculator }: { calculator: string }) {
@@ -21,6 +20,9 @@ export function EmbedAttributionLink({
   href: string;
   calculator: string;
 }) {
+  // The frame's call to action: a Signal Blue link at 600, underlined at rest,
+  // with no trailing arrow (DESIGN.md chrome rules). Focus is the global 3px
+  // outline in app/globals.css.
   return (
     <a
       href={href}
@@ -32,10 +34,9 @@ export function EmbedAttributionLink({
           referral_source: "embed",
         })
       }
-      className="inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      className="tc-link inline-flex min-h-11 items-center font-semibold"
     >
       Underwrite a full property in TrueCap
-      <ArrowUpRight className="h-3 w-3" />
     </a>
   );
 }
