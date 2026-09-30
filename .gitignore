@@ -141,6 +141,8 @@ config.bat
 .impeccable/*
 !.impeccable/design.json
 !.impeccable/config.json
+# Surface briefs carry each route's direction contract across sessions.
+!.impeccable/surfaces/
 
 # SEO loop run state. It lives on the `seo-state` orphan branch and is
 # overlaid into place at the start of every run (seo/README.md), so it must
