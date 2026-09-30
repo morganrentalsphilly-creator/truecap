@@ -5,6 +5,8 @@ import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { CookieConsentBanner } from "@/components/marketing/cookie-consent-banner";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { GoogleMeasurement } from "@/components/analytics/google-measurement";
+import { AgentProConfigProvider } from "@/components/marketing/agent-pro-config";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { TrueCapVercelAnalytics } from "@/components/analytics/vercel-analytics";
 import { OverlayRecovery } from "@/components/ui/overlay-recovery";
 import { getSiteUrl } from "@/lib/site-url";
@@ -268,7 +270,11 @@ export default function RootLayout({
         {/* One in-app confirm/prompt grammar for every destructive or
             work-clearing action — replaces the fourteen window.confirm /
             window.prompt sites that rendered as unstyled OS chrome. */}
-        <ActionConfirmProvider>{children}</ActionConfirmProvider>
+        {/* Agent-first nav (2026-09): the marketing nav is a client component
+            and needs to know whether /for-agents exists on this deployment. */}
+        <AgentProConfigProvider configured={isAgentProConfigured()}>
+          <ActionConfirmProvider>{children}</ActionConfirmProvider>
+        </AgentProConfigProvider>
         <Toaster />
         {/* Cookie consent banner — pairs with the Consent Mode v2
             defaults declared in <head>. Shows once on first visit, then
