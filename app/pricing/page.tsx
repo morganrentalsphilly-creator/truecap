@@ -11,6 +11,10 @@
  * via the existing billing action. A Stripe cancel returns with
  * ?billing=checkout_cancelled (CheckoutCancelledBanner below), which
  * the auto-resume treats as mutually exclusive — it never re-fires.
+ *
+ * Set in the design system's grammar (DESIGN.md): the shared hero, Section
+ * and FAQ parts, plan cards as the page's only cards, rules instead of
+ * boxes everywhere else, and no motion.
  */
 
 import { Suspense } from "react";
@@ -18,11 +22,15 @@ import { Testimonials } from "@/components/marketing/testimonials";
 import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, ShieldCheck, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
+import { FaqSection } from "@/components/marketing/landing-sections";
+import { ActionRow, PageHero } from "@/components/marketing/page-parts";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
+import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 import {
   getEntitlementsForUser,
   getActivePaidPlanSlug,
@@ -51,6 +59,7 @@ import {
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
+import { cn } from "@/lib/utils";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -271,76 +280,81 @@ export default async function PricingPage() {
 
       <main id="main" className="min-h-screen bg-background">
         <JsonLd data={pricingSchema} />
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
-          />
-          <div className="mx-auto max-w-5xl px-4 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16 text-center">
-            {/* Lead with the outcome (docs/site-overhaul.md Phase 9). The
-                arithmetic is deliberately simple and checkable and every
-                figure comes from PRICING_OUTCOME_EXAMPLE, not this file. */}
-            <h1
-              data-pricing-outcome
-              className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl"
-            >
+        {/* Hero. Lead with the outcome (docs/site-overhaul.md Phase 9). The
+            arithmetic is deliberately simple and checkable and every figure
+            comes from PRICING_OUTCOME_EXAMPLE, not this file. */}
+        <PageHero
+          data-pricing-outcome=""
+          title={
+            <>
               Overpaying by {PRICING_OUTCOME_EXAMPLE.overpayPct}% on a{" "}
               {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.purchasePriceUsd)} rental costs{" "}
               {formatUsdWhole(PRICING_OUTCOME_EXAMPLE.overpayUsd)}{" "}
               — before you collect a dollar of rent.
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-              {!user
-                ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} deals, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
-                : activePaidPlanSlug || billingRecoveryRequired
-                  ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
-                  : pricingEvaluation.status === "active" && evaluationAllowance
-                    ? `Your free trial has ${evaluationAllowance}.`
-                    : pricingEvaluation.status === "exhausted"
-                      ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                      : pricingEvaluation.status === "expired"
-                        ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                        : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
-            </p>
-            {/* Keep-and-add (2026-09 agent-first pass): the overpay arithmetic
-                stays the headline; one line under it speaks to the agent. */}
-            {!user && agentProConfigured ? (
-              <p data-pricing-agent-line="" className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
-                Working with investor clients? The client remembers who caught
-                it.{" "}
-                <Link href="/for-agents" className="font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
-                  TrueCap for agents →
-                </Link>
-              </p>
-            ) : null}
-            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+            </>
+          }
+          lede={
+            !user
+              ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} deals, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
+              : activePaidPlanSlug || billingRecoveryRequired
+                ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+                : pricingEvaluation.status === "active" && evaluationAllowance
+                  ? `Your free trial has ${evaluationAllowance}.`
+                  : pricingEvaluation.status === "exhausted"
+                    ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                    : pricingEvaluation.status === "expired"
+                      ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                      : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+          }
+          actions={
+            <ActionRow>
               <Link
                 href="/analyze" prefetch={false}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+                className={buttonVariants({ size: "cta" })}
               >
                 Analyze a property free
               </Link>
               <Link
                 href="#pro"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+                className={buttonVariants({ size: "cta", variant: "outline" })}
               >
                 See Pro plans
               </Link>
-            </div>
-          </div>
-        </section>
+            </ActionRow>
+          }
+        >
+          {/* Keep-and-add (2026-09 agent-first pass): the overpay arithmetic
+              stays the headline; one line speaks to the agent, set like the
+              homepage's investor cue on its soft rule. */}
+          {!user && agentProConfigured ? (
+            <p
+              data-pricing-agent-line=""
+              className="mt-6 border-t border-rule-soft pt-2.5 text-base"
+            >
+              Working with investor clients? The client remembers who caught
+              it.{" "}
+              {/* A 44px tap target from padding that the negative margin
+                  takes back out of the line box. */}
+              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+                TrueCap for agents
+              </Link>
+            </p>
+          ) : null}
+        </PageHero>
 
-        {/* Plans — 2-card layout with Monthly ↔ Annual toggle on Pro
-            (replaced the previous 3-card side-by-side). The toggle
-            consistently outperforms separate cards because users
-            directly compare per-month cost. ~10-15% lift on annual. */}
-        {/* id="plans" — scroll target for exit-intent CTAs and any other
-            deep link that needs to land directly on the plan toggle. */}
-        <section
+        {/* Plans — the Free / Pro (/ Agent Pro) cards under one Monthly ↔
+            Annual toggle. The toggle consistently outperforms separate
+            cards because users directly compare per-month cost. ~10-15%
+            lift on annual. */}
+        {/* id="plans" — scroll target for exit-intent CTAs, Stripe's
+            cancel_url (app/actions/billing.ts) and any other deep link that
+            needs to land directly on the plan toggle. The hero's rule sits
+            above it, so the section adds none. */}
+        <Section
           id="plans"
+          rhythm="tight"
+          rule="none"
           aria-labelledby="pricing-plans-title"
-          className="mx-auto mt-4 max-w-5xl px-4 pb-6 sm:px-6"
         >
           <h2 id="pricing-plans-title" className="sr-only">Plans</h2>
           {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
@@ -364,20 +378,23 @@ export default async function PricingPage() {
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
           />
+        </Section>
 
-          {/* One honest comparison (docs/site-overhaul.md Phase 9). The
-              DealCheck figures are its published monthly tiers, checked
-              against dealcheck.io/pricing on 2026-09-06; they live in
-              DEALCHECK_COMPARISON so this file holds no amounts. */}
-          <div
-            data-pricing-comparison
-            className="mx-auto mt-8 max-w-2xl rounded-2xl border border-border bg-card p-5 text-center sm:p-6"
-          >
-            <h2 className="text-base font-extrabold tracking-tight text-foreground sm:text-lg">
+        {/* One honest comparison (docs/site-overhaul.md Phase 9). The
+            DealCheck figures are its published monthly tiers, checked
+            against dealcheck.io/pricing on 2026-09-06; they live in
+            DEALCHECK_COMPARISON so this file holds no amounts. */}
+        <Section
+          rhythm="tight"
+          data-pricing-comparison
+          aria-labelledby="pricing-dealcheck-title"
+        >
+          <div className="max-w-3xl">
+            <SectionHeading id="pricing-dealcheck-title">
               How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
               Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro)
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            </SectionHeading>
+            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
               DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
               Box fit, downside stress test, and a memo. If you only need metrics,
               DealCheck or a spreadsheet is fine.
@@ -387,64 +404,53 @@ export default async function PricingPage() {
             </p>
             <Link
               href={DEALCHECK_COMPARISON.href}
-              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+              className="tc-link mt-3 inline-flex min-h-11 items-center"
             >
               Read the full DealCheck comparison
             </Link>
           </div>
+        </Section>
 
-          {/* Consented quotes from the in-product prompt (Phase 5); renders
-              nothing until real published rows exist. */}
-          {/* No paid-customer heading override: publication is gated on activity
-              (lib/testimonials/rules.ts), not on plan, so a free account's
-              quote can publish here — the component default is the truthful
-              label. */}
-          <Testimonials limit={3} className="mx-auto max-w-5xl" />
+        {/* Consented quotes from the in-product prompt (Phase 5); renders
+            nothing until real published rows exist. */}
+        {/* No paid-customer heading override: publication is gated on activity
+            (lib/testimonials/rules.ts), not on plan, so a free account's
+            quote can publish here — the component default is the truthful
+            label. The component is its own Section. */}
+        <Testimonials limit={3} />
 
-          {/* Trust row (Phase 9): the four facts a buyer checks before the
-              card form. Each is true today: no card to start (evaluation
-              flow), cancel from the profile, Stripe Checkout, and the
-              public methodology page. */}
+        {/* Trust row (Phase 9): the four facts a buyer checks before the
+            card form. Each is true today: no card to start (evaluation
+            flow), cancel from the profile, Stripe Checkout, and the
+            public methodology page. A strip hung off one rule, closing the
+            passage above; the section that follows brings its own rule, so
+            the strip carries none underneath (one rule between sections). */}
+        <div className={cn(PAGE_CONTAINER, "pb-12 sm:pb-16")}>
           <ul
             data-pricing-trust-row
-            className="mx-auto mt-6 flex max-w-3xl list-none flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground"
+            className="flex flex-wrap items-center gap-x-8 gap-y-1 border-t border-border py-2 text-base font-semibold"
           >
-            <li className="inline-flex items-center gap-1.5">
-              <ShieldCheck aria-hidden className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">Free to start — no card</strong>
-            </li>
-            <li>
-              <strong className="text-foreground">Cancel anytime from your profile</strong>
-            </li>
-            <li>
-              <strong className="text-foreground">Payments handled by Stripe</strong>
-            </li>
+            <li>Free to start — no card</li>
+            <li>Cancel anytime from your profile</li>
+            <li>Payments handled by Stripe</li>
             <li>
               <Link
                 href="/methodology"
-                className="font-bold text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+                className="tc-link inline-flex min-h-11 items-center"
               >
                 Methodology is public
               </Link>
             </li>
           </ul>
-        </section>
+        </div>
 
-        <section
-          aria-labelledby="pricing-stage-title"
-          className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12"
-        >
-          <div className="text-center">
-            <h2
-              id="pricing-stage-title"
-              className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-            >
-              Which stage are you at?
-            </h2>
-          </div>
-          <div
-            className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
-          >
+        {/* Which plan answers which job, as ruled rows: the job (the row's
+            heading), the plan, and what it answers. */}
+        <Section rhythm="tight" aria-labelledby="pricing-stage-title">
+          <SectionHeading id="pricing-stage-title">
+            Which stage are you at?
+          </SectionHeading>
+          <ul className="mt-8 border-t-2 border-foreground">
             {[
               // Agent stage first (2026-09 agent-first pass); investor stages follow.
               ...(agentProConfigured
@@ -467,161 +473,155 @@ export default async function PricingPage() {
                 answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
               },
             ].map((item) => (
-              <div
+              <li
                 key={item.job}
-                className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+                className="grid gap-x-8 gap-y-1 border-b border-rule-soft py-4 md:grid-cols-[minmax(0,14rem)_8rem_minmax(0,1fr)] md:items-baseline"
               >
-                <p className="text-3xs font-bold uppercase tracking-widest text-primary">
-                  {item.product}
-                </p>
-                <h3 className="mt-1 text-lg font-extrabold text-foreground">
+                <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
                   {item.job}
                 </h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                <p className="text-base font-semibold">{item.product}</p>
+                <p className="max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
                   {item.answer}
                 </p>
-              </div>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </Section>
 
         {/* What each tier produces — REAL screenshots from the sample flow
-            (Phase 4). One per tier; Agent Pro only when it is sold. */}
-        <section
-          aria-labelledby="pricing-shots-title"
-          className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16"
-        >
-          <h2
-            id="pricing-shots-title"
-            className="text-balance text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-          >
-            What you get at each tier
-          </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
-            Real output from the free sample deal, not mockups.{" "}
-            <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">
-              Run it yourself →
-            </Link>
-          </p>
-          <div className={`mt-8 grid gap-8 md:grid-cols-2 ${agentProConfigured ? "lg:grid-cols-3" : ""}`}>
+            (Phase 4). One per tier; Agent Pro only when it is sold. Set as
+            documents (a 1px rule, no browser chrome), captions kept. */}
+        <Section aria-labelledby="pricing-shots-title">
+          <div className="max-w-3xl">
+            <SectionHeading id="pricing-shots-title">
+              What you get at each tier
+            </SectionHeading>
+            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+              Real output from the free sample deal, not mockups.{" "}
+              <Link href="/analyze?sample=1" prefetch={false} className="tc-link">
+                Run it yourself
+              </Link>
+            </p>
+          </div>
+          <div className={cn("mt-8 grid gap-8 md:grid-cols-2", agentProConfigured && "lg:grid-cols-3")}>
             <ProductShot
               shot={DECISION_SHOT}
+              frame="document"
               alt="Free tier: the decision view for the sample deal — the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-              caption={<><strong className="text-foreground">Free.</strong> Your first full decision.</>}
+              caption={<><strong className="font-semibold text-foreground">Free.</strong> Your first full decision.</>}
             />
             <ProductShot
               shot={RENT_BREAKDOWN_SHOT}
+              frame="document"
               alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
-              caption={<><strong className="text-foreground">{proOfferName}.</strong> Know what to offer on every deal.</>}
+              caption={<><strong className="font-semibold text-foreground">{proOfferName}.</strong> Know what to offer on every deal.</>}
             />
             {agentProConfigured ? (
               <ProductShot
                 shot={MEMO_SHOT}
+                frame="document"
                 alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
-                caption={<><strong className="text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
+                caption={<><strong className="font-semibold text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
               />
             ) : null}
           </div>
-        </section>
+        </Section>
+
+        {/* The paid tiers as outcomes; its own Section. */}
+        <PricingValueStack agentProConfigured={agentProConfigured} />
 
         {/* Feature comparison */}
-        <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-          <PricingValueStack
-            proOfferName={proOfferName}
-            agentProConfigured={agentProConfigured}
-          />
-          <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            What you get
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
-            Free answers whether the deal deserves attention. Pro shows the
-            Offer Ceiling, what could break, and what to verify next.
-            {agentProConfigured
-              ? " Agent Pro does all of that per client, with a roster."
-              : ""}
-          </p>
-          {/* Phones use stacked comparison cards; tablet and desktop keep the
-              denser semantic table. No narrow viewport has to pan sideways. */}
-          <div className="tc-reveal mt-8 space-y-2 sm:hidden">
+        <Section rhythm="tight" aria-labelledby="pricing-compare-title">
+          <div className="max-w-3xl">
+            <SectionHeading id="pricing-compare-title">What you get</SectionHeading>
+            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+              Free answers whether the deal deserves attention. Pro shows the
+              Offer Ceiling, what could break, and what to verify next.
+              {agentProConfigured
+                ? " Agent Pro does all of that per client, with a roster."
+                : ""}
+            </p>
+          </div>
+          {/* Phones use ruled rows (the tiers side by side under each
+              feature); tablet and desktop keep the denser semantic table.
+              No narrow viewport has to pan sideways. */}
+          <ul className="mt-8 border-t-2 border-foreground sm:hidden">
             {FEATURE_COMPARISON.map(([label, free, pro]) =>
               !alertsLive &&
               label === "Rate-drop alerts on saved deals" ? null : (
-                <article
-                  key={label}
-                  className="rounded-2xl border border-border bg-card p-4"
-                >
-                  <h3 className="text-sm font-bold text-foreground">{label}</h3>
-                  <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <div className="rounded-xl bg-muted/30 p-3">
-                      <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Free
-                      </dt>
-                      <dd className="mt-1">
+                <li key={label} className="border-b border-rule-soft py-3">
+                  <p className="text-base font-semibold">{label}</p>
+                  <dl
+                    className={
+                      agentProConfigured
+                        ? "mt-1.5 grid grid-cols-3 gap-x-4 text-sm"
+                        : "mt-1.5 grid grid-cols-2 gap-x-4 text-sm"
+                    }
+                  >
+                    <div className="min-w-0">
+                      <dt className="text-muted-foreground">Free</dt>
+                      <dd className="mt-0.5">
                         <MobileFeatureValue value={free} />
                       </dd>
                     </div>
-                    <div className="rounded-xl bg-primary/5 p-3">
-                      <dt className="text-3xs font-bold uppercase tracking-wider text-primary">
-                        {proOfferName}
-                      </dt>
-                      <dd className="mt-1">
-                        <MobileFeatureValue value={pro} pro />
+                    <div className="min-w-0">
+                      <dt className="text-muted-foreground">{proOfferName}</dt>
+                      <dd className="mt-0.5">
+                        <MobileFeatureValue value={pro} />
                       </dd>
                     </div>
                     {agentProConfigured ? (
-                      <div className="col-span-2 rounded-xl bg-primary/5 p-3">
-                        <dt className="text-3xs font-bold uppercase tracking-wider text-primary">
-                          Agent Pro
-                        </dt>
-                        <dd className="mt-1">
-                          <MobileFeatureValue value={agentProCell(label, pro)} pro />
+                      <div className="min-w-0">
+                        <dt className="text-muted-foreground">Agent Pro</dt>
+                        <dd className="mt-0.5">
+                          <MobileFeatureValue value={agentProCell(label, pro)} />
                         </dd>
                       </div>
                     ) : null}
                   </dl>
-                </article>
+                </li>
               ),
             )}
-          </div>
-          <ScrollX label="Table" className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
-            <table className="w-full text-sm">
+          </ul>
+          {/* The homepage ladder's grammar: opens on the heavy rule, a rule
+              under the heads, soft rules between rows, marks in ink. */}
+          <ScrollX label="Table" className="mt-8 hidden border-t-2 border-foreground sm:block">
+            <table className="w-full border-collapse text-sm sm:text-base">
               <caption className="sr-only">
                 Features included with Free, {proOfferName}
                 {agentProConfigured ? ", and Agent Pro" : ""}
               </caption>
               <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">
+                <tr className="border-b border-border">
+                  <th scope="col" className="py-2.5 pr-4 text-left font-semibold">
                     Feature
                   </th>
-                  <th className="px-4 py-3 text-center font-bold text-foreground sm:px-6">
+                  <th scope="col" className="px-4 py-2.5 text-center font-semibold">
                     Free
                   </th>
-                  <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
+                  <th scope="col" className="px-4 py-2.5 text-center font-semibold">
                     {proOfferName}
                   </th>
                   {agentProConfigured ? (
-                    <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
+                    <th scope="col" className="px-4 py-2.5 text-center font-semibold">
                       Agent Pro
                     </th>
                   ) : null}
                 </tr>
               </thead>
               <tbody>
-                {FEATURE_COMPARISON.map(([label, free, pro], i) =>
+                {FEATURE_COMPARISON.map(([label, free, pro]) =>
                   !alertsLive &&
                   label === "Rate-drop alerts on saved deals" ? null : (
-                    <tr
-                      key={String(label)}
-                      className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}
-                    >
-                      <td className="px-4 py-3 text-foreground sm:px-6">
-                        {String(label)}
-                      </td>
+                    <tr key={label} className="border-b border-rule-soft">
+                      <th scope="row" className="py-2.5 pr-4 text-left font-normal">
+                        {label}
+                      </th>
                       <Cell value={free} />
-                      <Cell value={pro} pro />
+                      <Cell value={pro} />
                       {agentProConfigured ? (
-                        <Cell value={agentProCell(label, pro)} pro />
+                        <Cell value={agentProCell(label, pro)} />
                       ) : null}
                     </tr>
                   ),
@@ -629,47 +629,40 @@ export default async function PricingPage() {
               </tbody>
             </table>
           </ScrollX>
-        </section>
+        </Section>
 
-        {/* FAQ */}
-        <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">
-          <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Frequently asked
-          </h2>
-          <div className="tc-reveal mt-8 divide-y divide-border rounded-2xl border border-border bg-card">
-            {faqs.map((faq) => (
-              <details key={faq.q} className="group px-5 py-4 sm:px-6 sm:py-5">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                  <span className="font-semibold text-foreground">{faq.q}</span>
-                  <span
-                    aria-hidden
-                    className="text-2xl font-light text-muted-foreground transition-transform group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {faq.a}
-                </p>
-              </details>
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-col items-center gap-3 text-center">
-            <p className="text-sm text-muted-foreground">
-              Still have a question?{" "}
-              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                Email hello@usetruecap.com
-              </a>
-            </p>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Analyze a deal free →
-            </Link>
-          </div>
-        </section>
+        {/* FAQ: the shared ruled list. The page emits its own FAQPage below
+            (the same FAQS records), so the section adds none — one FAQPage
+            node per page, mirroring exactly the visible questions. The
+            page's close (the free action again) stays in the FAQ's block,
+            under the contact line, as it was before the restyle. */}
+        <FaqSection
+          id="faq"
+          heading="Frequently asked"
+          items={faqs}
+          structuredData={false}
+          contact={
+            <>
+              <p className="mt-4 text-base text-muted-foreground">
+                Still have a question?{" "}
+                <a
+                  href="mailto:hello@usetruecap.com"
+                  className="tc-link inline-flex min-h-11 items-center"
+                >
+                  Email hello@usetruecap.com
+                </a>
+              </p>
+              <ActionRow className="mt-6">
+                <Link
+                  href="/analyze" prefetch={false}
+                  className={buttonVariants({ size: "cta" })}
+                >
+                  Analyze a deal free
+                </Link>
+              </ActionRow>
+            </>
+          }
+        />
 
         {/* JSON-LD FAQPage for SEO */}
         <JsonLd
@@ -690,66 +683,41 @@ export default async function PricingPage() {
   );
 }
 
-function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
-  // sr-only text keeps the icon cells legible for screen readers and
+function Cell({ value }: { value: boolean | string }) {
+  // sr-only text keeps the mark cells legible for screen readers and
   // for crawlers/AI assistants — icon-only cells read as empty in
   // both, which made the whole Free-vs-Pro table invisible to them.
+  // Marks are ink (DESIGN.md Sign Rule: green is for a number's sign or
+  // a pass/fail, blue is for actions).
   return (
-    <td className="px-4 py-3 text-center sm:px-6">
+    <td className="px-4 py-2.5 text-center">
       {value === true ? (
         <>
-          <Check
-            aria-hidden
-            className={`mx-auto size-4 ${pro ? "text-primary" : "text-[var(--metric-positive)]"}`}
-          />
+          <Check aria-hidden className="mx-auto size-4 text-foreground" />
           <span className="sr-only">Included</span>
         </>
       ) : value === false ? (
         <>
-          <X aria-hidden className="mx-auto size-4 text-muted-foreground" />
+          <span aria-hidden className="text-muted-foreground">–</span>
           <span className="sr-only">Not included</span>
         </>
       ) : (
-        <span
-          className={`text-sm font-semibold ${pro ? "text-primary" : "text-foreground"}`}
-        >
-          {value}
-        </span>
+        <span className="text-sm">{value}</span>
       )}
     </td>
   );
 }
 
-function MobileFeatureValue({
-  value,
-  pro,
-}: {
-  value: boolean | string;
-  pro?: boolean;
-}) {
+function MobileFeatureValue({ value }: { value: boolean | string }) {
   if (value === true) {
     return (
-      <span
-        className={`inline-flex items-center gap-1.5 font-semibold ${pro ? "text-primary" : "text-foreground"}`}
-      >
+      <span className="inline-flex items-center gap-1.5">
         <Check aria-hidden className="size-4" /> Included
       </span>
     );
   }
   if (value === false) {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-        <X aria-hidden className="size-4" /> Not included
-      </span>
-    );
+    return <span className="text-muted-foreground">Not included</span>;
   }
-  return (
-    <span
-      className={
-        pro ? "font-semibold text-primary" : "font-semibold text-foreground"
-      }
-    >
-      {value}
-    </span>
-  );
+  return <span>{value}</span>;
 }

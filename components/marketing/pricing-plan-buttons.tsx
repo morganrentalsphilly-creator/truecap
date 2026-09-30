@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
+import { buttonVariants } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { CheckoutPlanSlug } from "@/lib/pricing-checkout-resume";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
@@ -17,6 +18,11 @@ type Slot = "free" | CheckoutPlanSlug;
  * - active subscribers manage/switch in Billing;
  * - authenticated non-subscribers see the exact immediate charge.
  * Signup never auto-opens Stripe and never schedules a future charge.
+ *
+ * Every branch is the 48px marketing button (DESIGN.md "Buttons"). A row of
+ * plan cards has one filled button: on /pricing the paid cards are the
+ * checkout, so the Pro card's action is "primary" and Free and Agent Pro are
+ * "secondary" (the outline button).
  */
 export function PricingPlanButtons({
   slot,
@@ -24,16 +30,24 @@ export function PricingPlanButtons({
   activePaidPlanSlug,
   priceLabel,
   checkoutReady = true,
+  emphasis = "primary",
 }: {
   slot: Slot;
   isAuthenticated: boolean;
   activePaidPlanSlug: string | null;
   priceLabel?: string;
   checkoutReady?: boolean;
+  /** "primary": the row's one filled button. "secondary": the outline one. */
+  emphasis?: "primary" | "secondary";
 }) {
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
+  const actionClass = buttonVariants({
+    size: "cta",
+    variant: emphasis === "primary" ? "default" : "outline",
+    className: "w-full",
+  });
 
   const startCheckout = (planSlug: CheckoutPlanSlug) => {
     track("checkout_started", {
@@ -67,12 +81,8 @@ export function PricingPlanButtons({
 
   if (slot === "free") {
     return (
-      <Link
-        href="/analyze" prefetch={false}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
-      >
+      <Link href="/analyze" prefetch={false} className={actionClass}>
         {isAuthenticated ? "Open the calculator" : "Analyze a property free"}
-        {!isAuthenticated ? <ArrowRight aria-hidden className="size-4" /> : null}
       </Link>
     );
   }
@@ -80,10 +90,7 @@ export function PricingPlanButtons({
   const paidCardDecision = decidePricingCardCta(activePaidPlanSlug, slot);
   if (paidCardDecision.kind !== "checkout") {
     return (
-      <Link
-        href="/profile#billing"
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
-      >
+      <Link href="/profile#billing" className={actionClass}>
         {paidCardDecision.label}
       </Link>
     );
@@ -96,9 +103,8 @@ export function PricingPlanButtons({
     return (
       <Link
         href={`/auth/sign-up?plan=${plan}&billing=${billing}&next=${encodeURIComponent("/dashboard/new")}`}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
+        className={actionClass}
       >
-        <Sparkles aria-hidden className="size-4" />{" "}
         {tierName === "Agent Pro"
           ? "Create a free account — no card"
           : `Start ${tierName} evaluation — no card`}
@@ -111,7 +117,7 @@ export function PricingPlanButtons({
       type="button"
       onClick={() => startCheckout(slot)}
       disabled={pending || !checkoutReady}
-      className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95 disabled:cursor-not-allowed disabled:opacity-60"
+      className={actionClass}
     >
       {!checkoutReady ? (
         "Billing setup pending"
@@ -120,9 +126,7 @@ export function PricingPlanButtons({
           <Loader2 aria-hidden className="size-4 animate-spin" /> Opening checkout…
         </>
       ) : (
-        <>
-          <Sparkles aria-hidden className="size-4" /> Subscribe — {priceLabel ?? "shown price"} today
-        </>
+        <>Subscribe — {priceLabel ?? "shown price"} today</>
       )}
     </button>
   );
