@@ -463,6 +463,52 @@ Every fix lands in one of these, never as a page-local override.
 - **Field:** white, 1px Ink 2 border (8.1:1 against white), 4px radius, 48px
   tall, 16px text on phones so iOS does not zoom.
 
+### As built in the rollout (2026-09-30)
+
+The pages after the homepage are composed from a small set of parts. Reach for
+these before writing page markup; a page that hand-rolls a hero, a feature grid
+or a close is the drift this pass removed.
+
+- **Page parts** (`components/marketing/page-parts.tsx`): `PageHero` (the
+  homepage hero's 5/7 grid and display voice; `aside` for an artifact in the
+  wide column, `asideWidth="shot"` when the artifact is a narrow phone
+  capture), `ActionRow`, `RuledList` (term and detail rows on rules, one or two
+  columns), `StepList` (DM Mono numerals, only for a real sequence), `Note` (a
+  caveat on the 1px Rule, never the heavy rule) and `CloseSection` (the page's
+  ask on the heavy rule: `stack` for a close whose actions are buttons, `split`
+  for a close that carries a block, such as /for-agents' price table).
+- **One rule under a hero.** Heroes carry `data-page-hero`; a `Section` that
+  follows one drops its own top rule, so pages never stack two 1px rules.
+- **Plan cards line up.** `PlanCard` is a CSS subgrid of five bands (name,
+  audience, price, answers, action), so prices, list rules and actions sit
+  level across a row with any parent grid. On /pricing the Pro card carries the
+  row's filled button, because there the paid cards are the checkout; on the
+  homepage the Free card does.
+- **Articles** (`components/marketing/article.tsx`): the `prose-ledger` utility
+  maps the typography plugin to the tokens (opt-in; `.prose` itself is not
+  redefined), the lede is a stand-first in ink at 20px, and the FAQ uses
+  `FaqSection variant="inline"`. The blog post template is
+  `/blog/1-percent-rule-rental-property`; the other posts get the frame in a
+  follow-up pass.
+- **Calculator pages**: the template is `/tools/1-percent-rule-calculator`
+  with `components/tools/tool-parts.tsx` (`ToolFrame`, `ToolResult`,
+  `ToolFormula`). The widget lays itself out by its own width (container
+  queries), so the same widget works in a partner's `/embed` iframe.
+- **Comparison pages**: `components/marketing/vs-page.tsx` (`VsHero`,
+  `VsMatrixTable`, the `VS_*` class strings). Every string stays in the page
+  files, where the SEO loop and the claim guards read it.
+  `lib/__tests__/vs-design-pass.test.ts` pins the grammar on all 38 pages so
+  the autopilot loop cannot bring the old look back.
+- **Screenshots**: `ProductShot` defaults to `frame="document"` (a rule, no
+  browser chrome); the fake browser frame is gone.
+- **Links below the fold prefetch on intent.** Content links, directory rows,
+  cross-links and secondary actions use `IntentPrefetchLink` (hover or
+  keyboard focus, never on scroll); a page's first-screen primary action stays
+  a plain `next/link`; `/analyze` is never prefetched.
+- **`cn()` knows the type ramp.** `lib/utils.ts` extends tailwind-merge with
+  the custom `--text-*` sizes and shadows, so a color class next to
+  `text-key-sm` no longer drops the size.
+
 ## The ledger as the hero
 
 The homepage hero shows the Verdict Ledger for the sample deal as HTML, not as
@@ -604,6 +650,18 @@ competing with it.
   and Offer Ceiling rows; the close sits on the hero's grid; orange is
   reserved for a miss, so the source table's tax-fallback flag is set in ink
   at 600. The run stays code-led: no image generation is configured.
+
+- 2026-09-30, rollout (the founder delegated the open calls: "do what is best
+  for the business and website", "prioritize converting agents"): the primary
+  action on every page is the analyzer, including the /vs closes (analyzer
+  filled and first, pricing outline); /pricing's Pro card carries the row's
+  filled button; the calculator template is the 1% rule page because the cap
+  rate calculator is unreleased; /embed keeps its structured data as it was
+  (no new FAQPage claim); partner iframes stay chrome-free on the paper; the
+  blog's First Offer Playbook capture is kept as it shipped (restyled, not
+  enlarged); copy changed only where it was untrue or broken ("the team
+  behind TrueCap", two /vs typos, the Pro card's duplicated four-answers note,
+  the signed-in upgrade line's title case).
 
 ## Do and don't
 
