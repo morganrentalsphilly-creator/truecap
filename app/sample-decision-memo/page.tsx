@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Fragment } from "react";
 
 import { Header } from "@/components/investcalc/header";
@@ -144,7 +148,10 @@ export default function SampleDecisionMemoPage() {
   ];
 
   // The page's actions: in the hero's first screen, and again where the
-  // reading ends. One filled button per row.
+  // reading ends. One filled button per row. Plain next/link: they are the
+  // first screen's primary actions, so /pricing keeps its default prefetch
+  // (the repeat at the end is the same route). Every link after the hero is
+  // IntentPrefetchLink (lib/__tests__/intent-prefetch-shared.test.ts).
   const memoActions = (
     <ActionRow>
       <Link
@@ -397,12 +404,12 @@ export default function SampleDecisionMemoPage() {
                 Targets: {SAMPLE_DEAL_FIXTURE.targetProfile.name}. The same sample
                 powers the homepage preview and the opened sample analysis.
               </p>
-              <Link
+              <IntentPrefetchLink
                 href="/methodology"
                 className="tc-link mt-2 inline-flex min-h-11 items-center text-base"
               >
                 Review the methodology
-              </Link>
+              </IntentPrefetchLink>
               {/* The close: the hero's actions again where the reading ends,
                   under the case the page has made, instead of a heading-less
                   slab of buttons. */}

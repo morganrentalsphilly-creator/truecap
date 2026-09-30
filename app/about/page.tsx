@@ -23,6 +23,10 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -154,9 +158,9 @@ export default function AboutPage() {
                 </p>
                 <p className="mt-4">
                   A{" "}
-                  <Link href="/pricing" className="tc-link">
+                  <IntentPrefetchLink href="/pricing" className="tc-link">
                     paid plan
-                  </Link>{" "}
+                  </IntentPrefetchLink>{" "}
                   adds unlimited saved deals you can edit, the Offer Ceiling and
                   downside checks on every deal, 10-year projections, a portfolio
                   dashboard, deal comparison, and lender-facing Pro report exports.
@@ -218,9 +222,9 @@ export default function AboutPage() {
                 <p className="mt-4">
                   Every formula the analyzer uses is documented, down to the
                   conventions, on the{" "}
-                  <Link href="/methodology" className="tc-link">
+                  <IntentPrefetchLink href="/methodology" className="tc-link">
                     methodology page
-                  </Link>
+                  </IntentPrefetchLink>
                   .
                 </p>
               </div>

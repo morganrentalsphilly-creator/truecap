@@ -23,6 +23,10 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import {
@@ -144,9 +148,9 @@ export default async function ReviewsPage() {
                 limits: cash flow, cap rate, DSCR, and the Offer Ceiling.
                 Nothing is hidden inside a model you cannot read.
               </p>
-              <Link href="/methodology" className={COLUMN_LINK_CLASS}>
+              <IntentPrefetchLink href="/methodology" className={COLUMN_LINK_CLASS}>
                 Read the methodology
-              </Link>
+              </IntentPrefetchLink>
             </div>
             <div className="flex flex-col border-b border-rule-soft py-4">
               <h3 className="text-lg font-semibold">Every assumption is labeled</h3>
@@ -215,9 +219,9 @@ export default async function ReviewsPage() {
                 detail: (
                   <>
                     Every formula is published, with its limits. Read it at{" "}
-                    <Link href="/methodology" className="tc-link">
+                    <IntentPrefetchLink href="/methodology" className="tc-link">
                       /methodology
-                    </Link>
+                    </IntentPrefetchLink>
                     .
                   </>
                 ),

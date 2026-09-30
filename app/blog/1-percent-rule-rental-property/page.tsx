@@ -14,6 +14,11 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+// The post's internal links prefetch on hover or keyboard focus
+// (IntentPrefetchLink), not as they scroll into view; /analyze links stay
+// next/link with prefetch={false}. A link the SEO loop adds is a plain <Link>,
+// as its skills write it (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import {
   ARTICLE_HEADER,
   ARTICLE_LEDE,
@@ -201,9 +206,9 @@ export default function OnePercentRulePost() {
           <header className={ARTICLE_HEADER}>
             <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
             <p className={ARTICLE_META}>
-              <Link href="/blog" className={ARTICLE_META_LINK}>
+              <IntentPrefetchLink href="/blog" className={ARTICLE_META_LINK}>
                 Blog
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               ·{" "}
               {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
@@ -260,12 +265,12 @@ export default function OnePercentRulePost() {
               point: the 1% rule exists to kill obviously bad listings in
               seconds so you only spend real time on the survivors. Run a few
               through the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="tc-link"
               >
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and you&apos;ll feel how brutally fast the filter is.
             </p>
 
@@ -300,12 +305,12 @@ export default function OnePercentRulePost() {
               that will probably appreciate fastest — doesn&apos;t come close.
               That tension between cash flow and appreciation is the rule&apos;s
               entire personality. The 1% rule is the opening move in the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwrite
-              </Link>
+              </IntentPrefetchLink>
               , not the closing argument.
             </p>
 
@@ -320,12 +325,12 @@ export default function OnePercentRulePost() {
             </p>
             <p>
               That makes it a cousin of the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/gross-rent-multiplier-explained"
                 className="tc-link"
               >
                 gross rent multiplier
-              </Link>
+              </IntentPrefetchLink>
               . Watch the algebra: if price = 100 × monthly rent, then price =
               100 ÷ 12 = <strong>8.3 × annual rent</strong>. So &quot;passes the
               1% rule&quot; is the same statement as &quot;has a gross rent
@@ -334,12 +339,12 @@ export default function OnePercentRulePost() {
               <em>monthly</em>-rent multiple; the GRM you&apos;ll see quoted
               uses annual rent, which is why the two numbers look so different.)
               If you prefer thinking in GRM, the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
               >
                 GRM calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               gets you to the same screen from the other direction.
             </p>
 
@@ -397,12 +402,12 @@ export default function OnePercentRulePost() {
               The deals that quietly broke in this shift are the 0.7–0.8%
               properties that gushed cash at 3.5% and now barely tread water.
               This is the same negative-leverage trap that makes a once-safe{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/what-is-a-good-cap-rate"
                 className="tc-link"
               >
                 cap rate look fine and still lose to the loan constant
-              </Link>
+              </IntentPrefetchLink>
               . The 1% rule didn&apos;t get wrong — the world underneath it
               moved, and the rule, being a fixed number, didn&apos;t notice.
             </p>
@@ -469,12 +474,12 @@ export default function OnePercentRulePost() {
               </Link>
               . If you&apos;re fuzzy on which metric answers which question, the
               guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
                 className="tc-link"
               >
                 cap rate vs cash-on-cash vs DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               draws the lines.
             </p>
 
@@ -485,12 +490,12 @@ export default function OnePercentRulePost() {
                 The denominator should be all-in cost, not list price.
               </strong>{" "}
               On a fixer or a{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/brrrr-method-explained"
                 className="tc-link"
               >
                 BRRRR deal
-              </Link>
+              </IntentPrefetchLink>
               , a $120,000 house that needs $40,000 of work and then rents for
               $1,400 looks like a screaming 1.17% against the purchase price —
               but against your true $160,000 all-in, it&apos;s 0.875% and fails.
@@ -614,12 +619,12 @@ export default function OnePercentRulePost() {
               &quot;bleeds.&quot; Use it to decide what to look at, never what
               to buy. Screen on all-in cost and real rent, then run the
               survivors through a full underwrite — PITI, reserves,{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
                 className="tc-link"
               >
                 cash-on-cash, and DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               — and the 1% rule goes back to doing the one job it&apos;s good
               at: getting you to a &quot;maybe&quot; fast.
             </p>

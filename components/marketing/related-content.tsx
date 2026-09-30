@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getRelatedContent, type RelatedKind } from "@/lib/related-content";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,11 @@ const KIND_LABEL: Record<string, string> = {
  * use (Sources, About TrueCap, Keep reading), so the end matter speaks in one
  * heading voice. It stays a <p>: the <nav>'s aria-label names the landmark,
  * and the pages' heading outline is left as it was.
+ *
+ * Below the fold on every page that mounts it, so the links are
+ * IntentPrefetchLink, never a plain next/link that prefetches on scroll
+ * (lib/__tests__/intent-prefetch-shared.test.ts). They keep F9's
+ * prefetch={false}; without it they would prefetch on hover or focus.
  */
 export function RelatedContent({
   kind,
@@ -47,7 +52,7 @@ export function RelatedContent({
       <ul className="mt-3 grid gap-x-8 sm:grid-cols-2">
         {links.map((link) => (
           <li key={link.href} className="min-w-0">
-            <Link
+            <IntentPrefetchLink
               href={link.href}
               prefetch={false}
               className="group inline-flex min-h-11 items-center gap-2.5 py-1 text-base"
@@ -56,7 +61,7 @@ export function RelatedContent({
                 {KIND_LABEL[link.kind]}
               </span>
               <span className="tc-link min-w-0 group-hover:text-primary-deep">{link.label}</span>
-            </Link>
+            </IntentPrefetchLink>
           </li>
         ))}
       </ul>

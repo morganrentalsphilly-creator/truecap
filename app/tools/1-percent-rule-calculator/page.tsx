@@ -15,6 +15,10 @@
 import { Fragment } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+// Internal links other than a first-screen primary action prefetch on hover
+// or keyboard focus, not as they scroll into view; /analyze links stay
+// next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getSiteUrl } from "@/lib/site-url";
 import { OnePercentRuleWidget } from "@/components/tools/one-percent-rule-widget";
 import { ToolFormula } from "@/components/tools/tool-parts";
@@ -139,9 +143,9 @@ export default function OnePercentRulePage() {
           aside={<OnePercentRuleWidget />}
         >
           <p className={ARTICLE_META}>
-            <Link href="/tools" className={ARTICLE_META_LINK}>
+            <IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>
               Free tools
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </PageHero>
 
@@ -162,12 +166,12 @@ export default function OnePercentRulePage() {
               <p>
                 That&apos;s it. No expenses, no financing, no projection — just a
                 5-second sanity check. For the full deal screen, the{" "}
-                <Link
+                <IntentPrefetchLink
                   href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                   className="tc-link"
                 >
                   60-second underwriting workflow
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 shows what to do next once a property clears this filter.
               </p>
 
@@ -185,13 +189,13 @@ export default function OnePercentRulePage() {
                 right.&rdquo; New investors and out-of-market buyers benefit from
                 the discipline. For the formal definition (and how it relates to
                 the{" "}
-                <Link href="/glossary/cap-rate" className="tc-link">
+                <IntentPrefetchLink href="/glossary/cap-rate" className="tc-link">
                   cap rate
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 metric), see the{" "}
-                <Link href="/glossary/1-percent-rule" className="tc-link">
+                <IntentPrefetchLink href="/glossary/1-percent-rule" className="tc-link">
                   1% rule glossary entry
-                </Link>
+                </IntentPrefetchLink>
                 .
               </p>
 
@@ -275,14 +279,14 @@ export default function OnePercentRulePage() {
               <p>
                 TrueCap handles steps 4 and 5 in about four minutes once you have
                 the inputs. Two sibling screens are worth knowing too: our{" "}
-                <Link href="/blog/50-percent-rule-rentals" className="tc-link">
+                <IntentPrefetchLink href="/blog/50-percent-rule-rentals" className="tc-link">
                   50% rule walkthrough
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 shows how to triage the expense side (does the rent survive
                 operating costs and the mortgage?), and the{" "}
-                <Link href="/tools/2-percent-rule-calculator" className="tc-link">
+                <IntentPrefetchLink href="/tools/2-percent-rule-calculator" className="tc-link">
                   2% rule calculator
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 covers the stricter cash-flow-market bar — including why a 2% deal
                 in 2026 deserves suspicion before celebration.
               </p>

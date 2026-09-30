@@ -8,10 +8,13 @@
  * analyzer CTA before the footer. The metadata, the three JSON-LD objects
  * and the date wiring are this file's contract with the SEO guards: keep
  * them as they are.
+ *
+ * Its one link, the "TrueCap Blog" date line, prefetches /blog on hover or
+ * keyboard focus (IntentPrefetchLink): it is not the post's primary action
+ * (lib/__tests__/intent-prefetch-shared.test.ts).
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { PostSources, type PostSource } from "@/components/blog/post-sources";
 import { Header } from "@/components/investcalc/header";
@@ -29,6 +32,7 @@ import {
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { FaqSection } from "@/components/marketing/faq-section";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -189,9 +193,9 @@ export function SourceFirstArticle({
         <header className={ARTICLE_HEADER}>
           <h1 className={ARTICLE_TITLE}>{titleWithPhrasesKept(article.title)}</h1>
           <p className={ARTICLE_META}>
-            <Link href="/blog" className={ARTICLE_META_LINK}>
+            <IntentPrefetchLink href="/blog" className={ARTICLE_META_LINK}>
               TrueCap Blog
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             ·{" "}
             {/* A date-only publishedAt is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(article.publishedAt).toLocaleDateString("en-US", {
