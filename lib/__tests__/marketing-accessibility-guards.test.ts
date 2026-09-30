@@ -78,11 +78,14 @@ describe("marketing small-text contrast", () => {
     expect(header).toContain("text-[var(--brand-orange-text)]");
 
     // The homepage sections lost their tinted pills in the 2026-09 design
-    // pass; the one colored note left (the property-tax default) uses the
-    // AA caution token, and nothing sets raw brand orange as text.
+    // pass. Orange now means a miss and nothing else (DESIGN.md color): it
+    // lives in the ledger's verdict, on the AA caution token, and the
+    // sections set no orange text of their own.
     const landing = read("components/marketing/landing-sections.tsx");
-    expect(landing).toContain("text-caution-text");
-    expect(landing).not.toMatch(/text-\[var\(--brand-orange\)\]|text-caution(?![-\w])/);
+    expect(landing).not.toMatch(/text-\[var\(--brand-orange\)\]|text-caution/);
+    expect(read("components/ledger/ledger-parts.tsx")).toContain(
+      'pass ? "text-positive" : "text-caution-text"',
+    );
 
     expect(read("components/investcalc/investcalc-page.tsx")).toContain(
       "text-[var(--brand-blue-text)] underline-offset-2"

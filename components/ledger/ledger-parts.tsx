@@ -12,6 +12,12 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * A non-breaking space, for joins that must not break at a line end: an
+ * operator and its figure ("≥ $750/mo"), an amount and its period.
+ */
+export const NBSP = String.fromCharCode(0xa0);
+
 /** Figure column widths, shared by every ledger grid and table on a page. */
 // The hero ledger sits in half the page between 1024 and 1279px, so its
 // figure columns step down to 9rem there and return to 13rem from xl, where

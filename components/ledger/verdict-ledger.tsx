@@ -21,6 +21,12 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { cn } from "@/lib/utils";
 
 const cell = "py-3 align-top sm:py-3.5";
+
+/** "Cash flow ≥ $750/mo" reads "cash flow ≥ $750/mo" mid-sentence; an
+ * acronym ("DSCR ≥ 1.25") keeps its capitals. */
+function inSentence(label: string): string {
+  return /^[A-Z][a-z]/.test(label) ? label[0].toLowerCase() + label.slice(1) : label;
+}
 const figure = "text-right text-base sm:text-lg lg:text-xl";
 
 export function VerdictLedger({
@@ -59,7 +65,7 @@ export function VerdictLedger({
             The sample deal at its asking price and at its Offer Ceiling
           </caption>
           <thead>
-            <tr className="border-b border-border text-sm text-muted-foreground sm:text-base">
+            <tr className="border-b border-border text-sm text-muted-foreground sm:text-base lg:text-sm xl:text-base">
               <th scope="col" className="py-2.5 text-left font-semibold">
                 <span className="sr-only">Line item</span>
               </th>
@@ -110,10 +116,10 @@ export function VerdictLedger({
                   "ledger-bleed-start pr-2 text-left font-medium",
                 )}
               >
-                Cash flow after reserves
+                Cash flow after reserves{" "}
                 {cashFlowTarget != null ? (
                   <span className="block text-sm font-normal text-muted-foreground">
-                    Target ≥ {formatLedgerDollars(cashFlowTarget)}/mo
+                    Target ≥&nbsp;{formatLedgerDollars(cashFlowTarget)}/mo
                   </span>
                 ) : null}
               </th>
@@ -144,10 +150,10 @@ export function VerdictLedger({
                 scope="row"
                 className={cn(cell, "pr-2 text-left font-medium")}
               >
-                DSCR
+                DSCR{" "}
                 {dscrTarget != null ? (
                   <span className="block text-sm font-normal text-muted-foreground">
-                    Target ≥ {dscrTarget}
+                    Target ≥&nbsp;{dscrTarget}
                   </span>
                 ) : null}
               </th>
@@ -204,7 +210,7 @@ export function VerdictLedger({
           ? `Asking price is ${formatLedgerDollars(ledger.belowAsking)} above the ceiling.`
           : "Asking price clears the sample targets."}
         {ledger.bindingTarget
-          ? ` Binding target: ${ledger.bindingTarget}.`
+          ? ` Binding target: ${inSentence(ledger.bindingTarget)}.`
           : null}
       </p>
       {walkthroughHref ? (

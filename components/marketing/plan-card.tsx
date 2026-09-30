@@ -50,8 +50,8 @@ export function PlanCard({
     >
       <h3 className="font-display text-2xl">{name}</h3>
       <p className="mt-1 text-base text-muted-foreground">{audience}</p>
-      <p className="mt-4 flex items-baseline gap-1">
-        <span className="font-mono text-key-sm font-medium tracking-[-0.02em] tabular-nums">
+      <p className="mt-4 flex flex-wrap items-baseline gap-x-1">
+        <span className="font-mono text-section-sm font-medium tracking-[-0.02em] tabular-nums min-[380px]:text-key-sm">
           {price}
         </span>
         {period ? (

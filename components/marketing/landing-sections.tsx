@@ -115,7 +115,7 @@ export function HowTrueCapWorks() {
           <OpenLedger
             ledger={ledger}
             notes={{
-              cashFlow: spineNote(analyze),
+              price: spineNote(analyze),
               buyBox: spineNote(screen),
               ceiling: spineNote(ceiling),
             }}
@@ -192,23 +192,29 @@ export function BuiltByInvestor() {
  */
 export function FinalCta() {
   return (
+    // The hero's grid: the case on the left, the field on the right, where
+    // the ledger stood at the top of the page.
     <Section rule="heavy" aria-labelledby="final-cta-heading">
-      <div className="max-w-2xl">
-        <SectionHeading id="final-cta-heading">
-          Paste the listing. Send the deal that already pencils.
-        </SectionHeading>
-        <p className="mt-4 max-w-[56ch] text-lg leading-relaxed text-muted-foreground">
-          Your first complete decision includes cash flow, cap rate, CoC, DSCR,
-          Buy Box fit, the Offer Ceiling, downside checks, and next
-          steps. No account or card required.
-        </p>
-        <HeroAddressForm placement="close" />
-        <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
-          Buying for your own portfolio?{" "}
-          <Link href="/for-investors" className="tc-link inline-flex min-h-11 items-center">
-            See TrueCap for investors
-          </Link>
-        </p>
+      <div className="grid gap-x-16 gap-y-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end">
+        <div>
+          <SectionHeading id="final-cta-heading">
+            Paste the listing. Send the deal that already pencils.
+          </SectionHeading>
+          <p className="mt-4 max-w-[56ch] text-lg leading-relaxed text-muted-foreground">
+            Your first complete decision includes cash flow, cap rate, CoC, DSCR,
+            Buy Box fit, the Offer Ceiling, downside checks, and next
+            steps. No account or card required.
+          </p>
+        </div>
+        <div>
+          <HeroAddressForm placement="close" className="max-w-none lg:mt-0" />
+          <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
+            Buying for your own portfolio?{" "}
+            <Link href="/for-investors" className="tc-link -my-3 inline-block py-3">
+              See TrueCap for investors
+            </Link>
+          </p>
+        </div>
       </div>
     </Section>
   );
@@ -767,7 +773,9 @@ export function DataSourcesSection() {
               <dd className="min-w-0 text-base leading-relaxed">
                 {s.source}
                 {s.flag ? (
-                  <span className="mt-1 block text-caution-text">{s.flag}</span>
+                  // Flagged in ink at 600: orange means a miss and
+                  // nothing else (DESIGN.md color).
+                  <span className="mt-1 block font-semibold">{s.flag}</span>
                 ) : null}
               </dd>
               <dd className="text-base leading-relaxed sm:col-start-2 lg:col-start-auto">
@@ -919,7 +927,7 @@ export async function PdfProUpsell() {
         "Complete: cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps.",
     },
     ...(freeCell("cash_flow") === true && freeCell("deal_score") === true
-      ? [{ term: "Every deal after that", detail: "Cash flow, cap rate, cash-on-cash, DSCR, and the 0–100 Deal score." }]
+      ? [{ term: "Every deal after that", detail: "Cash flow, cap rate, CoC, DSCR, and the 0–100 Deal score." }]
       : []),
     ...(typeof freeSaves === "string" ? [{ term: "Saved deals", detail: `${freeSaves}.` }] : []),
   ];
@@ -992,7 +1000,7 @@ export async function PdfProUpsell() {
           audience="Know what to offer on every deal."
           price={price.proMonthly}
           period="/mo"
-          priceNote={<>or {price.proAnnual} a year</>}
+          priceNote={<>or {price.proAnnual}&nbsp;a&nbsp;year</>}
           answers={proAnswers}
           action={
             <Link href="/pricing" className={ctaSecondary}>
@@ -1015,7 +1023,7 @@ export async function PdfProUpsell() {
             audience="Win investor clients."
             price={price.agentMonthly}
             period="/mo"
-            priceNote={<>or {price.agentAnnual} a year</>}
+            priceNote={<>or {price.agentAnnual}&nbsp;a&nbsp;year</>}
             answers={[
               { term: "A Buy Box per client", detail: "Up to 100 clients on your roster." },
               {
@@ -1038,9 +1046,16 @@ export async function PdfProUpsell() {
       <div
         role="region"
         aria-label="Free and Pro comparison"
-        className="mt-12 max-w-4xl border-t-2 border-foreground"
+        className={cn(
+          "mt-12 border-t-2 border-foreground",
+          // It compares Free and Pro, so it spans exactly the first two
+          // cards: two thirds of the row less half a gap (gap-5 = 1.25rem).
+          agentProConfigured
+            ? "md:w-[calc((100%-2.5rem)*2/3+1.25rem)]"
+            : "max-w-4xl",
+        )}
       >
-        <table className="w-full table-fixed border-collapse text-sm sm:text-base">
+        <table className="w-full table-fixed border-collapse text-sm [overflow-wrap:anywhere] sm:text-base">
           <colgroup>
             <col className="w-1/2" />
             <col className="w-1/4" />
@@ -1076,7 +1091,7 @@ export async function PdfProUpsell() {
                         readers / crawlers, not a wall of blank cells. */}
                     {cell === true ? (
                       <>
-                        <Check aria-hidden className="mx-auto size-4 text-positive" />
+                        <Check aria-hidden className="mx-auto size-4 text-foreground" />
                         <span className="sr-only">Included</span>
                       </>
                     ) : cell === false ? (

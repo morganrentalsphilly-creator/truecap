@@ -108,7 +108,7 @@ describe("the walkthrough ledger", () => {
     <OpenLedger
       ledger={ledger}
       notes={{
-        cashFlow: { lead: "Inputs note.", body: "Body." },
+        price: { lead: "Inputs note.", body: "Body." },
         buyBox: { lead: "Screen note.", body: "Body." },
         ceiling: { lead: "Ceiling note.", body: "Body." },
       }}
@@ -128,10 +128,11 @@ describe("the walkthrough ledger", () => {
       expect(index, fragment).toBeGreaterThan(-1);
       return index;
     };
-    // Inputs over the monthly arithmetic, the screen over the targets, the
-    // ceiling over its total.
-    expect(at("Cash flow after reserves")).toBeLessThan(at("Inputs note."));
-    expect(at("Inputs note.")).toBeLessThan(at("Rent"));
+    // DESIGN.md's order: the listing on Price, the screen over the targets,
+    // the ceiling over its total.
+    expect(at("Price")).toBeLessThan(at("Inputs note."));
+    expect(at("Inputs note.")).toBeLessThan(at("Down payment"));
+    expect(at("Inputs note.")).toBeLessThan(at("Cash flow after reserves"));
     expect(at("Meets the Buy Box")).toBeLessThan(at("Screen note."));
     expect(at("Screen note.")).toBeLessThan(at("Misses by"));
     expect(visible.lastIndexOf("Offer Ceiling")).toBeLessThan(at("Ceiling note."));

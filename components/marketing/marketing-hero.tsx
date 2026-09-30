@@ -3,11 +3,12 @@
  * visual (DESIGN.md "The ledger as the hero"; direction contract in
  * .impeccable/surfaces/app-page-tsx.md).
  *
- * Desktop: a 5/7 grid from 1280px, headline and the address form on the
- * left, the ledger in the wider column; halves between 1024 and 1279px, so
- * the headline keeps to four lines and the investor cue stays in the first
- * screen of a 1095x760 window. Phones: one column in reading order, so the
- * investor cue sits above the fold at 390px and the ledger starts under it.
+ * Desktop: a 5/7 grid from 1024px, headline and the address form on the
+ * left, the ledger in the wider column. The display size eases between 900
+ * and 1280px (--text-display) so the headline keeps to four lines and the
+ * investor cue stays in the first screen of a 1095x760 window. Phones: one
+ * column in reading order, so the investor cue sits above the fold at 390px
+ * and the ledger starts under it.
  *
  * SERVER COMPONENT. The ledger is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts) and ships as HTML: no screenshot,
@@ -34,7 +35,7 @@ export function MarketingHero() {
       <div
         className={cn(
           PAGE_CONTAINER,
-          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:items-start lg:pb-18 lg:pt-10 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16 xl:pt-14",
+          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:pb-18 lg:pt-8 xl:gap-x-16 xl:pt-14",
         )}
       >
         <div className="min-w-0">
@@ -80,7 +81,9 @@ export function MarketingHero() {
             className="mt-4 border-t border-rule-soft pt-2.5 text-base"
           >
             Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
-            <Link href="/for-investors" className="tc-link inline-flex min-h-11 items-center">
+            {/* A 44px tap target from padding that the negative margin takes
+                back out of the line box, so the cue keeps its body leading. */}
+            <Link href="/for-investors" className="tc-link -my-3 inline-block py-3">
               For investors
             </Link>
           </p>

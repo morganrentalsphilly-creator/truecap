@@ -74,7 +74,11 @@
      desaturated electric blue (hue 240, ~#0070c4). Single accent, sat
      dialed down per the taste-skill color-calibration rule. */
   --brand-blue: oklch(0.49 0.18 240);
-  --brand-blue-light: oklch(0.93 0.05 235);
+  /* A quiet blue wash for the surfaces not yet on the ledger primitives
+     (the app's Offer Ceiling card, older marketing heroes). It was a pale
+     cyan at chroma 0.05, which fought the warm Newsprint paper; DESIGN.md
+     keeps blue for actions, so the wash stays close to the paper. */
+  --brand-blue-light: oklch(0.935 0.02 240);
   /* Text-safe blue for small labels on --brand-blue-light (4.73:1).
      Keep --brand-blue/--primary unchanged for buttons, icons, and larger type. */
   --brand-blue-text: oklch(0.49 0.18 240);
@@ -309,6 +313,17 @@ textarea,
   box-shadow: 0.5rem 0 0 var(--band);
 }
 
+/* White means write (DESIGN.md "Color"). Older call sites pass
+   bg-background to a field because the page background used to be white;
+   on the paper that turned every analyzer field gray. A field that asks for
+   the page background gets the field white instead. Same layer, higher
+   specificity, so a caller's other bg-* choice still wins. */
+@layer utilities {
+  :is([data-slot="input"], [data-slot="select-trigger"], textarea).bg-background {
+    background-color: var(--field);
+  }
+}
+
 @keyframes ledger-rule-in {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -392,12 +407,21 @@ textarea,
   :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
     min-block-size: 2.75rem;
   }
+  /* DM Mono ships 400 and 500 only (app/layout.tsx). A figure inside a
+     semibold row asked for 600 and the browser smeared a faux bold over
+     tabular numerals; without synthesis it takes the 500 face, the key-figure
+     weight DESIGN.md sets. */
+  :where(.font-mono) {
+    font-synthesis-weight: none;
+  }
   /* Focus (DESIGN.md "Chrome"): a 3px Signal Blue outline, 2px out, on every
      control. !important makes it a floor. The shadcn primitives and older
      components set `outline-none` and drew a half-transparent ring instead,
      about 2.1:1 on paper where a focus indicator needs 3:1, and a normal
      utility in any layer loses to an important declaration. Menu items and
-     listbox options show focus with the band highlight instead; a -1
+     listbox options show focus with the band plus an inset 2px Signal Blue
+     ring instead (components/ui/dropdown-menu.tsx, select.tsx and the address
+     suggestions), since an outline would sit outside the menu; a -1
      tabindex marks a programmatic target (the skip link's <main>, a dialog
      panel), not a control. */
   :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):where(:not([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"])):focus-visible {
@@ -449,50 +473,41 @@ textarea,
       padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     }
   }
-  /* Fragment navigation aligns the target's block-start with the viewport top,
-     which knows nothing about the app header — a `sticky top-0 z-50` wrapper in
-     components/investcalc/header.tsx. 60 files link to /#main, so without a
-     scroll margin every one lands with the analyzer's heading behind that bar.
-
-     MEASURED ON PRODUCTION, because the first version of this rule guessed the
-     header was just its h-14 sm:h-16 row and was wrong on every phone:
-       375px  -> 56 (row) + 61 (marketing nav) = 118px
-       768px  -> 64 (row) + 61 (marketing nav) = 126px
-       1024px -> 65px (the nav is lg:hidden, so the stack collapses)
-     Values carry ~10px of headroom on purpose. Clearing by 1-2px satisfies a
-     >= assertion while leaving the heading flush against the bar, and any
-     later 3px of header growth silently reintroduces the original defect.
-     The flat marketing nav lives INSIDE the same sticky wrapper until lg, so
-     the step down belongs at lg — not at sm, where the first version put it
-     and left mobile 54px short. The .dashboard-shell rules below are more
-     specific and keep overriding all of this for dashboard chrome. */
+  /* Keep keyboard focus and fragment targets clear of the sticky header and
+     of any fixed bottom bar (WCAG 2.4.11, focus not obscured). Scroll padding
+     applies to focus scrolling and to fragment links alike, so it replaces
+     the per-target #main margins, which were sized for a two-row header that
+     no longer exists. MEASURED 2026-09-30 on a production build: the sticky
+     header is one row, 57px below 640px and 65px from 640px, on / and
+     /analyze. 4.5rem (72px) clears both with headroom. The dashboard shell
+     has its own Topbar and keeps the .dashboard-shell #main rules below. */
+  html:not(:has(.dashboard-shell)) {
+    scroll-padding-top: 4.5rem;
+  }
+  /* The bottom bars: the conversion, blog and tools bars (53-57px) and the
+     cookie banner (about 76px on a phone, 100px at desktop widths). */
+  html:has([data-sticky-bottom-bar]) {
+    scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  html:has([data-cookie-consent-banner]) {
+    scroll-padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+  body:has([data-cookie-consent-banner]) [data-site-footer] {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+  @media (max-width: 1023.9px) {
+    html:has([data-sticky-calc-bar]) {
+      scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+  }
   #main {
-    scroll-margin-top: 8rem;
+    scroll-margin-top: 0rem;
   }
-  @media (min-width: 640px) {
-    #main {
-      scroll-margin-top: 8.5rem;
-    }
-  }
-  @media (min-width: 1024px) {
-    #main {
-      scroll-margin-top: 4.5rem;
-    }
-  }
-  /* Signed-in free users also carry the h-9 (36px) upgrade bar. Excluded on
-     .dashboard-shell because :has() on an attribute outranks that override. */
+  /* Signed-in free users also carry the h-9 (36px) upgrade bar above the
+     header: 2.5rem on top of the scroll padding. Excluded on .dashboard-shell
+     because :has() on an attribute outranks that override. */
   body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
-    scroll-margin-top: 10rem;
-  }
-  @media (min-width: 640px) {
-    body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
-      scroll-margin-top: 10.5rem;
-    }
-  }
-  @media (min-width: 1024px) {
-    body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
-      scroll-margin-top: 7rem;
-    }
+    scroll-margin-top: 2.5rem;
   }
   /* "Skip to content" (root layout + DashboardShell) targets <main id="main">,
      and fragment navigation aligns the target's block-start with the viewport
