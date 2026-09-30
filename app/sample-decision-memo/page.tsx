@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, ShieldAlert } from "lucide-react";
 
 import { Header } from "@/components/investcalc/header";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import { LedgerFigure, LedgerTotal } from "@/components/ledger/ledger-parts";
+import { ActionRow, PageHero } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { buttonVariants } from "@/components/ui/button";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { buildOfferCeilingPresentation } from "@/lib/offer-ceiling";
@@ -21,6 +24,7 @@ import {
   formatSignedPct,
 } from "@/lib/financial-presentation";
 import type { GLOSSARY } from "@/lib/glossary";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Sample Rental Decision Memo",
@@ -53,6 +57,19 @@ export const metadata: Metadata = {
 
 const money = (value: number) =>
   `${value < 0 ? "-" : ""}$${Math.abs(Math.round(value)).toLocaleString("en-US")}`;
+
+/** A ruled ledger row (the OpenLedger grammar): label left, value right. */
+const LEDGER_ROW = "flex justify-between gap-4 border-t border-rule-soft py-2.5";
+
+/**
+ * A memo list: opened by the heavy rule, one soft rule under each item. The
+ * measure caps the list, not the items, so every rule runs the same width
+ * (StepList's grammar); the type size sits on the list so 62ch still counts
+ * the items' characters.
+ */
+const MEMO_LIST =
+  "mt-4 max-w-[62ch] border-t-2 border-foreground text-base leading-relaxed sm:text-lg";
+const MEMO_LIST_ITEM = "text-pretty border-b border-rule-soft py-4";
 
 export default function SampleDecisionMemoPage() {
   const { analysis, dealScore, maxOffer } = calculateSampleDealOutcome();
@@ -114,123 +131,146 @@ export default function SampleDecisionMemoPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header initialUser={null} initialEntitlements={null} />
-      <main id="main">
-        <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-          <div className="rounded-2xl border border-caution/30 bg-caution-light px-4 py-3 text-sm text-caution-text">
-            <strong>Illustrative sample — not a customer result.</strong> The
-            address and every input below are illustrative assumptions, not
-            verified property facts.
-          </div>
+      {/* One <main>: scripts/capture-screenshots.ts shoots main.first() on
+          this route for the homepage's memo image (MEMO_SHOT). */}
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="Doesn't meet your targets at asking."
+          lede={`Sample decision memo · ${SAMPLE_DEAL_FIXTURE.display.shortAddress} · asking ${money(values.purchasePrice)}`}
+        >
+          {/* The truth label stays in the first screen (app/for-agents says
+              the memo is labeled as not a customer result). Under the lede,
+              on a soft rule, in ink: a label above the H1 would be an
+              eyebrow, and orange means a miss. */}
+          <p className="mt-4 max-w-[68ch] text-pretty border-t border-rule-soft pt-2.5 text-base">
+            <strong className="font-semibold">
+              Illustrative sample — not a customer result.
+            </strong>{" "}
+            The address and every input below are illustrative assumptions,
+            not verified property facts.
+          </p>
+        </PageHero>
 
-          <header className="mt-8 border-b border-border pb-8">
-            <h1 className="text-balance text-3xl font-extrabold tracking-tight sm:text-5xl">
-              Doesn&apos;t meet your targets at asking.
-            </h1>
-            <p className="mt-3 text-lg text-muted-foreground">
-              Sample decision memo · {SAMPLE_DEAL_FIXTURE.display.shortAddress} ·
-              asking {money(values.purchasePrice)}
-            </p>
-          </header>
-
-          <section
-            aria-labelledby="sample-decision"
-            className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]"
-          >
-            <article className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm sm:p-6">
-              <h2
-                id="sample-decision"
-                className="text-xs font-extrabold uppercase tracking-widest text-primary"
-              >
-                Offer Ceiling
-              </h2>
-              <p className="mt-2 font-mono text-4xl font-extrabold tabular-nums text-primary sm:text-5xl">
-                {money(maxOffer.maxPrice)}
-              </p>
-              <p className="mt-2 text-sm font-semibold">
+        <Section aria-labelledby="sample-decision" rhythm="tight" rule="none">
+          <div className="grid gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            {/* The decision: the Offer Ceiling as the memo's one total, over
+                the double rule (no draw: the homepage keeps the one motion). */}
+            <div className="min-w-0 border-t-2 border-foreground">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 pb-2 pt-5">
+                <h2
+                  id="sample-decision"
+                  className="font-display text-balance text-h3-sm sm:text-2xl"
+                >
+                  Offer Ceiling
+                </h2>
+                <LedgerTotal className="text-key-sm lg:text-key">
+                  {money(maxOffer.maxPrice)}
+                </LedgerTotal>
+              </div>
+              <p className="mt-3 text-base font-semibold">
                 {SAMPLE_DEAL_FIXTURE.targetProfile.name} ·{" "}
                 {describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)}
               </p>
-              <p className="mt-3 text-sm text-muted-foreground">
+              <p className="mt-1 text-pretty text-base text-muted-foreground">
                 The asking price is{" "}
                 {money(values.purchasePrice - maxOffer.maxPrice)} above this
                 ceiling.
               </p>
-              <dl className="mt-5 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Binding
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold">
+              <dl className="mt-4 text-base">
+                <div className={LEDGER_ROW}>
+                  <dt>Binding</dt>
+                  <dd className="text-right">
                     {ceiling.bindingConstraints
                       .map((item) => item.criterion)
                       .join(" + ") || "Not resolved"}
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Next constraint
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold">
+                <div className={LEDGER_ROW}>
+                  <dt>Next constraint</dt>
+                  <dd className="text-right">
                     {ceiling.nextConstraint?.criterion ?? "None"}
                   </dd>
                 </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Screening range
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold">
-                    {ceiling.range.lower == null
-                      ? "No feasible downside price"
-                      : money(ceiling.range.lower)}
+                {/* A grid, so the "If …" note can run the row's full width
+                    under the label and the figures. */}
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 border-t border-rule-soft py-2.5">
+                  <dt>Screening range</dt>
+                  <dd className="text-right">
+                    {ceiling.range.lower == null ? (
+                      "No feasible downside price"
+                    ) : (
+                      <LedgerFigure>{money(ceiling.range.lower)}</LedgerFigure>
+                    )}
                     –
-                    {ceiling.range.upper == null
-                      ? "No feasible upside price"
-                      : money(ceiling.range.upper)}
-                    <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                      If {ceiling.range.label}.
-                    </span>
+                    {ceiling.range.upper == null ? (
+                      "No feasible upside price"
+                    ) : (
+                      <LedgerFigure>{money(ceiling.range.upper)}</LedgerFigure>
+                    )}
+                  </dd>
+                  <dd className="col-span-2 mt-1 text-pretty text-sm text-muted-foreground">
+                    If {ceiling.range.label}.
                   </dd>
                 </div>
               </dl>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                The highest price that still meets{" "}
-                {SAMPLE_DEAL_FIXTURE.targetProfile.name} under the assumptions
-                shown.
-              </p>
-            </article>
+              {/* The rule closes the ledger at the rows' width; the measure
+                  caps only the text under it (OpenLedger's closing line). */}
+              <div className="border-t border-border pt-3">
+                <p className="max-w-[62ch] text-pretty text-sm leading-relaxed text-muted-foreground">
+                  The highest price that still meets{" "}
+                  {SAMPLE_DEAL_FIXTURE.targetProfile.name} under the assumptions
+                  shown.
+                </p>
+              </div>
+            </div>
 
-            <article className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-              <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
+            <div className="min-w-0 border-t-2 border-foreground">
+              <h2 className="font-display text-balance py-2.5 text-h3-sm sm:text-2xl">
                 Base economics at asking
               </h2>
-              <dl className="mt-4 grid grid-cols-2 gap-4">
+              <dl>
                 {baseEconomics.map(({ label, term, value, toneClass }) => (
-                  <div key={label}>
-                    <dt className="text-xs text-muted-foreground">
-                      <GlossaryTip term={term} className="!no-underline">
+                  <div
+                    key={label}
+                    className="flex items-baseline justify-between gap-4 border-t border-rule-soft"
+                  >
+                    {/* The dotted underline marks a defined term (DESIGN.md,
+                        the OWID reference); it carries the affordance, so
+                        the help icon stays off. */}
+                    <dt className="text-base">
+                      <GlossaryTip term={term} showIcon={false}>
                         {label}
                       </GlossaryTip>
                     </dt>
-                    <dd
-                      className={`mt-1 font-mono text-lg font-extrabold tabular-nums ${toneClass ?? "text-foreground"}`}
-                    >
-                      {value}
+                    <dd>
+                      <LedgerFigure
+                        className={cn("text-lg", toneClass ?? "text-foreground")}
+                      >
+                        {value}
+                      </LedgerFigure>
                     </dd>
                   </div>
                 ))}
               </dl>
-              <p className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground">
+              <p className="text-pretty border-t border-border pt-3 text-sm text-muted-foreground">
                 Deal score {Math.round(dealScore.score)}/100 · a heuristic
                 summary of the modeled numbers.
               </p>
-            </article>
-          </section>
+            </div>
+          </div>
+        </Section>
 
-          <section aria-labelledby="memo-what" className="mt-8">
-            <h2 id="memo-what" className="text-lg font-extrabold">
+        <Section aria-labelledby="memo-what" rhythm="tight">
+          <div className="max-w-[68ch]">
+            {/* Every h2 on the page takes one size, so this aside does not
+                outrank the Offer Ceiling heading above it. */}
+            <h2
+              id="memo-what"
+              className="font-display text-balance text-h3-sm sm:text-2xl"
+            >
               What a decision memo is
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
               A decision memo is the written form of an analysis: the answer at
               asking price, the Offer Ceiling with the targets that produced
               it, the cash flow after reserves and the DSCR that drove the
@@ -244,64 +284,72 @@ export default function SampleDecisionMemoPage() {
               analysis, so what you see here is exactly what a real deal
               produces.
             </p>
-          </section>
+          </div>
+        </Section>
 
-          <section className="mt-8 grid gap-4 md:grid-cols-2">
-            <article className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="size-5 text-caution-text" aria-hidden />
-                <h2 className="text-lg font-extrabold">
-                  What could break the decision?
-                </h2>
-              </div>
-              <ul className="mt-4 space-y-3 text-sm leading-relaxed">
-                <li>
-                  <strong>Rent:</strong> {money(values.monthlyRent ?? 0)}/mo is
-                  a scenario assumption; a signed lease or rent roll could move
-                  the ceiling materially.
+        <Section rhythm="tight">
+          <div className="grid gap-x-16 gap-y-12 lg:grid-cols-2">
+            <div className="min-w-0">
+              <h2 className="font-display text-balance text-h3-sm sm:text-2xl">
+                What could break the decision?
+              </h2>
+              <ul className={MEMO_LIST}>
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">Rent:</strong>{" "}
+                  {money(values.monthlyRent ?? 0)}/mo is a scenario assumption;
+                  a signed lease or rent roll could move the ceiling
+                  materially.
                 </li>
-                <li>
-                  <strong>Financing:</strong> {values.interestRate}% at{" "}
-                  {values.downPaymentPct}% down is not a quote. Rate, points,
-                  PMI, and reserves can change cash flow and DSCR.
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">Financing:</strong>{" "}
+                  {values.interestRate}% at {values.downPaymentPct}% down is
+                  not a quote. Rate, points, PMI, and reserves can change cash
+                  flow and DSCR.
                 </li>
-                <li>
-                  <strong>Operating costs:</strong> taxes, insurance, vacancy,
-                  maintenance, management, and CapEx are screening inputs—not
-                  verified bills or bids.
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">Operating costs:</strong>{" "}
+                  taxes, insurance, vacancy, maintenance, management, and CapEx
+                  are screening inputs—not verified bills or bids.
                 </li>
               </ul>
-            </article>
+            </div>
 
-            <article className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-5 text-positive" aria-hidden />
-                <h2 className="text-lg font-extrabold">
-                  What should I verify next?
-                </h2>
-              </div>
-              <ol className="mt-4 space-y-3 text-sm leading-relaxed">
-                <li>
-                  <strong>1. Income:</strong> confirm contract rent,
-                  concessions, utilities, and current occupancy.
+            <div className="min-w-0">
+              <h2 className="font-display text-balance text-h3-sm sm:text-2xl">
+                What should I verify next?
+              </h2>
+              {/* The numbers are typed copy, so the list keeps no markers of
+                  its own. */}
+              <ol className={cn(MEMO_LIST, "list-none")}>
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">1. Income:</strong> confirm
+                  contract rent, concessions, utilities, and current
+                  occupancy.
                 </li>
-                <li>
-                  <strong>2. Debt:</strong> obtain a written investor-loan quote
-                  with rate, points, DSCR definition, escrows, and reserve
-                  requirements.
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">2. Debt:</strong> obtain a
+                  written investor-loan quote with rate, points, DSCR
+                  definition, escrows, and reserve requirements.
                 </li>
-                <li>
-                  <strong>3. Property costs:</strong> verify post-transfer
-                  taxes, insurance, inspection findings, and near-term capital
-                  work.
+                <li className={MEMO_LIST_ITEM}>
+                  <strong className="font-semibold">3. Property costs:</strong>{" "}
+                  verify post-transfer taxes, insurance, inspection findings,
+                  and near-term capital work.
                 </li>
               </ol>
-            </article>
-          </section>
+            </div>
+          </div>
+        </Section>
 
-          <section className="mt-8 rounded-2xl border border-border bg-muted/30 p-5 text-sm sm:p-6">
-            <h2 className="font-extrabold">Methodology and scope</h2>
-            <p className="mt-2 leading-relaxed text-muted-foreground">
+        <Section aria-labelledby="memo-method" rhythm="tight">
+          <div className="max-w-[68ch]">
+            <h2
+              id="memo-method"
+              className="font-display text-balance text-h3-sm sm:text-2xl"
+            >
+              Methodology and scope
+            </h2>
+            <p className="mt-3 text-pretty text-base leading-relaxed text-muted-foreground">
               Generated from TrueCap&apos;s sample deal using the{" "}
               {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
               Targets: {SAMPLE_DEAL_FIXTURE.targetProfile.name}. The same sample
@@ -309,29 +357,30 @@ export default function SampleDecisionMemoPage() {
             </p>
             <Link
               href="/methodology"
-              className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
+              className="tc-link mt-2 inline-flex min-h-11 items-center text-base"
             >
-              Review the methodology{" "}
-              <ArrowRight className="ml-1 size-4" aria-hidden />
+              Review the methodology
             </Link>
-          </section>
+          </div>
+        </Section>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Section rule="heavy" rhythm="tight">
+          <ActionRow>
             <Link
               href="/analyze"
               prefetch={false}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground"
+              className={buttonVariants({ size: "cta" })}
             >
-              Analyze a Deal <ArrowRight className="ml-2 size-4" aria-hidden />
+              Analyze a deal
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 font-bold"
+              className={buttonVariants({ variant: "outline", size: "cta" })}
             >
-              See Decision Memo access
+              See decision memo access
             </Link>
-          </div>
-        </div>
+          </ActionRow>
+        </Section>
       </main>
       <SiteFooter />
     </div>
