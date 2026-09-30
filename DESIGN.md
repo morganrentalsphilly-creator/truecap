@@ -345,7 +345,7 @@ a screenshot:
 1280px ─────────────────────────────────────────────────────────────────────
  TrueCap   Analyze  For agents  For investors  Pricing  Learn   Sign in [Create account]
 ─────────────────────────────────────────────────────────────────────────────
- Stop forwarding listings.       │ Philadelphia rental example    Synthetic sample
+ Stop forwarding listings.       │ Philadelphia rental example         Sample deal
  Start sending deals that        │═════════════════════════════════════════════════
  already pencil.                 │                        At asking  At the Offer Ceiling
                                  │ Price                  $265,000        $236,000
@@ -368,7 +368,8 @@ a screenshot:
   and 390×844 the cue sits above the fold and the ledger's head starts at it.
 - **Copy:** the copy pass's H1, subhead, CTA, sample link, risk line and
   investor cue, unchanged. The arrow suffixes go ("See the sample deal", "For
-  investors").
+  investors"). The ledger's caption calls it the sample deal, never
+  "synthetic" (`docs/voice.md` bans that word as internal vocabulary).
 - **Implementation:** a server render of the real sample-deal calculation at
   build time. The page calls `calculateSampleDealOutcome()` (the same
   `calculateAnalysis` and `calculateMaxAllowableOffer` the app uses) and renders
