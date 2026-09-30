@@ -278,22 +278,21 @@ export function SocialProof() {
   );
 }
 
-// ───────────────────────────────────────── Vs competitors (consolidated)
+// ───────────────────────────────────────── Why TrueCap: the workflow comparison
 /**
- * Single "Why TrueCap" comparison matrix covering BOTH the spreadsheet
- * objection and the DealCheck / BiggerPockets objection. Previously
- * there were two separate tables back-to-back; design critique flagged
- * that as "two walls of we're better" fighting for the same attention.
- * Consolidated here:
- *   - Spreadsheet column: where it falls down (text annotations)
- *   - DealCheck / BiggerPockets columns: feature parity vs gaps
- *   - TrueCap column: branded, primary, highlighted
+ * The /why-truecap comparison (that page is its only caller; its hero carries
+ * the H1 and the lede). Three workflows set as ruled columns under one heavy
+ * rule, each with its name as the heading, the thesis under it and a ruled
+ * definition list (PlanCard's grammar without the card). No column is
+ * emphasised: blue means "act here" (DESIGN.md color), and the block argues
+ * it is a fair comparison. From 1024px the columns share their rows
+ * (subgrid), so "Best when" and "Tradeoff" line up across them; stacked on a
+ * phone, each column opens on its own heavy rule.
  *
- * Rows ordered by descending discriminator value - start with the
- * differences that matter most (free tier depth, address auto-fill),
- * end with the price/pricing line so the reader leaves with cost
- * context. The "highlight" flag bolds rows where TrueCap is uniquely
- * differentiated against ALL three alternatives.
+ * Then "A deliberately fair comparison" in the same grammar: when DealCheck
+ * fits better and when TrueCap does, each list with the competitor's own
+ * pages linked as the source. The claims stay as written; the links are
+ * their substantiation.
  */
 const WORKFLOW_COMPARISONS = [
   {
@@ -322,140 +321,135 @@ const WORKFLOW_COMPARISONS = [
   },
 ] as const;
 
-// ───────────────────────────────────────── Press / "As featured in"
 export function VsCompetitors() {
   return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-10 text-center sm:mb-12">
-          <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Choose the workflow that fits how you invest.
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            These tools overlap. The meaningful difference is how they move you
-            from a listing to a decision—not whether one can win every feature
-            row.
-          </p>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {WORKFLOW_COMPARISONS.map((item) => (
-            <article
-              key={item.name}
-              className={`rounded-2xl border p-6 ${
-                item.name === "TrueCap"
-                  ? "border-primary/35 bg-primary/[0.04]"
-                  : "border-border bg-card"
-              }`}
-            >
-              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-                {item.name}
-              </p>
-              <h3 className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
-                {item.thesis}
-              </h3>
-              <dl className="mt-5 space-y-4 text-sm leading-relaxed">
-                <div>
-                  <dt className="font-bold text-foreground">Best when</dt>
-                  <dd className="mt-1 text-muted-foreground">{item.bestFor}</dd>
-                </div>
-                <div>
-                  <dt className="font-bold text-foreground">Tradeoff</dt>
-                  <dd className="mt-1 text-muted-foreground">
-                    {item.tradeoff}
-                  </dd>
-                </div>
-              </dl>
-            </article>
-          ))}
-        </div>
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h3 className="text-lg font-extrabold text-foreground">
-            A deliberately fair comparison
-          </h3>
-          <div className="mt-4 grid gap-6 text-sm leading-relaxed md:grid-cols-2">
-            <div>
-              <p className="font-bold text-foreground">
-                DealCheck may fit better if you want
-              </p>
-              <ul className="mt-2 space-y-1.5 text-muted-foreground">
-                <li>Native iOS and Android apps.</li>
-                <li>
-                  Established listing-import and property-comparison workflows.
-                </li>
-                <li>
-                  Its Offer Calculator and custom purchase-criteria workflow.
-                </li>
-                <li>A branded PDF report on every plan, including free.</li>
-              </ul>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Verify on DealCheck&apos;s official{" "}
-                <a
-                  className="underline hover:text-foreground"
-                  href="https://dealcheck.io/pricing/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  pricing
-                </a>
-                ,{" "}
-                <a
-                  className="underline hover:text-foreground"
-                  href="https://help.dealcheck.io/en/articles/2047630-using-the-offer-calculator-to-calculate-offers-to-sellers"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Offer Calculator
-                </a>
-                , and{" "}
-                <a
-                  className="underline hover:text-foreground"
-                  href="https://help.dealcheck.io/en/articles/2259844-screening-properties-with-custom-investment-criteria"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  criteria
-                </a>{" "}
-                pages.
-              </p>
-            </div>
-            <div>
-              <p className="font-bold text-foreground">
-                TrueCap may fit better if you want
-              </p>
-              <ul className="mt-2 space-y-1.5 text-muted-foreground">
-                <li>
-                  A no-signup, address-first screen with editable sourced
-                  assumptions.
-                </li>
-                <li>Buy Box fit on every deal.</li>
-                <li>
-                  Offer Ceiling, downside, and a decision-review package in one
-                  sequence.
-                </li>
-                <li>
-                  Screening for investor clients: a Buy Box per client,
-                  client-report links that open without an account, and a
-                  co-branded decision memo.
-                </li>
-              </ul>
-              <p className="mt-3 text-xs text-muted-foreground">
-                BiggerPockets may fit better for its community and education
-                ecosystem; see its official{" "}
-                <a
-                  className="underline hover:text-foreground"
-                  href="https://www.biggerpockets.com/rental-property-calculator"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Rental Property Calculator
-                </a>
-                .
-              </p>
-            </div>
+    // No top rule: the page hero's bottom rule already sits above it.
+    <Section rule="none" aria-labelledby="why-truecap-workflows-heading">
+      <SectionHeading id="why-truecap-workflows-heading" className="max-w-3xl">
+        Choose the workflow that fits how you invest.
+      </SectionHeading>
+      {/* One heavy rule opens the three columns from 1024px; stacked on a
+          phone, each column opens on its own. */}
+      <div className="mt-8 grid gap-y-10 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-0 lg:border-t-2 lg:border-foreground">
+        {WORKFLOW_COMPARISONS.map((item) => (
+          <article
+            key={item.name}
+            className="min-w-0 max-w-[68ch] border-t-2 border-foreground pt-5 lg:row-span-4 lg:grid lg:max-w-none lg:grid-rows-subgrid lg:border-t-0"
+          >
+            <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
+              {item.name}
+            </h3>
+            <p className="mt-1 text-pretty text-lg font-semibold">{item.thesis}</p>
+            <dl className="mt-4 border-t border-border text-base lg:row-span-2 lg:grid lg:grid-rows-subgrid">
+              <div className="border-b border-rule-soft py-2.5">
+                <dt className="font-semibold">Best when</dt>
+                <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
+                  {item.bestFor}
+                </dd>
+              </div>
+              <div className="border-b border-rule-soft py-2.5">
+                <dt className="font-semibold">Tradeoff</dt>
+                <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
+                  {item.tradeoff}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      <div className="mt-14 sm:mt-16">
+        <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
+          A deliberately fair comparison
+        </h3>
+        <div className="mt-6 grid gap-x-12 gap-y-10 md:grid-cols-2 md:border-t-2 md:border-foreground">
+          <div className="min-w-0 border-t-2 border-foreground pt-4 md:border-t-0">
+            <p className="text-lg font-semibold">
+              DealCheck may fit better if you want
+            </p>
+            <ul className="mt-3 border-t border-border text-base leading-relaxed">
+              <li className="border-b border-rule-soft py-2.5">
+                Native iOS and Android apps.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                Established listing-import and property-comparison workflows.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                Its Offer Calculator and custom purchase-criteria workflow.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                A branded PDF report on every plan, including free.
+              </li>
+            </ul>
+            <p className="mt-3 max-w-[64ch] text-pretty text-sm leading-relaxed text-muted-foreground">
+              Verify on DealCheck&apos;s official{" "}
+              <a
+                className="tc-link"
+                href="https://dealcheck.io/pricing/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                pricing
+              </a>
+              ,{" "}
+              <a
+                className="tc-link"
+                href="https://help.dealcheck.io/en/articles/2047630-using-the-offer-calculator-to-calculate-offers-to-sellers"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Offer Calculator
+              </a>
+              , and{" "}
+              <a
+                className="tc-link"
+                href="https://help.dealcheck.io/en/articles/2259844-screening-properties-with-custom-investment-criteria"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                criteria
+              </a>{" "}
+              pages.
+            </p>
+          </div>
+          <div className="min-w-0 border-t-2 border-foreground pt-4 md:border-t-0">
+            <p className="text-lg font-semibold">
+              TrueCap may fit better if you want
+            </p>
+            <ul className="mt-3 border-t border-border text-base leading-relaxed">
+              <li className="border-b border-rule-soft py-2.5">
+                A no-signup, address-first screen with editable sourced
+                assumptions.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                Buy Box fit on every deal.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                Offer Ceiling, downside, and a decision-review package in one
+                sequence.
+              </li>
+              <li className="border-b border-rule-soft py-2.5">
+                Screening for investor clients: a Buy Box per client,
+                client-report links that open without an account, and a
+                co-branded decision memo.
+              </li>
+            </ul>
+            <p className="mt-3 max-w-[64ch] text-pretty text-sm leading-relaxed text-muted-foreground">
+              BiggerPockets may fit better for its community and education
+              ecosystem; see its official{" "}
+              <a
+                className="tc-link"
+                href="https://www.biggerpockets.com/rental-property-calculator"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Rental Property Calculator
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 
