@@ -14,18 +14,20 @@
  * homepage's "Built by a rental investor" block (no new top-level nav,
  * per the product principle in CLAUDE.md §1).
  *
- * Layout (DESIGN.md, 2026-09 design pass): PageHero for the head, then one
- * Section per block on the homepage's 5/7 split (the heading on the rule,
- * the text beside it from 1024px, stacked below), and the close on the 2px
- * ink rule. No typography plugin: each block sets its own reading column.
+ * Layout (DESIGN.md, 2026-09 design pass): PageHero for the head with the
+ * page's one primary action, then one Section per block in BuiltByInvestor's
+ * stacked reading column (the heading above the text, both on the H1's left
+ * edge), and CloseSection on the 2px ink rule. The blocks run builder, tool,
+ * how, why, contact. No typography plugin: each block sets its own column.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { buttonVariants } from "@/components/ui/button";
 import { AUTHOR_BIO } from "@/lib/author";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
@@ -56,14 +58,15 @@ export const metadata: Metadata = {
 };
 
 /**
- * The homepage's 5/7 split (FaqSection layout="split", FinalCta). The
- * `_CLASS` suffix keeps these class strings out of the lastmod content
- * signature (CLASS_CONST_RE in seo/scripts/lib/content-signature.ts).
+ * BuiltByInvestor's reading column (components/marketing/landing-sections.tsx):
+ * the heading and its text stacked in one 68ch column, so every block shares
+ * the H1's left edge. The `_CLASS` suffix keeps these class strings out of
+ * the lastmod content signature (CLASS_CONST_RE in
+ * seo/scripts/lib/content-signature.ts).
  */
-const SPLIT_CLASS =
-  "grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]";
-/** Marketing body in a reading column. */
-const READING_CLASS = "max-w-[68ch] text-pretty text-lg leading-relaxed";
+const COLUMN_CLASS = "max-w-[68ch]";
+/** Marketing body under a block's heading. */
+const READING_CLASS = "mt-4 text-pretty text-lg leading-relaxed";
 
 export default function AboutPage() {
   const siteUrl = getSiteUrl();
@@ -89,6 +92,17 @@ export default function AboutPage() {
     ],
   };
 
+  // The page's one primary action, in the hero and again in the close. A
+  // plain link, not AnalyzeCtaLink: that island fires the homepage's CTA
+  // event, which would mislabel clicks from here.
+  const analyzeAction = (
+    <ActionRow>
+      <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+        Analyze a deal free
+      </Link>
+    </ActionRow>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
@@ -99,12 +113,13 @@ export default function AboutPage() {
         <PageHero
           title="About TrueCap"
           lede="One builder, one tool, one job: turn an address into an honest answer about whether the rental works."
+          actions={analyzeAction}
         />
 
         <article>
           {/* PageHero already draws the rule under the head. */}
           <Section rule="none" rhythm="tight" aria-labelledby="who-builds-this">
-            <div className={SPLIT_CLASS}>
+            <div className={COLUMN_CLASS}>
               <SectionHeading id="who-builds-this">Who builds this</SectionHeading>
               {/* The bio every post and /vs page ends with: lib/author.ts, which
                   must equal seo/author.md's Bio. Edit it there, not here. The
@@ -113,31 +128,77 @@ export default function AboutPage() {
             </div>
           </Section>
 
+          {/* The tool comes right after its builder, as the lede promises. The
+              saved-deal phrases stay whole on one source line each
+              (pricing-copy-guards.test). */}
+          <Section rhythm="tight" aria-labelledby="what-truecap-does">
+            <div className={COLUMN_CLASS}>
+              <SectionHeading id="what-truecap-does">What TrueCap does</SectionHeading>
+              <div className={READING_CLASS}>
+                <p>
+                  Paste a listing and, in about 60 seconds, see whether it works at
+                  the asking price, what price makes it work, and what could break
+                  the deal: monthly cash flow, cap rate, cash-on-cash return, DSCR, a
+                  Deal score, and the Offer Ceiling &mdash; your walk-away price
+                  based on your targets.
+                </p>
+                <p className="mt-4">
+                  The{" "}
+                  <Link href="/analyze" prefetch={false} className="tc-link">
+                    core analyzer
+                  </Link>{" "}
+                  is free with no signup, and your first complete decision is
+                  included. It is built for real estate agents who screen and
+                  present deals for investor clients, and for investors buying for
+                  their own portfolio; both use the same analyzer.
+                </p>
+                <p className="mt-4">
+                  A{" "}
+                  <Link href="/pricing" className="tc-link">
+                    paid plan
+                  </Link>{" "}
+                  adds unlimited saved deals you can edit, the Offer Ceiling and
+                  downside checks on every deal, 10-year projections, a portfolio
+                  dashboard, deal comparison, and lender-facing Pro report exports.
+                  Free keeps up to 5 saved deals.
+                </p>
+              </div>
+            </div>
+          </Section>
+
           <Section rhythm="tight" aria-labelledby="how-the-numbers-are-built">
-            <div className={SPLIT_CLASS}>
+            <div className={COLUMN_CLASS}>
               <SectionHeading id="how-the-numbers-are-built">
                 How the numbers are built
               </SectionHeading>
-              <p className={READING_CLASS}>
-                Every analysis starts from labeled inputs. Rent can start from
-                HUD&apos;s Fair Market Rent benchmark for the area and the
-                mortgage rate from FRED&apos;s national 30-year series; property
-                tax is always your local number, because no benchmark stands in
-                for an assessor&apos;s bill. Each starting value carries its
-                source label, and you can replace any of them before you rely on
-                the result. The output is a decision, not a score: cash flow after
-                reserves, DSCR, cap rate, cash-on-cash return, Buy Box fit, and the
-                Offer Ceiling &mdash; the highest price that still meets your
-                targets &mdash; with the best next step and the assumptions most
-                likely to move the answer. The formulas behind all of it are
-                published and versioned on the methodology page, so a partner or
-                lender can check the math instead of taking the label on faith.
-              </p>
+              <div className={READING_CLASS}>
+                <p>
+                  Every analysis starts from labeled inputs. Rent can start from
+                  HUD&apos;s Fair Market Rent benchmark for the area and the
+                  mortgage rate from FRED&apos;s national 30-year series; property
+                  tax is always your local number, because no benchmark stands in
+                  for an assessor&apos;s bill. Each starting value carries its
+                  source label, and you can replace any of them before you rely on
+                  the result.
+                </p>
+                <p className="mt-4">
+                  The output is a decision, not a score: cash flow after
+                  reserves, DSCR, cap rate, cash-on-cash return, Buy Box fit, and the
+                  Offer Ceiling &mdash; the highest price that still meets your
+                  targets &mdash; with the best next step and the assumptions most
+                  likely to move the answer.
+                </p>
+                <p className="mt-4">
+                  The formulas behind all of it are published and versioned on the
+                  methodology page, so a partner or lender can check the math
+                  instead of taking the label on faith.
+                </p>
+              </div>
             </div>
           </Section>
 
           <Section rhythm="tight" aria-labelledby="why-the-math-is-opinionated">
-            <div className={SPLIT_CLASS}>
+            <div className={COLUMN_CLASS}>
               <SectionHeading id="why-the-math-is-opinionated">
                 Why the math is opinionated
               </SectionHeading>
@@ -166,38 +227,13 @@ export default function AboutPage() {
             </div>
           </Section>
 
-          <Section rhythm="tight" aria-labelledby="what-truecap-does">
-            <div className={SPLIT_CLASS}>
-              <SectionHeading id="what-truecap-does">What TrueCap does</SectionHeading>
-              <p className={READING_CLASS}>
-                Paste a listing and, in about 60 seconds, see whether it works at
-                the asking price, what price makes it work, and what could break
-                the deal: monthly cash flow, cap rate, cash-on-cash return, DSCR, a
-                Deal score, and the Offer Ceiling &mdash; your walk-away price
-                based on your targets. The{" "}
-                <Link href="/analyze" prefetch={false} className="tc-link">
-                  core analyzer
-                </Link>{" "}
-                is free with no signup, and your first complete decision is
-                included. It is built for real estate agents who screen and
-                present deals for investor clients, and for investors buying for
-                their own portfolio; both use the same analyzer. A{" "}
-                <Link href="/pricing" className="tc-link">
-                  paid plan
-                </Link>{" "}
-                adds unlimited saved deals you can edit, the Offer Ceiling and
-                downside checks on every deal, 10-year projections, a portfolio
-                dashboard, deal comparison, and lender-facing Pro report exports.
-                Free keeps up to 5 saved deals.
-              </p>
-            </div>
-          </Section>
-
-          {/* The close opens on the 2px ink rule, as FinalCta does. */}
-          <Section rule="heavy" rhythm="tight" aria-labelledby="get-in-touch">
-            <div className={SPLIT_CLASS}>
-              <SectionHeading id="get-in-touch">Get in touch</SectionHeading>
-              <p className={READING_CLASS}>
+          {/* The close on the 2px ink rule (FinalCta's form): the contact line
+              on the left, the page's primary action again on the right. */}
+          <CloseSection
+            heading="Get in touch"
+            headingId="get-in-touch"
+            lede={
+              <>
                 TrueCap is a small operation, which means email actually gets read.
                 Questions about the math, a number that looks off, or something you
                 wish the analyzer did:{" "}
@@ -205,9 +241,10 @@ export default function AboutPage() {
                   hello@usetruecap.com
                 </a>
                 .
-              </p>
-            </div>
-          </Section>
+              </>
+            }
+            actions={analyzeAction}
+          />
         </article>
       </main>
       <SiteFooter />
