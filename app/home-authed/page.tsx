@@ -266,7 +266,7 @@ export default async function AuthedHome({
             <Testimonials limit={3} />
             <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           </div>
-          <HomepageFaq />
+            <HomepageFaq />
           <FinalCta />
           <StickyConversionBar />
         </div>

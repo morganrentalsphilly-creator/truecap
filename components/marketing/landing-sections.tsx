@@ -61,6 +61,8 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { JsonLd } from "@/components/seo/json-ld";
+import { AGENT_FAQS } from "@/lib/agent-faqs";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -89,22 +91,22 @@ const SPINE_STEPS = [
     key: "analyze",
     label: "Analyze",
     icon: Search,
-    title: "Paste the listing",
-    body: "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Every assumption stays yours to review and change.",
+    title: "Paste the listing at the showing",
+    body: "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.",
   },
   {
     key: "decide",
     label: "Screen",
     icon: Gauge,
-    title: "See if it works at asking",
-    body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, plus a 0–100 Deal score and plain-English context for the numbers.",
+    title: "Screen it against the client's Buy Box",
+    body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.",
   },
   {
     key: "offer",
     label: "Ceiling",
     icon: Target,
-    title: "Know your Offer Ceiling",
-    body: "Your walk-away price based on your targets: the highest price that still meets them under the assumptions shown, plus the assumptions most likely to break the deal. Verify the inputs before you make the offer.",
+    title: "Send the Offer Ceiling, co-branded",
+    body: "The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers.",
     proNote: "Included in your first complete decision",
   },
 ] as const;
@@ -172,9 +174,9 @@ export function HowTrueCapWorks() {
  * hero still carries the checkable overpay arithmetic.
  */
 const PROBLEM_QUESTIONS = [
-  "Does this deal fit my criteria?",
-  "What's my walk-away price?",
-  "What assumptions could kill the deal?",
+  "Does this fit my criteria?",
+  "What's the highest price that still works?",
+  "What could go wrong?",
 ] as const;
 
 export function ProblemBlock() {
@@ -187,7 +189,8 @@ export function ProblemBlock() {
         </h2>
         <p className="mx-auto mt-4 max-w-[58ch] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
           Traditional calculators tell you what a property&apos;s returns look
-          like. Before you make an offer, you need three other answers:
+          like. Before an investor client writes an offer, they ask their
+          agent three other things:
         </p>
         <ul className="mx-auto mt-6 grid max-w-2xl gap-3 text-left sm:grid-cols-3">
           {PROBLEM_QUESTIONS.map((question) => (
@@ -355,14 +358,15 @@ export function BuiltByInvestor() {
     >
       <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-16">
         <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Built by a rental investor, for rental investors.
+          Built by a rental investor. Now built for the agents who serve them, too.
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
           TrueCap is built by one person, a rental investor in Philadelphia. It
           started as a way to answer one practical question before every
-          offer: what price actually makes this property work? The defaults
-          lean conservative, every assumption is editable, and every formula is
-          published.
+          offer: what price actually makes this property work? The same
+          analyzer now serves agents who screen and present deals for investor
+          clients. The defaults lean conservative, every assumption is
+          editable, and every formula is published.
         </p>
         <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
           <Link
@@ -392,8 +396,8 @@ export function FinalCta() {
     <section className="border-t border-border">
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
         <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Paste a listing.{" "}
-          Know your walk-away price.
+          Paste the listing.{" "}
+          Send the deal that already pencils.
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
@@ -407,6 +411,15 @@ export function FinalCta() {
           Analyze a property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </AnalyzeCtaLink>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Buying for your own portfolio?{" "}
+          <Link
+            href="/for-investors"
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+          >
+            See TrueCap for investors →
+          </Link>
+        </p>
       </div>
     </section>
   );
@@ -716,14 +729,53 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
 
 export function HomepageFaq({
   structuredData = true,
-}: { structuredData?: boolean } = {}) {
+  audience = "both",
+}: {
+  structuredData?: boolean;
+  /**
+   * "both" (default, the homepage): the agent objection set first, then the
+   * investor set, and ONE FAQPage node carrying every visible question —
+   * Google requires FAQ markup to mirror the visible FAQ, and
+   * lib/__tests__/structured-data-f4.test.tsx enforces it per page.
+   * "investors": the investor set alone (/for-investors).
+   */
+  audience?: "both" | "investors";
+} = {}) {
+  const agentFirst = audience === "both";
+  const allItems = agentFirst ? [...AGENT_FAQS, ...HOMEPAGE_FAQS] : HOMEPAGE_FAQS;
   return (
-    <FaqSection
-      eyebrow="Common questions"
-      heading="The questions every investor asks first."
-      items={HOMEPAGE_FAQS}
-      structuredData={structuredData}
-    />
+    <>
+      {agentFirst ? (
+        <FaqSection
+          eyebrow="For agents"
+          heading="The questions agents ask first."
+          items={AGENT_FAQS}
+          structuredData={false}
+        />
+      ) : null}
+      <FaqSection
+        eyebrow={agentFirst ? "For investors" : "Common questions"}
+        heading={agentFirst ? "…and the ones investors ask." : "The questions investors ask first."}
+        items={HOMEPAGE_FAQS}
+        structuredData={false}
+        compact={agentFirst}
+      />
+      {/* Only one URL should claim a given FAQ block in structured data; the
+          homepage's node lists every question it shows, both sets. */}
+      {structuredData ? (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: allItems.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -741,6 +793,7 @@ export function FaqSection({
   items,
   structuredData = true,
   id,
+  compact = false,
 }: {
   eyebrow?: string;
   heading: string;
@@ -748,11 +801,16 @@ export function FaqSection({
   items: readonly { q: string; a: string }[];
   structuredData?: boolean;
   id?: string;
+  /** Stacked directly under another FaqSection: no top rule, less padding. */
+  compact?: boolean;
 }) {
   return (
     <>
-      <section id={id} className="scroll-mt-24 border-t border-border bg-background">
-        <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+      <section
+        id={id}
+        className={compact ? "scroll-mt-24 bg-background" : "scroll-mt-24 border-t border-border bg-background"}
+      >
+        <div className={compact ? "mx-auto max-w-3xl px-4 pb-14 sm:px-6 sm:pb-20" : "mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20"}>
           <div className="mb-10 text-center sm:mb-12">
             <p className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
               <HelpCircle className="size-3" />
@@ -898,7 +956,7 @@ export function DataSourcesSection() {
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Fast starting point. Transparent assumptions. Final control stays with
-          you.
+          you. This is what you show a client who asks where a number came from.
         </p>
       </div>
     </section>
@@ -959,6 +1017,9 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
 export function PdfProUpsell() {
   const { proOfferName } = getMarketingOfferConfig();
   const ladderHeaders = ["Free", proOfferName] as const;
+  // Agent Pro is deployment-configured; its card and link render only where
+  // the tier is sold (the persona route redirects otherwise).
+  const agentProConfigured = isAgentProConfigured();
   return (
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
@@ -973,6 +1034,9 @@ export function PdfProUpsell() {
             {proOfferName} answers four questions on every deal: does it meet
             my criteria, what is my Offer Ceiling, what could make it fail, and
             can I defend the analysis?
+            {agentProConfigured
+              ? " Agent Pro answers them per client, with a roster."
+              : ""}
           </p>
         </div>
 
@@ -1104,6 +1168,31 @@ export function PdfProUpsell() {
               </p>
             </div>
           </div>
+          {agentProConfigured ? (
+            <div
+              data-homepage-agent-pro=""
+              className="mt-4 flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <span className="w-fit rounded-full bg-primary/10 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+                  Agent Pro
+                </span>
+                <h3 className="mt-2 text-base font-bold text-foreground">
+                  Win investor clients.
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  A Buy Box per client, deals assigned and screened to their
+                  targets, and a co-branded memo they open without an account.
+                </p>
+              </div>
+              <Link
+                href="/for-agents"
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+              >
+                See TrueCap for agents →
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
