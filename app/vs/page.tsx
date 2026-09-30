@@ -9,18 +9,28 @@
  * curious site visitors a clean directory and gives us a single URL
  * to link from the footer + blog index.
  *
- * Cards are grouped by what category each competitor occupies, which
+ * Rows are grouped by what category each competitor occupies, which
  * also doubles as honest positioning — TrueCap is a rental
  * underwriter, NOT a marketplace, accounting tool, or rent-collection
- * platform, so each card frames the comparison correctly.
+ * platform, so each row frames the comparison correctly.
+ *
+ * Layout (DESIGN.md, 2026-09 design pass): PageHero on the homepage's
+ * 5/7 grid with the sample-deal screenshot as the aside, then one
+ * Section per group holding a ruled directory (no cards), then the close
+ * on the heavy rule. Every row is a plain server-rendered <a href>: this
+ * page is the in-graph inbound link for the whole /vs library
+ * (internal-link-graph.test.tsx "no orphans"), so no client filtering,
+ * tabs or pagination.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ProductShot } from "@/components/marketing/product-shot";
+import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -352,18 +362,21 @@ const COMPARISONS: ComparisonCard[] = [
 
 const GROUPS = [
   {
+    id: "vs-direct-alternatives",
     label: "Direct alternatives",
     description:
       "Tools whose acquisition-analysis workflow overlaps with TrueCap. Compare scope, assumptions, pricing, and free access directly.",
     items: COMPARISONS.filter((c) => c.group === "Direct alternative"),
   },
   {
+    id: "vs-complementary-tools",
     label: "Complementary tools",
     description:
       "Tools that solve a different stage of the rental lifecycle. We don't compete — most landlords use TrueCap + one of these together.",
     items: COMPARISONS.filter((c) => c.group === "Complementary tool"),
   },
   {
+    id: "vs-specialized-tools",
     label: "Specialized tools",
     description:
       "Tools that handle one slice (rent estimates, market discovery, turnkey listings). TrueCap can replace or complement depending on your workflow.",
@@ -394,122 +407,102 @@ export default function VsHubPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: no descendant can make
+    // the phone page scroll sideways, and an sr-only span re-parents here.
+    <div className="relative overflow-x-clip">
       <JsonLd data={structuredData} />
       <BreadcrumbSchema items={[VS_HUB_CRUMB]} />
       <Header />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Hero */}
-        <section className="mb-12 sm:mb-16 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            Honest comparisons
-          </div>
-          <h1 className="mx-auto max-w-3xl text-balance text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-            TrueCap vs every rental tool{" "}
-            that matters.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-base sm:text-lg leading-relaxed text-muted-foreground">
-            {COMPARISONS.length} side-by-side comparisons. Honest feature
-            matrices. Where each tool does the job better. When TrueCap fits,
-            when something else does, and how to combine them.
-          </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition hover:-translate-y-0.5"
-            >
-              <Calculator className="size-4" />
-              Try TrueCap free
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
-            >
-              See pricing
-            </Link>
-          </div>
-        </section>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="TrueCap vs every rental tool that matters."
+          lede={`${COMPARISONS.length} side-by-side comparisons. Honest feature matrices. Where each tool does the job better. When TrueCap fits, when something else does, and how to combine them.`}
+          actions={
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Try TrueCap free
+              </Link>
+              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+                See pricing
+              </Link>
+            </ActionRow>
+          }
+          aside={
+            // Real product screenshot from the free sample deal, set as a
+            // document (no fake browser frame; frame={false} would drop the
+            // caption).
+            <div role="group" aria-label="What the decision looks like">
+              <ProductShot
+                shot="verdict"
+                frame="document"
+                sizes="(min-width: 1024px) 680px, 100vw"
+                alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
+                caption={
+                  <>
+                    Real output from the free sample deal.{" "}
+                    <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">
+                      Run it yourself
+                    </Link>
+                  </>
+                }
+              />
+            </div>
+          }
+        />
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
-          <ProductShot
-            shot="verdict"
-            alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
-          />
-        </section>
-
-        {/* Comparison cards grouped by category */}
-        {GROUPS.map((group, gi) => (
-          <section
-            key={group.label}
-            className={gi === 0 ? "mb-10 sm:mb-14" : "mb-10 sm:mb-14"}
+        {/* The directory: one section per group, each a ruled list of
+            whole-row links. The hero's bottom rule opens the first group.
+            Two columns at most, as RuledList offers (the groups hold 6, 12
+            and 20 rows today; three columns left a ragged last row). */}
+        {GROUPS.map((group, index) => (
+          <Section
+            key={group.id}
+            rhythm="tight"
+            rule={index === 0 ? "none" : "rule"}
+            aria-labelledby={`${group.id}-heading`}
           >
-            <div className="mb-5">
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-1.5">
-                {group.label}
-              </p>
-              <p className="text-sm leading-relaxed text-muted-foreground max-w-2xl">
-                {group.description}
-              </p>
-            </div>
-            <div className="tc-reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SectionHeading id={`${group.id}-heading`}>{group.label}</SectionHeading>
+            <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+              {group.description}
+            </p>
+            <ul className="mt-8 grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
               {group.items.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/vs/${c.slug}`}
-                  className="group flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-                >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      TrueCap vs
+                <li key={c.slug} className="min-w-0 border-b border-rule-soft">
+                  <Link href={`/vs/${c.slug}`} className="group block py-4">
+                    <h3 className="text-balance text-lg font-semibold text-foreground">
+                      {/* Keeps the link's name in step with the ItemList
+                          names ("TrueCap vs …") without a visible kicker. */}
+                      <span className="sr-only">{"TrueCap vs "}</span>
+                      {c.competitor}
+                    </h3>
+                    <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                      {c.tagline}
+                    </p>
+                    <span className="tc-link mt-2 inline-block text-base font-medium group-hover:text-primary-deep">
+                      Read the comparison
                     </span>
-                    <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-                  </div>
-                  <h2 className="text-lg font-extrabold text-foreground leading-tight">
-                    {c.competitor}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground flex-1">
-                    {c.tagline}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary group-hover:underline">
-                    Read the comparison
-                    <ArrowUpRight className="size-3" />
-                  </span>
-                </Link>
+                  </Link>
+                </li>
               ))}
-            </div>
-          </section>
+            </ul>
+          </Section>
         ))}
 
-        {/* Bottom CTA */}
-        <section className="mt-14 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Stop comparison-shopping. Run your next deal.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            The fastest way to know whether TrueCap fits your workflow is to
-            paste an address and see the analysis. 60 seconds, no signup, no
-            card.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a deal — 60 seconds
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
-            >
-              See Pro pricing
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
+        <CloseSection
+          heading="Stop comparison-shopping. Run your next deal."
+          headingId="vs-close-heading"
+          lede="The fastest way to know whether TrueCap fits your workflow is to paste an address and see the analysis. 60 seconds, no signup, no card."
+          actions={
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Run a deal — 60 seconds
+              </Link>
+              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+        />
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
