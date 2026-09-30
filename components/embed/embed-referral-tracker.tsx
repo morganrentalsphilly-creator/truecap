@@ -20,9 +20,11 @@ export function EmbedAttributionLink({
   href: string;
   calculator: string;
 }) {
-  // The frame's call to action: a Signal Blue link at 600, underlined at rest,
-  // with no trailing arrow (DESIGN.md chrome rules). Focus is the global 3px
-  // outline in app/globals.css.
+  // A plain credit-row link: Signal Blue, underlined at rest, regular weight
+  // like "Powered by TrueCap" beside it, with no trailing arrow (DESIGN.md
+  // chrome rules: "Links are Signal Blue, underlined, and that is enough").
+  // The widget's filled button stays the frame's one primary action. Focus is
+  // the global 3px outline in app/globals.css.
   return (
     <a
       href={href}
@@ -34,7 +36,7 @@ export function EmbedAttributionLink({
           referral_source: "embed",
         })
       }
-      className="tc-link inline-flex min-h-11 items-center font-semibold"
+      className="tc-link inline-flex min-h-11 items-center"
     >
       Underwrite a full property in TrueCap
     </a>
