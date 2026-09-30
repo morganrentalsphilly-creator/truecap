@@ -109,7 +109,7 @@ JS chunks and RSC payloads requested while scrolling top to bottom.
 | Most pages | 34–41 JS / ~1.07 MB, 48–59 RSC / ~1.1–1.3 MB | **0 / 0** |
 | `/vs` | 35 JS, 120 RSC / 3.5 MB | **0 / 0** |
 | `/blog` | 59 JS, 194 RSC / 5.2 MB | **0 / 0** |
-| `/for-agents`, `/pricing` | ~38 JS, ~50–59 RSC | **6 JS / 331 KB, 3 RSC / 16 KB: `/auth/sign-up` only, the primary CTA** |
+| `/for-agents`, `/pricing` | ~38 JS, ~50–59 RSC | **0 / 0** (their sign-up CTAs are full-page navigations since the agent-journey fixes, so `/auth/sign-up` is no longer prefetched either) |
 
 This matches `main` after PR #151/#152 (the footer and landing-page fixes),
 which the branch merged; the sweep applied the same rule to every rebuilt
