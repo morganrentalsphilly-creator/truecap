@@ -9,7 +9,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Calculator, Check, Minus, Sparkles, X } from "lucide-react";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -18,8 +17,25 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { RelatedContent } from "@/components/marketing/related-content";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import { ActionRow, CloseSection } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  VS_ACTIONS,
+  VS_FOOTNOTE,
+  VS_H1,
+  VS_LEDE,
+  VS_LINK_ROW,
+  VS_NOTE,
+  VS_PROSE,
+  VS_TLDR_GRID,
+  VS_TLDR_LABEL,
+  VS_TLDR_LIST,
+  VsHero,
+  VsMatrixTable,
+} from "@/components/marketing/vs-page";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -80,54 +96,51 @@ export default function VsRentometerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage and the /vs hub: no
+    // descendant can make the phone page scroll sideways.
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema vsPath="/vs/rentometer" pageName="TrueCap vs Rentometer" />
-      <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-        </div>
-
-        <section className="mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary mb-4">
-            <Sparkles className="size-3" />
-            Honest comparison
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-            TrueCap vs Rentometer: <span className="text-primary">different tools, different jobs</span>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <VsHero>
+          <h1 className={VS_H1}>
+            TrueCap vs Rentometer: different tools, different jobs
           </h1>
           <BlogByline />
-          <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <p className={VS_LEDE}>
             Rentometer is a rent estimator — it tells you what a property should rent for based on local comps. TrueCap models the broader first-year rental economics from editable assumptions. They&apos;re not the same product; here&apos;s where each one fits.
           </p>
-          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <AnalyzeCtaLink analyticsSource="vs_hero" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
-              <Calculator className="size-4" />
+          <ActionRow className={VS_ACTIONS}>
+            <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
               Try TrueCap free
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </AnalyzeCtaLink>
-            <Link href="/pricing" className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted">
+            <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
               See pricing
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">Free analyzer: no card or signup</p>
-        </section>
+          </ActionRow>
+          <p className={VS_NOTE}>Free analyzer: no card or signup</p>
+        </VsHero>
 
-        {/* Real product screenshot from the free sample deal. */}
-        <section className="mb-12 sm:mb-16" aria-label="What the decision looks like">
+        {/* Real product screenshot from the free sample deal, set as a
+            document (no fake browser frame). */}
+        <Section rule="none" rhythm="tight" aria-label="What the decision looks like">
           <ProductShot
             shot="verdict"
+            frame="document"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
-            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">Run it yourself →</Link></>}
+            caption={<>Real output from the free sample deal. <Link href="/analyze?sample=1" prefetch={false} className="tc-link">Run it yourself</Link></>}
           />
-        </section>
+        </Section>
 
-        <section className="mb-12 sm:mb-16 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">TL;DR</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary mb-2">Pick TrueCap if</p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+        <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
+          <SectionHeading id="vs-tldr-heading">TL;DR</SectionHeading>
+          <div className={VS_TLDR_GRID}>
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>Pick TrueCap if</h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>You want a FULL deal underwrite — cap rate, CoC, DSCR, NCF, 10-yr projection.</li>
                 <li>You want to decide whether to buy, not just what rent to charge.</li>
                 <li>You want operating expenses, mortgage debt service, and an editable property-tax input included.</li>
@@ -135,9 +148,9 @@ export default function VsRentometerPage() {
                 <li>You want unlimited free analyses.</li>
               </ul>
             </div>
-            <div>
-              <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Use Rentometer if</p>
-              <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
+            <div className="min-w-0">
+              <h3 className={VS_TLDR_LABEL}>Use Rentometer if</h3>
+              <ul className={VS_TLDR_LIST}>
                 <li>You ONLY need a quick rent comp — and already have a deal model elsewhere.</li>
                 <li>You&apos;re a property manager checking comp prices for a rent renewal.</li>
                 <li>You need deeper comp data beyond HUD&apos;s Fair Market Rent.</li>
@@ -145,72 +158,99 @@ export default function VsRentometerPage() {
               </ul>
             </div>
           </div>
-          <p className="mt-4 text-xs italic text-muted-foreground">
+          <p className={VS_FOOTNOTE}>
             Honest take: they&apos;re complementary. Many investors use Rentometer for rent comp and TrueCap for the full deal underwrite. That&apos;s fine.
           </p>
-        </section>
+        </Section>
 
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">Feature-by-feature</h2>
-          <ScrollX label="Comparison table" className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">Feature</th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-primary">TrueCap</th>
-                  <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">Rentometer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
-                    <td className="py-3 px-3 text-sm font-semibold text-foreground">{row.feature}</td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2"><WinnerBadge winner={row.winner} side="truecap" /><span>{row.truecap}</span></div>
-                    </td>
-                    <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                      <div className="flex items-start gap-2"><WinnerBadge winner={row.winner} side="rentometer" /><span>{row.rentometer}</span></div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <Section aria-labelledby="vs-matrix-heading">
+          <SectionHeading id="vs-matrix-heading">Feature-by-feature</SectionHeading>
+          <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
+            <VsMatrixTable
+              head={["Feature", "TrueCap", "Rentometer"]}
+              rows={MATRIX.map((row) => ({
+                label: row.feature,
+                truecap: row.truecap,
+                competitor: row.rentometer,
+                winner: row.winner === "rentometer" ? "competitor" : row.winner,
+              }))}
+            />
           </ScrollX>
-          <p className="mt-4 text-sm leading-relaxed text-foreground">
-            A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
-            <Link href="/analyze" prefetch={false} className="font-semibold text-primary hover:underline">free deal analyzer</Link>
-            {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
-            <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
-            {" "}lays out every line.
-          </p>
-        </section>
+          <div className={VS_PROSE}>
+            <p>
+              A rent number only matters once it flows into returns. Drop your Rentometer comp into our{" "}
+              <Link href="/analyze" prefetch={false} className="tc-link">free deal analyzer</Link>
+              {" "}to see what that rent actually earns as cap rate and cash-on-cash return. For the full income statement behind those metrics, our{" "}
+              <Link href="/blog/rental-property-pro-forma-explained" className="tc-link">rental property pro forma guide</Link>
+              {" "}lays out every line.
+            </p>
+          </div>
+        </Section>
 
         <ComparisonFaq competitorName="Rentometer" items={RENTOMETER_FAQ} />
 
-        <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">Get the core underwrite free.</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            If you&apos;ve been using Rentometer for rent and a spreadsheet for everything else, TrueCap collapses both into one workflow. Try a deal in 60 seconds.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/analyze" prefetch={false} className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              <Calculator className="w-4 h-4" />Run a deal now
-            </Link>
-            <Link href="/pricing" className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors">
-              See Pro pricing<ArrowUpRight className="w-4 h-4" />
-            </Link>
+        <CloseSection
+          headingId="vs-close-heading"
+          heading={<>Get the core underwrite free.</>}
+          lede={
+            <>
+              If you&apos;ve been using Rentometer for rent and a spreadsheet for everything else, TrueCap collapses both into one workflow. Try a deal in 60 seconds.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Run a deal now
+              </Link>
+              <Link
+                href="/pricing"
+                className={buttonVariants({ variant: "outline", size: "cta" })}
+              >
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+        />
+
+        <Section rule="none" rhythm="tight">
+          <div className="max-w-5xl">
+            <RelatedContent kind="vs" slug="rentometer" />
+            <AuthorBio />
+
+            <footer className="mt-10 border-t border-border pt-6">
+              <p className="text-lg font-semibold">Other comparisons:</p>
+              <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
+                <li>
+                  <Link
+                    href="/vs/dealcheck"
+                    className={VS_LINK_ROW}
+                  >
+                    vs DealCheck
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/biggerpockets-calculator"
+                    className={VS_LINK_ROW}
+                  >
+                    vs BiggerPockets
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/excel"
+                    className={VS_LINK_ROW}
+                  >
+                    vs Excel
+                  </Link>
+                </li>
+              </ul>
+            </footer>
           </div>
-        </section>
-
-        <RelatedContent kind="vs" slug="rentometer" className="mt-10" />
-        <AuthorBio className="mb-10" />
-
-        <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Other comparisons:{" "}
-          <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">vs DealCheck</Link>{" · "}
-          <Link href="/vs/biggerpockets-calculator" className="font-bold text-foreground hover:underline">vs BiggerPockets</Link>{" · "}
-          <Link href="/vs/excel" className="font-bold text-foreground hover:underline">vs Excel</Link>
-        </footer>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
@@ -283,8 +323,3 @@ const RENTOMETER_FAQ: FaqItem[] = [
   },
 ];
 
-function WinnerBadge({ winner, side }: { winner: Verdict; side: "truecap" | "rentometer" }) {
-  if (winner === "tie") return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
-  if (winner === side) return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
-  return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
-}
