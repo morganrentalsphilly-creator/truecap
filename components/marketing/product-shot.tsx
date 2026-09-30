@@ -15,7 +15,7 @@ export const MEMO_SHOT = "memo";
  *   - "browser" (default, `true`): a quiet chrome bar over the screen, for
  *     app screens. A 1px rule and the 6px object radius.
  *   - "document": a printed page, for the memo. A 1px rule, no radius, no
- *     browser chrome, cropped to a page's proportion from the top.
+ *     browser chrome, at the capture's own proportion.
  *   - `false`: the image alone.
  */
 export function findProductShot(
@@ -67,7 +67,7 @@ export function ProductShot({
   if (frame === "document") {
     return (
       <figure className={`min-w-0 ${className}`.trim()}>
-        <div className="aspect-[4/5] overflow-hidden border border-border bg-card">{image}</div>
+        <div className="overflow-hidden border border-border bg-card">{image}</div>
         {captionNode}
       </figure>
     );

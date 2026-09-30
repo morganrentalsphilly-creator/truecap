@@ -23,10 +23,10 @@ export function AppLogo({
 }: AppLogoProps) {
   const content = (
     <>
-      <div className="relative h-[30px] w-[112px] overflow-hidden">
+      <div className="relative h-[30px] w-[112px] min-w-0 max-w-full shrink overflow-hidden">
         <Image
           src="/Logo-png-w.png"
-          alt="TrueCap logo"
+          alt="TrueCap"
           fill
           priority={priority}
           sizes="112px"

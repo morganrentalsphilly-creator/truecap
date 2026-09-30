@@ -27,7 +27,11 @@ for (const prof of profiles) {
     const field = page.locator('input[name="address"], input[placeholder*="Address"]').first();
     if (await field.count()) { await field.click(); await page.keyboard.type("1234 Main St", { delay: 40 }); }
     if (prof.mobile) { const menu = page.getByRole("button", { name: /menu/i }).first(); if (await menu.count()) { await menu.click(); await page.waitForTimeout(400); await page.keyboard.press("Escape"); } }
-    const faq = page.locator("details summary").first();
+    // An FAQ answer, as at baseline. Since the design pass the walkthrough
+    // ledger's rows are <details> too, so prefer the FAQ section's own rows.
+    const faq = (await page.locator("#questions details summary").count())
+      ? page.locator("#questions details summary").first()
+      : page.locator("details summary").first();
     if (await faq.count()) { await faq.scrollIntoViewIfNeeded(); await faq.click(); }
     await page.waitForTimeout(800);
     // Background the page so INP/CLS finalize.

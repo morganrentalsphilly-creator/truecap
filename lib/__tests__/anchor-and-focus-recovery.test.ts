@@ -49,47 +49,51 @@ describe("fragment links clear the sticky header", () => {
     return best ? best.rem : null;
   }
 
+  /** rem of the page-level scroll padding (every page but the dashboard). */
+  function paddingTop(): number {
+    const m = /html:not\(:has\(\.dashboard-shell\)\)\s*\{\s*scroll-padding-top:\s*([\d.]+)rem/.exec(css);
+    return m ? Number(m[1]) : 0;
+  }
+  /** px a fragment target or a focused element lands below the viewport top. */
+  function offsetAt(width: number): number {
+    return (paddingTop() + (marginAt(width) ?? 0)) * 16;
+  }
+
   it("clears the header at every width — MEASURED, not assumed", () => {
-    // The first version of this rule assumed the sticky stack was just the
-    // h-14 sm:h-16 row and stepped down at sm. Production says otherwise: the
-    // flat marketing nav sits in the SAME sticky wrapper until lg.
-    //   375px  -> 56 + 61 = 118px  (needs >= 7.375rem)
-    //   640px  -> 64 + 61 = 125px  (needs >= 7.8125rem)
-    //   1024px -> 65px             (needs >= 4.0625rem)
-    // Shipping 4rem/4.5rem left mobile 54px short with the heading behind the
-    // header. Assert the VALUE, not merely that some rule exists.
-    // Require HEADROOM, not a bare clearance. The first corrected version
-    // cleared by exactly 2px at 375 and 768 — passing a >= assertion while the
-    // heading sat flush against the bar, and one 3px header change away from
-    // the original bug returning silently.
-    const REM = 16;
+    // Re-measured 2026-09-30 on a production build (design pass): the flat
+    // marketing nav is gone, so the sticky header is ONE row everywhere:
+    //   320-639px -> 57px
+    //   640px up  -> 65px
+    // The offset is now the html scroll padding (which also keeps keyboard
+    // focus clear of the header, WCAG 2.4.11) plus #main's own margin.
+    // Require HEADROOM, not a bare clearance: clearing by 1-2px passes a >=
+    // assertion while the heading sits flush against the bar.
     const HEADROOM = 6;
-    expect((marginAt(375) ?? 0) * REM, "375px: 118px header + headroom").toBeGreaterThanOrEqual(118 + HEADROOM);
-    expect((marginAt(768) ?? 0) * REM, "768px: 126px header + headroom").toBeGreaterThanOrEqual(126 + HEADROOM);
-    expect((marginAt(1280) ?? 0) * REM, "1280px: 65px header + headroom").toBeGreaterThanOrEqual(65 + HEADROOM);
+    expect(offsetAt(375), "375px: 57px header + headroom").toBeGreaterThanOrEqual(57 + HEADROOM);
+    expect(offsetAt(768), "768px: 65px header + headroom").toBeGreaterThanOrEqual(65 + HEADROOM);
+    expect(offsetAt(1280), "1280px: 65px header + headroom").toBeGreaterThanOrEqual(65 + HEADROOM);
   });
 
-  it("steps down at lg, where the marketing nav actually hides", () => {
-    // If this regresses to a sm step-down, everything from 640-1023px breaks.
-    expect(css).toMatch(/@media \(min-width: 1024px\) \{\s*#main \{\s*scroll-margin-top/);
-    expect(marginAt(1023)).toBe(marginAt(768));
-    expect(marginAt(1024)).toBeLessThan(marginAt(1023) ?? Infinity);
+  it("does not over-scroll on phones or desktop", () => {
+    // A generous offset dumps blank space above the heading. Stay under ~1.5x
+    // the header at each width.
+    expect(offsetAt(375)).toBeLessThanOrEqual(90);
+    expect(offsetAt(1280)).toBeLessThanOrEqual(100);
   });
 
-  it("does not over-scroll on desktop", () => {
-    // A generous margin everywhere would dump 60px of blank space above the
-    // heading on desktop. 65px header, so stay under ~1.5x that.
-    expect((marginAt(1280) ?? 0) * 16).toBeLessThanOrEqual(100);
-  });
-
-  it("gives #main a scroll margin outside the dashboard", () => {
-    // components/investcalc/header.tsx wraps the header in `sticky top-0 z-50`
-    // with an h-14 sm:h-16 row. Fragment navigation aligns #main's block-start
-    // with the viewport top and knows nothing about that bar, so every /#main
-    // link landed with the analyzer's own heading hidden behind it. The only
-    // scroll-margin rule that existed was scoped to `.dashboard-shell #main`.
+  it("keeps focus and fragment targets clear of the header outside the dashboard", () => {
+    // components/investcalc/header.tsx wraps the header in `sticky top-0 z-50`.
+    // Fragment navigation and focus scrolling know nothing about that bar
+    // unless the scroll padding says so; the dashboard has its own Topbar.
+    expect(paddingTop()).toBeGreaterThan(0);
     const base = /(?:^|\n)\s*#main\s*\{[^}]*scroll-margin-top:/.exec(css);
     expect(base, "no unscoped #main scroll-margin rule in globals.css").not.toBeNull();
+  });
+
+  it("keeps focus clear of the fixed bottom bars and the cookie banner", () => {
+    expect(css).toMatch(/html:has\(\[data-sticky-bottom-bar\]\)\s*\{\s*scroll-padding-bottom:/);
+    expect(css).toMatch(/html:has\(\[data-cookie-consent-banner\]\)\s*\{\s*scroll-padding-bottom:/);
+    expect(read("components/marketing/cookie-consent-banner.tsx")).toContain('data-cookie-consent-banner=""');
   });
 
   it("keeps the dashboard override more specific than the base rule", () => {
