@@ -320,7 +320,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
               editable.
               <strong> BiggerPockets&apos;</strong> calculator treats the property
               as generic multifamily and requires you to mentally adjust the math
-              for your owner-occupied unit. For TrueCap has a free core
+              for your owner-occupied unit. TrueCap has a free core
               owner-occupant workflow, while BiggerPockets currently presents
               calculator results as a Pro membership feature. Compare both live
               pricing pages.
