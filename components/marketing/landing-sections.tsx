@@ -565,12 +565,16 @@ export function HomepageFaq({
       ) : null}
       {audience === "both" ? (
         <>
+          {/* Two lists, one contact line: it closes the second. */}
           <FaqSection
+            id="agent-questions"
             heading="The questions agents ask first."
             items={AGENT_FAQS}
             structuredData={false}
+            contact={null}
           />
           <FaqSection
+            id="investor-questions"
             heading="…and the ones investors ask."
             items={HOMEPAGE_FAQS}
             structuredData={false}
@@ -580,6 +584,7 @@ export function HomepageFaq({
       ) : null}
       {audience === "investors" ? (
         <FaqSection
+          id="investor-questions"
           heading="The questions investors ask first."
           items={HOMEPAGE_FAQS}
           structuredData={false}
@@ -827,7 +832,7 @@ export function ClientReceivesSection() {
           caption={
             <>
               The decision memo, generated from the free sample deal.{" "}
-              <Link href="/sample-decision-memo" className="tc-link font-medium">
+              <Link href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
                 Read the full sample memo
               </Link>
             </>
