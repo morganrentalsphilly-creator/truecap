@@ -116,7 +116,9 @@ export function RuledList({
 /** Only for a real sequence (DESIGN.md: structure encodes something true). */
 export function StepList({ steps, className }: { steps: readonly ReactNode[]; className?: string }) {
   return (
-    <ol className={cn("max-w-[68ch] border-t-2 border-foreground", className)}>
+    // role="list": Safari drops list semantics from a list-style:none list,
+    // and the step count is part of what a real sequence tells you.
+    <ol role="list" className={cn("max-w-[68ch] border-t-2 border-foreground", className)}>
       {steps.map((step, index) => (
         <li key={index} className="flex gap-4 border-b border-rule-soft py-4">
           <span aria-hidden className="w-6 shrink-0 font-mono text-base tabular-nums text-muted-foreground">
