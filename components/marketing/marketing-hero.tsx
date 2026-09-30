@@ -3,9 +3,11 @@
  * visual (DESIGN.md "The ledger as the hero"; direction contract in
  * .impeccable/surfaces/app-page-tsx.md).
  *
- * Desktop: a 5/7 grid, headline and the address form on the left, the ledger
- * in the wider column. Phones: one column in reading order, so the investor
- * cue sits above the fold at 390px and the ledger starts right under it.
+ * Desktop: a 5/7 grid from 1280px, headline and the address form on the
+ * left, the ledger in the wider column; halves between 1024 and 1279px, so
+ * the headline keeps to four lines and the investor cue stays in the first
+ * screen of a 1095x760 window. Phones: one column in reading order, so the
+ * investor cue sits above the fold at 390px and the ledger starts under it.
  *
  * SERVER COMPONENT. The ledger is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts) and ships as HTML: no screenshot,
@@ -32,7 +34,7 @@ export function MarketingHero() {
       <div
         className={cn(
           PAGE_CONTAINER,
-          "grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:pb-18 lg:pt-14",
+          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:items-start lg:pb-18 lg:pt-10 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16 xl:pt-14",
         )}
       >
         <div className="min-w-0">
@@ -44,7 +46,7 @@ export function MarketingHero() {
           <h1 className="font-display hyphens-auto break-words text-balance text-display-sm text-foreground lg:text-display">
             {homepageHeadline}
           </h1>
-          <p className="mt-4 max-w-[46ch] text-pretty text-[17px] leading-relaxed text-foreground sm:mt-5 sm:text-lg">
+          <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">
             {newHomepagePositioningEnabled
               ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
               : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
@@ -53,7 +55,7 @@ export function MarketingHero() {
           {newHomepagePositioningEnabled ? (
             <p
               data-hero-supporting-metrics=""
-              className="mt-2 text-[13.5px] font-medium text-muted-foreground sm:text-sm"
+              className="mt-2 text-sm font-medium text-muted-foreground"
             >
               Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable
               assumptions
@@ -66,7 +68,7 @@ export function MarketingHero() {
           {/* The full risk reversal stays next to the primary action at every
               viewport: paid mobile traffic must not have to infer account or
               card requirements. */}
-          <p className="text-sm text-muted-foreground sm:text-[14.5px]">
+          <p className="text-sm text-muted-foreground">
             Free. No account. Your first full decision is included.
           </p>
           {/* The investor cue (2026-09 agent-first pass): the hero addresses
@@ -75,7 +77,7 @@ export function MarketingHero() {
               390px, pointing at the investor hub. */}
           <p
             data-hero-investor-cue=""
-            className="mt-4 border-t border-rule-soft pt-2.5 text-[14.5px] sm:text-[15px]"
+            className="mt-4 border-t border-rule-soft pt-2.5 text-base"
           >
             Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
             <Link href="/for-investors" className="tc-link inline-flex min-h-11 items-center">

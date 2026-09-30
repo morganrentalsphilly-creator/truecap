@@ -53,7 +53,7 @@ const LEARN_LINKS: { label: string; href: string; hint: string }[] = [
 ];
 
 const linkClass =
-  "inline-flex min-h-11 min-w-11 items-center justify-center text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground";
+  "inline-flex min-h-11 min-w-11 items-center justify-center text-base font-medium text-muted-foreground transition-colors hover:text-foreground";
 
 export function MarketingNav() {
   const forAgents = agentsHref(useAgentProConfigured());
@@ -144,14 +144,14 @@ export function MarketingMobileMenu() {
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
             <Link
               href="/auth/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-input px-4 text-[15px] font-semibold text-foreground transition-colors hover:bg-accent"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-input px-4 text-base font-semibold text-foreground transition-colors hover:bg-accent"
               onClick={() => setOpen(false)}
             >
               Sign in
             </Link>
             <Link
               href="/auth/sign-up"
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary-deep"
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-deep"
               onClick={() => setOpen(false)}
             >
               Create account

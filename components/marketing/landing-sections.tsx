@@ -31,6 +31,7 @@ import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card"
 import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { OpenLedger } from "@/components/ledger/open-ledger";
+import { DisclosureMark } from "@/components/ledger/ledger-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { CLIENT_RECEIVES } from "@/lib/client-receives";
 import {
@@ -114,8 +115,8 @@ export function HowTrueCapWorks() {
           <OpenLedger
             ledger={ledger}
             notes={{
-              price: spineNote(analyze),
-              cashFlow: spineNote(screen),
+              cashFlow: spineNote(analyze),
+              buyBox: spineNote(screen),
               ceiling: spineNote(ceiling),
             }}
           />
@@ -160,10 +161,10 @@ export function BuiltByInvestor() {
   return (
     <Section rhythm="tight" data-homepage-block="built-by-investor">
       <div className="max-w-[68ch]">
-        <SectionHeading className="text-[1.625rem] sm:text-[2rem]">
+        <SectionHeading>
           Built by a rental investor. Now built for the agents who serve them, too.
         </SectionHeading>
-        <p className="mt-4 text-[17px] leading-relaxed">
+        <p className="mt-4 text-lg leading-relaxed">
           TrueCap is built by one person, a rental investor in Philadelphia. It
           started as a way to answer one practical question before every
           offer: what price actually makes this property work? The same
@@ -171,7 +172,7 @@ export function BuiltByInvestor() {
           clients. The defaults lean conservative, every assumption is
           editable, and every formula is published.
         </p>
-        <p className="mt-3 flex flex-wrap gap-x-6 text-[15px]">
+        <p className="mt-3 flex flex-wrap gap-x-6 text-base">
           <Link href="/about" className="tc-link inline-flex min-h-11 items-center">
             About TrueCap
           </Link>
@@ -196,13 +197,13 @@ export function FinalCta() {
         <SectionHeading id="final-cta-heading">
           Paste the listing. Send the deal that already pencils.
         </SectionHeading>
-        <p className="mt-4 max-w-[56ch] text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-4 max-w-[56ch] text-lg leading-relaxed text-muted-foreground">
           Your first complete decision includes cash flow, cap rate, CoC, DSCR,
           Buy Box fit, the Offer Ceiling, downside checks, and next
           steps. No account or card required.
         </p>
         <HeroAddressForm placement="close" />
-        <p className="mt-4 border-t border-rule-soft pt-2.5 text-[15px]">
+        <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
           Buying for your own portfolio?{" "}
           <Link href="/for-investors" className="tc-link inline-flex min-h-11 items-center">
             See TrueCap for investors
@@ -249,8 +250,8 @@ export function SocialProof() {
         <div className="grid content-start gap-8 lg:col-span-2">
           {rest.map((p) => (
             <figure key={p.id} className="border-t border-border pt-5">
-              <blockquote className="text-[15.5px] leading-relaxed">&ldquo;{p.quote}&rdquo;</blockquote>
-              <figcaption className="mt-3 text-[13px]">
+              <blockquote className="text-base leading-relaxed">&ldquo;{p.quote}&rdquo;</blockquote>
+              <figcaption className="mt-3 text-sm">
                 <span className="font-semibold">{p.customerName}</span>
                 <span className="block text-muted-foreground">
                   {p.customerType}
@@ -261,7 +262,7 @@ export function SocialProof() {
           ))}
         </div>
       </div>
-      <p className="mt-8 text-[15px]">
+      <p className="mt-8 text-base">
         <Link href="/reviews" className="tc-link inline-flex min-h-11 items-center font-medium">
           See verified proof &amp; methodology
         </Link>
@@ -601,23 +602,6 @@ export function HomepageFaq({
   );
 }
 
-/** Plus when closed, minus when open: one stroke, drawn to the text size. */
-function FaqMark() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 16 16"
-      className="mt-1 size-4 shrink-0 text-foreground"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    >
-      <path d="M2 8h12" />
-      <path d="M8 2v12" className="group-open:hidden" />
-    </svg>
-  );
-}
-
 /**
  * One FAQ block, any audience (DESIGN.md "Components": FAQ). A ruled list of
  * native <details> rows: no JS, every row reachable by keyboard, answers
@@ -647,7 +631,7 @@ export function FaqSection({
 }) {
   const headingId = id ? `${id}-heading` : undefined;
   const contact = (
-    <p className="mt-4 text-[15px] text-muted-foreground">
+    <p className="mt-4 text-base text-muted-foreground">
       Still have a question?{" "}
       <a href="mailto:hello@usetruecap.com" className="tc-link inline-flex min-h-11 items-center">
         Email us
@@ -673,7 +657,7 @@ export function FaqSection({
           <div>
             <SectionHeading id={headingId}>{heading}</SectionHeading>
             {intro ? (
-              <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted-foreground">
+              <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
                 {intro}
               </p>
             ) : null}
@@ -683,10 +667,10 @@ export function FaqSection({
             {items.map((faq) => (
               <details key={faq.q} className="group border-b border-border">
                 <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
-                  <span className="text-[17px] font-semibold">{faq.q}</span>
-                  <FaqMark />
+                  <span className="text-lg font-semibold">{faq.q}</span>
+                  <DisclosureMark className="mt-1.5" />
                 </summary>
-                <p className="max-w-[64ch] pb-5 text-[15.5px] leading-relaxed text-muted-foreground">
+                <p className="max-w-[64ch] pb-5 text-base leading-relaxed text-muted-foreground">
                   {faq.a}
                 </p>
               </details>
@@ -724,28 +708,25 @@ export function FaqSection({
  */
 const DATA_SOURCES: {
   label: string;
+  /** Where the starting value comes from, in lib/product-facts.ts's words. */
   source: string;
-  basis: string;
   /** Rendered as the row's flag: the default the model uses until replaced. */
   flag?: string;
   replace: string;
 }[] = [
   {
     label: "Rent",
-    source: "HUD Fair Market Rent",
-    basis: `${DATA_SOURCE_FACTS.rent}: a starting benchmark, not a rent comp.`,
+    source: `${DATA_SOURCE_FACTS.rent}.`,
     replace: "Local rent comps",
   },
   {
     label: "Mortgage rate",
-    source: "FRED 30-year fixed",
-    basis: `The ${DATA_SOURCE_FACTS.mortgageRate}, with its date shown: a benchmark, not a lender quote.`,
+    source: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown.`,
     replace: "An investor lender quote, before deciding",
   },
   {
     label: "Property tax",
-    source: "Manual local input",
-    basis: PROPERTY_TAX_FACTS.notAutoFilled,
+    source: `Your input. ${PROPERTY_TAX_FACTS.notAutoFilled}`,
     flag: PROPERTY_TAX_FACTS.blankFieldBehavior,
     replace: "A local annual bill or reviewed effective rate",
   },
@@ -761,7 +742,7 @@ export function DataSourcesSection() {
         <SectionHeading id="data-sources-heading">
           Visible sources. Editable assumptions.
         </SectionHeading>
-        <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
           TrueCap labels sourced benchmarks and manual fallbacks, and keeps
           every assumption editable. Start fast, then replace starting values
           with verified property facts, local comps, and lender terms.
@@ -772,25 +753,24 @@ export function DataSourcesSection() {
           aria-hidden
           className={cn(
             SOURCE_TABLE_GRID,
-            "hidden border-b border-border py-2.5 text-[13px] font-semibold text-muted-foreground sm:grid sm:text-sm",
+            "hidden border-b border-border py-2.5 text-sm font-semibold text-muted-foreground sm:grid",
           )}
         >
           <span>Starting value</span>
-          <span>Source and basis</span>
+          <span>Source</span>
           <span className="hidden lg:block">Replace it with</span>
         </div>
         <dl>
           {DATA_SOURCES.map((s) => (
             <div key={s.label} className={cn(SOURCE_TABLE_GRID, "border-b border-rule-soft py-4")}>
               <dt className="font-semibold">{s.label}</dt>
-              <dd className="min-w-0 text-[15.5px] leading-relaxed">
-                <span className="font-semibold">{s.source}.</span>{" "}
-                <span className="text-muted-foreground">{s.basis}</span>
+              <dd className="min-w-0 text-base leading-relaxed">
+                {s.source}
                 {s.flag ? (
                   <span className="mt-1 block text-caution-text">{s.flag}</span>
                 ) : null}
               </dd>
-              <dd className="text-[15.5px] leading-relaxed sm:col-start-2 lg:col-start-auto">
+              <dd className="text-base leading-relaxed sm:col-start-2 lg:col-start-auto">
                 <span className="lg:sr-only">Replace it with: </span>
                 {s.replace}
               </dd>
@@ -818,15 +798,15 @@ export function ClientReceivesSection() {
       <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <div>
           <SectionHeading id="client-receives-heading">What your client receives</SectionHeading>
-          <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted-foreground">
+          <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
             No account on their side, nothing hidden on yours. Branding is set
             up once in your profile and applies to every link and report.
           </p>
           <dl className="mt-8 border-t-2 border-foreground">
             {CLIENT_RECEIVES.map((item) => (
               <div key={item.key} className="border-b border-rule-soft py-4">
-                <dt className="text-[17px] font-semibold">{item.title}</dt>
-                <dd className="mt-1 max-w-[64ch] text-[15.5px] leading-relaxed text-muted-foreground">
+                <dt className="text-lg font-semibold">{item.title}</dt>
+                <dd className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
                   {item.body}
                 </dd>
               </div>
@@ -961,7 +941,14 @@ export async function PdfProUpsell() {
           : "The decision memo.",
     },
   ];
+  // One filled action in the row: the free analysis, the page's primary CTA.
+  // The paid plans link out with the secondary button (DESIGN.md "Buttons").
   const cta = buttonVariants({ size: "cta", className: "w-full" });
+  const ctaSecondary = buttonVariants({
+    size: "cta",
+    variant: "outline",
+    className: "w-full",
+  });
 
   return (
     <Section aria-labelledby="plans-heading">
@@ -971,7 +958,7 @@ export async function PdfProUpsell() {
           {proOfferName} tells you what
           to offer.
         </SectionHeading>
-        <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
           Free shows the economics before you spend more time on a property.{" "}
           {proOfferName} answers four questions on every deal: does it meet
           my criteria, what is my Offer Ceiling, what could make it fail, and
@@ -1008,7 +995,7 @@ export async function PdfProUpsell() {
           priceNote={<>or {price.proAnnual} a year</>}
           answers={proAnswers}
           action={
-            <Link href="/pricing" className={cta}>
+            <Link href="/pricing" className={ctaSecondary}>
               See Pro pricing
             </Link>
           }
@@ -1038,7 +1025,7 @@ export async function PdfProUpsell() {
               { term: "A co-branded memo", detail: "Your client opens it without an account." },
             ]}
             action={
-              <Link href="/for-agents" className={cta}>
+              <Link href="/for-agents" className={ctaSecondary}>
                 See TrueCap for agents
               </Link>
             }
@@ -1053,7 +1040,7 @@ export async function PdfProUpsell() {
         aria-label="Free and Pro comparison"
         className="mt-12 max-w-4xl border-t-2 border-foreground"
       >
-        <table className="w-full table-fixed border-collapse text-sm sm:text-[15px]">
+        <table className="w-full table-fixed border-collapse text-sm sm:text-base">
           <colgroup>
             <col className="w-1/2" />
             <col className="w-1/4" />
@@ -1070,7 +1057,7 @@ export async function PdfProUpsell() {
               {ladderHeaders.map((h, i) => (
                 <th key={h} scope="col" className="px-1 py-2.5 text-center font-semibold">
                   {h}
-                  <span className="block text-[13px] font-normal text-muted-foreground">
+                  <span className="block text-sm font-normal text-muted-foreground">
                     {LADDER_SUBHEADERS[i]}
                   </span>
                 </th>
@@ -1098,7 +1085,7 @@ export async function PdfProUpsell() {
                         <span className="sr-only">Not included</span>
                       </>
                     ) : (
-                      <span className="text-[13.5px]">{cell}</span>
+                      <span className="text-sm">{cell}</span>
                     )}
                   </td>
                 ))}

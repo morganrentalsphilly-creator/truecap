@@ -200,7 +200,7 @@ export function SiteFooter({
             .filter((col) => !(hideAccountLinks && col.title === "Account"))
             .map((col) => (
             <div key={col.title} className="border-t border-border pt-2">
-              <h2 className="flex h-11 items-center text-[15px] font-semibold text-foreground">
+              <h2 className="flex h-11 items-center text-base font-semibold text-foreground">
                 {col.title}
               </h2>
               <ul>
@@ -208,7 +208,7 @@ export function SiteFooter({
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="inline-flex min-h-11 min-w-11 items-center text-[15px] text-muted-foreground transition-colors hover:text-foreground"
+                      className="inline-flex min-h-11 min-w-11 items-center text-base text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -223,13 +223,13 @@ export function SiteFooter({
             Pages whose results view carries its own copy pass
             disclaimer={false} (docs/voice.md rule 3). */}
         {disclaimer ? (
-          <Disclaimer className="mt-12 max-w-3xl sm:text-xs" />
+          <Disclaimer className="mt-12" />
         ) : null}
 
         {/* Bottom strip — copyright, trust badges, legal links + email,
             all on the same horizontal band so the footer ends with a
             single visually-balanced row instead of trailing dead space. */}
-        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-4 text-[13px] text-muted-foreground sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p className="order-2 sm:order-1">
             © {year} TrueCap. All rights reserved.
           </p>
