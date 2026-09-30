@@ -23,12 +23,27 @@ import { cn } from "@/lib/utils";
 
 const LINK_CLASS = "tc-link inline-flex min-h-11 items-center";
 
+/**
+ * One rule per boundary: the bio opens on the section rule, unless the block
+ * right before it is a post's FAQ (data-faq-section, directly or as the last
+ * child of the <article> it ends), whose last row already closes on the same
+ * 1px rule. Two identical rules 48px apart read as a stray double rule, which
+ * the system keeps for a final total. After a Sources list the bio keeps its
+ * rule: that list ends on an inset soft row rule, and the section rule is
+ * what marks the boundary between two sections (DESIGN.md "Rules carry the
+ * structure").
+ *
+ * mt-12: the one gap between the blocks after an article (the reading list
+ * after the bio and the capture block inside it take the same step).
+ */
+const AFTER_FAQ_ROWS = "[[data-faq-section]+&]:border-t-0 [:has(>[data-faq-section]:last-child)+&]:border-t-0";
+
 export function AuthorBio({ className = "" }: { className?: string }) {
   return (
     <section
       aria-labelledby="about-truecap-heading"
       data-author-bio=""
-      className={cn("mt-10 border-t border-border pt-6", className)}
+      className={cn("mt-12 border-t border-border pt-6", AFTER_FAQ_ROWS, className)}
     >
       <div className="max-w-[68ch]">
         <h2

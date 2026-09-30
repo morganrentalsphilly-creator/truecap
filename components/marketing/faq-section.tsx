@@ -78,14 +78,17 @@ export function FaqSection<Item extends { q: string; a: string }>({
   const rows = items.map((faq) => (
     <details key={faq.q} className="group border-b border-border">
       <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
-        <span className="text-lg font-semibold">{faq.q}</span>
+        {/* The question is the row's heading: balanced, so "…need this?"
+            never leaves "this?" alone on the last line. The answer is body:
+            pretty. */}
+        <span className="text-balance text-lg font-semibold">{faq.q}</span>
         <DisclosureMark className="mt-1.5" />
       </summary>
       {/* A rendered answer's links take the tc-link look here: the row is
           not-prose, so an article body's link styling does not reach them. */}
       <p
         className={cn(
-          "max-w-[64ch] pb-5 text-base leading-relaxed text-muted-foreground",
+          "max-w-[64ch] text-pretty pb-5 text-base leading-relaxed text-muted-foreground",
           renderAnswer ? "[&_a]:tc-link" : null,
         )}
       >
@@ -109,14 +112,18 @@ export function FaqSection<Item extends { q: string; a: string }>({
   if (variant === "inline") {
     return (
       <>
+        {/* data-faq-section: the list ends on its own rule, so a ruled block
+            after it (AuthorBio) drops its top rule instead of stacking a
+            second one 40px below. */}
         <section
           id={id}
+          data-faq-section=""
           aria-labelledby={headingId}
           className={cn("not-prose", compact ? null : "mt-16")}
         >
           <SectionHeading id={headingId}>{heading}</SectionHeading>
           {intro ? (
-            <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
               {intro}
             </p>
           ) : null}
@@ -136,17 +143,19 @@ export function FaqSection<Item extends { q: string; a: string }>({
         containerClassName={compact ? "pt-0 sm:pt-0" : undefined}
         aria-labelledby={headingId}
       >
+        {/* split: the hero's 5/7 grid with the hero's gaps, so the list
+            starts where the hero's wide column does at every width. */}
         <div
           className={
             layout === "split"
-              ? "grid gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+              ? "grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16"
               : "max-w-3xl"
           }
         >
           <div>
             <SectionHeading id={headingId}>{heading}</SectionHeading>
             {intro ? (
-              <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
                 {intro}
               </p>
             ) : null}

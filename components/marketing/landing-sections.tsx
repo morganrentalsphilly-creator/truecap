@@ -31,6 +31,7 @@ import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
 import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
 import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { FaqSection } from "@/components/marketing/faq-section";
+import { Note } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { OpenLedger } from "@/components/ledger/open-ledger";
 import { buttonVariants } from "@/components/ui/button";
@@ -197,15 +198,15 @@ export function BuiltByInvestor() {
  */
 export function FinalCta() {
   return (
-    // The hero's grid: the case on the left, the field on the right, where
-    // the ledger stood at the top of the page.
+    // The hero's grid, with the hero's gaps: the case on the left, the field
+    // on the right, where the ledger stood at the top of the page.
     <Section rule="heavy" aria-labelledby="final-cta-heading">
-      <div className="grid gap-x-16 gap-y-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end">
+      <div className="grid gap-x-12 gap-y-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16">
         <div>
           <SectionHeading id="final-cta-heading">
             Paste the listing. Send the deal that already pencils.
           </SectionHeading>
-          <p className="mt-4 max-w-[56ch] text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-4 max-w-[56ch] text-pretty text-lg leading-relaxed text-muted-foreground">
             Your first complete decision includes cash flow, cap rate, CoC, DSCR,
             Buy Box fit, the Offer Ceiling, downside checks, and next
             steps. No account or card required.
@@ -290,13 +291,19 @@ export function SocialProof() {
  * definition list (PlanCard's grammar without the card). No column is
  * emphasised: blue means "act here" (DESIGN.md color), and the block argues
  * it is a fair comparison. From 1024px the columns share their rows
- * (subgrid), so "Best when" and "Tradeoff" line up across them; stacked on a
- * phone, each column opens on its own heavy rule.
+ * (subgrid), so "Best when" and "Tradeoff" line up across them. The heavy
+ * rule opens the block once at every width; stacked on a phone, each later
+ * column opens on the 1px section rule, so the phone shows one heavy rule per
+ * block, as the desktop grid does.
  *
- * Then "A deliberately fair comparison" in the same grammar: when DealCheck
- * fits better and when TrueCap does, each list with the competitor's own
- * pages linked as the source. The claims stay as written; the links are
- * their substantiation.
+ * Then "A deliberately fair comparison", its own section under its own H2
+ * (it answers the H1's "vs DealCheck & BiggerPockets", so it is not a fourth
+ * column name): when DealCheck fits better and when TrueCap does, two lists
+ * that share their rows from 768px (subgrid, like the columns above), so
+ * their rules line up; then BiggerPockets on its own line under both, not as
+ * fine print in TrueCap's column. Each claim links the competitor's own page
+ * as its source. The claims stay as written; the links are their
+ * substantiation.
  */
 const WORKFLOW_COMPARISONS = [
   {
@@ -327,50 +334,53 @@ const WORKFLOW_COMPARISONS = [
 
 export function VsCompetitors() {
   return (
-    // No top rule: the page hero's bottom rule already sits above it.
-    <Section rule="none" aria-labelledby="why-truecap-workflows-heading">
-      <SectionHeading id="why-truecap-workflows-heading" className="max-w-3xl">
-        Choose the workflow that fits how you invest.
-      </SectionHeading>
-      {/* One heavy rule opens the three columns from 1024px; stacked on a
-          phone, each column opens on its own. */}
-      <div className="mt-8 grid gap-y-10 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-0 lg:border-t-2 lg:border-foreground">
-        {WORKFLOW_COMPARISONS.map((item) => (
-          <article
-            key={item.name}
-            className="min-w-0 max-w-[68ch] border-t-2 border-foreground pt-5 lg:row-span-4 lg:grid lg:max-w-none lg:grid-rows-subgrid lg:border-t-0"
-          >
-            <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
-              {item.name}
-            </h3>
-            <p className="mt-1 text-pretty text-lg font-semibold">{item.thesis}</p>
-            <dl className="mt-4 border-t border-border text-base lg:row-span-2 lg:grid lg:grid-rows-subgrid">
-              <div className="border-b border-rule-soft py-2.5">
-                <dt className="font-semibold">Best when</dt>
-                <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
-                  {item.bestFor}
-                </dd>
-              </div>
-              <div className="border-b border-rule-soft py-2.5">
-                <dt className="font-semibold">Tradeoff</dt>
-                <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
-                  {item.tradeoff}
-                </dd>
-              </div>
-            </dl>
-          </article>
-        ))}
-      </div>
-      <div className="mt-14 sm:mt-16">
-        <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
+    <>
+      {/* No top rule: the page hero's bottom rule already sits above it. */}
+      <Section rule="none" aria-labelledby="why-truecap-workflows-heading">
+        <SectionHeading id="why-truecap-workflows-heading" className="max-w-3xl">
+          Choose the workflow that fits how you invest.
+        </SectionHeading>
+        <div className="mt-8 grid gap-y-10 border-t-2 border-foreground lg:grid-cols-3 lg:gap-x-12 lg:gap-y-0">
+          {WORKFLOW_COMPARISONS.map((item) => (
+            <article
+              key={item.name}
+              className="min-w-0 max-w-[68ch] border-t border-border pt-5 first:border-t-0 lg:row-span-4 lg:grid lg:max-w-none lg:grid-rows-subgrid lg:border-t-0"
+            >
+              <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
+                {item.name}
+              </h3>
+              <p className="mt-1 text-pretty text-lg font-semibold">{item.thesis}</p>
+              <dl className="mt-4 border-t border-border text-base lg:row-span-2 lg:grid lg:grid-rows-subgrid">
+                <div className="border-b border-rule-soft py-2.5">
+                  <dt className="font-semibold">Best when</dt>
+                  <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
+                    {item.bestFor}
+                  </dd>
+                </div>
+                <div className="border-b border-rule-soft py-2.5">
+                  <dt className="font-semibold">Tradeoff</dt>
+                  <dd className="mt-0.5 text-pretty leading-relaxed text-muted-foreground">
+                    {item.tradeoff}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </Section>
+      <Section aria-labelledby="why-truecap-fair-heading">
+        <SectionHeading id="why-truecap-fair-heading" className="max-w-3xl">
           A deliberately fair comparison
-        </h3>
-        <div className="mt-6 grid gap-x-12 gap-y-10 md:grid-cols-2 md:border-t-2 md:border-foreground">
-          <div className="min-w-0 border-t-2 border-foreground pt-4 md:border-t-0">
-            <p className="text-lg font-semibold">
+        </SectionHeading>
+        {/* From 768px each column spans six shared rows (its name, four
+            items, its source line) and each list four of them, so row N has
+            one height in both lists and their rules meet. */}
+        <div className="mt-8 grid gap-x-12 gap-y-10 border-t-2 border-foreground md:grid-cols-2 md:gap-y-0">
+          <div className="min-w-0 pt-4 md:row-span-6 md:grid md:grid-rows-subgrid">
+            <h3 className="text-balance text-lg font-semibold">
               DealCheck may fit better if you want
-            </p>
-            <ul className="mt-3 border-t border-border text-base leading-relaxed">
+            </h3>
+            <ul className="mt-3 border-t border-border text-base leading-relaxed md:row-span-4 md:grid md:grid-rows-subgrid">
               <li className="border-b border-rule-soft py-2.5">
                 Native iOS and Android apps.
               </li>
@@ -415,11 +425,11 @@ export function VsCompetitors() {
               pages.
             </p>
           </div>
-          <div className="min-w-0 border-t-2 border-foreground pt-4 md:border-t-0">
-            <p className="text-lg font-semibold">
+          <div className="min-w-0 border-t border-border pt-4 md:row-span-6 md:grid md:grid-rows-subgrid md:border-t-0">
+            <h3 className="text-balance text-lg font-semibold">
               TrueCap may fit better if you want
-            </p>
-            <ul className="mt-3 border-t border-border text-base leading-relaxed">
+            </h3>
+            <ul className="mt-3 border-t border-border text-base leading-relaxed md:row-span-4 md:grid md:grid-rows-subgrid">
               <li className="border-b border-rule-soft py-2.5">
                 A no-signup, address-first screen with editable sourced
                 assumptions.
@@ -437,23 +447,23 @@ export function VsCompetitors() {
                 co-branded decision memo.
               </li>
             </ul>
-            <p className="mt-3 max-w-[64ch] text-pretty text-sm leading-relaxed text-muted-foreground">
-              BiggerPockets may fit better for its community and education
-              ecosystem; see its official{" "}
-              <a
-                className="tc-link"
-                href="https://www.biggerpockets.com/rental-property-calculator"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Rental Property Calculator
-              </a>
-              .
-            </p>
           </div>
         </div>
-      </div>
-    </Section>
+        <Note className="mt-10">
+          BiggerPockets may fit better for its community and education
+          ecosystem; see its official{" "}
+          <a
+            className="tc-link"
+            href="https://www.biggerpockets.com/rental-property-calculator"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Rental Property Calculator
+          </a>
+          .
+        </Note>
+      </Section>
+    </>
   );
 }
 
@@ -567,6 +577,9 @@ export function HomepageFaq({
           layout="split"
         />
       ) : null}
+      {/* Every audience sets its lists on the homepage's split: the heading
+          beside the list from 1024px, so the rules run the container's width
+          like every other section's instead of stopping at max-w-3xl. */}
       {audience === "both" ? (
         <>
           {/* Two lists, one contact line: it closes the second. */}
@@ -576,6 +589,7 @@ export function HomepageFaq({
             items={AGENT_FAQS}
             structuredData={false}
             contact={null}
+            layout="split"
           />
           <FaqSection
             id="investor-questions"
@@ -583,6 +597,7 @@ export function HomepageFaq({
             items={HOMEPAGE_FAQS}
             structuredData={false}
             compact
+            layout="split"
           />
         </>
       ) : null}
@@ -592,6 +607,7 @@ export function HomepageFaq({
           heading="The questions investors ask first."
           items={HOMEPAGE_FAQS}
           structuredData={false}
+          layout="split"
         />
       ) : null}
       {/* Only one URL should claim a given FAQ block in structured data. */}

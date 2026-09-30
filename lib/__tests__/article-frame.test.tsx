@@ -142,7 +142,8 @@ describe("FaqSection variant=inline", () => {
   );
 
   it("sits in the column without a Section, outside the article's prose, on the 2px ink rule", () => {
-    expect(html).toMatch(/^<section id="inline" aria-labelledby="inline-heading" class="not-prose mt-16">/);
+    // data-faq-section: an AuthorBio after the list drops its top rule.
+    expect(html).toMatch(/^<section id="inline" data-faq-section="" aria-labelledby="inline-heading" class="not-prose mt-16">/);
     expect(html).not.toContain("max-w-7xl");
     expect(html).toContain('<h2 id="inline-heading" class="font-display');
     expect(html).toContain('<div class="mt-8 border-t-2 border-foreground"><details');
