@@ -6,6 +6,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -236,9 +237,9 @@ export default function VsDealcheckForShortTermRentalsPage() {
           <div className={VS_PROSE}>
             <p>
               Whichever calculator you land on, the STR underwrite is the same job. Our{" "}
-              <Link href="/blog/short-term-rental-underwriting-playbook" className="tc-link">short-term rental underwriting playbook</Link>
+              <IntentPrefetchLink href="/blog/short-term-rental-underwriting-playbook" className="tc-link">short-term rental underwriting playbook</IntentPrefetchLink>
               {" "}breaks down seasonal revenue into a defensible analysis, and our roundup of the{" "}
-              <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="tc-link">best short-term rental analysis tools for 2026</Link>
+              <IntentPrefetchLink href="/blog/best-short-term-rental-analysis-tool-2026" className="tc-link">best short-term rental analysis tools for 2026</IntentPrefetchLink>
               {" "}covers where the ADR and occupancy data should come from. For a quick first-pass check, our{" "}
               <Link href="/analyze" prefetch={false} className="tc-link">free deal analyzer</Link>
               {" "}returns cap rate, cash flow, and DSCR from a single address.
@@ -267,12 +268,12 @@ export default function VsDealcheckForShortTermRentalsPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -286,28 +287,28 @@ export default function VsDealcheckForShortTermRentalsPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/hostaway"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Hostaway
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/airdna"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs AirDNA
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

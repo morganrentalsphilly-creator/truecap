@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -351,20 +352,20 @@ export default function VsPropstreamPage() {
             </ol>
             <p>
               Just want the underwriting half? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="tc-link"
               >
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               screens a list of skip-traced addresses down to the handful worth
               modeling, and our guide to{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               shows what happens next. When one survives the screen, the full{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -399,12 +400,12 @@ export default function VsPropstreamPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -418,28 +419,28 @@ export default function VsPropstreamPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

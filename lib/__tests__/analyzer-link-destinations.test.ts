@@ -20,6 +20,12 @@ import { describe, expect, it } from "vitest";
  *   3. Every <Link> to /analyze carries prefetch={false} (the analyzer bundle
  *      must not be prefetched onto marketing pages — docs/site-overhaul.md),
  *      or is the <AnalyzeCtaLink> island, which sets it.
+ *
+ * Rules 2 and 3 read <IntentPrefetchLink> as well as <Link>. Below the first
+ * screen, marketing pages write their internal links through it
+ * (components/marketing/intent-prefetch-link.tsx; every body link on the 38
+ * /vs pages, intent-prefetch-vs.test.ts), and without prefetch={false} it
+ * would still prefetch /analyze on hover.
  */
 
 const ROOTS = ["app", "components"];
@@ -37,6 +43,11 @@ function walk(dir: string, out: string[] = []): string[] {
 const files = ROOTS.flatMap((root) => walk(root));
 const flatten = (source: string) =>
   source.replace(/\{"\s*"\}/g, " ").replace(/\s+/g, " ");
+
+/** A <Link> or <IntentPrefetchLink> to "/" and its label (group 2), in flattened source. */
+const homeAnchors = () => /<(Link|IntentPrefetchLink)\b[^>]*href="\/"[^>]*>(.*?)<\/\1>/g;
+/** The attributes (group 2) of a <Link> or <IntentPrefetchLink> to /analyze, in flattened source. */
+const analyzeAnchors = () => /<(Link|IntentPrefetchLink)\b([^>]*href="\/analyze(?:[?#][^"]*)?"[^>]*)>/g;
 
 /** Labels that promise the analyzer (brand/breadcrumb anchors do not). */
 const ANALYZER_LABEL =
@@ -64,10 +75,10 @@ describe("analyzer link destinations", () => {
     const offenders: string[] = [];
     for (const file of files) {
       const flat = flatten(readFileSync(file, "utf8"));
-      const anchor = /<Link\b[^>]*href="\/"[^>]*>(.*?)<\/Link>/g;
+      const anchor = homeAnchors();
       let match: RegExpExecArray | null;
       while ((match = anchor.exec(flat)) != null) {
-        const label = match[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        const label = match[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
         if (!ANALYZER_LABEL.test(label)) continue;
         // "Start free at usetruecap.com" is a brand link on the shared-deal
         // shell, not an analyzer promise.
@@ -86,19 +97,43 @@ describe("analyzer link destinations", () => {
     ).toEqual([]);
   });
 
-  it("never prefetches the analyzer bundle from a marketing <Link>", () => {
+  it("never prefetches the analyzer bundle from a marketing <Link> or <IntentPrefetchLink>", () => {
     const offenders: string[] = [];
     for (const file of files) {
       if (file.endsWith("components/marketing/analyze-cta-link.tsx")) continue;
       const flat = flatten(readFileSync(file, "utf8"));
-      for (const match of flat.matchAll(/<Link\b([^>]*href="\/analyze(?:[?#][^"]*)?"[^>]*)>/g)) {
-        if (!/prefetch=\{false\}/.test(match[1])) offenders.push(`${file}: <Link ${match[1].trim()}>`);
+      for (const match of flat.matchAll(analyzeAnchors())) {
+        if (!/prefetch=\{false\}/.test(match[2])) offenders.push(`${file}: <${match[1]} ${match[2].trim()}>`);
       }
     }
     expect(
       offenders,
       `/analyze links without prefetch={false}:\n${offenders.join("\n")}`,
     ).toEqual([]);
+  });
+
+  it("reads rules 2 and 3 through IntentPrefetchLink as well as Link", () => {
+    // Guard the guard: each fixture breaks a rule, so each must be caught.
+    for (const fixture of [
+      '<Link href="/" className="tc-link">rental property analysis</Link>',
+      '<IntentPrefetchLink href="/" className="tc-link">rental property analysis</IntentPrefetchLink>',
+    ]) {
+      const labels = [...flatten(fixture).matchAll(homeAnchors())].map((m) => m[2]);
+      expect(labels, fixture).toEqual(["rental property analysis"]);
+      expect(ANALYZER_LABEL.test(labels[0])).toBe(true);
+    }
+    for (const fixture of [
+      '<Link href="/analyze" className="tc-link">run a deal</Link>',
+      '<IntentPrefetchLink href="/analyze?strategy=brrrr" className="tc-link">run a deal</IntentPrefetchLink>',
+    ]) {
+      const tags = [...flatten(fixture).matchAll(analyzeAnchors())];
+      expect(tags, fixture).toHaveLength(1);
+      expect(/prefetch=\{false\}/.test(tags[0][2]), fixture).toBe(false);
+    }
+    // And the legal shape stays legal.
+    const off = [...flatten('<IntentPrefetchLink href="/analyze" prefetch={false} className="tc-link">').matchAll(analyzeAnchors())];
+    expect(off).toHaveLength(1);
+    expect(off[0][2]).toMatch(/prefetch=\{false\}/);
   });
 
   it("the /vs hero CTA is a real link to /analyze, not a scroll button", () => {

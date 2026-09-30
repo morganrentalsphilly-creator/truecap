@@ -12,6 +12,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -366,19 +367,19 @@ export default function VsAvailPage() {
             </ol>
             <p>
               Want to start with just the underwrite? Two free screens — the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="tc-link"
               >
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
               >
                 gross rent multiplier calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               — size up a listing in seconds, and the full{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -388,12 +389,12 @@ export default function VsAvailPage() {
               </Link>{" "}
               computes cap rate, cash-on-cash, and DSCR from an address. Our guide
               on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through exactly what to do.
             </p>
           </div>
@@ -422,12 +423,12 @@ export default function VsAvailPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -441,28 +442,28 @@ export default function VsAvailPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentredi"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs RentRedi
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

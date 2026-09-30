@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -238,12 +239,12 @@ export default function VsBiggerPocketsCalculatorPage() {
           </div>
           <p className={VS_FOOTNOTE}>
             Only need a free calculator? Full list:{" "}
-            <Link
+            <IntentPrefetchLink
               href="/blog/free-biggerpockets-calculator-alternatives"
               className="tc-link"
             >
               free BiggerPockets calculator alternatives
-            </Link>
+            </IntentPrefetchLink>
           </p>
         </Section>
 
@@ -342,26 +343,26 @@ export default function VsBiggerPocketsCalculatorPage() {
               If you only need one number — not a full calculator suite —
               TrueCap&apos;s free single-purpose tools cover the screening end
               for free: the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="tc-link"
               >
                 1% rule calculator
-              </Link>
+              </IntentPrefetchLink>
               , the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
               >
                 gross rent multiplier calculator
-              </Link>
+              </IntentPrefetchLink>
               , and the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/mortgage-payment-calculator"
                 className="tc-link"
               >
                 mortgage payment calculator
-              </Link>
+              </IntentPrefetchLink>
               . Cap rate, cash-on-cash and DSCR are not separate pages here — they
               come out of the{" "}
               <Link
@@ -372,26 +373,26 @@ export default function VsBiggerPocketsCalculatorPage() {
               </Link>
               , and if you would rather run the arithmetic yourself, the
               walkthroughs on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 how to calculate cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               show every step. For the rehab side, start with{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/brrrr-method-explained"
                 className="tc-link"
               >
                 the BRRRR workflow guide
-              </Link>
+              </IntentPrefetchLink>
               .
             </p>
           </div>
@@ -423,12 +424,12 @@ export default function VsBiggerPocketsCalculatorPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -442,28 +443,28 @@ export default function VsBiggerPocketsCalculatorPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>
@@ -515,9 +516,9 @@ const BP_FAQ: FaqItem[] = [
     answer: (
       <>
         See TrueCap&apos;s{" "}
-        <Link href="/pricing" className="tc-link">
+        <IntentPrefetchLink href="/pricing" className="tc-link">
           live pricing page
-        </Link>{" "}
+        </IntentPrefetchLink>{" "}
         and BiggerPockets&apos; official membership and calculator pages for
         current prices. BiggerPockets bundles a broader community and education
         ecosystem, so price alone is not an apples-to-apples comparison.

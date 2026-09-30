@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -324,12 +325,12 @@ export default function VsQuickbooksRentalPage() {
             </ol>
             <p>
               Sizing up a purchase instead of recording one? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/rental-property-spreadsheet"
                 className="tc-link"
               >
                 rental property spreadsheet
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               lays the numbers out the way you already work, and the full{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -339,12 +340,12 @@ export default function VsQuickbooksRentalPage() {
               </Link>{" "}
               tells you whether a deal is worth bookkeeping for at all — cap rate,
               cash-on-cash, and DSCR from an address. Our guide on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the workflow end-to-end.
             </p>
           </div>
@@ -375,12 +376,12 @@ export default function VsQuickbooksRentalPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -394,28 +395,28 @@ export default function VsQuickbooksRentalPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/baselane"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Baselane
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/landlord-studio"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Landlord Studio
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -313,20 +314,20 @@ export default function VsLodgifyPage() {
             </ol>
             <p>
               Want the underwriting half on its own? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/vacancy-rate-calculator"
                 className="tc-link"
               >
                 vacancy rate calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               turns vacant nights and turnover cost into the occupancy haircut an
               STR pro forma actually needs, and our{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/short-term-rental-underwriting-playbook"
                 className="tc-link"
               >
                 short-term rental underwriting playbook
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               walks through the rest of the assumptions. Then hand the address to
               the full{" "}
               <Link
@@ -362,12 +363,12 @@ export default function VsLodgifyPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -381,28 +382,28 @@ export default function VsLodgifyPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/hostfully"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Hostfully
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/hostaway"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Hostaway
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/airdna"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs AirDNA
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -330,19 +331,19 @@ export default function VsHostfullyPage() {
             </ol>
             <p>
               Not ready for a full underwrite? The free{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
               >
                 gross rent multiplier calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               triages a listing in seconds from price and gross revenue, and our{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/short-term-rental-underwriting-playbook"
                 className="tc-link"
               >
                 short-term rental underwriting playbook
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               explains which STR assumptions actually move the answer. When you
               need the cap rate, cash-on-cash and DSCR behind that screen, the
               full{" "}
@@ -379,12 +380,12 @@ export default function VsHostfullyPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -398,28 +399,28 @@ export default function VsHostfullyPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/mashvisor"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Mashvisor
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/roofstock"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Roofstock
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/stessa"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Stessa
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

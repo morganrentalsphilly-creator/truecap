@@ -74,8 +74,14 @@ function proseColumns(source: string): string[] {
   return out;
 }
 
-/** The opening tag of every <Link> or <a> (attributes may span lines). */
-const linkTags = (source: string) => [...source.matchAll(/<(?:Link|a)\b[^>]*>/g)].map((m) => m[0]);
+/**
+ * The opening tag of every <Link>, <IntentPrefetchLink> or <a> (attributes may
+ * span lines). Below the hero the pages' internal links are IntentPrefetchLink
+ * (intent-prefetch-vs.test.ts), so the close's secondary action and the prose
+ * links are read under that name.
+ */
+const linkTags = (source: string) =>
+  [...source.matchAll(/<(?:Link|IntentPrefetchLink|a)\b[^>]*>/g)].map((m) => m[0]);
 
 const FILLED = 'buttonVariants({ size: "cta" })';
 const OUTLINE = 'buttonVariants({ variant: "outline", size: "cta" })';
@@ -155,7 +161,7 @@ describe("the retired /vs look stays gone", () => {
     ["transition-all and entrance motion", /\btransition-all\b|\btc-(?:reveal|rise-in)\b/],
     ["hover nudges", /group-hover:translate/],
     ["the retired link class", /\bhover:underline\b/],
-    ["an arrow at the end of link text", /(?:→|»|-&gt;)\s*<\/(?:Link|a)>/],
+    ["an arrow at the end of link text", /(?:→|»|-&gt;)\s*<\/(?:Link|IntentPrefetchLink|a)>/],
   ];
 
   it("scans every .tsx under app/vs", () => {

@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -331,19 +332,19 @@ export default function VsYardiBreezePage() {
             </ol>
             <p>
               Want the acquisition math on its own?{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-noi-rental-property"
                 className="tc-link"
               >
                 How to calculate NOI
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               rebuilds the number Yardi Breeze reports after the fact, and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
               >
                 how to calculate DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               shows the ratio your lender checks before you get there. When it is
               time to underwrite the next building, the full{" "}
               <Link
@@ -379,12 +380,12 @@ export default function VsYardiBreezePage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -398,28 +399,28 @@ export default function VsYardiBreezePage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/buildium"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Buildium
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/rentec-direct"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Rentec Direct
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/appfolio"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs AppFolio
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

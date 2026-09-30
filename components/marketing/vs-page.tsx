@@ -40,8 +40,15 @@
  *   · the page keeps what tests read from its source: the literal <h1> with
  *     <BlogByline /> directly after it and <AuthorBio /> (author-byline-bio),
  *     analyticsSource="vs_hero" (analyzer-link-destinations), the first
- *     `<Link href="/tools/` and its lead-in (vs-page-copy-integrity), and
- *     prefetch={false} on every /analyze link;
+ *     `<IntentPrefetchLink href="/tools/` and its lead-in
+ *     (vs-page-copy-integrity), and prefetch={false} on every /analyze link;
+ *   · below the hero every internal link is IntentPrefetchLink
+ *     (components/marketing/intent-prefetch-link.tsx: it prefetches on hover
+ *     or keyboard focus, never on scroll). Only the hero's own links keep
+ *     next/link's default, and the /analyze links stay next/link with
+ *     prefetch={false}. Every page imports IntentPrefetchLink, so a link the
+ *     SEO loop adds needs no import; lib/__tests__/intent-prefetch-vs.test.ts
+ *     fails a default-prefetch <Link> anywhere outside VsHero;
  *   · nothing here is async: lastmod-invents-none renders a page by calling
  *     it synchronously;
  *   · an element the SEO loop adds to a page needs no class constant and no

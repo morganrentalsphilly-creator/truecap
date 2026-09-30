@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { AuthorBio } from "@/components/marketing/author-bio";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -311,19 +312,19 @@ export default function VsReonomyPage() {
             </ul>
             <p>
               Only need the residential underwriting?{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
               >
                 How to calculate cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               covers the formula Reonomy assumes you already know, and{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/what-is-a-good-cap-rate"
                 className="tc-link"
               >
                 what is a good cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               frames the result against real market ranges. For the full
               residential underwrite — cap rate, cash-on-cash, DSCR and a 10-year
               projection — start with the{" "}
@@ -360,12 +361,12 @@ export default function VsReonomyPage() {
               >
                 Run a deal now
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ variant: "outline", size: "cta" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         />
@@ -379,28 +380,28 @@ export default function VsReonomyPage() {
               <p className="text-lg font-semibold">Other comparisons:</p>
               <ul className="mt-2 grid gap-x-8 sm:grid-cols-2">
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/crexi"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs Crexi
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/propstream"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs PropStream
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
                 <li>
-                  <Link
+                  <IntentPrefetchLink
                     href="/vs/dealcheck"
                     className={VS_LINK_ROW}
                   >
                     TrueCap vs DealCheck
-                  </Link>
+                  </IntentPrefetchLink>
                 </li>
               </ul>
             </footer>

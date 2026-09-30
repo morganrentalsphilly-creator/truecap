@@ -5,7 +5,7 @@ description: Adds one contextual internal link to a target page from each of up 
 
 # seo-internal-links
 
-Wrap a phrase that already stands in a sentence in a `<Link>` to the target. Change nothing else in the file.
+Wrap a phrase that already stands in a sentence in a link to the target: a `<Link>` on a blog post, an `<IntentPrefetchLink>` on a /vs page. Change nothing else in the file.
 Google finds never-crawled pages, such as the new glossary terms, through links on pages it has crawled recently.
 
 ## When it applies
@@ -46,13 +46,14 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
 ## Steps
 **Turn budget.** seo-weekly has about 90 turns for the whole run and invokes this skill once per target. Spend at most ~15 turns per invocation. Send independent calls together in one message; a message counts as one turn. If you run out, record each remaining target in `skipped` with reason "turn budget".
 
-0. **Build the source table once per run.** If an earlier invocation in this run built it, reuse it and rerun only (c). Otherwise send all six calls in one message. "Source scope" means Grep with path `.` and glob `app/{blog,vs}/*/page.tsx`.
-   - a. Grep the source scope (files_with_matches) for `^import Link from "next/link";$`. A file not listed lacks the import, and adding one makes the file tier 1. Today the three `SourceFirstArticle` posts lack it.
+0. **Build the source table once per run.** If an earlier invocation in this run built it, reuse it and rerun only (c). Otherwise send all seven calls in one message. "Source scope" means Grep with path `.` and glob `app/{blog,vs}/*/page.tsx`.
+   - a. Grep the source scope (files_with_matches) for `^import (Link from "next/link"|\{ IntentPrefetchLink \} from "@/components/marketing/intent-prefetch-link");$`. A blog post needs the next/link line and a /vs page the IntentPrefetchLink line (every /vs page has it today); a file not listed lacks its import, and adding one makes the file tier 1. Today the three `SourceFirstArticle` posts lack it.
    - b. Grep the source scope (files_with_matches) for `dangerouslySetInnerHTML|<script`. A hit is a raw-HTML sink: since F4 every page emits JSON-LD through `<JsonLd data={…} />` and verify-static refuses both, so these files are fenced (any edit is rejected). This is the same set score.ts `fencedSourcesOnDisk` flags (none today: F4 converted the six prose posts).
    - c. `git status --porcelain`: files already changed in this run.
    - d. `node seo/scripts/ledger.ts query --status live,proposed,reverted`. Do not pass `--since`: it filters on the proposal date, and a later go-live or revert still starts a cooldown.
    - e. Grep (content) `^      "(path|lastCrawlTime|indexClass)":` in `seo/data/index-status.json`. Six spaces select each entry's own fields; the deeper `history[]` copies drop out. Each entry prints `lastCrawlTime`, then `path`, then `indexClass`.
    - f. Grep (content, `-B 5`) `"score": (0\.[89]|1)` in the newest similarity file. That gives the pairs at or above `mergeAbove` (0.8); change the pattern if the config value changes.
+   - g. Grep `seo/scripts/verify-static.ts` (content) for `isIdentifier\(tag\).*"IntentPrefetchLink"`. That line is the tag check in `isSingleInternalLinkAddition`, the rule that derives tier 0 ("one internal link added"); the name anywhere else in the file (a comment, a self-test) does not count. While it prints no line, that rule knows `<Link>` and `<a>` only, so an `<IntentPrefetchLink>` added to a /vs source derives tier 1 and has to be reverted (see Tier): leave every /vs source out and link from blog sources only. `lib/__tests__/intent-prefetch-vs.test.ts` fails when this Grep's answer and the tier verify-static actually derives disagree.
 
    Then apply the step 5 source rules to every `/blog/<slug>` and `/vs/<slug>` in `sitemapPaths`. Keep the survivors, each with its `lastCrawlTime`, in your notes for the rest of the run.
 1. **Check the brake.** If `demotedChangeTypes` lists `internal-links`, edit nothing and go to **Tier**.
@@ -73,6 +74,7 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
 5. **Keep a source only if all of these hold.** The source rules are settled once, in the step 0 table:
    - Its URL is in `sitemapPaths` and is neither in `activeHoldout` nor in `excludedFromOptimization`.
    - It is not fenced (0b), and it already has the import (0a).
+   - A /vs source only when 0g printed its line.
    - Its own `indexClass` is `indexed` or `crawled_not_indexed`. It is never `never_crawled` (it cannot pass the link on) and never `dropped_after_indexed` (score.ts veto: no edit while it recovers). A source with no index-status entry is out.
    - It is not itself a `candidates[]` path routed to another skill this run. Other skills own those files this run: a link here would merge into their edit and start a 30-day cooldown for them.
    - The ledger (0d) shows no touch within `pageTouchCooldownDays` of `run-flags.date`. A `live` row touches on `live_at` (else `date`), a `proposed` row on `date`. Any `reverted` row rules the source out: the query does not print the revert date, and score.ts counts the revert as the touch.
@@ -82,14 +84,14 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
    - This skill has not already used the source for another target in this run.
    - It mentions the head term (step 4), has no `href="<target>"`, and has no `contextual` crawl edge to the target.
    - The pair is not among the 0f pairs. Near-duplicates are an owner consolidation question, and an anchor between them would pick a winner.
-   - On a `/vs` source, the target is not a `/tools/` path. `vs-page-copy-integrity.test.ts` reads the first `<Link href="/tools/` as the CTA lead-in.
+   - On a `/vs` source, the target is not a `/tools/` path. `vs-page-copy-integrity.test.ts` reads the first `<IntentPrefetchLink href="/tools/` (or `<Link href="/tools/`) as the CTA lead-in.
 6. **Rank the survivors** by `lastCrawlTime`:
    - Sources crawled within 30 days of `run-flags.date` come first, newest first; then the rest, newest first.
    - Inside each group, sources with no edge at all to the target come before those that reach it only through navigation or footer links.
    - Take at most 5.
 7. **Pick the anchor** in each source: the first occurrence in reading order that passes every rule below.
    - Find it in one message: Grep the chosen sources (content, `-n`, case-insensitive, `-C 2`, glob such as `app/{vs/privy,blog/x}/page.tsx`) for the head-term alternation, and Grep them for `className="(tc-link|[^"]*text-primary[^"]*hover:underline)"` to learn each file's in-prose link class. Every /vs page, and every post already converted to the ledger design, writes `className="tc-link"`; a post not yet converted writes the legacy `text-primary … hover:underline` string (for example `font-semibold text-primary hover:underline`).
-   - It is JSX text inside a `<p>` or `<li>` of the article body, all on one line, within one element, and not already inside a `<Link>`/`<a>`.
+   - It is JSX text inside a `<p>` or `<li>` of the article body, all on one line, within one element, and not already inside a `<Link>`/`<IntentPrefetchLink>`/`<a>`.
    - It is not in:
      - headings, the post header's meta line (its Blog link) or the byline;
      - `FAQS` or the FAQ section;
@@ -101,13 +103,14 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
    - It sits mid-line, with a space or punctuation mark directly before and after it on the same line. JSX drops the whitespace at a line break next to a tag, so an occurrence that touches a line break renders "GRMof". The fix would be `{" "}`, and that breaks tier 0.
    - It is not pinned by a test. In one Grep of `lib/__tests__` and `e2e` (case-insensitive), search for the alternation of the two words on either side of every chosen insertion point ("threshold, rehab|rehab condition"). If a pin spans a boundary, use another occurrence or another source.
    - In the same message as the pin Grep, Read about 15 lines around each chosen occurrence (`offset`/`limit`). The Read confirms the enclosing element, and Edit refuses a file you have not Read.
-8. **Edit the lines**, one Edit per source, all in one message. `old_string` is the whole line; add a neighbouring line if it is not unique. The only change is the wrapper. Format example, `app/vs/privy/page.tsx` (indexed, crawled 2026-09-18, routed to no other skill on 2026-09-27):
-   `by cap rate threshold, <Link href="/glossary/rehab" className="tc-link">rehab</Link> condition, DOM, price reductions,`
+8. **Edit the lines**, one Edit per source, all in one message. `old_string` is the whole line; add a neighbouring line if it is not unique. The only change is the wrapper. Format example, `app/vs/privy/page.tsx` (indexed, crawled 2026-09-18, routed to no other skill on 2026-09-27; a /vs source, so it applies only once 0g prints its line, and on a blog source the same edit wraps the word in `<Link href="/glossary/rehab" className="tc-link">rehab</Link>`):
+   `by cap rate threshold, <IntentPrefetchLink href="/glossary/rehab" className="tc-link">rehab</IntentPrefetchLink> condition, DOM, price reductions,`
+   - The wrapper is `<IntentPrefetchLink …>…</IntentPrefetchLink>` on a /vs source (it prefetches on hover or keyboard focus, not on scroll; next/link's `<Link>` is no longer used for body links there, and `lib/__tests__/intent-prefetch-vs.test.ts` fails a `<Link>` outside the hero) and `<Link …>…</Link>` on a blog source.
    - `className` copies the file's existing in-prose link class: `tc-link` where the file has it (every /vs page, converted posts), otherwise the file's legacy `text-primary … hover:underline` string. Omit it only if the file has neither.
    - Add no other attribute (`prefetch`, `title`, `target`) and no `{…}`.
    - The link text keeps its original bytes: case and entities such as `&apos;`.
    - Do not reflow the line. Add no import, date or whitespace.
-9. **Check the diffs once, at the end.** In one message, run `git diff --stat -- <edited files>` and `git diff -- <edited files>`. Each file must show `1 insertion(+), 1 deletion(-)`, and its two lines may differ only by the opening tag and `</Link>`. If a file shows anything else, restore its original line with Edit and drop that source.
+9. **Check the diffs once, at the end.** In one message, run `git diff --stat -- <edited files>` and `git diff -- <edited files>`. Each file must show `1 insertion(+), 1 deletion(-)`, and its two lines may differ only by the opening tag and its closing tag (`</Link>`, or `</IntentPrefetchLink>` on a /vs source). If a file shows anything else, restore its original line with Edit and drop that source.
 10. **No WebFetch.** This skill adds no external link and cites nothing.
 11. **Stop** at 5 new sources for the target, when no source is left, when the run's changed files reach `caps.pagesChangedPerRun`, or at the turn budget.
 
@@ -115,7 +118,7 @@ Google finds never-crawled pages, such as the new glossary terms, through links 
 - **verify-static.** It runs after the model job; you cannot run it. Pre-check what it derives:
   - The file matches `app/blog/*/page.tsx` or `app/vs/*/page.tsx`.
   - The href is a literal site path in `sitemapPaths`, or this patch's new article.
-  - Exactly one `<Link>` element was added, with only `href` and `className` string literals and text-only children, and nothing else changed. That gives tier 0 ("one internal link added").
+  - Exactly one link element was added (`<Link>` on a blog source, `<IntentPrefetchLink>` on a /vs source), with only `href` and `className` string literals and text-only children, and nothing else changed. That gives tier 0 ("one internal link added"), for an `<IntentPrefetchLink>` only once verify-static knows the element (0g).
   - A tier-0 file may not add an external host.
 - **Guard tests** (they run in verify-build):
   - `lib/__tests__/internal-links.test.ts` and `internal-glossary-links.test.ts`: the href resolves to an `app/` route, and a glossary slug is in `GLOSSARY_SLUGS`.
