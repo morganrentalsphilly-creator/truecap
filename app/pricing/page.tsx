@@ -1,6 +1,8 @@
 /**
- * Public /pricing page. Outcome line, plans (annual-first), DealCheck
- * comparison, trust row, product shots, FAQ. Amounts come only from
+ * Public /pricing page. Outcome line with the stage chooser beside it, plans
+ * (annual-first) with the trial terms and trust row under the cards, the
+ * feature table, the value stack, product shots, the DealCheck comparison,
+ * FAQ. Amounts come only from
  * lib/public-pricing.ts and the Stripe display prices. For
  * unauthenticated visitors the CTA routes to
  * /auth/sign-up?next=/pricing?checkout=<plan>#plans, so they come back
@@ -24,12 +26,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import { ActionRow, PageHero } from "@/components/marketing/page-parts";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
-import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getEntitlementsForUser,
@@ -49,8 +52,11 @@ import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   DEALCHECK_COMPARISON,
+  formatPublicUsd,
   formatUsdWhole,
   PRICING_OUTCOME_EXAMPLE,
+  PUBLIC_AGENT_PRO_MONTHLY_USD,
+  PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
 import {
   formatPricingEvaluationAllowance,
@@ -172,6 +178,16 @@ const AGENT_PRO_CELLS: Record<string, boolean | string> = {
 const agentProCell = (label: string, pro: boolean | string) =>
   AGENT_PRO_CELLS[label] ?? pro;
 
+/**
+ * One frame box for the tier shots from 768px (ProductShot puts the class on
+ * its figure; the frame is the figure's div). The captures differ in
+ * proportion (the rent breakdown is a wide strip, the memo a tall page), so
+ * each fits inside a shared 4:3 frame from the top instead of setting the
+ * frame's height.
+ */
+const SHOT_FRAME =
+  "md:[&>div]:aspect-[4/3] md:[&_img]:h-full md:[&_img]:object-contain md:[&_img]:object-top";
+
 export default async function PricingPage() {
   const { proOfferName } = getMarketingOfferConfig();
   const alertsLive = rateAlertEmailsLive();
@@ -274,6 +290,43 @@ export default async function PricingPage() {
   // The exit-intent "50% off" offer was removed entirely (founder decision,
   // 2026-07): no discount offers anywhere — full price only.
 
+  // Which plan answers which job, with its monthly price: the hero's aside.
+  // Each paid price is the same expression its card shows on Monthly (the
+  // Stripe display price, else the catalog fallback), so the two never
+  // disagree; nothing here is typed by hand. Agent stage first (2026-09
+  // agent-first pass); investor stages follow. The plan name jumps to its
+  // card (Free has no fragment of its own, so it lands on the plans).
+  const stages = [
+    ...(agentProConfigured
+      ? [
+          {
+            job: "Win investor clients",
+            product: "Agent Pro",
+            href: "#agent-pro",
+            price: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
+            period: agentMonthly ? `/${agentMonthly.period}` : "/month",
+            answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
+          },
+        ]
+      : []),
+    {
+      job: "Screen the deal",
+      product: "Free",
+      href: "#plans",
+      price: "$0",
+      period: "forever",
+      answer: "Understand the economics before spending more time on the property.",
+    },
+    {
+      job: "Know what to offer",
+      product: proOfferName,
+      href: "#pro",
+      price: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
+      period: `/${monthly?.period ?? "month"}`,
+      answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
+    },
+  ];
+
   return (
     <>
       <Header initialUser={user} initialEntitlements={entitlements} />
@@ -321,6 +374,50 @@ export default async function PricingPage() {
                 See Pro plans
               </Link>
             </ActionRow>
+          }
+          aside={
+            /* The stage chooser, set as a ledger in the hero's wider column
+               (the homepage's 5/7 grid from 1024px; it follows the text on
+               phones): a caption on the heavy rule, then one ruled row per
+               plan with the job, the plan and its price in DM Mono, and what
+               it answers. It puts every price in the first screen. */
+            <div data-pricing-stages="">
+              <h2
+                id="pricing-stage-title"
+                className="text-balance border-b-2 border-foreground pb-2.5 text-base font-semibold"
+              >
+                Which stage are you at?
+              </h2>
+              <ul>
+                {stages.map((stage) => (
+                  <li
+                    key={stage.job}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule-soft py-3.5"
+                  >
+                    <h3 className="col-span-2 text-balance text-lg font-semibold">
+                      {stage.job}
+                    </h3>
+                    <p className="mt-0.5 min-w-0 text-base">
+                      {/* A 44px tap target from padding that the negative
+                          margin takes back out of the line box. */}
+                      <Link
+                        href={stage.href}
+                        className="tc-link -my-3 inline-block min-w-11 py-3 font-semibold"
+                      >
+                        {stage.product}
+                      </Link>
+                    </p>
+                    <p className="mt-0.5 flex items-baseline justify-end gap-x-1 whitespace-nowrap">
+                      <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>
+                      <span className="text-sm text-muted-foreground">{stage.period}</span>
+                    </p>
+                    <p className="col-span-2 mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                      {stage.answer}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
           }
         >
           {/* Keep-and-add (2026-09 agent-first pass): the overpay arithmetic
@@ -378,57 +475,14 @@ export default async function PricingPage() {
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
           />
-        </Section>
-
-        {/* One honest comparison (docs/site-overhaul.md Phase 9). The
-            DealCheck figures are its published monthly tiers, checked
-            against dealcheck.io/pricing on 2026-09-06; they live in
-            DEALCHECK_COMPARISON so this file holds no amounts. */}
-        <Section
-          rhythm="tight"
-          data-pricing-comparison
-          aria-labelledby="pricing-dealcheck-title"
-        >
-          <div className="max-w-3xl">
-            <SectionHeading id="pricing-dealcheck-title">
-              How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
-              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro)
-            </SectionHeading>
-            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-              DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
-              Box fit, downside stress test, and a memo. If you only need metrics,
-              DealCheck or a spreadsheet is fine.
-              {agentProConfigured
-                ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
-                : ""}
-            </p>
-            <Link
-              href={DEALCHECK_COMPARISON.href}
-              className="tc-link mt-3 inline-flex min-h-11 items-center"
-            >
-              Read the full DealCheck comparison
-            </Link>
-          </div>
-        </Section>
-
-        {/* Consented quotes from the in-product prompt (Phase 5); renders
-            nothing until real published rows exist. */}
-        {/* No paid-customer heading override: publication is gated on activity
-            (lib/testimonials/rules.ts), not on plan, so a free account's
-            quote can publish here — the component default is the truthful
-            label. The component is its own Section. */}
-        <Testimonials limit={3} />
-
-        {/* Trust row (Phase 9): the four facts a buyer checks before the
-            card form. Each is true today: no card to start (evaluation
-            flow), cancel from the profile, Stripe Checkout, and the
-            public methodology page. A strip hung off one rule, closing the
-            passage above; the section that follows brings its own rule, so
-            the strip carries none underneath (one rule between sections). */}
-        <div className={cn(PAGE_CONTAINER, "pb-12 sm:pb-16")}>
+          {/* Trust row (Phase 9): the four facts a buyer checks before the
+              card form, set under the card row and its trial terms, on one
+              rule. Each is true today: no card to start (evaluation flow),
+              cancel from the profile, Stripe Checkout, and the public
+              methodology page. */}
           <ul
             data-pricing-trust-row
-            className="flex flex-wrap items-center gap-x-8 gap-y-1 border-t border-border py-2 text-base font-semibold"
+            className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-1 border-t border-border py-2 text-base font-semibold"
           >
             <li>Free to start — no card</li>
             <li>Cancel anytime from your profile</li>
@@ -442,96 +496,11 @@ export default async function PricingPage() {
               </Link>
             </li>
           </ul>
-        </div>
-
-        {/* Which plan answers which job, as ruled rows: the job (the row's
-            heading), the plan, and what it answers. */}
-        <Section rhythm="tight" aria-labelledby="pricing-stage-title">
-          <SectionHeading id="pricing-stage-title">
-            Which stage are you at?
-          </SectionHeading>
-          <ul className="mt-8 border-t-2 border-foreground">
-            {[
-              // Agent stage first (2026-09 agent-first pass); investor stages follow.
-              ...(agentProConfigured
-                ? [
-                    {
-                      job: "Win investor clients",
-                      product: "Agent Pro",
-                      answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
-                    },
-                  ]
-                : []),
-              {
-                job: "Screen the deal",
-                product: "Free",
-                answer: "Understand the economics before spending more time on the property.",
-              },
-              {
-                job: "Know what to offer",
-                product: proOfferName,
-                answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
-              },
-            ].map((item) => (
-              <li
-                key={item.job}
-                className="grid gap-x-8 gap-y-1 border-b border-rule-soft py-4 md:grid-cols-[minmax(0,14rem)_8rem_minmax(0,1fr)] md:items-baseline"
-              >
-                <h3 className="font-display text-balance text-h3-sm sm:text-2xl">
-                  {item.job}
-                </h3>
-                <p className="text-base font-semibold">{item.product}</p>
-                <p className="max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
-                  {item.answer}
-                </p>
-              </li>
-            ))}
-          </ul>
         </Section>
 
-        {/* What each tier produces — REAL screenshots from the sample flow
-            (Phase 4). One per tier; Agent Pro only when it is sold. Set as
-            documents (a 1px rule, no browser chrome), captions kept. */}
-        <Section aria-labelledby="pricing-shots-title">
-          <div className="max-w-3xl">
-            <SectionHeading id="pricing-shots-title">
-              What you get at each tier
-            </SectionHeading>
-            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-              Real output from the free sample deal, not mockups.{" "}
-              <Link href="/analyze?sample=1" prefetch={false} className="tc-link">
-                Run it yourself
-              </Link>
-            </p>
-          </div>
-          <div className={cn("mt-8 grid gap-8 md:grid-cols-2", agentProConfigured && "lg:grid-cols-3")}>
-            <ProductShot
-              shot={DECISION_SHOT}
-              frame="document"
-              alt="Free tier: the decision view for the sample deal — the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-              caption={<><strong className="font-semibold text-foreground">Free.</strong> Your first full decision.</>}
-            />
-            <ProductShot
-              shot={RENT_BREAKDOWN_SHOT}
-              frame="document"
-              alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
-              caption={<><strong className="font-semibold text-foreground">{proOfferName}.</strong> Know what to offer on every deal.</>}
-            />
-            {agentProConfigured ? (
-              <ProductShot
-                shot={MEMO_SHOT}
-                frame="document"
-                alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
-                caption={<><strong className="font-semibold text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
-              />
-            ) : null}
-          </div>
-        </Section>
-
-        {/* The paid tiers as outcomes; its own Section. */}
-        <PricingValueStack agentProConfigured={agentProConfigured} />
-
-        {/* Feature comparison */}
+        {/* Feature comparison: the ladder under the cards (DESIGN.md
+            "Homepage structure": plans, then the comparison table under
+            them), so the plans block reads cards, terms, table. */}
         <Section rhythm="tight" aria-labelledby="pricing-compare-title">
           <div className="max-w-3xl">
             <SectionHeading id="pricing-compare-title">What you get</SectionHeading>
@@ -631,16 +600,107 @@ export default async function PricingPage() {
           </ScrollX>
         </Section>
 
+        {/* The explanation after the table: the paid tiers as outcomes (its
+            own Section), the tier shots, then the DealCheck comparison. The
+            value stack sits between the table ("What you get") and the shots
+            ("What you get at each tier") so the two headings never meet. */}
+        <PricingValueStack agentProConfigured={agentProConfigured} />
+
+        {/* What each tier produces — REAL screenshots from the sample flow
+            (Phase 4). One per tier; Agent Pro only when it is sold. Set as
+            documents (a 1px rule, no browser chrome), captions kept. From
+            768px the shots sit side by side in one shared frame box
+            (SHOT_FRAME), so the frames and captions line up whatever each
+            capture's proportion; phones keep each capture's own. */}
+        <Section aria-labelledby="pricing-shots-title">
+          <div className="max-w-3xl">
+            <SectionHeading id="pricing-shots-title">
+              What you get at each tier
+            </SectionHeading>
+            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+              Real output from the free sample deal, not mockups.{" "}
+              <Link href="/analyze?sample=1" prefetch={false} className="tc-link">
+                Run it yourself
+              </Link>
+            </p>
+          </div>
+          <div className={cn("mt-8 grid gap-8 md:grid-cols-2", agentProConfigured && "lg:grid-cols-3")}>
+            <ProductShot
+              shot={DECISION_SHOT}
+              frame="document"
+              className={SHOT_FRAME}
+              alt="Free tier: the decision view for the sample deal — the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+              caption={<><strong className="font-semibold text-foreground">Free.</strong> Your first full decision.</>}
+            />
+            <ProductShot
+              shot={RENT_BREAKDOWN_SHOT}
+              frame="document"
+              className={SHOT_FRAME}
+              alt={`${proOfferName}: the cash-flow breakdown for the sample deal — where each month's rent goes, from operating expenses and reserves to debt service and cash flow`}
+              caption={<><strong className="font-semibold text-foreground">{proOfferName}.</strong> Know what to offer on every deal.</>}
+            />
+            {agentProConfigured ? (
+              <ProductShot
+                shot={MEMO_SHOT}
+                frame="document"
+                className={SHOT_FRAME}
+                alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+                caption={<><strong className="font-semibold text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
+              />
+            ) : null}
+          </div>
+        </Section>
+
+        {/* One honest comparison (docs/site-overhaul.md Phase 9). The
+            DealCheck figures are its published monthly tiers, checked
+            against dealcheck.io/pricing on 2026-09-06; they live in
+            DEALCHECK_COMPARISON so this file holds no amounts. */}
+        <Section
+          data-pricing-comparison
+          aria-labelledby="pricing-dealcheck-title"
+        >
+          <div className="max-w-3xl">
+            <SectionHeading id="pricing-dealcheck-title">
+              How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
+              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro)
+            </SectionHeading>
+            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+              DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
+              Box fit, downside stress test, and a memo. If you only need metrics,
+              DealCheck or a spreadsheet is fine.
+              {agentProConfigured
+                ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
+                : ""}
+            </p>
+            <Link
+              href={DEALCHECK_COMPARISON.href}
+              className="tc-link mt-3 inline-flex min-h-11 items-center"
+            >
+              Read the full DealCheck comparison
+            </Link>
+          </div>
+        </Section>
+
+        {/* Consented quotes from the in-product prompt (Phase 5); renders
+            nothing until real published rows exist. */}
+        {/* No paid-customer heading override: publication is gated on activity
+            (lib/testimonials/rules.ts), not on plan, so a free account's
+            quote can publish here — the component default is the truthful
+            label. The component is its own Section. */}
+        <Testimonials limit={3} />
+
         {/* FAQ: the shared ruled list. The page emits its own FAQPage below
             (the same FAQS records), so the section adds none — one FAQPage
-            node per page, mirroring exactly the visible questions. The
-            page's close (the free action again) stays in the FAQ's block,
-            under the contact line, as it was before the restyle. */}
+            node per page, mirroring exactly the visible questions. Split as
+            on the homepage: from 1024px the heading, the contact line and
+            the page's close (the free action again) sit in the left 5
+            columns beside the ruled questions. */}
         <FaqSection
           id="faq"
           heading="Frequently asked"
           items={faqs}
           structuredData={false}
+          layout="split"
           contact={
             <>
               <p className="mt-4 text-base text-muted-foreground">

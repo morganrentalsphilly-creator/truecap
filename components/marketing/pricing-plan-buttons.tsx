@@ -43,10 +43,14 @@ export function PricingPlanButtons({
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
+  // Full width in a card, so 12px of side padding is enough (the cta size's
+  // 20px broke "Create a free account — no card" onto two lines in the
+  // ~274px card column at 1095px), and a label that must wrap in a narrower
+  // column splits evenly instead of leaving its last word alone.
   const actionClass = buttonVariants({
     size: "cta",
     variant: emphasis === "primary" ? "default" : "outline",
-    className: "w-full",
+    className: "w-full px-3 text-balance",
   });
 
   const startCheckout = (planSlug: CheckoutPlanSlug) => {

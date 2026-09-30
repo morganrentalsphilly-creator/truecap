@@ -295,35 +295,16 @@ export function PricingTogglePlans({
 
   return (
     <>
-      {/* The upgrade logic in one line, before the cards. Without it a visitor
-          has to infer the difference between the tiers from the feature lists;
-          with it, the cards below are just the detail. Each line takes its
-          card's order, so the recommended plan comes first on phones and the
-          line reads in the cards' order at every width. */}
-      <ul className="flex flex-col gap-y-1 text-base sm:flex-row sm:flex-wrap sm:gap-x-8">
-        <li className="order-1 md:order-2">
-          <span className="font-semibold">{proOfferName}</span>{" "}
-          <span className="text-muted-foreground">— know what to offer</span>
-        </li>
-        <li className="order-2 md:order-1">
-          <span className="font-semibold">Free</span>{" "}
-          <span className="text-muted-foreground">— screen the deal</span>
-        </li>
-        {showAgentPro ? (
-          <li className="order-3">
-            <span className="font-semibold">Agent Pro</span>{" "}
-            <span className="text-muted-foreground">— win investor clients</span>
-          </li>
-        ) : null}
-      </ul>
-
       {/* Monthly ↔ Annual toggle, above the row: it sets both paid cards'
           prices. A 4px control whose pressed segment takes the band and an
-          ink edge, so the state does not rest on color alone. */}
+          ink edge, so the state does not rest on color alone. The plans open
+          on it: which plan does which job is the hero's stage chooser
+          (app/pricing/page.tsx), with each plan's price, and each card's
+          bold lead repeats its job. */}
       <div
         role="group"
         aria-label="Billing period"
-        className="mt-6 flex w-fit gap-1 rounded-md border border-border p-1"
+        className="flex w-fit gap-1 rounded-md border border-border p-1"
       >
         <button
           type="button"
@@ -416,7 +397,14 @@ export function PricingTogglePlans({
               ? `${proCard.subline} · ${annualSavingsLabel}`
               : proCard.subline
           }
-          answersCaption="Everything in Free, plus answers to four questions —"
+          // A block span, so the caption's wrap is balanced ("Everything in
+          // Free, plus / answers to four questions —") rather than leaving
+          // the last words alone on a second line in a narrow card.
+          answersCaption={
+            <span className="block text-balance">
+              Everything in Free, plus answers to four questions —
+            </span>
+          }
           answers={PRO_OUTCOMES.map((group) => ({
             term: group.outcome,
             detail: group.detail,
@@ -435,14 +423,6 @@ export function PricingTogglePlans({
                 ))}
               </span>
             </>
-          }
-          footnote={
-            !isPaid ? (
-              <PricingTrialTerms
-                isAuthenticated={isAuthenticated}
-                evaluation={evaluation}
-              />
-            ) : null
           }
           action={
             billingRecoveryRequired ? (
@@ -494,15 +474,6 @@ export function PricingTogglePlans({
                 pages and PDFs.
               </>
             }
-            footnote={
-              !isPaid ? (
-                <PricingTrialTerms
-                  isAuthenticated={isAuthenticated}
-                  evaluation={evaluation}
-                  tier="agent_pro"
-                />
-              ) : null
-            }
             action={
               billingRecoveryRequired ? (
                 <Link
@@ -525,12 +496,28 @@ export function PricingTogglePlans({
           />
         ) : null}
       </div>
+
+      {/* The trial terms, once, under the row (they were each paid card's
+          fine print, which padded both cards and left holes in the others).
+          With Agent Pro on the page they carry its roster sentence too. */}
+      {!isPaid ? (
+        <div
+          data-pricing-trial-terms=""
+          className="mt-4 max-w-[68ch] text-pretty text-sm leading-relaxed text-muted-foreground"
+        >
+          <PricingTrialTerms
+            isAuthenticated={isAuthenticated}
+            evaluation={evaluation}
+            tier={showAgentPro ? "agent_pro" : "pro"}
+          />
+        </div>
+      ) : null}
     </>
   );
 }
 
 /**
- * The trial terms, set as a card's fine print (PlanCard's footnote, a div).
+ * The trial terms, set once as fine print under the plan cards.
  * Every string here is pinned (pricing-copy-guards.test.ts and the
  * authenticated e2e specs): restyle, never reword.
  */
@@ -542,8 +529,8 @@ function PricingTrialTerms({
   isAuthenticated: boolean;
   evaluation: PricingEvaluationSummary;
   /** The no-card trial grants Pro deal analyses only — never the client
-   *  roster (lib/entitlements.ts evaluationFeatures) — so the Agent Pro card
-   *  says so instead of repeating the Pro card's terms. */
+   *  roster (lib/entitlements.ts evaluationFeatures) — so with Agent Pro on
+   *  the page the terms say so after the Pro allowance. */
   tier?: "pro" | "agent_pro";
 }) {
   if (!isAuthenticated) {
