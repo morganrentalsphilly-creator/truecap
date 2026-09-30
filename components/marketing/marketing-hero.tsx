@@ -55,7 +55,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste any rental listing. In about 60 seconds, see whether it works at the asking price, what price makes it work, and what could break the deal."
+                ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded, with every assumption visible and editable."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
             </p>
             {/* The math supports the decision; it is not the headline. */}
@@ -82,6 +82,19 @@ export function MarketingHero() {
                 className="size-3.5 shrink-0 text-[var(--metric-positive)]"
               />
               <span>Free. No account. Your first full decision is included.</span>
+            </p>
+            {/* The investor cue (2026-09 agent-first pass): the hero addresses
+                the agent, so the investor buying for their own portfolio gets
+                one unmissable line in the first screen, on desktop and at
+                390px, pointing at the investor hub. */}
+            <p data-hero-investor-cue="" className="mt-2 text-xs text-muted-foreground">
+              Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
+              <Link
+                href="/for-investors"
+                className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                For investors →
+              </Link>
             </p>
           </div>
 
