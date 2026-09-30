@@ -64,7 +64,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
 6. **Edit the claim.**
    - **Supported:** link it.
      - If the file imports `ArticleSources` from `@/components/marketing/article-sources`, add `{ label, url, publisher, retrieved }` to its `SOURCES` array: one entry per URL, with `retrieved` = `run-flags.date`.
-     - Otherwise, wrap the source's name, or the claim's key noun phrase, in `<a href="https://…">`. Use the `className` the file's existing external links use; if it has none, use `className="text-primary font-semibold hover:underline"`.
+     - Otherwise, wrap the source's name, or the claim's key noun phrase, in `<a href="https://…">`. Use the `className` the file's existing external links use (`tc-link` on a post on the article frame, `components/marketing/article.tsx`); if it has none, use `className="tc-link"`, the site's link style. Never bring `text-primary font-semibold hover:underline` into a file that does not already use it.
      - The anchor text names the source ("IRS Publication 946"), never "here" or "source".
    - **Supported, but with a different figure or year:** rewrite the claim to exactly what the source states, with its year ("for 2026, …"), then link it.
    - **Partly supported:** soften the claim to what the source supports, then link it.
