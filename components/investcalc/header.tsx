@@ -107,12 +107,23 @@ function deriveAccessState(features: string[]) {
 export function Header({
   initialUser = null,
   initialEntitlements = null,
+  anonymousByDefault = false,
 }: {
   initialUser?: HeaderUser | null;
   initialEntitlements?: HeaderEntitlements | null;
+  /**
+   * The page is anonymous by construction (the static homepage: proxy.ts
+   * rewrites signed-in visitors to /home-authed), so the server HTML carries
+   * the signed-out controls instead of a loading placeholder. Without JS, or
+   * before hydration on a slow phone, a visitor still has Analyze, the menu,
+   * Sign in and Create account. If a session does turn up, the user menu
+   * replaces them as before. Pages a signed-in visitor can reach must not
+   * set this, or they would flash Sign in before the menu.
+   */
+  anonymousByDefault?: boolean;
 }) {
   const [user, setUser] = useState<HeaderUser | null>(initialUser);
-  const [authLoaded, setAuthLoaded] = useState(Boolean(initialUser));
+  const [authLoaded, setAuthLoaded] = useState(Boolean(initialUser) || anonymousByDefault);
   const initialFeatures = initialEntitlements?.features ?? [];
   const initialAccess = deriveAccessState(initialFeatures);
   const [isPremium, setIsPremium] = useState(initialAccess.isPremium);

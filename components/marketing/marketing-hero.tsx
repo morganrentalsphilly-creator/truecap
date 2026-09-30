@@ -18,9 +18,10 @@
 import Link from "next/link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { VerdictLedger } from "@/components/ledger/verdict-ledger";
+import { LedgerFigure, LedgerVerdict } from "@/components/ledger/ledger-parts";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
-import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { buildSampleDealLedger, formatLedgerDollars } from "@/lib/sample-deal-ledger";
 import { cn } from "@/lib/utils";
 
 /** The walkthrough section's anchor (HowTrueCapWorks in landing-sections). */
@@ -35,7 +36,7 @@ export function MarketingHero() {
       <div
         className={cn(
           PAGE_CONTAINER,
-          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:pb-18 lg:pt-8 xl:gap-x-16 xl:pt-14",
+          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-4 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:pb-18 lg:pt-8 xl:gap-x-16 xl:pt-14",
         )}
       >
         <div className="min-w-0">
@@ -52,11 +53,33 @@ export function MarketingHero() {
               ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
               : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
+          {/* Phones only: the ledger's verdict in one sentence, before the
+              form, so a phone's first screen shows the answer and not only the
+              claim (the full ledger starts under the fold there). Set from the
+              same engine output as the ledger. It takes the metrics strip's
+              place below 640px, which keeps the investor cue above the fold
+              with the cookie banner up. */}
+          {ledger ? (
+            <p data-hero-verdict-line="" className="mt-3 text-base leading-snug sm:hidden">
+              Sample deal. Meets the Buy Box:{" "}
+              <LedgerVerdict pass={ledger.meetsTargets.asking}>
+                {ledger.meetsTargets.asking ? "yes" : "no"}
+              </LedgerVerdict>{" "}
+              at <LedgerFigure>{formatLedgerDollars(ledger.askingPrice)}</LedgerFigure> asking,{" "}
+              <LedgerVerdict pass={ledger.meetsTargets.ceiling}>
+                {ledger.meetsTargets.ceiling ? "yes" : "no"}
+              </LedgerVerdict>{" "}
+              at the <LedgerFigure>{formatLedgerDollars(ledger.offerCeiling)}</LedgerFigure> Offer Ceiling.
+            </p>
+          ) : null}
           {/* The math supports the decision; it is not the headline. */}
           {newHomepagePositioningEnabled ? (
             <p
               data-hero-supporting-metrics=""
-              className="mt-2 text-sm font-medium text-muted-foreground"
+              className={cn(
+                "mt-2 text-sm font-medium text-muted-foreground",
+                ledger && "hidden sm:block",
+              )}
             >
               Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable
               assumptions

@@ -94,6 +94,15 @@ describe("the homepage hero", () => {
     expect(source).not.toMatch(/\$\d{2,3},\d{3}/);
   });
 
+  it("gives phones the verdict in one line, read from the same ledger", () => {
+    // Below 640px the ledger starts under the fold, so the hero states its
+    // verdict before the form; every value comes from the engine's ledger.
+    expect(source).toContain('data-hero-verdict-line=""');
+    expect(source).toContain("ledger.meetsTargets.asking");
+    expect(source).toContain("formatLedgerDollars(ledger.offerCeiling)");
+    expect(source).toMatch(/data-hero-verdict-line=""[^>]*sm:hidden/);
+  });
+
   it("keeps the ledger's figures on the shared sample fixture", () => {
     expect(read("lib/sample-deal-ledger.ts")).toContain("SAMPLE_DEAL_FIXTURE");
     expect(read("lib/sample-deal-ledger.ts")).toContain(

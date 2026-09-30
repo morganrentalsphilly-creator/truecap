@@ -131,7 +131,31 @@ Offer Ceiling column is empty because the preview does not compute it.
 - The live Stripe display prices on the plan cards (local builds fall back to
   the catalog).
 
-## Held for you
+## Decisions (founder, 2026-09-30: "Do what you think is best for the business and website")
+
+Approved; the rollout starts. Decided on that authority:
+
+1. **Phone hero: b.** Below 640px the hero states the ledger's verdict in one
+   sentence before the form ("Sample deal. Meets the Buy Box: no at $265,000
+   asking, yes at the $236,000 Offer Ceiling."), set from the same engine
+   output, and it takes the metrics strip's place there (the strip stays in the
+   page and shows from 640px). The phone hero's top padding and form spacing
+   tightened by 12px, so the investor cue clears the cookie banner at 375×812
+   (726 vs 732 px) and 390×844 (704 vs 764 px).
+2. **Memo image: a.** Kept until `public/product` is regenerated in rollout
+   step 4, which lands before the rollout's PR merges, so the old capture
+   never reaches production.
+3. **Header: b.** The shared header takes `anonymousByDefault`; only the
+   static homepage passes it (it is anonymous by construction), so its server
+   HTML carries Analyze, the menu, Sign in and Create account instead of the
+   pulsing placeholder. Other pages are unchanged.
+4. **History: a.** Left as is: a force-push of a public branch buys little
+   when every commit already carries the author's name.
+
+The two performance items became separate task chips (Sentry idle bundle,
+footer prefetch).
+
+## Held for you (as presented at checkpoint 3)
 
 1. **The phone hero.** As approved, the ledger starts just under the fold on
    phones, so a first phone visit shows the claim and the form but no figure,
