@@ -7,13 +7,21 @@
  * The list, counts, and schema are all driven by lib/calculator-registry.ts
  * (the single source of truth) so /tools, /embed, the footer, the sitemap,
  * and the OG image can never disagree on how many calculators exist.
+ *
+ * Layout (DESIGN.md, 2026-09 design pass): the page head is the shared
+ * PageHero, the directory is one ruled list per category on the FAQ's 5/7
+ * split grid, the two explanations sit in a reading column between rules, and
+ * the page closes on the heavy rule (CloseSection). No cards, icon tiles or
+ * trailing arrows.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { CloseSection, PageHero } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { buttonVariants } from "@/components/ui/button";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   CALCULATOR_REGISTRY,
@@ -71,117 +79,127 @@ export default function ToolsLandingPage() {
     },
   };
 
+  // Only categories with at least one released calculator. Every "returns"
+  // calculator is unreleased today, and rendering the group anyway put a
+  // "Returns" heading over an empty list. A group reappears on its own when
+  // one of its calculators is released.
+  const groups = calculatorsByCategory().filter((group) => group.items.length > 0);
+
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={collectionLd} />
       <BreadcrumbSchema items={[{ name: "Free Tools", path: "/tools" }]} />
-      <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
-            Free real estate calculators
-          </h1>
-          <p className="text-base text-muted-foreground mt-2 leading-relaxed">
-            No signup. These are narrow educational screens and input utilities,
-            not substitutes for the full TrueCap underwrite. Use the analyzer
-            when a decision depends on cash flow, NOI, DSCR, or returns.
-          </p>
-        </header>
-
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="Free real estate calculators"
+          lede="No signup. These are narrow educational screens and input utilities, not substitutes for the full TrueCap underwrite. Use the analyzer when a decision depends on cash flow, NOI, DSCR, or returns."
+        />
 
         {/* Grouped by job (registry categories) so investors can find the
-            calculator for the question they're answering: screen a deal →
-            finance it → model income/expenses → check returns → set an offer. */}
-        <div className="space-y-9">
-          {calculatorsByCategory().map((group) => (
-            <section key={group.category} aria-labelledby={`cat-${group.category}`}>
-              <h2
-                id={`cat-${group.category}`}
-                className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3"
+            calculator for the question they're answering: screen a deal,
+            finance it, model income and expenses, check returns (once a
+            returns calculator is released), set an offer.
+            Each group is a ruled list on the FAQ's 5/7 split grid: the
+            category beside its rows from 1024px, above them on phones.
+            rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <div className="flex flex-col gap-12 sm:gap-16">
+            {groups.map((group) => (
+              <section
+                key={group.category}
+                aria-labelledby={`cat-${group.category}`}
+                className="grid gap-x-16 gap-y-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
               >
-                {group.label}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {group.items.map((tool) => (
-                  <Link
-                    key={tool.slug}
-                    href={`/tools/${tool.slug}`}
-                    className="group bg-card border border-border rounded-2xl p-5 hover:border-primary transition-colors flex flex-col gap-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <Calculator className="w-5 h-5 text-primary" />
-                      <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-foreground">{tool.title}</h3>
-                    <p className="text-sm text-muted-foreground">{tool.description}</p>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+                <h2
+                  id={`cat-${group.category}`}
+                  className="font-display text-balance text-h3-sm sm:text-2xl"
+                >
+                  {group.label}
+                </h2>
+                <ul className="border-t-2 border-foreground">
+                  {/* The title sits 16px below the rule (row pt-2 + link py-2)
+                      however many lines it wraps to; py-2 around one 28px line
+                      is the 44px target, and min-h-11 keeps that floor. */}
+                  {group.items.map((tool) => (
+                    <li key={tool.slug} className="border-b border-rule-soft pb-4 pt-2">
+                      <h3 className="text-lg font-semibold">
+                        <Link
+                          href={`/tools/${tool.slug}`}
+                          className="tc-link inline-flex min-h-11 py-2"
+                        >
+                          {tool.title}
+                        </Link>
+                      </h3>
+                      <p className="max-w-[62ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                        {tool.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </Section>
 
+        <Section rhythm="tight" aria-labelledby="tools-how">
+          <div className="max-w-[68ch]">
+            <SectionHeading id="tools-how">How these fit the full analysis</SectionHeading>
+            <p className="mt-4 text-pretty text-lg leading-relaxed">
+              Each calculator answers one question with one formula: is the rent
+              in range for the price, what does the loan cost, what does a rule
+              of thumb say before you spend an hour on a listing. They are
+              deliberately narrow. When you want the whole picture, the analyzer
+              runs every one of these numbers together on the same assumptions
+              &mdash; cash flow after reserves, DSCR, cap rate, cash-on-cash
+              return, Buy Box fit, and the Offer Ceiling &mdash; and shows which
+              inputs move the decision most. Several calculators can hand their
+              values straight into it, so nothing you typed here is typed twice.
+              Every formula is the same one the analyzer uses and is published on
+              the methodology page.
+            </p>
+          </div>
+        </Section>
 
-        <section aria-labelledby="tools-how" className="mt-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <h2 id="tools-how" className="text-lg font-extrabold text-foreground">
-            How these fit the full analysis
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Each calculator answers one question with one formula: is the rent
-            in range for the price, what does the loan cost, what does a rule
-            of thumb say before you spend an hour on a listing. They are
-            deliberately narrow. When you want the whole picture, the analyzer
-            runs every one of these numbers together on the same assumptions
-            &mdash; cash flow after reserves, DSCR, cap rate, cash-on-cash
-            return, Buy Box fit, and the Offer Ceiling &mdash; and shows which
-            inputs move the decision most. Several calculators can hand their
-            values straight into it, so nothing you typed here is typed twice.
-            Every formula is the same one the analyzer uses and is published on
-            the methodology page.
-          </p>
-        </section>
+        <Section rhythm="tight" aria-labelledby="learn-the-math">
+          <div className="max-w-[68ch]">
+            <SectionHeading id="learn-the-math">Learn the math behind the calculators</SectionHeading>
+            <p className="mt-4 text-pretty text-lg leading-relaxed">
+              Want to understand what these tools are actually computing? Our
+              step-by-step guides walk through{" "}
+              <Link href="/blog/how-to-calculate-cap-rate" className="tc-link">how to calculate cap rate</Link>,{" "}
+              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="tc-link">how to calculate cash-on-cash return</Link>,{" "}
+              <Link href="/blog/how-to-calculate-dscr" className="tc-link">how to calculate DSCR</Link>, and{" "}
+              <Link href="/blog/how-to-calculate-noi-rental-property" className="tc-link">how to calculate NOI</Link>{" "}
+              — or see all the pieces come together in{" "}
+              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">how to underwrite a rental property in 60 seconds</Link>.
+            </p>
+          </div>
+        </Section>
 
-        <section
-          aria-labelledby="learn-the-math"
-          className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8"
-        >
-          <h2
-            id="learn-the-math"
-            className="text-xl sm:text-2xl font-extrabold text-foreground mb-2"
-          >
-            Learn the math behind the calculators
-          </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Want to understand what these tools are actually computing? Our
-            step-by-step guides walk through{" "}
-            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">how to calculate cap rate</Link>,{" "}
-            <Link href="/blog/how-to-calculate-cash-on-cash-return" className="font-semibold text-primary hover:underline">how to calculate cash-on-cash return</Link>,{" "}
-            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>, and{" "}
-            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">how to calculate NOI</Link>{" "}
-            — or see all the pieces come together in{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">how to underwrite a rental property in 60 seconds</Link>.
-          </p>
-        </section>
-
-        <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-            Want the full picture?
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4">
-            Single-purpose calculators are great for triaging deals. When
-            you&apos;re ready to underwrite a stabilized rental, open the full
-            TrueCap analyzer for cash flow, cap rate, cash-on-cash return,
-            DSCR, projections, sensitivity, and an Offer
-            Ceiling. Free to start.
-          </p>
-          <Link
-            href="/analyze" prefetch={false}
-            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-          >
-            Open TrueCap
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </section>
+        {/* The close on the heavy rule. A plain Link, not AnalyzeCtaLink:
+            that island fires homepage_primary_cta and would count /tools
+            clicks as homepage clicks. */}
+        <CloseSection
+          heading="Want the full picture?"
+          headingId="tools-close-heading"
+          lede={
+            <>
+              Single-purpose calculators are great for triaging deals. When
+              you&apos;re ready to underwrite a stabilized rental, open the full
+              TrueCap analyzer for cash flow, cap rate, cash-on-cash return,
+              DSCR, projections, sensitivity, and an Offer
+              Ceiling. Free to start.
+            </>
+          }
+          actions={
+            <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+              Open TrueCap
+            </Link>
+          }
+        />
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
