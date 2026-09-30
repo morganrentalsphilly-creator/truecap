@@ -20,36 +20,36 @@ the SEO loop's lastmod does not re-date a page for a presentation change.
 
 | Page | Conversion | Visual review | Notes |
 |---|---|---|---|
-| `/for-agents` | 8176ef7 | b15afc9 | Two Disclaimers → one; memo shown as a document; primary CTA "Analyze a deal free" |
-| `/pricing` | a571293 | 547d1d6 | Plan cards on a subgrid; billing toggle above the row; Pro carries the filled button; phone comparison as a ruled list |
-| `/for-investors` | 6c36cec | 2995815 | Investor hub on PageHero, the source table, split FAQ |
-| `/for-buy-and-hold` | a2a7f83 | 467d3dc | Persona family grammar |
-| `/for-house-hackers` | e1e75b5 | 339dce2, 2f773c9 | Hero column sized to its phone capture |
-| `/for-brrrr` | 08911d6 | 43666ed | Identical structure to /for-flippers |
-| `/for-flippers` | 106c802 | d909cd4 | |
-| `/why-truecap` | 2c64320 | 39e4dd4 | Visible H1 (was screen-reader only); comparison on rules |
-| `/vs` (hub) | abd3489 | fef5ed8 | 38 rows as a ruled directory, all server links |
-| `/vs/*` (38 pages) | b91b749 (template), da6c0de (37) | — | `vs-page.tsx`; analyzer first and filled in every close; 246-test guard |
-| `/sample-decision-memo` | 19db1b5 | 1aa1024 | A printed memo on the ledger; source of the regenerated memo shot |
-| `/embed` family | 3725d6f | d2bb907, 06b0cd8 | Hub on PageHero; iframe footer as plain links; structured data unchanged |
-| `/about` | 29eb507 | 0352e75 | 5/7 split; the founder still unnamed |
-| `/reviews` | 4cc9959 | 7e6d7ee | "Proof, not praise"; renders nothing it cannot substantiate |
-| `/tools` | fbdd8a6 | 2578aec | Empty "Returns" group no longer renders |
-| `/tools/1-percent-rule-calculator` | 701ee22 | 2597f2f | The calculator template (cap-rate is unreleased and redirects) |
-| `/blog` | 140e559 | 5d2aef2, fda95ec | Ruled topic sections, sticky group headings |
-| `/blog/1-percent-rule-rental-property` | 4281293 | b0c84cc | The post template on the article frame; OG card on the Newsprint template |
-| `/blog/what-is-a-good-cap-rate` (and the 2 other SourceFirstArticle posts) | 3f49231 | dea41b6 | Gained the site header they never had |
+| `/for-agents` | e4e5bf3 | adfc289 | Two Disclaimers → one; memo shown as a document; primary CTA "Analyze a deal free" |
+| `/pricing` | 4677e6a | 3f81c4e | Plan cards on a subgrid; billing toggle above the row; Pro carries the filled button; phone comparison as a ruled list |
+| `/for-investors` | 761b6d3 | 7ca5e06 | Investor hub on PageHero, the source table, split FAQ |
+| `/for-buy-and-hold` | 3161437 | cf097fe | Persona family grammar |
+| `/for-house-hackers` | aa091da | 09e1cba, e2c85e5 | Hero column sized to its phone capture |
+| `/for-brrrr` | 2d6bc2e | dacf40c | Identical structure to /for-flippers |
+| `/for-flippers` | 7fdfa6d | 8023b57 | |
+| `/why-truecap` | 7fffe70 | 8e870ab | Visible H1 (was screen-reader only); comparison on rules |
+| `/vs` (hub) | 5ea5e98 | a25620c | 38 rows as a ruled directory, all server links |
+| `/vs/*` (38 pages) | 805ecd5 (template), 6537c35 (37) | — | `vs-page.tsx`; analyzer first and filled in every close; 246-test guard |
+| `/sample-decision-memo` | e9932b8 | 58d066b | A printed memo on the ledger; source of the regenerated memo shot |
+| `/embed` family | 2b9f8e8 | 6bb4fec, 6741e34 | Hub on PageHero; iframe footer as plain links; structured data unchanged |
+| `/about` | 91488ed | 6a946cc | 5/7 split; the founder still unnamed |
+| `/reviews` | 82cd973 | af58c5c | "Proof, not praise"; renders nothing it cannot substantiate |
+| `/tools` | 709bcd6 | f3be6bd | Empty "Returns" group no longer renders |
+| `/tools/1-percent-rule-calculator` | b834581 | 67cb158 | The calculator template (cap-rate is unreleased and redirects) |
+| `/blog` | 8b145d4 | 13d45ae, 9644279 | Ruled topic sections, sticky group headings |
+| `/blog/1-percent-rule-rental-property` | d6eaf4a | d8f369c | The post template on the article frame; OG card on the Newsprint template |
+| `/blog/what-is-a-good-cap-rate` (and the 2 other SourceFirstArticle posts) | d0f653d | 17e2392 | Gained the site header they never had |
 
-Shared parts: 4254f53 (page parts, plan card, testimonials), 46f0519 (header
+Shared parts: fcc7854 (page parts, plan card, testimonials), 8586b1a (header
 states, user menu, toast, tooltip, label weight, ProductShot's frame),
-3f49231 and effb646 (article frame and content chrome), e08f126 (comparison
-FAQ), 4769bc6 (tools and embed furniture), afd736b (fixes from the 15-page
-visual review), 074453b (`cn()` and the type ramp). Prefetch: b453806,
-c27f1cf, d20c9b9, 1fb0de3, b9e7af7. Step 4: ced3f8d.
+d0f653d and ff43223 (article frame and content chrome), 6df66fc (comparison
+FAQ), fe252eb (tools and embed furniture), a76f551 (fixes from the 15-page
+visual review), f0408ab (`cn()` and the type ramp). Prefetch: 85acb4a,
+ec732fb, 3c347f5, ddf60a8, ffdf7d5. Step 4: 37d1f71.
 
 Copy changed only where the design rules force it (arrow suffixes,
 eyebrows, pills, sentence-cased chrome labels) or where it was untrue or
-broken (f09c3c7, 05c803c). Each commit message lists its copy changes and
+broken (df87742, 5d56623). Each commit message lists its copy changes and
 the guards it re-anchored.
 
 ## The agent journey (commit "Agent journey: conversion fixes")
@@ -187,7 +187,7 @@ its rule. The source scan of all 106 `.tsx` files the rollout changed reports 0 
   rent goes" shots are the analyzer as it is today, at the new tokens; its
   decision summary still uses the app's own panels (see TODO).
 - OG images: `/og/home`, `/og/for-agents`, the persona cards, and the
-  vs/tool/blog templates on the Newsprint frame (c2313d1); the post template's
+  vs/tool/blog templates on the Newsprint frame (ed4e63c); the post template's
   bespoke card now uses the blog template.
 
 ## App screens affected
