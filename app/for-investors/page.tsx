@@ -22,6 +22,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
 import { ActionRow, CloseSection, PageHero, RuledList } from "@/components/marketing/page-parts";
@@ -64,6 +65,16 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", images: ["/og/home"] },
 };
+
+/** The hero's metric strip, joined with " · " (each item keeps its dot). */
+const HERO_METRICS = [
+  "Cash flow",
+  "Cap rate",
+  "Cash-on-cash return",
+  "DSCR",
+  "Deal score",
+  "Offer Ceiling",
+] as const;
 
 const STRATEGIES: { title: string; body: string; href: string; cta: string }[] = [
   {
@@ -158,8 +169,18 @@ export default function ForInvestorsPage() {
                 Ceiling for your targets, and what could break the deal.
                 Every assumption is labeled and yours to change.
               </p>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">
-                Cash flow · Cap rate · Cash-on-cash return · DSCR · Deal score · Offer Ceiling
+              {/* Each metric keeps its trailing separator, so a wrapped line
+                  never opens on a dot; balance keeps "Offer Ceiling" from
+                  standing alone on the second line. */}
+              <p className="mt-2 text-balance text-sm font-medium text-muted-foreground">
+                {HERO_METRICS.map((metric, index) => (
+                  <Fragment key={metric}>
+                    {index > 0 ? " " : null}
+                    <span className="whitespace-nowrap">
+                      {index < HERO_METRICS.length - 1 ? `${metric} ·` : metric}
+                    </span>
+                  </Fragment>
+                ))}
               </p>
             </>
           }
@@ -205,17 +226,22 @@ export default function ForInvestorsPage() {
         {/* Strategies: ruled rows, the title, what the numbers cover, the way in. */}
         <Section aria-labelledby="strategies-heading">
           <SectionHeading id="strategies-heading">Pick your strategy</SectionHeading>
-          <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
+          {/* Two lines at desktop: balance sets them evenly instead of
+              leaving "you buy." alone on the second. */}
+          <p className="mt-3 max-w-[62ch] text-balance text-lg leading-relaxed text-muted-foreground">
             The analyzer is the same; each page shows how the numbers apply to
             the way you buy.
           </p>
+          {/* The homepage source table's grid (11rem term, 16rem link), so
+              the body column starts at the same x as the source table below;
+              the titles are row terms in RuledList's voice. */}
           <ul className="mt-8 border-t-2 border-foreground">
             {STRATEGIES.map(({ title, body, href, cta }) => (
               <li
                 key={title}
-                className="grid gap-x-8 gap-y-2 border-b border-rule-soft py-5 lg:grid-cols-[13rem_minmax(0,1fr)_16rem] lg:items-baseline"
+                className="grid gap-x-8 gap-y-2 border-b border-rule-soft py-5 lg:grid-cols-[11rem_minmax(0,1fr)_16rem] lg:items-baseline"
               >
-                <h3 className="font-display text-h3-sm sm:text-2xl">{title}</h3>
+                <h3 className="text-lg font-semibold">{title}</h3>
                 <p className="max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
                   {body}
                 </p>
