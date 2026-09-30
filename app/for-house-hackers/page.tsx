@@ -28,6 +28,9 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Below-the-fold cross-links prefetch on hover or keyboard focus, not on
+// scroll; hero and primary CTA links keep the default (see the component).
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "For House Hackers",
@@ -207,13 +210,13 @@ export default function ForHouseHackersPage() {
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
             Start with the deep-dive on{" "}
-            <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">
+            <IntentPrefetchLink href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">
               house hacking explained
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             and the comparison of{" "}
-            <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">
+            <IntentPrefetchLink href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">
               single-family vs multi-family
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             properties. Screen candidates fast with the free{" "}
             <Link href="/analyze?strategy=house-hack" prefetch={false} className="text-primary font-semibold hover:underline">
               analyzer in House Hack mode
@@ -226,9 +229,9 @@ export default function ForHouseHackersPage() {
             </Link>{" "}
             — cap rate and DSCR for the rented portion — then run the year-1 screen
             with the{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+            <IntentPrefetchLink href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
               60-second underwriting workflow
-            </Link>
+            </IntentPrefetchLink>
             .
           </p>
         </section>
@@ -261,9 +264,9 @@ export default function ForHouseHackersPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Evaluating a non-owner-occupied rental? See TrueCap for{" "}
-          <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
+          <IntentPrefetchLink href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
             buy-and-hold investors
-          </Link>
+          </IntentPrefetchLink>
           .
         </footer>
 
@@ -272,9 +275,9 @@ export default function ForHouseHackersPage() {
         {isAgentProConfigured() ? (
           <p className="mt-6 border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
             Are you an agent working with investor clients?{" "}
-            <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+            <IntentPrefetchLink href="/for-agents" className="font-bold text-foreground hover:underline">
               See TrueCap for agents →
-            </Link>
+            </IntentPrefetchLink>
           </p>
         ) : null}
       </main>
