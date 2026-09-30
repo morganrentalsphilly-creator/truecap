@@ -895,6 +895,15 @@ describe("deriveTier", () => {
   it("tier 0: exactly one internal link wrapped around existing text, or inserted whole", () => {
     expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <Link href="/blog/dscr">guide on DSCR</Link> next.</p>'))).toBe(0);
     expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the guide on DSCR next.<Link href="/blog/dscr">DSCR guide</Link></p>'))).toBe(0);
+    // /vs pages and converted posts write internal links as IntentPrefetchLink
+    // (intent-only prefetch); one added is the same tier-0 change.
+    expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <IntentPrefetchLink href="/blog/dscr" className="tc-link">guide on DSCR</IntentPrefetchLink> next.</p>'))).toBe(0);
+  });
+
+  it("tier 1: an IntentPrefetchLink to an external URL, or two of them, is not a one-link change", () => {
+    expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <IntentPrefetchLink href="https://www.irs.gov/x">guide on DSCR</IntentPrefetchLink> next.</p>'))).toBe(1);
+    expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <IntentPrefetchLink href="/blog/dscr">guide on DSCR</IntentPrefetchLink> next. Then <IntentPrefetchLink href="/glossary/noi">NOI</IntentPrefetchLink>.</p>'))).toBe(1);
+    expect(tier(edit(BASE_PAGE, "<p>Read the guide on DSCR next.</p>", '<p>Read the <IntentPrefetchLink href="/blog/dscr" prefetch={false}>guide on DSCR</IntentPrefetchLink> next.</p>'))).toBe(1);
   });
 
   it("tier 1: anything else, however small", () => {
