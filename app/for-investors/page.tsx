@@ -4,10 +4,15 @@
  * The homepage now speaks to real estate agents first, so investors buying
  * for their own portfolio need one named destination from the header and
  * from the hero's investor cue. This page states the investor value prop
- * once and routes to the strategy pages. It mirrors /for-agents in shape
- * (hero → what you get → strategies → sources → FAQ → CTA) and adds nothing
- * the product does not do: the free first decision, Pro, labeled HUD/FRED
- * benchmarks, manual property tax.
+ * once and routes to the strategy pages, in this order: hero → strategies →
+ * what you get → sources → FAQ → close. It adds nothing the product does not
+ * do: the free first decision, Pro, labeled HUD/FRED benchmarks, manual
+ * property tax.
+ *
+ * Set on the homepage's grammar (DESIGN.md, 2026-09 design pass): PageHero,
+ * then Sections on rules, the strategies and the four questions as ruled
+ * rows instead of cards, the sources as a source table, and the close on the
+ * heavy rule. No cards (the page shows no plans), no icons, no motion.
  *
  * BRRRR and fix-and-flip route to their guides and calculators rather than
  * /for-brrrr and /for-flippers: those two are deliberately noindexed
@@ -17,20 +22,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Building2,
-  Hammer,
-  Home,
-  Repeat,
-  ShieldCheck,
-  Target,
-} from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
+import { ActionRow, CloseSection, PageHero, RuledList } from "@/components/marketing/page-parts";
 import { DECISION_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { buttonVariants } from "@/components/ui/button";
 import {
   PRODUCT_EVALUATION_COMPARISON_LIMIT,
   PRODUCT_EVALUATION_DAYS,
@@ -38,6 +37,7 @@ import {
 } from "@/lib/product-access";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+import { cn } from "@/lib/utils";
 
 const PAGE_TITLE = "For Rental Investors — Buy Box & Offer Ceiling";
 const PAGE_DESCRIPTION =
@@ -65,30 +65,26 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/og/home"] },
 };
 
-const STRATEGIES: { icon: typeof Home; title: string; body: string; href: string; cta: string }[] = [
+const STRATEGIES: { title: string; body: string; href: string; cta: string }[] = [
   {
-    icon: Building2,
     title: "Buy-and-hold",
     body: "Stabilized rentals for cash flow and equity: cap rate, cash-on-cash, DSCR, downside, the Offer Ceiling, and a 10-year projection.",
     href: "/for-buy-and-hold",
     cta: "For buy-and-hold investors",
   },
   {
-    icon: Home,
     title: "House hacking",
     body: "Two to four units, owner-occupied: your unit's cost against the rent from the others, with low-down-payment financing modeled honestly.",
     href: "/for-house-hackers",
     cta: "For house hackers",
   },
   {
-    icon: Repeat,
     title: "BRRRR",
     body: "Research each stage in the analyzer and the BRRRR calculator: rehab budget, ARV, DSCR on the refinance, stabilized returns. No integrated lifecycle model is offered yet.",
     href: "/blog/brrrr-method-explained",
     cta: "Read the BRRRR guide",
   },
   {
-    icon: Hammer,
     title: "Fix and flip",
     body: "Rehab, ARV, and 70%-rule screening for early research. A complete flip model also needs time, financing, and selling costs; the guide says where.",
     href: "/blog/70-percent-rule-house-flipping",
@@ -96,167 +92,207 @@ const STRATEGIES: { icon: typeof Home; title: string; body: string; href: string
   },
 ];
 
+/** The four questions Pro answers, as ruled term and detail rows. */
+const WHAT_YOU_GET = [
+  {
+    term: "Does it meet my Buy Box?",
+    detail: "Your cash-flow, cash-on-cash, DSCR, cap-rate, and price targets, checked on every deal with the reason for a miss.",
+  },
+  {
+    term: "What is my Offer Ceiling?",
+    detail: "The highest price that still meets your targets under the assumptions shown. Not a recommended offer; your line, computed.",
+  },
+  {
+    term: "What could make it fail?",
+    detail: "Rent, vacancy, rate, and price stressed against the assumptions that drive the decision.",
+  },
+  {
+    term: "Can I defend it?",
+    detail: "Save unlimited deals, compare up to four, and hand a lender or partner a report with the assumptions and risks intact.",
+  },
+];
+
+/**
+ * Where the starting numbers come from, in the homepage source table's
+ * grammar (FRED's: the value's name, then its source and how to replace it).
+ * Every sentence reads lib/product-facts.ts, so the claims cannot drift from
+ * the product; the property-tax row keeps PROPERTY_TAX_FACTS' own wording.
+ */
+const SOURCES: { label: string; source: string; flag?: string }[] = [
+  {
+    label: "Rent",
+    source: `${DATA_SOURCE_FACTS.rent}, labeled as a benchmark to check against local comps.`,
+  },
+  {
+    label: "Mortgage rate",
+    source: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown; replace it with your lender's quote.`,
+  },
+  {
+    label: "Property tax",
+    source: PROPERTY_TAX_FACTS.notAutoFilled,
+    // Flagged in ink at 600, as on the homepage: orange means a miss.
+    flag: PROPERTY_TAX_FACTS.blankFieldBehavior,
+  },
+];
+
+const SOURCE_ROW_GRID =
+  "grid gap-x-8 gap-y-1 sm:grid-cols-[9rem_minmax(0,1fr)] lg:grid-cols-[11rem_minmax(0,1fr)]";
+
 export default function ForInvestorsPage() {
   const agentProConfigured = isAgentProConfigured();
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: nothing a section
+    // bleeds can scroll the page sideways, and `clip` keeps the sticky
+    // header working (it creates no scroll container).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
-      <main id="main" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         {/* Hero: the investor's outcome; the same free analyzer as every page. */}
-        <section className="mb-12 sm:mb-16">
-          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-2xs font-semibold uppercase tracking-widest text-primary">
-                <Target className="size-3" />
-                For rental investors
-              </div>
-              <h1 className="text-balance text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-                Know the highest price that still meets your targets before you write the offer.
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+        <PageHero
+          title="Know the highest price that still meets your targets before you write the offer."
+          lede={
+            <>
+              <p>
                 Paste a listing. In about 60 seconds, see whether the rental
                 works at asking, whether it meets your Buy Box, the Offer
                 Ceiling for your targets, and what could break the deal.
                 Every assumption is labeled and yours to change.
               </p>
-              <p className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground">
+              <p className="mt-2 text-sm font-medium text-muted-foreground">
                 Cash flow · Cap rate · Cash-on-cash return · DSCR · Deal score · Offer Ceiling
               </p>
-              <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-                <Link
-                  href="/analyze"
-                  prefetch={false}
-                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-                >
-                  Analyze a property free
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
-                >
-                  See Pro pricing
-                </Link>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Free. No account. Your first full decision is included. A free
-                account adds a {PRODUCT_EVALUATION_DAYS}-day trial with{" "}
-                {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
-                {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card.
-              </p>
-            </div>
-            <div>
-              <ProductShot
-                shot={DECISION_SHOT}
-                priority
-                alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-                caption={
-                  <>
-                    Real output from the free sample deal.{" "}
-                    <Link href="/analyze?sample=1" prefetch={false} className="font-semibold text-primary underline underline-offset-4">
-                      Run it yourself →
-                    </Link>
-                  </>
-                }
-              />
-            </div>
-          </div>
-        </section>
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Analyze a property free
+              </Link>
+              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+                See Pro pricing
+              </Link>
+            </ActionRow>
+          }
+          note={
+            <>
+              Free. No account. Your first full decision is included. A free
+              account adds a {PRODUCT_EVALUATION_DAYS}-day trial with{" "}
+              {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
+              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card.
+            </>
+          }
+          aside={
+            // A real capture shown as a document, never in a browser frame.
+            // Not the homepage's Verdict Ledger: its double rule draws in,
+            // and that motion belongs to the homepage alone.
+            <ProductShot
+              shot={DECISION_SHOT}
+              frame="document"
+              priority
+              alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
+              caption={
+                <>
+                  Real output from the free sample deal.{" "}
+                  <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">
+                    Run it yourself
+                  </Link>
+                </>
+              }
+            />
+          }
+        />
 
-        {/* Strategies */}
-        <section className="mb-12 sm:mb-16" aria-labelledby="strategies-heading">
-          <h2 id="strategies-heading" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Pick your strategy
-          </h2>
-          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
+        {/* Strategies: ruled rows, the title, what the numbers cover, the way in. */}
+        <Section aria-labelledby="strategies-heading">
+          <SectionHeading id="strategies-heading">Pick your strategy</SectionHeading>
+          <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
             The analyzer is the same; each page shows how the numbers apply to
             the way you buy.
           </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {STRATEGIES.map(({ icon: Icon, title, body, href, cta }) => (
-              <article key={title} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-3 text-base font-extrabold text-foreground sm:text-lg">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                <Link href={href} className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+          <ul className="mt-8 border-t-2 border-foreground">
+            {STRATEGIES.map(({ title, body, href, cta }) => (
+              <li
+                key={title}
+                className="grid gap-x-8 gap-y-2 border-b border-rule-soft py-5 lg:grid-cols-[13rem_minmax(0,1fr)_16rem] lg:items-baseline"
+              >
+                <h3 className="font-display text-h3-sm sm:text-2xl">{title}</h3>
+                <p className="max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                  {body}
+                </p>
+                {/* justify-self-start: the 44px target stays the label's
+                    width instead of stretching across the grid cell. */}
+                <Link href={href} className="tc-link inline-flex min-h-11 items-center justify-self-start text-base">
                   {cta}
-                  <ArrowRight className="size-4" aria-hidden />
                 </Link>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* What you get, free and Pro */}
-        <section className="mb-12 rounded-3xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:mb-16 sm:p-8" aria-labelledby="get-heading">
-          <h2 id="get-heading" className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Free screens the deal. Pro answers four questions on every deal.
-          </h2>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            {[
-              ["Does it meet my Buy Box?", "Your cash-flow, cash-on-cash, DSCR, cap-rate, and price targets, checked on every deal with the reason for a miss."],
-              ["What is my Offer Ceiling?", "The highest price that still meets your targets under the assumptions shown. Not a recommended offer; your line, computed."],
-              ["What could make it fail?", "Rent, vacancy, rate, and price stressed against the assumptions that drive the decision."],
-              ["Can I defend it?", "Save unlimited deals, compare up to four, and hand a lender or partner a report with the assumptions and risks intact."],
-            ].map(([title, body]) => (
-              <li key={title} className="rounded-2xl border border-border bg-card p-4">
-                <p className="text-sm font-extrabold text-foreground">{title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
               </li>
             ))}
           </ul>
-          <Link href="/pricing" className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
-            Compare Free and Pro →
-          </Link>
-        </section>
+        </Section>
+
+        {/* What you get, free and Pro */}
+        <Section aria-labelledby="get-heading">
+          <SectionHeading id="get-heading">
+            Free screens the deal. Pro answers four questions on every deal.
+          </SectionHeading>
+          <RuledList items={WHAT_YOU_GET} columns={2} className="mt-8" />
+          <p className="mt-5 text-base">
+            <Link href="/pricing" className="tc-link inline-flex min-h-11 items-center">
+              Compare Free and Pro
+            </Link>
+          </p>
+        </Section>
 
         {/* Sources */}
-        <section className="mb-12 rounded-2xl border border-border bg-card p-6 sm:mb-16 sm:p-8" aria-labelledby="sources-heading">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-5 text-primary" aria-hidden />
-            <h2 id="sources-heading" className="text-lg font-extrabold text-foreground sm:text-xl">
-              Where the starting numbers come from
-            </h2>
-          </div>
-          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
-            <li><strong className="text-foreground">Rent:</strong> {DATA_SOURCE_FACTS.rent}, labeled as a benchmark to check against local comps.</li>
-            <li><strong className="text-foreground">Mortgage rate:</strong> {DATA_SOURCE_FACTS.mortgageRate}, with its date shown; replace it with your lender&apos;s quote.</li>
-            <li><strong className="text-foreground">Property tax:</strong> {PROPERTY_TAX_FACTS.notAutoFilled} {PROPERTY_TAX_FACTS.blankFieldBehavior}</li>
-          </ul>
-          <Link href="/methodology" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
-            Read the methodology →
-          </Link>
-        </section>
-      </main>
+        <Section rhythm="tight" aria-labelledby="sources-heading">
+          <SectionHeading id="sources-heading">
+            Where the starting numbers come from
+          </SectionHeading>
+          <dl className="mt-8 border-t-2 border-foreground">
+            {SOURCES.map((s) => (
+              <div key={s.label} className={cn(SOURCE_ROW_GRID, "border-b border-rule-soft py-4")}>
+                <dt className="font-semibold">{s.label}</dt>
+                <dd className="min-w-0 max-w-[68ch] text-pretty text-base leading-relaxed">
+                  {s.source}
+                  {s.flag ? <span className="mt-1 block font-semibold">{s.flag}</span> : null}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 text-base">
+            <Link href="/methodology" className="tc-link inline-flex min-h-11 items-center">
+              Read the methodology
+            </Link>
+          </p>
+        </Section>
 
-      {/* The investor FAQ set; the homepage owns its FAQPage JSON-LD. */}
-      <HomepageFaq structuredData={false} audience="investors" />
+        {/* The investor FAQ set. No FAQPage here: "/" claims the one question
+            the two sets share, and claiming the rest on this URL is a
+            separate SEO decision. */}
+        <HomepageFaq structuredData={false} audience="investors" />
 
-      <section className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-          <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Paste a listing. See if it works before you write the offer.
-          </h2>
-          <Link
-            href="/analyze"
-            prefetch={false}
-            className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-          >
-            Analyze a property free
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+        <CloseSection
+          heading="Paste a listing. See if it works before you write the offer."
+          headingId="final-cta-heading"
+          actions={
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Analyze a property free
+              </Link>
+            </ActionRow>
+          }
+        >
+          {/* /for-agents redirects while Agent Pro is unconfigured, so the
+              link renders only behind the same gate as its sitemap entry. */}
           {agentProConfigured ? (
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Working with investor clients as an agent?{" "}
-              <Link href="/for-agents" className="font-semibold text-primary underline underline-offset-4">
-                See TrueCap for agents →
+              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+                See TrueCap for agents
               </Link>
             </p>
           ) : null}
-        </div>
-      </section>
+        </CloseSection>
+      </main>
       <SiteFooter />
       <ScrollDepthTracker />
     </div>
