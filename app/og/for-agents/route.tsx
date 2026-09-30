@@ -1,12 +1,20 @@
 import { ImageResponse } from "next/og";
 import { findProductShot } from "@/components/marketing/product-shot";
+import {
+  loadNewsprintFonts,
+  NEWSPRINT,
+  NewsprintFrame,
+  OG_SIZE,
+  ogFamily,
+} from "@/lib/og/newsprint";
 
 /**
- * GET /og/for-agents — the agent landing page's OG card: the wordmark, the
- * agent headline, and the REAL decision memo screenshot from the sample flow
- * (public/product/memo-desktop.png) — the artifact an investor client
- * receives. Mirrors app/og/home/route.tsx; degrades to wordmark + headline if
- * the screenshot cannot be loaded, never to a placeholder.
+ * GET /og/for-agents — the agent landing page's OG card: the agent headline
+ * beside the REAL decision memo screenshot from the sample flow
+ * (public/product/memo-desktop.png), the artifact an investor client
+ * receives, shown as a printed page (a 1px rule, no radius, no shadow).
+ * Degrades to the headline alone if the screenshot cannot be loaded, never to
+ * a placeholder.
  *
  * A route handler rather than app/for-agents/opengraph-image.tsx so the
  * page's metadata can point og:image AND twitter:image at one URL (the file
@@ -14,9 +22,10 @@ import { findProductShot } from "@/components/marketing/product-shot";
  * the page).
  */
 
-const size = { width: 1200, height: 630 };
-
-const BLUE = "#0070c4";
+const HEADLINE = "Send your investor clients deals that already pencil.";
+const SUBHEAD =
+  "Screen a listing against each client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo.";
+const URL_TEXT = "usetruecap.com/for-agents";
 
 export async function GET() {
   const shot = findProductShot("memo", "desktop");
@@ -32,77 +41,54 @@ export async function GET() {
       shotSrc = null;
     }
   }
+  const fonts = await loadNewsprintFonts({
+    display: `TrueCap. ${HEADLINE}`,
+    text: `For real estate agents ${SUBHEAD} Free first decision. No card.`,
+    mono: URL_TEXT,
+  });
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          background: "linear-gradient(135deg, #eaf4fc 0%, #ffffff 55%)",
-          fontFamily: "Helvetica, Arial, sans-serif",
-          color: "#0f172a",
-        }}
+      <NewsprintFrame
+        label="For real estate agents"
+        footerLeft="Free first decision. No card."
+        footerRight={URL_TEXT}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            width: shotSrc ? 520 : 1200,
-            padding: "56px 48px 48px 56px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", fontSize: 34, fontWeight: 800 }}>
-              TrueCap<span style={{ color: BLUE }}>.</span>
-            </div>
-            <div style={{ display: "flex", fontSize: 14, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#475569" }}>
-              For real estate agents
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: shotSrc ? 44 : 64, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1 }}>
-              Send your investor clients deals that already pencil.
-            </div>
-            <div style={{ marginTop: 20, fontSize: shotSrc ? 20 : 26, color: "#475569", lineHeight: 1.35 }}>
-              Screen a listing against each client&apos;s Buy Box, show their Offer Ceiling, and send a co-branded decision memo.
-            </div>
-          </div>
-          <div style={{ display: "flex", fontSize: 18, color: BLUE, fontWeight: 700 }}>
-            usetruecap.com/for-agents · Free first decision. No card.
-          </div>
-        </div>
-        {shotSrc ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              width: 680,
-              height: 630,
-              overflow: "hidden",
-              paddingTop: 40,
-            }}
-          >
+        <div style={{ display: "flex", flexGrow: 1, gap: 48, alignItems: shotSrc ? "flex-start" : "center", paddingTop: shotSrc ? 32 : 0, overflow: "hidden" }}>
+          <div style={{ display: "flex", flexDirection: "column", width: shotSrc ? 470 : 1072 }}>
             <div
               style={{
                 display: "flex",
-                width: 660,
-                borderRadius: 18,
+                fontFamily: ogFamily("display"),
+                fontSize: shotSrc ? 56 : 76,
+                lineHeight: 1.02,
+                letterSpacing: "-0.012em",
+              }}
+            >
+              {HEADLINE}
+            </div>
+            <div style={{ display: "flex", marginTop: 22, fontSize: 26, lineHeight: 1.35, color: NEWSPRINT.ink2 }}>
+              {SUBHEAD}
+            </div>
+          </div>
+          {shotSrc ? (
+            <div
+              style={{
+                display: "flex",
+                width: 560,
+                height: 420,
                 overflow: "hidden",
-                border: "1px solid #dbe4ee",
-                boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
-                background: "#fff",
+                border: `1px solid ${NEWSPRINT.rule}`,
+                background: NEWSPRINT.raised,
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={shotSrc} alt="" width={660} style={{ width: 660, height: "auto" }} />
+              <img src={shotSrc} alt="" width={560} style={{ width: 560, height: "auto" }} />
             </div>
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      </NewsprintFrame>
     ),
-    { ...size, headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" } },
+    { ...OG_SIZE, fonts, headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" } },
   );
 }
