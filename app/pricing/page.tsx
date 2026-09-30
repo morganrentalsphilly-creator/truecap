@@ -28,6 +28,12 @@ import { Check } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's links (its actions, the stage chooser's plan jumps and
+// the agent line) and the plan cards' checkout actions keep next/link's
+// default; /analyze never prefetches. Guarded by
+// lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import { ActionRow, PageHero } from "@/components/marketing/page-parts";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
@@ -488,12 +494,12 @@ export default async function PricingPage() {
             <li>Cancel anytime from your profile</li>
             <li>Payments handled by Stripe</li>
             <li>
-              <Link
+              <IntentPrefetchLink
                 href="/methodology"
                 className="tc-link inline-flex min-h-11 items-center"
               >
                 Methodology is public
-              </Link>
+              </IntentPrefetchLink>
             </li>
           </ul>
         </Section>
@@ -672,12 +678,12 @@ export default async function PricingPage() {
                 ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
                 : ""}
             </p>
-            <Link
+            <IntentPrefetchLink
               href={DEALCHECK_COMPARISON.href}
               className="tc-link mt-3 inline-flex min-h-11 items-center"
             >
               Read the full DealCheck comparison
-            </Link>
+            </IntentPrefetchLink>
           </div>
         </Section>
 

@@ -30,6 +30,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's actions keep next/link's default; /analyze never
+// prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "For Buy-and-Hold Investors",
@@ -217,26 +221,26 @@ export default function ForBuyAndHoldPage() {
             <p className="mt-4 text-pretty text-lg leading-relaxed">
               The handful of guides and calculators long-term investors return to
               most often: the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
               >
                 60-second underwriting workflow
-              </Link>
+              </IntentPrefetchLink>
               , the deep-dive on{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
                 className="tc-link"
               >
                 cap rate vs cash-on-cash vs DSCR
-              </Link>
+              </IntentPrefetchLink>
               , the breakdown of{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/rental-property-tax-deductions"
                 className="tc-link"
               >
                 every deductible expense
-              </Link>
+              </IntentPrefetchLink>
               , and the{" "}
               <Link
                 href="/analyze" prefetch={false}
@@ -282,12 +286,12 @@ export default function ForBuyAndHoldPage() {
               >
                 Try the free analyzer
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ size: "cta", variant: "outline" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         >
@@ -296,9 +300,9 @@ export default function ForBuyAndHoldPage() {
               line box (the homepage's cue line). */}
           <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
             Also evaluating an owner-occupied rental? See TrueCap for{" "}
-            <Link href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
+            <IntentPrefetchLink href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
               house hackers
-            </Link>
+            </IntentPrefetchLink>
             .
           </p>
           {/* Agent-first pass (2026-09): the agent persona page, only where Agent
@@ -306,9 +310,9 @@ export default function ForBuyAndHoldPage() {
           {isAgentProConfigured() ? (
             <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Are you an agent working with investor clients?{" "}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </CloseSection>

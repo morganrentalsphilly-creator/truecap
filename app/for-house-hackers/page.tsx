@@ -32,6 +32,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's actions keep next/link's default; /analyze never
+// prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
 export const metadata: Metadata = {
   title: "For House Hackers",
@@ -239,13 +243,13 @@ export default function ForHouseHackersPage() {
             <SectionHeading id="reading-heading">Recommended reading and tools</SectionHeading>
             <p className="mt-4 text-pretty text-lg leading-relaxed">
               Start with the deep-dive on{" "}
-              <Link href="/blog/house-hacking-explained" className="tc-link">
+              <IntentPrefetchLink href="/blog/house-hacking-explained" className="tc-link">
                 house hacking explained
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               and the comparison of{" "}
-              <Link href="/blog/single-family-vs-multi-family-rental" className="tc-link">
+              <IntentPrefetchLink href="/blog/single-family-vs-multi-family-rental" className="tc-link">
                 single-family vs multi-family
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               properties. Screen candidates fast with the free{" "}
               <Link href="/analyze?strategy=house-hack" prefetch={false} className="tc-link">
                 analyzer in House Hack mode
@@ -258,9 +262,9 @@ export default function ForHouseHackersPage() {
               </Link>{" "}
               — cap rate and DSCR for the rented portion — then run the year-1 screen
               with the{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
+              <IntentPrefetchLink href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
                 60-second underwriting workflow
-              </Link>
+              </IntentPrefetchLink>
               .
             </p>
           </div>
@@ -279,12 +283,12 @@ export default function ForHouseHackersPage() {
               >
                 Try the free analyzer
               </Link>
-              <Link
+              <IntentPrefetchLink
                 href="/pricing"
                 className={buttonVariants({ size: "cta", variant: "outline" })}
               >
                 See Pro pricing
-              </Link>
+              </IntentPrefetchLink>
             </ActionRow>
           }
         >
@@ -293,9 +297,9 @@ export default function ForHouseHackersPage() {
               line box (the homepage's cue line). */}
           <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
             Evaluating a non-owner-occupied rental? See TrueCap for{" "}
-            <Link href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
+            <IntentPrefetchLink href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
               buy-and-hold investors
-            </Link>
+            </IntentPrefetchLink>
             .
           </p>
           {/* Agent-first pass (2026-09): the agent persona page, only where Agent
@@ -303,9 +307,9 @@ export default function ForHouseHackersPage() {
           {isAgentProConfigured() ? (
             <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
               Are you an agent working with investor clients?{" "}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
                 See TrueCap for agents
-              </Link>
+              </IntentPrefetchLink>
             </p>
           ) : null}
         </CloseSection>

@@ -31,6 +31,11 @@ import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
+// Links below the first screen prefetch on hover or keyboard focus, not on
+// scroll. The hero's actions and the close's Agent Pro sign-up keep
+// next/link's default; /analyze never prefetches. Guarded by
+// lib/__tests__/intent-prefetch-landing.test.ts.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import {
   ActionRow,
@@ -256,9 +261,9 @@ export default async function ForAgentsPage() {
               caption={
                 <>
                   What your client receives: the decision memo, generated from the free sample deal.{" "}
-                  <Link href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
+                  <IntentPrefetchLink href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
                     Read the full sample memo
-                  </Link>
+                  </IntentPrefetchLink>
                 </>
               }
             />
@@ -364,9 +369,9 @@ export default async function ForAgentsPage() {
               // A 44px tap target from padding the negative margin takes back
               // out of the line box, so the term keeps the list's spacing.
               term: (
-                <Link href={href} className="tc-link -my-3 inline-block py-3">
+                <IntentPrefetchLink href={href} className="tc-link -my-3 inline-block py-3">
                   {title}
-                </Link>
+                </IntentPrefetchLink>
               ),
               detail: body,
             }))}
@@ -392,13 +397,13 @@ export default async function ForAgentsPage() {
           <p className="mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed">
             When a client asks &ldquo;is this a good deal?&rdquo; the cleanest
             answer cites the math: send them the{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
+            <IntentPrefetchLink href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
               60-second underwriting workflow
-            </Link>
+            </IntentPrefetchLink>
             , the explainer on{" "}
-            <Link href="/blog/what-is-a-good-cap-rate" className="tc-link">
+            <IntentPrefetchLink href="/blog/what-is-a-good-cap-rate" className="tc-link">
               what counts as a good cap rate in 2026
-            </Link>
+            </IntentPrefetchLink>
             , or the{" "}
             <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
@@ -420,9 +425,9 @@ export default async function ForAgentsPage() {
             working calculator on your agent site is a credibility piece for
             investor visitors; it collects no leads and reports nothing back.
             Copy a snippet from the{" "}
-            <Link href="/embed" className="tc-link">
+            <IntentPrefetchLink href="/embed" className="tc-link">
               embed page
-            </Link>
+            </IntentPrefetchLink>
             .
           </p>
         </Section>
@@ -501,9 +506,9 @@ export default async function ForAgentsPage() {
             showing that client&apos;s Offer Ceiling, and sending a co-branded
             decision memo with the assumptions and the risks intact. Check
             DealCheck&apos;s current pricing on its own site; the{" "}
-            <Link href="/vs/dealcheck" className="tc-link">
+            <IntentPrefetchLink href="/vs/dealcheck" className="tc-link">
               full comparison
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             is kept deliberately fair.
           </p>
         </Section>
@@ -584,9 +589,9 @@ export default async function ForAgentsPage() {
                   >
                     Try the free analyzer
                   </Link>
-                  <Link href="/pricing#plans" className="tc-link inline-flex min-h-11 items-center text-base">
+                  <IntentPrefetchLink href="/pricing#plans" className="tc-link inline-flex min-h-11 items-center text-base">
                     Compare all plans
-                  </Link>
+                  </IntentPrefetchLink>
                 </ActionRow>
               </>
             }
@@ -599,28 +604,28 @@ export default async function ForAgentsPage() {
             <p className="mt-6 border-t border-rule-soft pt-2.5 text-base text-muted-foreground">
               Investing yourself as well? See TrueCap for{" "}
               <span className="whitespace-nowrap">
-                <Link href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
+                <IntentPrefetchLink href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
                   buy-and-hold
-                </Link>
+                </IntentPrefetchLink>
                 ,
               </span>{" "}
               <span className="whitespace-nowrap">
-                <Link href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
+                <IntentPrefetchLink href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
                   house hackers
-                </Link>
+                </IntentPrefetchLink>
                 ,
               </span>{" "}
               <span className="whitespace-nowrap">
-                <Link href="/for-brrrr" className="tc-link -my-3 inline-block py-3">
+                <IntentPrefetchLink href="/for-brrrr" className="tc-link -my-3 inline-block py-3">
                   BRRRR operators
-                </Link>
+                </IntentPrefetchLink>
                 ,
               </span>{" "}
               and{" "}
               <span className="whitespace-nowrap">
-                <Link href="/for-flippers" className="tc-link -my-3 inline-block py-3">
+                <IntentPrefetchLink href="/for-flippers" className="tc-link -my-3 inline-block py-3">
                   fix-and-flippers
-                </Link>
+                </IntentPrefetchLink>
                 .
               </span>
             </p>
