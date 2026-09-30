@@ -17,6 +17,10 @@
  * point the post's Article `author` at the site Organization `@id`.
  * lib/__tests__/author-byline-bio.test.tsx renders every post and /vs page
  * and fails when one loses it.
+ *
+ * A meta line: 14px Ink 2 in sentence case, as lib/author.ts writes it, with
+ * the one link in the site's link style. One element, so nothing can sit
+ * between it and the H1 on the /vs pages.
  */
 
 import Link from "next/link";
@@ -24,12 +28,9 @@ import { AUTHOR_BYLINE_SUFFIX } from "@/lib/author";
 
 export function BlogByline() {
   return (
-    <p className="mt-1.5 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+    <p className="mt-2 text-sm text-muted-foreground">
       By{" "}
-      <Link
-        href="/about"
-        className="text-foreground/80 underline decoration-border underline-offset-2 transition-colors hover:text-primary hover:decoration-primary"
-      >
+      <Link href="/about" className="tc-link">
         TrueCap
       </Link>{" "}
       · {AUTHOR_BYLINE_SUFFIX}

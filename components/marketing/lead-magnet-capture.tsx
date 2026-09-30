@@ -15,11 +15,20 @@
  *
  * On success both variants show the direct download link — the email is the
  * delivery mechanism and follow-up, not a hostage exchange.
+ *
+ * Styling (design pass, restyle only: placement, copy and behaviour are
+ * unchanged, and whether this capture stays is the founder's call): the
+ * inline variant is a ruled block with no box or wash; the field follows the
+ * DESIGN.md field spec (white, Ink 2 border, 4px, 48px, 16px text) beside the
+ * marketing button; the exit card is a float (10px radius, rule edge, the
+ * one float shadow).
  */
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { FileDown, X } from "lucide-react";
+import { X } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
@@ -97,14 +106,25 @@ function CaptureForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           aria-label="Email address"
-          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className={cn(
+            "h-12 min-w-0 flex-1 rounded-md border border-input bg-field text-base placeholder:text-muted-foreground",
+            // The exit card is 384px wide: tighter padding keeps its field
+            // as wide as it was beside the 16px button.
+            compact ? "px-3" : "px-4",
+          )}
         />
         <button
           type="submit"
           disabled={state === "submitting"}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
+          // Outline, not filled: the analyzer CTA (SeoAnalyzerCta) stays the
+          // one filled action wherever the capture shows; on /playbook the
+          // two share a group.
+          className={cn(
+            buttonVariants({ variant: "outline", size: "cta" }),
+            "shrink-0",
+            compact && "px-4",
+          )}
         >
-          <FileDown className="size-4" />
           {state === "submitting" ? "Sending…" : "Send me the playbook"}
         </button>
       </div>
@@ -121,12 +141,12 @@ function CaptureForm({
       />
       {message ? (
         <>
-          <p className="mt-2 text-xs font-semibold text-destructive">{message}</p>
+          <p className="mt-2 text-sm font-semibold text-destructive-text">{message}</p>
           {fallbackUrl ? (
             <p className="mt-1 text-sm text-foreground">
               <a
                 href={fallbackUrl}
-                className="font-bold text-primary underline underline-offset-4"
+                className="tc-link"
                 target="_blank"
                 rel="noopener"
               >
@@ -136,7 +156,7 @@ function CaptureForm({
           ) : null}
         </>
       ) : (
-        <p className="mt-2 text-2xs text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           One link email plus two short follow-ups. Unsubscribe anytime.
         </p>
       )}
@@ -147,10 +167,10 @@ function CaptureForm({
 function CapturedState({ downloadUrl }: { downloadUrl: string }) {
   return (
     <p className="mt-3 text-sm text-foreground">
-      <strong>Check your inbox</strong> — and here&apos;s the direct link:{" "}
+      <strong className="font-semibold">Check your inbox</strong> — and here&apos;s the direct link:{" "}
       <a
         href={downloadUrl}
-        className="font-bold text-primary underline underline-offset-4"
+        className="tc-link"
         target="_blank"
         rel="noopener"
       >
@@ -171,11 +191,11 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
   }, [source]);
 
   return (
-    <section className="rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 sm:p-6">
-      <h3 className="mt-1 text-lg font-extrabold tracking-tight text-foreground">
+    <section className="border-t border-border pt-6">
+      <h3 className="text-lg font-semibold">
         The First Offer Playbook
       </h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-1.5 max-w-[64ch] text-sm leading-relaxed text-muted-foreground">
         A review path for Buy Box criteria, editable assumptions, sensitivity,
         due diligence, and adviser questions. It does not replace property-level
         verification or tax, legal, lending, or investment advice.
@@ -253,20 +273,20 @@ export function LeadMagnetExitIntent() {
     <aside
       role="complementary"
       aria-label="Free rental screening guide"
-      className={`fixed ${barMounted ? "bottom-24" : "bottom-4"} right-4 z-30 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-primary/25 bg-card p-4 shadow-[0_18px_44px_rgba(15,23,42,0.15)]`}
+      className={`fixed ${barMounted ? "bottom-24" : "bottom-4"} right-4 z-30 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-border bg-card p-4 shadow-lg`}
     >
       <button
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
-        <X className="size-4" />
+        <X aria-hidden className="size-4" />
       </button>
-      <p className="pr-6 text-sm font-bold leading-snug text-foreground">
+      <p className="pr-10 text-base font-semibold leading-snug text-foreground">
         Leaving? Take the First Offer Playbook with you.
       </p>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
         A public review path for assumptions, sensitivity, due diligence, and
         adviser questions. No state-law or property-tax claims are included.
       </p>
