@@ -524,7 +524,7 @@ const EXCEL_FAQ: FaqItem[] = [
       <>
         That can be the right choice. Keep a reviewed Excel template for edge
         cases such as partnership splits, syndication waterfalls, or custom debt
-        structures the underwriting engine doesn&apos;t model. You TrueCap
+        structures the underwriting engine doesn&apos;t model. TrueCap
         includes PDF reports with Pro for sharing a review snapshot while
         keeping the spreadsheet as the custom back-office model.
       </>
