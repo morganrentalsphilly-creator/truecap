@@ -306,6 +306,17 @@ export default async function PricingPage() {
                         ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
                         : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
+            {/* Keep-and-add (2026-09 agent-first pass): the overpay arithmetic
+                stays the headline; one line under it speaks to the agent. */}
+            {!user && agentProConfigured ? (
+              <p data-pricing-agent-line="" className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+                Working with investor clients? The client remembers who caught
+                it.{" "}
+                <Link href="/for-agents" className="font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary">
+                  TrueCap for agents →
+                </Link>
+              </p>
+            ) : null}
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/analyze" prefetch={false}
