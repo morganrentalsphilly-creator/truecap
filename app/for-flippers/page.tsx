@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+
 import { ArrowRight, Calculator, Hammer, Home, Percent } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -119,6 +121,17 @@ export default function ForFlippersPage() {
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </section>
+
+        {/* Agent-first pass (2026-09): the agent persona page, only where Agent
+            Pro is sold (its route redirects otherwise — see site-footer.tsx). */}
+        {isAgentProConfigured() ? (
+          <p className="mt-6 border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
+            Are you an agent working with investor clients?{" "}
+            <Link href="/for-agents" className="font-bold text-foreground hover:underline">
+              See TrueCap for agents →
+            </Link>
+          </p>
+        ) : null}
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
