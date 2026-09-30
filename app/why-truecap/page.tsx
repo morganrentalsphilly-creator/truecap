@@ -1,19 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import {
   HomepageFaq,
   VsCompetitors,
 } from "@/components/marketing/landing-sections";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+} from "@/components/marketing/page-parts";
+import { buttonVariants } from "@/components/ui/button";
 
 /**
- * Dedicated "Why TrueCap" page — houses the competitor comparison matrix
- * and the FAQ that used to live on the homepage. Moved off the homepage to
- * keep the landing minimal, but kept (not deleted) so they retain their SEO
- * value: the comparison content ranks for "TrueCap vs ..." intent and the FAQ
- * carries its FAQPage JSON-LD here for rich-result eligibility.
+ * Dedicated "Why TrueCap" page: the workflow comparison (spreadsheets,
+ * traditional analysis software, TrueCap, then a fair word on DealCheck and
+ * BiggerPockets) and the agent and investor questions that used to live on
+ * the homepage. Moved off the homepage to keep the landing minimal, but kept
+ * for its SEO value: the comparison ranks for "TrueCap vs ..." intent.
+ *
+ * Neither FAQ list emits FAQPage JSON-LD here (structuredData={false}):
+ * /for-agents claims the agent set and the homepage its curated eight, and
+ * only one URL should claim a given question.
  *
  * Static — no per-user data. The Header self-corrects to the real session
  * client-side, same as the homepage.
@@ -55,35 +64,39 @@ export default function WhyTrueCapPage() {
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main">
-        {/* Single page-level H1 for the document outline. The visual lede is the
-            VsCompetitors eyebrow ("Why TrueCap") + its H2, which reads well but
-            left this page opening on an H2 with NO H1 — an a11y/SEO gap (screen
-            readers and crawlers use the H1 as the page's name). Rendered sr-only
-            so the existing layout is untouched; every section heading below stays
-            an H2 nested under it. Mirrors the page <title>. */}
-        <h1 className="sr-only">
-          Why TrueCap — vs spreadsheets, DealCheck &amp; BiggerPockets
-        </h1>
+        {/* The page's one H1, in the display voice; every section heading
+            below stays an H2 under it. Its text is the one the 2026-08-02 SEO
+            baseline added as an sr-only H1 (it echoes the OG image alt, not
+            the <title>). The lede is the comparison's own introduction. */}
+        <PageHero
+          title="Why TrueCap — vs spreadsheets, DealCheck & BiggerPockets"
+          lede="These tools overlap. The meaningful difference is how they move you from a listing to a decision—not whether one can win every feature row."
+        />
         <VsCompetitors />
         <HomepageFaq structuredData={false} />
-        <section className="border-t border-border bg-background">
-          <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
-            <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-              See it on your own deal.
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        <CloseSection
+          heading="See it on your own deal."
+          headingId="why-truecap-close-heading"
+          lede={
+            <>
               Type an address — get cap rate, cash flow, DSCR, and a
               plain-English verdict in 60 seconds. No card, no signup.
-            </p>
-            <Link
-              href="/analyze" prefetch={false}
-              className="mt-6 inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 sm:text-base"
-            >
-              Analyze a property free
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </section>
+            </>
+          }
+          actions={
+            // A plain link, not AnalyzeCtaLink: that island fires the
+            // homepage's CTA event, which would mislabel clicks from here.
+            <ActionRow>
+              <Link
+                href="/analyze"
+                prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Analyze a property free
+              </Link>
+            </ActionRow>
+          }
+        />
       </main>
       <SiteFooter />
     </>
