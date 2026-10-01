@@ -62,7 +62,14 @@ export function MarketingHero() {
               place below 640px, which keeps the investor cue above the fold
               with the cookie banner up. */}
           {ledger ? (
-            <p data-hero-verdict-line="" className="mt-3 text-base leading-snug sm:hidden">
+            // Short phones (under 700px tall, e.g. 375x667) drop the line: there
+            // the primary CTA has to clear the cookie banner, and the line is
+            // the one optional block above the form (e2e: "at 375px the
+            // header is one row and the hero CTA is in the first viewport").
+            <p
+              data-hero-verdict-line=""
+              className="mt-3 text-base leading-snug sm:hidden [@media(max-height:699.98px)]:hidden"
+            >
               Sample deal. Meets the Buy Box:{" "}
               <LedgerVerdict pass={ledger.meetsTargets.asking}>
                 {ledger.meetsTargets.asking ? "yes" : "no"}
