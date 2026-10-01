@@ -14,10 +14,19 @@ test("1% rule calculator passes, fails, and never prints NaN", async ({ page }) 
   await expect(price).toBeVisible();
   await expect(rent).toBeVisible();
 
-  await price.fill("200000");
-  await rent.fill("2100");
+  // Inputs are editable in the server HTML before React hydrates, and
+  // hydration resets a controlled field to its default (180,000 / 1,900,
+  // which reads 1.06% and also passes). Retry until the computed ratio
+  // proves both edits reached widget state, as the 2% widget's spec does
+  // (site-overhaul-conversion.spec.ts). Clear first so a retry changes it.
+  await expect(async () => {
+    await price.fill("");
+    await price.fill("200000");
+    await rent.fill("");
+    await rent.fill("2100");
+    await expect(page.getByText(/1\.05%/)).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
   await expect(page.getByText("Passes 1% rule", { exact: false })).toBeVisible();
-  await expect(page.getByText(/1\.05%/)).toBeVisible();
 
   await rent.fill("1500");
   await expect(page.getByText("Fails 1% rule", { exact: false })).toBeVisible();
