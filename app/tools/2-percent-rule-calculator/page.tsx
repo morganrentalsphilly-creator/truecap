@@ -26,6 +26,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "2% Rule Calculator | Free Cash-Flow Screener",
   description:
@@ -40,24 +41,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/2-percent-rule-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "2% Rule Calculator — The Strict Cash-Flow Screen",
     description:
       "Rent ÷ price against the 2% bar, live. Plus the honest take: where 2% deals still exist, and why most of them carry the risk that explains the price.",
     url: "/tools/2-percent-rule-calculator",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap 2% rule calculator",
-      },
-    ],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/home.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS: { q: string; a: string }[] = [

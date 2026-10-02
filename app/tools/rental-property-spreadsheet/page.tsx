@@ -36,6 +36,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 
@@ -54,26 +55,18 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rental-property-spreadsheet" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
       "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
     url: "/tools/rental-property-spreadsheet",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap free rental property spreadsheet",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
       "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email needed.",
-    images: ["/home.jpg"],
   },
 };
 

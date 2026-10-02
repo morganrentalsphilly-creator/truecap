@@ -32,6 +32,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
@@ -47,17 +48,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/arv-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "ARV Calculator — After-Repair Value + 70% Rule",
     description:
       "Estimate ARV from renovated comps and calculate a 70%-rule price screen — with comps-method checks and guidance on when 70% is the wrong screen.",
     url: "/tools/arv-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap ARV calculator" }],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/home.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS: { q: string; a: string }[] = [

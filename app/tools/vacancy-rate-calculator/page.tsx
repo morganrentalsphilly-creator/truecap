@@ -18,6 +18,7 @@ import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
@@ -33,21 +34,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/vacancy-rate-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Vacancy Rate Calculator — Effective Rate",
     description:
       "Compute effective vacancy rate on a rental property — including turnover cost. Honest vacancy modeling for accurate cash flow.",
     url: "/tools/vacancy-rate-calculator",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vacancy rate calculator",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 /**
