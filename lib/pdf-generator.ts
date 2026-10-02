@@ -397,6 +397,28 @@ const fmtCurrency = (n: number, withSign = false) => {
 const fmtPct = (n: number, sign = false) =>
   `${sign && n > 0 ? "+" : ""}${n.toFixed(1)}%`;
 
+/**
+ * The targets an Offer Ceiling was solved from, as the OBJECT of "meets".
+ *
+ * `maxOffer.sourceLabel` is a line opener ("Under your selected targets"),
+ * which is how the web app and the two "…: basis" lines here use it. Spliced
+ * after "meets" it printed "The highest price that still meets Under your
+ * selected targets under the assumptions shown." on the cover and on page 2.
+ * This maps the source to a noun phrase for that one sentence and leaves the
+ * label alone. A payload without a known source falls back to its label with
+ * the opener removed, then to the neutral phrase.
+ */
+export function offerCeilingTargetsPhrase(
+  maxOffer: Pick<NonNullable<ReportData["maxOffer"]>, "source" | "sourceLabel">,
+): string {
+  if (maxOffer.source === "buy-box") return "your Buy Box";
+  if (maxOffer.source === "starter-criteria") return "TrueCap starter criteria";
+  if (maxOffer.source === "selected-targets") return "your selected targets";
+  if (maxOffer.source === "screening-defaults") return "the screening defaults";
+  const label = maxOffer.sourceLabel?.trim().replace(/^under\s+/i, "").trim();
+  return label ? label : "the captured targets";
+}
+
 export function formatReportInsuranceAssumption(
   expenses: Pick<
     ReportData["expenses"],
@@ -1183,7 +1205,7 @@ function pageCover(
       py + 42,
     );
     doc.text(
-      `The highest price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown.`,
+      `The highest price that still meets ${offerCeilingTargetsPhrase(d.maxOffer)} under the assumptions shown.`,
       panelX + 20,
       py + 52,
     );
@@ -1863,7 +1885,7 @@ function pageInputs(
       criteriaY + 11,
     );
     doc.text(
-      `The highest price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown.`,
+      `The highest price that still meets ${offerCeilingTargetsPhrase(d.maxOffer)} under the assumptions shown.`,
       M.left,
       criteriaY + 22,
     );
