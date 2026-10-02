@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 
 /**
  * One point per saved deal, with BOTH candidate return metrics carried so
@@ -136,6 +137,9 @@ export function RiskReturn({
   showLongTermRoi?: boolean;
 }) {
   const [metric, setMetric] = useState<ReturnMetricId>("coc");
+  // Recharts animates from JavaScript, which the reduced-motion CSS rule
+  // cannot stop, so the mark is told directly (as the analyzer's charts are).
+  const animate = !usePrefersReducedMotion();
   const effectiveMetric: ReturnMetricId = showLongTermRoi ? metric : "coc";
   const availableMetrics = showLongTermRoi
     ? RETURN_METRICS
@@ -258,7 +262,7 @@ export function RiskReturn({
                   label={{ value: effectiveMetric === "coc" ? "8% CoC" : "100% ROI", position: "top", fontSize: 10, fill: AXIS }}
                 />
                 <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ChartTooltip metricLabel={active.axis} />} />
-                <Scatter data={points} fill={POINT} fillOpacity={0.7} />
+                <Scatter isAnimationActive={animate} data={points} fill={POINT} fillOpacity={0.7} />
               </ScatterChart>
             </ResponsiveContainer>
           </div>
