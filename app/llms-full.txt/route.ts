@@ -80,9 +80,9 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> =
         "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen.",
     },
     "rehab-cost-estimator": {
-      formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
+      formula: "Total rehab = sum of the selected work items' planning amounts + contingency %",
       description:
-        "An educational square-foot calculation across work items you switch on or off, with the square footage, bath count and contingency you enter. Defaults are generic planning inputs, not current local contractor quotes or a recommended contingency; replace the total with scoped bids.",
+        "An educational planning total across work items you switch on or off. Interior paint and flooring are priced per square foot, bath work per bath, and every other item as a flat amount; you enter the square footage, bath count and contingency. Defaults are generic planning inputs, not current local contractor quotes or a recommended contingency; replace the total with scoped bids.",
     },
     "mortgage-payment-calculator": {
       formula:
