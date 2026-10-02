@@ -76,7 +76,7 @@ const MATRIX: Row[] = [
   {
     feature: "Primary asset class",
     truecap: "Residential (SFR, small multifamily, owner-occupant)",
-    crexi: "Commercial (office, retail, industrial, large multifamily)",
+    crexi: "Commercial (office, retail, industrial, multifamily)",
     winner: "tie",
   },
   {
@@ -88,55 +88,58 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine for residential",
-    crexi: "Listing-level cap rate; no per-deal calc engine",
-    winner: "truecap",
+    crexi:
+      "Valuation calculator on sale listings (DSCR, cap rate, ROI) after free registration",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — residential rent + expense + appreciation",
-    crexi: "Not modeled",
+    crexi: "Not listed in its listing calculator",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax (residential)",
-    crexi: "Listing-pulled CRE data",
-    winner: "truecap",
+    crexi:
+      "Listing calculator inputs: purchase price, NOI, down payment, rate and term",
+    winner: "tie",
   },
   {
     feature: "CRE listings (office, retail, industrial)",
     truecap: "No — residential focus",
-    crexi: "Yes — 500k+ active CRE listings",
+    crexi: "Yes, a national CRE marketplace for sale, lease and auction listings",
     winner: "crexi",
   },
   {
     feature: "CRE sale + lease comps",
     truecap: "No",
-    crexi: "Yes — national CRE comp database",
+    crexi: "Yes, 46M+ sales comps plus lease data on paid Intelligence plans",
     winner: "crexi",
   },
   {
-    feature: "Broker tools (offer management)",
+    feature: "Broker listing tools",
     truecap: "No",
-    crexi: "Yes — built for CRE brokers",
+    crexi: "Yes, Crexi PRO helps brokers market listings",
     winner: "crexi",
   },
   {
     feature: "Tenant info (CRE)",
     truecap: "Not applicable",
-    crexi: "Yes — public-record tenant data",
+    crexi: "Yes, tenant history in its Intelligence lease data",
     winner: "crexi",
   },
   {
     feature: "Free tier",
-    truecap: "Yes — full residential underwriting",
-    crexi: "Free to browse listings; paid for intelligence",
+    truecap: "Yes — core residential underwriting",
+    crexi: "Free to browse and list; paid for Intelligence",
     winner: "tie",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    crexi: "Free for buyers/browsers; Intelligence ~$100+/mo",
+    crexi:
+      "Free to browse and list; Intelligence Select $299/month, or $269/month billed yearly; higher tiers on request (as of October 2026)",
     winner: "tie",
   },
 ];
@@ -170,8 +173,8 @@ export default function VsCrexiPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Crexi is a commercial real-estate marketplace + intelligence
-            platform — the modern LoopNet alternative for CRE listings, sale
-            comps, lease data, and broker tools. TrueCap is a residential rental
+            platform for CRE listings, sale comps, lease data, and broker
+            listing tools. TrueCap is a residential rental
             underwriting calculator — single-family, small multifamily,
             owner-occupant. Different asset classes. Investors who do both
             residential and commercial may use Crexi for sourcing CRE deals and
@@ -226,7 +229,8 @@ export default function VsCrexiPage() {
                   residential address.
                 </li>
                 <li>
-                  You want financing math + an illustrative tax-impact model.
+                  You want financing math (PITI, amortization) on a specific
+                  residential address.
                 </li>
                 <li>You&apos;re not evaluating commercial deals.</li>
               </ul>
@@ -238,13 +242,10 @@ export default function VsCrexiPage() {
               <ul className={VS_TLDR_LIST}>
                 <li>
                   You&apos;re sourcing commercial real estate (office, retail,
-                  industrial, large multifamily).
+                  industrial, multifamily).
                 </li>
                 <li>You need a CRE listings marketplace + comp database.</li>
-                <li>
-                  You&apos;re a CRE broker managing listings, offers, and
-                  tenants.
-                </li>
+                <li>You&apos;re a CRE broker marketing listings.</li>
                 <li>
                   You&apos;re evaluating commercial deals where Crexi&apos;s
                   data is the comp source.
@@ -275,17 +276,17 @@ export default function VsCrexiPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Crexi details based on publicly available product info as of 2026.
-            See{" "}
+            Crexi details were checked against its{" "}
             <a
-              href="https://crexi.com"
+              href="https://www.crexi.com/intelligence"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              crexi.com
+              Intelligence pricing page
             </a>{" "}
-            for their current state.
+            and its sale listings in October 2026. Features and prices can
+            change.
           </p>
         </Section>
 
@@ -303,14 +304,16 @@ export default function VsCrexiPage() {
               </li>
               <li>
                 <strong>For CRE underwriting specifically.</strong> Crexi shows
-                you the deal + market comps; you&apos;d run the CRE underwrite in
-                a dedicated CRE calculator (Argus, CrowdStreet&apos;s tools, or a
-                CRE spreadsheet model).
+                you the deal + market comps, and the valuation calculator on its
+                sale listings returns DSCR, cap rate, and ROI after free
+                registration. For a full CRE model, use dedicated CRE
+                underwriting software or a CRE spreadsheet model.
               </li>
               <li>
-                <strong>If you&apos;re purely residential.</strong> TrueCap is
-                enough; Crexi is overkill — the residential MLS or Roofstock-style
-                platforms are a better fit.
+                <strong>If you&apos;re purely residential.</strong> TrueCap
+                covers the underwriting. Crexi&apos;s marketplace is commercial,
+                so source residential deals on the MLS or a residential listing
+                site.
               </li>
             </ul>
             <p>
@@ -348,7 +351,11 @@ export default function VsCrexiPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Crexi" items={CREXI_FAQ} />
+        <ComparisonFaq
+          competitorName="Crexi"
+          items={CREXI_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -356,9 +363,9 @@ export default function VsCrexiPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -429,7 +436,7 @@ const CREXI_FAQ: FaqItem[] = [
     answer: (
       <>
         No — different asset classes. Crexi is commercial real estate (office,
-        retail, industrial, large multifamily). TrueCap is residential
+        retail, industrial, multifamily). TrueCap is residential
         (single-family, small multifamily, owner-occupant). The two don&apos;t
         overlap meaningfully.
       </>
@@ -439,11 +446,9 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Crexi vs LoopNet — which one?",
     answer: (
       <>
-        Both are major CRE marketplaces. Crexi is newer, has more modern UX, and
-        is increasingly the broker-preferred platform. LoopNet (owned by CoStar)
-        has deeper historical listings + integration with CoStar&apos;s broader
-        data. For active buyers, Crexi tends to be faster to search; for
-        institutional research, LoopNet + CoStar is the deeper data source.
+        That choice is outside what TrueCap does, so this page takes no side.
+        Compare listing coverage in your market, data tools, and current
+        pricing on Crexi&apos;s and LoopNet&apos;s own sites before choosing.
       </>
     ),
   },
@@ -455,7 +460,7 @@ const CREXI_FAQ: FaqItem[] = [
         unit, owner-occupant). Commercial deals (office, retail, industrial)
         have entirely different cash-flow math, lease structures, and metrics
         (NOI multiples, vacancy by tenant type, TI / LC allowances). For CRE
-        underwriting use Argus, RealNex, or a dedicated CRE spreadsheet.
+        underwriting use dedicated CRE software or a CRE spreadsheet.
       </>
     ),
   },
@@ -463,9 +468,9 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Is Crexi free?",
     answer: (
       <>
-        Free for buyers to browse listings and basic search. Paid for advanced
-        intelligence features (sale comps, lease data, broker tools, advanced
-        analytics) — typically $100+ per month depending on tier.
+        Free to browse listings and to list properties. Crexi Intelligence
+        Select is $299 a month, or $269 a month billed yearly, and higher tiers
+        are priced on request (as of October 2026).
       </>
     ),
   },
@@ -473,9 +478,9 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Can I use TrueCap for small multifamily commercial deals?",
     answer: (
       <>
-        Yes — TrueCap supports residential multifamily up to about 4 units. The
-        owner-occupant property type also handles small multifamily
-        configurations. For 5+ unit multifamily that&apos;s classified as
+        Yes. TrueCap is built for 1-4 unit residential deals, and the form
+        accepts more units. The owner-occupant property type also handles small
+        multifamily configurations. For 5+ unit multifamily that&apos;s classified as
         commercial financing, the math gets different (commercial loans + DSCR
         underwriting standards) and you&apos;d want a dedicated multifamily
         calculator.

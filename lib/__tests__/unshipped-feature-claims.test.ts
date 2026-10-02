@@ -39,7 +39,7 @@ const tracked = (globs: string[]) =>
 
 /** Terms that only make sense if an unshipped feature works. */
 const UNSHIPPED_TERM_MAP: Record<string, readonly string[]> = {
-  tax_strategy: ["depreciation", "tax-loss", "tax loss"],
+  tax_strategy: ["depreciation", "tax-loss", "tax loss", "tax-impact", "tax impact"],
   exit_scenarios: ["exit scenario", "sale scenario", "modeled sale"],
 };
 
@@ -86,6 +86,17 @@ describe("no marketing surface sells an unshipped feature", () => {
       offenders,
       `these cells promise an unshipped capability to a paying tier:\n${offenders.join("\n")}`,
     ).toEqual([]);
+  });
+
+  it("/vs/crexi prose does not sell a tax-impact model", () => {
+    // The cell test above reads only `truecap:` cells that also name a plan, so
+    // the TL;DR bullet "financing math + an illustrative tax-impact model"
+    // passed it. This reads the whole page. "depreciation" stays a cell check:
+    // /vs/fundrise and /vs/arrived use the word honestly in prose.
+    if (isFeatureReleased("tax_strategy")) return;
+    const source = read("app/vs/crexi/page.tsx");
+    expect(source.length).toBeGreaterThan(1000);
+    expect(source.replace(/\s+/g, " ")).not.toMatch(/tax[- ]impact/i);
   });
 
   it("the mashvisor 10-year row claims only what is released", () => {
