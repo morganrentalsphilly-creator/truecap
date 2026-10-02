@@ -331,15 +331,15 @@ export default function SampleDecisionMemoPage() {
               A decision memo is the written form of an analysis: the answer at
               asking price, the Offer Ceiling with the targets that produced
               it, the cash flow after reserves and the DSCR that drove the
-              verdict, the assumptions with their sources, the two inputs most
-              likely to change the outcome, and what to verify before you
-              offer. For an investor, it is what you hand your lender or
-              partner. For an agent, it is what your investor client receives:
-              the numbers and the reasoning travel together, under your name,
-              with every assumption still editable. This one is
-              generated from the sample deal by the same engine that runs every
-              analysis, so what you see here is exactly what a real deal
-              produces.
+              verdict, the inputs most likely to change the outcome, and what
+              to verify before you offer. For an investor, it is what you hand
+              your lender or partner. For an agent, it is what your investor
+              client receives: the numbers and the reasoning travel together,
+              under your name, and the client can rerun the deal with their own
+              numbers in the free analyzer. This page is a sample, computed
+              from the sample deal by the same engine that runs every analysis.
+              The share link and the PDF for a real deal are laid out
+              differently.
             </p>
           </div>
         </Section>
