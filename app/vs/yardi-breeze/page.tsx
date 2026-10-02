@@ -2,7 +2,7 @@
  * /vs/yardi-breeze — competitor comparison landing page.
  *
  * Target queries: "yardi breeze alternative", "yardi breeze vs buildium", "yardi breeze pricing", "yardi breeze review".
- * Yardi Breeze is Yardi's property management software. Competitor cells were checked in
+ * Yardi Breeze is property management software from Yardi. Competitor cells were checked in
  * October 2026 against yardibreeze.com/residential-features/ (features and pricing); Yardi
  * publishes no unit range, so the page ties its advice to the $100 monthly minimum.
  */
@@ -197,7 +197,7 @@ export default function VsYardiBreezePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Yardi Breeze is Yardi&apos;s property management software: tenant
+            Yardi Breeze is property management software from Yardi: tenant
             management, rent collection, accounting, owner reports. Residential
             pricing starts at $1 per unit per month with a $100 monthly minimum.
             TrueCap models the first-year economics of properties you are
@@ -248,8 +248,8 @@ export default function VsYardiBreezePage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>
-                  You own a few units: residential Breeze bills a $100 monthly
-                  minimum whatever your unit count.
+                  You own a few units: residential Breeze bills at least $100 a
+                  month however few units you have.
                 </li>
                 <li>You want a free tier — no commitment.</li>
               </ul>
@@ -496,7 +496,7 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
       <>
         Start from the price. Residential Breeze bills a $100 monthly minimum
         on an annual agreement, the same for 1 unit or 100. It earns that when
-        you need what its feature list adds, such as general ledger
+        you need what its feature list names, such as general ledger
         accounting, owner reports and 1099 e-file. TurboTenant&apos;s paid
         plans start at $149 a year for up to 10 units (both as of October
         2026).
