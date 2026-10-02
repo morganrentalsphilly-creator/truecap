@@ -154,7 +154,7 @@ const MATRIX: Row[] = [
     feature: "Free tier covers house hacking",
     truecap: "Yes — core owner-occupant underwriting on free tier",
     biggerpockets:
-      "Its calculator form says results unlock with Pro or a 7-day free trial; a sign-up prompt on its site mentions 5 free calculator reports",
+      "Its calculator form says results unlock with Pro or a 7-day free trial; a sign-up prompt on its site mentions 5 free calculator reports, and its house hacking page offers a free House Hack vs. Rent vs. Buy calculator download with sign-up",
     winner: "tie",
   },
   {
@@ -176,8 +176,10 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         unit&apos;s &quot;rent&quot; from the income side of the underwriting
         (because you&apos;re paying yourself, effectively). BiggerPockets&apos;
         rental calculator form has no owner-occupied setting, so you leave your
-        own unit out of the income yourself. Both work; TrueCap is just less
-        manual setup for the house-hack workflow.
+        own unit out of the income yourself. BiggerPockets also offers a
+        separate House Hack vs. Rent vs. Buy calculator as a free download with
+        sign-up. Both work; TrueCap is just less manual setup for the
+        house-hack workflow.
       </>
     ),
   },
@@ -255,7 +257,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
     name: "BiggerPockets vs TrueCap for House Hacking (2026)",
     url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,
     description:
-      "House-hack-specific comparison of TrueCap and BiggerPockets — owner-occupant modeling, FHA financing, net monthly cost.",
+      "House-hack-specific comparison of TrueCap and BiggerPockets: owner-occupant modeling, FHA financing, net monthly cost.",
     dateModified: lastmodFor("/vs/biggerpockets-for-house-hacking"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -354,8 +356,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           </ScrollX>
           <p className={VS_SOURCES}>
             BiggerPockets details checked against its rental calculator page,
-            its public calculator form, and its membership page in October 2026.
-            See{" "}
+            its public calculator form, its house hacking page, and its
+            membership page in October 2026. See{" "}
             <a
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
