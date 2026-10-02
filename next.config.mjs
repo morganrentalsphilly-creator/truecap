@@ -35,6 +35,47 @@ const cspReportOnly = [
   "manifest-src 'self'",
   "report-uri /api/csp-report",
 ].join("; ");
+
+// The ten retired calculator URLs (lib/historical-tool-redirects.ts). Each
+// page still calls permanentRedirect(), but those pages are prerendered, so
+// the 308 carried a fixed Location and the query string was gone before any
+// script ran: an ad click to /tools/cap-rate-calculator?gclid=... arrived at
+// the article with no click id and was stored as direct traffic. A redirect
+// declared here runs before the page and passes the request's query through
+// (same 308, same destination).
+//
+// Keep this map equal to HISTORICAL_TOOL_REDIRECTS. A redirect here shadows
+// the page, so a calculator must leave this list in the same change that
+// releases it; lib/__tests__/historical-tool-redirects.test.ts fails on
+// either drift. The BRRRR calculator is gated by a build-time flag, read
+// below the way lib/feature-flags.ts reads it (off unless set to a true
+// value), so turning the flag on takes its redirect out of the build.
+const RETIRED_TOOL_REDIRECTS = {
+  "rental-cash-flow-calculator": "/",
+  "cap-rate-calculator": "/blog/how-to-calculate-cap-rate",
+  "cash-on-cash-calculator": "/blog/how-to-calculate-cash-on-cash-return",
+  "dscr-calculator": "/blog/how-to-calculate-dscr",
+  "noi-calculator": "/blog/how-to-calculate-noi-rental-property",
+  "roi-calculator": "/",
+  "brrrr-calculator": "/blog/brrrr-method-explained",
+  "house-hacking-calculator": "/for-house-hackers",
+  "rental-property-tax-calculator": "/blog/rental-property-tax-deductions",
+  "50-percent-rule-calculator": "/blog/50-percent-rule-rentals",
+};
+
+function retiredToolRedirects() {
+  const brrrrCalculatorReleased = ["1", "true", "yes", "on", "enabled"].includes(
+    (process.env.NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL ?? "").trim().toLowerCase(),
+  );
+  return Object.entries(RETIRED_TOOL_REDIRECTS)
+    .filter(([slug]) => slug !== "brrrr-calculator" || !brrrrCalculatorReleased)
+    .map(([slug, destination]) => ({
+      source: `/tools/${slug}`,
+      destination,
+      permanent: true,
+    }));
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Do not advertise the framework on every response (audit finding
@@ -146,6 +187,8 @@ const nextConfig = {
         destination: "/blog/how-to-calculate-dscr",
         permanent: true,
       },
+      // Retired calculators: declared above so the query string survives.
+      ...retiredToolRedirects(),
       {
         source: "/deals",
         destination: "/dashboard/saved-analyses",

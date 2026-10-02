@@ -1,7 +1,9 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { UNRELEASED_UNDERWRITING_CALCULATORS } from "@/lib/calculator-registry";
+import { resolveFeatureFlags } from "@/lib/feature-flags";
 import {
   HISTORICAL_TOOL_PATHS,
   HISTORICAL_TOOL_REDIRECTS,
@@ -154,6 +156,107 @@ describe("historical calculator redirects", () => {
         declaresCanonicalPath(source, destination),
         `${destination} is not a self-canonical destination`,
       ).toBe(true);
+    }
+  });
+});
+
+/**
+ * Go-to-market audit 2026-10, row P1-51. The ten pages are prerendered, so
+ * their permanentRedirect() answered with a fixed Location and dropped the
+ * query string: an ad click arrived with no gclid and no utm_ value. Redirects
+ * declared in next.config.mjs run before the page and pass the query through
+ * (node_modules/next/dist/docs/01-app/03-api-reference/05-config/
+ * 01-next-config-js/redirects.md: "any query values provided in the request
+ * will be passed through to the redirect destination"; measured on production
+ * for /guarantee, which is declared the same way).
+ */
+describe("historical calculator redirects keep the query string", () => {
+  type ConfigRedirect = {
+    source: string;
+    destination: string;
+    permanent?: boolean;
+    statusCode?: number;
+  };
+  const FLAG_ENV = "NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL";
+  const TEN_SOURCES = [
+    "/tools/rental-cash-flow-calculator",
+    "/tools/cap-rate-calculator",
+    "/tools/cash-on-cash-calculator",
+    "/tools/dscr-calculator",
+    "/tools/noi-calculator",
+    "/tools/roi-calculator",
+    "/tools/brrrr-calculator",
+    "/tools/house-hacking-calculator",
+    "/tools/rental-property-tax-calculator",
+    "/tools/50-percent-rule-calculator",
+  ];
+
+  /** next.config.mjs redirects() with the BRRRR flag set to `flag` (unset when undefined). */
+  async function configRedirects(flag?: string): Promise<ConfigRedirect[]> {
+    vi.stubEnv(FLAG_ENV, flag);
+    const config = (await import("../../next.config.mjs")).default as {
+      redirects: () => Promise<ConfigRedirect[]>;
+    };
+    return config.redirects();
+  }
+  const toolRedirects = (redirects: ConfigRedirect[]) =>
+    redirects.filter((entry) => TEN_SOURCES.includes(entry.source));
+
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("pins the ten sources", () => {
+    expect([...HISTORICAL_TOOL_PATHS]).toEqual(TEN_SOURCES);
+  });
+
+  it("declares all ten at the config level: same destination, same 308, nothing but a path", async () => {
+    const redirects = await configRedirects();
+    expect(toolRedirects(redirects).map((entry) => entry.source)).toEqual(TEN_SOURCES);
+    for (const entry of toolRedirects(redirects)) {
+      const slug = entry.source.replace("/tools/", "") as HistoricalToolSlug;
+      // Exactly these three keys: `permanent: true` is the 308 the page's
+      // permanentRedirect() sent, and no `has`/`missing` condition narrows it.
+      expect(entry, entry.source).toEqual({
+        source: entry.source,
+        destination: EXPECTED_REDIRECTS[slug],
+        permanent: true,
+      });
+      // A query-free destination: Next appends the request's own query. A
+      // destination that carried one would be merged with it.
+      expect(entry.destination, entry.source).not.toMatch(/[?#]/);
+    }
+    // No source is declared twice (the first match would win silently).
+    const sources = redirects.map((entry) => entry.source);
+    expect(new Set(sources).size).toBe(sources.length);
+  });
+
+  it("redirects only what the page's own release gate redirects", async () => {
+    // A config redirect runs before the page and would shadow a released
+    // calculator, so releasing a slug must take it out of next.config.mjs.
+    // Eight are held back in code, one page redirects unconditionally, and
+    // BRRRR follows its flag (next case).
+    const gatedInCode = new Set<string>(UNRELEASED_UNDERWRITING_CALCULATORS);
+    for (const entry of toolRedirects(await configRedirects())) {
+      const slug = entry.source.replace("/tools/", "");
+      if (slug === "brrrr-calculator") continue;
+      expect(
+        slug === "rental-property-tax-calculator" || gatedInCode.has(slug),
+        `${slug} is released: remove it from RETIRED_TOOL_REDIRECTS in next.config.mjs`,
+      ).toBe(true);
+    }
+    expect(gatedInCode.size + 2).toBe(TEN_SOURCES.length);
+  });
+
+  it("reads the BRRRR flag exactly as lib/feature-flags.ts does", async () => {
+    const values = [undefined, "", "0", "false", "off", "no", "disabled", "nonsense", "1", "true", "TRUE", " on ", "yes", "enabled"];
+    const releasedCount = values.filter(
+      (value) => resolveFeatureFlags({ brrrr_strategy_model: value }).brrrr_strategy_model,
+    ).length;
+    expect(releasedCount).toBe(6);
+    for (const value of values) {
+      const released = resolveFeatureFlags({ brrrr_strategy_model: value }).brrrr_strategy_model;
+      const sources = toolRedirects(await configRedirects(value)).map((entry) => entry.source);
+      expect(sources.includes("/tools/brrrr-calculator"), JSON.stringify(value)).toBe(!released);
+      expect(sources, JSON.stringify(value)).toHaveLength(released ? 9 : 10);
     }
   });
 });
