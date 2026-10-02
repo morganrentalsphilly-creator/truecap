@@ -86,7 +86,7 @@ type Row = {
 const MATRIX: Row[] = [
   {
     feature: "Primary audience",
-    truecap: "Solo / small-portfolio investors (1-30 doors)",
+    truecap: "Agents with investor clients, and buy-and-hold investors",
     appfolio:
       "Property managers and investment managers; Core states a 50-unit minimum",
     winner: "tie",
@@ -100,13 +100,13 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    appfolio: "Not modeled",
+    appfolio: "No acquisition calculator listed in its plans",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    appfolio: "Not modeled",
+    appfolio: "No pre-purchase projection listed in its plans",
     winner: "truecap",
   },
   {
@@ -130,19 +130,21 @@ const MATRIX: Row[] = [
   {
     feature: "Accounting + reporting at scale",
     truecap: "No",
-    appfolio: "Yes — full GL, P&L, owner statements",
+    appfolio: "Yes, property, portfolio and trust accounting with reports",
     winner: "appfolio",
   },
   {
     feature: "Resident services + utilities",
     truecap: "No",
-    appfolio: "Yes — bundled smart-home, utility billing",
+    appfolio:
+      "Yes, resident services, with smart-home and utility management through AppFolio Stack partners",
     winner: "appfolio",
   },
   {
     feature: "AI assistant for renters",
     truecap: "No",
-    appfolio: "Yes — AI leasing assistant",
+    appfolio:
+      "Yes, Realm-X Assistant is included; the AI Leasing Performer is a paid add-on",
     winner: "appfolio",
   },
   {
@@ -154,19 +156,20 @@ const MATRIX: Row[] = [
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    appfolio: "Quote-based; Core states a minimum spend and 50-unit minimum",
-    winner: "truecap",
+    appfolio:
+      "By quote; AppFolio's pricing page has shown Core from $1.49 per unit per month, with a minimum spend and a 50-unit minimum (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "Smallest published portfolio",
-    truecap: "Designed for 1-30 doors",
+    truecap: "No minimum; you can analyze a single property",
     appfolio: "Core states a 50-unit minimum",
     winner: "truecap",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    appfolio: "Internal portal only",
+    appfolio: "Owner, vendor and resident portals; no public deal link listed",
     winner: "truecap",
   },
 ];
@@ -248,11 +251,13 @@ export default function VsAppfolioPage() {
                 Use TrueCap when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You own 1-30 doors and underwrite deals yourself.</li>
+                <li>
+                  You underwrite deals yourself, or for investor clients.
+                </li>
                 <li>
                   You want cap rate, DSCR, cash flow, projection before buying.
                 </li>
-                <li>You want a free tier — no enterprise contract.</li>
+                <li>You want a free tier with no unit minimum.</li>
                 <li>You&apos;re not running a property management company.</li>
               </ul>
             </div>
@@ -300,8 +305,8 @@ export default function VsAppfolioPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            AppFolio details based on publicly available product info as of
-            2026. See{" "}
+            AppFolio details checked against its pricing page and AppFolio
+            Stack marketplace in October 2026. See{" "}
             <a
               href="https://www.appfolio.com/pricing"
               target="_blank"
@@ -310,7 +315,7 @@ export default function VsAppfolioPage() {
             >
               AppFolio&apos;s official pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
@@ -327,13 +332,15 @@ export default function VsAppfolioPage() {
               </li>
               <li>
                 <strong>
-                  Scale to 30+ doors and use TurboTenant / Buildium /{" "}
+                  Add an operations tool as the portfolio grows, such as
+                  TurboTenant, Buildium, or{" "}
                   <IntentPrefetchLink href="/vs/stessa" className="tc-link">
                     Stessa
-                  </IntentPrefetchLink>{" "}
-                  for ops.
+                  </IntentPrefetchLink>
+                  .
                 </strong>{" "}
-                Mid-market tools that fit 30-200 units.
+                Compare each vendor&apos;s current plans against your unit
+                count.
               </li>
               <li>
                 <strong>
@@ -343,9 +350,9 @@ export default function VsAppfolioPage() {
                 a current quote.
               </li>
               <li>
-                <strong>Keep TrueCap for new acquisitions.</strong> AppFolio
-                doesn&apos;t underwrite. Still need TrueCap or a similar
-                calculator for new deals.
+                <strong>Keep TrueCap for new acquisitions.</strong>{" "}
+                AppFolio&apos;s plans list no acquisition calculator, so you
+                still need TrueCap or a similar calculator for new deals.
               </li>
             </ol>
             <p>
@@ -376,7 +383,11 @@ export default function VsAppfolioPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="AppFolio" items={APPFOLIO_FAQ} />
+        <ComparisonFaq
+          competitorName="AppFolio"
+          items={APPFOLIO_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -384,9 +395,9 @@ export default function VsAppfolioPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -467,10 +478,11 @@ const APPFOLIO_FAQ: FaqItem[] = [
     answer: (
       <>
         AppFolio&apos;s current Core pricing page states a 50-unit minimum and
-        minimum spend, with quote-based pricing. A smaller landlord should
-        confirm eligibility, obtain the current quote, and compare the
-        operational features with alternatives rather than assume a published
-        per-unit rate.
+        minimum spend, and its plans are sold by quote; the page has shown Core
+        from $1.49 per unit per month (as of October 2026). A smaller landlord
+        should confirm eligibility, obtain the current quote, and compare the
+        operational features with alternatives rather than rely on the starting
+        rate.
       </>
     ),
   },
@@ -478,9 +490,10 @@ const APPFOLIO_FAQ: FaqItem[] = [
     question: "Does AppFolio underwrite deals?",
     answer: (
       <>
-        No. AppFolio is purely operational. You&apos;d use a separate calculator
-        (TrueCap, DealCheck) to underwrite acquisitions and then ingest the
-        property into AppFolio post-closing.
+        AppFolio&apos;s property management plans list operations features
+        (accounting, leasing, maintenance) and no acquisition calculator.
+        You&apos;d use a separate calculator (TrueCap, DealCheck) to underwrite
+        acquisitions and then set the property up in AppFolio after closing.
       </>
     ),
   },
@@ -502,7 +515,8 @@ const APPFOLIO_FAQ: FaqItem[] = [
       <>
         Everything in the operational stack — tenant management, lease
         workflows, accounting, vendor management, owner portals, resident
-        services, smart-home integration. TrueCap is intentionally scope-limited
+        services, smart-home integrations through AppFolio Stack. TrueCap is
+        intentionally scope-limited
         to pre-purchase underwriting.
       </>
     ),
