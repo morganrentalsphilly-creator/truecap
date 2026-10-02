@@ -6,7 +6,7 @@ import { GLOSSARY } from "@/lib/glossary";
  * A glossary term's snippet and link-preview text end on a full stop.
  *
  * The page used to cut "definition + benchmark" at the limit: 14 of the 44
- * meta descriptions ended mid-sentence with an ellipsis and 8 og:descriptions
+ * meta descriptions ended mid-sentence with an ellipsis and 7 og:descriptions
  * were sliced mid-word at 200 characters (/glossary/dscr ended "Lender
  * definitio"). These are rules, not a snapshot of today's entries: they hold
  * for whatever lib/glossary.ts contains.

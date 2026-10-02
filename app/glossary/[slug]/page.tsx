@@ -60,7 +60,7 @@ function glossaryTitle(term: string): string {
  *   3. only when the first sentence is itself over the limit, a cut at a
  *      word boundary with an ellipsis (truncateMetaDescription).
  * Definition plus benchmark runs to 326 characters, and cutting that at the
- * limit ended 14 of the 44 snippets mid-sentence and 8 previews mid-word
+ * limit ended 14 of the 44 snippets mid-sentence and 7 previews mid-word
  * ("Lender definitio").
  */
 function glossaryDescription(entry: GlossaryEntry, max: number): string {
