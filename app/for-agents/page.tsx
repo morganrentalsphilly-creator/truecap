@@ -32,9 +32,10 @@ import { Header } from "@/components/investcalc/header";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
 // Links below the first screen prefetch on hover or keyboard focus, not on
-// scroll. The hero's actions keep next/link's default; the close's Agent Pro
-// sign-up is a full-document link (TrackedMarketingLink renders /auth/ hrefs
-// as a plain <a>, so Back returns to the close); /analyze never prefetches.
+// scroll. The hero's #pricing jump and the close's Agent Pro sign-up are
+// plain <a> elements (TrackedMarketingLink renders a same-page fragment and
+// /auth/ hrefs that way, so the jump scrolls every time it is used and Back
+// from sign-up returns to the close); /analyze never prefetches.
 // Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
@@ -71,7 +72,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
 const PAGE_DESCRIPTION =
-  "For real estate agents: screen a listing against each investor client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo in about 60 seconds.";
+  "Screen a listing against each investor client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo in about 60 seconds.";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
