@@ -18,6 +18,10 @@
  *     and Y fit together" heading still pass.
  *   - The hub carried unit ranges no vendor publishes, an AirDNA line that read
  *     as an integration, and a metric the analyzer does not show.
+ *   - Review of the fix found two lines that implied a competitor lacks what
+ *     its own site lists: the complementary group's intro (Bricked lists a
+ *     rental offer calculator) and the Rentometer row (its Pro worksheet
+ *     works out a maximum offer price).
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -206,7 +210,7 @@ describe("no /vs surface states how many people use the tools", () => {
       "Can a realtor use both TrueCap + RentSpree?",
       "Using both is optional, not the default answer.",
       "How TrueCap and Landlord Studio fit together",
-      "TrueCap covers the purchase decision, so you can use it alongside any of them.",
+      "You can use TrueCap alongside any of them for the rental purchase decision.",
       "Honest take: most landlords should consider a rental-specific tool instead.",
     ]) {
       expect(usageClaim(plain), plain).toBeNull();
@@ -240,6 +244,21 @@ describe("the /vs hub's one-liners", () => {
     // Rentometer's Pro plan includes a Deal Worksheet, and TrueCap's starting rent is a HUD benchmark, not an estimate.
     expect(hub).not.toMatch(/including the rent/i);
     expect(hub).not.toMatch(/gold-standard|enterprise commercial|LoopNet/i);
+  });
+
+  it("does not imply a competitor lacks what its own site lists", () => {
+    // Bricked is in the complementary group and lists offer calculators for
+    // each deal type, a rental one included (bricked.ai, 2026-10-02), so the
+    // group's intro cannot say these tools leave the purchase decision to TrueCap.
+    expect(hub).not.toMatch(/different stage of the rental lifecycle/i);
+    expect(hub).not.toMatch(/covers the purchase decision, so/i);
+    // Rentometer's Pro worksheet also works out a maximum offer price
+    // (rentometer.com/pricing/individual, 2026-10-02), so the row does not set
+    // TrueCap's highest price against it.
+    expect(hub).not.toMatch(/Rentometer is[^"]*(?:highest|maximum) (?:offer )?price/i);
+    // Privy's own description is deal sourcing and property analysis, wider
+    // than the "investor-filtered MLS search" the hub used to call it.
+    expect(hub).not.toMatch(/investor-filtered/i);
   });
 
   it("does not describe TrueCap features that do not exist", () => {
