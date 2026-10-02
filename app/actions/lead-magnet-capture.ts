@@ -23,8 +23,10 @@
  * Postal address: every email in the sequence prints the sender's postal
  * address (EMAIL_POSTAL_ADDRESS) next to the unsubscribe link, because the
  * day-5 email is a Pro pitch. While that variable is unset the action sends
- * and schedules NOTHING: it returns the playbook link as a success, spends no
- * capture slot, reads no table and logs one line. No address is typed here.
+ * and schedules NOTHING: it returns CONFIG_MISSING with the "isn't configured
+ * yet" note and the playbook link (never a success, so the form never says
+ * "Check your inbox"), spends no capture slot, reads no table and logs one
+ * line. No address is typed here.
  */
 
 import { headers } from "next/headers";
@@ -153,14 +155,20 @@ export async function captureLeadMagnetEmail(input: {
     return { ok: true, scheduledCount: 0, downloadUrl };
   }
   // No postal address, no email: nothing is sent or scheduled, no capture
-  // slot is spent and no table is read. The playbook needs no email, so the
-  // visitor still gets the link and this is not an error for them.
+  // slot is spent and no table is read. The result is CONFIG_MISSING, not a
+  // success: an ok result makes the form say "Check your inbox", and no email
+  // is coming. The visitor still gets the link.
   const postalAddress = readEmailPostalAddress();
   if (!postalAddress) {
     console.log(
       "[lead-magnet] BLOCKED — nothing sent or scheduled: EMAIL_POSTAL_ADDRESS is not set",
     );
-    return { ok: true, scheduledCount: 0, downloadUrl };
+    return {
+      ok: false,
+      code: "CONFIG_MISSING",
+      message: "Email sending isn't configured yet, but the direct link below still works.",
+      downloadUrl,
+    };
   }
   const email = parsed.data.email;
   const emailHash = hashDripEmail(email);
