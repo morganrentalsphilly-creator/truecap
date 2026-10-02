@@ -136,12 +136,15 @@ describe("retired capability copy and control boundaries", () => {
 
     const toolsOg = source("app/tools/opengraph-image.tsx");
     expect(toolsOg).not.toContain("BRRRR");
-    expect(
-      source("app/tools/brrrr-calculator/opengraph-image.tsx"),
-    ).not.toContain('name: "BRRRR calculator"');
-    expect(
-      source("app/tools/rental-property-tax-calculator/opengraph-image.tsx"),
-    ).not.toMatch(/after-tax cash flow|name: "Rental property tax calculator"/);
+    // Both tool pages redirect, so neither may serve a card at all: a card
+    // file is its own public route (/tools/<slug>/opengraph-image) whatever
+    // the page does. Stronger than the wording checks these two lines held.
+    for (const slug of ["brrrr-calculator", "rental-property-tax-calculator"]) {
+      expect(
+        existsSync(join(process.cwd(), `app/tools/${slug}/opengraph-image.tsx`)),
+        `${slug} redirects and must not serve a social card`,
+      ).toBe(false);
+    }
     expect(
       existsSync(
         join(process.cwd(), "app/vs/dealcheck-for-brrrr/opengraph-image.tsx"),
