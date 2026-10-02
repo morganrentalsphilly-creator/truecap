@@ -4,9 +4,10 @@
  * Target queries: "rentometer alternative", "rentometer vs", "free
  * rentometer", "rent estimator tool". Rentometer sells rent estimates and
  * comps, plus a Deal Worksheet on its Pro plan. TrueCap underwrites the
- * purchase and starts rent from a HUD area benchmark the user replaces (it
- * does not estimate a property's rent). Competitor cells were checked against
- * rentometer.com/pricing/individual and /deal-worksheet-landing in October 2026.
+ * purchase and starts rent from a HUD area benchmark the user replaces (a
+ * rent estimate appears only through the optional comps lookup). Competitor
+ * cells were checked against rentometer.com/pricing/individual and
+ * /deal-worksheet-landing in October 2026.
  */
 
 import type { Metadata } from "next";
@@ -155,7 +156,7 @@ export default function VsRentometerPage() {
             <div className="min-w-0">
               <h3 className={VS_TLDR_LABEL}>Use Rentometer if</h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You need rent comps for an address: a rent renewal, a listing, or a client report.</li>
+                <li>You need rent comps for an address: a listing or a client report.</li>
                 <li>You&apos;re a property manager checking comp prices for a rent renewal.</li>
                 <li>You need deeper comp data beyond HUD&apos;s Fair Market Rent.</li>
                 <li>You want a quick second-opinion rent estimate alongside your other tools.</li>
@@ -304,11 +305,13 @@ const RENTOMETER_FAQ: FaqItem[] = [
     question: "Does TrueCap give me a rent estimate like Rentometer?",
     answer: (
       <>
-        Not a comp-based one. TrueCap pre-fills rent using an editable HUD Fair
+        Not by default. TrueCap pre-fills rent using an editable HUD Fair
         Market Rent area benchmark for the relevant bedroom count. It is a
         housing-program benchmark, not a property-specific rent opinion
-        or lender approval input. Rentometer&apos;s comp-based estimates can
-        provide a separate source to evaluate.
+        or lender approval input. The optional comps lookup (one free lookup;
+        Pro includes 50 per month) adds a rent estimate from nearby
+        properties. Rentometer&apos;s comp-based estimates can provide a
+        separate source to evaluate.
       </>
     ),
   },
