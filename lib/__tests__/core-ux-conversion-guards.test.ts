@@ -277,9 +277,11 @@ describe("input-phase traps and mislabels", () => {
     const action = read("app/actions/enrich-property.ts");
     expect(action).toContain("stateAverage: true,");
     expect(calculator).toContain('"(HUD statewide average)"');
-    expect(calculator).toContain("this is a statewide average");
+    expect(calculator).toContain("so this is a statewide HUD average");
     // The multi-family per-unit fill discloses the same fallback.
-    expect(calculator).toContain("these are statewide averages");
+    expect(calculator).toContain("so these are statewide HUD averages");
+    // The toast says what happened without blaming HUD's coverage.
+    expect(calculator).not.toContain("No local HUD match");
   });
 });
 

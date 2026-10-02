@@ -56,6 +56,15 @@ export type MultiFamilyRentCheck = {
   rollup: string | null;
 };
 
+/**
+ * How the benchmark map was resolved. `statewide` is true when enrich-property
+ * returned `meta.unitRents.stateAverage`: the address had no county match and
+ * the figures are the statewide average of HUD's area figures, not a Fair
+ * Market Rent for the address's area (audit row P0-02). The lines then name
+ * it as such and draw no "achievable" conclusion from it.
+ */
+export type FmrBenchmarkOptions = { statewide?: boolean };
+
 function finitePositive(n: unknown): number | null {
   const v = typeof n === "number" ? n : Number(n);
   return Number.isFinite(v) && v > 0 ? v : null;
@@ -69,7 +78,8 @@ function finitePositive(n: unknown): number | null {
  */
 export function checkUnitRentsAgainstFmr(
   units: ReadonlyArray<UnitRentCheckInput | undefined | null> | null | undefined,
-  fmrByBedrooms: Record<number, number> | null | undefined
+  fmrByBedrooms: Record<number, number> | null | undefined,
+  options: FmrBenchmarkOptions = {}
 ): MultiFamilyRentCheck {
   const verdicts: UnitRentVerdict[] = [];
   if (!units || !fmrByBedrooms) return { verdicts, rollup: null };
@@ -104,7 +114,10 @@ export function checkUnitRentsAgainstFmr(
   // beds/rent entered yet, or no FMR for that bedroom count) so the rollup
   // never implies the whole building was checked when it wasn't.
   const rentalUnits = units.filter((u) => u && !u.isOwnerOccupied).length;
-  return { verdicts, rollup: buildRollup(verdicts, rentalUnits - verdicts.length) };
+  return {
+    verdicts,
+    rollup: buildRollup(verdicts, rentalUnits - verdicts.length, options.statewide === true),
+  };
 }
 
 /** "2 of 3 units are…" / "1 of 3 units is…" subject fragment. */
@@ -112,9 +125,17 @@ function countPhrase(count: number, total: number): string {
   return `${count} of ${total} units ${count === 1 ? "is" : "are"}`;
 }
 
-function buildRollup(verdicts: UnitRentVerdict[], skipped = 0): string | null {
+function buildRollup(
+  verdicts: UnitRentVerdict[],
+  skipped = 0,
+  statewide = false
+): string | null {
   const total = verdicts.length;
   if (total === 0) return null;
+
+  const theirCount = statewide
+    ? "the HUD statewide average for their bedroom count"
+    : "HUD fair-market rent for their bedroom count";
 
   // Scope note when some rental units couldn't be checked — "all in line"
   // must never speak for a unit the check silently skipped.
@@ -126,13 +147,20 @@ function buildRollup(verdicts: UnitRentVerdict[], skipped = 0): string | null {
   const below = verdicts.filter((v) => v.verdict === "below").length;
 
   if (farAbove > 0) {
-    return `${countPhrase(farAbove, total)} modeled ≥${FAR_OFF_PCT}% above HUD fair-market rent for their bedroom count — make sure you can actually get those rents, or the deal softens fast.${scopeNote}`;
+    return `${countPhrase(farAbove, total)} modeled ≥${FAR_OFF_PCT}% above ${theirCount} — make sure you can actually get those rents, or the deal softens fast.${scopeNote}`;
   }
   if (above > 0) {
-    return `${countPhrase(above, total)} modeled above HUD fair-market rent for their bedroom count — confirm against local comps.${scopeNote}`;
+    return `${countPhrase(above, total)} modeled above ${theirCount} — confirm against local comps.${scopeNote}`;
   }
   if (below > 0) {
-    return `${countPhrase(below, total)} modeled below HUD fair-market rent for their bedroom count — you may be leaving upside on the table.${scopeNote}`;
+    return `${countPhrase(below, total)} modeled below ${theirCount} — you may be leaving upside on the table.${scopeNote}`;
+  }
+  // A statewide average says nothing about what this address can rent for,
+  // so the in-line line draws no "achievable" conclusion from it.
+  if (statewide) {
+    return total === 1
+      ? `Your unit's rent is in line with the HUD statewide average for its bedroom count.${scopeNote}`
+      : `All ${total} checked units are in line with the HUD statewide average for their bedroom counts.${scopeNote}`;
   }
   return total === 1
     ? `Your unit's rent is in line with HUD fair-market rent for its bedroom count — a good sign it's achievable.${scopeNote}`
@@ -145,13 +173,17 @@ function buildRollup(verdicts: UnitRentVerdict[], skipped = 0): string | null {
  * mild cases are covered by the rollup line, so the inline hint stays
  * reserved for the rents that genuinely change the verdict.
  */
-export function unitRentHint(v: UnitRentVerdict): string | null {
+export function unitRentHint(
+  v: UnitRentVerdict,
+  options: FmrBenchmarkOptions = {}
+): string | null {
   if (!v.farOff || v.verdict === "within") return null;
   const rent = `$${Math.round(v.rent).toLocaleString()}`;
   const fmr = `$${Math.round(v.fmr).toLocaleString()}`;
+  const benchmark = options.statewide ? "HUD statewide average" : "HUD area estimate";
   const beds = v.bedrooms === 0 ? "a studio" : `a ${v.bedrooms}-bed`;
   if (v.verdict === "above") {
-    return `${rent}/mo is ${v.diffPct}% above the ${fmr} HUD area estimate for ${beds} — make sure you can actually get it.`;
+    return `${rent}/mo is ${v.diffPct}% above the ${fmr} ${benchmark} for ${beds} — make sure you can actually get it.`;
   }
-  return `${rent}/mo is ${Math.abs(v.diffPct)}% below the ${fmr} HUD area estimate for ${beds} — you may be leaving upside on the table.`;
+  return `${rent}/mo is ${Math.abs(v.diffPct)}% below the ${fmr} ${benchmark} for ${beds} — you may be leaving upside on the table.`;
 }

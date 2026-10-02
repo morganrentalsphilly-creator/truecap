@@ -236,3 +236,89 @@ describe("unitRentHint", () => {
     expect(unitRentHint({ ...base, diffPct: 2, verdict: "within", farOff: false })).toBeNull();
   });
 });
+
+// Audit row P0-02: when the address has no county match, enrich-property
+// returns the statewide average of HUD's area figures and marks it
+// (meta.unitRents.stateAverage). The check must name it as such, never as an
+// area Fair Market Rent, and draw no "achievable" conclusion from it.
+describe("statewide HUD benchmark", () => {
+  const STATEWIDE = { statewide: true };
+
+  it("names the statewide average in every rollup branch", () => {
+    const far = checkUnitRentsAgainstFmr(
+      [
+        { bedrooms: 2, monthlyRent: 2400 },
+        { bedrooms: 2, monthlyRent: 2400 },
+      ],
+      FMR,
+      STATEWIDE
+    ).rollup;
+    expect(far).toBe(
+      "2 of 2 units are modeled ≥25% above the HUD statewide average for their bedroom count — make sure you can actually get those rents, or the deal softens fast."
+    );
+    const above = checkUnitRentsAgainstFmr([{ bedrooms: 2, monthlyRent: 1430 }], FMR, STATEWIDE).rollup;
+    expect(above).toBe(
+      "1 of 1 units is modeled above the HUD statewide average for their bedroom count — confirm against local comps."
+    );
+    const below = checkUnitRentsAgainstFmr([{ bedrooms: 2, monthlyRent: 1100 }], FMR, STATEWIDE).rollup;
+    expect(below).toContain("modeled below the HUD statewide average for their bedroom count");
+    for (const line of [far, above, below]) {
+      expect(line).not.toMatch(/fair-market rent|area estimate/i);
+    }
+  });
+
+  it("confirms in-line rents without calling them achievable", () => {
+    expect(
+      checkUnitRentsAgainstFmr(
+        [
+          { bedrooms: 2, monthlyRent: 1300 },
+          { bedrooms: 1, monthlyRent: 1100 },
+        ],
+        FMR,
+        STATEWIDE
+      ).rollup
+    ).toBe("All 2 checked units are in line with the HUD statewide average for their bedroom counts.");
+    const one = checkUnitRentsAgainstFmr([{ bedrooms: 2, monthlyRent: 1300 }], FMR, STATEWIDE).rollup;
+    expect(one).toBe("Your unit's rent is in line with the HUD statewide average for its bedroom count.");
+    expect(one).not.toContain("achievable");
+  });
+
+  it("keeps the scope note when units were skipped", () => {
+    const r = checkUnitRentsAgainstFmr(
+      [
+        { bedrooms: 2, monthlyRent: 1300 },
+        { bedrooms: 2, monthlyRent: undefined },
+      ],
+      FMR,
+      STATEWIDE
+    );
+    expect(r.rollup).toBe(
+      "Your unit's rent is in line with the HUD statewide average for its bedroom count. (1 unit not checked yet)"
+    );
+  });
+
+  it("names the statewide average in the per-unit hint", () => {
+    const v: UnitRentVerdict = {
+      unitIndex: 0,
+      bedrooms: 2,
+      rent: 2400,
+      fmr: 1300,
+      diffPct: 85,
+      verdict: "above",
+      farOff: true,
+    };
+    expect(unitRentHint(v, STATEWIDE)).toBe(
+      "$2,400/mo is 85% above the $1,300 HUD statewide average for a 2-bed — make sure you can actually get it."
+    );
+    expect(unitRentHint({ ...v, rent: 900, diffPct: -31, verdict: "below" }, STATEWIDE)).toBe(
+      "$900/mo is 31% below the $1,300 HUD statewide average for a 2-bed — you may be leaving upside on the table."
+    );
+  });
+
+  it("leaves the area wording unchanged when the flag is absent or false", () => {
+    const rows = [{ bedrooms: 2, monthlyRent: 1300 }];
+    expect(checkUnitRentsAgainstFmr(rows, FMR, { statewide: false }).rollup).toBe(
+      checkUnitRentsAgainstFmr(rows, FMR).rollup
+    );
+  });
+});

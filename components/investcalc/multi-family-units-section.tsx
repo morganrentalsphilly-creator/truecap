@@ -37,6 +37,12 @@ interface MultiFamilyUnitsSectionProps {
    */
   fmrByBedrooms?: Record<number, number> | null;
   /**
+   * True when enrich-property marked the benchmarks as the HUD statewide
+   * average (the address had no county match), so the rent check names them
+   * as such rather than as an area Fair Market Rent.
+   */
+  fmrIsStatewide?: boolean;
+  /**
    * ADDITIVE chrome variant (redesign Phase 4, hero unification — same
    * contract as PropertyDetailsSection/SingleFamilyUnitSection): "bare"
    * drops this section's own card wrapper so the unit rows compose inside
@@ -51,6 +57,7 @@ export function MultiFamilyUnitsSection({
   form,
   isHouseHack = false,
   fmrByBedrooms = null,
+  fmrIsStatewide = false,
   chrome = "card",
 }: MultiFamilyUnitsSectionProps) {
   const { register, control, watch, setValue } = form;
@@ -115,6 +122,7 @@ export function MultiFamilyUnitsSection({
   const rentCheck = checkUnitRentsAgainstFmr(
     withoutHudFilledRents(units, fmrByBedrooms),
     fmrByBedrooms,
+    { statewide: fmrIsStatewide },
   );
 
   const handleAddUnit = () => {
@@ -228,7 +236,9 @@ export function MultiFamilyUnitsSection({
           const unitVerdict = rentCheck.verdicts.find(
             (v) => v.unitIndex === index,
           );
-          const rentHint = unitVerdict ? unitRentHint(unitVerdict) : null;
+          const rentHint = unitVerdict
+            ? unitRentHint(unitVerdict, { statewide: fmrIsStatewide })
+            : null;
 
           return (
             <fieldset
