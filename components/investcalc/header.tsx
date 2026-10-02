@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import type { User } from "@supabase/supabase-js";
 import { AppLogo } from "@/components/brand/app-logo";
 import { UserMenu } from "@/components/auth/user-menu";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { MarketingMobileMenu, MarketingNav } from "@/components/marketing/marketing-nav";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { cn } from "@/lib/utils";
@@ -361,10 +362,10 @@ export function Header({
     <div className="sticky top-0 z-50">
     {/* Announcement bar - Pro upgrade prompt. Only shown to AUTHENTICATED
         free users (who can actually 'upgrade'). Suppressed for cold
-        visitors because (a) 'upgrade' doesn't apply when they don't have
-        an account yet, and (b) the AnnualPromoBanner above already
-        carries the upsell more appropriately. Reduces the 3-bar mobile
-        stack to 2 bars for the visitor's first impression.
+        visitors because 'upgrade' doesn't apply when they don't have an
+        account yet. No other bar sits above this one today: the annual
+        promo banner (components/marketing/annual-promo-banner.tsx) is
+        mounted nowhere.
         DESIGN.md (2026-09 design pass): a paper strip on a bottom rule with
         one Signal Blue link, not a full-bleed blue band, and no Zap
         ornament. Copy unchanged and shown at the same breakpoints as
@@ -488,11 +489,18 @@ export function Header({
             />
           ) : (
             <>
-              {/* Desktop (lg+): Sign in + Create account beside the marketing nav. */}
+              {/* Desktop (lg+): Sign in + Create account beside the marketing nav.
+                  IntentPrefetchLink, not a default <Link>: in the first
+                  screen of every page, a default link prefetched both auth
+                  routes and supabase-js (about 100 KB of script) on every
+                  anonymous desktop load. These prefetch on hover or keyboard
+                  focus instead. rel="nofollow" as in the footer: robots.txt
+                  disallows /auth/, so a crawler never reads those pages'
+                  noindex (go-to-market audit, P2-94). */}
               <Button variant="ghost"
               className="hidden lg:inline-flex h-9 px-4 text-base font-medium text-foreground hover:bg-accent"
              asChild>
-                <Link href="/auth/login">Sign in</Link>
+                <IntentPrefetchLink href="/auth/login" rel="nofollow">Sign in</IntentPrefetchLink>
               </Button>
               {/* "Create account" is a primary button at the control radius,
                   not a pill, and carries no glow (DESIGN.md "Header"). */}
@@ -500,7 +508,7 @@ export function Header({
                 asChild
                 className="hidden lg:inline-flex h-9 px-4 text-base font-semibold"
               >
-                <Link href="/auth/sign-up">Create account</Link>
+                <IntentPrefetchLink href="/auth/sign-up" rel="nofollow">Create account</IntentPrefetchLink>
               </Button>
               {/* Phones + tablets (<lg): ONE row — the primary Analyze action
                   and a hamburger for everything else. */}
