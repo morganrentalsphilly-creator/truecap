@@ -189,7 +189,10 @@ export async function GET() {
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
     "Content surfaces:",
-    `  - ${glossaryCount}-term glossary with one-sentence definitions, formulas, and worked examples`,
+    // 27 of the 44 definitions run past one sentence, 11 terms carry a
+    // formula and 17 a worked example, so this no longer promises all three
+    // on every term.
+    `  - ${glossaryCount}-term glossary with a definition for each term, and a formula or worked example where the term has one`,
     `  - ${blogCount} long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more`,
     // Examples are derived from the RELEASED registry, never hardcoded: a
     // gated calculator named here would advertise a 404 to AI crawlers,
