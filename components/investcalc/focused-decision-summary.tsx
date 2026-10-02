@@ -257,6 +257,9 @@ function FirstYearSnapshot({
   return (
     <div
       className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
+      // role="group": an aria-label on a role-less div is dropped by
+      // assistive tech (ARIA 1.2 forbids naming a generic element).
+      role="group"
       aria-label="First-year investment snapshot"
     >
       <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
@@ -1076,6 +1079,7 @@ export function FocusedDecisionSummary({
 
       <div
         className="mt-4 grid grid-cols-1 gap-2 border-t border-border pt-4 min-[320px]:grid-cols-2 sm:flex sm:flex-wrap"
+        role="group"
         aria-label="Primary result actions"
       >
         {canTunePriceCeiling ? (
@@ -1369,6 +1373,7 @@ export function FocusedDecisionSummary({
         <div className="space-y-3 border-t border-border px-2 py-3">
           <div
             className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-4"
+            role="group"
             aria-label="Secondary first-year metrics"
           >
             <div className="rounded-xl border border-border bg-background p-3">
@@ -1511,6 +1516,7 @@ export function FocusedDecisionSummary({
         </summary>
         <div
           className="flex flex-wrap gap-2 border-t border-border px-2 py-3"
+          role="group"
           aria-label="Secondary result actions"
         >
           <Button
