@@ -9,7 +9,7 @@ type LeadRow = {
   created_at: string;
 };
 
-/** Rows shown before the "earlier messages" disclosure. */
+/** Rows shown before the "earlier leads" disclosure. */
 const SHOWN_FIRST = 8;
 /** Rows fetched. Past this the card says how many it is showing of the total. */
 const FETCH_LIMIT = 50;
@@ -65,7 +65,7 @@ function LeadItem({ lead }: { lead: LeadRow }) {
  * While LEAD_NOTIFICATIONS_MODE is not live this card is the only place an
  * agent learns a client wrote (2026-10 go-to-market audit, row P1-67), so the
  * dashboard mounts it above the deal sections, the number beside the heading
- * is the real total rather than the number of rows fetched, and messages past
+ * is the real total rather than the number of rows fetched, and leads past
  * the first eight stay reachable under a native disclosure.
  */
 export async function DealLeadsCard({
@@ -101,11 +101,15 @@ export async function DealLeadsCard({
           >
             Leads from your shared deals
           </h2>
-          <span
-            className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary"
-            aria-label={`${total} ${total === 1 ? "message" : "messages"}`}
-          >
+          {/* The unit is visually hidden text, not an aria-label: a span has
+              no role, so a label on it is not announced. A row is a lead, and
+              its message is optional, so the unit is "leads". */}
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
             {total}
+            <span className="sr-only">
+              {" "}
+              {total === 1 ? "lead" : "leads"}
+            </span>
           </span>
         </div>
         <ul className="divide-y divide-border">
@@ -117,7 +121,7 @@ export async function DealLeadsCard({
           <details className="border-t border-border">
             <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
               Show {earlier.length} earlier{" "}
-              {earlier.length === 1 ? "message" : "messages"}
+              {earlier.length === 1 ? "lead" : "leads"}
             </summary>
             <ul className="divide-y divide-border">
               {earlier.map((lead) => (
