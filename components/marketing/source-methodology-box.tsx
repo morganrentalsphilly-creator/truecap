@@ -8,17 +8,23 @@ import { cn } from "@/lib/utils";
  * Carries the page's one dating line ("Data as of HUD FY2026 (retrieved
  * July 13, 2026)." — the data vintage, never the build date and never the
  * page's lastmod), every source the page cites as a link with the day it was
- * retrieved, and the reviewer. Sources are passed in by the page from its
+ * retrieved, and one closing line. Sources are passed in by the page from its
  * data (lib/markets/market-page-data.ts, lib/markets/indexability.ts), so the
  * box can never name a source the page does not use. The page's one
  * <Disclaimer /> (in SiteFooter) carries the not-advice statement; this box
  * does not repeat it (docs/voice.md rule 3).
+ *
+ * The closing line states only what the box itself shows: where the sourced
+ * figures come from and when they were retrieved. It used to read "Reviewed
+ * by the TrueCap team", which named no reviewer, no review and no date, on a
+ * site that says elsewhere that one person builds TrueCap. Do not bring back
+ * a reviewer or a team claim here; lib/__tests__/markets-states-data-first
+ * renders every market and state page and fails on one.
  */
 export function SourceMethodologyBox({
   dataAsOf,
   sources,
   note,
-  reviewer = "the TrueCap team",
   className,
 }: {
   /** The visible dating line, e.g. "Data as of HUD FY2026 (retrieved July 13, 2026)." */
@@ -26,8 +32,6 @@ export function SourceMethodologyBox({
   sources: readonly SourceLink[];
   /** One plain sentence on how the page uses the data. */
   note?: string;
-  /** Who reviewed the page's claims. Defaults to "the TrueCap team". */
-  reviewer?: string;
   className?: string;
 }) {
   return (
@@ -66,7 +70,9 @@ export function SourceMethodologyBox({
         </ul>
       ) : null}
       <p className="mt-2">
-        Reviewed by {reviewer}.{" "}
+        {sources.length > 0
+          ? "Figures with a source come from the pages listed here, retrieved on the dates shown. "
+          : null}
         <Link
           href="/methodology"
           className="underline decoration-dotted underline-offset-2 hover:text-foreground"
