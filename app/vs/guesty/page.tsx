@@ -120,7 +120,7 @@ const MATRIX: Row[] = [
     feature: "Multi-owner portal + accounting",
     truecap: "No",
     guesty:
-      "Owners portal and customizable owner statements on Pro and Enterprise, not on Lite; Trust Accounting is an add-on",
+      "Owners portal and customizable owner statements on Pro and Enterprise, not on Lite; Trust Accounting is an add-on for Pro and Enterprise",
     winner: "guesty",
   },
   {
@@ -376,7 +376,6 @@ export default function VsGuestyPage() {
         <ComparisonFaq
           competitorName="Guesty"
           items={GUESTY_FAQ}
-          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
