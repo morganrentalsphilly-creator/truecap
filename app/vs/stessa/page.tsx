@@ -161,7 +161,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Document storage",
-    truecap: "Pro acquisition due-diligence vault",
+    truecap:
+      "Due-diligence checklist and document vault on saved deals (a free account saves up to 5)",
     stessa: "Unlimited document storage is listed across current plans",
     winner: "tie",
   },
@@ -201,7 +202,7 @@ export default function VsStessaPage() {
             decision and the Offer Ceiling: the highest price that still meets your targets.
           </p>
           <p className={VS_NOTE}>
-            Reviewed August 27, 2026 against the official sources linked below.
+            Reviewed October 2026 against the official sources linked below.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -310,7 +311,7 @@ export default function VsStessaPage() {
           </ScrollX>
           <div className={VS_SOURCES}>
             <p className="font-semibold text-foreground">
-              Sources reviewed August 27, 2026:
+              Sources reviewed October 2026:
             </p>
             <ul className="mt-1">
               <li>
@@ -330,7 +331,7 @@ export default function VsStessaPage() {
                   rel="noopener noreferrer"
                   className="tc-link inline-flex min-h-11 items-center"
                 >
-                  Marketplace help article (September 3, 2025)
+                  Marketplace help article
                 </a>
               </li>
               <li>
@@ -340,7 +341,7 @@ export default function VsStessaPage() {
                   rel="noopener noreferrer"
                   className="tc-link inline-flex min-h-11 items-center"
                 >
-                  Investment Property Metrics FAQ (September 2, 2025)
+                  Investment Property Metrics FAQ
                 </a>
               </li>
               <li>
@@ -350,7 +351,7 @@ export default function VsStessaPage() {
                   rel="noopener noreferrer"
                   className="tc-link inline-flex min-h-11 items-center"
                 >
-                  Stress Test / Sensitivity Analysis Report (April 15, 2025)
+                  Stress Test / Sensitivity Analysis Report
                 </a>
               </li>
               <li>
@@ -440,7 +441,7 @@ export default function VsStessaPage() {
         <ComparisonFaq
           competitorName="Stessa"
           items={STESSA_FAQ}
-          reviewedDate="August 27, 2026"
+          reviewedDate="October 2026"
         />
 
         <CloseSection
@@ -448,7 +449,7 @@ export default function VsStessaPage() {
           heading={<>Underwriting the next deal? Start free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, model DSCR, NCF, monthly cash
+              TrueCap free covers cap rate, CoC, model DSCR, monthly cash
               flow, up to five saves, read-only share links, and the due-diligence
               checklist/document vault. Pro adds sensitivity, the Offer Ceiling,
               10-year projections, focused comparison, Buy Box screening,
