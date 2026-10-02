@@ -47,8 +47,10 @@ describe("CSP report-only collector", () => {
    * Go-to-market audit 2026-10, rows P1-63, P2-90 and P2-109. The report-only
    * policy does not list the Google Ads hosts, so every consented page view
    * posted these reports and each became a Sentry event. The bodies below are
-   * the four the audit captured (ws07/ws07b/out/recheck-thirdparty.*.json and
-   * ws09/ws09a/result.json), with the query strings shortened.
+   * the five the audit captured, from four origins
+   * (ws07/ws07b/out/recheck-thirdparty.*.json and
+   * ws09/ws09a/supplementary-probes.json B_cspReports), with the query strings
+   * shortened.
    */
   it.each([
     ["script-src-elem", "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/8236119484/?random=1&cv=11"],
@@ -102,6 +104,52 @@ describe("CSP report-only collector", () => {
     }
   });
 
+  it("drops an Ads origin only under the directive the audit captured it in", async () => {
+    // The drop is keyed on origin plus directive. A script from
+    // www.google.com, or a beacon to the script host, is not one of the
+    // captured reports and would be news.
+    for (const [directive, blockedUri] of [
+      ["script-src-elem", "https://www.google.com/recaptcha/api.js"],
+      ["frame-src", "https://www.googleadservices.com/pagead/frame"],
+      ["img-src", "https://ad.doubleclick.net/pixel.gif"],
+      ["connect-src", "https://googleads.g.doubleclick.net/pagead/collect"],
+    ]) {
+      vi.clearAllMocks();
+      const response = await POST(
+        new Request("https://usetruecap.com/api/csp-report", {
+          method: "POST",
+          body: JSON.stringify({
+            "csp-report": { "effective-directive": directive, "blocked-uri": blockedUri },
+          }),
+        })
+      );
+      expect(response.status).toBe(204);
+      expect(Sentry.captureMessage, `${directive} ${blockedUri}`).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(Sentry.captureMessage).mock.calls[0][1]).toMatchObject({
+        tags: { directive },
+        extra: { blockedOrigin: new URL(blockedUri).origin },
+      });
+    }
+  });
+
+  it("recognises the Ads report when the browser sends only violated-directive", async () => {
+    // The legacy report shape: no effective-directive, and the violated one
+    // quoted with its source list.
+    const response = await POST(
+      new Request("https://usetruecap.com/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify({
+          "csp-report": {
+            "violated-directive": "connect-src 'self' https://*.supabase.co",
+            "blocked-uri": "https://www.google.com/ccm/collect?en=page_view",
+          },
+        }),
+      })
+    );
+    expect(response.status).toBe(204);
+    expect(Sentry.captureMessage).not.toHaveBeenCalled();
+  });
+
   it("keeps the forwarding window for real reports when Ads reports flood in", async () => {
     // 60 Ads reports first: more than the 50-per-window limit. They must not
     // use the window up, or the report that matters is dropped unseen.
@@ -132,6 +180,37 @@ describe("CSP report-only collector", () => {
       })
     );
     expect(Sentry.captureMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("answers a flood without reading the body, as it did before the Ads drop", async () => {
+    // A fresh copy of the route, so this flood does not use up the counters
+    // the other cases share.
+    vi.resetModules();
+    const fresh = await import("@/app/api/csp-report/route");
+    const freshSentry = await import("@sentry/nextjs");
+    const report = (blockedUri: string) =>
+      new Request("https://usetruecap.com/api/csp-report", {
+        method: "POST",
+        body: JSON.stringify({
+          "csp-report": { "effective-directive": "script-src-elem", "blocked-uri": blockedUri },
+        }),
+      });
+
+    // 600 requests are read. The first 50 real ones are forwarded.
+    let lastRead = report("https://unexpected.example/injected.js");
+    for (let index = 0; index < 600; index += 1) {
+      lastRead = report("https://unexpected.example/injected.js");
+      await fresh.POST(lastRead);
+    }
+    expect(lastRead.bodyUsed).toBe(true);
+    expect(freshSentry.captureMessage).toHaveBeenCalledTimes(50);
+
+    // The 601st is answered before its body is touched.
+    const overCeiling = report("https://another.example/injected.js");
+    const response = await fresh.POST(overCeiling);
+    expect(response.status).toBe(204);
+    expect(overCeiling.bodyUsed).toBe(false);
+    expect(freshSentry.captureMessage).toHaveBeenCalledTimes(50);
   });
 
   it("rejects an explicitly oversized report without parsing it", async () => {
