@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
   description:
-    "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. Honest side-by-side and how they fit.",
+    "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. See what each does and how they fit.",
   keywords: [
     "rentcast alternative",
     "rentcast vs rentometer",
@@ -101,14 +101,16 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Rent comp data",
-    truecap: "HUD Fair Market Rent (county-level, gov-published)",
+    truecap:
+      "HUD Fair Market Rent as an editable area benchmark; the comps lookup adds nearby rent comps and a rent estimate from third-party data",
     rentcast:
       "Yes: up to 20 nearby rental listings as comps (5 on the Free plan)",
     winner: "rentcast",
   },
   {
     feature: "Property value estimate",
-    truecap: "Purchase price as user input",
+    truecap:
+      "You enter the price; the comps lookup adds a value estimate from third-party data (one free lookup with an account, 50 a month on Pro and Agent Pro)",
     rentcast: "Yes: property value estimates (AVM) through its API",
     winner: "rentcast",
   },
@@ -134,7 +136,8 @@ const MATRIX: Row[] = [
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    rentcast: "Free + paid tiers ~$15-$74/mo (as of 2026)",
+    rentcast:
+      "App: Free, or Pro at $19 a month ($12 a month billed annually). API: a free Developer plan, then $74, $199 or $449 a month (as of October 2026)",
     winner: "tie",
   },
   {
@@ -175,7 +178,7 @@ export default function VsRentcastPage() {
     name: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
     url: `${siteUrl}/vs/rentcast`,
     description:
-      "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. Honest side-by-side and how they fit.",
+      "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. See what each does and how they fit.",
     dateModified: lastmodFor("/vs/rentcast"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -298,17 +301,26 @@ export default function VsRentcastPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            RentCast details based on publicly available product info as of
-            2026. See{" "}
+            RentCast plans, prices and features were checked against its
+            pricing and API pages in October 2026. See{" "}
             <a
-              href="https://rentcast.io"
+              href="https://www.rentcast.io/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              rentcast.io
+              rentcast.io/pricing
             </a>{" "}
-            for their current state.
+            and{" "}
+            <a
+              href="https://www.rentcast.io/api"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              rentcast.io/api
+            </a>{" "}
+            for current terms.
           </p>
         </Section>
 
@@ -320,9 +332,10 @@ export default function VsRentcastPage() {
           <div className={VS_PROSE}>
             <ol>
               <li>
-                <strong>Get a tighter rent estimate in RentCast.</strong> Their
-                listings-based comps give you a more specific number than the HUD
-                county-level baseline.
+                <strong>Get a tighter rent estimate in RentCast.</strong> Its
+                estimate is for the specific property, from similar rentals
+                listed nearby; the HUD benchmark TrueCap starts from covers an
+                area.
               </li>
               <li>
                 <strong>Plug that rent into TrueCap.</strong> Override the
@@ -368,7 +381,11 @@ export default function VsRentcastPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="RentCast" items={RENTCAST_FAQ} />
+        <ComparisonFaq
+          competitorName="RentCast"
+          items={RENTCAST_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection

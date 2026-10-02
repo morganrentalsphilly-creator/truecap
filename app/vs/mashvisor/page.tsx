@@ -117,14 +117,16 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Airbnb / STR market data",
-    truecap: "Long-term focus; STR-specific fields coming",
+    truecap:
+      "No Airbnb market data. A beta short-term rental revenue screen works from the nightly rate and occupancy you enter",
     mashvisor:
       "Yes: Airbnb occupancy, nightly rate and revenue estimates by address or market",
     winner: "mashvisor",
   },
   {
     feature: "Sale + rent comps",
-    truecap: "One free lookup; Pro includes 50 per month; no AVM",
+    truecap:
+      "One free lookup with an account; Pro and Agent Pro include 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
     mashvisor:
       "Rental comps on Standard and above; comparable sales feed its investment scores",
     winner: "mashvisor",

@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
   description:
-    "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit.",
+    "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. See what each does and how the two fit.",
   keywords: [
     "privy alternative",
     "privy real estate",
@@ -100,7 +100,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Sale + rent comps",
-    truecap: "One free lookup; Pro includes 50 per month; no AVM",
+    truecap:
+      "One free lookup with an account; Pro and Agent Pro include 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
     privy: "Yes: comparable transactions and rental comp tables",
     winner: "privy",
   },
@@ -141,7 +142,7 @@ export default function VsPrivyPage() {
     name: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     url: `${siteUrl}/vs/privy`,
     description:
-      "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit.",
+      "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. See what each does and how the two fit.",
     dateModified: lastmodFor("/vs/privy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -340,7 +341,11 @@ export default function VsPrivyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Privy" items={PRIVY_FAQ} />
+        <ComparisonFaq
+          competitorName="Privy"
+          items={PRIVY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
