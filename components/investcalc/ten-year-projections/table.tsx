@@ -154,10 +154,21 @@ export function TenYearProjectionTable({
         })}
       </div>
 
-      <div className="hidden rounded-2xl border border-border bg-card overflow-hidden sm:block">
-        <ScrollX label="Table" className="overflow-x-auto">
+      {/* cue + stickyFirstColumn: below about 1120px the 980px table is
+          wider than the card, and at 768px its two cash-flow columns were
+          off-screen with nothing to say so. The card chrome sits on the
+          scroll region itself so the "Scroll for more" cue lands under the
+          card, and the head is the solid band so the pinned Year head
+          matches its row. */}
+      <div className="hidden sm:block">
+        <ScrollX
+          label="Table"
+          cue
+          stickyFirstColumn
+          className="overflow-x-auto rounded-2xl border border-border bg-card"
+        >
           <table className="w-full min-w-[980px] text-sm">
-            <thead className="bg-muted/40">
+            <thead className="bg-muted">
               <tr className="h-12 border-b border-border">
                 {columns.map((label) => (
                   <th

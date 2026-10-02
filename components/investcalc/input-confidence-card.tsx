@@ -749,13 +749,19 @@ export function InputConfidenceCard({
                   );
                 })}
               </ul>
-              <ScrollX label="Input confidence table" className="hidden overflow-x-auto sm:block">
+              {/* cue + stickyFirstColumn: between 640 and about 860px the
+                  table is wider than the card and its last column (the
+                  review buttons) was off-screen with nothing to say so. The
+                  head is the solid band so the pinned first head matches its
+                  row; the wrapper pads the cue to the cells' px-3. */}
+              <div className="[&>p]:px-3 [&>p]:pb-2">
+              <ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[720px] text-left text-xs">
                   <caption className="sr-only">
                     Assumption values, sources, confirmation types, evidence
                     flags, and review controls
                   </caption>
-                  <thead className="bg-muted/50 text-3xs uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted text-3xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -829,6 +835,7 @@ export function InputConfidenceCard({
                   </tbody>
                 </table>
               </ScrollX>
+              </div>
             </>
           ) : (
             <>
@@ -889,17 +896,22 @@ export function InputConfidenceCard({
                   </li>
                 ))}
               </ul>
-              <ScrollX
-                label="Input confidence table" className="hidden overflow-x-auto sm:block"
-                tabIndex={0}
-                aria-label="Scrollable input confidence table"
-              >
+              {/* No tabIndex or aria-label here: ScrollX names the region
+                  and makes it a tab stop only while it overflows. Passing
+                  them unconditionally left a role-less div with an aria-label
+                  (which assistive tech drops) and a tab stop on wide screens.
+                  cue + stickyFirstColumn: between 640 and about 860px the
+                  Confirmation column was off-screen with nothing to say so.
+                  The head is the solid band so the pinned first head matches
+                  its row; the wrapper pads the cue to the cells' px-3. */}
+              <div className="[&>p]:px-3 [&>p]:pb-2">
+              <ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[760px] text-left text-xs">
                   <caption className="sr-only">
                     Input value, source, scoring points, and confirmation status
                     for every underwriting input
                   </caption>
-                  <thead className="bg-muted/50 text-3xs uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted text-3xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -969,6 +981,7 @@ export function InputConfidenceCard({
                   </tbody>
                 </table>
               </ScrollX>
+              </div>
             </>
           )}
           <p className="border-t border-border bg-muted/20 px-3 py-2 text-3xs leading-relaxed text-muted-foreground">
