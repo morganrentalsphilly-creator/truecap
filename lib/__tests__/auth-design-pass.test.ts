@@ -39,6 +39,11 @@ describe("the auth screens are on the ledger tokens", () => {
     // four brand fills are SVG attributes, not classes, and stay.
     expect(source).not.toMatch(/(?:bg|text|border|ring|from|to|via)-\[#/);
     expect(source).not.toMatch(/\bbg-white\b/);
+    // A raw Tailwind palette class (CLAUDE.md section 9.3): colors come from
+    // the tokens in app/globals.css, never from slate-500, blue-600 or white.
+    expect(source).not.toMatch(
+      /\b(?:bg|text|border|ring|fill|stroke|from|to|via)-(?:white|black|(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3})\b/,
+    );
   });
 
   it.each(SURFACE)("$file keeps sentence case and nothing under 12px", ({ source }) => {
@@ -47,7 +52,8 @@ describe("the auth screens are on the ledger tokens", () => {
   });
 
   it.each(SURFACE)("$file takes its radius from the role scale (4px controls, nothing rounder)", ({ source }) => {
-    expect(source).not.toMatch(/rounded-(?:lg|xl|2xl|3xl|full|\[)/);
+    // Side and corner variants too (rounded-t-xl, rounded-tl-2xl), up to 4xl.
+    expect(source).not.toMatch(/rounded-(?:[a-z]{1,2}-)?(?:lg|xl|[2-4]xl|full|\[)/);
   });
 
   it.each(SURFACE)("$file uses no green or orange for emphasis and the text-safe red for error titles", ({ source }) => {
