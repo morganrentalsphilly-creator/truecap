@@ -1,17 +1,17 @@
 /**
- * Dynamic OG image for /blog/rental-property-insurance. Auto-detected by the
- * Next.js App Router convention; overrides the images: [...] fallback in
- * the route's metadata.
+ * Social card for /blog/rental-property-insurance, on the shared blog template
+ * (lib/og/blog-og-template.tsx, the Newsprint frame). Next serves it as the
+ * post's og:image and twitter:image because the page's metadata sets no
+ * images of its own.
  *
- * Implementation lives in the shared template at
- * lib/og/blog-og-template.tsx — this file is just the per-post config
- * wrapper so all blog OG images stay visually consistent. The title
- * string mirrors the post's own metadata title.
+ * Every line restates the post as it reads today. When the post's title,
+ * figures or sections change, change this card in the same commit
+ * (lib/__tests__/blog-social-card-truth.test.ts checks the figures).
  */
 
 import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const alt = "Rental property insurance: landlord coverage and cost in 2026 — TrueCap";
+export const alt = "Rental property insurance: coverage, quotes, and underwriting";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Underwriting",
     tag: "Insurance",
-    title: "Rental property insurance: landlord coverage and cost in 2026",
-    subline: "DP-3 vs HO-3 · coverage · what it costs",
+    title: "Rental property insurance: coverage, quotes, and underwriting",
+    subline: "Coverage and exclusions · quotes · the premium in NOI and DSCR",
   });
 }
