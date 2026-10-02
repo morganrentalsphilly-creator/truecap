@@ -402,8 +402,8 @@ export function VsCompetitors() {
                   rendered 2026-10-01: "Property Reports with Custom
                   Branding" is unavailable on Starter and Plus). */}
               <li className="border-b border-rule-soft py-2.5">
-                Every DealCheck plan exports a PDF report; putting your own
-                name and logo on it needs DealCheck Pro.
+                PDF reports. Every DealCheck plan exports a PDF report;
+                putting your own name and logo on it needs DealCheck Pro.
               </li>
             </ul>
             <p className="mt-3 max-w-[64ch] text-pretty text-sm leading-relaxed text-muted-foreground">
