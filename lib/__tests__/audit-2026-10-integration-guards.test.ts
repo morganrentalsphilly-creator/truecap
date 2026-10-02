@@ -12,6 +12,7 @@ import {
   PRODUCT_EVALUATION_DAYS,
   PRODUCT_EVALUATION_DEAL_LIMIT,
 } from "@/lib/product-access";
+import { cn } from "@/lib/utils";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
@@ -89,5 +90,38 @@ describe("a post's reference to the blog names its type (P2-99)", () => {
       }
     }
     expect(references).toBeGreaterThanOrEqual(10);
+  });
+});
+
+describe("the hero address field fits its placeholder at 1024px without stacking (P2-154)", () => {
+  // Measured on the homepage at 1024px: the hero form is 366.7px wide and
+  // its button 177.25px, which left a 179.4px field with 145px of room for a
+  // 149.8px placeholder ("Address or listing link"): cut by 4.8px, and still
+  // cut at 1031px. With 12px (field) and 16px (button) of inline padding
+  // between lg and xl the field has 161px, 11.2px to spare, and the form is
+  // still 48px tall.
+  // The audit's own fix, stacking the form in that band, adds 58px: the
+  // investor cue then ends at 740.7px in a 1095x760 window, under the cookie
+  // banner that starts at 691px. DESIGN.md records that the cue clears it.
+  const hero = read("components/marketing/hero-address-form.tsx");
+
+  it("trims the inline padding between lg and xl, for the hero placement only", () => {
+    expect(hero).toContain('isHero && "lg:px-3 xl:px-4"');
+    expect(hero).toContain('isHero && "lg:px-4 xl:px-5"');
+    // What reaches the input: the hero's classes over the Input primitive's
+    // px-3. The base px-4 survives and the two breakpoint steps join it.
+    const field = cn(
+      "h-9 min-h-11 px-3 py-1 text-base lg:text-sm",
+      cn("h-12 rounded-md bg-field px-4 text-base lg:text-base", "lg:px-3 xl:px-4"),
+    ).split(" ");
+    expect(field).toEqual(expect.arrayContaining(["px-4", "lg:px-3", "xl:px-4"]));
+    expect(field).not.toContain("px-3");
+    const button = cn("h-12 shrink-0 px-5 text-base", "lg:px-4 xl:px-5").split(" ");
+    expect(button).toEqual(expect.arrayContaining(["px-5", "lg:px-4", "xl:px-5"]));
+  });
+
+  it("keeps the form on one row from sm: it is not stacked at lg", () => {
+    expect(hero).toContain('className="flex flex-col items-stretch gap-2.5 sm:flex-row"');
+    expect(hero).not.toMatch(/\b(?:lg|xl):flex-col\b/);
   });
 });

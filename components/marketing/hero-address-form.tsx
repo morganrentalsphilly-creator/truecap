@@ -261,7 +261,17 @@ export function HeroAddressForm({
             hasError={Boolean(addressError)}
             errorId={errorId}
             required
-            inputClassName="h-12 rounded-md bg-field px-4 text-base lg:text-base"
+            // In the hero the form shares a 5/12 column from 1024px, so the
+            // field is 179px wide at 1024 and its placeholder (about 150px)
+            // was cut by 5px up to about 1036px. Between lg and xl the field
+            // and the button each give up 4px of inline padding a side: the
+            // placeholder then has 11px to spare at 1024. The form is NOT
+            // stacked there: 58px more height pushes the investor cue under
+            // the cookie banner at 1095x760 (DESIGN.md, "The ledger as the hero").
+            inputClassName={cn(
+              "h-12 rounded-md bg-field px-4 text-base lg:text-base",
+              isHero && "lg:px-3 xl:px-4",
+            )}
             onPlaceSelected={(place) => {
               // Capture the picked suggestion's parsed components so the
               // analyzer's enrichment (HUD/FRED) has state/county/zip.
@@ -288,7 +298,10 @@ export function HeroAddressForm({
         <button
           type="submit"
           aria-busy={opening || undefined}
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-5 text-base font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-deep"
+          className={cn(
+            "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-5 text-base font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-deep",
+            isHero && "lg:px-4 xl:px-5",
+          )}
         >
           {opening ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {opening ? "Opening the analyzer…" : "Analyze a deal free"}
