@@ -41,9 +41,10 @@ export type SharedDealLeadCapture = {
 /**
  * Whether a client's message is also emailed to the agent. The same test as
  * notificationsLive() in app/actions/capture-deal-lead.ts, which decides the
- * send: the form's confirmation may say the agent was emailed only when this
- * is true (row P1-67). lib/__tests__/share-page-one-cta.test.tsx holds the two
- * expressions together.
+ * send: the form's confirmation may say TrueCap emails the agent only when
+ * this is true (row P1-67). It is the mode, not proof that one message went
+ * out, so the confirmation states the rule and reports only the save.
+ * lib/__tests__/share-page-one-cta.test.tsx holds the two expressions together.
  */
 function leadNotificationsLive(): boolean {
   return (
