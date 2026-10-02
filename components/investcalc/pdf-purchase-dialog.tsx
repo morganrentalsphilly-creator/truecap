@@ -68,10 +68,12 @@ export function PdfPurchaseDialog({
 
         <div className="space-y-3">
           {/* Pro - preferred option, listed first and framed as the repeat
-              acquisition workflow at the moment of report intent. */}
+              acquisition workflow at the moment of report intent.
+              Stacked below sm: beside the copy, "Compare plans" left the
+              paragraph a 139px column in a 308px card at 390px. */}
           <Link
             href="/pricing"
-            className="group relative flex items-start justify-between gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70"
+            className="group relative flex flex-col items-start gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70 sm:flex-row sm:justify-between"
           >
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
@@ -85,7 +87,7 @@ export function PdfPurchaseDialog({
                 billing terms are shown before checkout.
               </p>
             </div>
-            <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-right text-sm font-bold text-primary">
+            <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-primary sm:mt-0.5 sm:text-right">
               Compare plans
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
