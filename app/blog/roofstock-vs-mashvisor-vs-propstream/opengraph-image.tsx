@@ -20,6 +20,6 @@ export default function Image() {
     section: "Comparisons",
     tag: "3-way comparison",
     title: "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison",
-    subline: "Deal discovery platforms side by side",
+    subline: "How they differ · pricing · which combo to use · where TrueCap fits",
   });
 }
