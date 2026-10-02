@@ -122,7 +122,7 @@ const MATRIX: Row[] = [
   {
     feature: "Auto-categorized expenses",
     truecap: "No",
-    baselane: "Yes — synced with bank feed",
+    baselane: "Yes, auto-tagging is on the paid Smart plan",
     winner: "baselane",
   },
   {
@@ -390,9 +390,9 @@ export default function VsBaselanePage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -464,8 +464,8 @@ const BASELANE_FAQ: FaqItem[] = [
       <>
         No — different stages. Baselane is post-purchase banking + bookkeeping
         for properties you own. TrueCap is pre-purchase underwriting for
-        properties you&apos;re considering buying. Most landlords end up using
-        both.
+        properties you&apos;re considering buying. The two cover different
+        stages and can be used together.
       </>
     ),
   },
