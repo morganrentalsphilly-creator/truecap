@@ -146,7 +146,7 @@ export async function GET() {
     `  - ${stateCount} state rental data guides (Census and HUD figures) and ${marketCount} city rental market data guides with HUD Fair Market Rent${comboCount ? `, plus ${comboCount} city + strategy guides` : ""}`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
-    "  - Methodology page documenting the exact math the analyzer uses",
+    "  - Methodology page documenting the analyzer's core formulas",
     `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
   ].join("\n");
 
@@ -206,7 +206,7 @@ export async function GET() {
 
   const reference = [
     `- [About](${siteUrl}/about): Who builds TrueCap — one Philadelphia rental investor who underwrites his own deals with it — and why the defaults are conservative.`,
-    `- [Methodology](${siteUrl}/methodology): The exact math the analyzer uses, including cap rate, cash-on-cash, DSCR, and projection formulas.`,
+    `- [Methodology](${siteUrl}/methodology): The analyzer's core formulas (cap rate, cash-on-cash, DSCR, the mortgage payment), the Offer Ceiling procedure, and the 10-year projection method.`,
     `- [Tools index](${siteUrl}/tools): All ${CALCULATOR_COUNT} free calculators in one place.`,
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
