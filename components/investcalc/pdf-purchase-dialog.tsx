@@ -26,7 +26,9 @@ interface PdfPurchaseDialogProps {
    * The export was asked for on the sample deal. A first-time visitor on the
    * sample has bought nothing, so the one-time-purchase notice, the recovery
    * note for past buyers and the payment line do not apply to them; the
-   * dialog says where the sample's report is and what a PDF needs.
+   * dialog says where the sample's report is and that Pro includes its PDF.
+   * It does not say a PDF "needs" Pro: a visitor's own first decision can be
+   * exported without an account (lib/entitlements-catalog.ts, pdf_export).
    */
   sample?: boolean;
 }
@@ -56,7 +58,7 @@ export function PdfPurchaseDialog({
           <DialogTitle>PDF reports are included with Pro</DialogTitle>
           <DialogDescription>
             {sample
-              ? "The sample's full report is on this page. Exporting a report as a PDF needs a Pro plan."
+              ? "The sample's full report is on this page. A PDF of it comes with a Pro plan."
               : "One-time report purchases are temporarily unavailable."}
           </DialogDescription>
         </DialogHeader>
