@@ -56,7 +56,18 @@ describe("released public-tool surfaces", () => {
 });
 
 describe("gated calculators expose no public discovery surface", () => {
-  it("no unreleased calculator ships an opengraph-image route", async () => {
+  // Two more tool URLs redirect without being on the unreleased list: the
+  // BRRRR calculator (its page redirects while the brrrr_strategy_model flag
+  // is off) and the tax calculator (its page only redirects). Their card
+  // routes returned 200 on production on 2026-10-02 with a card saying the
+  // tool is "not currently released". A card for the BRRRR calculator comes
+  // back in the same reviewed change that releases the tool, not before.
+  const REDIRECTING_TOOL_SLUGS = [
+    "brrrr-calculator",
+    "rental-property-tax-calculator",
+  ] as const;
+
+  it("no unreleased or redirecting calculator ships an opengraph-image route", async () => {
     // A tool whose page redirects still serves an independently routable
     // /tools/<slug>/opengraph-image when that file exists.
     // as a real, crawlable, shareable branded card — a public surface implying
@@ -65,7 +76,16 @@ describe("gated calculators expose no public discovery surface", () => {
     const { existsSync } = await import("node:fs");
     const { UNRELEASED_UNDERWRITING_CALCULATORS } =
       await import("@/lib/calculator-registry");
-    const leaked = UNRELEASED_UNDERWRITING_CALCULATORS.filter((slug) =>
+    const { HISTORICAL_TOOL_REDIRECTS } =
+      await import("@/lib/historical-tool-redirects");
+    // The two slugs above are real redirects, not a typo that guards nothing.
+    for (const slug of REDIRECTING_TOOL_SLUGS) {
+      expect(HISTORICAL_TOOL_REDIRECTS, slug).toHaveProperty(slug);
+    }
+    const leaked = [
+      ...UNRELEASED_UNDERWRITING_CALCULATORS,
+      ...REDIRECTING_TOOL_SLUGS,
+    ].filter((slug) =>
       existsSync(join(process.cwd(), `app/tools/${slug}/opengraph-image.tsx`)),
     );
     expect(
@@ -83,6 +103,43 @@ describe("gated calculators expose no public discovery surface", () => {
         /notFound\(\)|permanentRedirect\(/.test(page),
         `${slug} page must fail closed or redirect`,
       ).toBe(true);
+    }
+  });
+});
+
+describe("tool social cards say only what the tool does", () => {
+  // The shared template's default chips are "Live data · No signup · 60
+  // seconds". Until 2026-10 every tool card inherited them, so calculators
+  // that take typed numbers, and a spreadsheet download, advertised live
+  // data. The same audit found a rehab card claiming "Mid-market 2024-25
+  // contractor pricing" over defaults the code calls illustrative, and
+  // break-even and vacancy cards promising benchmarks neither tool has.
+  const toolCards = readdirSync(join(process.cwd(), "app/tools"), {
+    withFileTypes: true,
+  })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => `app/tools/${entry.name}/opengraph-image.tsx`)
+    .filter((file) => existsSync(join(process.cwd(), file)));
+
+  it("finds the tool cards", () => {
+    expect(toolCards.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it("every tool card passes its own chips and none claims live data", () => {
+    for (const file of [...toolCards, "app/tools/opengraph-image.tsx"]) {
+      const card = read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(card, `${file} inherits the template's default chips`).toMatch(
+        /pills:\s*\[/,
+      );
+      expect(card, file).not.toMatch(/Live data|60 seconds/i);
+    }
+  });
+
+  it("no tool card claims contractor pricing or benchmarks the tool does not have", () => {
+    for (const file of toolCards) {
+      expect(read(file), file).not.toMatch(
+        /contractor pricing|20\d\d-\d\d|benchmarks? by (?:strategy|market)/i,
+      );
     }
   });
 });
@@ -119,8 +176,21 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     "app/blog/1-percent-rule-rental-property/page.tsx",
   ];
 
+  // The 70% rule post's social card. Its post stopped calling the rule of
+  // thumb an Offer Ceiling; the card still printed "How to calculate a
+  // 70%-rule Offer Ceiling" (2026-10 audit). It is held to the Offer Ceiling
+  // rule only, not to the exact price-screen name: a card's headline is short
+  // and may be the post's own title.
+  const RULE_OF_THUMB_CARDS = [
+    "app/blog/70-percent-rule-house-flipping/opengraph-image.tsx",
+  ];
+
   it("only mentions Offer Ceiling to contrast it with the canonical solver", () => {
-    for (const path of [...HEURISTIC_SURFACES, ...RULE_OF_THUMB_POSTS]) {
+    for (const path of [
+      ...HEURISTIC_SURFACES,
+      ...RULE_OF_THUMB_POSTS,
+      ...RULE_OF_THUMB_CARDS,
+    ]) {
       for (const line of read(path).split("\n")) {
         if (!/Offer Ceiling/.test(line)) continue;
         // Permitted: naming TrueCap's own solver as a DIFFERENT thing.
