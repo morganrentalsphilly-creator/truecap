@@ -87,7 +87,7 @@ const MATRIX: Row[] = [
   { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Quarterly redemptions, subject to limitations", winner: "tie" },
   { feature: "Diversification", truecap: "One property at a time", fundrise: "Across the assets its funds hold: real estate, private credit and venture capital", winner: "fundrise" },
   { feature: "Control over property choice", truecap: "Total", fundrise: "You choose a plan or a fund; Fundrise selects the assets", winner: "truecap" },
-  { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Tax reporting depends on the fund; see Fundrise's own tax documents", winner: "tie" },
+  { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "See Fundrise's own tax documents", winner: "tie" },
   { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "See Fundrise's site for how its funds pay distributions", winner: "tie" },
   { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% annual advisory fee, plus a 0.85% annual asset management fee paid by the funds in its standard portfolios", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", fundrise: "Not applicable", winner: "truecap" },
@@ -166,7 +166,7 @@ export default function VsFundrisePage() {
               <ul className={VS_TLDR_LIST}>
                 <li>You want direct control of the property and the financing.</li>
                 <li>You want direct-property control and will verify depreciation, interest, and any 1031 eligibility with tax professionals.</li>
-                <li>You have $20k+ to deploy in one property at a time.</li>
+                <li>You have the capital for a down payment and want to deploy it in one property at a time.</li>
                 <li>You&apos;re willing to do the underwriting + management work yourself.</li>
               </ul>
             </div>
@@ -178,7 +178,6 @@ export default function VsFundrisePage() {
                 <li>You want passive real estate exposure with zero work.</li>
                 <li>You want diversification across asset classes (real estate, private credit and venture capital).</li>
                 <li>You want to start with as little as $10 rather than a down payment.</li>
-                <li>You&apos;re fine without direct control of depreciation or a 1031 exchange.</li>
               </ul>
             </div>
           </div>

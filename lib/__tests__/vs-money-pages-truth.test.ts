@@ -153,6 +153,11 @@ describe("the comparison pages about financial products", () => {
       expect(text).not.toMatch(/depreciation pass-through/i);
       expect(text).not.toMatch(/\bStarter\b|\$1k|higher tiers/i);
       expect(text).not.toMatch(/\+ tax benefits/i);
+      // The tax row points to Fundrise and asserts nothing. The depreciation
+      // and 1031 sentence approved for /vs/arrived was approved for that page only.
+      const taxCell = /feature: "Ownership tax treatment",[^}]*fundrise: "([^"]*)"/.exec(text);
+      expect(taxCell?.[1]).toMatch(/^See Fundrise/);
+      expect(text).not.toMatch(/fine (?:without|giving up) [^.]{0,40}depreciation/i);
     });
 
     it("links Fundrise's client returns page instead of quoting a return", () => {
