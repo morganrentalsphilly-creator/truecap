@@ -15,7 +15,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { notFound } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
@@ -202,15 +202,15 @@ export default async function StatePage({
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li>
-              <Link href="/" className="hover:text-foreground">
+              <IntentPrefetchLink href="/" className="hover:text-foreground">
                 Home
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li>
-              <Link href="/states" className="hover:text-foreground">
+              <IntentPrefetchLink href="/states" className="hover:text-foreground">
                 States
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">{state.name}</li>
@@ -299,13 +299,13 @@ export default async function StatePage({
                     >
                       <td className="px-4 py-2.5 font-semibold">
                         {isLinkablePath(`/markets/${city.slug}`) ? (
-                          <Link
+                          <IntentPrefetchLink
                             href={`/markets/${city.slug}`}
                             className="inline-flex min-h-11 items-center text-primary hover:underline"
                             aria-label={describeStateHudCity(city)}
                           >
                             {city.name}
-                          </Link>
+                          </IntentPrefetchLink>
                         ) : (
                           city.name
                         )}
@@ -332,12 +332,12 @@ export default async function StatePage({
               {bespoke.map((market, index) => (
                 <span key={market.slug}>
                   {index > 0 ? ", " : ""}
-                  <Link
+                  <IntentPrefetchLink
                     href={`/markets/${market.slug}`}
                     className="font-semibold text-primary hover:underline"
                   >
                     {market.name}
-                  </Link>
+                  </IntentPrefetchLink>
                 </span>
               ))}
               .
@@ -394,13 +394,13 @@ export default async function StatePage({
                   isLinkablePath(`/states/${candidate.slug}`),
               )
               .map((candidate) => (
-                <Link
+                <IntentPrefetchLink
                   key={candidate.slug}
                   href={`/states/${candidate.slug}`}
                   className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
                 >
                   {candidate.name}
-                </Link>
+                </IntentPrefetchLink>
               ))}
           </div>
         </section>

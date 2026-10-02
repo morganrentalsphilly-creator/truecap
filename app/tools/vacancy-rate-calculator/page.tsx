@@ -6,7 +6,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getSiteUrl } from "@/lib/site-url";
 import { VacancyRateCalculatorWidget } from "@/components/tools/vacancy-rate-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -131,15 +131,15 @@ export default function VacancyRateCalculatorPage() {
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li>
-              <Link href="/" className="hover:text-foreground">
+              <IntentPrefetchLink href="/" className="hover:text-foreground">
                 Home
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li>
-              <Link href="/tools" className="hover:text-foreground">
+              <IntentPrefetchLink href="/tools" className="hover:text-foreground">
                 Tools
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">
@@ -200,26 +200,26 @@ export default function VacancyRateCalculatorPage() {
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
             Vacancy is part of your{" "}
-            <Link
+            <IntentPrefetchLink
               href="/glossary/operating-expense-ratio"
               className="text-primary font-semibold hover:underline"
             >
               effective gross income calculation
-            </Link>
+            </IntentPrefetchLink>
             , which feeds into{" "}
-            <Link
+            <IntentPrefetchLink
               href="/glossary/noi"
               className="text-primary font-semibold hover:underline"
             >
               NOI
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             and{" "}
-            <Link
+            <IntentPrefetchLink
               href="/glossary/cap-rate"
               className="text-primary font-semibold hover:underline"
             >
               cap rate
-            </Link>
+            </IntentPrefetchLink>
             . Under-modeling vacancy by 3 points inflates cap rate by 0.3-0.5
             points — enough to make a marginal deal look like a winner.
           </p>
@@ -248,30 +248,30 @@ export default function VacancyRateCalculatorPage() {
             Where your vacancy number goes next
           </h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link
+            <IntentPrefetchLink
               href="/tools/break-even-calculator"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               Break-even calculator
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/blog/how-to-calculate-noi-rental-property"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               How to calculate NOI
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/blog/how-to-calculate-cap-rate"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               How to calculate cap rate
-            </Link>
-            <Link
+            </IntentPrefetchLink>
+            <IntentPrefetchLink
               href="/blog/how-to-calculate-cash-on-cash-return"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               How to calculate cash-on-cash
-            </Link>
+            </IntentPrefetchLink>
           </div>
         </section>
 

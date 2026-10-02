@@ -6,7 +6,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -81,7 +81,7 @@ export default function StatesIndexPage() {
           {linkableStates(Object.values(STATES))
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((s) => (
-              <Link
+              <IntentPrefetchLink
                 key={s.slug}
                 href={`/states/${s.slug}`}
                 className="block rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
@@ -96,7 +96,7 @@ export default function StatesIndexPage() {
                   Parcel tax · insurance · controlling law · condition · rent ·
                   financing
                 </p>
-              </Link>
+              </IntentPrefetchLink>
             ))}
         </div>
       </main>

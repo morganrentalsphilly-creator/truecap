@@ -6,7 +6,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getSiteUrl } from "@/lib/site-url";
 import { ClosingCostCalculatorWidget } from "@/components/tools/closing-cost-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -111,9 +111,9 @@ export default function ClosingCostCalculatorPage() {
       <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
+            <li><IntentPrefetchLink href="/" className="hover:text-foreground">Home</IntentPrefetchLink></li>
             <li aria-hidden="true">›</li>
-            <li><Link href="/tools" className="hover:text-foreground">Tools</Link></li>
+            <li><IntentPrefetchLink href="/tools" className="hover:text-foreground">Tools</IntentPrefetchLink></li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">Closing Cost Calculator</li>
           </ol>
@@ -143,7 +143,7 @@ export default function ClosingCostCalculatorPage() {
             <li><strong>Due diligence:</strong> appraisal, inspection, optional radon/sewer/pest inspections.</li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
-            Include transaction costs in <Link href="/glossary/closing-costs" className="text-primary font-semibold hover:underline">total cash invested</Link> when computing <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash return</Link>. Omitting them understates modeled cash invested and overstates the resulting return percentage.
+            Include transaction costs in <IntentPrefetchLink href="/glossary/closing-costs" className="text-primary font-semibold hover:underline">total cash invested</IntentPrefetchLink> when computing <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash return</IntentPrefetchLink>. Omitting them understates modeled cash invested and overstates the resulting return percentage.
           </p>
         </section>
 
@@ -162,10 +162,10 @@ export default function ClosingCostCalculatorPage() {
         <section className="mt-12 border-t border-border pt-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related calculators and terms</h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment calculator</Link>
-            <Link href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</Link>
-            <Link href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
-            <Link href="/glossary/down-payment" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Down payment</Link>
+            <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment calculator</IntentPrefetchLink>
+            <IntentPrefetchLink href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</IntentPrefetchLink>
+            <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</IntentPrefetchLink>
+            <IntentPrefetchLink href="/glossary/down-payment" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Down payment</IntentPrefetchLink>
           </div>
         </section>
 

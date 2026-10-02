@@ -26,6 +26,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ArrowUpRight, Check, Download, FileSpreadsheet } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -149,12 +150,12 @@ export default function RentalPropertySpreadsheetPage() {
         >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Free Rental Property Spreadsheet
             </h1>
@@ -309,40 +310,40 @@ export default function RentalPropertySpreadsheetPage() {
               and the disagreement quietly changes your DSCR. This workbook
               follows the lender-standard convention — the same one used across
               TrueCap and documented in our{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/methodology"
                 className="text-primary font-semibold hover:underline"
               >
                 methodology
-              </Link>
+              </IntentPrefetchLink>
               :
             </p>
             <ul>
               <li>
-                <Link
+                <IntentPrefetchLink
                   href="/glossary/noi"
                   className="text-primary font-semibold hover:underline"
                 >
                   NOI
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 and{" "}
-                <Link
+                <IntentPrefetchLink
                   href="/glossary/dscr"
                   className="text-primary font-semibold hover:underline"
                 >
                   DSCR
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 <strong>exclude</strong> the CapEx reserve — it&apos;s a
                 below-the-line return-of-capital reserve, not an operating
                 expense.
               </li>
               <li>
-                <Link
+                <IntentPrefetchLink
                   href="/glossary/monthly-cash-flow"
                   className="text-primary font-semibold hover:underline"
                 >
                   Cash flow
-                </Link>{" "}
+                </IntentPrefetchLink>{" "}
                 <strong>includes</strong> the CapEx reserve — the roof fund is
                 real money leaving your account every month.
               </li>
@@ -386,12 +387,12 @@ export default function RentalPropertySpreadsheetPage() {
               to start, and because the conventions match, your spreadsheet
               numbers carry over exactly. For the longer version of this
               comparison, see{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/vs/excel"
                 className="text-primary font-semibold hover:underline"
               >
                 TrueCap vs. Excel
-              </Link>
+              </IntentPrefetchLink>
               .
             </p>
 
