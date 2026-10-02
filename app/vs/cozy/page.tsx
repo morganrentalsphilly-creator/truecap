@@ -2,7 +2,12 @@
  * /vs/cozy — competitor comparison landing page.
  *
  * Target queries: "cozy alternative", "cozy.co alternative", "cozy shut down replacement", "what replaced cozy", "free landlord platform like cozy".
- * Cozy.co was a popular landlord ops platform (rent collection, listings, applications). Acquired by Apartments.com in 2018, shut down + migrated users to Apartments.com in 2022. Still searched ~5k/mo by ex-users looking for alternatives.
+ * Cozy.co was property management software for landlords (listings, screening,
+ * rent collection). CoStar Group, the owner of Apartments.com, bought it in
+ * November 2018 and Cozy moved to Apartments.com in mid-2021. The page is kept
+ * as an explainer of what replaced Cozy: every Cozy cell is what Cozy's own
+ * archived site said, and no row picks a side, because Cozy is no longer
+ * offered. Sources (rendered 2026-10-02) are linked under the table.
  */
 
 import type { Metadata } from "next";
@@ -47,7 +52,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Cozy.co Alternatives (2026): What Replaced It",
   description:
-    "Cozy.co shut down in 2022. Here's what TrueCap does (and doesn't), plus which modern tools replace each part of the Cozy workflow.",
+    "Cozy.co moved to Apartments.com in mid-2021. Here's what TrueCap does (and doesn't), plus which tools cover each part of the Cozy workflow today.",
   keywords: [
     "cozy alternative",
     "cozy.co alternative",
@@ -59,7 +64,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Cozy.co Alternatives (2026): What Replaced It",
     description:
-      "Cozy.co shut down in 2022. TrueCap underwrites deals; here's what replaces Cozy's other features.",
+      "Cozy.co moved to Apartments.com in mid-2021. TrueCap underwrites deals; here's what covers Cozy's other features today.",
     url: "/vs/cozy",
     type: "website",
   },
@@ -69,72 +74,76 @@ export const metadata: Metadata = {
 type Verdict = "truecap" | "cozy" | "tie";
 type Row = { feature: string; truecap: string; cozy: string; winner: Verdict };
 
+// Every Cozy cell restates Cozy's own site as the Internet Archive saved it
+// (the features page, May 2020; the tenant screening page, September 2020; the
+// homepage, June and August 2021). Every winner is a tie: Cozy is no longer
+// offered, so no row picks a side.
 const MATRIX: Row[] = [
   {
     feature: "Status",
     truecap: "Active",
-    cozy: "Shut down June 2022",
-    winner: "truecap",
+    cozy: "Moved to Apartments.com in mid-2021",
+    winner: "tie",
   },
   {
     feature: "Lifecycle stage",
     truecap: "Pre-purchase — underwrite the deal",
-    cozy: "Was post-purchase landlord ops",
+    cozy: "Was property management software for rentals you own",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    cozy: "Not modeled (was ops only)",
-    winner: "truecap",
+    cozy: "Not on the feature list Cozy published",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    cozy: "Not modeled",
-    winner: "truecap",
+    cozy: "Not on the feature list Cozy published",
+    winner: "tie",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    cozy: "Not applicable",
-    winner: "truecap",
+    cozy: "Offered rent estimates for pricing a listing",
+    winner: "tie",
   },
   {
     feature: "Rental listing distribution",
     truecap: "No",
-    cozy: "Was syndicated to Apartments.com etc.",
-    winner: "cozy",
+    cozy: "Listings were syndicated to Doorsteps.com and Realtor.com",
+    winner: "tie",
   },
   {
     feature: "Online rental application",
     truecap: "No",
-    cozy: "Was customizable",
-    winner: "cozy",
+    cozy: "Each listing had a built-in rental application",
+    winner: "tie",
   },
   {
     feature: "Online rent collection",
     truecap: "No",
-    cozy: "Was ACH free",
-    winner: "cozy",
+    cozy: "Was free for landlords; tenants paid free from a checking account",
+    winner: "tie",
   },
   {
     feature: "Tenant screening",
     truecap: "No",
-    cozy: "Was TransUnion-backed",
-    winner: "cozy",
+    cozy: "Credit reports from Experian; background checks via Checkr",
+    winner: "tie",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    cozy: "Was free",
+    cozy: "Core features were free for landlords",
     winner: "tie",
   },
   {
     feature: "Pricing",
     truecap: "Free core; paid Pro — see live pricing",
-    cozy: "Was free (shut down)",
-    winner: "truecap",
+    cozy: "No subscription; applicants paid for their screening reports",
+    winner: "tie",
   },
 ];
 
@@ -146,7 +155,7 @@ export default function VsCozyPage() {
     name: "Cozy.co Alternatives (2026): What Replaced It",
     url: `${siteUrl}/vs/cozy`,
     description:
-      "Cozy.co shut down in 2022. Here's what TrueCap does (and doesn't), plus which modern tools replace each part of the Cozy workflow.",
+      "Cozy.co moved to Apartments.com in mid-2021. Here's what TrueCap does (and doesn't), plus which tools cover each part of the Cozy workflow today.",
     dateModified: lastmodFor("/vs/cozy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -162,17 +171,19 @@ export default function VsCozyPage() {
         <VsHero>
           <h1 className={VS_H1}>
             TrueCap vs Cozy:{" "}
-            Cozy shut down. Here&apos;s what replaces it.
+            Cozy moved to Apartments.com. Here&apos;s what replaced it.
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Cozy.co was a free landlord ops platform — listings, online
-            applications, rent collection — until Apartments.com acquired and
-            shut it down in 2022. If you landed here looking for an alternative,
-            the honest answer is: no single tool replaced it. TrueCap covers
-            pre-purchase underwriting (Cozy didn&apos;t do that), and
-            you&apos;d pair it with TurboTenant, Avail, or RentRedi for the
-            operations Cozy used to handle. Here&apos;s the breakdown.
+            Cozy.co was property management software whose core features were
+            free for landlords: listings, tenant screening and online rent
+            collection. CoStar Group, the owner of Apartments.com, bought Cozy
+            in 2018, and Cozy moved to Apartments.com in mid-2021. Cozy&apos;s
+            own answer to what replaced it was Apartments.com&apos;s rental
+            tools. TrueCap does a different job: it underwrites a property
+            before you buy it. For listings, screening and rent collection,
+            compare Apartments.com with TurboTenant, Avail or RentRedi.
+            Here&apos;s the breakdown.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -216,8 +227,7 @@ export default function VsCozyPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You&apos;re evaluating a property before making an offer (Cozy
-                  didn&apos;t do this).
+                  You&apos;re evaluating a property before making an offer.
                 </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>You want a free tier that doesn&apos;t cap analyses.</li>
@@ -225,12 +235,13 @@ export default function VsCozyPage() {
             </div>
             <div className="min-w-0">
               <h3 className={VS_TLDR_LABEL}>
-                Use Cozy when
+                To replace what Cozy did
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  For listings + applications + rent collection (Cozy&apos;s old
-                  core): TurboTenant, Avail, or RentRedi.
+                  For listings, applications and rent collection (Cozy&apos;s
+                  old core): Apartments.com, where Cozy moved, or TurboTenant,
+                  Avail or RentRedi.
                 </li>
                 <li>
                   For accounting + Schedule E: Stessa, Baselane, or Landlord
@@ -248,8 +259,8 @@ export default function VsCozyPage() {
             Feature-by-feature
           </SectionHeading>
           <p className={VS_INTRO}>
-            Side-by-side on every dimension that matters for a
-            comparison-shopping investor.
+            What Cozy offered, from its own site before it moved, beside what
+            TrueCap does. No row picks a side: Cozy is no longer offered.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
             <VsMatrixTable
@@ -263,17 +274,44 @@ export default function VsCozyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Cozy details based on publicly available product info as of 2026.
-            See{" "}
+            Cozy details are from Cozy&apos;s own site as the Internet Archive
+            saved it: the{" "}
             <a
-              href="https://cozy.co"
+              href="https://web.archive.org/web/20200512055824/https://cozy.co/features-benefits/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              cozy.co
+              features page (May 2020)
+            </a>
+            , the{" "}
+            <a
+              href="https://web.archive.org/web/20200902061933/https://cozy.co/for-landlords/tenant-screening/"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              tenant screening page (September 2020)
             </a>{" "}
-            for their current state.
+            and the{" "}
+            <a
+              href="https://web.archive.org/web/20210811194249/https://cozy.co/"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              homepage after the move (August 2021)
+            </a>
+            . The 2018 purchase is from{" "}
+            <a
+              href="https://www.prnewswire.com/news-releases/costar-group-acquires-cozy-services-ltd-with-plans-to-integrate-its-innovative-renter-screening-and-rent-payments-solutions-into-apartmentscom-300747156.html"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              CoStar Group&apos;s announcement
+            </a>
+            .
           </p>
         </Section>
 
@@ -294,16 +332,22 @@ export default function VsCozyPage() {
                   Listings + applications + rent collection (Cozy&apos;s old
                   core).
                 </strong>{" "}
-                TurboTenant (most Cozy-like free tier), Avail (Realtor.com-owned),
-                or RentRedi.
+                Apartments.com&apos;s Rental Manager is where Cozy moved.
+                TurboTenant and Avail each publish a free plan with listings,
+                screening and online rent collection; RentRedi publishes paid
+                plans with unlimited units.
               </li>
               <li>
                 <strong>Accounting + tax-time Schedule E.</strong> Stessa,
-                Baselane, or Landlord Studio. All have free or low-cost tiers.
+                Baselane, or Landlord Studio. Each publishes a free plan; check
+                each pricing page for the plan that includes the Schedule E
+                report.
               </li>
               <li>
-                <strong>Tenant screening only.</strong> RentSpree (tenant pays,
-                free for landlord) or any of the above bundled solutions.
+                <strong>Tenant screening only.</strong> RentSpree (a $0 Basic
+                plan; screening is priced per report, and you choose whether
+                the applicant pays) or the screening built into TurboTenant or
+                Avail.
               </li>
             </ol>
             <p>
@@ -329,7 +373,8 @@ export default function VsCozyPage() {
               >
                 cash-on-cash return
               </IntentPrefetchLink>
-              , and DSCR — all free, the way Cozy used to be. Our guide on{" "}
+              , and DSCR — all free, the way Cozy&apos;s core features were. Our
+              guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
@@ -421,11 +466,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "What happened to Cozy.co?",
     answer: (
       <>
-        Cozy.co was acquired by Apartments.com (a CoStar Group property) in 2018
-        and shut down in June 2022. Users were migrated to Apartments.com Rental
-        Manager, which kept some of Cozy&apos;s core features (listings,
-        applications, rent collection) under the Apartments.com brand. Many
-        ex-Cozy users found the migration painful and went elsewhere.
+        CoStar Group, the owner of Apartments.com, bought Cozy in 2018. Cozy
+        moved to Apartments.com in mid-2021: by August 2021 its homepage said
+        Cozy had moved to Apartments.com, that most Cozy accounts had moved
+        with it, and that rentals on accounts that were not moved could no
+        longer be managed on Cozy.
       </>
     ),
   },
@@ -433,10 +478,10 @@ const COZY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Cozy alternative?",
     answer: (
       <>
-        Only for the underwriting part — TrueCap calculates cap rate, DSCR, cash
-        flow on a property you&apos;re considering buying. Cozy never did that.
-        For Cozy&apos;s actual core (listings, applications, rent collection),
-        you&apos;ll want TurboTenant, Avail, or RentRedi.
+        Not for the work Cozy did. TrueCap calculates cap rate, DSCR and cash
+        flow on a property you&apos;re considering buying. For Cozy&apos;s
+        actual core (listings, applications, rent collection), look at
+        Apartments.com, TurboTenant, Avail or RentRedi.
       </>
     ),
   },
@@ -456,11 +501,19 @@ const COZY_FAQ: FaqItem[] = [
     question: "Did Apartments.com replace Cozy?",
     answer: (
       <>
-        Technically yes — Apartments.com Rental Manager kept the listings +
-        applications + rent collection workflow. Many ex-Cozy users felt the
-        rebrand was awkward and the UX worse. The free tier is more limited than
-        Cozy&apos;s was. If you tried it and it didn&apos;t work, TurboTenant or
-        Avail are typically the next stops.
+        Yes, by Cozy&apos;s own account. In August 2021 Cozy&apos;s homepage
+        said it had moved to Apartments.com and listed the tools there:
+        listings, renter applications with screening reports, leases, rent
+        payments, and expense and maintenance tracking. See{" "}
+        <a
+          href="https://www.apartments.com/rental-manager/"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Apartments.com&apos;s Rental Manager
+        </a>{" "}
+        for what it offers today.
       </>
     ),
   },
@@ -468,12 +521,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "Can I use TrueCap + a Cozy replacement together?",
     answer: (
       <>
-        Yes — that&apos;s one possible stack. TrueCap (free) covers pre-purchase
-        underwriting, while TurboTenant or Avail (free) covers post-purchase
-        operations. Together they span much of Cozy&apos;s old free-tier
-        coverage and add an underwriting layer.
+        Yes. TrueCap&apos;s free analyzer covers the underwriting before you
+        buy. TurboTenant and Avail each publish a free plan with listings,
+        screening and online rent collection, the work Cozy&apos;s free
+        features did after you bought.
       </>
     ),
   },
 ];
-

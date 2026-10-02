@@ -129,8 +129,17 @@ describe("the /vs social cards", () => {
      * A size, price or count on a card is a competitor fact with a shelf life.
      * AppFolio: "*Minimum spend and 50 unit minimum apply" under the Core plan
      * on appfolio.com/pricing, rendered 2026-10-02; /vs/appfolio says the same.
+     * Cozy: "mid-2021", the move to Apartments.com. Cozy's homepage said in
+     * June 2021 that accounts would move "by mid-2021" and on 2021-08-11 that
+     * Cozy had moved (web.archive.org captures of cozy.co, rendered
+     * 2026-10-02); /vs/cozy says the same. The card once said 2022.
      */
-    const ALLOWED: Record<string, string[]> = { appfolio: ["50"] };
+    const ALLOWED: Record<string, string[]> = { appfolio: ["50"], cozy: ["2021"] };
+    /** How the page states each allowed number. */
+    const ON_PAGE: Record<string, (n: string) => RegExp> = {
+      appfolio: (n) => new RegExp(`\\b${n}[- ]unit`),
+      cozy: (n) => new RegExp(`\\bmid-${n}\\b`),
+    };
     for (const card of CARDS) {
       const numbers = card.tagline.match(/\d[\d,.]*/g) ?? [];
       expect(numbers, `${card.slug}: ${card.tagline}`).toEqual(ALLOWED[card.slug] ?? []);
@@ -141,7 +150,7 @@ describe("the /vs social cards", () => {
     for (const [slug, numbers] of Object.entries(ALLOWED)) {
       const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8");
       for (const n of numbers) {
-        expect(page, `${slug}: the page no longer states ${n}`).toMatch(new RegExp(`\\b${n}[- ]unit`));
+        expect(page, `${slug}: the page no longer states ${n}`).toMatch(ON_PAGE[slug](n));
       }
     }
   });
@@ -178,14 +187,15 @@ describe("the /vs social cards", () => {
 
   it("keeps a card neutral while its page's competitor rows wait on a decision", () => {
     /**
-     * The competitor claims on these pages are open report rows (P1-18 Cozy,
-     * P1-31 Roofstock). Until a page is rewritten, its card says only what
+     * The competitor claims on these pages are open report rows (P1-31
+     * Roofstock). Until a page is rewritten, its card says only what
      * TrueCap does and repeats none of the claims. When a row closes, take
      * the slug off this list in the commit that rewrites the page and its
      * card. Baselane (P0-05), Arrived (P0-08) and Fundrise (P1-20) came off
      * on 2026-10-02; lib/__tests__/vs-money-pages-truth.test.ts holds them.
+     * (P1-18 Cozy closed on 2026-10-02: the page and its card say "mid-2021".)
      */
-    const WAITING = ["cozy", "roofstock"];
+    const WAITING = ["roofstock"];
     for (const slug of WAITING) {
       const { tagline, competitor } = bySlug(slug);
       expect(tagline, slug).toMatch(/^TrueCap /);
