@@ -34,6 +34,11 @@
  * lib/__tests__/structured-data-f4.test.tsx reads that text as the visible
  * answer. The sources note is a Note, the price answer a ruled block (no
  * card), and the analyzer bridge follows them.
+ *
+ * The sources note prints a review date only when the page passes
+ * `reviewedDate` (see the prop). There is no shared default: one constant
+ * once printed "last reviewed June 2026" on 35 pages nobody had re-checked.
+ * lib/__tests__/vs-shared-truth-guards.test.tsx pins both forms of the note.
  */
 
 import { Fragment, isValidElement, type ReactNode } from "react";
@@ -42,14 +47,6 @@ import { Note } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { JsonLd } from "@/components/seo/json-ld";
-
-/**
- * Manual last-reviewed date for the comparison content (feature rows +
- * pricing) shown on every /vs page. This is intentionally NOT auto-`now()`:
- * a "last reviewed" date must reflect a real human review, not the render
- * time. Update this when the comparison tables are actually re-checked.
- */
-const COMPARISON_REVIEWED = "June 2026";
 
 export type FaqItem = {
   /** Question — phrased exactly as a comparison-shopper would type it. */
@@ -114,12 +111,18 @@ const HEADING_ID = "comparison-faq-heading";
 export function ComparisonFaq({
   competitorName,
   items,
-  reviewedDate = COMPARISON_REVIEWED,
+  reviewedDate,
 }: {
   /** "DealCheck", "Stessa", "Excel", etc. Used in the section heading. */
   competitorName: string;
   items: FaqItem[];
-  /** Date this page's competitor claims were actually checked. */
+  /**
+   * The date this page's competitor claims were checked, as the note prints
+   * it ("October 2026", "August 27, 2026"). Pass it only after every
+   * competitor row, price and FAQ statement on the page was compared with the
+   * vendor's own pricing and feature pages. It is never the render time and
+   * has no default: without it the note states no review at all.
+   */
   reviewedDate?: string;
 }) {
   const schema = {
@@ -163,18 +166,30 @@ export function ComparisonFaq({
           ))}
         </div>
 
-        {/* Sources & methodology — transparency note attached to every
-            /vs comparison. Keeps the matrix defensible: we don't claim a
-            competitor lacks a capability they publicly offer, and we date
-            the review so stale claims are obvious. */}
+        {/* Sources & methodology — the note attached to every /vs
+            comparison. A page that passes reviewedDate says its rows were
+            reviewed and when. A page that passes none claims no review: the
+            note then says only that the rows are TrueCap's summary, may be
+            out of date, and where to check. */}
         <Note className="mt-10">
           <span className="font-semibold text-foreground">
             Sources &amp; methodology:
           </span>{" "}
-          Feature and pricing rows reflect {competitorName}&apos;s publicly listed
-          information, last reviewed {reviewedDate}. Vendors change features and
-          prices often — verify current details on {competitorName}&apos;s own
-          site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
+          {reviewedDate ? (
+            <>
+              Feature and pricing rows reflect {competitorName}&apos;s publicly
+              listed information, last reviewed {reviewedDate}. Vendors change
+              features and prices often — verify current details on{" "}
+              {competitorName}&apos;s own site.
+            </>
+          ) : (
+            <>
+              Rows about {competitorName} are TrueCap&apos;s summary and may be
+              out of date. Vendors change features and prices often, so check
+              the vendor&apos;s own site for current details.
+            </>
+          )}{" "}
+          Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
           specifically to an editable HUD area-rent benchmark and the FRED
           owner-occupied 30-year mortgage-rate benchmark. Property tax is a manual
           local input with a disclosed generic fallback, not a state-data
