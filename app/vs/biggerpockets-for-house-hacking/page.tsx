@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "BiggerPockets vs TrueCap for House Hacking (2026)",
   description:
-    "Both calculators run house-hack deals. See which one models owner-occupant unit usage, FHA financing, and effective rent saved more cleanly.",
+    "Both calculators run house-hack deals. See how each one handles the owner's unit, FHA financing, and your net monthly cost.",
   keywords: [
     "biggerpockets house hacking",
     "house hacking calculator",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BiggerPockets vs TrueCap for House Hacking (2026)",
     description:
-      "House-hack-specific comparison: owner-occupant unit modeling, FHA financing, effective rent saved. Which calculator fits the house-hack workflow.",
+      "House-hack-specific comparison: owner-occupant unit modeling, FHA financing, net monthly cost. Which calculator fits the house-hack workflow.",
     url: "/vs/biggerpockets-for-house-hacking",
     type: "website",
     images: [
@@ -88,20 +88,24 @@ const MATRIX: Row[] = [
     feature: "Owner-occupant property type",
     truecap:
       "Yes — explicit 'owner-occupant' property type with per-unit setup",
-    biggerpockets: "Standard multifamily form; you manually adjust",
+    biggerpockets:
+      "Standard rental form with no owner-occupied setting; you adjust it yourself",
     winner: "truecap",
   },
   {
     feature: "Per-unit rent + status modeling",
     truecap: "Yes — mark which unit YOU live in; other units' rent counted",
-    biggerpockets: "Manual — you adjust the rent calculation yourself",
+    biggerpockets:
+      "One gross monthly income field with an optional breakdown; you leave out your own unit's rent",
     winner: "truecap",
   },
   {
-    feature: "Effective 'rent saved' calculation",
-    truecap: "Yes — surfaces what your monthly housing cost actually is",
-    biggerpockets: "You compute it yourself from the spreadsheet",
-    winner: "truecap",
+    feature: "Your unit in the cash-flow line",
+    truecap:
+      "In House Hack mode your unit counts at $0 rent, so the cash-flow line is your net monthly cost after reserves",
+    biggerpockets:
+      "Read it from the cash-flow line after leaving out your own unit's rent",
+    winner: "tie",
   },
   {
     feature: "FHA financing assumptions (3.5% down)",
@@ -118,19 +122,20 @@ const MATRIX: Row[] = [
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD FMR per unit + FRED rate + manual local property tax",
-    biggerpockets: "Manual entry",
+    biggerpockets:
+      "Entered by hand in the rental form; a separate Rent Estimator calculator is listed",
     winner: "truecap",
   },
   {
     feature: "DSCR screening ratio",
     truecap: "Yes — screening output, not a lender approval model",
-    biggerpockets: "Available in its calculator; not lender approval",
+    biggerpockets: "Not listed on its public calculator page",
     winner: "tie",
   },
   {
     feature: "Post-move-out scenario",
     truecap: "Save a separate fully rented scenario; no move-out-year switch",
-    biggerpockets: "Adjust and save a separate scenario",
+    biggerpockets: "Run a separate report for the fully rented case",
     winner: "tie",
   },
   {
@@ -142,14 +147,15 @@ const MATRIX: Row[] = [
   {
     feature: "Mobile UX at the showing",
     truecap: "PWA installable",
-    biggerpockets: "Desktop-leaning calculator + separate mobile app",
+    biggerpockets: "Web calculator form; BiggerPockets also has an iPhone app",
     winner: "tie",
   },
   {
     feature: "Free tier covers house hacking",
     truecap: "Yes — core owner-occupant underwriting on free tier",
-    biggerpockets: "Current calculator presents results as a Pro feature",
-    winner: "truecap",
+    biggerpockets:
+      "Its calculator form says results unlock with Pro or a 7-day free trial; a sign-up prompt on its site mentions 5 free calculator reports",
+    winner: "tie",
   },
   {
     feature: "Pricing",
@@ -169,9 +175,9 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         which unit you&apos;ll live in, and TrueCap automatically excludes that
         unit&apos;s &quot;rent&quot; from the income side of the underwriting
         (because you&apos;re paying yourself, effectively). BiggerPockets&apos;
-        calculator treats the property as a generic multifamily and makes you
-        mentally adjust the math for the owner-occupied unit. Both work; TrueCap
-        is just less manual setup for the house-hack workflow.
+        rental calculator form has no owner-occupied setting, so you leave your
+        own unit out of the income yourself. Both work; TrueCap is just less
+        manual setup for the house-hack workflow.
       </>
     ),
   },
@@ -190,15 +196,15 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     ),
   },
   {
-    question: "What's 'effective rent saved' and why does it matter?",
+    question: "What is my net monthly cost in a house hack, and why does it matter?",
     answer: (
       <>
-        When you house-hack, your monthly housing cost isn&apos;t the full PITI
-        — it&apos;s the PITI minus the rent your rental units bring in. That gap
-        is your &quot;effective rent saved&quot; vs a regular apartment lease.
-        TrueCap surfaces this number explicitly so you can compare house-hacking
-        vs renting an apartment using the same assumptions. BiggerPockets&apos;
-        calculator requires you to compute it from the cash-flow line yourself.
+        When you house-hack, your monthly housing cost isn&apos;t the full
+        PITI: the rent from the other units offsets it. In House Hack mode
+        TrueCap counts your unit at $0 rent, so the monthly cash-flow line is
+        your net monthly cost after the other units&apos; rent, operating
+        expenses, and reserves. Compare that number with what you would pay to
+        rent a similar apartment.
       </>
     ),
   },
@@ -217,9 +223,9 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
     question: "Is BiggerPockets Pro worth it for the calculator alone?",
     answer: (
       <>
-        It depends on which membership benefits you use. BiggerPockets currently
-        presents calculator results as a Pro feature, and its membership
-        includes benefits beyond the calculator. TrueCap has free core
+        It depends on which membership benefits you use. BiggerPockets&apos;
+        calculator form says results unlock with Pro or a 7-day free trial, and
+        its membership includes benefits beyond the calculator. TrueCap has free core
         owner-occupant underwriting and paid Pro analysis tools. Compare both
         live pricing pages and the features you actually need.
       </>
@@ -249,7 +255,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
     name: "BiggerPockets vs TrueCap for House Hacking (2026)",
     url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,
     description:
-      "House-hack-specific comparison of TrueCap and BiggerPockets — owner-occupant modeling, FHA financing, effective rent saved.",
+      "House-hack-specific comparison of TrueCap and BiggerPockets — owner-occupant modeling, FHA financing, net monthly cost.",
     dateModified: lastmodFor("/vs/biggerpockets-for-house-hacking"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -273,10 +279,9 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Both run house-hack underwriting. This is the house-hacker cut:
-            which one models owner-occupant unit usage cleanly, FHA 3.5%-down
-            financing, and surfaces &quot;effective rent saved&quot; — the
-            metric that actually decides whether the deal beats just renting an
-            apartment.
+            which one models owner-occupant unit usage cleanly, handles FHA
+            3.5%-down financing, and shows your net monthly cost: the number
+            that decides whether the deal beats just renting an apartment.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -314,16 +319,15 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           </SectionHeading>
           <div className={VS_PROSE}>
             <p>
-              <strong>TrueCap</strong> wins for house-hacking specifically — the
-              explicit &quot;owner-occupant&quot; property type auto-excludes your
-              unit from the rent income side, surfaces an &quot;effective rent
-              saved&quot; metric, while keeping every rent and expense input
-              editable.
-              <strong> BiggerPockets&apos;</strong> calculator treats the property
-              as generic multifamily and requires you to mentally adjust the math
-              for your owner-occupied unit. TrueCap has a free core
-              owner-occupant workflow, while BiggerPockets currently presents
-              calculator results as a Pro membership feature. Compare both live
+              <strong>TrueCap</strong> has a dedicated house-hack setup: the
+              explicit &quot;owner-occupant&quot; property type counts your unit
+              at $0 rent, so the cash-flow line is your net monthly cost after
+              reserves, and every rent and expense input stays editable.
+              <strong> BiggerPockets&apos;</strong> rental calculator form has
+              one gross income field and no owner-occupied setting, so you adjust
+              the rent for your own unit yourself. TrueCap has a free core
+              owner-occupant workflow; BiggerPockets&apos; calculator form says
+              results unlock with Pro or a 7-day free trial. Compare both live
               pricing pages.
             </p>
           </div>
@@ -349,8 +353,9 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            BiggerPockets calculator details based on publicly available product
-            info as of 2026. See{" "}
+            BiggerPockets details checked against its rental calculator page,
+            its public calculator form, and its membership page in October 2026.
+            See{" "}
             <a
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
@@ -359,7 +364,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             >
               BiggerPockets&apos; official rental calculator page
             </a>{" "}
-            for their current state.
+            for current details.
           </p>
           <div className={VS_PROSE}>
             <p>
@@ -385,8 +390,9 @@ export default function VsBiggerPocketsForHouseHackingPage() {
         </Section>
 
         <ComparisonFaq
-          competitorName="BiggerPockets (House Hacking)"
+          competitorName="BiggerPockets"
           items={BP_HOUSE_HACK_FAQ}
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
@@ -396,8 +402,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           lede={
             <>
               TrueCap&apos;s free tier covers owner-occupant property types,
-              per-unit rent + status, FHA financing, and effective-rent-saved
-              math. Pro adds a 10-year cash-flow and equity planning view,
+              per-unit rent + status, FHA financing, and your net monthly cost in
+              House Hack mode. Pro adds a 10-year cash-flow and equity planning view,
               sensitivity, Offer Ceiling, and saved-deal comparison. Model
               post-move-out as a separate fully rented scenario; see live pricing
               and check trial eligibility.
