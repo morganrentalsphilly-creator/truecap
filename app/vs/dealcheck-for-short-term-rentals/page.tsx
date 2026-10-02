@@ -67,13 +67,13 @@ type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "LTR + STR scenario comparison", truecap: "Save separate scenarios; side-by-side comparison is Pro", dealcheck: "Duplicate the deal and compare, subject to plan caps", winner: "tie" },
-  { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field — same approach", winner: "tie" },
-  { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Annualized only", winner: "tie" },
-  { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "Same approach", winner: "tie" },
+  { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field; gross rent can be entered on a daily or weekly basis", winner: "tie" },
+  { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Not listed in its short-term rental help article", winner: "tie" },
+  { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "No AirDNA or Mashvisor integration listed on its integrations page", winner: "tie" },
   { feature: "Bonus depreciation / STR tax eligibility", truecap: "No tax-specific module; review with a qualified professional", dealcheck: "Verify the current calculator scope and eligibility limits", winner: "tie" },
-  { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Manual", winner: "tie" },
-  { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes", winner: "tie" },
-  { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes", winner: "tie" },
+  { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Not listed on its pricing or short-term rental help pages", winner: "tie" },
+  { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes, operating expenses are customizable", winner: "tie" },
+  { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes, custom operating expenses for cleaning and upkeep", winner: "tie" },
   { feature: "Mobile UX", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
   { feature: "Free tier covers STR underwriting", truecap: "Yes — core cap rate / CoC / DSCR / cash flow", dealcheck: "Yes — Rental Cash Flow for Airbnbs is included on Starter", winner: "tie" },
 ];
@@ -146,12 +146,12 @@ export default function VsDealcheckForShortTermRentalsPage() {
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <VsHero>
           <h1 className={VS_H1}>
-            TrueCap vs DealCheck for Short-term rentals:{" "}
+            TrueCap vs DealCheck for short-term rentals:{" "}
             which supports the underwriting workflow better?
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Both calculators were built for long-term rentals first. Both let you model short-term rentals with projected revenue inputs. This comparison covers seasonal ADR + occupancy, AirDNA-input workflow, and where tax-specific work must move to a CPA model.
+            Both calculators let you model short-term rentals with projected revenue inputs. This comparison covers seasonal ADR + occupancy, AirDNA-input workflow, and where tax-specific work must move to a CPA model.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -181,7 +181,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
 
         <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
           <SectionHeading id="vs-tldr-heading">
-            TL;DR for Short-term rentals investors
+            TL;DR for short-term rental investors
           </SectionHeading>
           <div className={VS_TLDR_GRID}>
             <div className="min-w-0">
@@ -210,10 +210,10 @@ export default function VsDealcheckForShortTermRentalsPage() {
 
         <Section aria-labelledby="vs-matrix-heading">
           <SectionHeading id="vs-matrix-heading">
-            Short-term rentals feature-by-feature
+            Short-term rental feature-by-feature
           </SectionHeading>
           <p className={VS_INTRO}>
-            Where each tool wins on the Short-term rentals workflow specifically.
+            Where each tool wins on the short-term rental workflow specifically.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
             <VsMatrixTable
@@ -232,7 +232,16 @@ export default function VsDealcheckForShortTermRentalsPage() {
             <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener" className="tc-link">
               DealCheck&apos;s official pricing page
             </a>{" "}
-            for current terms.
+            for current terms. DealCheck details were checked against that
+            page and its{" "}
+            <a href="https://help.dealcheck.io/en/articles/2259769-can-i-use-dealcheck-to-analyze-airbnb-s-and-vacation-rentals" target="_blank" rel="noopener" className="tc-link">
+              short-term rental help article
+            </a>{" "}
+            and{" "}
+            <a href="https://help.dealcheck.io/en/collections/2978273-integrations" target="_blank" rel="noopener" className="tc-link">
+              integrations page
+            </a>{" "}
+            in October 2026.
           </p>
           <div className={VS_PROSE}>
             <p>
@@ -247,11 +256,11 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="DealCheck (Short-term rentals)" items={NICHE_FAQ} />
+        <ComparisonFaq competitorName="DealCheck" items={NICHE_FAQ} reviewedDate="October 2026" />
 
         <CloseSection
           headingId="vs-close-heading"
-          heading={<>Underwrite your next Short-term rentals deal — free.</>}
+          heading={<>Underwrite your next short-term rental deal — free.</>}
           lede={
             <>
               Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
