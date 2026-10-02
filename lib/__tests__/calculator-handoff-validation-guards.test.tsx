@@ -12,6 +12,8 @@ import {
 import { BreakEvenCalculatorWidget } from "@/components/tools/break-even-calculator-widget";
 import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
 import {
+  calculateMortgagePaymentEstimate,
+  fmtMoney,
   MortgagePaymentWidget,
   validateMortgagePaymentInputs,
   type MortgagePaymentRawInputs,
@@ -213,6 +215,28 @@ describe("P2-48: the mortgage calculator rejects negative and absurd inputs", ()
     }
     // The formula is the one the unit test pins, called as before.
     expect(source).toContain("interestRate: Math.max(0, num(rateInput))");
+  });
+
+  it("prints $0, never -$0, for a loan at a 0% rate", () => {
+    // Inside the bounds and with no error shown, a 0% rate printed "Total
+    // interest over loan -$0": the payments sum to a hair under the loan in
+    // floating point, and the sign was read before rounding.
+    const { totalInterest } = calculateMortgagePaymentEstimate({
+      price: 125000,
+      downPaymentPct: 20,
+      interestRate: 0,
+      loanTermYears: 7,
+      propertyTaxPct: 1.49,
+      homeownerInsurancePct: 0.5,
+    });
+    expect(Math.abs(totalInterest)).toBeLessThan(0.5);
+    expect(fmtMoney(totalInterest)).toBe("$0");
+    // The sign comes from the rounded figure: nothing that rounds to zero is
+    // negative, and a real negative keeps its sign.
+    expect(fmtMoney(-1.5e-11)).toBe("$0");
+    expect(fmtMoney(-0.4)).toBe("$0");
+    expect(fmtMoney(-489.2)).toBe("-$489");
+    expect(fmtMoney(1530.6)).toBe("$1,531");
   });
 
   it("marks and announces: aria-invalid, a described error with role=alert, a polite status", () => {
