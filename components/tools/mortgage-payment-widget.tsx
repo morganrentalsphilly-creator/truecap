@@ -28,8 +28,13 @@ const num = (s: string) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-const fmtMoney = (n: number) =>
-  `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+/** Whole dollars. The sign is the rounded figure's, so a value that rounds to
+ * zero (total interest at a 0% rate is a hair under zero in floating point)
+ * prints "$0", never "-$0". */
+export const fmtMoney = (n: number) => {
+  const rounded = Math.round(n);
+  return `${rounded < 0 ? "-" : ""}$${Math.abs(rounded).toLocaleString("en-US")}`;
+};
 
 export type MortgagePaymentEstimateInput = {
   price: number;
