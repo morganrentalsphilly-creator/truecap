@@ -48,8 +48,10 @@ describe("public funnel and trust guards", () => {
     expect(emptyBranch).toContain("setAddressError(HERO_EMPTY_HELPER)");
     expect(emptyBranch).toContain('form.setFocus("address")');
     expect(emptyBranch).not.toContain("scrollToCalculator");
+    // The helper names the same sites as the unsupported-link error and the
+    // analyzer's listing-link help (one list; it used to name two of five).
     expect(form).toContain(
-      'HERO_EMPTY_HELPER = "Paste an address or a Zillow/Redfin link"',
+      "HERO_EMPTY_HELPER = `Paste an address or a ${SUPPORTED_LISTING_SITES_TEXT} link`",
     );
     expect(form).toContain('role="alert"');
     expect(form).toContain('const errorId = isHero ? "hero-address-error" : "close-address-error";');
