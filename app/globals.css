@@ -268,6 +268,35 @@ textarea,
   letter-spacing: -0.012em;
 }
 
+/* What the display voice is set in until Archivo arrives. next/font's own
+   fallback face ("Archivo Fallback": local Arial at 98.7%) is matched to
+   Archivo at normal width, so a heading in the 82% cut was set too wide,
+   took an extra line and gave it back at the swap: a layout shift of 0.199
+   on /pricing on a slow first visit. This face joins the same family at
+   font-stretch 82%, so only font-display text selects it and everything at
+   normal width keeps next/font's face.
+   size-adjust is measured, not estimated: Archivo at 82% width and weight
+   750 is 0.853 of Arial Bold's width over the site's own headings (77
+   strings from 14 pages, in Chromium). The ascent and descent overrides are
+   Archivo's (878 and 210 per 1000 units) divided by that 0.853, the way
+   next/font derives its own. Liberation Sans Bold has Arial Bold's advance
+   widths and stands in where Arial is not installed (Linux).
+   One factor cannot make every heading break identically: Archivo's digits
+   are 0.92 of Arial Bold's width and a plain sentence 0.85, so a balanced
+   headline with figures can still move a word at the swap. The face relies
+   on next/font naming its fallback family "Archivo Fallback";
+   lib/__tests__/display-font-fallback.test.ts pins both ends. */
+@font-face {
+  font-family: "Archivo Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("LiberationSans-Bold");
+  font-weight: 750;
+  font-stretch: 82%;
+  ascent-override: 102.93%;
+  descent-override: 24.62%;
+  line-gap-override: 0%;
+  size-adjust: 85.3%;
+}
+
 /* A link in running text: Signal Blue, underlined, no arrow (DESIGN.md
    chrome rules). Inline links that stand alone add min-h-11 for the target. */
 @utility tc-link {
