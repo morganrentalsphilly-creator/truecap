@@ -80,9 +80,6 @@ describe("analyzer link destinations", () => {
       while ((match = anchor.exec(flat)) != null) {
         const label = match[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
         if (!ANALYZER_LABEL.test(label)) continue;
-        // "Start free at usetruecap.com" is a brand link on the shared-deal
-        // shell, not an analyzer promise.
-        if (/usetruecap\.com/i.test(label)) continue;
         offenders.push(`${file}: "${label}"`);
       }
       for (const match of flat.matchAll(
