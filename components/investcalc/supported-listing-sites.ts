@@ -7,12 +7,15 @@
  *
  * A site is named here only when the link shape it serves today reaches its
  * own branch of the address parser (lib/listing-url.ts) and comes back as an
- * address. Trulia is not named: its property links are
- * trulia.com/home/<address>-<id>, the parser's Trulia branch reads only
- * /homedetails/ paths, and the generic fallback that catches the real link
- * leaves the listing id in the address. It can return to the list once the
- * parser reads that shape; `lib/__tests__/analyzer-first-visit-guards.test.ts`
- * holds the condition and checks that a link from each named site parses.
+ * address. Trulia is not named. The parser reads its property links
+ * (trulia.com/home/<address>-<id> and /p/<st>/<city>/<address>--<id>) and
+ * drops the listing id, but those shapes were taken from search results:
+ * trulia.com answered 403 to an automated page load on 2026-10-02, so no
+ * Trulia page was read to confirm them. Naming it here also means
+ * re-anchoring the three strings the guards and two e2e specs pin.
+ * `lib/__tests__/analyzer-first-visit-guards.test.ts` checks that a link
+ * from each named site parses, and that Trulia is never named while the
+ * parser cannot read its links.
  */
 export const SUPPORTED_LISTING_SITES = [
   "Zillow",
