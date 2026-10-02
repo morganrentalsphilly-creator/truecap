@@ -214,7 +214,7 @@ export default function SeventyPercentRulePost() {
                 ARV calculator
               </Link>{" "}
               runs this exact formula against your own comps — the comps-based
-              ARV, the 70%-rule price screen at any multiplier, and the 75% refi line in one
+              ARV and the 70%-rule price screen at any multiplier in one
               screen. Already have the ARV? The free{" "}
               <Link
                 href="/tools/70-percent-rule-calculator"
@@ -639,16 +639,23 @@ export default function SeventyPercentRulePost() {
               a long rehab, or a bidding war. Get the two inputs right first: an
               ARV disciplined by real sold comps and a neighborhood ceiling, and a
               rehab number built bottom-up with a contingency. Then use the rule to
-              screen and the backward solve to commit. The{" "}
+              screen and the backward solve to commit. The free{" "}
+              <Link
+                href="/tools/70-percent-rule-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                70% rule calculator
+              </Link>{" "}
+              runs the 70%-rule price screen from your ARV and repair budget.
+              The{" "}
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              runs a property&apos;s 70%-rule price screen, cash flow, cap rate, and DSCR from
-              the same inputs — so whether you&apos;re flipping it or holding it,
-              you can see the number that protects your spread before you write the
-              offer. Confirm your own costs, comps, and financing terms before
-              recording a decision; the 70%-rule price screen is not a
-              recommended offer.
+              does not model a flip. It screens the finished property as a
+              rental: cash flow, cap rate, and DSCR from the price, rent, and
+              loan terms you enter. Run it if you plan to hold. Confirm your own
+              costs, comps, and financing terms before recording a decision; the
+              70%-rule price screen is not a recommended offer.
             </p>
           </div>
         </article>

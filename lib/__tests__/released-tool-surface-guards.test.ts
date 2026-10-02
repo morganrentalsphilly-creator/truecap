@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -131,5 +131,31 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     ]) {
       expect(read(widget)).toMatch(/buildAnalyzerHandoffUrl\(\s*\{\}\s*,/);
     }
+  });
+
+  it("no blog post says the analyzer runs the 70% rule", () => {
+    // The 70% Rule Calculator (/tools/70-percent-rule-calculator) runs the
+    // price screen. The analyzer has no 70%-rule screen and no flip model, so
+    // a post may name the rule next to the standalone tools, never as
+    // something the analyzer does. Tags and JSX spacers are stripped first, so
+    // a sentence that wraps around a <Link> is still read as one sentence; the
+    // match stops at a full stop or a closing quote, so two neighbouring
+    // strings in a list are not read as one.
+    const offenders: string[] = [];
+    for (const entry of readdirSync(join(process.cwd(), "app/blog"), {
+      withFileTypes: true,
+    })) {
+      if (!entry.isDirectory()) continue;
+      const file = `app/blog/${entry.name}/page.tsx`;
+      if (!existsSync(join(process.cwd(), file))) continue;
+      const prose = read(file)
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\{" "\}/g, " ")
+        .replace(/&apos;/g, "'")
+        .replace(/\s+/g, " ");
+      const hit = /\banalyzer\b[^."]{0,160}\b70%[- ]rule\b/i.exec(prose);
+      if (hit) offenders.push(`${file}: ${hit[0]}`);
+    }
+    expect(offenders).toEqual([]);
   });
 });
