@@ -371,6 +371,27 @@ describe("voice: 'released' is not customer copy in the shared calculator blocks
   });
 });
 
+describe("P2-121: the page's one Disclaimer is not restated beside an element", () => {
+  // docs/voice.md rule 3: SiteFooter renders the Disclaimer once per page
+  // ("not tax, legal or investment advice"), and nothing else repeats it.
+  it.each([
+    "app/methodology/page.tsx",
+    "app/vs/stessa/page.tsx",
+    "components/marketing/lead-magnet-capture.tsx",
+  ])("%s", (path) => {
+    const source = withoutComments(read(path)).replace(/\s+/g, " ");
+    expect(source).not.toMatch(/not (?:tax|legal|investment|financial|lending)[a-z, ]{0,40}advice/i);
+    expect(source).not.toMatch(/does not replace property-level verification/i);
+  });
+
+  it("each of the three still renders the footer's Disclaimer, or sits on pages that do", () => {
+    for (const page of ["app/methodology/page.tsx", "app/vs/stessa/page.tsx", "app/playbook/page.tsx"]) {
+      expect(read(page), page).toContain("<SiteFooter");
+    }
+    expect(read("components/marketing/site-footer.tsx")).toContain("<Disclaimer");
+  });
+});
+
 describe("P1-37: the feed credits TrueCap, not a team", () => {
   it("the channel description names no team", async () => {
     const xml = await (await getFeed()).text();
