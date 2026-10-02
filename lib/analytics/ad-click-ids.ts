@@ -21,7 +21,8 @@
  * deep (`next=%2F%3Fgclid%3D...`). That value is decoded, filtered and
  * written back with `encodeURIComponent`, so its escaping can differ from
  * the original (a `+` comes back as `%2B`). A value that does not decode
- * (a malformed `%` sequence) is left as it was.
+ * (a malformed `%` sequence) is not decoded further; only what the
+ * plain-text pass finds in it is removed.
  */
 
 import { AD_CLICK_ID_PARAMS } from "@/lib/first-touch";

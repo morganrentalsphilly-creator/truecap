@@ -20,7 +20,8 @@ import {
  * runs the same redaction on what it finds. A value is rewritten, with
  * `encodeURIComponent`, only when something inside it was redacted; every
  * other value is left byte for byte. A value that does not decode (a
- * malformed `%` sequence) is left as it was.
+ * malformed `%` sequence) is not decoded further; only what the plain-text
+ * pass finds in it is redacted.
  *
  * This lives here, not in lib/sensitive-url.ts, because that module also
  * decides whether the measurement scripts load (`hasSensitiveQueryParameter`)
