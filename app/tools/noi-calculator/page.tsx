@@ -233,7 +233,7 @@ export default function NoiCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="NOI calculator"
-            hook="TrueCap's free core analyzer takes NOI into editable cap rate, cash-on-cash, model DSCR, and cash flow. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
+            hook="TrueCap's free core analyzer takes NOI into editable cap rate, cash-on-cash, model DSCR, and cash flow. Projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
 
         </main>

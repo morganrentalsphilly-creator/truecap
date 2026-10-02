@@ -262,6 +262,36 @@ describe("voice: 'released' is not customer copy on the calculator pages", () =>
   });
 });
 
+describe("voice: the retired calculator pages keep the same words out of their source", () => {
+  // Ten /tools URLs only redirect today, but their page source is kept and
+  // would render again if a calculator came back. The source is held to the
+  // rules the live pages follow, so the old wording cannot return with it.
+  const listed = new Set(CALCULATOR_REGISTRY.map((tool) => tool.slug));
+  const retired = readdirSync(join(ROOT, "app/tools"))
+    .filter((slug) => !listed.has(slug))
+    .map((slug) => `app/tools/${slug}/page.tsx`)
+    .filter((path) => {
+      try {
+        return statSync(join(ROOT, path)).isFile();
+      } catch {
+        return false;
+      }
+    });
+
+  it("finds the retired pages", () => {
+    expect(retired).toContain("app/tools/rental-cash-flow-calculator/page.tsx");
+    expect(retired).toContain("app/tools/noi-calculator/page.tsx");
+    expect(retired.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it.each(retired)("%s", (path) => {
+    const source = withoutComments(read(path));
+    expect(source).not.toMatch(/\b(?:un)?released\b/i);
+    // The Strong-to-Negative bands are screening bands, not the Buy Box.
+    expect(source).not.toMatch(/Buy Box classifier/i);
+  });
+});
+
 describe("voice: 'released' is not customer copy in the shared calculator blocks", () => {
   // The calculator pages mount these: the shared analyzer CTA (its default
   // supporting text) and the calculator widgets, whose link labels show on
