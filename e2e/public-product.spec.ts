@@ -170,7 +170,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   await expect(
     form.getByRole("alert").filter({
       hasText:
-        "Paste an address or a Zillow, Redfin, Realtor.com, Homes.com, or Trulia link",
+        "Paste an address or a Zillow, Redfin, Realtor.com, or Homes.com link",
     }),
   ).toBeVisible();
   await expect(

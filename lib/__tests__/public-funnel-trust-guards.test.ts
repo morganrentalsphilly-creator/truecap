@@ -49,7 +49,7 @@ describe("public funnel and trust guards", () => {
     expect(emptyBranch).toContain('form.setFocus("address")');
     expect(emptyBranch).not.toContain("scrollToCalculator");
     // The helper names the same sites as the unsupported-link error and the
-    // analyzer's listing-link help (one list; it used to name two of five).
+    // analyzer's listing-link help (one list; it used to name only two).
     expect(form).toContain(
       "HERO_EMPTY_HELPER = `Paste an address or a ${SUPPORTED_LISTING_SITES_TEXT} link`",
     );
