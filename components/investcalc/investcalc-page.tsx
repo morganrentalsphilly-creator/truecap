@@ -8077,13 +8077,31 @@ export function InvestCalcPage({
    */
   const handleAnalyzeAnotherLikeThis = async () => {
     const shouldConfirm = hasPendingDealChanges || !savedDealId;
+    // The sample's financing is a fixture input (6.6%), not a rate the
+    // visitor chose. Carried into their own deal it blocked the live rate:
+    // the address lookup only replaces the untouched starting rate, so the
+    // first real property was underwritten at the sample's rate and labelled
+    // "custom financing". From the sample, financing returns to the starting
+    // values; a real deal keeps its financing, as the action promises.
+    // Only while the sample's financing is still the fixture's: a visitor
+    // who edited the rate in the sample chose it, and keeps it.
+    const leavingSample =
+      isTrueCapSyntheticSampleAddress(form.getValues("address")) &&
+      Number(form.getValues("interestRate")) ===
+        SAMPLE_DEAL_FIXTURE.values.interestRate &&
+      Number(form.getValues("downPaymentPct")) ===
+        SAMPLE_DEAL_FIXTURE.values.downPaymentPct &&
+      Number(form.getValues("loanTermYears")) ===
+        SAMPLE_DEAL_FIXTURE.values.loanTermYears;
     const ok =
       !shouldConfirm ||
       (await confirmDialog({
         title: "Analyze another property?",
         body: hasUnappliedTargetDraft
           ? "Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
-          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Targets will be matched again for the next property. Save first if you want to keep this deal.",
+          : leavingSample
+            ? "The sample will be cleared.\n\nIts general operating assumptions will remain. Financing returns to the starting values, so the sample's rate is not carried into your deal. Targets will be matched again for the next property."
+            : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Targets will be matched again for the next property. Save first if you want to keep this deal.",
         confirmLabel: "Analyze another",
       }));
     if (!ok) return;
@@ -8094,6 +8112,15 @@ export function InvestCalcPage({
       form.formState.dirtyFields as Record<string, unknown>,
     );
     const forkedValues = buildRepeatDealDraft(sourceValues);
+    if (leavingSample) {
+      const startingValues = buildNewAnalysisDefaults(
+        sourceValues.propertyType,
+        userAnalysisDefaults,
+      );
+      forkedValues.downPaymentPct = startingValues.downPaymentPct;
+      forkedValues.interestRate = startingValues.interestRate;
+      forkedValues.loanTermYears = startingValues.loanTermYears;
+    }
     const forkedValuesForConfidence = forkedValues as InvestmentFormValues;
     const survivingSourceContext = restoreInputConfidenceSourceContext(
       sourceInputContext,
@@ -8191,7 +8218,11 @@ export function InvestCalcPage({
     // must NOT fire over them (mirrors the Duplicate mount branch, which
     // never arms eligibility). Also drop any live auto-apply Undo snapshot:
     // restoring pre-apply values now would stomp the fork.
-    autoApplyEligibleRef.current = false;
+    //
+    // Leaving the sample is the exception: none of its values are the
+    // visitor's own, and the address lookup adopts the live rate only on a
+    // session that is still eligible (mayAdoptStartingBenchmark).
+    autoApplyEligibleRef.current = leavingSample;
     autoApplyUndoRef.current = null;
     // Overwrite the anon draft so a reload restores this partial fork instead
     // of the SOURCE deal the watcher last wrote. The lenient draft normalizer
@@ -8214,8 +8245,9 @@ export function InvestCalcPage({
     });
     toast({
       title: "Reusable assumptions kept",
-      description:
-        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Targets, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
+      description: leavingSample
+        ? "Enter the next property's address, price, and rent. The sample's general operating assumptions carried over and financing is back to the starting values; Targets, tax, insurance, and other property-specific inputs will be matched or reviewed again."
+        : "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; Targets, tax, insurance, and other property-specific inputs will be matched or reviewed again.",
     });
     // Land the user on the (now visible again) address input. Deferred a
     // beat so the results section has unmounted and the input phase is the
@@ -10891,6 +10923,7 @@ export function InvestCalcPage({
           open
           onOpenChange={setIsPdfPurchaseDialogOpen}
           returnFocusRef={pdfPurchaseTriggerRef}
+          sample={isTrueCapSyntheticSampleAddress(analysisValues?.address)}
         />
       ) : null}
       {/* Duplicate-address chooser - opens when saving an address that's
