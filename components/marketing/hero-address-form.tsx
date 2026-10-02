@@ -40,20 +40,45 @@ import {
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
 import { parseListingUrl } from "@/lib/listing-url";
+import {
+  extractListingLink,
+  SUPPORTED_LISTING_SITES_TEXT,
+} from "@/components/investcalc/supported-listing-sites";
 import { cn } from "@/lib/utils";
 
-export const HERO_EMPTY_HELPER = "Paste an address or a Zillow/Redfin link";
-export const HERO_LISTING_ERROR =
-  "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link.";
+// Neither message ends in a full stop: each is followed on the next line by
+// "or try the sample deal", so the pair reads as one sentence. Both name the
+// same sites as the analyzer's listing-link help (one list, one module).
+export const HERO_EMPTY_HELPER = `Paste an address or a ${SUPPORTED_LISTING_SITES_TEXT} link`;
+export const HERO_LISTING_ERROR = `Paste a supported ${SUPPORTED_LISTING_SITES_TEXT} property link`;
 
-/** Looks like a listing URL rather than a street address. */
+/**
+ * Carries a listing link rather than a street address. The link may sit
+ * anywhere in the text: a phone share sheet pastes "Check out this home"
+ * and then the link, and that sentence must not become the address.
+ */
 export function looksLikeListingLink(value: string): boolean {
-  const v = value.trim();
-  if (!v) return false;
-  return (
-    /^https?:\/\//i.test(v) ||
-    /^(www\.)?(zillow|redfin|realtor|homes|trulia)\.com\b/i.test(v)
+  return extractListingLink(value) !== null;
+}
+
+/**
+ * What a visitor typed into the server-rendered field before React attached.
+ *
+ * The form is a plain GET until hydration, which on a slow phone takes over a
+ * second. react-hook-form writes its default value into the input when it
+ * registers it, so a default of "" erased whatever had been typed in that
+ * window. Reading the field first makes the typed text the default.
+ */
+export function readPreHydrationAddress(placement: "hero" | "close"): string {
+  if (typeof document === "undefined") return "";
+  const form =
+    placement === "hero"
+      ? "form[data-hero-address-form]"
+      : "form[data-close-address-form]";
+  const input = document.querySelector<HTMLInputElement>(
+    `${form} input[name="address"]`,
   );
+  return typeof input?.value === "string" ? input.value : "";
 }
 
 function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {
@@ -86,10 +111,17 @@ export function HeroAddressForm({
   const isHero = placement === "hero";
   const errorId = isHero ? "hero-address-error" : "close-address-error";
   const router = useRouter();
+  // Read once, on the first client render, while the server-rendered input
+  // still holds whatever was typed before hydration.
+  const [preHydrationAddress] = useState(() =>
+    readPreHydrationAddress(placement),
+  );
   // Throwaway form instance purely to satisfy <AddressAutocomplete>'s
   // react-hook-form API; the value is read on submit.
   const form = useForm<InvestmentFormValues>({
-    defaultValues: { address: "" } as DefaultValues<InvestmentFormValues>,
+    defaultValues: {
+      address: preHydrationAddress,
+    } as DefaultValues<InvestmentFormValues>,
   });
   // Last suggestion the user actually picked (carries state/county/zip).
   const selectedRef = useRef<SelectedAddress | null>(null);
@@ -119,7 +151,7 @@ export function HeroAddressForm({
     }
 
     if (looksLikeListingLink(raw)) {
-      const parsed = parseListingUrl(raw);
+      const parsed = parseListingUrl(extractListingLink(raw) ?? raw);
       if (!parsed) {
         setAddressError(HERO_LISTING_ERROR);
         form.setFocus("address");
