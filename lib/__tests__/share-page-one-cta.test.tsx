@@ -335,4 +335,17 @@ describe("the agent's leads card on the dashboard", () => {
     // Leads past the first screenful stay reachable without client code.
     expect(card).toContain("<details");
   });
+
+  it("names the count's unit in text a screen reader gets, and calls a row a lead", () => {
+    const card = code("components/dashboard/DealLeadsCard.tsx");
+    // A span has no role, so an aria-label on it is not announced: the unit
+    // is visually hidden text beside the number.
+    expect(card).not.toMatch(/aria-label=/);
+    expect(card).toMatch(
+      /\{total\} <span className="sr-only"> \{" "\} \{total === 1 \? "lead" : "leads"\} <\/span>/,
+    );
+    // The message field is optional, so a row is a lead, not a message.
+    expect(card).not.toMatch(/"messages?"/);
+    expect(card).toContain('{earlier.length === 1 ? "lead" : "leads"}');
+  });
 });
