@@ -321,7 +321,7 @@ export default function VsRentspreePage() {
               <li>
                 <strong>Underwrite the deal in TrueCap.</strong> Either you (the
                 agent) or your buyer client runs the address. The result is an
-                analysis with labeled sources that you can share.
+                analysis you can share by read-only link.
               </li>
               <li>
                 <strong>Buyer makes the offer + closes.</strong> TrueCap&apos;s
@@ -447,7 +447,7 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Is TrueCap a RentSpree alternative?",
     answer: (
       <>
-        No — different jobs. RentSpree is listings, rental applications, tenant
+        No. They do different jobs. RentSpree is listings, rental applications, tenant
         screening and rent collection for properties you own or manage. TrueCap
         is pre-purchase underwriting for properties you&apos;re considering
         buying. An agent who helps clients with both ends of the workflow can
