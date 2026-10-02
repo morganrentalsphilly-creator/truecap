@@ -173,12 +173,7 @@ export default function BreakEvenCalculatorPage() {
         <ToolEmbedInvite slug="break-even-calculator" />
 
 
-        {/* Own hook: the shared default still says "released", a build word
-            the voice guide keeps out of customer copy (docs/voice.md rule 6). */}
-        <ToolsConversionCta
-          calculatorName="Break-even calculator"
-          hook="Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
-        />
+        <ToolsConversionCta calculatorName="Break-even calculator" />
         <RelatedContent kind="tool" slug="break-even-calculator" title="Break-Even Calculator" className="mt-10" />
       </main>
       <SiteFooter />
