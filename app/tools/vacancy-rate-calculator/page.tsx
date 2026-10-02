@@ -72,7 +72,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How do you calculate vacancy rate?",
-    a: "Vacancy rate = (annual vacancy loss ÷ annual gross potential rent) × 100. Annual vacancy loss = (vacant days × daily rent) + turnover costs (cleaning, repairs, listing fees). The calculator above does this math automatically. Most listing brochures quote 5%, which is optimistic — model 7-9% to be safe.",
+    a: "Vacancy rate = (annual vacancy loss ÷ annual gross potential rent) × 100. Annual vacancy loss = (vacant days × daily rent) + turnover costs (cleaning, repairs, listing fees). The calculator above does this math automatically. A 5% vacancy assumption is optimistic; model 7-9% to be safe.",
   },
   {
     q: "What's included in vacancy loss?",
@@ -168,8 +168,8 @@ export default function VacancyRateCalculatorPage() {
             Housing Vacancy Survey
           </a>{" "}
           put the national rental vacancy rate at {HVS_RENTAL_VACANCY.rate} in{" "}
-          {HVS_RENTAL_VACANCY.period}. Most listing brochures quote 5%. The gap
-          is where deals quietly fail.
+          {HVS_RENTAL_VACANCY.period}. A pro forma that assumes 5% sits below
+          that. The gap is where deals quietly fail.
           This calculator converts vacant days + turnover cost into the true
           effective vacancy rate to use in your underwrite.
         </p>
