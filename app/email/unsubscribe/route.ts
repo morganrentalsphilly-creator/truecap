@@ -9,6 +9,11 @@
  * (List-Unsubscribe-Post) also POSTs to the header URL with body
  * `List-Unsubscribe=One-Click`, so header-driven unsubscribes keep working
  * through the query-token fallback. House pattern: app/api/testimonials/unpublish.
+ *
+ * The account token (scope "marketing-unsubscribe") is the link in every
+ * lifecycle email (lib/email/lifecycle-compliance.ts) and in the feedback
+ * request. It sets profiles.marketing_opt_out, which the lifecycle senders
+ * read before every send.
  */
 import { NextResponse } from "next/server";
 import { readSignedToken } from "@/lib/signed-token";
@@ -90,7 +95,11 @@ export async function POST(request: Request) {
       }
       return reply("You're unsubscribed from TrueCap checklist and playbook emails. Product and billing notices still arrive.", 200);
     }
-    await setMarketingOptOut(admin, recipient.userId);
+    // False means the opt-out was not stored (the column is not there yet).
+    // Every lifecycle email links here, so "unsubscribed" is only said once
+    // the row is written.
+    const saved = await setMarketingOptOut(admin, recipient.userId);
+    if (!saved) return reply("Could not update your preference right now. Please try this link again.", 503);
   } catch {
     return reply("Could not update your preference right now. Please try this link again.", 503);
   }

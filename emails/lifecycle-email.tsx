@@ -6,6 +6,12 @@
  * day-NN.json) and is rendered server-side by lib/email/render-lifecycle.ts.
  * Sent as individual Resend emails by app/api/cron/send-lifecycle-emails.
  *
+ * Footer: every marketing send carries the signed unsubscribe link and the
+ * sender's postal address. Both come from the caller
+ * (lib/email/lifecycle-compliance.ts builds the link per user; the address is
+ * read from EMAIL_POSTAL_ADDRESS). Neither has a default here: an address is
+ * never typed in this file, and a sender that has no address does not send.
+ *
  * Brand mirrors emails/rate-alert.tsx — #5248D4 primary, white card on
  * #F1F5F9, "TrueCap." wordmark.
  */
@@ -34,8 +40,15 @@ export type LifecycleEmailProps = {
   ctaUrl: string;
   signatureNote?: string | null;
   siteUrl: string;
-  /** Link to the email-preferences page (CAN-SPAM unsubscribe path). */
+  /** Link to /settings, where alert and summary emails are switched on or off. */
   manageUrl: string;
+  /**
+   * Signed one-click opt-out (/email/unsubscribe). Present on every marketing
+   * send; null only for a billing notice and for a preview that cannot sign.
+   */
+  unsubscribeUrl?: string | null;
+  /** The sender's postal address, from EMAIL_POSTAL_ADDRESS. */
+  postalAddress?: string | null;
 };
 
 export default function LifecycleEmail({
@@ -47,6 +60,8 @@ export default function LifecycleEmail({
   signatureNote,
   siteUrl,
   manageUrl,
+  unsubscribeUrl,
+  postalAddress,
 }: LifecycleEmailProps) {
   return (
     <Html>
@@ -109,9 +124,12 @@ export default function LifecycleEmail({
               ) : null}
             </Section>
           </Section>
+          {/* Footer text uses the body text color: the unsubscribe link and
+              the address have to be readable, and the lighter grey used here
+              before was not on this background. */}
           <Text
             style={{
-              color: "#94A3B8",
+              color: SUB,
               fontSize: 12,
               lineHeight: "18px",
               textAlign: "center",
@@ -120,9 +138,28 @@ export default function LifecycleEmail({
           >
             TrueCap · Underwrite rentals in 60 seconds
             <br />
-            <Link href={manageUrl} style={{ color: "#94A3B8", textDecoration: "underline" }}>
+            You&apos;re getting this email because you have a TrueCap account.
+            <br />
+            {unsubscribeUrl ? (
+              <>
+                <Link
+                  href={unsubscribeUrl}
+                  style={{ color: SUB, textDecoration: "underline" }}
+                >
+                  Unsubscribe
+                </Link>
+                {" · "}
+              </>
+            ) : null}
+            <Link href={manageUrl} style={{ color: SUB, textDecoration: "underline" }}>
               Manage email preferences
             </Link>
+            {postalAddress ? (
+              <>
+                <br />
+                {postalAddress}
+              </>
+            ) : null}
           </Text>
         </Container>
       </Body>
