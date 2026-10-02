@@ -92,7 +92,8 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
             trackEvent("upgrade_cta_click", { feature: title, placement: "analysis_dashboard" });
           }
         }
-        className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+        // min-h-11: 44px target (the global floor covers buttons, not links).
+        className="group mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="size-4" />
         See {title} for this deal · Compare Pro plans
