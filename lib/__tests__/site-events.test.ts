@@ -3,7 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@vercel/analytics", () => ({ track: vi.fn() }));
 
 import { track as vercelTrack } from "@vercel/analytics";
-import { CONSENT_STORAGE_KEY, SITE_EVENTS, track } from "@/lib/analytics/site-events";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  CONSENT_STORAGE_KEY,
+  SITE_EVENTS,
+  recordCookieConsentChoice,
+  track,
+} from "@/lib/analytics/site-events";
 
 type TestWindow = {
   dataLayer?: unknown[];
@@ -33,9 +40,13 @@ afterEach(() => {
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("typed track()", () => {
-  it("names the thirteen funnel events", () => {
-    expect(SITE_EVENTS).toHaveLength(13);
+  it("names the thirteen funnel events and the two measurement events", () => {
+    // 13 funnel events, plus cookie_consent_choice and primary_cta_clicked
+    // (go-to-market audit 2026-10, rows P1-52 and P2-115).
+    expect(SITE_EVENTS).toHaveLength(15);
+    expect(new Set(SITE_EVENTS).size).toBe(SITE_EVENTS.length);
     expect(SITE_EVENTS).toContain("checkout_completed");
+    expect(SITE_EVENTS.slice(13)).toEqual(["cookie_consent_choice", "primary_cta_clicked"]);
   });
 
   it("buffers the event for tests and reaches Vercel, but keeps GTM dark without consent", async () => {
@@ -66,5 +77,91 @@ describe("typed track()", () => {
   it("is a no-op during server rendering", () => {
     delete (globalThis as unknown as { window?: TestWindow }).window;
     expect(() => track("sample_viewed", { source: "hero" })).not.toThrow();
+  });
+});
+
+/**
+ * Go-to-market audit 2026-10, row P1-52: the banner choice was recorded
+ * nowhere, so the share of visitors the consent-gated Google tags can see was
+ * unknown.
+ */
+describe("cookie banner choice", () => {
+  const win = () => (globalThis as unknown as { window: TestWindow }).window;
+
+  it("counts Accept through Vercel and, because consent is now granted, dataLayer", async () => {
+    storage.set(CONSENT_STORAGE_KEY, "granted");
+    expect(recordCookieConsentChoice()).toBe("granted");
+    await flush();
+    expect(vercelTrack).toHaveBeenCalledTimes(1);
+    expect(vercelTrack).toHaveBeenCalledWith("cookie_consent_choice", { choice: "granted" });
+    expect(win().dataLayer).toEqual([{ event: "cookie_consent_choice", choice: "granted" }]);
+  });
+
+  it("counts Reject through cookieless Vercel only: nothing reaches dataLayer", async () => {
+    storage.set(CONSENT_STORAGE_KEY, "denied");
+    expect(recordCookieConsentChoice()).toBe("denied");
+    await flush();
+    expect(vercelTrack).toHaveBeenCalledTimes(1);
+    expect(vercelTrack).toHaveBeenCalledWith("cookie_consent_choice", { choice: "denied" });
+    expect(win().dataLayer).toBeUndefined();
+    expect(win().__tcEvents).toEqual([
+      expect.objectContaining({ event: "cookie_consent_choice", props: { choice: "denied" } }),
+    ]);
+  });
+
+  it("sends nothing while no decision is stored", async () => {
+    expect(recordCookieConsentChoice()).toBeNull();
+    storage.set(CONSENT_STORAGE_KEY, "maybe");
+    expect(recordCookieConsentChoice()).toBeNull();
+    await flush();
+    expect(vercelTrack).not.toHaveBeenCalled();
+    expect(win().__tcEvents).toBeUndefined();
+    expect(win().dataLayer).toBeUndefined();
+  });
+
+  it("is wired to the banner's decision event, and only where Vercel Analytics runs", () => {
+    const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+    const vercel = read("components/analytics/vercel-analytics.tsx");
+    const listener = vercel.slice(vercel.indexOf("const onChoice"), vercel.indexOf("if (!pathname || disabledForDocument) return null;"));
+    expect(listener).toContain("recordCookieConsentChoice();");
+    expect(listener).toContain("window.addEventListener(COOKIE_CONSENT_EVENT, onChoice)");
+    expect(listener).toContain("window.removeEventListener(COOKIE_CONSENT_EVENT, onChoice)");
+    expect(vercel).toMatch(/useEffect\(\(\) => \{\s+if \(disabledForDocument\) return;\s+const onChoice/);
+
+    // The event name the component listens for is the one the banner
+    // dispatches, and the banner dispatches it only from its two handlers,
+    // after it has stored the decision.
+    const hook = read("lib/use-cookie-banner.ts");
+    expect(hook).toContain("export const COOKIE_CONSENT_EVENT = CONSENT_EVENT;");
+    expect(hook).toContain("window.dispatchEvent(new Event(CONSENT_EVENT))");
+    const banner = read("components/marketing/cookie-consent-banner.tsx");
+    expect(banner.match(/notifyCookieConsentChanged\(\);/g)).toHaveLength(2);
+    for (const handler of ["handleAccept", "handleReject"]) {
+      const start = banner.indexOf(`const ${handler} = () => {`);
+      const body = banner.slice(start, banner.indexOf("  };", start));
+      expect(body.indexOf("writeStoredConsent("), handler).toBeGreaterThan(0);
+      expect(body.indexOf("notifyCookieConsentChanged();"), handler).toBeGreaterThan(
+        body.indexOf("writeStoredConsent("),
+      );
+    }
+  });
+});
+
+/**
+ * Row P2-115: every click event was PostHog-only and PostHog has no key in
+ * production, so the funnel had no click step at all.
+ */
+describe("primary CTA clicks", () => {
+  it("reaches Vercel with the control's name and nothing else", async () => {
+    track("primary_cta_clicked", { source: "content_inline_cta" });
+    await flush();
+    expect(vercelTrack).toHaveBeenCalledWith("primary_cta_clicked", { source: "content_inline_cta" });
+  });
+
+  it("fires beside the PostHog event on the content pages' analyzer button", () => {
+    const link = readFileSync(join(process.cwd(), "components/analytics/tracked-content-cta-link.tsx"), "utf8");
+    expect(link).toContain('trackEvent("content_cta_clicked", {');
+    expect(link).toContain('track("primary_cta_clicked", { source: `content_${referralSource}` });');
+    expect(link).toContain('referralSource: "inline_cta" | "sticky_cta";');
   });
 });
