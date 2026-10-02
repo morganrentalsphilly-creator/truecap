@@ -10,6 +10,10 @@ import {
   scrubSentryRequestHeaders,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
+import {
+  stripAdClickIdsFromSentryEvent,
+  stripAdClickIdsFromSentrySpan,
+} from "@/lib/sentry/ad-click-ids";
 
 Sentry.init({
   dsn: "https://273531778de80e317ca3e8cc6e1bf4ba@o4511448368480257.ingest.us.sentry.io/4511448369528832",
@@ -47,12 +51,15 @@ Sentry.init({
     return scrubSentryBreadcrumbUrl(breadcrumb);
   },
 
+  // Credentials first, then ad click ids as a separate step
+  // (lib/sentry/ad-click-ids.ts): the first request of a paid landing reaches
+  // the server with its gclid, before any consent decision exists.
   beforeSendSpan(span) {
-    return scrubSentrySpanUrl(span);
+    return stripAdClickIdsFromSentrySpan(scrubSentrySpanUrl(span));
   },
 
   beforeSendTransaction(event) {
-    return scrubSentryEventSensitiveData(event);
+    return stripAdClickIdsFromSentryEvent(scrubSentryEventSensitiveData(event));
   },
 
   // PII scrubbing — same pattern as instrumentation-client.ts. Strips
@@ -83,6 +90,6 @@ Sentry.init({
     if (event.request && "data" in event.request) {
       event.request.data = "[scrubbed]";
     }
-    return event;
+    return stripAdClickIdsFromSentryEvent(event);
   },
 });

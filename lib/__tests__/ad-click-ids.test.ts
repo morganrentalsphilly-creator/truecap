@@ -301,6 +301,21 @@ describe("browser Sentry payloads", () => {
   });
 });
 
+describe("every Sentry runtime strips ad click ids", () => {
+  it("the server and edge configs wire the same three hooks as the browser", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    for (const path of ["lib/sentry/client-init.ts", "sentry.server.config.ts", "sentry.edge.config.ts"]) {
+      const source = readFileSync(join(process.cwd(), path), "utf8");
+      expect(source, path).toContain("return stripAdClickIdsFromSentrySpan(scrubSentrySpanUrl(span));");
+      expect(source, path).toContain(
+        "return stripAdClickIdsFromSentryEvent(scrubSentryEventSensitiveData(event));",
+      );
+      expect(source, path).toContain("return stripAdClickIdsFromSentryEvent(event);");
+    }
+  });
+});
+
 describe("the browser Sentry hooks run the strip after the credential scrub", () => {
   type Hooks = {
     beforeSend: (event: Record<string, unknown>) => Record<string, unknown> | null;
@@ -346,5 +361,101 @@ describe("the browser Sentry hooks run the strip after the credential scrub", ()
     const sent = hooks.beforeSendSpan({ description: `GET ${landing}`, data: { "http.url": landing } });
     expect(JSON.stringify(sent)).not.toContain(GCLID);
     expect(sent.data["http.url"]).toBe("https://usetruecap.com/?utm_medium=cpc");
+  });
+});
+
+/**
+ * Row P2-108, server half. The first request of a paid landing reaches the
+ * server (and proxy.ts) with its gclid before any consent decision exists, so
+ * the Node and edge runtimes need the same strip as the browser. These load
+ * the real config files with Sentry.init mocked and run the hooks they pass.
+ */
+describe.each([
+  ["sentry.server.config.ts", () => import("../../sentry.server.config")],
+  ["sentry.edge.config.ts", () => import("../../sentry.edge.config")],
+])("%s runs the strip after the credential scrub", (_file, load) => {
+  type Hooks = {
+    tracesSampleRate: number;
+    beforeSend: (event: Record<string, unknown>) => Record<string, unknown> | null;
+    beforeSendTransaction: (event: Record<string, unknown>) => Record<string, unknown> | null;
+    beforeSendSpan: (span: { data: Record<string, unknown>; description?: string }) => {
+      data: Record<string, unknown>;
+      description?: string;
+    };
+  };
+  let hooks: Hooks;
+
+  beforeAll(async () => {
+    const callsBefore = initMock.mock.calls.length;
+    await load();
+    expect(initMock.mock.calls).toHaveLength(callsBefore + 1);
+    hooks = initMock.mock.calls[callsBefore][0] as Hooks;
+  });
+
+  const path = `/for-agents?pdf_claim=secret&gclid=${GCLID}&utm_medium=cpc`;
+  const landing = `https://usetruecap.com${path}`;
+
+  it("on a server error event: URL, parsed query and Referer", () => {
+    const sent = hooks.beforeSend({
+      exception: { values: [{ type: "Error", value: `render failed for ${path}` }] },
+      request: {
+        url: landing,
+        query_string: `gclid=${GCLID}&utm_medium=cpc`,
+        headers: { referer: landing, "user-agent": "test" },
+      },
+    });
+    expect(JSON.stringify(sent)).not.toContain(GCLID);
+    expect(JSON.stringify(sent)).not.toContain("secret");
+    expect(sent?.request).toEqual({
+      url: "https://usetruecap.com/for-agents?utm_medium=cpc",
+      query_string: "utm_medium=cpc",
+      headers: { referer: "https://usetruecap.com/for-agents?utm_medium=cpc", "user-agent": "test" },
+    });
+  });
+
+  it("on a request transaction: trace attributes and child spans", () => {
+    const sent = hooks.beforeSendTransaction({
+      type: "transaction",
+      transaction: "GET /for-agents",
+      request: { url: landing },
+      contexts: {
+        trace: {
+          data: {
+            "http.target": path,
+            "url.full": landing,
+            "http.query": `?gclid=${GCLID}&utm_medium=cpc`,
+            "url.query": `gclid=${GCLID}&utm_medium=cpc`,
+          },
+        },
+      },
+      spans: [{ description: `GET ${path}`, data: { "http.url": landing } }],
+    });
+    expect(JSON.stringify(sent)).not.toContain(GCLID);
+    expect(JSON.stringify(sent)).not.toContain("secret");
+    expect(JSON.stringify(sent)).toContain("utm_medium=cpc");
+    expect(sent?.request).toEqual({ url: "https://usetruecap.com/for-agents?utm_medium=cpc" });
+    expect((sent?.contexts as { trace: { data: Record<string, string> } }).trace.data["url.query"]).toBe(
+      "utm_medium=cpc",
+    );
+  });
+
+  it("on a standalone span", () => {
+    const sent = hooks.beforeSendSpan({ description: `GET ${landing}`, data: { "http.url": landing } });
+    expect(JSON.stringify(sent)).not.toContain(GCLID);
+    expect(sent.data["http.url"]).toBe("https://usetruecap.com/for-agents?utm_medium=cpc");
+  });
+
+  it("leaves an event with no click id as the credential scrub returned it, and tracing on", () => {
+    const sent = hooks.beforeSendTransaction({
+      type: "transaction",
+      transaction: "GET /pricing",
+      request: { url: "https://usetruecap.com/pricing?utm_source=google&utm_medium=cpc" },
+    });
+    expect(sent).toEqual({
+      type: "transaction",
+      transaction: "GET /pricing",
+      request: { url: "https://usetruecap.com/pricing?utm_source=google&utm_medium=cpc" },
+    });
+    expect(hooks.tracesSampleRate).toBe(1);
   });
 });
