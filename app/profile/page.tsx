@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { featuresForTier } from "@/lib/entitlements-catalog";
+import { PLAN_CATALOG } from "@/lib/public-pricing";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   loadStripeDisplayPriceById,
@@ -49,9 +50,31 @@ type SubscriptionRow = {
     | null;
 };
 
-function formatPrice(planSlug: PaidPlanSlug, stripePrice?: StripePriceDisplay): string {
+/**
+ * What Pro annual saves against twelve Pro monthly charges, as a whole
+ * percent. It is read from the two prices the switcher shows (Stripe), and
+ * from the catalog when Stripe does not answer, so the badge cannot go stale
+ * when a price moves. Same arithmetic as the /pricing toggle
+ * (components/marketing/pricing-toggle-plans.tsx). Null when annual saves
+ * nothing: the badge and the "savings" clause are then left out.
+ */
+function proAnnualSavingsPercent(
+  displays?: Partial<Record<PaidPlanSlug, StripePriceDisplay>>
+): number | null {
+  const monthlyUsd = displays?.pro_monthly?.unitAmount ?? PLAN_CATALOG.pro_monthly.unitAmountUsd;
+  const annualUsd = displays?.pro_annual?.unitAmount ?? PLAN_CATALOG.pro_annual.unitAmountUsd;
+  if (!(monthlyUsd > 0) || !(annualUsd > 0)) return null;
+  const percent = Math.round((1 - annualUsd / (monthlyUsd * 12)) * 100);
+  return percent > 0 ? percent : null;
+}
+
+function formatPrice(
+  planSlug: PaidPlanSlug,
+  stripePrice: StripePriceDisplay | undefined,
+  proAnnualOffLabel: string | undefined
+): string {
   if (stripePrice) return stripePrice.amountLabel;
-  if (planSlug === "pro_annual") return "17% off";
+  if (planSlug === "pro_annual") return proAnnualOffLabel ?? "Pro";
   if (planSlug.startsWith("agent_pro")) return "Agent Pro";
   return "Pro";
 }
@@ -197,6 +220,8 @@ export default async function ProfilePage({
       .filter((feature) => !feature.tiers.includes("pro") && feature.shipped !== false)
       .map((feature) => feature.label),
   ];
+  const proAnnualSavings = proAnnualSavingsPercent(stripePriceDisplays);
+  const proAnnualOffLabel = proAnnualSavings ? `${proAnnualSavings}% off` : undefined;
   const billingPlans = PAID_PLAN_SLUGS
     .filter((slug) => availablePlanSlugs.size === 0 || availablePlanSlugs.has(slug))
     // Agent Pro needs BOTH its plan row (migration) and a configured price:
@@ -206,8 +231,8 @@ export default async function ProfilePage({
       slug,
       title: getPlanTitle(slug),
       intervalLabel: stripePriceDisplays[slug]?.period ?? (slug.endsWith("_annual") ? "year" : "month"),
-      priceLabel: formatPrice(slug, stripePriceDisplays[slug]),
-      badge: slug === "pro_annual" ? "17% off" : undefined,
+      priceLabel: formatPrice(slug, stripePriceDisplays[slug], proAnnualOffLabel),
+      badge: slug === "pro_annual" ? proAnnualOffLabel : undefined,
       description: slug.startsWith("agent_pro")
         ? slug.endsWith("_annual")
           ? "Give every buyer separate criteria and keep their deals organized, billed yearly."
@@ -296,9 +321,11 @@ export default async function ProfilePage({
                     slug: "pro_annual",
                     title: "Pro Annual",
                     intervalLabel: "year",
-                    priceLabel: "17% off",
-                    badge: "17% off",
-                    description: "Full Pro access billed yearly with 17% savings.",
+                    priceLabel: proAnnualOffLabel ?? "Pro",
+                    badge: proAnnualOffLabel,
+                    description: proAnnualSavings
+                      ? `Full Pro access billed yearly with ${proAnnualSavings}% savings.`
+                      : "Full Pro access billed yearly.",
                     features: [
                       "Save and compare deals",
                       "10-year projections",

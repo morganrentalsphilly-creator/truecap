@@ -28,7 +28,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
-import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+} from "@/lib/product-access";
 import { featuresForTier } from "@/lib/entitlements-catalog";
 import {
   formatPublicUsd,
@@ -554,8 +558,8 @@ function PricingTrialTerms({
     return (
       <p>
         <strong className="font-semibold text-foreground">New account: $0 today, no card.</strong>{" "}
-        The {PRODUCT_EVALUATION_DAYS}-day free trial includes three complete Pro deals and one
-        comparison.
+        The {PRODUCT_EVALUATION_DAYS}-day free trial includes {PRODUCT_EVALUATION_DEAL_LIMIT} complete
+        Pro deals and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison.
         {tier === "agent_pro"
           ? " Co-branded share pages and PDFs start with a Pro or Agent Pro subscription, and the client roster and client Buy Boxes with Agent Pro, not the trial."
           : " Co-branded share pages and PDFs start with a Pro subscription, not the trial."}{" "}

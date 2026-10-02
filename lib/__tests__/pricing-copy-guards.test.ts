@@ -7,6 +7,7 @@ import {
   PRODUCT_EVALUATION_DAYS,
 } from "@/lib/product-access";
 import { FEATURE_CATALOG, featureLimit, tierHas } from "@/lib/entitlements-catalog";
+import { PLAN_CATALOG } from "@/lib/public-pricing";
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { unusableToolRoutes } from "./unreleased-tool-routes";
@@ -114,7 +115,22 @@ describe("no-card product evaluation", () => {
     // The allowance is stated once, under the CTA, in every trial state
     // (2026-09 audit removed the duplicate pill beside the price).
     expect(plans).toContain("New account: $0 today, no card.");
-    expect(plans).toContain("three complete Pro deals and one");
+    // The deal and comparison limits are interpolated from lib/product-access
+    // beside the day count. They were typed as words ("three ... one"), which
+    // a limit change would have left stale on /pricing and on sign-up.
+    expect(plans).toContain("includes {PRODUCT_EVALUATION_DEAL_LIMIT} complete");
+    expect(plans).toMatch(
+      /Pro deals and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\./,
+    );
+    expect(signup).toContain(
+      "Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deal analyses and",
+    );
+    expect(signup).toContain("{PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison.");
+    for (const source of [plans, signup]) {
+      expect(source).not.toMatch(
+        /\b(?:one|two|three|four|five)\s+(?:complete\s+|full\s+)?(?:Pro\s+deal|comparison)/i,
+      );
+    }
     expect(signup).toContain("Nothing auto-renews");
     expect(signup).toContain("No card is requested and no subscription starts today");
   });
@@ -221,6 +237,23 @@ describe("pricing offer hierarchy", () => {
     expect(page).not.toContain("Not ready for a subscription?");
     expect(page).not.toContain("TrueCap Deal Decision Pack");
     expect(page).not.toContain("singleDeal.priceLabel");
+  });
+
+  it("derives the /profile annual badge from the prices beside it, never a typed percent", () => {
+    // The plan switcher printed "17% off" in three places. It is now computed
+    // from the two Pro prices the switcher shows (Stripe), with the catalog
+    // standing in when Stripe does not answer.
+    const profile = read("../../app/profile/page.tsx");
+    expect(profile).not.toMatch(/\d+%\s+(?:off|savings)/);
+    expect(profile).toContain("PLAN_CATALOG.pro_monthly.unitAmountUsd");
+    expect(profile).toContain("PLAN_CATALOG.pro_annual.unitAmountUsd");
+    expect(profile).toContain("displays?.pro_monthly?.unitAmount");
+    expect(profile).toContain("displays?.pro_annual?.unitAmount");
+    expect(profile).toContain('badge: slug === "pro_annual" ? proAnnualOffLabel : undefined');
+    // Annual has to save something at catalog prices for a badge to exist.
+    expect(PLAN_CATALOG.pro_annual.unitAmountUsd).toBeLessThan(
+      PLAN_CATALOG.pro_monthly.unitAmountUsd * 12,
+    );
   });
 
   it("does not manufacture scarcity around the permanent annual plan", () => {
