@@ -290,7 +290,7 @@ export default function VsReonomyPage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            Where investors use both
+            Where TrueCap and Reonomy fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ul>
