@@ -342,7 +342,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is TrueCap better than DealCheck?",
-    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier offers unlimited preliminary rental screens with no signup, plus labeled HUD rent and FRED rate starting points from public data (you enter property tax yourself). DealCheck has native mobile apps, listing-site property import, and a longer track record. The honest side-by-side is on our TrueCap vs DealCheck page.",
+    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier offers unlimited preliminary rental screens with no signup, plus labeled HUD rent and FRED rate starting points from public data (you enter property tax yourself). DealCheck has native mobile apps, listing-site property import, and a longer track record. The side-by-side is on our TrueCap vs DealCheck page.",
   },
   {
     q: "When should I just stay with DealCheck?",
