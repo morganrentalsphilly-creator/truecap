@@ -127,7 +127,10 @@ const COMPARISONS: ComparisonCard[] = [
     group: "Direct alternative",
   },
 
-  // Complementary tools — post-purchase ops, accounting, banking
+  // Complementary tools — post-purchase ops, accounting, banking, and one
+  // comps-and-repairs tool (Bricked). Bricked also lists offer calculators,
+  // a rental one included, so the group's intro must not say these tools
+  // leave the purchase decision to TrueCap.
   {
     slug: "bricked",
     competitor: "Bricked AI",
@@ -225,7 +228,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "rentometer",
     competitor: "Rentometer",
     tagline:
-      "Rentometer is rent estimates and rental comps, with a Deal Worksheet on its Pro plan. TrueCap underwrites the deal and shows the highest price that still meets your targets.",
+      "Rentometer is rent estimates and rental comps, with a Deal Worksheet on its Pro plan. TrueCap underwrites the deal and checks it against your targets.",
     group: "Specialized tool",
   },
   {
@@ -244,8 +247,8 @@ const COMPARISONS: ComparisonCard[] = [
   },
   // Short-term-rental operations software (Hostfully, Hostaway, Lodgify,
   // Guesty) runs the property after closing, as each tagline says: the
-  // complementary group's "different stage of the rental lifecycle", not
-  // one of the specialized group's slices.
+  // complementary group's "managing a rental", not one of the specialized
+  // group's slices.
   {
     slug: "hostfully",
     competitor: "Hostfully",
@@ -335,7 +338,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "privy",
     competitor: "Privy",
     tagline:
-      "Privy is investor-filtered MLS search. TrueCap underwrites the deals Privy surfaces.",
+      "Privy is a real estate investment platform: deal sourcing and property analysis from MLS feeds and public records. TrueCap underwrites the deals Privy surfaces.",
     group: "Specialized tool",
   },
   {
@@ -421,7 +424,7 @@ const GROUPS = [
     id: "vs-complementary-tools",
     label: "Complementary tools",
     description:
-      "Tools that solve a different stage of the rental lifecycle. TrueCap covers the purchase decision, so you can use it alongside any of them.",
+      "Tools built mainly for a different job: managing a rental, collecting rent, keeping the books, or pricing comps and repairs. You can use TrueCap alongside any of them for the rental purchase decision.",
     items: inGroup("Complementary tool"),
   },
   {
