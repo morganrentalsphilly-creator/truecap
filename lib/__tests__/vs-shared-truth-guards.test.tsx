@@ -1,6 +1,6 @@
 /**
- * Truth guards for the parts every /vs comparison page shares, starting with
- * the sources note in ComparisonFaq.
+ * Truth guards for the parts every /vs comparison page shares: the sources
+ * note in ComparisonFaq and its one line for agents.
  *
  * Each block pins a defect the 2026-10 go-to-market audit found live:
  *
@@ -8,13 +8,28 @@
  *     constant, on rows nobody had re-checked. A page now prints a review date
  *     only when it passes `reviewedDate` itself; with none, the note claims no
  *     review.
+ *   - 34 of 38 pages never mentioned agents. The shared block now carries one
+ *     line for them, linked to /for-agents only where that page renders.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/vs/example" }));
+
+/** Whether Agent Pro is sold on the deployment under test (the Stripe Price id is absent in unit tests). */
+const agentPro = vi.hoisted(() => ({ configured: false }));
+vi.mock("@/lib/stripe/plan-prices", async (importActual) => ({
+  ...(await importActual<typeof import("@/lib/stripe/plan-prices")>()),
+  isAgentProConfigured: () => agentPro.configured,
+}));
+vi.mock("@/components/marketing/intent-prefetch-link", async (importActual) => ({
+  ...(await importActual<typeof import("@/components/marketing/intent-prefetch-link")>()),
+  IntentPrefetchLink: ({ href, children }: { href: string; children?: ReactNode }) =>
+    createElement("a", { href, "data-intent-prefetch": "" }, children),
+}));
 
 import { ComparisonFaq } from "@/components/marketing/comparison-faq";
 
@@ -41,6 +56,10 @@ function sourcesNote(html: string): string {
 }
 
 describe("the /vs sources note prints a review date only when the page passes one", () => {
+  beforeEach(() => {
+    agentPro.configured = false;
+  });
+
   it("has no shared default date", () => {
     const source = read(FAQ);
     expect(source).not.toContain("COMPARISON_REVIEWED");
@@ -73,5 +92,25 @@ describe("the /vs sources note prints a review date only when the page passes on
     expect(html).not.toMatch(/<h[1-6][^>]*>[^<]*Sources/);
     // The label opens the first <aside> on the block: Note's own element.
     expect(html).toMatch(/<aside class="max-w-\[68ch\][^"]*"><div[^>]*><span class="font-semibold text-foreground">Sources &amp; methodology:<\/span>/);
+  });
+});
+
+describe("the /vs agent line links /for-agents only where that page renders", () => {
+  it("renders nothing while Agent Pro is not sold (the persona page redirects, and the link graph forbids linking a redirect)", () => {
+    agentPro.configured = false;
+    const html = renderToStaticMarkup(<ComparisonFaq competitorName="Acme" items={ITEMS} />);
+    expect(html).not.toContain("/for-agents");
+    expect(html).not.toContain("investor clients");
+  });
+
+  it("renders one sentence with one intent-prefetch link when it is", () => {
+    agentPro.configured = true;
+    const html = renderToStaticMarkup(<ComparisonFaq competitorName="Acme" items={ITEMS} />);
+    expect(html.match(/href="\/for-agents"/g)).toHaveLength(1);
+    expect(html).toContain('<a href="/for-agents" data-intent-prefetch="">TrueCap for agents</a>');
+    expect(html.replace(/<!-- -->/g, "")).toContain(
+      "Screening listings for investor clients? <a href=\"/for-agents\" data-intent-prefetch=\"\">TrueCap for agents</a> keeps a client roster and screens a deal against that client&#x27;s Buy Box.",
+    );
+    agentPro.configured = false;
   });
 });
