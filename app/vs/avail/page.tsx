@@ -96,7 +96,7 @@ const MATRIX: Row[] = [
     feature: "Cash flow projection",
     truecap: "Pro — 10-year with rent + expense + appreciation",
     avail:
-      "Its calculator lists monthly income and an IRR based on a growth-rate input; no year-by-year projection is listed",
+      "Its calculator lists monthly income and IRR as outputs and takes a growth-rate input; no year-by-year projection is listed",
     winner: "truecap",
   },
   {

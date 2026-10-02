@@ -190,7 +190,7 @@ export default function VsAirdnaPage() {
             is the underwriting calculator that turns that revenue projection
             into a full deal analysis (cap rate, DSCR, cash flow, projection).
             AirDNA estimates the revenue; TrueCap adds financing, DSCR, and your
-            Offer Ceiling.
+            Offer Ceiling, the highest price that still meets your targets.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
