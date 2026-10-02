@@ -3,14 +3,17 @@
  * payloads. See lib/analytics/ad-click-ids.ts for why this is its own step
  * and not an entry in the sensitive-parameter list.
  *
- * Sentry traces run without cookie consent. On a paid landing the page URL,
- * the Referer header, navigation breadcrumbs and the fetch spans for
- * `/?gclid=...&_rsc=...` all carried the click id (12 of 17 envelopes in the
- * 2026-10 audit's Reject run). Error triage and tracing never need it.
+ * Sentry traces run without cookie consent. In the 2026-10 audit's Reject
+ * run 12 of 17 envelopes carried the landing URL's gclid: in `request.url`
+ * of both the error event and the page-load transaction, and in the
+ * page-load span's `url.full` attribute. Error triage and tracing never need
+ * it.
  *
  * Runs AFTER lib/sentry-url-scrubber.ts in each hook and visits the same
- * fields that scrubber does, so it only ever sees plain event data. `utm_*`
- * and every other parameter are left as they were.
+ * fields that scrubber does (those two and every other URL-bearing field:
+ * headers, breadcrumbs, messages, extra, contexts, tags, spans), so it only
+ * ever sees plain event data. `utm_*` and every other parameter are left as
+ * they were.
  */
 
 import type { Event } from "@sentry/nextjs";
