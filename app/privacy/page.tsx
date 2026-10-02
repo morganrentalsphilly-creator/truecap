@@ -19,6 +19,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
   // social, but absence flags as a gap in any SEO crawler and a sane
   // social card if someone does post the link is cheap to provide.
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap Privacy Policy",
     description: "How TrueCap collects, uses, and protects your data. We don't sell it.",
     url: "/privacy",

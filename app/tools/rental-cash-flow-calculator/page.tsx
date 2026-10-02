@@ -33,6 +33,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -48,6 +49,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rental-cash-flow-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Rental Property Cash Flow Calculator — Free Tool",
     description:
       "Calculate monthly rental cash flow in seconds — price, rent, financing, and the full expense set — plus plain-English guidance on what counts as good cash flow.",

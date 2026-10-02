@@ -28,6 +28,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "50% Rule Calculator | Free Rental Expense Triage",
   description:
@@ -42,6 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/50-percent-rule-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "50% Rule Calculator — 3-Second Rental Expense Triage",
     description:
       "Operating expenses ≈ half of gross rent. Run the triage live, with an adjustable expense ratio for the markets where 50% is wrong.",

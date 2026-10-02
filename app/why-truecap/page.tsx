@@ -12,6 +12,7 @@ import {
   PageHero,
 } from "@/components/marketing/page-parts";
 import { buttonVariants } from "@/components/ui/button";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 /**
  * Dedicated "Why TrueCap" page: the workflow comparison (spreadsheets,
@@ -36,6 +37,7 @@ export const metadata: Metadata = {
   // comparison intent, not the generic homepage card from layout.tsx. Mirrors
   // the /for-agents pattern; /home.jpg already exists.
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Why TrueCap for Rental Property Analysis",
     description:
       "Compare TrueCap with spreadsheets and rental analysis tools, including workflow, assumptions, Offer Ceiling, reports, and where each approach fits.",

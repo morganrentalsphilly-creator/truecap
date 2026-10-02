@@ -43,6 +43,7 @@ import { isReleasedHandoffStrategy } from "@/lib/analyzer-handoff";
 import { cookies } from "next/headers";
 import { CHECKOUT_RETURN_COOKIE, isCheckoutSessionId } from "@/lib/stripe/checkout-return-cookie";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   // Same homepage identity; the signed-in route remains excluded from indexing.
@@ -66,6 +67,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.

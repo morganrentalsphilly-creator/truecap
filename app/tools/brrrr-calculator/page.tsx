@@ -15,6 +15,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
   description:
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/brrrr-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
     description:
       "Model the buy-rehab-rent-refinance cycle in seconds. See cash left in deal and post-refi cash flow before you commit.",

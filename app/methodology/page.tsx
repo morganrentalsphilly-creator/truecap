@@ -31,6 +31,7 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 /** The page's last significant change (content/seo/lastmod.json): the visible line and dateModified agree. */
 const METHODOLOGY_MODIFIED_AT = lastmodFor("/methodology");
@@ -56,6 +57,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/methodology" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap Methodology — how we compute the numbers",
     description:
       "The core formulas, data sources, and conventions TrueCap uses to underwrite rental properties.",

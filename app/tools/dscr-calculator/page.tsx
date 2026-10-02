@@ -22,6 +22,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -38,6 +39,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/dscr-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free DSCR Calculator — Debt Service Coverage Ratio",
     description:
       "Compute DSCR in seconds. Plus what lenders typically require and how DSCR loans work.",

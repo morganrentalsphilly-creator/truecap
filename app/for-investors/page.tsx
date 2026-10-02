@@ -43,6 +43,7 @@ import {
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { cn } from "@/lib/utils";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const PAGE_TITLE = "For Rental Investors — Buy Box & Offer Ceiling";
 const PAGE_DESCRIPTION =
@@ -61,6 +62,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/for-investors" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: `${PAGE_TITLE} | TrueCap`,
     description: PAGE_DESCRIPTION,
     url: "/for-investors",

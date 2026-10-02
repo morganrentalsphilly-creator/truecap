@@ -32,6 +32,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { fmrLabel } from "@/lib/markets/data-copy";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const dynamicParams = false;
 
@@ -74,6 +75,7 @@ export async function generateMetadata({
     // (lib/markets/indexability.ts); the city rule still applies after that.
     robots: isStrategyIndexable(combo.citySlug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title,
       description,
       url: `/markets/${combo.citySlug}/${combo.strategy}`,
