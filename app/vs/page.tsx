@@ -170,7 +170,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "landlord-studio",
     competitor: "Landlord Studio",
     tagline:
-      "Landlord Studio tracks expenses + Schedule E after closing. TrueCap is the deal-evaluation step before.",
+      "Landlord Studio manages rentals you own: listings, rent collection and accounting. TrueCap underwrites the ones you're considering.",
     group: "Complementary tool",
   },
   {
