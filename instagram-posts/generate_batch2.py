@@ -2,25 +2,28 @@
 """
 TrueCap Instagram posts: what is left of batch 2 (posts 31-50).
 
-Draws four posts: 32 (sensitivity grid), 35 (rehab estimator), 40 (10-year
-projection) and 43 (compare deals). Each is a 1080x1080 PNG.
+Draws three posts: 35 (rehab estimator), 40 (10-year projection) and 43
+(compare deals). Each is a 1080x1080 PNG.
 
-The other sixteen posts of the batch, and the functions that drew them, were
+The other seventeen posts of the batch, and the functions that drew them, were
 removed on 2026-10-02 because each stated something that is not true today:
 tax and exit features, the refinance and resale strategy models, property tax
 filled in automatically, a report described as ready for a lender, an "AI
 recommendation", a buy or strong-buy verdict or a price the reader "should
 pay" (the product shows a screening result and an Offer Ceiling, not advice),
-a lender threshold stated as fact, calculators that are retired, or a share
-preview card that shows the address and metrics. Do not add a post back
-without checking its text against lib/entitlements-catalog.ts,
-lib/product-facts.ts and lib/verdict-display.ts.
+a lender threshold stated as fact, calculators that are retired, a share
+preview card that shows the address and metrics, or (post 32) a sensitivity
+grid whose figures the analyzer cannot produce: its cap rate moved with the
+interest rate, and a 10% change on a $2,950 rent moved cash flow by $1,050.
+Do not add a post back without checking its text against
+lib/entitlements-catalog.ts, lib/product-facts.ts and lib/verdict-display.ts,
+and its figures against lib/calc-analysis.ts.
 
-The figures in the four remaining mockups are sample figures, not output of
+The figures in the three remaining mockups are sample figures, not output of
 the analyzer. Regenerate them from the real engine before publishing.
 
 Run:  python3 generate_batch2.py
-Outputs: 32_*.png, 35_*.png, 40_*.png and 43_*.png in this folder.
+Outputs: 35_*.png, 40_*.png and 43_*.png in this folder.
 """
 
 import os
@@ -205,44 +208,6 @@ def sparkline(draw, x, y, w, h, points, line_color=BRAND, fill_color=None):
 # ---------------------------------------------------------------- per-post mockups
 
 
-def mockup_sensitivity(canvas, ix, iy, iw, ih, dark=False):
-    """Mockup: sensitivity grid with rent / vacancy / rate rows."""
-    d = ImageDraw.Draw(canvas)
-    text(d, (ix, iy), "Sensitivity analysis", F(LATO_BLACK, 26), WHITE if dark else INK)
-    text(d, (ix, iy+34), "If rent comes in lower, vacancy spikes, or rates rise.",
-         F(LATO_REG, 16), MUTED if dark else SUB)
-    # header row
-    col_w = (iw - 140) // 3
-    hdr_y = iy + 90
-    headers = ["STRESS", "BASE", "UPSIDE"]
-    for i, h in enumerate(headers):
-        x = ix + 140 + i * col_w
-        text(d, (x + col_w//2, hdr_y), h, F(LATO_BOLD, 13), MUTED if dark else SUB, anchor="mm")
-    # rows
-    rows = [
-        ("Rent",        "-10%",  "$2,950/mo", "+10%",   [-410, 640, 1690], [4.2, 7.6, 11.0]),
-        ("Vacancy",     "+5pp",  "5%",        "-5pp",   [380, 640, 900],    [6.7, 7.6, 8.4]),
-        ("Interest Rate","+1pp", "6.75%",     "-1pp",   [350, 640, 935],    [6.5, 7.6, 8.6]),
-    ]
-    row_h = (ih - 130) // 3
-    for r_i, (lbl, sd, bd, ud, cfs, caps) in enumerate(rows):
-        ry = iy + 120 + r_i * row_h
-        text(d, (ix, ry+14), lbl, F(LATO_BLACK, 20), WHITE if dark else INK)
-        text(d, (ix, ry+40), "±change", F(LATO_REG, 13), MUTED if dark else SUB)
-        for i, (delta, cf, cap) in enumerate(zip([sd, bd, ud], cfs, caps)):
-            x = ix + 140 + i * col_w + col_w//2
-            tone = INK if i == 1 else (GREEN if cf >= cfs[1] else RED)
-            if dark and i == 1: tone = WHITE
-            text(d, (x, ry+6), delta, F(LATO_BOLD, 12), MUTED if dark else SUB, anchor="mm")
-            sign = "" if cf < 0 else ""
-            cf_str = ("$" + f"{abs(cf):,}" + "/mo") if cf >= 0 else ("-$" + f"{abs(cf):,}" + "/mo")
-            text(d, (x, ry+28), cf_str, F(LATO_BLACK, 22), tone, anchor="mm")
-            text(d, (x, ry+56), f"+{cap:.1f}% cap", F(LATO_REG, 14), MUTED if dark else SUB, anchor="mm")
-        if r_i < len(rows) - 1:
-            d.line([(ix, ry+row_h-6), (ix+iw, ry+row_h-6)],
-                   fill=BORDER_DARK if dark else BORDER, width=1)
-
-
 def mockup_rehab(canvas, ix, iy, iw, ih, dark=False):
     """Rehab estimator — sq-ft based catalog."""
     d = ImageDraw.Draw(canvas)
@@ -355,7 +320,6 @@ def mockup_compare(canvas, ix, iy, iw, ih, dark=False):
 
 POSTS = [
     # (number, slug, dark, eyebrow, headline, subtitle, mockup_fn, [headline_size, headline_top, sub_top])
-    (32, "sensitivity_grid",     True,  "Phase 1",          "Stress-test before you offer.",  "Rent ±10%, vacancy ±5pp, rates ±1pp — at a glance.",   mockup_sensitivity,    {"hs":60}),
     (35, "rehab_estimator",      True,  "Strategies",       "Defensible rehab budgets.",      "Sq-ft based defaults for every common work item.",     mockup_rehab,          {"hs":56}),
     (40, "projection_chart",     False, "10-Year view",     "$14,200 in 10 years.",           "Compounding cash flow with rent + expense growth.",    mockup_projection_chart,{"hs":62}),
     (43, "compare_deals",        True,  "Compare",          "4 deals. One winner.",           "Side-by-side. Best metric in each row highlighted.",   mockup_compare,        {"hs":62}),
