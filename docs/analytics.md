@@ -44,7 +44,7 @@ Vercel Web Analytics is cookieless and runs on every page (`components/analytics
 
 ## Ad URLs
 
-Every ad's Final URL carries `utm_medium`, written exactly as below:
+Every ad's landing URL should carry `utm_medium`, written exactly as below. Add it through the ad platform's URL-parameter setting (in Google Ads, the campaign's Final URL suffix), not inside the Final URL itself, which stays free of parameters:
 
 | Where the ad runs | `utm_medium` | First-touch source it is stored as |
 | --- | --- | --- |
@@ -66,13 +66,13 @@ The convention follows what `classifyFirstTouchReferralSource` in `lib/first-tou
 Why each value matters:
 
 - Search. With auto-tagging on, the ad platform adds a click id and rule 2 already stores the landing as `paid_search`. `utm_medium=cpc` gives the same answer when the click id is not there, for example with auto-tagging switched off.
-- Meta. `fbclid` is not read: it is not in `AD_CLICK_ID_PARAMS`, and `lib/__tests__/first-touch.test.ts` pins that, with the note that Facebook adds it to unpaid links too. That rule is unchanged. A Meta ad click without `utm_medium` therefore falls to rule 7. The October 2026 audit measured it on production: `organic_social` with an `l.facebook.com` referrer, `direct` with no referrer. `utm_medium=paid_social` is what stores a Meta ad click as `paid_social`.
+- Meta. `fbclid` is not read: it is not in `AD_CLICK_ID_PARAMS`, and `lib/__tests__/first-touch.test.ts` pins that, with the note that Facebook adds it to unpaid links too. That rule is unchanged. A Meta ad click without `utm_medium` therefore falls to rule 7. The audit measured it on production on 2026-10-01: `organic_social` with an `l.facebook.com` referrer. With no referrer, rule 7 stores it as `direct`. `utm_medium=paid_social` is what stores a Meta ad click as `paid_social`.
 
 What the convention does not give you:
 
-- The first-touch record holds a source category and a landing section, nothing else: the `tc_ft` cookie once cookies are accepted, then `app_metadata.tc_first_touch` at sign-up. `utm_source`, `utm_campaign`, `utm_content` and `utm_term` are never read or stored by it. The campaign and the keyword are not kept.
-- Nothing in the repository counts paid sign-ups from the record. Its one reader, `seo/scripts/signups.ts`, counts `organic_search` and `organic_ai` only.
-- The other `utm_*` parameters are free to use. They are kept in the page URL sent to Vercel Web Analytics; only the click ids are removed from it (see Consent above).
+- The first-touch record holds a source category and a landing section (plus a version number in app_metadata), nothing else: the `tc_ft` cookie once cookies are accepted, then `app_metadata.tc_first_touch` at sign-up. `utm_source`, `utm_campaign`, `utm_content` and `utm_term` are never read or stored by it. The campaign and the keyword are not kept.
+- Nothing in the repository counts paid sign-ups. `seo/scripts/signups.ts`, the only code that reads `app_metadata.tc_first_touch` back, counts `organic_search` and `organic_ai` only. The sign-up paths read the `tc_ft` cookie to write that record (`app/actions/auth.ts`, and `app/auth/callback/route.ts` for a new Google account). The source category also goes to PostHog as `referral_source`: from the browser on every event whose allowlist in `lib/analytics-event-dictionary.ts` names it, `account_created` included (`captureRaw` in `lib/analytics.ts`, read from the tab's session record), and from the server on `account_created` and `product_evaluation_started` for a new Google account (`app/auth/callback/route.ts`). PostHog is on hold: the browser sends nothing while `NEXT_PUBLIC_POSTHOG_KEY` is unset (`initAnalytics` in `lib/analytics.ts`; the key is absent on purpose, `lib/sentry/self-noise.ts`), and the server sends only when `POSTHOG_API_KEY` is set (`lib/posthog-server.ts`).
+- The other `utm_*` parameters are free to use. They are kept in the page URL sent to Vercel Web Analytics; the click ids and the sensitive parameters listed in `lib/sensitive-url.ts` are removed from it (see Consent above).
 
 ## Verifying locally
 
