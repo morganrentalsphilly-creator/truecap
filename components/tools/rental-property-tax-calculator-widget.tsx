@@ -16,7 +16,7 @@
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -340,7 +340,6 @@ export function RentalPropertyTaxCalculatorWidget() {
         <Sparkles className="w-4 h-4" />
         Run the rental screen with these inputs — cash flow, cap rate,
         CoC, and DSCR — free
-        <ArrowUpRight className="w-4 h-4" />
       </AnalyzerHandoffLink>
     </div>
   );
