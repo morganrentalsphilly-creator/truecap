@@ -53,6 +53,14 @@ describe("BiggerPockets' free allowance is stated the way BiggerPockets states i
     }
   });
 
+  it("puts the partner perks on the annual plan, where the membership page lists them", () => {
+    // membership-types lists calculators, BPCON tickets and the forum badge
+    // under Pro Monthly ($39) and the partner perks under Pro Annual ($390).
+    const page = read("app/blog/free-biggerpockets-calculator-alternatives/page.tsx");
+    expect(page).not.toMatch(/Pro also bundles/i);
+    expect(page).toContain("adds partner perks on the $390/year annual plan");
+  });
+
   it("links the vendor page behind each statement in the posts", () => {
     for (const file of BIGGERPOCKETS_PAGES.filter((path) => path.startsWith("app/blog/"))) {
       const page = read(file);

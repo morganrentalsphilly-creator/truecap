@@ -240,7 +240,7 @@ export default function ThreeWayComparisonPost() {
             <div>
               <ul>
                 <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
-                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator that comes with the BiggerPockets Pro membership, alongside broader community and educational resources.</li>
+                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator included in BiggerPockets Pro (its form offers a 7-day free trial, and a sign-up prompt mentions 5 free calculator reports), alongside broader community and educational resources.</li>
                 <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
               </ul>
             </div>

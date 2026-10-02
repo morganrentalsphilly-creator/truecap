@@ -97,7 +97,7 @@ const TOOLS: Tool[] = [
     url: "/vs/biggerpockets-calculator",
     pricing: "Free core; paid Pro — see live pricing",
     disclosure:
-      "Full disclosure: TrueCap is our tool. We put it first because the free tier runs a rental analysis with no account and no report count. The side-by-side comparison shows where BiggerPockets still wins.",
+      "Full disclosure: TrueCap is our tool. We put it first because the free tier runs unlimited preliminary rental screens with no account. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
       "Editable HUD rent + FRED mortgage-rate benchmarks; manual local property tax",
@@ -246,7 +246,7 @@ const TOOLS: Tool[] = [
 const FAQ_ITEMS = [
   {
     q: "How many free reports does the BiggerPockets calculator give you?",
-    a: "BiggerPockets says two things. Its rental calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Its membership page lists unlimited calculator access under Pro at $39/month or $390/year (as of October 2026). Pro also bundles a forum badge, discounted BPCON tickets, partner software (RentRedi, Baselane) and lender and insurance discounts, so the calculator is one piece of a membership.",
+    a: "BiggerPockets says two things. Its rental calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Its membership page lists unlimited calculator access, discounted BPCON tickets and a forum badge under Pro at $39/month, and adds partner perks on the $390/year annual plan, among them software from RentRedi and lender and insurance discounts (as of October 2026). The calculator is one piece of a membership.",
   },
   {
     q: "Is there a truly free alternative to the BiggerPockets rental calculator?",
