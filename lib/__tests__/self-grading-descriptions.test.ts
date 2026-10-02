@@ -25,23 +25,15 @@ const STRING = String.raw`"((?:[^"\\]|\\.)*)"`;
 const SELF_GRADE = /\bhonest(?:ly)?\b|\bfair\b|\bunbiased\b/i;
 
 /**
- * /vs pages whose descriptions still carried the words when this guard was
- * written and whose files belong to other packages of the same fix wave
- * (x-vs-money, y2-vs-data, y3-vs-str). Each of those packages removes the
- * words from its own pages; once a held page is clean, the test below turns
- * red until its slug comes off this list.
+ * /vs pages exempt from the check below while another change removes the
+ * words from them. The list is empty: the nine pages it held when this guard
+ * was written (arrived, baselane, hostaway, hostfully, lodgify,
+ * mashvisor-for-short-term-rentals, privy, propstream, rentcast) were all
+ * cleaned in the same fix wave, so every /vs page is checked. A page added
+ * here must still carry the words, or the test below turns red until its slug
+ * comes off the list.
  */
-const HELD_BY_ANOTHER_PACKAGE = new Set([
-  "arrived",
-  "baselane",
-  "hostaway",
-  "hostfully",
-  "lodgify",
-  "mashvisor-for-short-term-rentals",
-  "privy",
-  "propstream",
-  "rentcast",
-]);
+const HELD_BY_ANOTHER_PACKAGE = new Set<string>([]);
 
 const VS_SLUGS = readdirSync(VS_DIR)
   .filter((slug) => existsSync(join(VS_DIR, slug, "page.tsx")))
