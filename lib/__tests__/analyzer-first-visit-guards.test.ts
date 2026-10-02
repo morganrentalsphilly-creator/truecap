@@ -3,6 +3,11 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  isCityOnlyAddress,
+  STREET_ADDRESS_REQUIRED_MESSAGE,
+  streetAddressPlaceholder,
+} from "@/components/investcalc/address-shape";
+import {
   extractListingLink,
   SUPPORTED_LISTING_SITES,
   SUPPORTED_LISTING_SITES_TEXT,
@@ -107,6 +112,16 @@ describe("the phone run bar is never hidden behind the cookie banner (P2-75, P2-
   });
 });
 
+function section(source: string, start: string, end: string): string {
+  const from = source.indexOf(start);
+  expect(from, `missing source marker: ${start}`).toBeGreaterThanOrEqual(0);
+  const to = source.indexOf(end, from + start.length);
+  expect(to, `missing source marker after ${start}: ${end}`).toBeGreaterThan(
+    from,
+  );
+  return source.slice(from, to);
+}
+
 describe("one list of supported listing sites, and share-sheet text (P2-37)", () => {
   const hero = read("components/marketing/hero-address-form.tsx");
   const help = read("components/investcalc/listing-link-input.tsx");
@@ -178,8 +193,11 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
       expect(looksLikeListingLink(address)).toBe(false);
       expect(extractListingLink(address)).toBeNull();
     }
-    // The hero reads the extracted link, not the raw text.
+    // Both entry points read the extracted link, not the raw text.
     expect(hero).toContain("parseListingUrl(extractListingLink(raw) ?? raw)");
+    expect(read("components/investcalc/investcalc-page.tsx")).toContain(
+      "parseListingUrl(extractListingLink(listingUrl) ?? listingUrl)",
+    );
   });
 });
 
@@ -212,5 +230,146 @@ describe("the hero keeps text typed before hydration (P2-34)", () => {
     expect(hero).toContain("readPreHydrationAddress(placement),");
     expect(hero).toContain("address: preHydrationAddress,");
     expect(hero).not.toContain('defaultValues: { address: "" }');
+  });
+});
+
+describe("a city is context, not a property (P2-45)", () => {
+  const calculator = read("components/investcalc/investcalc-page.tsx");
+
+  it("recognises a bare city and state, and nothing with a street or a number", () => {
+    for (const area of [
+      "Columbus, OH",
+      "Columbus OH",
+      "Austin, Texas",
+      "Charleston, West Virginia",
+      "New York, NY, USA",
+      "Winston-Salem, NC",
+      "St. Louis, MO",
+      "Washington, DC",
+    ]) {
+      expect(isCityOnlyAddress(area), area).toBe(true);
+    }
+    for (const property of [
+      "123 Main St, Columbus, OH",
+      "123 Main St, Columbus, OH 43215",
+      "Columbus, OH 43215",
+      "Main Street, Columbus OH",
+      "Main Street, Columbus Ohio",
+      "One Lincoln Plaza, New York, NY",
+      "Main St Columbus OH",
+      "Duplex on Elm",
+      "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA",
+      "",
+    ]) {
+      expect(isCityOnlyAddress(property), property).toBe(false);
+    }
+    expect(isCityOnlyAddress(undefined)).toBe(false);
+    expect(isCityOnlyAddress(null)).toBe(false);
+  });
+
+  it("a handed-off city becomes the field's hint, never its value", () => {
+    const handoff = section(
+      calculator,
+      "const handoff = analyzerHandoff;",
+      "// No edit-handoff payload.",
+    );
+    expect(handoff).toContain(
+      "if (handoffAddressIsArea) setAddressAreaHint(handoffAddress);",
+    );
+    expect(handoff).toContain('else form.setValue("address", handoffAddress);');
+    expect(handoff).not.toContain('form.setValue("address", handoff.address)');
+    expect(streetAddressPlaceholder("Columbus, OH")).toBe(
+      "Street address in Columbus, OH",
+    );
+    expect(calculator).toContain("streetAddressPlaceholder(addressAreaHint)");
+    expect(read("components/investcalc/property-details-section.tsx")).toContain(
+      "placeholder={addressPlaceholder}",
+    );
+  });
+
+  it("a bare city cannot run, or claim the no-signup decision, without an account", () => {
+    expect(calculator).toContain(
+      "!isAuthenticated && isCityOnlyAddress(watchedAddress);",
+    );
+    expect(calculator).toContain(
+      "Boolean(watchedAddress?.trim()) && !addressIsAreaOnly;",
+    );
+    // Enter submits the form directly, so the run itself checks too, before
+    // anything else in onSubmit (the decision claim sits further down).
+    const submit = section(
+      calculator,
+      "const onSubmit = async (validated: InvestmentFormValues) => {",
+      "const onError = ",
+    );
+    const guard = submit.indexOf("isCityOnlyAddress(validated.address)");
+    expect(guard).toBeGreaterThan(-1);
+    expect(guard).toBeLessThan(submit.indexOf("claimAnonymousDecisionAction("));
+    expect(guard).toBeLessThan(
+      submit.indexOf("addressEnrichmentPromiseRef.current"),
+    );
+    expect(submit.slice(guard, guard + 400)).toContain(
+      "message: STREET_ADDRESS_REQUIRED_MESSAGE",
+    );
+    expect(STREET_ADDRESS_REQUIRED_MESSAGE).toBe(
+      "Add the street address. A city and state are not enough to analyze a property.",
+    );
+  });
+});
+
+describe("the GET fallback and a failed lookup behave like the scripted hero path (P2-34)", () => {
+  const calculator = read("components/investcalc/investcalc-page.tsx");
+
+  it("an address-only handoff goes through the hero handler, which runs the lookup", () => {
+    const handoff = section(
+      calculator,
+      "const handoff = analyzerHandoff;",
+      "// No edit-handoff payload.",
+    );
+    expect(handoff).toContain("const handoffIsAddressOnly =");
+    for (const field of [
+      "purchasePrice",
+      "monthlyRent",
+      "bedrooms",
+      "interestRate",
+      "propertyTaxPct",
+      "propertyType",
+      "strategy",
+    ]) {
+      expect(handoff).toContain(`handoff.${field} === undefined`);
+    }
+    expect(handoff).toContain("!handoffAddressIsArea &&");
+    const call = handoff.indexOf("heroAnalyzeHandlerRef.current?.({");
+    expect(call).toBeGreaterThan(-1);
+    // After the programmatic-reset flag drops, as a user action would be.
+    expect(call).toBeGreaterThan(
+      handoff.indexOf("isProgrammaticResetRef.current = false;"),
+    );
+    expect(handoff.slice(call, call + 200)).toContain("address: handoffAddress");
+  });
+
+  it("says the lookup failed in the one toast the visitor keeps", () => {
+    const enrichment = section(
+      calculator,
+      "const runPropertyEnrichment = useCallback(",
+      "const runTrackedPropertyEnrichment = useCallback(",
+    );
+    expect(enrichment).toContain("failedEnrichmentPlaceRef.current = null;");
+    expect(enrichment).toContain("failedEnrichmentPlaceRef.current = place;");
+
+    const heroHandler = section(
+      calculator,
+      "heroAnalyzeHandlerRef.current = async (detail: HeroAnalyzeDetail) => {",
+      "Live provenance + raw capture getters",
+    );
+    expect(heroHandler).toContain(
+      "landOnPrice(false, failedEnrichmentPlaceRef.current === place);",
+    );
+    const failed = section(heroHandler, "} else if (lookupFailed) {", "} else {");
+    expect(failed).toContain('title: "Property lookup unavailable"');
+    expect(failed).toContain(
+      "The current rate and area rent could not be fetched, so neither was filled in.",
+    );
+    // The ordinary guidance must not be what a failed lookup shows.
+    expect(failed).not.toContain("Two fields to your first screen");
   });
 });

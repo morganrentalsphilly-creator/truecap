@@ -21,6 +21,9 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   onAddressSelected?: (place: SelectedAddress) => void;
+  /** Replaces the address field's example placeholder, for instance with
+   *  "Street address in Columbus, OH" after a market page handoff. */
+  addressPlaceholder?: string;
   /** Pull beds/baths/sqft/price/rent from RentCast for the typed address. */
   onAutofillFromAddress?: () => void;
   isAutofilling?: boolean;
@@ -65,6 +68,7 @@ interface PropertyDetailsSectionProps {
 export function PropertyDetailsSection({
   form,
   onAddressSelected,
+  addressPlaceholder,
   onAutofillFromAddress,
   isAutofilling,
   autofillRequiresAccount = false,
@@ -122,6 +126,7 @@ export function PropertyDetailsSection({
         inputId="address"
         errorId="address-error"
         required
+        placeholder={addressPlaceholder}
         onPlaceSelected={onAddressSelected}
       />
       <FieldError id="address-error" message={errors.address?.message} />
