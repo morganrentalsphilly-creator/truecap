@@ -203,6 +203,52 @@ describe("browser Sentry payloads", () => {
     });
   });
 
+  it("cleans the two envelope shapes the audit captured after Reject", () => {
+    // ws09/ws09a/run-denied/result.json, requests 44 and 66: the same landing
+    // URL in an event's request.url and in the page-load span's url.full.
+    const landing = `https://usetruecap.com/?utm_source=google&utm_medium=cpc&utm_campaign=audit_test&utm_content=a1&utm_term=test&gclid=${GCLID}`;
+    const clean = "https://usetruecap.com/?utm_source=google&utm_medium=cpc&utm_campaign=audit_test&utm_content=a1&utm_term=test";
+
+    const errorEvent = stripAdClickIdsFromSentryEvent({
+      message: "an error",
+      level: "warning" as const,
+      platform: "javascript",
+      request: { url: landing, headers: { "User-Agent": "Mozilla/5.0" } },
+    });
+    expect(errorEvent.request?.url).toBe(clean);
+
+    const pageload = stripAdClickIdsFromSentryEvent({
+      type: "transaction" as const,
+      transaction: "/",
+      request: { url: `${landing}#pricing`, headers: { "User-Agent": "Mozilla/5.0" } },
+      contexts: {
+        trace: {
+          trace_id: "a",
+          span_id: "b",
+          op: "pageload",
+          origin: "auto.pageload.nextjs.app_router_instrumentation",
+          data: {
+            "sentry.op": "pageload",
+            "sentry.source": "url",
+            "url.path": "/",
+            "url.full": landing,
+            effectiveConnectionType: "4g",
+          },
+        },
+      },
+      spans: [],
+    });
+    expect(pageload.request?.url).toBe(`${clean}#pricing`);
+    expect(pageload.contexts?.trace?.data).toEqual({
+      "sentry.op": "pageload",
+      "sentry.source": "url",
+      "url.path": "/",
+      "url.full": clean,
+      effectiveConnectionType: "4g",
+    });
+    expect(JSON.stringify([errorEvent, pageload])).not.toContain(GCLID);
+  });
+
   it("drops the click id from a parsed query in either shape", () => {
     expect(
       stripAdClickIdsFromSentryEvent({ request: { query_string: { gclid: GCLID, utm_source: "ad" } } }).request
