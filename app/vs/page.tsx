@@ -209,7 +209,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "roofstock",
     competitor: "Roofstock",
     tagline:
-      "Roofstock offers individual-investor real-estate services. TrueCap provides a separate, assumption-driven underwrite.",
+      "Roofstock's property listings now open on Stessa's marketplace, and its brands cover property management, landlord software and tenant screening. TrueCap underwrites the property you pick.",
     group: "Specialized tool",
   },
   {
@@ -255,14 +255,14 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "hostfully",
     competitor: "Hostfully",
     tagline:
-      "Hostfully manages short-term rentals after closing. TrueCap underwrites the STR deal before.",
+      "Hostfully manages short-term rentals after closing. TrueCap underwrites the deal before you buy.",
     group: "Complementary tool",
   },
   {
     slug: "hostaway",
     competitor: "Hostaway",
     tagline:
-      "Hostaway is vacation rental management software. TrueCap underwrites the STR deal before.",
+      "Hostaway is vacation rental management software. TrueCap underwrites the deal before you buy.",
     group: "Complementary tool",
   },
   {
@@ -305,14 +305,14 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "fundrise",
     competitor: "Fundrise",
     tagline:
-      "Fundrise sells diversified non-traded REIT shares (passive). TrueCap underwrites whole properties you'd own directly.",
+      "Fundrise is a direct-to-consumer private markets manager: portfolios of real estate, private credit and venture capital. TrueCap underwrites whole properties you'd own directly.",
     group: "Specialized tool",
   },
   {
     slug: "lodgify",
     competitor: "Lodgify",
     tagline:
-      "Lodgify is vacation rental software: calendar sync, direct bookings and guest messaging. TrueCap underwrites the STR deal before.",
+      "Lodgify is vacation rental software: calendar sync, direct bookings and guest messaging. TrueCap underwrites the deal before you buy.",
     group: "Complementary tool",
   },
   {
@@ -362,7 +362,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "dealcheck-for-short-term-rentals",
     competitor: "DealCheck for STRs",
     tagline:
-      "STR investor's cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
+      "Short-term rentals: how TrueCap and DealCheck handle revenue you supply, occupancy assumptions, financing and tax-eligibility limits.",
     group: "Direct alternative",
   },
   {
@@ -374,9 +374,9 @@ const COMPARISONS: ComparisonCard[] = [
   },
   {
     slug: "cozy",
-    competitor: "Cozy.co (shut down)",
+    competitor: "Cozy.co (moved to Apartments.com)",
     tagline:
-      "Cozy shut down in 2022. Here's what replaces it — and how TrueCap fits the underwriting half it never had.",
+      "Cozy moved to Apartments.com in mid-2021. Here's what replaced it, and where TrueCap fits.",
     group: "Specialized tool",
   },
 ];
@@ -433,7 +433,7 @@ const GROUPS = [
     id: "vs-specialized-tools",
     label: "Specialized tools",
     description:
-      "Tools that handle one slice (rent estimates, market discovery, turnkey listings). TrueCap can replace or complement depending on your workflow.",
+      "Tools that handle one slice (rent estimates, market discovery, listings). TrueCap can replace or complement depending on your workflow.",
     items: inGroup("Specialized tool"),
   },
 ];

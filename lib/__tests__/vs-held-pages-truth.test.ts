@@ -23,6 +23,13 @@
  * FAQPage JSON-LD. The page is rewritten around what roofstock.com and
  * stessa.com rendered on 2026-10-02, and agrees with
  * /blog/roofstock-vs-mashvisor-vs-propstream.
+ *
+ * The /vs hub (app/vs/page.tsx) repeats each page in one line, so its lines
+ * for these pages change with them: Cozy's year, Roofstock's premise, a
+ * Fundrise line in Fundrise's own words with no figure, and the short-term
+ * rental lines, which said TrueCap underwrites "the STR deal" while the
+ * product labels that mode a beta revenue screen (report row P2-23) and
+ * listed "AirDNA inputs" although nothing connects to AirDNA.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -36,6 +43,16 @@ const flat = (source: string) => source.replace(/&apos;|&rsquo;/g, "'").replace(
 
 /** Every `winner: "…"` value in a page's MATRIX, in order. */
 const winners = (source: string) => [...source.matchAll(/\bwinner:\s*"([a-z-]+)"/g)].map((m) => m[1]);
+
+/** The hub's entry for one slug: its competitor label and tagline. */
+function hubEntry(slug: string): { competitor: string; tagline: string } {
+  const hub = read("app/vs/page.tsx");
+  const match = new RegExp(
+    `slug:\\s*"${slug}",\\s*competitor:\\s*"((?:[^"\\\\]|\\\\.)*)",\\s*tagline:\\s*"((?:[^"\\\\]|\\\\.)*)"`,
+  ).exec(hub);
+  if (!match) throw new Error(`app/vs/page.tsx: no entry for ${slug}`);
+  return { competitor: match[1], tagline: match[2] };
+}
 
 describe("/vs/cozy says when and where Cozy went", () => {
   const page = read("app/vs/cozy/page.tsx");
@@ -151,5 +168,53 @@ describe("/vs/roofstock describes what Roofstock offers an individual buyer toda
     expect(post).toContain("https://www.stessa.com/investment-properties");
     expect(post).toMatch(/where Roofstock now sends buyers/);
     expect(text).toMatch(/where Roofstock now sends buyers/);
+  });
+});
+
+describe("the /vs hub's lines for the held pages match the pages", () => {
+  const hub = read("app/vs/page.tsx");
+
+  it("dates Cozy's move to mid-2021 and no longer calls it a shutdown", () => {
+    const { competitor, tagline } = hubEntry("cozy");
+    expect(tagline).toMatch(/^Cozy moved to Apartments\.com in mid-2021\. /);
+    expect(`${competitor} ${tagline}`).not.toMatch(/2022|shut down|never had/i);
+    // app/llms.txt/route.ts lists the page as "Cozy.co": the hub's name, or
+    // the hub's name before its parenthetical (llms-txt-coverage.test.ts).
+    expect(competitor).toMatch(/^Cozy\.co \(/);
+    // The line is the page's own sentence.
+    expect(flat(read("app/vs/cozy/page.tsx"))).toContain("Cozy moved to Apartments.com in mid-2021");
+  });
+
+  it("says where Roofstock's listings are now, as the page and its card do", () => {
+    const { tagline } = hubEntry("roofstock");
+    const sentence = "Roofstock's property listings now open on Stessa's marketplace";
+    expect(tagline.startsWith(sentence)).toBe(true);
+    expect(read("app/vs/roofstock/page.tsx")).toContain(`${sentence}.`);
+    expect(read("app/vs/roofstock/opengraph-image.tsx")).toContain(`${sentence}.`);
+    // "turnkey listings" was the hub's word for Roofstock's slice.
+    expect(hub).not.toMatch(/turnkey/i);
+  });
+
+  it("states no return figure about Fundrise", () => {
+    // /vs/fundrise loses every return figure (report row P1-20); the hub line
+    // never replaces one with another.
+    const { tagline } = hubEntry("fundrise");
+    expect(tagline).not.toMatch(/%|\breturns?\b|\byield\b|\bhistorical\b/i);
+  });
+
+  it("does not say TrueCap underwrites a short-term rental as such, or list AirDNA as an input", () => {
+    // Same rule as the cards (vs-social-card-guards.test.ts): everything from
+    // the first "TrueCap" on is about TrueCap.
+    for (const slug of ["guesty", "hostaway", "hostfully", "lodgify", "airdna"]) {
+      const { tagline } = hubEntry(slug);
+      const fromTrueCap = tagline.slice(tagline.indexOf("TrueCap"));
+      expect(tagline, slug).toContain("TrueCap");
+      expect(fromTrueCap, slug).not.toMatch(/\b(?:STRs?|short-term)\b/i);
+    }
+    expect(hub).not.toMatch(/AirDNA inputs|using AirDNA/i);
+    // The hub line for the DealCheck short-term page is its card's line.
+    expect(read("app/vs/dealcheck-for-short-term-rentals/opengraph-image.tsx")).toContain(
+      `"${hubEntry("dealcheck-for-short-term-rentals").tagline}"`,
+    );
   });
 });
