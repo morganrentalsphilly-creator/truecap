@@ -229,7 +229,17 @@ describe("browser Sentry payloads", () => {
     const cyclic: Record<string, unknown> = { href: `/?gclid=${GCLID}` };
     cyclic.self = cyclic;
     const event = stripAdClickIdsFromSentryEvent({ extra: { cyclic } });
-    expect((event.extra?.cyclic as Record<string, unknown>).href).toBe("/");
+    expect(event.extra?.cyclic).toEqual({ href: "/", self: "[circular]" });
+    expect(JSON.stringify(event)).not.toContain(GCLID);
+  });
+
+  it("strips an object that is referenced from two places, in both", () => {
+    const shared = { href: `/?gclid=${GCLID}&utm_medium=cpc` };
+    const event = stripAdClickIdsFromSentryEvent({ extra: { first: shared, second: { again: shared } } });
+    expect(event.extra).toEqual({
+      first: { href: "/?utm_medium=cpc" },
+      second: { again: { href: "/?utm_medium=cpc" } },
+    });
   });
 
   it("strips a standalone span", () => {
