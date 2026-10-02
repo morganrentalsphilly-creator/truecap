@@ -180,7 +180,9 @@ describe("/vs/roofstock describes what Roofstock offers an individual buyer toda
   it("agrees with the sourced blog post about where Roofstock sends buyers", () => {
     const post = flat(read("app/blog/roofstock-vs-mashvisor-vs-propstream/page.tsx"));
     expect(post).toContain("https://www.stessa.com/investment-properties");
-    expect(post).toMatch(/where Roofstock now sends buyers/);
+    // The weekly SEO loop may reword the post (app/blog/*/page.tsx is on its
+    // allow-list), so the post is held to the fact, not to one phrasing.
+    expect(post).toMatch(/Roofstock[^.]{0,80}Stessa|Stessa[^.]{0,80}Roofstock/);
     expect(text).toMatch(/where Roofstock now sends buyers/);
   });
 });
