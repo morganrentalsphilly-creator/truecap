@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
-TrueCap — Google Ads display creatives.
+TrueCap: Google Ads display assets.
 
-Produces a paste-ready set for Google Ads Responsive Display / Performance
-Max campaigns. Each concept renders in two formats:
+Draws what is left of the May 2026 display set:
 
-  - Landscape 1200x628  (primary asset — used most often)
-  - Square    1200x1200 (secondary — feeds + mobile)
+  - 02_60_second_speed_landscape_1200x628.png
+  - logo_square_1200x1200.png
+  - logo_landscape_1200x300.png
 
-Plus brand logo assets:
-  - Square  1200x1200
-  - Landscape 1200x300
+On 2026-10-02 four concepts and the square version of this one were removed,
+with the images they drew, because each stated something that is not true
+today: tax and exit features, property tax filled in automatically, a report
+described as ready for a lender, and the refinance strategy model. Do not add
+a concept back without checking its text against lib/entitlements-catalog.ts,
+lib/product-facts.ts and lib/public-pricing.ts.
 
-Brand colors match the Instagram post style (#5248D4 purple).
-Fonts use Lato Black / Bold / Regular.
+The colors and wordmark are the earlier brand (#5248D4 purple, Lato).
 
 Run:  python3 generate_ads.py
 Outputs into google-ads/creatives/.
@@ -121,14 +123,6 @@ def metric_tile(draw, x, y, w, h, label, value, value_color=GREEN, dark=False):
     text(draw, (x + 14, y + 30), value, F(LATO_BLACK, 30), value_color)
 
 
-def pill(draw, x, y, label, bg=BRAND, fg=WHITE, font_size=13, pad_x=11, pad_y=5):
-    f = F(LATO_BOLD, font_size)
-    tw, th = measure(draw, label, f)
-    rounded_rect(draw, (x, y, x + tw + pad_x * 2, y + th + pad_y * 2 + 4), 999, fill=bg)
-    text(draw, (x + pad_x, y + pad_y), label, f, fg)
-    return tw + pad_x * 2
-
-
 def add_glow(canvas, dark=False):
     if not dark:
         return canvas
@@ -143,57 +137,10 @@ def add_glow(canvas, dark=False):
 
 # ─────────────────────────────────────────── concept renderers
 
-def concept_stop_losing(canvas, dark=False):
-    """Concept 1: Headline-first hero. 'Stop losing deals to bad math.'"""
-    d = ImageDraw.Draw(canvas)
-    w, h = canvas.size
-    is_landscape = w > h
-    pad = 60 if is_landscape else 70
-
-    draw_brand_pill(d, pad, pad, "Truecap")
-
-    # headline
-    head_size = 80 if is_landscape else 96
-    head_y = pad + 60
-    text(d, (pad, head_y), "Stop losing deals", F(LATO_BLACK, head_size), INK)
-    text(d, (pad, head_y + head_size * 0.95), "to", F(LATO_BLACK, head_size), INK)
-    # to "bad math" in brand color, on same line
-    f = F(LATO_BLACK, head_size)
-    bb = d.textbbox((pad, head_y + head_size * 0.95), "to", font=f)
-    text(d, (bb[2] + 22, head_y + head_size * 0.95), "bad math.", f, BRAND)
-
-    # sub
-    sub_y = head_y + head_size * 2.05
-    text(d, (pad, sub_y), "Underwrite a rental deal in 60 seconds.",
-         F(LATO_BOLD, 26 if is_landscape else 30), SUB)
-    text(d, (pad, sub_y + 38), "Cap rate · CoC · DSCR · projection · tax · exit.",
-         F(LATO_REG, 22 if is_landscape else 26), MUTED)
-
-    # CTA button
-    btn_y = sub_y + 100 if is_landscape else sub_y + 130
-    draw_button(d, pad, btn_y, "Try the free calculator →", kind="primary",
-                h=56, font_size=18, w=360)
-
-    # trust line
-    text(d, (pad, btn_y + 80), "Free · No card · No signup",
-         F(LATO_BOLD, 16), MUTED)
-
-    # product mock — right-side on landscape, bottom-half on square
-    if is_landscape:
-        draw_mock_dashboard(canvas, w - pad - 440, pad + 30, 440, 540)
-    else:
-        # Bottom half fills with a wider dashboard mock — leave clear
-        # space under the trust-line so they don't overlap
-        draw_mock_dashboard(canvas, pad, h - pad - 540, w - pad * 2, 510)
-
-    # footer wordmark
-    draw_truecap_wordmark(d, pad, h - pad - 30, 32)
-    text(d, (w - pad, h - pad - 26), "usetruecap.com",
-         F(LATO_MED, 18), SUB, anchor="ra")
-
 
 def concept_60_second(canvas, dark=False):
-    """Concept 2: Speed headline. Dark mode."""
+    """Concept 2: Speed headline. Dark mode. Landscape only: the square
+    version carried a property-tax auto-fill row and was removed."""
     canvas = add_glow(canvas, dark=True)
     d = ImageDraw.Draw(canvas)
     w, h = canvas.size
@@ -217,7 +164,7 @@ def concept_60_second(canvas, dark=False):
     draw_button(d, pad, btn_y, "Try the free calculator →", kind="primary",
                 h=56, font_size=18, w=360)
 
-    # mini metrics — right-side on landscape, bottom row on square
+    # mini metrics on the right-hand side
     if is_landscape:
         tile_w = 160
         tile_y = pad + 60
@@ -228,368 +175,11 @@ def concept_60_second(canvas, dark=False):
         ]):
             metric_tile(d, w - pad - tile_w, tile_y + i * 120, tile_w, 96,
                         lbl, val, value_color=color, dark=True)
-    else:
-        # 3 tiles + a feature row across the bottom
-        tile_y = h - pad - 360
-        tile_w = (w - pad * 2 - 24) // 3
-        for i, (lbl, val, color) in enumerate([
-            ("CASH FLOW", "+$640/mo", GREEN),
-            ("CAP RATE",  "+8.2%",    GREEN),
-            ("DSCR",      "1.34",     GREEN),
-        ]):
-            metric_tile(d, pad + i * (tile_w + 12), tile_y, tile_w, 110,
-                        lbl, val, value_color=color, dark=True)
-        # feature row below tiles
-        ft_y = tile_y + 140
-        for i, (icon_label, body) in enumerate([
-            ("RENT", "HUD Fair Market Rent"),
-            ("RATE", "FRED 30-yr fixed"),
-            ("TAX", "State effective rate"),
-        ]):
-            col_x = pad + i * (tile_w + 12)
-            text(d, (col_x, ft_y), icon_label, F(LATO_BLACK, 11), BRAND)
-            text(d, (col_x, ft_y + 18), body, F(LATO_REG, 16), WHITE)
 
     # footer
     draw_truecap_wordmark(d, pad, h - pad - 30, 32, dark=True)
     text(d, (w - pad, h - pad - 26), "usetruecap.com",
          F(LATO_MED, 18), MUTED, anchor="ra")
-
-
-def concept_auto_fill(canvas, dark=False):
-    """Concept 3: 'Type the address. We do the rest.'"""
-    d = ImageDraw.Draw(canvas)
-    w, h = canvas.size
-    is_landscape = w > h
-    pad = 60 if is_landscape else 70
-
-    draw_brand_pill(d, pad, pad, "New")
-
-    head_size = 64 if is_landscape else 80
-    head_y = pad + 60
-    text(d, (pad, head_y), "Type the address.", F(LATO_BLACK, head_size), INK)
-    text(d, (pad, head_y + head_size * 0.95), "We do the rest.",
-         F(LATO_BLACK, head_size), BRAND)
-
-    sub_y = head_y + head_size * 2.1
-    text(d, (pad, sub_y), "HUD rent · FRED rate · state tax — auto-filled.",
-         F(LATO_BOLD, 22 if is_landscape else 26), SUB)
-    text(d, (pad, sub_y + 34), "Zero lookup time. Every assumption editable.",
-         F(LATO_REG, 19 if is_landscape else 22), MUTED)
-
-    # input mock
-    in_x = pad
-    in_y = sub_y + 100
-    in_w = (w // 2 - pad - 20) if is_landscape else (w - pad * 2)
-    rounded_rect(d, (in_x, in_y, in_x + in_w, in_y + 52), 12, fill=WHITE,
-                 outline=BRAND, width=2)
-    text(d, (in_x + 16, in_y + 14), "1700 W Erie Ave",
-         F(LATO_MED, 22), INK)
-    # cursor
-    d.rectangle((in_x + 226, in_y + 14, in_x + 228, in_y + 40), fill=BRAND)
-
-    # auto-fill callout
-    cb_y = in_y + 70
-    rounded_rect(d, (in_x, cb_y, in_x + in_w, cb_y + 54), 10, fill=GREEN_SOFT,
-                 outline=GREEN, width=1)
-    text(d, (in_x + 14, cb_y + 8), "↻  AUTO-FILLED", F(LATO_BLACK, 12), GREEN)
-    text(d, (in_x + 14, cb_y + 26),
-         "Rent $1,425  ·  Tax 1.49%  ·  Rate 6.78%",
-         F(LATO_BOLD, 15), INK)
-
-    # right side preview (landscape only)
-    if is_landscape:
-        draw_mock_dashboard(canvas, w - pad - 420, pad + 40, 420, 480)
-
-    # CTA
-    btn_y = cb_y + 100 if is_landscape else cb_y + 110
-    draw_button(d, pad, btn_y, "Try the free calculator →", kind="primary",
-                h=52, font_size=17, w=340)
-
-    # Square: fill bottom half with a wide dashboard mock
-    if not is_landscape:
-        draw_mock_dashboard(canvas, pad, h - pad - 480, w - pad * 2, 440)
-
-    # footer
-    draw_truecap_wordmark(d, pad, h - pad - 30, 32)
-    text(d, (w - pad, h - pad - 26), "Free · No signup",
-         F(LATO_MED, 18), SUB, anchor="ra")
-
-
-def concept_pdf_export(canvas, dark=False):
-    """Concept 4: 'Lender-ready PDF.'"""
-    canvas = add_glow(canvas, dark=True)
-    d = ImageDraw.Draw(canvas)
-    w, h = canvas.size
-    is_landscape = w > h
-    pad = 60 if is_landscape else 70
-
-    draw_brand_pill(d, pad, pad, "Pro feature")
-
-    head_size = 70 if is_landscape else 88
-    head_y = pad + 60
-    text(d, (pad, head_y), "Lender-ready", F(LATO_BLACK, head_size), WHITE)
-    text(d, (pad, head_y + head_size * 0.95), "PDF.", F(LATO_BLACK, head_size), BRAND)
-
-    sub_y = head_y + head_size * 2.1
-    text(d, (pad, sub_y), "4-page report. Verdict + projections + tax + exit.",
-         F(LATO_BOLD, 22 if is_landscape else 26), MUTED)
-    text(d, (pad, sub_y + 36), "Send to your lender in one click.",
-         F(LATO_REG, 20 if is_landscape else 24), MUTED)
-
-    # CTA
-    btn_y = sub_y + 90
-    draw_button(d, pad, btn_y, "See Pro pricing →", kind="primary",
-                h=52, font_size=17, w=270)
-
-    # PDF paper mock on the right (landscape) or below (square)
-    if is_landscape:
-        draw_pdf_mock(canvas, w - pad - 320, pad + 80, 320, 420)
-    else:
-        # below for square
-        draw_pdf_mock(canvas, w - pad - 360, btn_y + 100, 360, 400)
-
-    # footer
-    draw_truecap_wordmark(d, pad, h - pad - 30, 32, dark=True)
-    text(d, (w - pad, h - pad - 26), "usetruecap.com",
-         F(LATO_MED, 18), MUTED, anchor="ra")
-
-
-def concept_brrrr(canvas, dark=False):
-    """Concept 5: BRRRR — 'Did your money come back?'"""
-    d = ImageDraw.Draw(canvas)
-    w, h = canvas.size
-    is_landscape = w > h
-    pad = 60 if is_landscape else 70
-
-    draw_brand_pill(d, pad, pad, "BRRRR")
-
-    head_size = 62 if is_landscape else 76
-    head_y = pad + 60
-    text(d, (pad, head_y), "Did your money", F(LATO_BLACK, head_size), INK)
-    text(d, (pad, head_y + head_size * 0.95), "come back?",
-         F(LATO_BLACK, head_size), BRAND)
-
-    sub_y = head_y + head_size * 2.1
-    text(d, (pad, sub_y),
-         "Model the cash-out refi before you commit.",
-         F(LATO_BOLD, 22 if is_landscape else 26), SUB)
-    text(d, (pad, sub_y + 34), "Cash left in deal · post-refi CF · infinite-return alerts.",
-         F(LATO_REG, 17 if is_landscape else 21), MUTED)
-
-    # tiles
-    tile_y = sub_y + 100
-    tile_w = 170 if is_landscape else 220
-    for i, (lbl, val, color) in enumerate([
-        ("CASH LEFT", "$0", GREEN),
-        ("RETURNED", "$72,400", GREEN),
-        ("POST-REFI CF", "$520/mo", GREEN),
-    ]):
-        metric_tile(d, pad + i * (tile_w + 12), tile_y, tile_w, 86,
-                    lbl, val, value_color=color)
-
-    # CTA
-    btn_y = tile_y + 110
-    draw_button(d, pad, btn_y, "Try the BRRRR calculator →", kind="primary",
-                h=52, font_size=17, w=340)
-    text(d, (pad, btn_y + 70), "Free · No signup · No card",
-         F(LATO_BOLD, 16), MUTED)
-
-    # Square: fill bottom half with a "before / after" refi breakdown
-    if not is_landscape:
-        box_y = h - pad - 400
-        rounded_rect(d, (pad, box_y, w - pad, box_y + 360), 16,
-                     fill=(248, 250, 255), outline=BORDER, width=1)
-        # left column — cash going in
-        col_w = (w - pad * 2 - 40) // 2
-        text(d, (pad + 20, box_y + 18), "CASH GOING IN",
-             F(LATO_BLACK, 14), SUB)
-        for i, (lbl, val) in enumerate([
-            ("Down payment",   "$25,000"),
-            ("Rehab",          "$45,000"),
-            ("Closing + carry", "$7,500"),
-            ("Total invested", "$77,500"),
-        ]):
-            row_y = box_y + 50 + i * 36
-            bold = i == 3
-            text(d, (pad + 20, row_y), lbl,
-                 F(LATO_REG, 16), MUTED if not bold else INK)
-            text(d, (pad + 20 + col_w - 12, row_y), val,
-                 F(LATO_BLACK if bold else LATO_BOLD, 17), INK, anchor="ra")
-        # divider
-        d.line([(pad + col_w + 20, box_y + 30),
-                (pad + col_w + 20, box_y + 330)], fill=BORDER, width=1)
-        # right column — refi
-        text(d, (pad + col_w + 40, box_y + 18), "AFTER REFI",
-             F(LATO_BLACK, 14), BRAND)
-        for i, (lbl, val) in enumerate([
-            ("New loan (75%)", "$262,500"),
-            ("Cash returned",  "$72,400"),
-            ("Cash left in deal","$0"),
-            ("Equity created", "$58,000"),
-        ]):
-            row_y = box_y + 50 + i * 36
-            bold = i == 2 or i == 3
-            text(d, (pad + col_w + 40, row_y), lbl,
-                 F(LATO_REG, 16), MUTED if not bold else INK)
-            color = GREEN if i == 2 else (BRAND if i == 3 else INK)
-            text(d, (w - pad - 20, row_y), val,
-                 F(LATO_BLACK if bold else LATO_BOLD, 17), color, anchor="ra")
-
-    # footer
-    draw_truecap_wordmark(d, pad, h - pad - 30, 32)
-    text(d, (w - pad, h - pad - 26), "usetruecap.com",
-         F(LATO_MED, 18), SUB, anchor="ra")
-
-
-# ───────────────────── shared mock components ─────────────────────
-
-def draw_mock_dashboard(canvas, x, y, w, h):
-    """A polished mini dashboard preview — used on the right side of landscape ads."""
-    d = ImageDraw.Draw(canvas)
-    # shadow
-    shadow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shadow)
-    sd.rounded_rectangle((x + 4, y + 10, x + w + 4, y + h + 10),
-                         radius=14, fill=(15, 23, 42, 50))
-    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(14)))
-    d = ImageDraw.Draw(canvas)
-
-    # card
-    rounded_rect(d, (x, y, x + w, y + h), 14, fill=WHITE, outline=BORDER, width=1)
-
-    # browser dots
-    cx, cy = x + 16, y + 16
-    for col in [(252, 99, 89), (251, 193, 67), (87, 202, 87)]:
-        d.ellipse((cx, cy, cx + 10, cy + 10), fill=col)
-        cx += 14
-
-    # address
-    text(d, (x + 18, y + 42), "1700 W Erie · Philadelphia",
-         F(LATO_BLACK, 18), INK)
-    text(d, (x + 18, y + 64), "Single Family · $295k",
-         F(LATO_REG, 13), SUB)
-
-    # pills
-    px = x + 18
-    py = y + 92
-    pw = pill(d, px, py, "BUY", bg=GREEN, fg=WHITE, font_size=11)
-    px += pw + 6
-    pw = pill(d, px, py, "SCORE 84", bg=BRAND, fg=WHITE, font_size=11)
-
-    # mini metric tiles 2x2
-    mt_y = y + 132
-    cell_w = (w - 36 - 8) // 2
-    cell_h = 56
-    items = [
-        ("CASH FLOW", "+$640", GREEN),
-        ("CAP RATE", "+8.2%", GREEN),
-        ("CoC", "+13.1%", BRAND),
-        ("DSCR", "1.34", GREEN),
-    ]
-    for i, (lbl, val, color) in enumerate(items):
-        cx = x + 18 + (i % 2) * (cell_w + 8)
-        cy = mt_y + (i // 2) * (cell_h + 6)
-        rounded_rect(d, (cx, cy, cx + cell_w, cy + cell_h), 8,
-                     fill=(250, 251, 254), outline=BORDER, width=1)
-        text(d, (cx + 8, cy + 5), lbl, F(LATO_BOLD, 9), SUB)
-        text(d, (cx + 8, cy + 18), val, F(LATO_BLACK, 22), color)
-
-    # spark
-    sp_y = mt_y + cell_h * 2 + 26
-    rounded_rect(d, (x + 18, sp_y, x + w - 18, sp_y + 100), 8,
-                 fill=(250, 251, 254), outline=BORDER, width=1)
-    text(d, (x + 26, sp_y + 8), "10-YR CASH FLOW",
-         F(LATO_BOLD, 9), SUB)
-    text(d, (x + w - 26, sp_y + 8), "+$14,200",
-         F(LATO_BLACK, 11), GREEN, anchor="ra")
-    # sparkline
-    pts = [7680, 8500, 9380, 10310, 11290, 12320, 13400, 14530, 15710, 16940]
-    mn, mx = min(pts), max(pts)
-    rng = mx - mn
-    spx = x + 28
-    spy = sp_y + 36
-    spw = w - 56
-    sph = 50
-    step = spw / (len(pts) - 1)
-    coords = []
-    for i, v in enumerate(pts):
-        px = spx + i * step
-        py = spy + sph - (v - mn) / rng * sph
-        coords.append((px, py))
-    # filled area
-    poly = coords + [(spx + spw, spy + sph), (spx, spy + sph)]
-    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    od = ImageDraw.Draw(overlay)
-    od.polygon(poly, fill=(82, 72, 212, 60))
-    canvas.alpha_composite(overlay)
-    d = ImageDraw.Draw(canvas)
-    for i in range(len(coords) - 1):
-        d.line([coords[i], coords[i + 1]], fill=BRAND, width=3)
-    last = coords[-1]
-    d.ellipse((last[0] - 5, last[1] - 5, last[0] + 5, last[1] + 5),
-              fill=BRAND, outline=WHITE, width=2)
-
-
-def draw_pdf_mock(canvas, x, y, w, h):
-    """Polished PDF cover preview."""
-    d = ImageDraw.Draw(canvas)
-    shadow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shadow)
-    sd.rounded_rectangle((x + 4, y + 12, x + w + 4, y + h + 12),
-                         radius=10, fill=(0, 0, 0, 60))
-    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(14)))
-    d = ImageDraw.Draw(canvas)
-    rounded_rect(d, (x, y, x + w, y + h), 10, fill=WHITE, outline=BORDER, width=1)
-    rounded_rect(d, (x, y, x + w, y + 8), 10, fill=BRAND)
-
-    # logo
-    draw_truecap_wordmark(d, x + 18, y + 22, 20)
-    text(d, (x + 18, y + 52), "Investment analysis report",
-         F(LATO_REG, 11), SUB)
-
-    text(d, (x + 18, y + 92), "1700 W ERIE",
-         F(LATO_BLACK, 26), INK)
-    text(d, (x + 18, y + 124), "PHILADELPHIA, PA",
-         F(LATO_BOLD, 12), SUB)
-
-    # pills
-    px = x + 18
-    py = y + 156
-    pw = pill(d, px, py, "BUY", bg=GREEN, fg=WHITE, font_size=10)
-    px += pw + 6
-    pw = pill(d, px, py, "SCORE 84", bg=BRAND, fg=WHITE, font_size=10)
-    px += pw + 6
-    pw = pill(d, px, py, "LOW RISK", bg=GREEN, fg=WHITE, font_size=10)
-
-    # grid 3x2
-    g_y = y + 196
-    g_w = (w - 36 - 12) // 3
-    grid = [
-        ("CASH FLOW", "$640", GREEN),
-        ("CoC", "+13.1%", BRAND),
-        ("CAP", "+8.2%", GREEN),
-        ("DSCR", "1.34", GREEN),
-        ("TAX SAVE", "$320", GREEN),
-        ("AFTER-TAX", "$960", BRAND),
-    ]
-    for i, (lbl, val, c) in enumerate(grid):
-        gx = x + 18 + (i % 3) * (g_w + 6)
-        gy = g_y + (i // 3) * 44
-        rounded_rect(d, (gx, gy, gx + g_w, gy + 38), 6,
-                     fill=(250, 251, 254), outline=BORDER, width=1)
-        text(d, (gx + 6, gy + 4), lbl, F(LATO_BOLD, 8), SUB)
-        text(d, (gx + 6, gy + 15), val, F(LATO_BLACK, 16), c)
-
-    # verdict
-    v_y = g_y + 100
-    rounded_rect(d, (x + 18, v_y, x + w - 18, v_y + 60), 8,
-                 fill=(248, 250, 255), outline=BORDER, width=1)
-    text(d, (x + 26, v_y + 6), "AI RECOMMENDATION",
-         F(LATO_BOLD, 9), BRAND)
-    text(d, (x + 26, v_y + 20), "Solid fundamentals.", F(LATO_BOLD, 11), INK)
-    text(d, (x + 26, v_y + 36), "Cap 8.2% · DSCR 1.34 — clears threshold.",
-         F(LATO_REG, 9), SUB)
 
 
 def make_logo_square():
@@ -621,16 +211,12 @@ def make_logo_landscape():
 # ──────────────────────────── main ────────────────────────────
 
 CONCEPTS = [
-    ("01_stop_losing_deals", concept_stop_losing, False),
-    ("02_60_second_speed",   concept_60_second,    True),  # dark
-    ("03_auto_fill_address", concept_auto_fill,    False),
-    ("04_lender_ready_pdf",  concept_pdf_export,   True),  # dark
-    ("05_brrrr_money_back",  concept_brrrr,        False),
+    # (slug, renderer, dark, sizes)
+    ("02_60_second_speed", concept_60_second, True, ("landscape_1200x628",)),
 ]
 
 SIZES = {
     "landscape_1200x628": (1200, 628),
-    "square_1200x1200":   (1200, 1200),
 }
 
 
@@ -643,14 +229,16 @@ if __name__ == "__main__":
     out_dir = "/sessions/adoring-sweet-einstein/mnt/final_source_code/google-ads/creatives"
     os.makedirs(out_dir, exist_ok=True)
 
-    for slug, renderer, dark in CONCEPTS:
-        for size_name, size in SIZES.items():
-            canvas = make_canvas(size, dark)
+    count = 0
+    for slug, renderer, dark, size_names in CONCEPTS:
+        for size_name in size_names:
+            canvas = make_canvas(SIZES[size_name], dark)
             renderer(canvas, dark=dark)
             out = canvas.convert("RGB")
             path = f"{out_dir}/{slug}_{size_name}.png"
             out.save(path, "PNG", optimize=True)
             print(f"  {os.path.basename(path)}")
+            count += 1
 
     # logos
     make_logo_square().save(f"{out_dir}/logo_square_1200x1200.png", "PNG", optimize=True)
@@ -658,4 +246,4 @@ if __name__ == "__main__":
     make_logo_landscape().save(f"{out_dir}/logo_landscape_1200x300.png", "PNG", optimize=True)
     print("  logo_landscape_1200x300.png")
 
-    print(f"\nGenerated {len(CONCEPTS) * len(SIZES) + 2} assets.")
+    print(f"\nGenerated {count + 2} assets.")
