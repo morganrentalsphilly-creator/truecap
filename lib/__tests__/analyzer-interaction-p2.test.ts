@@ -30,6 +30,10 @@ describe("a typed unit number survives a suggestion pick (P2-148)", () => {
     expect(addressUnitDesignator("100 Main St Ste E, Dayton, OH")).toBe("Ste E");
     expect(addressUnitDesignator("100 Main St Suite #4A")).toBe("Suite #4A");
     expect(addressUnitDesignator("9 Oak Rd apartment 12-3, Reno, NV")).toBe("apartment 12-3");
+    // No space, a dot, or "#" between the keyword and the token.
+    expect(addressUnitDesignator("12 Elm Ave Apt2B, Austin, TX")).toBe("Apt2B");
+    expect(addressUnitDesignator("12 Elm Ave Apt. 2B, Austin, TX")).toBe("Apt. 2B");
+    expect(addressUnitDesignator("12 Elm Ave Unit#5, Austin, TX")).toBe("Unit#5");
   });
 
   it("does not read a street name or a plain address as a unit", () => {
@@ -37,6 +41,17 @@ describe("a typed unit number survives a suggestion pick (P2-148)", () => {
     expect(addressUnitDesignator("12 Unit St, Akron, OH")).toBeNull();
     expect(addressUnitDesignator("7 Suite Ave, Akron, OH")).toBeNull();
     expect(addressUnitDesignator("3 Capt Smith Rd, Mystic, CT")).toBeNull();
+    // A keyword that runs straight into a letter is a word, not a unit:
+    // these were read as "Unity", "Step", "Stem", "Stew", "Suites", "Apts".
+    expect(addressUnitDesignator("4612 Unity St, Philadelphia, PA 19124, USA")).toBeNull();
+    expect(addressUnitDesignator("4612 UNITY ST PHILADELPHIA PA")).toBeNull();
+    expect(addressUnitDesignator("123 Main St, Unity, ME 04988, USA")).toBeNull();
+    expect(addressUnitDesignator("12 Step Rd, Durham, NC")).toBeNull();
+    expect(addressUnitDesignator("210 Main St, Stem, NC 27581")).toBeNull();
+    expect(addressUnitDesignator("300 Stew Leonard Dr, Yonkers, NY 10710")).toBeNull();
+    expect(addressUnitDesignator("500 Embassy Suites Dr, Franklin, TN")).toBeNull();
+    expect(addressUnitDesignator("1 Sunset Apts, Miami, FL")).toBeNull();
+    expect(addressUnitDesignator("100 Main St, Ste. Genevieve, MO 63670")).toBeNull();
     expect(addressUnitDesignator(undefined)).toBeNull();
     expect(addressUnitDesignator(209)).toBeNull();
   });
@@ -49,6 +64,11 @@ describe("a typed unit number survives a suggestion pick (P2-148)", () => {
       ),
     ).toBe("444 N Front St #209, Columbus, OH 43215, USA");
     expect(withTypedUnit("12 Elm Ave", "12 elm ave apt 2B")).toBe("12 Elm Ave apt 2B");
+    // A street whose name starts with a keyword ("Unity") is not a unit the
+    // pick already carries, so the typed one still goes back in.
+    expect(
+      withTypedUnit("4612 Unity St, Philadelphia, PA 19124, USA", "4612 unity st apt 2"),
+    ).toBe("4612 Unity St apt 2, Philadelphia, PA 19124, USA");
   });
 
   it("leaves the pick alone when nothing was typed, a unit is already there, or it is another place", () => {
@@ -97,6 +117,18 @@ describe("HOA prompt for an address with a unit number (P2-148)", () => {
     expect(shouldPromptForHoa({ address: condo, hoaMonthly: 0, hoaFieldVisited: true })).toBe(false);
     expect(
       shouldPromptForHoa({ address: "123 Main St, Columbus, OH 43215", hoaMonthly: 0, hoaFieldVisited: false }),
+    ).toBe(false);
+    // The prompt says "This address has a unit number": a house on Unity St
+    // or in Unity, ME must not get it.
+    expect(
+      shouldPromptForHoa({
+        address: "4612 Unity St, Philadelphia, PA 19124, USA",
+        hoaMonthly: 0,
+        hoaFieldVisited: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldPromptForHoa({ address: "123 Main St, Unity, ME 04988, USA", hoaMonthly: 0, hoaFieldVisited: false }),
     ).toBe(false);
   });
 
