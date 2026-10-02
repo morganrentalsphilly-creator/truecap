@@ -127,7 +127,7 @@ const MATRIX: Row[] = [
     feature: "Comps + ARV / market value",
     truecap: "One free sale and rent comps lookup; Pro includes up to 50 per month",
     bricked:
-      "Yes, comps from MLS, county records and public listing sites, with as-is value and ARV",
+      "Yes: comps from MLS, county records and public listing sites, with as-is value and ARV",
     winner: "bricked",
   },
   {

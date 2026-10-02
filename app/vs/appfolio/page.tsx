@@ -130,21 +130,21 @@ const MATRIX: Row[] = [
   {
     feature: "Accounting + reporting at scale",
     truecap: "No",
-    appfolio: "Yes, property, portfolio and trust accounting with reports",
+    appfolio: "Yes: property, portfolio and trust accounting with reports",
     winner: "appfolio",
   },
   {
     feature: "Resident services + utilities",
     truecap: "No",
     appfolio:
-      "Yes, resident services, with smart-home and utility management through AppFolio Stack partners",
+      "Yes: resident services, with smart-home and utility management through AppFolio Stack partners",
     winner: "appfolio",
   },
   {
     feature: "AI assistant for renters",
     truecap: "No",
     appfolio:
-      "Yes, Realm-X Assistant is included; the AI Leasing Performer is a paid add-on",
+      "Yes: Realm-X Assistant is included; the AI Leasing Performer is a paid add-on",
     winner: "appfolio",
   },
   {

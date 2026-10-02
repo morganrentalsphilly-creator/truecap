@@ -119,7 +119,7 @@ const MATRIX: Row[] = [
     feature: "Motivated-seller lists",
     truecap: "No",
     batchleads:
-      "Yes, motivated-seller quick filters, preforeclosure info, expired and canceled listings",
+      "Yes: motivated-seller quick filters, preforeclosure info, expired and canceled listings",
     winner: "batchleads",
   },
   {
@@ -132,13 +132,13 @@ const MATRIX: Row[] = [
     feature: "Direct mail + SMS campaigns",
     truecap: "No",
     batchleads:
-      "Yes, direct mail built in; SMS through a third-party integration, not on Growth",
+      "Yes: direct mail built in; SMS through a third-party integration, not on Growth",
     winner: "batchleads",
   },
   {
     feature: "Stacked / multi-criteria lists",
     truecap: "No",
-    batchleads: "Yes, list stacking and deduplication",
+    batchleads: "Yes: list stacking and deduplication",
     winner: "batchleads",
   },
   {

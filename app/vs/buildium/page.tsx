@@ -130,19 +130,19 @@ const MATRIX: Row[] = [
     feature: "Property accounting + financial reports",
     truecap: "No",
     buildium:
-      "Yes, property accounting, bank reconciliation and financial reports",
+      "Yes: property accounting, bank reconciliation and financial reports",
     winner: "buildium",
   },
   {
     feature: "Owner reports + portals",
     truecap: "No",
-    buildium: "Yes, Owners Portal and standard reports on every plan",
+    buildium: "Yes: Owners Portal and standard reports on every plan",
     winner: "buildium",
   },
   {
     feature: "Maintenance vendor management",
     truecap: "No",
-    buildium: "Yes, task and work order management on every plan",
+    buildium: "Yes: task and work order management on every plan",
     winner: "buildium",
   },
   {
