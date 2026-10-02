@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
     description:
-      "RentCast estimates rent + property value. TrueCap underwrites the full deal. Honest comparison.",
+      "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace.",
     url: "/vs/rentcast",
     type: "website",
   },
