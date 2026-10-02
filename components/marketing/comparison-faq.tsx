@@ -227,8 +227,9 @@ export function ComparisonFaq({
 
         {/* One line for agents: the comparison pages otherwise speak only
             to investors. It states what the catalog's client_buy_box
-            feature does (lib/entitlements-catalog.ts; the roster and the
-            one-client-per-deal screening are spelled out on /for-agents).
+            feature does (lib/entitlements-catalog.ts; the roster, assigning
+            a saved deal to a client and the one-client-per-deal screening
+            are spelled out on /for-agents).
             An inline link in a sentence, through IntentPrefetchLink like
             every /vs link below the hero. */}
         {agentProConfigured ? (
@@ -237,8 +238,8 @@ export function ComparisonFaq({
             <IntentPrefetchLink href="/for-agents" className="tc-link">
               TrueCap for agents
             </IntentPrefetchLink>{" "}
-            keeps a client roster and screens a deal against that client&apos;s
-            Buy Box.
+            keeps a client roster and screens each deal against the Buy Box of
+            the client you assign it to.
           </p>
         ) : null}
 
