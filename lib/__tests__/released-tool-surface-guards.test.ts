@@ -99,6 +99,8 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     "app/tools/70-percent-rule-calculator/opengraph-image.tsx",
     "app/blog/70-percent-rule-house-flipping/page.tsx",
     "app/blog/how-to-calculate-arv/page.tsx",
+    "app/blog/70-percent-rule-house-flipping/opengraph-image.tsx",
+    "app/blog/how-to-calculate-arv/opengraph-image.tsx",
   ];
 
   it("uses the price-screen name for the rule of thumb", () => {
