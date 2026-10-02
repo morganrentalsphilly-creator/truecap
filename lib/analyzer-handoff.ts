@@ -309,7 +309,10 @@ export const ANALYZER_ROUTE = "/analyze";
 
 /**
  * Build a handoff URL into the full analyzer from a calculator's inputs.
- * Adds utm_source for attribution (ignored by readAnalyzerHandoff).
+ * Adds `from` to name the page the link sits on (ignored by
+ * readAnalyzerHandoff). It is deliberately not `utm_source`: the link is a
+ * hop inside the site, and a utm_ parameter on it reaches analytics as a
+ * traffic source and would overwrite the visitor's real one.
  * Defaults to /analyze — the homepage no longer mounts the analyzer, so a
  * handoff aimed at "/" would stage values nothing reads.
  */
@@ -353,7 +356,7 @@ export function buildAnalyzerHandoffUrl(
   if (isReleasedHandoffStrategy(input.strategy)) {
     params.set("strategy", input.strategy);
   }
-  params.set("utm_source", opts?.utmSource ?? "tool-handoff");
+  params.set("from", opts?.utmSource ?? "tool-handoff");
 
   return `${base}?${params.toString()}`;
 }

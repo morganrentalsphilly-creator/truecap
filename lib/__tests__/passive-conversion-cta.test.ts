@@ -23,7 +23,10 @@ describe("sitewide passive-conversion CTA", () => {
     // The analyzer lives at /analyze (site overhaul Phase 2). A "/…#main"
     // destination lands on the marketing hero and drops the staged prefill.
     expect(shared).toContain('base: ANALYZER_ROUTE');
-    expect(shared).toContain('`${ANALYZER_ROUTE}?utm_source=${encodeURIComponent(utmSource)}`');
+    // An internal hop is marked with `from`, never a utm_ parameter, which
+    // analytics would count as a traffic source (audit row P2-113).
+    expect(shared).toContain('`${ANALYZER_ROUTE}?from=${encodeURIComponent(utmSource)}`');
+    expect(shared).not.toContain("?utm_source=");
     expect(shared).toContain(": ANALYZER_ROUTE;");
     expect(shared).not.toContain("#main");
     expect(shared).not.toContain('"/?utm_source');

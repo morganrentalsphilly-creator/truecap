@@ -96,10 +96,10 @@ describe("/embed hub design pass", () => {
 
   it("closes on one filled button, the analyzer link, with no icon", () => {
     const html = renderHub();
-    const close = html.match(/<a\b[^>]*href="\/analyze\?utm_source=embed-hub-cta"[^>]*>([\s\S]*?)<\/a>/);
+    const close = html.match(/<a\b[^>]*href="\/analyze\?from=embed-hub-cta"[^>]*>([\s\S]*?)<\/a>/);
     expect(close?.[1]).toBe("Try the full TrueCap analyzer");
     // Kept: prefetch={false} and the literal href (analyzer-link-destinations).
-    expect(hub).toMatch(/href="\/analyze\?utm_source=embed-hub-cta"\s+prefetch=\{false\}/);
+    expect(hub).toMatch(/href="\/analyze\?from=embed-hub-cta"\s+prefetch=\{false\}/);
   });
 
   it("kept: exactly one Disclaimer, SiteFooter's", () => {

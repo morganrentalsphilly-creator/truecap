@@ -44,8 +44,12 @@ export function SeoAnalyzerCta({
   /** Optional page-specific bridge copy. It must not contain entered deal data. */
   supportingText?: string;
 }) {
-  // Attribution must survive the no-handoff path too — most call sites
-  // (glossary, vs, playbook) pass no prefill but still need utm_source.
+  // The page family must survive the no-handoff path too: most call sites
+  // (glossary, vs, playbook) pass no prefill but still name where the click
+  // came from. It travels as `from`, not `utm_source`: this is a hop inside
+  // the site, and a utm_ parameter on it reaches analytics as a traffic
+  // source and would overwrite the visitor's real one. Nothing reads the
+  // value from the URL.
   // Every variant lands on /analyze: the analyzer moved off the homepage
   // (site overhaul Phase 2), so a homepage-fragment destination would drop the
   // visitor on the marketing hero and discard any staged prefill.
@@ -55,7 +59,7 @@ export function SeoAnalyzerCta({
         ...(utmSource ? { utmSource } : {}),
       })
     : utmSource
-      ? `${ANALYZER_ROUTE}?utm_source=${encodeURIComponent(utmSource)}`
+      ? `${ANALYZER_ROUTE}?from=${encodeURIComponent(utmSource)}`
       : ANALYZER_ROUTE;
   const contentType: ContentCtaType =
     utmSource === "glossary"
