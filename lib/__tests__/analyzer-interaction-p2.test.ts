@@ -306,6 +306,42 @@ describe("reduced motion reaches the charts and the last two scripted scrolls (P
     expect(source).toContain("const animate = !usePrefersReducedMotion();");
   });
 
+  // The signed-in dashboard's charts draw in from JavaScript too. They were
+  // outside the analyzer package and still animated under reduced motion.
+  const dashboardChartFiles = [
+    "components/dashboard/PortfolioChart.tsx",
+    "components/dashboard/RiskReturn.tsx",
+    "components/dashboard/owned-equity-chart.tsx",
+    "components/dashboard/stat-card-sparkline.tsx",
+  ];
+
+  it.each(dashboardChartFiles)("tells every mark in %s whether to animate", (file) => {
+    const source = read(file);
+    const marks = source.match(/<(?:Bar|Line|Area|Scatter)[\s\n]/g) ?? [];
+    expect(marks.length).toBeGreaterThan(0);
+    expect(source.match(/isAnimationActive=\{animate\}/g) ?? []).toHaveLength(marks.length);
+    expect(source).toContain("const animate = !usePrefersReducedMotion();");
+  });
+
+  it("covers every file that draws a Recharts mark", () => {
+    // A new chart file has to join one of the two lists above, so it cannot
+    // ship a mark that ignores prefers-reduced-motion.
+    const listed = new Set([...chartFiles, ...dashboardChartFiles]);
+    const found: string[] = [];
+    for (const dir of ["app", "components"]) {
+      const root = join(process.cwd(), dir);
+      for (const file of readdirSync(root, { recursive: true }) as string[]) {
+        if (!/\.tsx$/.test(file)) continue;
+        const source = readFileSync(join(root, file), "utf8");
+        if (!/from "recharts"/.test(source)) continue;
+        if (!/<(?:Bar|Line|Area|Scatter|Pie|Radar|RadialBar|Funnel|Treemap)[\s\n]/.test(source)) continue;
+        found.push(`${dir}/${file}`);
+      }
+    }
+    expect(found.length).toBeGreaterThanOrEqual(listed.size);
+    expect(found.filter((file) => !listed.has(file))).toEqual([]);
+  });
+
   it("leaves no literal smooth scroll in the analyzer components", () => {
     // Every file under components/investcalc, not only the two that had one.
     const root = join(process.cwd(), "components/investcalc");
