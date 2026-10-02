@@ -8691,8 +8691,8 @@ export function InvestCalcPage({
         toast({
           title: "Property lookup unavailable",
           description: priceMissing
-            ? "The current rate and area rent could not be fetched, so neither was filled in. Add the asking price, the rent and your interest rate, then run the analysis."
-            : "The current rate and area rent could not be fetched, so neither was filled in. Add the rent and check the interest rate, then run the analysis.",
+            ? "TrueCap could not fetch the current rate or the area rent, so it filled in neither. Add the asking price, then enter or check the rent and the interest rate before you run the analysis."
+            : "TrueCap could not fetch the current rate or the area rent, so it filled in neither. Enter or check the rent and the interest rate, then run the analysis.",
           variant: "warning",
         });
         if (!priceMissing) {

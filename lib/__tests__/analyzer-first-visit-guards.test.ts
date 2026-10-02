@@ -413,9 +413,18 @@ describe("the GET fallback and a failed lookup behave like the scripted hero pat
     );
     const failed = section(heroHandler, "} else if (lookupFailed) {", "} else {");
     expect(failed).toContain('title: "Property lookup unavailable"');
+    // Both variants name what failed, in the active voice (docs/voice.md 2).
+    expect(
+      failed.split(
+        "TrueCap could not fetch the current rate or the area rent, so it filled in neither.",
+      ),
+    ).toHaveLength(3);
+    // A restored draft can already hold a rent: never "add" a value that is
+    // there.
     expect(failed).toContain(
-      "The current rate and area rent could not be fetched, so neither was filled in.",
+      "Enter or check the rent and the interest rate, then run the analysis.",
     );
+    expect(failed).not.toContain("Add the rent");
     // The ordinary guidance must not be what a failed lookup shows.
     expect(failed).not.toContain("Two fields to your first screen");
   });
