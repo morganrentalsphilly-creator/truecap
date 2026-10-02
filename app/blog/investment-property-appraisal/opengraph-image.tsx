@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "How-to",
     tag: "Appraisals",
-    title: "How investment property appraisals work (2026)",
+    title: "Investment property appraisals: how they work",
     subline: "1007 rent schedule · lower-of rule · low-appraisal playbook",
   });
 }

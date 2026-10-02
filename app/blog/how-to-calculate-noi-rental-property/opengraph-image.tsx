@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Metrics",
     tag: "Net operating income",
-    title: "How to calculate NOI on a rental property",
+    title: "How to calculate NOI (net operating income) on a rental property",
     subline: "EGI minus operating expenses · before the mortgage · cap rate and DSCR",
   });
 }
