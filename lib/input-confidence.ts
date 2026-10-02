@@ -746,8 +746,11 @@ export function buildInputConfidence(
             rateProvenance && !rateProvenance.overridden
               ? {
                   sourceClass: "market-benchmark",
-                  sourceLabel: "TrueCap estimated market rate",
-                  reason: `TrueCap estimate based on FRED's national owner-occupied mortgage series${
+                  // The value is FRED's published observation, passed through
+                  // unchanged (app/actions/enrich-property.ts), so the label
+                  // names FRED, as the form's receipt does ("FRED benchmark").
+                  sourceLabel: "FRED 30-year rate benchmark",
+                  reason: `Taken from FRED's national owner-occupied mortgage series${
                     rateProvenance.fetchedAt
                       ? ` as of ${rateProvenance.fetchedAt}`
                       : ""
