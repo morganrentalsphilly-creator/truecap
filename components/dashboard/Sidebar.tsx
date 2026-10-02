@@ -100,7 +100,9 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
       </div>
 
       <div className="px-3 py-5">
-        <div className="px-3 mb-2 text-3xs font-semibold tracking-[0.18em] text-sidebar-foreground/40">MAIN MENU</div>
+        {/* Sentence case at 12px and 70% alpha: about 6:1 on the navy rail.
+            It was 10px, tracked capitals at 40% alpha, about 2.8:1. */}
+        <div className="px-3 mb-2 text-xs font-semibold text-sidebar-foreground/70">Main menu</div>
         <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"} className="space-y-1">
           {nav
             // Disabled items normally render greyed as a one-tier-up upsell
