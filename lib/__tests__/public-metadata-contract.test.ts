@@ -205,6 +205,35 @@ describe("social card contract", () => {
   const visible = (file: string) => withoutComments(read(file));
   const setsOpenGraph = (source: string) => /\bopenGraph\s*:/.test(source);
 
+  /**
+   * Every `openGraph: { … }` object in a source, braces matched. og:image
+   * comes from this object alone: an `images` key in the `twitter` block
+   * beside it sets twitter:image and leaves the page with no og:image. An
+   * `openGraph` value that is not an object literal (or never closes) cannot
+   * be read here and comes back as null, so the caller reports the page
+   * instead of passing it unread.
+   */
+  const openGraphBlocks = (source: string): (string | null)[] => {
+    const blocks: (string | null)[] = [];
+    const key = /\bopenGraph\s*:\s*/g;
+    for (let match = key.exec(source); match; match = key.exec(source)) {
+      const open = match.index + match[0].length;
+      let block: string | null = null;
+      if (source[open] === "{") {
+        let depth = 0;
+        for (let i = open; i < source.length; i += 1) {
+          if (source[i] === "{") depth += 1;
+          else if (source[i] === "}" && (depth -= 1) === 0) {
+            block = source.slice(match.index, i + 1);
+            break;
+          }
+        }
+      }
+      blocks.push(block);
+    }
+    return blocks;
+  };
+
   const PAGES = pageFiles();
   const WITH_CARD = PAGES.filter(hasCard);
   const WITHOUT_CARD = PAGES.filter((page) => !hasCard(page));
@@ -232,16 +261,46 @@ describe("social card contract", () => {
     ).toEqual([]);
   });
 
-  it("a page without its own card that sets openGraph names an image", () => {
+  it("a page without its own card that sets openGraph names an image in it", () => {
+    // The image must be inside the openGraph object. Looking for an `images`
+    // key anywhere in the file let a page drop its Open Graph image and pass
+    // on the twitter one (2026-10 review, by mutation on /markets).
     const offenders = WITHOUT_CARD.filter((page) => {
       if (NO_IMAGE_BY_DESIGN.has(page)) return false;
-      const source = visible(page);
-      return setsOpenGraph(source) && !IMAGES_KEY.test(source);
+      return openGraphBlocks(visible(page)).some(
+        (block) => block === null || !IMAGES_KEY.test(block),
+      );
     });
     expect(
       offenders,
-      "these pages set a page-level openGraph, have no opengraph-image.tsx, and name no image: they would ship no og:image. Add a card file or keep the default image",
+      "these pages set a page-level openGraph, have no opengraph-image.tsx, and name no image inside it (or build it in a way this test cannot read): they would ship no og:image. Add a card file or keep the default image",
     ).toEqual([]);
+  });
+
+  it("reads the openGraph object itself, not the twitter block beside it", () => {
+    const withBoth = `export const metadata = {
+      openGraph: { title: "A", images: [{ url: "/home.jpg", width: 1200 }] },
+      twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+    };`;
+    const twitterOnly = `export const metadata = {
+      openGraph: { title: \`A \${count}\`, url: "/a" },
+      twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+    };`;
+    expect(openGraphBlocks(withBoth)).toHaveLength(1);
+    expect(openGraphBlocks(withBoth)[0]).toMatch(IMAGES_KEY);
+    expect(IMAGES_KEY.test(twitterOnly)).toBe(true);
+    expect(openGraphBlocks(twitterOnly)).toHaveLength(1);
+    expect(openGraphBlocks(twitterOnly)[0]).not.toMatch(IMAGES_KEY);
+    expect(openGraphBlocks("const m = { openGraph: shared };")).toEqual([null]);
+    expect(openGraphBlocks("const m = { title: 1 };")).toEqual([]);
+    // The walk finds real blocks: the one page excused above has one, with no image.
+    const share = openGraphBlocks(visible("app/s/[token]/page.tsx"));
+    expect(share).toHaveLength(1);
+    expect(share[0]).not.toBeNull();
+    expect(share[0]).not.toMatch(IMAGES_KEY);
+    const markets = openGraphBlocks(visible("app/markets/page.tsx"));
+    expect(markets).toHaveLength(1);
+    expect(markets[0]).toMatch(IMAGES_KEY);
   });
 
   it("every page that sets openGraph keeps a twitter block of its own", () => {
@@ -311,15 +370,16 @@ describe("social card contract", () => {
     // spreads the base (2026-10 audit: missing on every sitemap page).
     //
     // Two groups wait, each on a decision this test does not make:
-    //   - The comparison pages and blog posts the weekly SEO loop edits
-    //     (app/vs/<slug>, app/blog/<slug>). The loop's verifier refuses any
-    //     edit to a page that imports a module outside its import allow-list
-    //     (seo/config.json `paths.importAllow`), and the base's module is not
-    //     on it. They take the base once it is. Posts built with
+    //   - The comparison pages, blog posts and research pages the weekly SEO
+    //     loop writes (app/vs/<slug>, app/blog/<slug>, app/research/<slug>:
+    //     seo/config.json `paths.agentAllow`). The loop's verifier refuses
+    //     any page that imports a module outside its import allow-list
+    //     (`paths.importAllow`), and the base's module is not on it. They
+    //     take the base once it is. Posts built with
     //     buildSourceFirstArticleMetadata already have it through the builder.
     //   - The two share pages. What a texted /s or /d link previews as,
     //     site name included, is an open product decision.
-    const LOOP_EDITED = /^app\/(?:vs|blog)\/[^/[\]]+\/page\.tsx$/;
+    const LOOP_EDITED = /^app\/(?:vs|blog|research)\/[^/[\]]+\/page\.tsx$/;
     const SHARE_PAGES = new Set([
       "app/s/[token]/page.tsx",
       "app/d/[encoded]/page.tsx",
@@ -327,6 +387,11 @@ describe("social card contract", () => {
     const held = (page: string) =>
       SHARE_PAGES.has(page) ||
       (LOOP_EDITED.test(page) && page !== "app/blog/topics/page.tsx");
+    // The loop's own list still names all three page families held above.
+    const agentAllow: string[] = JSON.parse(read("seo/config.json")).paths.agentAllow;
+    for (const family of ["vs", "blog", "research"]) {
+      expect(agentAllow, family).toContain(`app/${family}/*/page.tsx`);
+    }
     const subject = PAGES.filter((page) => setsOpenGraph(visible(page)));
     expect(subject.length).toBeGreaterThan(150);
     expect(subject.filter((page) => !held(page)).length).toBeGreaterThan(50);
