@@ -11,10 +11,6 @@ import {
 import { buildEvaluationDealResourceKey } from "@/lib/evaluation-resource-key";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
-import {
-  PRODUCT_EVALUATION_COMPARISON_LIMIT,
-  PRODUCT_EVALUATION_DEAL_LIMIT,
-} from "@/lib/product-access";
 
 export type ClaimAnonymousDecisionResult =
   | { ok: true; expiresAt: number; repeated: boolean }
@@ -69,7 +65,7 @@ export async function claimAnonymousDecisionAction(
         ok: false,
         code: "LIMIT_REACHED",
         message:
-          `This browser's no-signup decision has been used. Create a free account for ${PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card.`,
+          "This browser's no-signup decision has been used. Create a free account for three complete Pro deals and one comparison — no card.",
       };
     }
     return { ok: true, expiresAt: current.expiresAt, repeated: true };
