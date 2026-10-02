@@ -44,8 +44,30 @@ describe("/changelog archive", () => {
       /Team Pro/i,
       /one-time (?:single-deal )?PDF/i,
       /sticky CTA/i,
+      // The ledger row was removed with the Deal Q&A row (2026-08-17).
+      /Where these numbers came from/i,
     ]) {
       expect(entries, String(gone)).not.toMatch(gone);
+    }
+  });
+
+  it("quotes no control label or placement that has since changed", () => {
+    for (const stale of [
+      // The sample deal is a link under the homepage address form.
+      /sample deal' button next to/i,
+      /next to the analyzer's H1/i,
+      // Notes is the last ledger row; results are rows, not tabs.
+      /Lives at the top of the analysis dashboard/i,
+      /inside the Cash Flow tab/i,
+      // The analyzer is not on the homepage.
+      /Server-side fetch on the homepage/i,
+      // The card's headline is "Create an account to save {deal}".
+      /Save \[your address\] for later/i,
+      // BRRRR and depreciation years are switched off on the templates page.
+      /Five prebuilt starting points/i,
+      /depreciation years/i,
+    ]) {
+      expect(entries, String(stale)).not.toMatch(stale);
     }
   });
 
@@ -69,8 +91,29 @@ describe("/changelog archive", () => {
   it("says it is a dated archive and promises no updates", () => {
     expect(source).toContain("This archive preserves historical release notes.");
     expect(source).toMatch(/Each note\s+describes the product on its date/);
+    // Not every note about a withdrawn feature was removed: the entries
+    // marked "(retired)" and "(partly retired)" are still on the page, and
+    // the notice's next clause says so.
+    expect(source).not.toMatch(
+      /notes about features\s+that were later withdrawn have been removed/i,
+    );
+    expect(source).toMatch(/Notes about some withdrawn\s+features have been removed/);
+    expect(entries).toContain("(retired)");
     expect(source).not.toMatch(/Updated as we ship/i);
     expect(source).not.toMatch(/as they ship/i);
     expect(source).toContain("robots: { index: false, follow: true }");
+  });
+
+  it("does not tell a free account it gets the dashboard screen", () => {
+    // /dashboard redirects an account without dashboard_insights to My Deals.
+    expect(source).not.toMatch(/opens\s+the dashboard/i);
+    expect(source).toMatch(/in\s+My Deals\./);
+    const route = readFileSync(
+      join(process.cwd(), "app/dashboard/page.tsx"),
+      "utf8",
+    );
+    expect(route).toMatch(
+      /if \(!canViewDashboardInsights\) \{\s+redirect\("\/dashboard\/saved-analyses"\);/,
+    );
   });
 });
