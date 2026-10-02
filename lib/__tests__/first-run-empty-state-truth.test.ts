@@ -8,8 +8,12 @@ import { tierHas } from "@/lib/entitlements-catalog";
  * promise things a Free account does not get: My Deals said "compare, edit,
  * and revisit" (updating a saved deal and comparing are paid), and the
  * dashboard promised "portfolio totals, top performers, and risk/return
- * analysis" (the focused dashboard is one deals table, and its Offer Ceiling
- * and Gap columns are solved for paid subscribers only).
+ * analysis" (the focused dashboard is one table of active deals, and its
+ * Offer Ceiling and Gap columns are solved for paid subscribers only).
+ *
+ * /dashboard needs dashboard_insights, so a Free or trial account is sent to
+ * My Deals and never reads the dashboard line: its non-premium wording is a
+ * fail-safe for an account that passes the route gate without a paid plan.
  *
  * Each copy assertion is paired with the gate it describes, so a change to
  * the gate fails here and sends the editor back to the sentence.
@@ -41,9 +45,9 @@ describe("My Deals first-run empty state", () => {
 describe("dashboard first-run empty state", () => {
   const home = read("components/dashboard/DashboardHome.tsx");
   const FREE_LINE =
-    "Every saved deal appears here in one table with its asking price, screening result and Deal score. Pro adds the Offer Ceiling and the gap to asking.";
+    "Active deals you save appear here in one table with asking price, screening result and Deal score. Pro adds the Offer Ceiling and the gap to asking.";
   const PAID_LINE =
-    "Every saved deal appears here in one table with its Offer Ceiling and the gap to asking.";
+    "Active deals you save appear here in one table with the Offer Ceiling and the gap to asking.";
   const OLD_LINE =
     "You'll see portfolio totals, top performers, and risk/return analysis here.";
 
@@ -51,20 +55,39 @@ describe("dashboard first-run empty state", () => {
     expect(home).toContain(FREE_LINE);
     expect(home).toContain(PAID_LINE);
     // The pre-rebuild sentence survives for the kill-switch layout alone.
+    // Anchored on a pattern, not on the block's indentation.
+    const start = home.search(/\{!focusedDashboard\s+\? "You'll see portfolio totals/);
+    expect(start).toBeGreaterThan(-1);
     const ternary = home.slice(
-      home.indexOf("{!focusedDashboard\n                ? \"You'll see portfolio totals"),
+      start,
       home.indexOf(FREE_LINE) + FREE_LINE.length + 1,
     );
     expect(ternary).toContain(OLD_LINE);
     expect(ternary).toMatch(
-      /!focusedDashboard\s+\? "You'll see portfolio totals[^"]+"\s+: data\.user\.isPremium\s+\? "Every saved deal[^"]+"\s+: "Every saved deal[^"]+Pro adds the Offer Ceiling and the gap to asking\."/,
+      /!focusedDashboard\s+\? "You'll see portfolio totals[^"]+"\s+: data\.user\.isPremium\s+\? "Active deals you save[^"]+"\s+: "Active deals you save[^"]+Pro adds the Offer Ceiling and the gap to asking\."/,
     );
     expect(home.split(OLD_LINE).length - 1).toBe(1);
+  });
+
+  it("does not say every saved deal is listed: the table holds active deals only", () => {
+    // This empty state is also shown to an account whose saved deals are all
+    // archived, so "Every saved deal appears here" was false for its reader.
+    expect(home).not.toMatch(/Every saved deal appears here/);
+    const route = read("app/dashboard/page.tsx");
+    expect(route).toMatch(
+      /\.eq\("is_completed", false\)\s+\.eq\("is_archived", false\)\s+\.order\("created_at", \{ ascending: false \}\)\s+\.limit\(DASHBOARD_ACTIVE_DEALS_LIMIT\)/,
+    );
   });
 
   it("matches the gate: the dashboard solves an Offer Ceiling for paid subscribers only", () => {
     const route = read("app/dashboard/page.tsx");
     expect(route).toContain("const canShowMao = isPremium;");
+    // The screen itself is insights-gated: Free and trial accounts land on
+    // My Deals, so the catalog's free "Dashboard access" is the area, not
+    // this screen.
+    expect(route).toMatch(
+      /if \(!canViewDashboardInsights\) \{\s+redirect\("\/dashboard\/saved-analyses"\);/,
+    );
     expect(tierHas("free", "mao")).toBe(false);
     expect(tierHas("free", "dashboard_access")).toBe(true);
   });
