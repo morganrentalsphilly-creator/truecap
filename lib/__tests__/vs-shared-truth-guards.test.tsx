@@ -151,23 +151,6 @@ const usageClaim = (source: string): string | null => {
   return QUANTIFIED_PAIRING.exec(text)?.[0] ?? QUANTIFIED_USERS.exec(text)?.[0] ?? null;
 };
 
-/**
- * Social cards that still carry a quantified usage line. The comparison
- * pages that were listed here beside them (origin/main ed1890d) have been
- * swept and are held to the rule; the three cards are rewritten by the
- * social-card change of the same fix train. The list only shrinks: the last
- * test in the block below fails, naming the path, as soon as a listed file
- * no longer carries such a line, so an entry cannot outlive its sweep and go
- * on exempting a file where the claim could come back. Delete the path it
- * names, and delete the list (and that test) when the last one has gone.
- * Every /vs page, the hub and the shared frame are held to the rule today.
- */
-const USAGE_SWEEP_PENDING: ReadonlySet<string> = new Set([
-  "app/vs/airdna/opengraph-image.tsx",
-  "app/vs/quickbooks-rental/opengraph-image.tsx",
-  "app/vs/rentcast/opengraph-image.tsx",
-]);
-
 describe("no /vs surface states how many people use the tools", () => {
   const surfaces = [...new Set([...tracked(["app/vs/**/*.tsx"]), HUB, FAQ, "components/marketing/vs-page.tsx"])];
 
@@ -175,11 +158,8 @@ describe("no /vs surface states how many people use the tools", () => {
     expect(surfaces).toContain(HUB);
     expect(surfaces).toContain(FAQ);
     expect(surfaces.length).toBeGreaterThan(75);
-    for (const file of USAGE_SWEEP_PENDING) expect(surfaces, `${file} is on the pending list but is not a /vs file`).toContain(file);
-    // The files this change owns are never exempt.
-    for (const file of [HUB, FAQ, "components/marketing/vs-page.tsx"]) expect(USAGE_SWEEP_PENDING.has(file), file).toBe(false);
-    // Every comparison page has been swept: only a social card may still wait.
-    for (const file of USAGE_SWEEP_PENDING) expect(file, "only a social card may be pending").toMatch(/\/opengraph-image\.tsx$/);
+    // The social cards are read too: each is served as its page's og:image.
+    expect(surfaces.filter((file) => file.endsWith("/opengraph-image.tsx")).length).toBeGreaterThan(35);
   });
 
   it("matches the audited forms and lets the plain ones pass", () => {
@@ -206,20 +186,12 @@ describe("no /vs surface states how many people use the tools", () => {
     }
   });
 
-  it("finds no quantified usage claim outside the files still waiting on their sweep", () => {
+  it("finds no quantified usage claim on any /vs surface: no file is exempt", () => {
     const violations = surfaces
-      .filter((file) => !USAGE_SWEEP_PENDING.has(file))
       .map((file) => [file, usageClaim(read(file))] as const)
       .filter(([, claim]) => claim !== null)
       .map(([file, claim]) => `${file}: ${claim}`);
     expect(violations).toEqual([]);
-  });
-
-  it("keeps the pending list honest: a file whose sweep has landed comes off it", () => {
-    const swept = [...USAGE_SWEEP_PENDING].filter(
-      (file) => !existsSync(join(ROOT, file)) || usageClaim(read(file)) === null,
-    );
-    expect(swept, "no quantified usage line is left in these files: delete them from USAGE_SWEEP_PENDING").toEqual([]);
   });
 });
 

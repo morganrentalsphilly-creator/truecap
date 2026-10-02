@@ -1,16 +1,15 @@
 /**
- * Dynamic OG image for /vs/bricked. Auto-detected by Next.js App Router
- * convention; overrides any images: [...] declared in the route's
- * metadata.
+ * Social card for /vs/bricked. The page sets no images of its own, so Next
+ * serves this file as its og:image and twitter:image. Drawn by the shared
+ * template, lib/og/vs-og-template.tsx.
  *
- * Implementation lives in the shared template at
- * lib/og/vs-og-template.tsx — this file is just the per-competitor
- * config wrapper so all /vs OG images stay visually consistent.
+ * The tagline restates what /vs/bricked and the /vs hub say today. When the
+ * page changes a fact, change this line with it.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const alt = "TrueCap vs Bricked AI — honest comparison";
+export const alt = "TrueCap vs Bricked AI";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -18,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Bricked AI",
     tagline:
-      "Bricked tells you what a house is worth. TrueCap tells you what a rental will earn.",
+      "Bricked works from comps, repair estimates and ARV to an offer price. TrueCap models rental economics under the assumptions shown.",
     slug: "bricked",
   });
 }
