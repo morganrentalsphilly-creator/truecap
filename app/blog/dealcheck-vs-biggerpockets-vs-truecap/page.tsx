@@ -194,7 +194,7 @@ export default function ThreeWayComparisonPost() {
               href="https://dealcheck.io/pricing/"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="tc-link"
             >
               DealCheck pricing
             </a>
@@ -203,7 +203,7 @@ export default function ThreeWayComparisonPost() {
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="tc-link"
             >
               BiggerPockets calculator
             </a>
@@ -212,7 +212,7 @@ export default function ThreeWayComparisonPost() {
               href="https://www.biggerpockets.com/pro-membership"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="tc-link"
             >
               BiggerPockets Pro
             </a>
@@ -221,7 +221,7 @@ export default function ThreeWayComparisonPost() {
               href="https://usetruecap.com/pricing"
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline"
+              className="tc-link"
             >
               TrueCap pricing
             </a>{" "}
