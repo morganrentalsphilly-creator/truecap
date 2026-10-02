@@ -28,6 +28,18 @@ export type SiteEventProps = {
   compare_used: { count_bucket: string };
   testimonial_prompt_shown: { source: string };
   testimonial_submitted: { consent: boolean };
+  /**
+   * The cookie banner's decision: Accept is "granted"; Reject, the X and
+   * Escape are "denied". It is the only way to learn what share of visitors
+   * the consent-gated Google tags can see at all.
+   */
+  cookie_consent_choice: { choice: "granted" | "denied" };
+  /**
+   * A click on a primary call to action. `source` names the control, never
+   * the visitor or the deal. PostHog has no key in production, so without
+   * this the funnel jumped from page view to `analysis_started`.
+   */
+  primary_cta_clicked: { source: string };
 };
 
 export type SiteEvent = keyof SiteEventProps;
@@ -46,6 +58,8 @@ export const SITE_EVENTS: readonly SiteEvent[] = [
   "compare_used",
   "testimonial_prompt_shown",
   "testimonial_submitted",
+  "cookie_consent_choice",
+  "primary_cta_clicked",
 ];
 
 export const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
@@ -119,4 +133,17 @@ export function track<E extends SiteEvent>(event: E, props: SiteEventProps[E]): 
       /* ignore */
     }
   });
+}
+
+/**
+ * Count the banner's decision, read back from storage after the banner wrote
+ * it. Cookieless: Vercel always, `dataLayer` only when the decision is
+ * "granted" (the rule every `track()` call follows). Returns the choice it
+ * recorded, or null when no decision is stored (storage blocked), in which
+ * case nothing is sent.
+ */
+export function recordCookieConsentChoice(): "granted" | "denied" | null {
+  const choice = readStoredAnalyticsConsent();
+  if (choice) track("cookie_consent_choice", { choice });
+  return choice;
 }
