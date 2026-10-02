@@ -75,6 +75,15 @@ describe("the /vs social cards", () => {
       const numbers = card.tagline.match(/\d[\d,.]*/g) ?? [];
       expect(numbers, `${card.slug}: ${card.tagline}`).toEqual(ALLOWED[card.slug] ?? []);
     }
+    // The card must not outlive its page: the weekly SEO loop may edit
+    // app/vs/<slug>/page.tsx and may not edit the card, so a number the page
+    // stops stating fails here until the card line is changed with it.
+    for (const [slug, numbers] of Object.entries(ALLOWED)) {
+      const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8");
+      for (const n of numbers) {
+        expect(page, `${slug}: the page no longer states ${n}`).toMatch(new RegExp(`\\b${n}[- ]unit`));
+      }
+    }
   });
 
   it("does not restore the lines the audit found false or unsupported", () => {
@@ -98,6 +107,13 @@ describe("the /vs social cards", () => {
     expect(text).not.toMatch(/AirDNA inputs|using AirDNA/i);
     // Internal shorthand.
     expect(text).not.toMatch(/\bSTR cut\b/i);
+    // /vs/propstream and /vs/batchleads score rental analysis a tie: both
+    // vendors publish their own rental calculators. Their cards name what
+    // each product is and do not frame underwriting as a job the vendor
+    // leaves to TrueCap.
+    for (const slug of ["propstream", "batchleads"]) {
+      expect(bySlug(slug).tagline, slug).not.toMatch(/different jobs|finds the leads/i);
+    }
   });
 
   it("keeps a card neutral while its page's competitor rows wait on a decision", () => {
@@ -122,8 +138,14 @@ describe("the /vs social cards", () => {
     // screen only". Whether the comparison pages market it is an open
     // decision (report row P2-23), so the cards for the short-term rental
     // tools say TrueCap underwrites "the deal", not "the STR deal".
+    // Everything from the first "TrueCap" on is about TrueCap, including a
+    // closing sentence of its own ("Different STR lifecycle stages." placed
+    // TrueCap as a stage of the short-term rental lifecycle).
     for (const slug of ["guesty", "hostaway", "hostfully", "lodgify", "airdna"]) {
-      expect(bySlug(slug).tagline, slug).not.toMatch(/TrueCap[^.]*\b(?:STR|short-term)\b/i);
+      const { tagline } = bySlug(slug);
+      const fromTrueCap = tagline.slice(tagline.indexOf("TrueCap"));
+      expect(tagline, slug).toContain("TrueCap");
+      expect(fromTrueCap, slug).not.toMatch(/\b(?:STRs?|short-term)\b/i);
     }
   });
 });

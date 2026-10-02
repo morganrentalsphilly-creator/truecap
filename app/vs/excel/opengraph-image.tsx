@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Excel",
     tagline:
-      "A structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
+      "TrueCap is a structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
     slug: "excel",
   });
 }

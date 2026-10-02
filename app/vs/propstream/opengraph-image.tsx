@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "PropStream",
     tagline:
-      "PropStream finds the leads. TrueCap underwrites the deals. Different jobs in the same investor workflow.",
+      "PropStream is property data and lead lists, on and off market. TrueCap underwrites the leads you choose.",
     slug: "propstream",
   });
 }
