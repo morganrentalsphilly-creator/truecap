@@ -213,6 +213,49 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     expect(Number.parseFloat(fields.match(/rate: "(\d+(?:\.\d+)?)%"/)![1]!)).toBeGreaterThan(5);
   });
 
+  it("the vacancy page names no unsourced band or default, and the bands it names are the widget's", () => {
+    const page = read("app/tools/vacancy-rate-calculator/page.tsx").replace(/\s+/g, " ");
+    // Nothing on file says what sellers quote, what a property class or a
+    // kind of town runs, or that 8% is the default to use (the analyzer's
+    // own default is 5%).
+    for (const claim of [
+      /under-quote/i,
+      /\bhonest/i,
+      /8% as a default/i,
+      /model 7-9%/i,
+      /Class [ABC]\b/,
+      /urban[- ]core/i,
+      /tertiary markets/i,
+      /always beats/i,
+      /most brochures/i,
+    ]) {
+      expect(page, String(claim)).not.toMatch(claim);
+    }
+    // The analyzer's default is read from the schema, never typed here.
+    expect(page).toContain(
+      "TrueCap's analyzer starts at ${CURRENT_DEFAULT_FACTS.vacancy} vacancy as an editable default",
+    );
+    // The bands the FAQ names are the ones the widget grades with.
+    const widget = read("components/tools/vacancy-rate-calculator-widget.tsx").replace(/\s+/g, " ");
+    expect(widget).toContain(
+      'result.vacancyPct < 5 ? "Aggressive (low)" : result.vacancyPct < 8 ? "Realistic" : result.vacancyPct < 12 ? "Conservative" : "Distressed"',
+    );
+    expect(page).toContain(
+      'under 5% reads "Aggressive (low)", 5% to under 8% "Realistic", 8% to under 12% "Conservative", and 12% or more "Distressed"',
+    );
+  });
+
+  it("the closing cost page does not promise every line item, and counts its own list", () => {
+    const page = read("app/tools/closing-cost-calculator/page.tsx");
+    // The widget totals eight cost fields; the page's own list names charges
+    // it has no field for (points, settlement fee, prepaid interest).
+    expect(page).not.toMatch(/every line item/i);
+    const list = page.slice(page.indexOf("Closing costs fall into"), page.indexOf("</ul>", page.indexOf("Closing costs fall into")));
+    const stated = list.match(/fall into (\w+) buckets/)![1]!;
+    const buckets = list.match(/<li><strong>/g) ?? [];
+    expect(["zero", "one", "two", "three", "four", "five", "six", "seven"][buckets.length]).toBe(stated);
+  });
+
   it("llms-full.txt describes the vacancy calculator as the page does: graded bands, no denial of a benchmark", async () => {
     const full = await (await getLlmsFull()).text();
     const start = full.indexOf("/tools/vacancy-rate-calculator");
