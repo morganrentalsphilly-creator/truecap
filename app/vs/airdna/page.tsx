@@ -2,7 +2,7 @@
  * /vs/airdna — competitor comparison landing page.
  *
  * Target queries: "airdna alternative", "airdna vs mashvisor", "airdna pricing", "airdna review", "str data tool".
- * AirDNA is short-term rental market intelligence — Airbnb/Vrbo occupancy rates, ADR, RevPAR by market and property. The gold standard for STR investors evaluating markets and properties.
+ * AirDNA is short-term rental market data: occupancy, ADR and revenue by market, plus Rentalizer, a revenue projection for one address with a cash-purchase cap rate. Vendor facts on this page were checked against airdna.co/pricing and help.airdna.co in October 2026.
  */
 
 import type { Metadata } from "next";
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
     description:
-      "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Often used together by STR investors.",
+      "AirDNA estimates STR revenue. TrueCap underwrites the full deal. How the two fit together.",
     url: "/vs/airdna",
     type: "website",
     images: [
@@ -87,31 +87,34 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    airdna: "Not modeled",
-    winner: "truecap",
+    airdna:
+      "Rentalizer's calculator gives net operating income and a cap rate for a cash purchase; no cash-on-cash, DSCR or mortgage math is published",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    airdna: "Forward STR revenue forecast",
+    airdna: "Forward-looking demand data and occupancy forecasts",
     winner: "tie",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    airdna: "Property-level investibility score",
+    airdna:
+      "Market Score: a market-level grade from 40 to 100 that includes investability",
     winner: "tie",
   },
   {
     feature: "STR revenue projection (ADR + occupancy)",
     truecap: "Editable input only",
-    airdna: "Yes — best-in-class market data",
+    airdna: "Yes, Rentalizer projects revenue from comparable listings",
     winner: "airdna",
   },
   {
     feature: "Comparable STR listings nearby",
     truecap: "No",
-    airdna: "Yes — Airbnb + Vrbo comp set",
+    airdna:
+      "Yes, comparable listings in Rentalizer; custom comp sets on Market Research",
     winner: "airdna",
   },
   {
@@ -123,7 +126,7 @@ const MATRIX: Row[] = [
   {
     feature: "Mortgage + financing math",
     truecap: "Yes — PITI + DSCR + amortization",
-    airdna: "Not included",
+    airdna: "Not listed; Rentalizer's cap rate is for a cash purchase",
     winner: "truecap",
   },
   {
@@ -135,20 +138,20 @@ const MATRIX: Row[] = [
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    airdna: "Free MarketMinder dashboard with limited data",
+    airdna: "Free plan with a limited Rentalizer and limited market insights",
     winner: "tie",
   },
   {
     feature: "Pricing (paid tier)",
     truecap: "Paid Pro; see live pricing for current rates",
     airdna:
-      "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)",
-    winner: "truecap",
+      "Market Research $125 a month, or $400 a year ($34 a month billed annually); Rentalizer is included, not sold per report (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "Shareable read-only analysis",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    airdna: "PDF reports on paid tier",
+    airdna: "PDF report downloads on Market Research",
     winner: "tie",
   },
 ];
@@ -181,12 +184,13 @@ export default function VsAirdnaPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            AirDNA is the gold standard for short-term rental market data —
-            Airbnb / Vrbo occupancy rates, ADR, RevPAR by market and individual
-            property. TrueCap is the underwriting calculator that turns
-            AirDNA&apos;s revenue projections into a full deal analysis (cap
-            rate, DSCR, cash flow, projection). AirDNA feeds the inputs; TrueCap
-            runs the math.
+            AirDNA is a short-term rental data provider: occupancy, ADR, and
+            revenue by market, plus a revenue projection for an individual
+            address, built from Airbnb, Vrbo, and Booking.com listings. TrueCap
+            is the underwriting calculator that turns that revenue projection
+            into a full deal analysis (cap rate, DSCR, cash flow, projection).
+            AirDNA estimates the revenue; TrueCap adds financing, DSCR, and your
+            Offer Ceiling.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -246,16 +250,16 @@ export default function VsAirdnaPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You want best-in-class STR revenue projections (ADR,
-                  occupancy, RevPAR).
+                  You want STR revenue projections built from comparable
+                  listings (ADR, occupancy, revenue).
                 </li>
                 <li>
                   You&apos;re evaluating multiple STR markets and need
                   comparable data.
                 </li>
                 <li>
-                  You want a property-level Rentalizer report from real Airbnb
-                  data.
+                  You want a property-level Rentalizer report built from real
+                  listing data.
                 </li>
                 <li>
                   You&apos;re scaling STR investments and need market
@@ -287,35 +291,35 @@ export default function VsAirdnaPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            AirDNA details based on publicly available product info as of 2026.
-            See{" "}
+            AirDNA details checked against airdna.co/pricing and AirDNA&apos;s
+            help center in October 2026. See{" "}
             <a
-              href="https://airdna.co"
+              href="https://www.airdna.co/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              airdna.co
+              AirDNA&apos;s pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How STR investors use both
+            How AirDNA and TrueCap fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
               <li>
-                <strong>Pick a target STR market in AirDNA.</strong> MarketMinder
-                — occupancy rates, ADR, seasonality, regulations.
+                <strong>Pick a target STR market in AirDNA.</strong> Market
+                data: occupancy rates, ADR, seasonality, regulation.
               </li>
               <li>
                 <strong>Run a Rentalizer report on the specific property.</strong>{" "}
-                AirDNA&apos;s address-level revenue projection ($20-40 per
-                report).
+                AirDNA&apos;s address-level revenue projection (limited on the
+                Free plan, customizable on Market Research).
               </li>
               <li>
                 <strong>
@@ -363,7 +367,11 @@ export default function VsAirdnaPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="AirDNA" items={AIRDNA_FAQ} />
+        <ComparisonFaq
+          competitorName="AirDNA"
+          items={AIRDNA_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -371,9 +379,9 @@ export default function VsAirdnaPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -444,9 +452,9 @@ const AIRDNA_FAQ: FaqItem[] = [
     answer: (
       <>
         No — they solve different problems. AirDNA is STR market + revenue data;
-        TrueCap is the underwriting calculator. AirDNA feeds revenue inputs;
-        TrueCap runs the cap rate / DSCR / cash flow math on top. STR investors
-        typically use both.
+        TrueCap is the underwriting calculator. AirDNA estimates the revenue;
+        TrueCap adds financing, DSCR, and cash flow on top. The two can be used
+        together.
       </>
     ),
   },
@@ -454,11 +462,11 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "AirDNA vs Mashvisor — which one for STR data?",
     answer: (
       <>
-        AirDNA is more focused and considered the gold standard for STR-specific
-        data (ADR, occupancy, RevPAR). Mashvisor covers STR too but also
-        includes LTR data and broader market analysis. If STR is your primary
-        strategy, AirDNA wins. If you toggle between LTR and STR,
-        Mashvisor&apos;s broader scope wins.
+        AirDNA focuses on short-term rental data (ADR, occupancy, revenue).
+        Mashvisor covers short-term rentals too and also estimates long-term
+        rental rates. If STR is your only strategy, AirDNA&apos;s focus fits.
+        If you compare long-term and short-term rents on the same property,
+        look at Mashvisor as well.
       </>
     ),
   },
@@ -466,9 +474,11 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "Does AirDNA do cap rate or DSCR calculations?",
     answer: (
       <>
-        No — AirDNA gives you projected STR revenue. You&apos;d plug that
-        revenue into a separate calculator (TrueCap, DealCheck, or your
-        spreadsheet) to compute cap rate, DSCR, and cash flow.
+        Partly. Rentalizer estimates revenue and, once you add expenses and a
+        purchase price, shows net operating income and a cap rate for a cash
+        purchase. AirDNA&apos;s help center does not describe DSCR,
+        cash-on-cash, or mortgage math. For those, plug the revenue into a
+        separate calculator (TrueCap, DealCheck, or your spreadsheet).
       </>
     ),
   },
@@ -476,12 +486,12 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "How accurate are AirDNA's revenue projections?",
     answer: (
       <>
-        They&apos;re the industry standard but not perfect. AirDNA&apos;s
-        Rentalizer reports are derived from actual Airbnb + Vrbo data, so
-        they&apos;re tighter than guesses but still depend on the property being
-        a good comp match in the local market. Always run sensitivity (TrueCap
-        Pro&apos;s sensitivity grid lets you stress-test) — what happens if
-        AirDNA&apos;s projection is 20% high?
+        They are estimates. Rentalizer projects revenue from comparable
+        listings, and AirDNA reports a Comp Set Strength (Low, Medium, or High)
+        that shows how consistent those comps are, so the projection still
+        depends on the property being a good comp match in the local market.
+        Always run sensitivity (TrueCap Pro&apos;s sensitivity grid lets you
+        stress-test): what happens if AirDNA&apos;s projection is 20% high?
       </>
     ),
   },
