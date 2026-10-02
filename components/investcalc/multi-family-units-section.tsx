@@ -320,7 +320,7 @@ export function MultiFamilyUnitsSection({
                         : undefined
                     }
                     className={cn(
-                      "h-11 border-input bg-background text-base md:text-sm",
+                      "h-11 border-input bg-background text-base lg:text-sm",
                       unitErrors?.bedrooms && "border-destructive",
                     )}
                   />
@@ -358,7 +358,7 @@ export function MultiFamilyUnitsSection({
                         : undefined
                     }
                     className={cn(
-                      "h-11 border-input bg-background text-base md:text-sm",
+                      "h-11 border-input bg-background text-base lg:text-sm",
                       unitErrors?.bathrooms && "border-destructive",
                     )}
                   />
@@ -394,7 +394,7 @@ export function MultiFamilyUnitsSection({
                       unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined
                     }
                     className={cn(
-                      "h-11 border-input bg-background text-base md:text-sm",
+                      "h-11 border-input bg-background text-base lg:text-sm",
                       unitErrors?.sqft && "border-destructive",
                     )}
                   />
@@ -420,7 +420,7 @@ export function MultiFamilyUnitsSection({
                         readOnly
                         aria-readonly="true"
                         aria-describedby={`unit-${index}-owner-rent-help`}
-                        className="h-11 cursor-not-allowed border-input bg-muted/50 pl-7 text-base text-muted-foreground md:text-sm"
+                        className="h-11 cursor-not-allowed border-input bg-muted/50 pl-7 text-base text-muted-foreground lg:text-sm"
                       />
                     ) : (
                       <Controller
@@ -445,7 +445,7 @@ export function MultiFamilyUnitsSection({
                                 : undefined
                             }
                             className={cn(
-                              "h-11 border-input bg-background pl-7 text-base md:text-sm",
+                              "h-11 border-input bg-background pl-7 text-base lg:text-sm",
                               unitErrors?.monthlyRent && "border-destructive",
                             )}
                           />
