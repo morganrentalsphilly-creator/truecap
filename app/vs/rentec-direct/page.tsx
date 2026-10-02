@@ -125,7 +125,7 @@ const MATRIX: Row[] = [
     feature: "Online rent collection",
     truecap: "No",
     rentecdirect:
-      "Yes, ACH and card; tenant ACH payments cost $2 on Starter and are free on Pro and PM",
+      "Yes, ACH and card; tenant ACH payments cost $2 on Starter and are free on Pro and PM within Rentec's fair-use limit (one per active property a month, then $0.50 each)",
     winner: "rentecdirect",
   },
   {
