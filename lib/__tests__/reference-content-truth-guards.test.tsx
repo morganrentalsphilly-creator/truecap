@@ -172,12 +172,32 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     }
   });
 
-  it("the vacancy page cites its national figure and states no unsourced national average", () => {
+  it("the vacancy page cites its national figure, typed once, and states no unsourced national average", () => {
     const page = read("app/tools/vacancy-rate-calculator/page.tsx").replace(/\s+/g, " ");
     expect(page).not.toMatch(/National average[^.]*7-9%/i);
-    expect(page).toContain("https://www.census.gov/housing/hvs/index.html");
-    // Lede and FAQ answer give the same sourced figure, with its quarter.
-    expect(page.match(/national rental vacancy rate at 7\.3% in the second quarter of 2026/g)).toHaveLength(2);
+    // The rule, not the release: the figure, its quarter and its source live
+    // in one constant, so the next Housing Vacancy Survey release is a change
+    // in one place and the lede and the FAQ answer cannot drift apart.
+    const constant = page.match(/const HVS_RENTAL_VACANCY = \{([^}]*)\} as const;/);
+    expect(constant, "the sourced figure moved out of HVS_RENTAL_VACANCY: update this test with it").not.toBeNull();
+    const fields = constant![1]!;
+    expect(fields.match(/\d+(?:\.\d+)?%/g)).toHaveLength(1);
+    expect(fields).toMatch(/rate: "\d+(?:\.\d+)?%"/);
+    expect(fields).toMatch(/period: "the (?:first|second|third|fourth) quarter of \d{4}"/);
+    expect(fields).toContain('href: "https://www.census.gov/housing/hvs/index.html"');
+    // Outside the constant the sentence appears twice (FAQ answer, lede) and
+    // both times reads the rate and the period from it; the link reads the href.
+    const outside = page.replace(constant![0], "");
+    expect(outside.match(/national rental vacancy rate at/g)).toHaveLength(2);
+    expect(outside).toContain(
+      "national rental vacancy rate at ${HVS_RENTAL_VACANCY.rate} in ${HVS_RENTAL_VACANCY.period}.",
+    );
+    // In JSX the space between the two expressions may be literal or {" "}.
+    expect(outside).toMatch(
+      /national rental vacancy rate at \{HVS_RENTAL_VACANCY\.rate\} in(?: |\{" "\} ?)\{HVS_RENTAL_VACANCY\.period\}\./,
+    );
+    expect(outside).toContain("href={HVS_RENTAL_VACANCY.href}");
+    expect(outside).not.toContain("census.gov");
   });
 });
 
