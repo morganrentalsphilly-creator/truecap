@@ -15,7 +15,7 @@ const fmt = (value: number) => new Intl.NumberFormat("en-US").format(value);
 const decimal = (value: number | null) => value === null ? "—" : value.toFixed(1);
 const percent = (value: number | null) => value === null ? "—" : `${(value * 100).toFixed(1)}%`;
 const shortDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-const SECTION_LABELS: Record<string, string> = { home: "Homepage", blog: "Blog", tools: "Tools", markets: "Markets", states: "States", glossary: "Glossary", vs: "Comparisons", pricing: "Pricing", analyze: "Analyze", other: "Other" };
+const SECTION_LABELS: Record<string, string> = { home: "Homepage", blog: "Blog", tools: "Tools", markets: "Markets", states: "States", glossary: "Glossary", vs: "Comparisons", pricing: "Pricing", analyze: "Analyze", for_agents: "For agents", for_investors: "For investors", other: "Other" };
 
 function Card({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
