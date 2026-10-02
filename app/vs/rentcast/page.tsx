@@ -2,7 +2,7 @@
  * /vs/rentcast — competitor comparison landing page.
  *
  * Target queries: "rentcast alternative", "rentcast vs rentometer", "rentcast review", "rentcast pricing", "rent estimate tool".
- * RentCast (formerly Realtyna RentCast / often confused with rentcast.com.au) is a property data + rent estimation API + dashboard. Newer entrant competing with Rentometer for rent comps, plus adds property value estimation. Investors evaluate it as a Rentometer alternative or for API access.
+ * RentCast offers a rent-estimate app (rentcast.io/pricing) and a separate property data API with value and rent estimates (rentcast.io/api); both pages were read on 2026-10-02.
  */
 
 import type { Metadata } from "next";
