@@ -453,10 +453,10 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "Can TrueCap model short-term rental revenue?",
     answer: (
       <>
-        Yes, in two ways. Enter your expected monthly STR revenue (gross income
-        ÷ 12, conservatively discounted for vacancy and cleaning) as the rent
-        value and run the full underwrite, or use the Short-term Rental mode, a
-        beta revenue screen that takes a nightly rate and occupancy. TrueCap
+        Yes, in two ways. Enter your expected monthly STR revenue as the rent
+        value, put vacancy and operating costs in the expense fields, and run
+        the full underwrite. Or use the Short-term Rental mode, a beta revenue
+        screen that takes a nightly rate and occupancy. TrueCap
         doesn&apos;t auto-pull AirDNA or Mashvisor STR data; for that
         you&apos;d use those tools alongside.
       </>
