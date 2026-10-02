@@ -23,10 +23,15 @@ that billing is ready for paid traffic. Read against the code on 2026-10-02
   without a configuration id, so the account's default portal applies.
 - **Receipts, invoice emails and the statement descriptor are not covered.**
   The application sends no receipt or confirmation email of its own after a
-  purchase (the webhook can only schedule the legacy trial onboarding
-  sequence, and Checkout is created without a trial). Whether a buyer gets a
-  receipt, what business details it shows, and the name on the card
-  statement are Dashboard settings this document never asks anyone to check.
+  subscription purchase (the webhook can only schedule the legacy trial
+  onboarding sequence, and Checkout is created without a trial). The one
+  application email a purchase can trigger is the Pack-credit notice
+  (`lib/email/pack-credit-emails.ts`): when a paid Decision Pack is verified
+  and its Pro credit is granted, the buyer is sent the notice and a reminder
+  28 days later. It is not a receipt, and new Pack sales are off. Whether a
+  buyer gets a receipt, what business details it shows, and the name on the
+  card statement are Dashboard settings this document never asks anyone to
+  check.
 - **The webhook event list is partial.** "Return and lifecycle verification"
   names seven refund and dispute events. The handler
   (`app/api/stripe/webhooks/route.ts`) dispatches 31 event types, listed
