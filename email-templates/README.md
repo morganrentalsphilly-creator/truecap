@@ -13,6 +13,12 @@ supabase/
 └── invite-user.html      ← admin-invited accounts
 ```
 
+These files are copies. Supabase sends whatever was last pasted into its
+dashboard, so a change here reaches nobody until the templates are pasted
+again (step 1 below). Changed on 2026-10-02: the footer line of all five
+templates now reads "TrueCap · Rental property underwriting", and the invite
+template's opening sentence was shortened.
+
 ## Install
 
 ### 0. Custom SMTP — make auth emails send from hello@usetruecap.com (5 min)
