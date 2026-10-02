@@ -2,7 +2,14 @@
  * /vs/baselane — competitor comparison landing page.
  *
  * Target queries: "baselane alternative", "baselane vs stessa", "baselane review", "baselane pricing", "rental property banking".
- * Baselane is rental banking + bookkeeping + rent collection — all-in-one financial stack for landlords. Direct competitor to Stessa on the accounting side, Avail/TurboTenant on rent collection. Strong free tier on banking.
+ * Baselane is rental banking + bookkeeping + rent collection for landlords, and it
+ * publishes a free ROI calculator.
+ *
+ * Every Baselane statement on this page was checked against Baselane's own
+ * pages as rendered on 2026-10-02 (pricing, rent collection, the ROI calculator
+ * and its results panel, the help-center FDIC article). The FDIC answer is the
+ * wording the founder approved that day. Change a Baselane fact only with the
+ * vendor page open, and change the social card with it.
  */
 
 import type { Metadata } from "next";
@@ -47,7 +54,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Baselane vs TrueCap (2026): Banking vs Analysis",
   description:
-    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
+    "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. How the two fit together.",
   keywords: [
     "baselane alternative",
     "baselane vs stessa",
@@ -59,7 +66,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Baselane vs TrueCap (2026): Banking vs Analysis",
     description:
-      "Baselane is rental banking + bookkeeping after closing. TrueCap underwrites the deal before. Different stages.",
+      "Baselane is banking and bookkeeping for rentals you own. TrueCap is the pre-purchase underwrite: cash flow, cap rate and DSCR before you offer.",
     url: "/vs/baselane",
     type: "website",
   },
@@ -78,37 +85,40 @@ const MATRIX: Row[] = [
   {
     feature: "Lifecycle stage",
     truecap: "Pre-purchase — underwrite the deal",
-    baselane: "Post-purchase — banking + bookkeeping + ops",
+    baselane:
+      "Mostly post-purchase: banking, bookkeeping and rent collection, plus a free ROI calculator",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    baselane: "Not modeled",
+    baselane:
+      "Free ROI calculator: annual cash flow, NOI, cash-on-cash return and cap rate; no DSCR in its results",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    baselane: "Not modeled",
-    winner: "truecap",
+    baselane: "Its free ROI calculator shows 1, 5 and 10 year cash flow",
+    winner: "tie",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    baselane: "Not applicable",
+    baselane: "Not among its ROI calculator's results",
     winner: "truecap",
   },
   {
     feature: "Sensitivity grid",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
-    baselane: "Not modeled",
+    baselane: "Not among its ROI calculator's results",
     winner: "truecap",
   },
   {
     feature: "Rental business banking",
     truecap: "No",
-    baselane: "Yes — FDIC-insured business checking",
+    baselane:
+      "Yes: checking and savings accounts, with banking services provided by Thread Bank, Member FDIC",
     winner: "baselane",
   },
   {
@@ -120,43 +130,45 @@ const MATRIX: Row[] = [
   {
     feature: "Schedule E P&L reports",
     truecap: "Forward projection only",
-    baselane: "Yes — actuals from bank feed",
+    baselane: "Yes: Schedule E reports are listed on the free Core plan",
     winner: "baselane",
   },
   {
     feature: "Rent collection (ACH)",
     truecap: "No",
-    baselane: "Yes — ACH free",
+    baselane:
+      "Yes: an ACH fee of $2 to $5, waived for rent deposited to a Baselane account",
     winner: "baselane",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    baselane: "Not applicable",
-    winner: "truecap",
+    baselane: "Its ROI calculator opens with its own default inputs",
+    winner: "tie",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)",
+    baselane:
+      "Core is $0/mo; Smart is $20/mo on an annual plan (as of October 2026)",
     winner: "tie",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    baselane: "Yes — banking + basic bookkeeping",
+    baselane: "Yes: Core covers banking and bookkeeping essentials",
     winner: "tie",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    baselane: "Not the use case",
-    winner: "truecap",
+    baselane: "Shared access to the account is on the Smart plan",
+    winner: "tie",
   },
   {
     feature: "PDF deal report",
     truecap: "Included with Pro",
-    baselane: "Schedule E reports for tax filing",
+    baselane: "Accountant tax package and Schedule E reports",
     winner: "tie",
   },
 ];
@@ -169,7 +181,7 @@ export default function VsBaselanePage() {
     name: "Baselane vs TrueCap (2026): Banking vs Analysis",
     url: `${siteUrl}/vs/baselane`,
     description:
-      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. Honest comparison + how the two fit.",
+      "Baselane is rental banking + bookkeeping for properties you own. TrueCap underwrites the ones you're considering. How the two fit together.",
     dateModified: lastmodFor("/vs/baselane"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -192,12 +204,14 @@ export default function VsBaselanePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Baselane is a rental-property banking + bookkeeping + rent
-            collection platform — FDIC-insured business banking,
-            auto-categorized expenses, Schedule E reports, ACH rent collection.
-            TrueCap is a pre-purchase underwriting calculator that helps screen
-            an acquisition. We don&apos;t compete; we cover different halves of
-            the rental lifecycle.
+            Baselane is a banking, bookkeeping and rent collection platform
+            for rental property owners: checking and savings accounts with
+            banking services provided by Thread Bank, Member FDIC, income and
+            expense tracking by property, Schedule E reports and online rent
+            collection. TrueCap is a pre-purchase underwriting calculator that
+            helps screen an acquisition. Baselane also publishes a free ROI
+            calculator, but its core product is for rentals you already own;
+            TrueCap is for the one you are deciding whether to buy.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -268,8 +282,9 @@ export default function VsBaselanePage() {
                   reports.
                 </li>
                 <li>
-                  You want online rent collection (ACH free, no separate
-                  platform).
+                  You want online rent collection with no separate platform
+                  (Baselane waives its ACH fee for rent deposited to a Baselane
+                  account).
                 </li>
                 <li>
                   You&apos;re consolidating QuickBooks + Stessa + a checking
@@ -301,17 +316,34 @@ export default function VsBaselanePage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Baselane details based on publicly available product info as of
-            2026. See{" "}
+            Baselane plans, prices and fees were checked against its{" "}
             <a
-              href="https://baselane.com"
+              href="https://www.baselane.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              baselane.com
+              pricing page
+            </a>
+            , its{" "}
+            <a
+              href="https://www.baselane.com/rent-collection"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              rent collection page
             </a>{" "}
-            for their current state.
+            and its{" "}
+            <a
+              href="https://www.baselane.com/rental-property-roi-calculator"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              ROI calculator
+            </a>{" "}
+            in October 2026. See those pages for current terms.
           </p>
         </Section>
 
@@ -333,12 +365,14 @@ export default function VsBaselanePage() {
               </li>
               <li>
                 <strong>Close the property.</strong> Open a Baselane account for
-                the new property — banking + a dedicated checking account.
+                the new property: Baselane lists unlimited property-specific
+                accounts.
               </li>
               <li>
-                <strong>Operate in Baselane.</strong> Collect rent via ACH; the
-                bank feed auto-categorizes mortgage, taxes, insurance, repairs.
-                Schedule E builds itself.
+                <strong>Operate in Baselane.</strong> Collect rent online and
+                track income and expenses by property. Auto-tagging of
+                transactions is on the paid Smart plan; Schedule E reports are
+                on the free Core plan.
               </li>
               <li>
                 <strong>Annual tax time.</strong> Pull the Schedule E report from
@@ -354,8 +388,8 @@ export default function VsBaselanePage() {
               >
                 mortgage payment calculator
               </IntentPrefetchLink>{" "}
-              to size the PITI that Baselane&apos;s bank feed will later
-              categorize, then run the full{" "}
+              to size the PITI that Baselane&apos;s ledger will later track,
+              then run the full{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"
@@ -375,7 +409,11 @@ export default function VsBaselanePage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Baselane" items={BASELANE_FAQ} />
+        <ComparisonFaq
+          competitorName="Baselane"
+          items={BASELANE_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -456,9 +494,10 @@ const BASELANE_FAQ: FaqItem[] = [
     answer: (
       <>
         No — different stages. Baselane is post-purchase banking + bookkeeping
-        for properties you own. TrueCap is pre-purchase underwriting for
-        properties you&apos;re considering buying. The two cover different
-        stages and can be used together.
+        for properties you own, and it also publishes a free ROI calculator.
+        TrueCap is pre-purchase underwriting for properties you&apos;re
+        considering buying. The two cover different stages and can be used
+        together.
       </>
     ),
   },
@@ -466,10 +505,20 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Is Baselane FDIC-insured?",
     answer: (
       <>
-        Yes. Baselane partners with FDIC-insured banks (Thread Bank and Blue
-        Ridge Bank as of 2026) for deposit insurance up to standard FDIC limits
-        ($250k per depositor per bank). They&apos;re not a chartered bank
-        themselves — they&apos;re a fintech with bank partners.
+        Baselane is a financial technology company, not a bank. Banking is
+        provided by Thread Bank, Member FDIC. Deposits can qualify for up to
+        $3,000,000 in FDIC coverage through Thread Bank&apos;s deposit sweep
+        program, up to $250,000 at each program bank. Baselane says the
+        threshold can change. See{" "}
+        <a
+          href="https://support.baselane.com/hc/en-us/articles/25483539080603-Is-my-Baselane-account-FDIC-insured"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Baselane&apos;s help-center article on FDIC insurance
+        </a>{" "}
+        for the current terms.
       </>
     ),
   },
@@ -477,12 +526,29 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Should I use Baselane or Stessa?",
     answer: (
       <>
-        Baselane bundles banking + bookkeeping + rent collection. Stessa is more
-        focused on bookkeeping + financial reporting (you connect your existing
-        bank). If you want a dedicated business checking account per property
-        AND simplified bookkeeping, Baselane is the more integrated choice. If
-        you already have business banking set up and just want bookkeeping,
-        Stessa works. Both have free tiers — try both.
+        Both list a free plan, so you can try both. Baselane&apos;s free Core
+        plan covers banking, bookkeeping and rent collection. Stessa&apos;s
+        free Essentials plan lists automatic bank feeds, basic financial
+        reports and online rent collection, and Stessa also offers its own
+        cash management accounts. Compare the current plans on{" "}
+        <a
+          href="https://www.baselane.com/pricing"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Baselane&apos;s pricing page
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://www.stessa.com/pricing/"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Stessa&apos;s pricing page
+        </a>
+        .
       </>
     ),
   },
