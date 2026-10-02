@@ -95,7 +95,7 @@ const STRATEGIES: { title: string; body: string; href: string; cta: string }[] =
   },
   {
     title: "BRRRR",
-    body: "Research each stage in the analyzer and the BRRRR calculator: rehab budget, ARV, DSCR on the refinance, stabilized returns. No integrated lifecycle model is offered yet.",
+    body: "Research each stage with the rehab estimator, the ARV calculator and the analyzer: rehab budget, ARV, DSCR on the refinance, stabilized returns. No integrated lifecycle model is offered yet.",
     href: "/blog/brrrr-method-explained",
     cta: "Read the BRRRR guide",
   },

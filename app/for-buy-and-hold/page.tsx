@@ -88,7 +88,7 @@ const USE_CASES: readonly RuledListItem[] = [
 const WORKFLOW_STEPS = [
   "Paste the listing address. HUD area rent and the FRED owner-occupied mortgage-rate benchmark can pre-fill; enter a local property-tax bill or reviewed rate manually.",
   "Adjust the financing (down %, term, rate) to match the offer you're considering.",
-  "Hit Calculate — cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
+  "Run the analysis: cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
   "Pro: open the 10-year planning projection to review cash flow and equity under the entered growth assumptions.",
   "Pro: stress-test in the Sensitivity grid before you write the offer.",
   "Save the deal. The portfolio rollup in My Deals shows your aggregate cash flow across everything you're considering.",
