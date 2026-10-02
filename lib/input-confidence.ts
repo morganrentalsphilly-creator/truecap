@@ -647,10 +647,10 @@ export function buildInputConfidence(
                   rentProvenance.source === "rentcast-estimate"
                     ? "RentCast market-rent estimate"
                     : isStatewideHudRent(rentProvenance)
-                      ? "HUD Rent Benchmark (statewide average)"
+                      ? "HUD rent benchmark (statewide average)"
                       : rentProvenance.source === "hud-safmr"
-                        ? "HUD Rent Benchmark (ZIP)"
-                        : "HUD Rent Benchmark (county)",
+                        ? "HUD rent benchmark (ZIP)"
+                        : "HUD rent benchmark (county)",
                 reason:
                   rentProvenance.source === "rentcast-estimate"
                     ? "Automated market estimate, not verified in-place rent or a signed lease."

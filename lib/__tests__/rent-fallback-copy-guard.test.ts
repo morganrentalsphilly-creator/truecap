@@ -161,7 +161,7 @@ describe("rent source copy names the statewide fallback (audit row P0-02)", () =
     expect(visible("lib/data-confidence.ts")).toContain(
       'export const HUD_STATEWIDE_RENT_LABEL = "HUD rent benchmark (statewide average)";',
     );
-    expect(visible("lib/input-confidence.ts")).toContain('"HUD Rent Benchmark (statewide average)"');
+    expect(visible("lib/input-confidence.ts")).toContain('"HUD rent benchmark (statewide average)"');
     expect(visible("components/investcalc/enrichment-receipt.tsx")).toContain('return "HUD statewide average";');
     const strip = visible("components/investcalc/assumptions-source-strip.tsx");
     expect(strip).toContain("isStatewideHudRent(rent) ? HUD_STATEWIDE_RENT_LABEL");
