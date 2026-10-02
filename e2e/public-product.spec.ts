@@ -1072,8 +1072,14 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
     name: "Analyze another property?",
   });
   await expect(anotherDialog).toBeVisible();
+  // Leaving the SAMPLE: its operating assumptions stay, but its 6.6% rate is
+  // a fixture input, not the visitor's, so financing returns to the starting
+  // values (a real deal keeps its financing; see the unit guards).
   await expect(anotherDialog).toContainText(
-    "Reusable financing and general operating assumptions will remain",
+    "Its general operating assumptions will remain",
+  );
+  await expect(anotherDialog).toContainText(
+    "Financing returns to the starting values",
   );
   await anotherDialog
     .getByRole("button", { name: "Analyze another", exact: true })
@@ -1096,7 +1102,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   ).toHaveValue("");
   await expect(
     page.getByRole("button", {
-      name: /20% down · 6\.6% interest · 30 years/i,
+      name: /20% down · 6\.75% interest · 30 years/i,
     }),
   ).toBeVisible();
   await expect(
@@ -1105,8 +1111,8 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
 
   // The synthetic sample is a disposable preview, not the visitor's one
   // no-signup decision. Prove that the same browser can still claim its first
-  // exact Offer Ceiling after leaving the sample while the reusable financing
-  // assumptions remain intact.
+  // exact Offer Ceiling after leaving the sample, starting from the product's
+  // own financing values and not the sample's.
   await address.fill("300 Sample Follow-up Ave, Columbus, OH 43215");
   await page.getByLabel("Price to analyze", { exact: true }).fill("250000");
   await page

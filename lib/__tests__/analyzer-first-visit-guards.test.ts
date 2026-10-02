@@ -373,3 +373,81 @@ describe("the GET fallback and a failed lookup behave like the scripted hero pat
     expect(failed).not.toContain("Two fields to your first screen");
   });
 });
+
+describe("leaving the sample does not carry its rate into the visitor's deal (P2-35)", () => {
+  const calculator = read("components/investcalc/investcalc-page.tsx");
+  const nextDeal = section(
+    calculator,
+    "const handleAnalyzeAnotherLikeThis = async () =>",
+    "useEffect(() => {\n    if (!autoExportPdfRef.current)",
+  );
+
+  it("resets financing to the starting values only from the untouched sample", () => {
+    expect(nextDeal).toContain(
+      'isTrueCapSyntheticSampleAddress(form.getValues("address")) &&',
+    );
+    for (const field of ["interestRate", "downPaymentPct", "loanTermYears"]) {
+      expect(nextDeal).toContain(
+        `Number(form.getValues("${field}")) ===\n        SAMPLE_DEAL_FIXTURE.values.${field}`,
+      );
+      expect(nextDeal).toContain(
+        `forkedValues.${field} = startingValues.${field};`,
+      );
+    }
+    const reset = nextDeal.indexOf("if (leavingSample) {");
+    expect(reset).toBeGreaterThan(nextDeal.indexOf("buildRepeatDealDraft("));
+    // Before the value-bound source context is rebuilt and the form is reset.
+    expect(reset).toBeLessThan(
+      nextDeal.indexOf("restoreInputConfidenceSourceContext("),
+    );
+    expect(reset).toBeLessThan(nextDeal.indexOf("form.reset(forkedValues)"));
+  });
+
+  it("leaves the session eligible for the live rate, and a real deal ineligible", () => {
+    expect(nextDeal).toContain("autoApplyEligibleRef.current = leavingSample;");
+    expect(nextDeal).not.toContain("autoApplyEligibleRef.current = true;");
+  });
+
+  it("does not tell a visitor leaving the sample that its financing carried over", () => {
+    expect(nextDeal).toContain(
+      "Financing returns to the starting values, so the sample's rate is not carried into your deal.",
+    );
+    expect(nextDeal).toContain(
+      "financing is back to the starting values;",
+    );
+    // The real-deal wording is unchanged.
+    expect(nextDeal).toContain(
+      "Reusable financing and general operating assumptions will remain.",
+    );
+    expect(nextDeal).toContain(
+      "Financing and general operating assumptions carried over;",
+    );
+  });
+});
+
+describe("Export PDF on the sample does not talk about a purchase shutdown (P2-36)", () => {
+  const dialog = read("components/investcalc/pdf-purchase-dialog.tsx");
+
+  it("has a sample variant without the one-time-purchase and payment copy", () => {
+    expect(dialog).toContain("sample = false,");
+    expect(dialog).toContain(
+      "The sample's full report is on this page. Exporting a report as a PDF needs a Pro plan.",
+    );
+    const shutdown = dialog.indexOf("Already purchased a one-time report?");
+    const payments = dialog.indexOf("Payments are processed by Stripe.");
+    for (const index of [shutdown, payments]) {
+      expect(index).toBeGreaterThan(-1);
+      expect(dialog.lastIndexOf("{sample ? null : (", index)).toBeGreaterThan(
+        dialog.indexOf("<DialogHeader>"),
+      );
+    }
+    // Buyers of a past one-time report still get the recovery note.
+    expect(dialog).toContain("Existing paid claims and recovery remain supported");
+  });
+
+  it("the analyzer tells the dialog when the result on screen is the sample", () => {
+    expect(read("components/investcalc/investcalc-page.tsx")).toContain(
+      "sample={isTrueCapSyntheticSampleAddress(analysisValues?.address)}",
+    );
+  });
+});
