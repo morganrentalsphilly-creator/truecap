@@ -14,6 +14,7 @@
  */
 
 import type { captureMessageLazyTarget } from "@/lib/sentry/client-init";
+import { isPerPageLoadConfigNotice } from "@/lib/sentry/self-noise";
 
 export function captureExceptionLazy(
   error: unknown,
@@ -34,6 +35,11 @@ export function captureMessageLazy(
   message: string,
   context?: Parameters<typeof captureMessageLazyTarget>[1],
 ): Promise<void> {
+  // The per-page-load PostHog notice (lib/sentry/self-noise.ts) stops here,
+  // before the SDK is loaded for it. beforeSend drops it as well, but by then
+  // Sentry has counted a discarded event and queues a client report for
+  // /monitoring on every page view.
+  if (isPerPageLoadConfigNotice({ message })) return Promise.resolve();
   return import("@/lib/sentry/client-init")
     .then((m) => {
       m.initSentryClient();
