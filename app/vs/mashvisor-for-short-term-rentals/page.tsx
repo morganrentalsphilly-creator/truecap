@@ -130,7 +130,6 @@ const MATRIX: Row[] = [
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
     mashvisor:
       "No free plan on its pricing page; platform subscriptions have no free trial",
-    winner: "truecap",
   },
   {
     feature: "Pricing (paid tier)",

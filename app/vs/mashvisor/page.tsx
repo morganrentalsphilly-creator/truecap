@@ -98,7 +98,6 @@ const MATRIX: Row[] = [
       "Core cap rate, CoC, DSCR, cash flow and the Deal score; Buy Box fit on the first decision, then with Pro",
     mashvisor:
       "No free plan on its pricing page; platform subscriptions have no free trial",
-    winner: "truecap",
   },
   {
     feature: "Per-deal cap rate / CoC / DSCR",
