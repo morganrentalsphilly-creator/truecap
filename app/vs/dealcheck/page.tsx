@@ -526,9 +526,9 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "Can I import properties from Zillow or Redfin with TrueCap?",
     answer: (
       <>
-        Partly. You can paste a Zillow, Redfin, Realtor.com or Homes.com link
-        and TrueCap pulls the <strong>address</strong> out of it, then can
-        pre-fill editable HUD area rent and the FRED owner-occupied 30-year
+        Partly. You can paste a Zillow, Redfin, Realtor.com, Homes.com or
+        Trulia link and TrueCap pulls the <strong>address</strong> out of it,
+        then can pre-fill editable HUD area rent and the FRED owner-occupied 30-year
         mortgage-rate benchmark. Property tax stays manual. What it does{" "}
         <em>not</em> do is scrape the listing page for price, taxes and photos —
         DealCheck&apos;s full property-detail import is deeper there. The

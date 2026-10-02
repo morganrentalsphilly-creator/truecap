@@ -7,12 +7,12 @@
  *
  * A site is named here only when the link shape it serves today reaches its
  * own branch of the address parser (lib/listing-url.ts) and comes back as an
- * address. Trulia is not named. The parser reads its property links
- * (trulia.com/home/<address>-<id> and /p/<st>/<city>/<address>--<id>) and
- * drops the listing id, but those shapes were taken from search results:
- * trulia.com answered 403 to an automated page load on 2026-10-02, so no
- * Trulia page was read to confirm them. Naming it here also means
- * re-anchoring the three strings the guards and two e2e specs pin.
+ * address. Trulia joined the list once its link shape was read on Trulia's
+ * own search page in a normal browser on 2026-10-02
+ * (trulia.com/home/<street>-<city>-<state>-<zip>-<id>; trulia.com answers 403
+ * to an automated page load): the parser's Trulia branch reads that shape and
+ * drops the listing id, and lib/__tests__/listing-url.test.ts holds it to the
+ * two links seen there.
  * `lib/__tests__/analyzer-first-visit-guards.test.ts` checks that a link
  * from each named site parses, and that Trulia is never named unless the
  * parser reads that link shape without the listing id.
@@ -22,9 +22,10 @@ export const SUPPORTED_LISTING_SITES = [
   "Redfin",
   "Realtor.com",
   "Homes.com",
+  "Trulia",
 ] as const;
 
-/** "Zillow, Redfin, Realtor.com, or Homes.com" */
+/** "Zillow, Redfin, Realtor.com, Homes.com, or Trulia" */
 export const SUPPORTED_LISTING_SITES_TEXT = `${SUPPORTED_LISTING_SITES.slice(0, -1).join(", ")}, or ${SUPPORTED_LISTING_SITES.at(-1)}`;
 
 /**

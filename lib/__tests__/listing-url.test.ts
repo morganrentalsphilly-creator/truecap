@@ -56,6 +56,29 @@ describe("parseListingUrl", () => {
       zip: "43203",
       source: "trulia",
     });
+    // The two listing links read on Trulia's own search page
+    // (trulia.com/PA/Philadelphia/) in a normal browser on 2026-10-02: an
+    // eight-digit id and a ten-digit one.
+    expect(
+      parseListingUrl(
+        "https://www.trulia.com/home/1707-s-18th-st-philadelphia-pa-19145-10372535",
+      ),
+    ).toEqual({
+      address: "1707 s 18th st philadelphia pa 19145",
+      state: "PA",
+      zip: "19145",
+      source: "trulia",
+    });
+    expect(
+      parseListingUrl(
+        "https://www.trulia.com/home/1019-n-63rd-st-philadelphia-pa-19151-2086375584",
+      ),
+    ).toEqual({
+      address: "1019 n 63rd st philadelphia pa 19151",
+      state: "PA",
+      zip: "19151",
+      source: "trulia",
+    });
     // A unit number repeated in the slug stays; only the trailing id goes.
     expect(
       parseListingUrl(
