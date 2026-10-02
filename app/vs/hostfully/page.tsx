@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how STR investors use both.",
+    "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how the two fit together.",
   keywords: [
     "hostfully alternative",
     "hostfully vs",
@@ -79,7 +79,7 @@ type Row = {
   feature: string;
   truecap: string;
   hostfully: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -92,62 +92,63 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine (long-term rental model)",
-    hostfully: "Not modeled",
+    hostfully:
+      "Not among Hostfully's listed features; its free tools compare mid-term and short-term revenue and rate a listing",
     winner: "truecap",
   },
   {
     feature: "Underwriting math (purchase decision)",
     truecap: "Yes — full engine + Pro projections",
-    hostfully: "Not modeled",
+    hostfully: "Not among Hostfully's listed features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    hostfully: "Not applicable",
+    hostfully: "Not among Hostfully's listed features",
     winner: "truecap",
   },
   {
     feature: "Channel manager (Airbnb, Vrbo)",
     truecap: "No",
-    hostfully: "Yes — unified inbox + calendar",
+    hostfully: "Yes: channel manager, central calendar and unified inbox",
     winner: "hostfully",
   },
   {
     feature: "Dynamic pricing",
     truecap: "No",
-    hostfully: "Yes — integrations with PriceLabs etc.",
+    hostfully: "Through integration partners such as PriceLabs",
     winner: "hostfully",
   },
   {
     feature: "Guest messaging automation",
     truecap: "No",
-    hostfully: "Yes — automated booking + check-in flows",
+    hostfully: "Yes: unified inbox with InboxAI, plus automation tools",
     winner: "hostfully",
   },
   {
     feature: "Cleaning / vendor scheduling",
     truecap: "No",
-    hostfully: "Yes — turn-over automation",
+    hostfully:
+      "Task management built in; cleaning and turnover through integration partners",
     winner: "hostfully",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    hostfully: "No — trial only, $109+/mo (as of 2026)",
-    winner: "truecap",
+    hostfully: "No free plan and no free trial; a free demo",
   },
   {
     feature: "STR-specific underwriting (ADR, occupancy)",
     truecap: "Inputs editable; not auto-pulled",
-    hostfully: "Not the use case",
+    hostfully: "Not among Hostfully's listed features",
     winner: "truecap",
   },
   {
     feature: "Pricing model",
     truecap: "Free core; paid Pro — see live pricing",
-    hostfully: "$109+/mo for STR managers (as of 2026)",
-    winner: "truecap",
+    hostfully:
+      "From $15 per property per month (Growth) or $25 (Pro), plus a platform fee; Enterprise is quoted (as of October 2026)",
   },
 ];
 
@@ -159,7 +160,7 @@ export default function VsHostfullyPage() {
     name: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
     url: `${siteUrl}/vs/hostfully`,
     description:
-      "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how STR investors use both.",
+      "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how the two fit together.",
     dateModified: lastmodFor("/vs/hostfully"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -182,9 +183,10 @@ export default function VsHostfullyPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Hostfully is short-term rental management software — channel manager
-            (Airbnb, Vrbo, Booking.com), guest messaging, dynamic pricing,
-            automation. TrueCap models the property&apos;s pre-purchase
+            Hostfully is short-term rental management software: a channel
+            manager (Airbnb, Vrbo, Booking.com), a unified guest inbox,
+            automation, and dynamic pricing through integration partners.
+            TrueCap models the property&apos;s pre-purchase
             economics from user-reviewed assumptions. Different stages,
             complementary tools.
           </p>
@@ -252,11 +254,11 @@ export default function VsHostfullyPage() {
                   You list on Airbnb + Vrbo + Booking.com and want one inbox.
                 </li>
                 <li>
-                  You want dynamic pricing, guest messaging, cleaning
-                  automation.
+                  You want a unified inbox, automation, and pricing and
+                  cleaning integrations.
                 </li>
                 <li>
-                  You&apos;re managing 2+ STRs and need to scale operations.
+                  You want one system to run day-to-day hosting operations.
                 </li>
               </ul>
             </div>
@@ -284,24 +286,24 @@ export default function VsHostfullyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Hostfully details based on publicly available product info as of
-            2026. See{" "}
+            Hostfully plans, prices and features were checked against its
+            pricing and FAQ pages in October 2026. See{" "}
             <a
-              href="https://hostfully.com"
+              href="https://www.hostfully.com/pricing/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              hostfully.com
+              hostfully.com/pricing
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How STR investors use both
+            How TrueCap and Hostfully fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -319,9 +321,9 @@ export default function VsHostfullyPage() {
                 <strong>If the deal pencils — buy.</strong> Close the property.
               </li>
               <li>
-                <strong>Set up the STR in Hostfully.</strong> Import to
-                Airbnb/Vrbo/Booking, set dynamic pricing, automate guest messages
-                and check-in.
+                <strong>Set up the STR in Hostfully.</strong> Connect Airbnb, Vrbo
+                and Booking.com, add a pricing integration, and set up guest
+                messaging.
               </li>
               <li>
                 <strong>Operate.</strong> Hostfully runs the day-to-day. Pair with
@@ -358,7 +360,11 @@ export default function VsHostfullyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Hostfully" items={HOSTFULLY_FAQ} />
+        <ComparisonFaq
+          competitorName="Hostfully"
+          items={HOSTFULLY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -366,10 +372,10 @@ export default function VsHostfullyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -483,11 +489,20 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "How much does Hostfully cost?",
     answer: (
       <>
-        Hostfully&apos;s pricing starts around $109/month (as of 2026) for STR
-        operators, scaling up with the number of properties. There&apos;s no
-        free tier — they offer a trial. For 1-2 STR properties, the cost can be
-        heavy; many solo STR hosts use Hostfully alternatives like Lodgify,
-        Smoobu, or just direct Airbnb tools until they scale.
+        Hostfully prices per property: from $15 per property per month on
+        Growth (1 to 50 listings) and from $25 on Pro (1 to 199 listings), each
+        plus a platform fee, with Enterprise quoted for 200 or more listings
+        (as of October 2026). There is no free plan. Hostfully says it does not
+        offer free trials and offers a free demo instead. See{" "}
+        <a
+          href="https://www.hostfully.com/pricing/"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Hostfully&apos;s pricing page
+        </a>{" "}
+        for current terms.
       </>
     ),
   },
