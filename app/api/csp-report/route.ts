@@ -19,17 +19,18 @@ let requestCount = 0;
 /**
  * The reports the consent-gated Google Ads tag (components/analytics/
  * google-measurement.tsx) causes on every consented page view. The
- * report-only policy in next.config.mjs does not list these hosts yet, so
- * each consented view posted 4 or 5 reports here and each one became a
- * Sentry event. With the per-page-load PostHog notice, these are the two
+ * report-only policy in next.config.mjs did not list these hosts until
+ * 2026-10, so each consented view posted 4 or 5 reports here and each one
+ * became a Sentry event. With the per-page-load PostHog notice, these are the two
  * events the site sent about itself on every view; the 2026-10 audit's crawl
  * most likely used the error quota up through them (Sentry answered 429 from
  * 2026-10-01). Each entry is an origin the audit captured in a report body
  * and the directive it was reported under (script-src-elem for the tag's
  * script, connect-src for its beacons); a report matching both says nothing
  * new, so it is answered and not forwarded. The same origin under any other
- * directive, and every other origin, is still reported. When the policy
- * gains these hosts the reports stop at the browser and this list can go.
+ * directive, and every other origin, is still reported. The policy lists
+ * these hosts now; a browser holding the old header can still send them, and
+ * once none arrive this list can go.
  */
 const KNOWN_GOOGLE_ADS_ORIGINS: ReadonlyMap<string, "script-src" | "connect-src"> = new Map([
   ["https://googleads.g.doubleclick.net", "script-src"],

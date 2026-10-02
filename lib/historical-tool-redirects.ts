@@ -5,7 +5,9 @@
  * gates. When a calculator is not released, its historical URL transfers to
  * the closest live canonical resource instead of returning a soft-dead 404.
  * Keep this map in sync with the live redirect assertions in
- * scripts/seo/healthcheck.mjs.
+ * scripts/seo/healthcheck.mjs and with RETIRED_TOOL_REDIRECTS in
+ * next.config.mjs, which answers these URLs first so the query string
+ * survives.
  */
 export const HISTORICAL_TOOL_REDIRECTS = {
   "rental-cash-flow-calculator": "/",
