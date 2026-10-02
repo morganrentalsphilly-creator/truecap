@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createElement, type ReactElement, type ReactNode } from "react";
+import { createElement, type FunctionComponent, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
@@ -531,7 +531,13 @@ describe("paid landing pages: intent-only prefetch (rendered)", () => {
     const { IntentPrefetchLink: RealIntentPrefetchLink } = await vi.importActual<
       typeof import("@/components/marketing/intent-prefetch-link")
     >("@/components/marketing/intent-prefetch-link");
-    const { TrackedMarketingLink } = await import("@/components/marketing/tracked-marketing-link");
+    const tracked = await import("@/components/marketing/tracked-marketing-link");
+    // The label goes in as createElement's child argument (the lint rule),
+    // which the component's required `children` prop type does not see.
+    type TrackedProps = Parameters<typeof tracked.TrackedMarketingLink>[0];
+    const TrackedMarketingLink = tracked.TrackedMarketingLink as FunctionComponent<
+      Omit<TrackedProps, "children">
+    >;
 
     const intentFragment = renderToStaticMarkup(
       createElement(RealIntentPrefetchLink, { href: "#pricing", className: "x", scroll: false }, "Jump"),
