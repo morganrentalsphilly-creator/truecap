@@ -152,40 +152,20 @@ const usageClaim = (source: string): string | null => {
 };
 
 /**
- * Files that still carried a quantified usage line when this guard was
- * written (origin/main ed1890d). Each is rewritten in the same fix train by
- * the change that owns that page or social card. The list only shrinks: the
- * last test in the block below fails, naming the path, as soon as a listed
- * file no longer carries such a line, so an entry cannot outlive its sweep
- * and go on exempting a file where the claim could come back. Delete the
- * path it names, and delete the list (and that test) when the last one has
- * gone. Every other /vs file, the hub and the shared frame are held to the
- * rule today.
+ * Social cards that still carry a quantified usage line. The comparison
+ * pages that were listed here beside them (origin/main ed1890d) have been
+ * swept and are held to the rule; the three cards are rewritten by the
+ * social-card change of the same fix train. The list only shrinks: the last
+ * test in the block below fails, naming the path, as soon as a listed file
+ * no longer carries such a line, so an entry cannot outlive its sweep and go
+ * on exempting a file where the claim could come back. Delete the path it
+ * names, and delete the list (and that test) when the last one has gone.
+ * Every /vs page, the hub and the shared frame are held to the rule today.
  */
 const USAGE_SWEEP_PENDING: ReadonlySet<string> = new Set([
   "app/vs/airdna/opengraph-image.tsx",
-  "app/vs/airdna/page.tsx",
-  "app/vs/arrived/page.tsx",
-  "app/vs/avail/page.tsx",
-  "app/vs/baselane/page.tsx",
-  "app/vs/batchleads/page.tsx",
-  "app/vs/dealmachine/page.tsx",
-  "app/vs/hostfully/page.tsx",
-  "app/vs/landlord-studio/page.tsx",
-  "app/vs/mashvisor-for-short-term-rentals/page.tsx",
-  "app/vs/mashvisor/page.tsx",
-  "app/vs/privy/page.tsx",
-  "app/vs/propstream/page.tsx",
   "app/vs/quickbooks-rental/opengraph-image.tsx",
-  "app/vs/quickbooks-rental/page.tsx",
   "app/vs/rentcast/opengraph-image.tsx",
-  "app/vs/rentcast/page.tsx",
-  "app/vs/rentec-direct/page.tsx",
-  "app/vs/rentometer/page.tsx",
-  "app/vs/rentredi/page.tsx",
-  "app/vs/rentspree/page.tsx",
-  "app/vs/turbotenant/page.tsx",
-  "app/vs/yardi-breeze/page.tsx",
 ]);
 
 describe("no /vs surface states how many people use the tools", () => {
@@ -198,6 +178,8 @@ describe("no /vs surface states how many people use the tools", () => {
     for (const file of USAGE_SWEEP_PENDING) expect(surfaces, `${file} is on the pending list but is not a /vs file`).toContain(file);
     // The files this change owns are never exempt.
     for (const file of [HUB, FAQ, "components/marketing/vs-page.tsx"]) expect(USAGE_SWEEP_PENDING.has(file), file).toBe(false);
+    // Every comparison page has been swept: only a social card may still wait.
+    for (const file of USAGE_SWEEP_PENDING) expect(file, "only a social card may be pending").toMatch(/\/opengraph-image\.tsx$/);
   });
 
   it("matches the audited forms and lets the plain ones pass", () => {
