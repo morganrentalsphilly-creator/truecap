@@ -426,9 +426,8 @@ export function InputConfidenceCard({
                   : `${remaining} high-priority ${remaining === 1 ? "input" : "inputs"} still need confirmation before relying on this underwrite.`}
             </p>
             <p className="mt-2 max-w-xl text-xs leading-relaxed text-muted-foreground">
-              Scope: rental base-case inputs. Strategy-specific ARV, refinance,
-              hold-time, and flip assumptions are reviewed separately in their
-              strategy panels.
+              Scope: rental base-case inputs. ARV, refinance, hold-time, and
+              flip assumptions are outside this score.
             </p>
           </div>
         </div>
@@ -975,7 +974,7 @@ export function InputConfidenceCard({
           <p className="border-t border-border bg-muted/20 px-3 py-2 text-3xs leading-relaxed text-muted-foreground">
             {advocacyContractEnabled
               ? `Legacy Input Confidence v${confidence.methodVersion} remains stored for compatibility, but its percentage and Offer Ready stages do not control this view. Browser self-confirmation remains “User confirmed”; only server-resolved, owner-scoped evidence may count as evidence-verified.`
-              : `Deterministic Input Confidence v${confidence.methodVersion}: verified 100%, property-specific 80%, local estimate 65%, user estimate 50%, market benchmark 45%, generic default 20%, missing 0%. Field weights reflect decision impact. The score is not statistical certainty. Strategy-specific ARV, refinance, hold-time, and flip assumptions are outside this base score and must be verified separately in their strategy panels.`}
+              : `Deterministic Input Confidence v${confidence.methodVersion}: verified 100%, property-specific 80%, local estimate 65%, user estimate 50%, market benchmark 45%, generic default 20%, missing 0%. Field weights reflect decision impact. The score is not statistical certainty. ARV, refinance, hold-time, and flip assumptions are outside this base score.`}
           </p>
         </div>
       </details>
