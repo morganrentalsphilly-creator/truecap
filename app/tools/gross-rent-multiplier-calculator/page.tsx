@@ -65,7 +65,7 @@ export default function GrmCalculatorPage() {
       "Free Gross Rent Multiplier (GRM) calculator. The fastest real-estate screen — compare deals in seconds, no operating expenses needed. And a good GRM range.",
     featureList: [
       "GRM from price ÷ annual gross rent",
-      "Compare to market averages",
+      "Result graded against fixed rule-of-thumb GRM bands",
       "Fast deal screening without operating expenses",
     ],
   });
@@ -237,7 +237,7 @@ export default function GrmCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="GRM calculator"
-            hook="GRM is a screening tool. TrueCap's free core analyzer adds editable cap rate, cash-on-cash, model DSCR, and cash flow. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
+            hook="GRM is a screening tool. TrueCap's free core analyzer adds editable cap rate, cash-on-cash, model DSCR, and cash flow. Projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
 
           <RelatedContent kind="tool" slug="gross-rent-multiplier-calculator" title="Gross Rent Multiplier (GRM) Calculator" className="mt-10" />

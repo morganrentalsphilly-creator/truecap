@@ -60,7 +60,7 @@ export default function MortgagePaymentPage() {
     featureList: [
       "Monthly P&I from price, down payment, rate, term",
       "Include PMI + taxes + insurance",
-      "Total interest + amortization breakdown",
+      "Total interest over the loan",
     ],
   });
 
@@ -133,7 +133,7 @@ export default function MortgagePaymentPage() {
               total months. Mortgages are fully amortizing — early payments are
               mostly interest, late payments mostly principal. On a 30-year
               mortgage at 7%, you don&apos;t cross the 50/50
-              principal-to-interest line until roughly year 19.
+              principal-to-interest line until about year 20.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -188,8 +188,8 @@ export default function MortgagePaymentPage() {
               >
                 closing cost calculator
               </Link>
-              ), and, when your access includes it, a released 10-year cash-flow
-              and equity projection (how might the stabilized hold evolve?).
+              ), and, when your access includes it, a 10-year cash-flow and
+              equity projection (how might the stabilized hold evolve?).
               TrueCap&apos;s free core analyzer combines the preliminary
               first-year rental metrics; evaluation and paid access gates apply
               to projection features.
@@ -204,7 +204,7 @@ export default function MortgagePaymentPage() {
 
           <ToolsConversionCta
             calculatorName="Mortgage payment calculator"
-            hook="The free core analyzer plugs your mortgage assumptions into editable DSCR and cash-flow modeling. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
+            hook="The free core analyzer plugs your mortgage assumptions into editable DSCR and cash-flow modeling. Projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
 
           <RelatedContent kind="tool" slug="mortgage-payment-calculator" title="Mortgage Payment Calculator" className="mt-10" />

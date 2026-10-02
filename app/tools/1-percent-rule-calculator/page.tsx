@@ -115,7 +115,6 @@ export default function OnePercentRulePage() {
     description:
       "Free 1% rule calculator. Instantly screen any rental deal Pass / Fail. Plus when the rule applies, when it doesn't, and what to do on a fail.",
     featureList: [
-      "Validate the 1% rule on any address",
       "Compare monthly rent to purchase price",
       "Instant Pass / Fail screening",
     ],

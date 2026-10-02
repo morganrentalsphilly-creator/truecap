@@ -94,8 +94,7 @@ export default function BreakEvenCalculatorPage() {
       "Free rental break-even calculator estimating cash-flow recovery time from entered assumptions.",
     featureList: [
       "Months to recover initial cash investment",
-      "Account for operating expenses + debt service",
-      "Compare break-even periods across strategies",
+      "Uses the monthly net cash flow you enter, after operating expenses and debt service",
     ],
   });
 
@@ -174,7 +173,12 @@ export default function BreakEvenCalculatorPage() {
         <ToolEmbedInvite slug="break-even-calculator" />
 
 
-        <ToolsConversionCta calculatorName="Break-even calculator" />
+        {/* Own hook: the shared default still says "released", a build word
+            the voice guide keeps out of customer copy (docs/voice.md rule 6). */}
+        <ToolsConversionCta
+          calculatorName="Break-even calculator"
+          hook="Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
+        />
         <RelatedContent kind="tool" slug="break-even-calculator" title="Break-Even Calculator" className="mt-10" />
       </main>
       <SiteFooter />
