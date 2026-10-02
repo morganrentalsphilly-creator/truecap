@@ -96,32 +96,34 @@ const MATRIX: Row[] = [
     winner: "tie",
   },
   {
-    feature: "Cap rate / CoC / DSCR analysis",
+    feature: "Pre-purchase cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    rentredi: "Not modeled",
+    rentredi:
+      "No pre-purchase underwriting listed; its dashboard tracks NOI, cash flow and cash-on-cash on units you own",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent growth + expense growth + appreciation",
-    rentredi: "Not modeled",
+    rentredi: "Not on RentRedi's published feature list",
     winner: "truecap",
   },
   {
     feature: "Sensitivity grid",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
-    rentredi: "Not modeled",
+    rentredi: "Not on RentRedi's published feature list",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — with subscore breakdown",
-    rentredi: "Not modeled",
+    rentredi: "Not on RentRedi's published feature list",
     winner: "truecap",
   },
   {
     feature: "Buy Box fit",
-    truecap: "Yes — named targets with supporting economics",
+    truecap:
+      "Free on your first decision, then with Pro: named targets with supporting economics",
     rentredi: "Not applicable",
     winner: "truecap",
   },
@@ -152,7 +154,7 @@ const MATRIX: Row[] = [
   {
     feature: "Listing distribution",
     truecap: "No",
-    rentredi: "Yes — syndicated to Realtor.com, Zillow, etc.",
+    rentredi: "Yes, listing syndication on every plan, Zillow included",
     winner: "rentredi",
   },
   {
@@ -311,8 +313,8 @@ export default function VsRentRediPage() {
             Feature-by-feature
           </SectionHeading>
           <p className={VS_INTRO}>
-            Most rows show clear specialization — that&apos;s the point. Each
-            tool is the best in class at its stage.
+            The rows split by stage: TrueCap before the purchase, RentRedi
+            after it.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
             <VsMatrixTable
@@ -326,8 +328,7 @@ export default function VsRentRediPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            RentRedi details based on publicly available product info as of
-            2026. See{" "}
+            RentRedi details checked in October 2026. See{" "}
             <a
               href="https://rentredi.com/pricing"
               target="_blank"
@@ -336,20 +337,20 @@ export default function VsRentRediPage() {
             >
               RentRedi&apos;s official pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
         {/* Complementary */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How most investors use both
+            How the two fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
               <li>
                 <strong>Sourcing:</strong> find a property (Zillow, MLS,
-                wholesaler, Roofstock).
+                wholesaler).
               </li>
               <li>
                 <strong>Underwriting (TrueCap):</strong> paste the address, run
@@ -401,7 +402,11 @@ export default function VsRentRediPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="RentRedi" items={RENTREDI_FAQ} />
+        <ComparisonFaq
+          competitorName="RentRedi"
+          items={RENTREDI_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -409,7 +414,7 @@ export default function VsRentRediPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow
+              TrueCap free covers cap rate, CoC, DSCR, monthly cash flow
               and plain read-only share links. Pro adds co-branding, 10-year
               cash-flow and equity projections, sensitivity, Offer Ceiling,
               saved-deal comparison, and included PDFs. New one-time PDF checkout
@@ -485,7 +490,7 @@ const RENTREDI_FAQ: FaqItem[] = [
         No — different tools for different stages. RentRedi is for managing a
         property you already own (rent collection, tenant screening,
         maintenance). TrueCap is for modeling pre-purchase economics (cap rate,
-        cash flow, and projections). Many landlords use both at different
+        cash flow, and projections). A landlord can use both at different
         points.
       </>
     ),
@@ -496,9 +501,8 @@ const RENTREDI_FAQ: FaqItem[] = [
       <>
         No, and we&apos;re not planning to. Rent collection is a serious
         compliance + payments product (ACH, NACHA rules, late-fee automation,
-        tenant disputes), and there are great companies focused on it — RentRedi
-        is one. TrueCap is intentionally scope-limited to the underwriting
-        layer.
+        tenant disputes), and RentRedi is one of the companies focused on it.
+        TrueCap is intentionally scope-limited to the underwriting layer.
       </>
     ),
   },
@@ -533,7 +537,7 @@ const RENTREDI_FAQ: FaqItem[] = [
         No. TrueCap doesn&apos;t pull credit reports or store rental
         applications. That&apos;s a different compliance regime (FCRA-regulated)
         and we don&apos;t build there. If you need tenant screening, RentRedi,
-        RentSpree, or TurboTenant are the right tools.
+        RentSpree and TurboTenant all offer it.
       </>
     ),
   },
