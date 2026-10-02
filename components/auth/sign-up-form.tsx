@@ -400,7 +400,6 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       aria-required="true"
                       placeholder="Create a password"
                       disabled={isSubmitting}
-                      aria-describedby="password-policy"
                       className="h-12 pl-4 pr-12 text-base lg:text-base"
                       {...field}
                     />
@@ -420,7 +419,12 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                     )}
                   </button>
                 </div>
-                <FormDescription id="password-policy">
+                {/* No hand-set id here and no aria-describedby on the field:
+                    FormControl names this description and, when there is
+                    one, the error under it. A hand-set aria-describedby on
+                    the input replaced that list, so a rejected password was
+                    never part of the field's description. */}
+                <FormDescription>
                   {PASSWORD_POLICY_TEXT}
                 </FormDescription>
                 <FormMessage />
