@@ -64,13 +64,11 @@ export const metadata: Metadata = {
     type: "article",
     publishedTime: PUBLISHED_AT,
     modifiedTime: MODIFIED_AT,
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE_PLAIN }],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE_PLAIN,
     description: DESCRIPTION,
-    images: ["/home.jpg"],
   },
 };
 

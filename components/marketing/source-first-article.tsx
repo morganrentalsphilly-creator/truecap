@@ -67,15 +67,14 @@ export function buildSourceFirstArticleMetadata(
       type: "article",
       publishedTime: article.publishedAt,
       modifiedTime: article.modifiedAt,
-      images: [
-        { url: "/home.jpg", width: 1200, height: 630, alt: article.title },
-      ],
+      // No `images` here or under `twitter`: every post built with this
+      // helper has its own opengraph-image.tsx, and Next serves a file card
+      // only when the page's metadata sets no images.
     },
     twitter: {
       card: "summary_large_image",
       title: seoTitle,
       description: article.description,
-      images: ["/home.jpg"],
     },
   };
 }

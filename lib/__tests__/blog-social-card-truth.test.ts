@@ -188,3 +188,49 @@ describe("blog social cards say only what their posts say", () => {
     }
   });
 });
+
+/**
+ * Next 16 serves a route's opengraph-image file only when the page's own
+ * metadata sets no `images` (mergeStaticMetadata in
+ * next/dist/lib/metadata/resolve-metadata.js tests
+ * `openGraph.hasOwnProperty("images")`), and a `twitter` block without
+ * `images` inherits the Open Graph image. Until 2026-10 every post named
+ * "/home.jpg" in both blocks, so all 73 cards returned 200 at their own URLs
+ * and no page used one.
+ */
+describe("a blog post with its own card lets Next serve it", () => {
+  function metadataOf(slug: string): string {
+    const source = read(`app/blog/${slug}/page.tsx`);
+    const start = source.indexOf("export const metadata");
+    expect(start, `${slug} has no metadata export`).toBeGreaterThanOrEqual(0);
+    if (/export const metadata = buildSourceFirstArticleMetadata\(ARTICLE\);/.test(source)) {
+      const helper = read("components/marketing/source-first-article.tsx");
+      const from = helper.indexOf("export function buildSourceFirstArticleMetadata");
+      const to = helper.indexOf("\n}\n", from);
+      expect(from, "the source-first metadata helper moved").toBeGreaterThanOrEqual(0);
+      expect(to).toBeGreaterThan(from);
+      // Without the helper's line comments, which explain the missing key.
+      return helper.slice(from, to).replace(/^\s*\/\/.*$/gm, "");
+    }
+    const end = source.indexOf("\n};", start);
+    expect(end, `${slug} metadata is not statically inspectable`).toBeGreaterThan(start);
+    return source.slice(start, end);
+  }
+
+  it("sets no images in openGraph or twitter", () => {
+    for (const slug of SLUGS) {
+      const metadata = metadataOf(slug);
+      expect(metadata, `${slug}: an images key hides the post's own card`).not.toMatch(/\bimages\b/);
+      expect(metadata, slug).not.toContain("home.jpg");
+    }
+  });
+
+  it("keeps an openGraph block and a large-image twitter block", () => {
+    for (const slug of SLUGS) {
+      const metadata = metadataOf(slug);
+      expect(metadata, slug).toMatch(/openGraph:\s*\{/);
+      expect(metadata, slug).toMatch(/twitter:\s*\{/);
+      expect(metadata, slug).toContain('card: "summary_large_image"');
+    }
+  });
+});
