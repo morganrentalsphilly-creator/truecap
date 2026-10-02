@@ -146,8 +146,27 @@ describe("performance contract", () => {
   // The homepage's largest paint is the ledger's text since the 2026-09
   // design pass, so nothing on these pages preloads an image ahead of it.
   it("preloads no image ahead of the text hero", () => {
-    const shots = ["components/marketing/marketing-hero.tsx", "app/pricing/page.tsx", "app/blog/page.tsx", "app/for-buy-and-hold/page.tsx"]
+    const shots = ["components/marketing/marketing-hero.tsx", "app/pricing/page.tsx", "app/blog/page.tsx"]
       .map((p) => read(p));
     for (const source of shots) expect(source).not.toMatch(/\bpriority\b/);
+  });
+
+  // Where a product shot IS the largest paint it must not wait for layout:
+  // lazy, it was the desktop LCP on every /vs page and painted about 1.4 s
+  // after the text on /for-buy-and-hold on a slow phone connection.
+  it("loads the first-screen product shot with priority where it is the largest paint", () => {
+    const firstShot = (source: string) => source.match(/<ProductShot\b[^>]*?\balt=/)?.[0] ?? null;
+    for (const path of ["app/for-investors/page.tsx", "app/for-buy-and-hold/page.tsx"]) {
+      expect(firstShot(read(path)), path).toMatch(/^\s*priority$/m);
+    }
+    const comparisons = readdirSync(join(ROOT, "app/vs"))
+      .filter((entry) => statSync(join(ROOT, "app/vs", entry)).isDirectory())
+      .map((entry) => join("app/vs", entry, "page.tsx"))
+      .filter((path) => read(path).includes("<ProductShot"));
+    // Every comparison page that is not a redirect carries the shot.
+    expect(comparisons.length).toBeGreaterThanOrEqual(38);
+    for (const path of comparisons) {
+      expect(firstShot(read(path)), path).toMatch(/^\s*priority$/m);
+    }
   });
 });

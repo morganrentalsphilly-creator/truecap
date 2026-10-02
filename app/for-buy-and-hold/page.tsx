@@ -150,12 +150,16 @@ export default function ForBuyAndHoldPage() {
             // screen pairs the claim with the output: across the container
             // it left the hero's right half empty and set a raster taller
             // than the window. `sizes` follows the 7/12 column (about 555px
-            // at 1095, 653px from 1280); the image stays lazy. The caption
-            // link takes a 44px target from padding the negative margin
-            // takes back out of the line box (the cue-line technique).
+            // at 1095, 653px from 1280). The shot is in the first screen and
+            // is the largest paint on a phone, so it loads with priority, as
+            // on /for-investors: lazy, it painted about 1.4 s after the text
+            // on a slow connection. The caption link takes a 44px target from
+            // padding the negative margin takes back out of the line box (the
+            // cue-line technique).
             <ProductShot
               shot={DECISION_SHOT}
               frame="document"
+              priority
               sizes="(min-width: 1280px) 660px, (min-width: 1024px) 52vw, 100vw"
               alt="TrueCap's decision view for the sample buy-and-hold deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
               caption={
