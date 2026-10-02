@@ -3,8 +3,9 @@
  * serves this file as its og:image and twitter:image. Drawn by the shared
  * template, lib/og/vs-og-template.tsx.
  *
- * The competitor rows on /vs/arrived wait on a decision (report row P0-08),
- * so this card says only what TrueCap does.
+ * The line restates the page's lede and its Open Graph description: what
+ * Arrived sells (checked against arrived.com on 2026-10-02) and what TrueCap
+ * does. It carries no minimum, fee or return figure.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
@@ -17,7 +18,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Arrived",
     tagline:
-      "TrueCap underwrites whole rental properties you buy and own directly, from assumptions you can edit.",
+      "Arrived sells shares of rental homes and of its funds. TrueCap underwrites whole rental properties you buy and own directly, from assumptions you can edit.",
     slug: "arrived",
   });
 }
