@@ -76,9 +76,7 @@ export default function GoodRentalYieldPost() {
 
       <p>
         TrueCap&apos;s free core analyzer places the yield-related metrics
-        beside editable operating and financing assumptions. It is a preliminary
-        model—not an appraisal, lender approval, forecast, or investment
-        recommendation.
+        beside editable operating and financing assumptions.
       </p>
 
       <RelatedContent kind="blog" slug={ARTICLE.slug} title={ARTICLE.title} className="mt-10" />
