@@ -31,6 +31,7 @@ import {
   VS_LINK_ROW,
   VS_NOTE,
   VS_PROSE,
+  VS_SOURCES,
   VS_TLDR_GRID,
   VS_TLDR_LABEL,
   VS_TLDR_LIST,
@@ -113,7 +114,7 @@ const MATRIX: Row[] = [
   {
     feature: "Live updates as you change inputs",
     truecap: "Instant recalc, visual indicators of impact",
-    excel: "Recalc works but you have to track which cells you changed",
+    excel: "Recalculates instantly; change tracking depends on the workbook",
     winner: "truecap",
   },
   {
@@ -126,7 +127,7 @@ const MATRIX: Row[] = [
   {
     feature: "Sensitivity analysis (stress test)",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp in one view",
-    excel: "Possible with Data Table feature but most users don't",
+    excel: "Possible with a Data Table or a scenario sheet you build",
     winner: "truecap",
   },
   {
@@ -145,7 +146,8 @@ const MATRIX: Row[] = [
   {
     feature: "Offline use",
     truecap: "Requires internet",
-    excel: "Works offline once file is open",
+    excel:
+      "Desktop Excel works on local files; Google Sheets needs offline access turned on",
     winner: "excel",
   },
   {
@@ -169,7 +171,7 @@ const MATRIX: Row[] = [
         with full definitions per term
       </>
     ),
-    excel: "Whatever you remember from your last research session",
+    excel: "None built in; add your own notes or links",
     winner: "truecap",
   },
   {
@@ -214,7 +216,7 @@ export default function VsExcelPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Many investors start with an Excel or Google Sheets template.
+            You may already underwrite in an Excel or Google Sheets template.
             TrueCap offers a structured, mobile-friendly workflow with
             consistent calculations and editable screening benchmarks. A
             well-built, reviewed spreadsheet can still be the right tool for
@@ -323,6 +325,38 @@ export default function VsExcelPage() {
               }))}
             />
           </ScrollX>
+          <p className={VS_SOURCES}>
+            Excel details were checked against Microsoft&apos;s support pages
+            for{" "}
+            <a
+              href="https://support.microsoft.com/en-us/office/calculate-multiple-results-by-using-a-data-table-e95e2487-6ca6-4413-ad12-77542a5ea50b"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              data tables
+            </a>
+            ,{" "}
+            <a
+              href="https://support.microsoft.com/en-us/office/view-previous-versions-of-office-files-5c1e076f-a9c9-41b8-8ace-f77b9642e2c2"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              version history
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://support.microsoft.com/en-us/office/save-or-convert-to-pdf-or-xps-in-office-desktop-apps-d85416c5-7d77-4fd6-a216-6f4bf7c7c110"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              PDF export
+            </a>{" "}
+            in October 2026. Google Sheets differs in places; check
+            Google&apos;s own help pages.
+          </p>
         </Section>
 
         <Section aria-labelledby="vs-fit-heading">
@@ -354,7 +388,7 @@ export default function VsExcelPage() {
             </ul>
             <p>
               Want to sanity-check one formula before you trust a whole sheet?
-              Check your payment row against the released{" "}
+              Check your payment row against the{" "}
               <IntentPrefetchLink
                 href="/tools/mortgage-payment-calculator"
                 className="tc-link"
@@ -397,7 +431,11 @@ export default function VsExcelPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Excel" items={EXCEL_FAQ} />
+        <ComparisonFaq
+          competitorName="Excel"
+          items={EXCEL_FAQ}
+          reviewedDate="October 2026"
+        />
 
         <CloseSection
           headingId="vs-close-heading"
@@ -511,11 +549,11 @@ const EXCEL_FAQ: FaqItem[] = [
       "Does TrueCap handle BRRRR and fix-and-flip like my spreadsheet does?",
     answer: (
       <>
-        Not currently. TrueCap&apos;s released rehab, ARV, and rental tools can
-        support individual inputs, but the integrated BRRRR and fix-and-flip
-        lifecycle models are disabled. Keep a reviewed spreadsheet or use
-        another released product for dated contributions, renovation financing,
-        refinance or sale proceeds, and project-level returns.
+        Not currently. TrueCap&apos;s rehab, ARV, and rental calculators cover
+        individual inputs, but TrueCap has no BRRRR or fix-and-flip model. Keep
+        a reviewed spreadsheet or use another tool for dated contributions,
+        renovation financing, refinance or sale proceeds, and project-level
+        returns.
       </>
     ),
   },
