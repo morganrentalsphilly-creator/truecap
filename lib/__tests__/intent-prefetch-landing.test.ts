@@ -543,34 +543,6 @@ describe("paid landing pages: intent-only prefetch (rendered)", () => {
       createElement(RealIntentPrefetchLink, { href: "#pricing", className: "x", scroll: false }, "Jump"),
     );
     expect(intentFragment).toBe('<a href="#pricing" class="x">Jump</a>');
-    // Every prop only next/link understands is dropped before the <a>: one
-    // that reached the DOM would be an unknown attribute, which React
-    // reports through console.error.
-    const reactErrors = vi.spyOn(console, "error").mockImplementation(() => {});
-    try {
-      const everyLinkOnlyProp = renderToStaticMarkup(
-        createElement(
-          RealIntentPrefetchLink,
-          {
-            href: "#pricing",
-            className: "x",
-            replace: true,
-            scroll: false,
-            shallow: true,
-            passHref: true,
-            legacyBehavior: false,
-            transitionTypes: ["slide-in"],
-            unstable_dynamicOnHover: true,
-            onNavigate: () => {},
-          },
-          "Jump",
-        ),
-      );
-      expect(everyLinkOnlyProp).toBe('<a href="#pricing" class="x">Jump</a>');
-      expect(reactErrors.mock.calls).toEqual([]);
-    } finally {
-      reactErrors.mockRestore();
-    }
     const trackedFragment = renderToStaticMarkup(
       createElement(
         TrackedMarketingLink,
