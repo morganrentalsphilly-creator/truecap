@@ -122,7 +122,7 @@ const MATRIX: Row[] = [
   {
     feature: "Auto-categorized expenses",
     truecap: "No",
-    baselane: "Yes, auto-tagging is on the paid Smart plan",
+    baselane: "Yes: auto-tagging is on the paid Smart plan",
     winner: "baselane",
   },
   {
