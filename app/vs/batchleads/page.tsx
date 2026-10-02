@@ -2,7 +2,7 @@
  * /vs/batchleads — competitor comparison landing page.
  *
  * Target queries: "batchleads alternative", "batchleads vs propstream", "batchleads pricing", "batchleads review".
- * BatchLeads is real-estate lead generation + list-pulling + skip-tracing — direct competitor to PropStream, often cheaper. Popular with wholesalers and direct-mail-heavy buy-and-hold investors.
+ * BatchLeads is real-estate lead generation + list-pulling + skip-tracing. PropStream announced its acquisition on 2025-07-07 (batchleads.io blog); the two are still sold separately, so this page makes no price comparison between them. BatchLeads also publishes free rental, BRRRR and fix-and-flip calculators. Vendor facts checked against batchleads.io in October 2026.
  */
 
 import type { Metadata } from "next";
@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
   description:
-    "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how active investors use both.",
+    "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how the two fit together.",
   keywords: [
     "batchleads alternative",
     "batchleads vs propstream",
@@ -91,31 +91,35 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    batchleads: "Not modeled",
-    winner: "truecap",
+    batchleads:
+      "Free standalone calculators; its rental calculator lists cash flow, cap rate, cash-on-cash and DSCR. Underwriting is not the core workflow",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    batchleads: "Not modeled",
+    batchleads:
+      "Its rental calculator has an optional appreciation step; no year-by-year projection is listed",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    batchleads: "Not applicable",
-    winner: "truecap",
+    batchleads:
+      "BatchRankAI flags homes most likely to sell (limited on Growth); it scores leads, not deals",
+    winner: "tie",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    batchleads: "Property data only",
-    winner: "truecap",
+    batchleads: "Property data, rental estimates and comps",
+    winner: "tie",
   },
   {
     feature: "Motivated-seller lists",
     truecap: "No",
-    batchleads: "Yes — pre-foreclosure, probate, vacant, etc.",
+    batchleads:
+      "Yes, motivated-seller quick filters, preforeclosure info, expired and canceled listings",
     winner: "batchleads",
   },
   {
@@ -127,31 +131,34 @@ const MATRIX: Row[] = [
   {
     feature: "Direct mail + SMS campaigns",
     truecap: "No",
-    batchleads: "Yes — built-in outreach",
+    batchleads:
+      "Yes, direct mail built in; SMS through a third-party integration, not on Growth",
     winner: "batchleads",
   },
   {
     feature: "Stacked / multi-criteria lists",
     truecap: "No",
-    batchleads: "Yes — overlay multiple filters",
+    batchleads: "Yes, list stacking and deduplication",
     winner: "batchleads",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    batchleads: "Trial; paid from ~$99/mo (as of 2026)",
-    winner: "truecap",
+    batchleads:
+      "7-day free trial; plans from $119 a month billed monthly (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    batchleads: "Standard ~$99/mo + per-skiptrace fees",
-    winner: "truecap",
+    batchleads:
+      "Growth $119 a month billed monthly, with owner phone numbers and emails included (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    batchleads: "Internal-only",
+    batchleads: "No share link listed; its free calculator lets you export the data",
     winner: "truecap",
   },
 ];
@@ -164,7 +171,7 @@ export default function VsBatchleadsPage() {
     name: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
     url: `${siteUrl}/vs/batchleads`,
     description:
-      "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how active investors use both.",
+      "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how the two fit together.",
     dateModified: lastmodFor("/vs/batchleads"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -188,10 +195,19 @@ export default function VsBatchleadsPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             BatchLeads is a lead-generation + skip-tracing + list-pulling
-            platform — pull motivated-seller lists, get owner contact info, run
-            direct mail and SMS campaigns. Direct competitor to PropStream,
-            often a cheaper alternative. TrueCap is the underwriting calculator
-            you&apos;d use after BatchLeads surfaces a property.
+            platform — pull motivated-seller lists, get owner contact info, and
+            send direct mail.{" "}
+            <a
+              href="https://batchleads.io/blog/propstream-announces-acquisition-of-batchleads-and-batchdialer-enhancing-its-ai-powered-real-estate-data-and-lead-generation-solutions"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              PropStream announced its acquisition of BatchLeads
+            </a>{" "}
+            on July 7, 2025; the two are still sold separately. TrueCap is the
+            underwriting calculator you&apos;d use after BatchLeads surfaces a
+            property.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -246,15 +262,18 @@ export default function VsBatchleadsPage() {
                 Use BatchLeads when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You source off-market deals via direct mail or SMS.</li>
                 <li>
-                  You need motivated-seller lists (pre-foreclosure, probate,
-                  vacant, tax-delinquent).
+                  You source off-market deals through direct mail and outbound
+                  campaigns.
                 </li>
-                <li>You need stacked filters (overlay multiple list types).</li>
                 <li>
-                  You want a PropStream alternative that&apos;s sometimes
-                  cheaper.
+                  You need motivated-seller lists (quick filters, preforeclosure
+                  info, expired and canceled listings).
+                </li>
+                <li>You need list stacking (overlay multiple lists).</li>
+                <li>
+                  You want owner phone numbers and emails included on every
+                  plan.
                 </li>
               </ul>
             </div>
@@ -282,35 +301,37 @@ export default function VsBatchleadsPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            BatchLeads details based on publicly available product info as of
-            2026. See{" "}
+            BatchLeads details checked against batchleads.io&apos;s pricing,
+            feature, and rental property calculator pages in October 2026. See{" "}
             <a
-              href="https://batchleads.io"
+              href="https://batchleads.io/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              batchleads.io
+              BatchLeads&apos; pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How wholesalers + active investors use both
+            How BatchLeads and TrueCap fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
               <li>
                 <strong>Pull motivated-seller lists in BatchLeads.</strong>{" "}
-                Probate, pre-foreclosure, vacant, tax-delinquent, absentee owner.
-                Stack filters as needed.
+                Use its quick filters, preforeclosure info, and expired or
+                canceled listings. Stack lists as needed.
               </li>
               <li>
-                <strong>Skip-trace + outreach (mail / SMS / cold call).</strong>{" "}
-                BatchLeads handles the outreach automation.
+                <strong>Skip-trace + outreach (mail / calls / SMS).</strong>{" "}
+                BatchLeads includes owner contact data on every plan and direct
+                mail in the app; SMS runs through a third-party integration on
+                its higher plans.
               </li>
               <li>
                 <strong>Seller responds with an address.</strong> Now you have a
@@ -355,7 +376,11 @@ export default function VsBatchleadsPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="BatchLeads" items={BATCHLEADS_FAQ} />
+        <ComparisonFaq
+          competitorName="BatchLeads"
+          items={BATCHLEADS_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -363,9 +388,9 @@ export default function VsBatchleadsPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -437,7 +462,8 @@ const BATCHLEADS_FAQ: FaqItem[] = [
       <>
         No — they solve different problems. BatchLeads finds motivated-seller
         leads and gives you owner contact info. TrueCap underwrites the property
-        once you have the address. Most active off-market buyers use both.
+        once you have the address. The two do different jobs and can be used
+        together.
       </>
     ),
   },
@@ -445,10 +471,11 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "BatchLeads vs PropStream — which one?",
     answer: (
       <>
-        BatchLeads is generally cheaper and stronger on stacked filters (overlay
-        multiple list types). PropStream has deeper public-records data and a
-        more mature ecosystem. Wholesalers running tight mail margins lean
-        BatchLeads; data-heavy operators lean PropStream. Some run both.
+        PropStream announced its acquisition of BatchLeads on July 7, 2025, and
+        the two are still sold as separate products. Which one costs less
+        depends on the plan and the billing term, so compare the two current
+        pricing pages. BatchLeads&apos; plan table lists list stacking, direct
+        mail, and owner contact data on every plan.
       </>
     ),
   },
@@ -456,9 +483,11 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "Does BatchLeads underwrite deals?",
     answer: (
       <>
-        No — BatchLeads gives you leads and contact data. It doesn&apos;t
-        calculate cap rate, DSCR, or cash flow. Use TrueCap, DealCheck, or a
-        spreadsheet for the underwriting layer.
+        Its core job is leads and contact data. BatchLeads also publishes free
+        standalone calculators: its rental property calculator lists cash flow,
+        NOI, cash-on-cash return, cap rate, and DSCR. TrueCap adds labeled
+        starting values, a Deal score, and, in your first free decision, the
+        Offer Ceiling: the highest price that still meets your targets.
       </>
     ),
   },
@@ -467,9 +496,9 @@ const BATCHLEADS_FAQ: FaqItem[] = [
       "How does TrueCap's address auto-fill compare to BatchLeads' property data?",
     answer: (
       <>
-        Different scope. BatchLeads has 150M+ properties with motivated-seller
-        indicators (probate, foreclosure status, vacancy, tax delinquency,
-        etc.). TrueCap provides editable HUD rent and FRED owner-occupied rate
+        Different scope. BatchLeads says it covers more than 150 million U.S.
+        properties, with property characteristics, sale history, loan
+        information, and preforeclosure info. TrueCap provides editable HUD rent and FRED owner-occupied rate
         benchmarks while keeping property tax as a manual local input. The two
         products serve different, potentially complementary jobs.
       </>
