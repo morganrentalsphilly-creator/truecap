@@ -75,7 +75,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How much does the vacancy assumption change the numbers?",
-    a: "On a rental with $20,000 of annual gross rent, moving the vacancy assumption from 8% to 5% adds $600 a year to modeled NOI. At a 7% cap rate, $600 of NOI is about $8,600 of value. Re-run any pro forma with your own vacancy assumption.",
+    a: "On a rental with $20,000 of annual gross rent, moving the vacancy assumption from 8% to 5% adds $600 a year of modeled income. If nothing else changes, that is $600 of NOI, and at a 7% cap rate about $8,600 of value. Re-run any pro forma with your own vacancy assumption.",
   },
   {
     q: "Does vacancy rate vary by market?",
