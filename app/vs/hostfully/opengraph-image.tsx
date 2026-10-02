@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Hostfully",
     tagline:
-      "Hostfully manages STRs after closing. TrueCap underwrites the deal before. Different STR lifecycle stages.",
+      "Hostfully manages STRs after closing. TrueCap underwrites the deal before you buy. Different stages.",
     slug: "hostfully",
   });
 }

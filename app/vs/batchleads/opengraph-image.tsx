@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "BatchLeads",
     tagline:
-      "BatchLeads is lead gen + skip-tracing. TrueCap underwrites the deals. Different jobs.",
+      "BatchLeads is lead lists and skip tracing. TrueCap underwrites the deals.",
     slug: "batchleads",
   });
 }
