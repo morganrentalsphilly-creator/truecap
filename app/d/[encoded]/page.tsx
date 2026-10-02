@@ -9,7 +9,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
@@ -47,10 +46,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: socialTitle,
       description: "Shared via TrueCap.",
-      // No images: [] here — the sibling opengraph-image.tsx file is
-      // auto-detected by Next.js and generates a per-deal preview card
-      // showing the address + key metrics + recommendation badge. That
-      // dynamic image wins over any static URL declared here.
+      // No `images` here: Next serves the sibling opengraph-image.tsx only
+      // when the page names no image. That card is the same for every
+      // legacy link and shows no address, metric or verdict, because an
+      // unfurler caches what it reads outside TrueCap's privacy boundary.
     },
     twitter: {
       card: "summary",
@@ -153,9 +152,6 @@ function InvalidLink({ reason }: { reason?: string }) {
       id="main"
       className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center"
     >
-      <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
-        TrueCap
-      </div>
       <h1 className="text-xl sm:text-2xl font-bold text-foreground">
         Link couldn&apos;t be opened
       </h1>
@@ -165,10 +161,9 @@ function InvalidLink({ reason }: { reason?: string }) {
       </p>
       <Link
         href="/"
-        className="mt-6 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-bold text-primary hover:underline"
+        className="mt-6 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-primary hover:underline"
       >
         Go to TrueCap
-        <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
       </Link>
     </main>
   );

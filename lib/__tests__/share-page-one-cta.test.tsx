@@ -144,6 +144,17 @@ describe("the share page asks for TrueCap once", () => {
     expect(view).not.toMatch(/>\s*Frozen strategy analysis\s*<\/p>/);
   });
 
+  it("holds the legacy page's broken-link screen to the same chrome rules", () => {
+    // InvalidLink in app/d/[encoded]/page.tsx is what a mangled /d link
+    // opens. It carried an uppercase "TrueCap" eyebrow above its heading and
+    // an arrow icon after "Go to TrueCap".
+    const legacy = code("app/d/[encoded]/page.tsx");
+    expect(legacy).toContain("function InvalidLink(");
+    expect(legacy).not.toMatch(/\bArrow(?:UpRight|Right)\b/);
+    expect(legacy).not.toContain("→");
+    expect(legacy).not.toMatch(/uppercase/);
+  });
+
   it("keeps the rerun button, the copy action and the agent's band colour", () => {
     expect(view).toContain("Run this property with your assumptions");
     expect(view).toContain("Run these assumptions with a property you choose");
