@@ -59,7 +59,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, scrollBehavior } from "@/lib/utils";
 import { comparisonGridColumns } from "@/lib/compare-responsive";
 import {
   buildAssumptionDifferences,
@@ -1254,7 +1254,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
     window.requestAnimationFrame(() => {
       document
         .getElementById("compare-selection-editor")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     });
   };
 
