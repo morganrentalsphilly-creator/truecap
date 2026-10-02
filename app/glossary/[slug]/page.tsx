@@ -51,6 +51,33 @@ function glossaryTitle(term: string): string {
   return term;
 }
 
+/**
+ * A term's description for a search snippet (155 characters) or a link
+ * preview (200), ending on a full stop wherever the text allows:
+ *   1. the definition and the benchmark, when both fit whole;
+ *   2. otherwise the definition alone, as many whole sentences as fit (a
+ *      benchmark is never quoted in part: half a range reads as the range);
+ *   3. only when the first sentence is itself over the limit, a cut at a
+ *      word boundary with an ellipsis (truncateMetaDescription).
+ * Definition plus benchmark runs to 326 characters, and cutting that at the
+ * limit ended 14 of the 44 snippets mid-sentence and 8 previews mid-word
+ * ("Lender definitio").
+ */
+function glossaryDescription(entry: GlossaryEntry, max: number): string {
+  const definition = entry.definition.trim();
+  if (entry.benchmark) {
+    const both = `${definition} ${entry.benchmark.trim()}`;
+    if (both.length <= max) return both;
+  }
+  let fitted = "";
+  for (const sentence of definition.split(/(?<=[.!?])\s+/)) {
+    const next = fitted ? `${fitted} ${sentence}` : sentence;
+    if (next.length > max) break;
+    fitted = next;
+  }
+  return fitted || truncateMetaDescription(definition, max);
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -61,12 +88,9 @@ export async function generateMetadata({
   if (!entry) {
     return { title: "Glossary term not found" };
   }
-  const description = entry.benchmark
-    ? `${entry.definition} ${entry.benchmark}`
-    : entry.definition;
   return {
     title: glossaryTitle(entry.term),
-    description: truncateMetaDescription(description),
+    description: glossaryDescription(entry, 155),
     keywords: [
       entry.term.toLowerCase(),
       `${entry.term.toLowerCase()} definition`,
@@ -80,7 +104,7 @@ export async function generateMetadata({
     openGraph: {
       ...OPEN_GRAPH_BASE,
       title: `${entry.term} — what it is, how to calculate it`,
-      description: description.slice(0, 200),
+      description: glossaryDescription(entry, 200),
       url: `/glossary/${entry.slug}`,
       type: "article",
       images: [
