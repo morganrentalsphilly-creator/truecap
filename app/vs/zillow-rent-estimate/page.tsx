@@ -1,12 +1,13 @@
 /**
  * /vs/zillow-rent-estimate — TrueCap vs Zillow's Rent Zestimate.
  *
- * Zillow answers automated clients with a bot check, so nothing about Zillow
- * on this page could be re-read from zillow.com in October 2026. The Zillow
- * column therefore says only what Zillow's linked explanation of the Rent
- * Zestimate says (a starting-point rent estimate from public data and similar
- * local listings) and what follows from that definition. The page passes no
- * review date to ComparisonFaq.
+ * Zillow answers automated clients with a bot check, so its explanation of
+ * the Rent Zestimate (zillow.com/rent/what-is-a-rent-zestimate/) was read in a
+ * normal browser on 2026-10-02. The Zillow column says only what that page
+ * says (a starting-point rent estimate from public data and similar local
+ * listings; special features, location and market conditions may not be
+ * taken into account) and what follows from that definition. That read is
+ * what the October 2026 review date passed to ComparisonFaq rests on.
  *
  * Target queries: "zillow rent estimate accuracy", "zillow rent vs",
  * "zestimate alternative", "how accurate is zillow rent", "better than
@@ -96,7 +97,8 @@ const MATRIX: Row[] = [
     feature: "Estimate accuracy",
     truecap:
       "Depends on the benchmark and property-specific evidence you enter",
-    zillow: "Varies with the available data, property, and market",
+    zillow:
+      "Zillow says special features, location and market conditions may not be taken into account",
     winner: "tie",
   },
   {
@@ -238,9 +240,9 @@ export default function VsZillowRentPage() {
                 records, or a local professional.
               </li>
               <li>
-                <strong>Property and market coverage vary.</strong> Renovation
-                quality, concessions, seasonality, and block-level differences may
-                not be fully represented.
+                <strong>Zillow names its own limits.</strong> It says special
+                features, location and market conditions may not be taken into
+                account.
               </li>
               <li>
                 <strong>Rent is only one assumption.</strong> Taxes, insurance,
@@ -368,6 +370,7 @@ export default function VsZillowRentPage() {
         <ComparisonFaq
           competitorName="Zillow Rent Estimate"
           items={ZILLOW_FAQ}
+          reviewedDate="October 2026"
         />
 
         <CloseSection
@@ -448,10 +451,10 @@ const ZILLOW_FAQ: FaqItem[] = [
     answer: (
       <>
         Zillow describes its Rent Zestimate as a starting point based on public
-        data and similar local listings. Accuracy depends on the available data,
-        property, and market. For underwriting, compare it with current rent
-        comps, lease evidence, and local professional input, then stress-test a
-        reasonable range.
+        data and similar local listings, and says special features, location
+        and market conditions may not be taken into account. For underwriting,
+        compare it with current rent comps, lease evidence, and local
+        professional input, then stress-test a reasonable range.
       </>
     ),
   },
