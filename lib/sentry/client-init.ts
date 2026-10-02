@@ -97,9 +97,9 @@ export function initSentryClient(): void {
   // attaches despite default PII collection being disabled.
   beforeSend(event) {
     // The site's own per-page-load configuration notice (PostHog key absent
-    // while PostHog is on hold) cost one error-quota event per page view and
-    // helped exhaust the quota on 2026-10-01. Drop that one message; every
-    // other event continues. See lib/sentry/self-noise.ts.
+    // while PostHog is on hold) cost one error-quota event per page view; the
+    // quota ran out on 2026-10-01. Drop that one message; every other event
+    // continues. See lib/sentry/self-noise.ts.
     if (isPerPageLoadConfigNotice(event)) return null;
     // Checkout/OAuth capabilities must not survive in an error event's URL or
     // parsed query string. This runs before transport even if React never

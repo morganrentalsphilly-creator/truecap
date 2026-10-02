@@ -135,7 +135,7 @@ describe("Vercel Web Analytics beforeSend", () => {
 });
 
 describe("browser Sentry payloads", () => {
-  it("strips the click id from every URL-bearing field of an event", () => {
+  it("strips the click id from every field the walker visits", () => {
     const event = stripAdClickIdsFromSentryEvent({
       message: `fetch failed for /?gclid=${GCLID}&_rsc=1`,
       transaction: "/",
