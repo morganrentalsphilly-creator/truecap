@@ -253,10 +253,16 @@ describe("CSP report-only collector", () => {
 
 /**
  * Go-to-market audit 2026-10, rows P2-90 and P2-109: the report-only policy
- * must list the Google Ads origins the audit captured, so a consented page
- * view posts no report and enforcing the policy later does not stop
- * conversion tracking. Only the four captured origins, each under the
- * directive it was captured in, and nothing wider.
+ * must list the Google Ads origins the audit captured on a consented page
+ * view, so that view no longer posts the reports it posted before. Only the
+ * four captured origins, each under the directive it was captured in, and
+ * nothing wider.
+ *
+ * This does not make the policy ready to enforce: the purchase conversion
+ * request was never captured, and Google's CSP guide for an Ads conversion
+ * tag (developers.google.com/tag-platform/security/guides/csp) lists more
+ * sources than these four. Whoever adds them re-anchors the first case below
+ * in the same commit.
  */
 describe("report-only CSP and the Google Ads tag", () => {
   const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
