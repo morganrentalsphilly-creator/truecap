@@ -15,7 +15,9 @@
  * landing with a gclid would switch measurement off.
  *
  * `utm_*` and every other parameter are kept, byte for byte: the query is
- * filtered as text, never re-serialised.
+ * filtered as text, never re-serialised. Nothing is decoded either, so a
+ * click id percent-encoded inside another parameter's value
+ * (`next=%2F%3Fgclid%3D...`) is not found.
  */
 
 import { AD_CLICK_ID_PARAMS } from "@/lib/first-touch";
