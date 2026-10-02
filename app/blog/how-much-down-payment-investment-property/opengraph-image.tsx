@@ -20,6 +20,6 @@ export default function Image() {
     section: "Guide",
     tag: "Down payment",
     title: "How much down payment do you need for an investment property? (2026)",
-    subline: "15% single-family · 25% on 2–4 units · the house-hack shortcut",
+    subline: "Conventional loans: 15% single-family · 25% on 2–4 units · house hacks",
   });
 }
