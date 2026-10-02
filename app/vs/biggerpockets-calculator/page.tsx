@@ -104,7 +104,7 @@ const MATRIX: Row[] = [
     workflow: "Offer Ceiling",
     truecap:
       "Offer Ceiling works backward from your target and shows threshold alternatives.",
-    bp: "The calculator supports an offer-price input inside a broader rental analysis.",
+    bp: "The calculator takes the purchase price as an input to a broader rental analysis.",
   },
   {
     workflow: "Ecosystem",
@@ -149,8 +149,8 @@ export default function VsBiggerPocketsCalculatorPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            BiggerPockets has been the default real estate analysis tool for two
-            decades. Their calculator is solid. We built TrueCap because we
+            BiggerPockets has run a real estate investing community since 2004.
+            Their calculator is solid. We built TrueCap because we
             wanted an address-first workflow that connects the initial screen to
             Buy Box fit, an Offer Ceiling, downside, and presentation.
             BiggerPockets may be the better choice when its community and
@@ -217,15 +217,15 @@ export default function VsBiggerPocketsCalculatorPage() {
               <ul className={VS_TLDR_LIST}>
                 <li>
                   You&apos;re already deep in the BiggerPockets ecosystem
-                  (forums, podcast, books, courses).
+                  (forums, podcasts, books, events).
                 </li>
                 <li>
                   You want the community + calculator + content all bundled in
                   one membership.
                 </li>
                 <li>
-                  You want the longest track record / brand recognition in the
-                  space.
+                  You want a brand with a long track record (BiggerPockets
+                  dates to 2004).
                 </li>
                 <li>
                   You already have a paid Pro subscription you&apos;re using.
@@ -269,8 +269,8 @@ export default function VsBiggerPocketsCalculatorPage() {
           </ScrollX>
           <p className={VS_SOURCES}>
             Pricing and feature availability change. BiggerPockets Calculator
-            details were reviewed against its official product pages on August
-            15, 2026. See{" "}
+            details were checked against its official product pages in October
+            2026. See{" "}
             <a
               href="https://www.biggerpockets.com/rental-property-calculator"
               target="_blank"
@@ -329,16 +329,23 @@ export default function VsBiggerPocketsCalculatorPage() {
                 You actively use the forums for partner / lender / contractor
                 introductions in your market.
               </li>
-              <li>You&apos;re working through a BP course or bootcamp.</li>
               <li>
-                You need an established brand-name for credibility (if you&apos;re
-                using output in client presentations to investors).
+                You&apos;re working through BiggerPockets&apos; books, podcasts,
+                or events.
+              </li>
+              <li>
+                You want the BiggerPockets name on the report you share.
               </li>
               <li>
                 You already have all your historical deals in BP and don&apos;t
                 want to migrate.
               </li>
             </ul>
+            <p>
+              Presenting to investor clients? With TrueCap Pro the share page
+              carries your logo, brand color, and name, and the PDF adds a
+              &quot;Prepared by&quot; block with your contact details.
+            </p>
             <p>
               If you only need one number — not a full calculator suite —
               TrueCap&apos;s free single-purpose tools cover the screening end
@@ -401,7 +408,7 @@ export default function VsBiggerPocketsCalculatorPage() {
         <ComparisonFaq
           competitorName="BiggerPockets Calculator"
           items={BP_FAQ}
-          reviewedDate="August 15, 2026"
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
@@ -526,7 +533,7 @@ const BP_FAQ: FaqItem[] = [
     ),
   },
   {
-    question: "Does TrueCap have a 10-year projection like BiggerPockets?",
+    question: "Does TrueCap project a deal over time like BiggerPockets?",
     answer: (
       <>
         Yes. TrueCap Pro&apos;s 10-year projection models user-editable rent
