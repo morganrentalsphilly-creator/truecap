@@ -255,6 +255,10 @@ describe("the /vs hub's one-liners", () => {
     // Privy's own description is deal sourcing and property analysis, wider
     // than the "investor-filtered MLS search" the hub used to call it.
     expect(hub).not.toMatch(/investor-filtered/i);
+    // Landlord Studio lists rentals, screens tenants and collects rent online
+    // on every plan (landlordstudio.com/pricing, 2026-10-02), so the row does
+    // not reduce it to expense tracking and Schedule E.
+    expect(hub).not.toMatch(/Landlord Studio tracks expenses/i);
   });
 
   it("does not describe TrueCap features that do not exist", () => {
