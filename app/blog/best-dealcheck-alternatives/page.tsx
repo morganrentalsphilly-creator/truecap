@@ -11,7 +11,7 @@
  * Honesty rules baked in: TrueCap is listed first but disclosed as
  * ours; the other six are real alternatives described fairly, and
  * DealCheck itself gets a "when to stick with it" section. Competitor
- * pricing checked against each vendor's own pricing page in September 2026.
+ * pricing checked against each vendor's own pricing page in October 2026.
  *
  * Schema: Article + Breadcrumb + ItemList + FAQPage.
  */
@@ -234,7 +234,8 @@ const TOOLS: Tool[] = [
     url: "/vs/mashvisor",
     pricing: (
       <a href="https://www.mashvisor.com/pricing" className={SOURCE_LINK}>
-        From $49.99/mo (Lite); Standard $74.99/mo (billed annually)
+        $39.99–$99.99/mo billed annually ($49.99–$119.99/mo billed
+        quarterly)
       </a>
     ),
     strengths: [
@@ -244,8 +245,7 @@ const TOOLS: Tool[] = [
     ],
     tradeoffs: [
       "No free tier — annual or quarterly subscriptions only",
-      "Deal-level underwriting is shallower than DealCheck or TrueCap",
-      "Priced for research, so it's expensive if you only analyze a deal or two a month",
+      "Customizing expenses and ROI estimates requires the Standard plan or higher",
     ],
     pickIf:
       "You're choosing a market (especially for STR) rather than underwriting a specific address you've already found.",
@@ -283,7 +283,7 @@ const TOOLS: Tool[] = [
           Free account; Basic $59/yr; Essential $16/mo or $96/yr; Pro $29/mo
           or $199/yr
         </a>{" "}
-        (September 2026)
+        (October 2026)
       </>
     ),
     strengths: [
@@ -336,7 +336,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Does DealCheck have a free plan?",
-    a: "Yes. DealCheck's Starter plan is free and lets you analyze and save up to 15 properties at a time (signup required). Plus is $10/month and Pro is $20/month billed annually ($14/$29 billed monthly, as of September 2026). Both raise the saved-property, photo, comp and template limits and unlock the Purchase Offer Calculator, investment-potential insights and all purchase criteria; Pro also adds custom comps, property owner lookup and custom-branded reports.",
+    a: "Yes. DealCheck's Starter plan is free and lets you analyze and save up to 15 properties at a time (signup required). Plus is $10/month and Pro is $20/month billed annually ($14/$29 billed monthly, as of October 2026). Both raise the saved-property, photo, comp and template limits and unlock the Purchase Offer Calculator, investment-potential insights and all purchase criteria; Pro also adds custom comps, property owner lookup and custom-branded reports.",
   },
   {
     q: "Which DealCheck alternative is best for rent estimates?",
@@ -450,7 +450,7 @@ export default function BestDealCheckAlternativesPost() {
               and rate data filled in for you, or maybe you only need one piece
               of what it does. Here are seven real alternatives — including one
               we make, clearly labeled — with pricing checked against each
-              vendor&apos;s own pricing page (September 2026) and an honest note
+              vendor&apos;s own pricing page (October 2026) and an honest note
               on when sticking with DealCheck is the right call.
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
@@ -489,7 +489,7 @@ export default function BestDealCheckAlternativesPost() {
                       Tool
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Pricing (September 2026)
+                      Pricing (October 2026)
                     </th>
                     <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
                       Best for
@@ -597,7 +597,7 @@ export default function BestDealCheckAlternativesPost() {
               import is central to your workflow, none of the tools above will
               feel like an upgrade — they&apos;ll feel like a migration. Its
               paid tiers are also cheap for what they unlock ($10–$20/month
-              billed annually, as of September 2026). Switch when a specific
+              billed annually, as of October 2026). Switch when a specific
               limitation bites — the free-tier property cap, or paying for
               underwriting features when all you needed was a rent comp. Our
               full{" "}

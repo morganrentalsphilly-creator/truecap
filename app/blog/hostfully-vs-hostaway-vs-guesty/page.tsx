@@ -67,15 +67,15 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "Which STR PMS is best for 1-3 short-term rentals?",
-    a: "Guesty Lite is built for 1–3 listings, and Hostfully says it serves hosts from a single listing up; Hostaway steers single-listing hosts to a waitlist. Lodgify and Smoobu are also worth comparing at this size, and if you only list on Airbnb, its own tools may be enough. As you grow, Hostaway (priced in tiers from 2–14 listings up to 50+), Hostfully (Growth plan pitched at 1–50 listings) and Guesty Pro (4–199 listings) all become options.",
+    a: "Guesty Lite is built for 1–3 listings, and Hostfully says it serves hosts from a single listing up; Hostaway steers single-listing hosts to a waitlist. Lodgify and Smoobu are also worth comparing at this size, and if you only list on Airbnb, its own tools may be enough. As you grow, Hostaway (quoted by listing count), Hostfully (Growth plan pitched at 1–50 listings) and Guesty Pro (4–199 listings) all become options.",
   },
   {
     q: "Hostfully vs Hostaway — which one?",
-    a: "Both serve small-to-mid STR operators; Hostfully pitches its plans from 1 listing up, and Hostaway prices in tiers starting at 2–14 listings. Hostfully is generally easier to onboard with stronger guidebook + branding features. Hostaway has tighter channel management and dynamic pricing integrations. Try the demo of both — the UX preference often decides.",
+    a: "Both serve small-to-mid STR operators; Hostfully pitches its plans from 1 listing up, and Hostaway quotes by listing count. Hostfully is generally easier to onboard with stronger guidebook + branding features. Hostaway has tighter channel management and dynamic pricing integrations. Try the demo of both — the UX preference often decides.",
   },
   {
     q: "Hostaway vs Guesty — which is more enterprise?",
-    a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway prices in tiers from 2–14 listings to 50+. If you're a solo operator scaling into a business, Hostaway is the more practical step. If you're already managing STRs for other owners, Guesty's owner-portal + custom-permission features become valuable.",
+    a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway quotes by listing count. If you're a solo operator scaling into a business, Hostaway is the more practical step. If you're already managing STRs for other owners, Guesty's owner-portal + custom-permission features become valuable.",
   },
   {
     q: "Do any of these underwrite STR deals?",
@@ -172,12 +172,11 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               channel managers, automation, dynamic pricing, cleaning workflows.
               <strong> Hostfully</strong> favors small-to-mid operators with
               strong guidebook + branding features.
-              <strong> Hostaway</strong> serves operators from a couple of
-              listings up (its{" "}
+              <strong> Hostaway</strong>{" "}
               <a href="https://www.hostaway.com/pricing/">
-                pricing tiers start at 2–14
+                quotes each portfolio by listing count
               </a>
-              ) with tighter channel management and pricing integrations.
+              , with tighter channel management and pricing integrations.
               <strong> Guesty</strong> runs from{" "}
               <a href="https://www.guesty.com/pricing/">
                 Lite (1–3 listings) through Pro and Enterprise (200+ listings
@@ -217,10 +216,9 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 </a>
                 ).{" "}
                 <a href="https://www.hostaway.com/pricing/">
-                  Priced in tiers from 2–14 listings to 50+
+                  Quoted by listing count
                 </a>
-                . Pricing is quote-based (not published) and varies by
-                features.
+                . Pricing is not published and varies by features.
               </li>
               <li>
                 <strong>Guesty</strong> — STR property management that spans
@@ -263,8 +261,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                   Hostfully advertises 150+ integrations
                 </a>{" "}
                 and{" "}
-                <a href="https://www.hostaway.com/glossary/hostaway-marketplace/">
-                  Hostaway over 200
+                <a href="https://www.hostaway.com/">
+                  Hostaway 300+
                 </a>
                 .
               </li>
@@ -280,7 +278,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 .
               </li>
               <li>
-                A marketplace of 200+ integrations, including the
+                A marketplace of 300+ integrations, including the
                 dynamic-pricing tools PriceLabs, Wheelhouse, and Beyond.
               </li>
               <li>
@@ -336,8 +334,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 <a href="https://www.hostaway.com/pricing/">
                   pricing isn&apos;t published
                 </a>
-                ; you get a quote based on listing count (tiers from 2–14
-                listings). No free tier.
+                ; you get a quote based on listing count. No free tier.
               </li>
               <li>
                 <strong>Guesty</strong> —{" "}
@@ -363,9 +360,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <h2>What if you have only 1-3 STRs?</h2>
             <p>
               Guesty Lite is built for 1–3 listings, and Hostfully says it
-              serves hosts with a single listing; Hostaway&apos;s lowest pricing
-              tier covers 2–14 listings, and it sends single-listing hosts to a
-              waitlist. Also look at:
+              serves hosts with a single listing; Hostaway sends single-listing
+              hosts to a waitlist. Also look at:
             </p>
             <ul>
               <li>
@@ -457,7 +453,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               <li>
                 <strong>
                   &quot;I have 5-50 STRs and want deep channel management plus
-                  a 200+ integration marketplace.&quot;
+                  a 300+ integration marketplace.&quot;
                 </strong>{" "}
                 Hostaway.
               </li>
