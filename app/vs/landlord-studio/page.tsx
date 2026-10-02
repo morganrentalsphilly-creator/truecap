@@ -2,7 +2,9 @@
  * /vs/landlord-studio — competitor comparison landing page.
  *
  * Target queries: "landlord studio alternative", "landlord studio vs stessa", "landlord studio pricing", "landlord studio review".
- * Landlord Studio is mobile-first accounting + receipt scanning for small landlords. Direct alternative to Stessa, simpler than Buildium/Rentec. Strong on UK + US markets.
+ * Landlord Studio is property management software for independent landlords:
+ * listings, screening, online rent collection and rental accounting with
+ * receipt scanning (landlordstudio.com/pricing, checked October 2026).
  */
 
 import type { Metadata } from "next";
@@ -47,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Landlord Studio vs TrueCap (2026): Which to Use",
   description:
-    "Landlord Studio is mobile-first accounting for properties you own. TrueCap underwrites the ones you're considering. Honest comparison and how they fit.",
+    "Landlord Studio manages rentals you own: listings, rent collection and accounting. TrueCap underwrites the ones you're considering. How the two fit.",
   keywords: [
     "landlord studio alternative",
     "landlord studio vs stessa",
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Landlord Studio vs TrueCap (2026): Which to Use",
     description:
-      "Landlord Studio is mobile accounting for properties you own. TrueCap underwrites the deal before. Different stages.",
+      "Landlord Studio manages rentals you own. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/landlord-studio",
     type: "website",
     images: [
@@ -78,62 +80,67 @@ type Row = {
   feature: string;
   truecap: string;
   landlordstudio: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
   {
     feature: "Lifecycle stage",
     truecap: "Pre-purchase — underwrite the deal",
-    landlordstudio: "Post-purchase — accounting + tracking",
+    landlordstudio: "Post-purchase: find tenants, collect rent, keep the books",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    landlordstudio: "Not modeled",
-    winner: "truecap",
+    landlordstudio:
+      "Free standalone calculators (cap rate, NOI, rental yield, mortgage, BRRRR); not part of its plans",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    landlordstudio: "Not modeled",
+    landlordstudio: "Not among Landlord Studio's listed features",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    landlordstudio: "Not applicable",
+    landlordstudio: "Not among Landlord Studio's listed features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    landlordstudio: "Not applicable",
-    winner: "truecap",
+    landlordstudio:
+      "A free rent estimator that uses Zillow, HUD and Census data",
+    winner: "tie",
   },
   {
     feature: "Receipt scanning",
     truecap: "No",
-    landlordstudio: "Yes — mobile camera + OCR",
+    landlordstudio: "Yes: a smart receipt scanner on every plan",
     winner: "landlordstudio",
   },
   {
     feature: "Expense tracking + categorization",
     truecap: "No",
-    landlordstudio: "Yes — per-property bookkeeping",
+    landlordstudio:
+      "Yes: income and expense tracking on every plan; bank feeds and automatic categorization on Pro and Pro Plus",
     winner: "landlordstudio",
   },
   {
     feature: "Schedule E P&L reports",
     truecap: "Forward projection only",
-    landlordstudio: "Yes — actuals export",
+    landlordstudio:
+      "Yes: Schedule E and other tax-ready reports on Pro and Pro Plus",
     winner: "landlordstudio",
   },
   {
-    feature: "Rent tracking",
+    feature: "Rent collection",
     truecap: "No",
-    landlordstudio: "Yes — payment logging (no ACH collection itself)",
+    landlordstudio:
+      "Yes, online by card or ACH on every plan, including the free Go plan",
     winner: "landlordstudio",
   },
   {
@@ -145,14 +152,14 @@ const MATRIX: Row[] = [
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    landlordstudio: "Yes — limited properties",
+    landlordstudio: "Yes: the Go plan, for up to 3 units",
     winner: "tie",
   },
   {
     feature: "Pricing (paid tier)",
     truecap: "Paid Pro; see live pricing for current rates",
-    landlordstudio: "Starter ~$12/mo, Premium ~$30/mo (as of 2026)",
-    winner: "tie",
+    landlordstudio:
+      "Pro from $12 a month billed annually ($15 monthly); Pro Plus from $24 a month billed annually ($30 monthly), as of October 2026",
   },
 ];
 
@@ -164,7 +171,7 @@ export default function VsLandlordStudioPage() {
     name: "Landlord Studio vs TrueCap (2026): Which to Use",
     url: `${siteUrl}/vs/landlord-studio`,
     description:
-      "Landlord Studio is mobile-first accounting for properties you own. TrueCap underwrites the ones you're considering. Honest comparison and how they fit.",
+      "Landlord Studio manages rentals you own: listings, rent collection and accounting. TrueCap underwrites the ones you're considering. How the two fit.",
     dateModified: lastmodFor("/vs/landlord-studio"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -187,11 +194,11 @@ export default function VsLandlordStudioPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Landlord Studio is mobile-first accounting + expense tracking for
-            small landlords — snap a receipt, categorize it, generate a Schedule
-            E. TrueCap is a pre-purchase underwriting calculator that helps
-            screen an acquisition. Different stages, potentially complementary
-            tools.
+            Landlord Studio is property management software for independent
+            landlords: listings, tenant screening, online rent collection, and
+            rental accounting with receipt scanning. TrueCap is a pre-purchase
+            underwriting calculator that helps screen an acquisition. Different
+            stages, potentially complementary tools.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -253,10 +260,12 @@ export default function VsLandlordStudioPage() {
                 <li>
                   You want a mobile app for snapping receipts at the property.
                 </li>
-                <li>You need a simple Schedule E export at tax time.</li>
                 <li>
-                  You don&apos;t need bank-feed accounting (Stessa/Baselane do
-                  that).
+                  You want Schedule E reports at tax time (Pro and Pro Plus).
+                </li>
+                <li>
+                  You want online rent collection, receipt scanning and bank
+                  feeds (Pro and Pro Plus) in one app.
                 </li>
               </ul>
             </div>
@@ -284,17 +293,17 @@ export default function VsLandlordStudioPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Landlord Studio details based on publicly available product info as
-            of 2026. See{" "}
+            Landlord Studio plans, prices and features were checked against its
+            pricing page in October 2026. See{" "}
             <a
-              href="https://landlordstudio.com"
+              href="https://www.landlordstudio.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              landlordstudio.com
+              landlordstudio.com/pricing
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
@@ -318,9 +327,10 @@ export default function VsLandlordStudioPage() {
                 invoice on your phone? Snap, categorize, file.
               </li>
               <li>
-                <strong>Annual tax time.</strong> Pull Schedule E from Landlord
-                Studio. Re-run TrueCap to compare actuals vs projection — the gap
-                is your learning for the next acquisition.
+                <strong>Annual tax time.</strong> Pull the Schedule E report from
+                Landlord Studio (Pro and Pro Plus). Re-run TrueCap to compare
+                actuals vs projection — the gap is your learning for the next
+                acquisition.
               </li>
             </ol>
             <p>
@@ -354,6 +364,7 @@ export default function VsLandlordStudioPage() {
         <ComparisonFaq
           competitorName="Landlord Studio"
           items={LANDLORD_STUDIO_FAQ}
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
@@ -362,10 +373,10 @@ export default function VsLandlordStudioPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -434,9 +445,10 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
     question: "Is TrueCap a Landlord Studio alternative?",
     answer: (
       <>
-        No — different stages. Landlord Studio is mobile-first accounting for
-        properties you own. TrueCap underwrites properties you&apos;re
-        considering buying. Most small landlords use both.
+        No — different stages. Landlord Studio manages properties you own
+        (listings, rent collection, accounting). TrueCap underwrites properties
+        you&apos;re considering buying. They cover different stages, so a
+        landlord can use both.
       </>
     ),
   },
@@ -444,12 +456,29 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
     question: "Landlord Studio vs Stessa — which one?",
     answer: (
       <>
-        Landlord Studio is more mobile-first with stronger receipt scanning.
-        Stessa is more bank-feed-driven with automated transaction
-        categorization. If you take a lot of receipts on the go, Landlord
-        Studio&apos;s mobile UX wins. If you want everything pulled
-        automatically from your bank, Stessa is more hands-off. Both have free
-        tiers — try both.
+        Both import bank transactions: Stessa lists automatic bank feeds on its
+        free Essentials plan, and Landlord Studio&apos;s bank feeds start on
+        Pro. Landlord Studio&apos;s receipt scanner and online rent collection
+        are on every plan, and both have a free plan. Compare reports and price
+        on{" "}
+        <a
+          href="https://www.landlordstudio.com/pricing"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Landlord Studio&apos;s pricing page
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://www.stessa.com/pricing/"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          Stessa&apos;s pricing page
+        </a>
+        .
       </>
     ),
   },
@@ -457,9 +486,9 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
     question: "Does Landlord Studio collect rent?",
     answer: (
       <>
-        Not directly — they log rent payments but don&apos;t process them. For
-        online rent collection (ACH/card), you&apos;d pair Landlord Studio with
-        TurboTenant, RentRedi, Avail, or Baselane.
+        Yes. Landlord Studio collects rent online by card or ACH on every plan,
+        including the free Go plan, and deposits it into your bank account.
+        TrueCap does not collect rent.
       </>
     ),
   },
@@ -478,10 +507,20 @@ const LANDLORD_STUDIO_FAQ: FaqItem[] = [
     question: "Is Landlord Studio free?",
     answer: (
       <>
-        Yes — there&apos;s a free tier for a limited number of properties. Paid
-        tiers (Starter ~$12/month, Premium ~$30/month as of 2026) lift the
-        property cap and add features like custom reports and bank
-        reconciliation.
+        Yes. The Go plan is free for up to 3 units and includes online rent
+        collection. The paid plans are Pro (from $12 a month billed annually,
+        $15 monthly) and Pro Plus (from $24 a month billed annually, $30
+        monthly), as of October 2026. They add bank feeds, Schedule E and other
+        tax-ready reports, and more document storage. See{" "}
+        <a
+          href="https://www.landlordstudio.com/pricing"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          landlordstudio.com/pricing
+        </a>{" "}
+        for current prices.
       </>
     ),
   },
