@@ -216,8 +216,7 @@ export function SharedDealShell({
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
                   See 10-year cash-flow and equity projections, an Offer
-                  Ceiling, downside sensitivity, and the secondary Screening
-                  Index
+                  Ceiling, downside sensitivity, and the Deal score
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   The full analysis with multi-year cash flow and equity

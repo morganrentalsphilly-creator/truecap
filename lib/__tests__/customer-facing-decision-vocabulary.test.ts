@@ -86,11 +86,13 @@ describe("customer-facing decision vocabulary", () => {
 
   it("uses Deal score as the one public name for the secondary score", () => {
     // docs/voice.md term map: "Screening Index" is retired customer-facing
-    // vocabulary; the one public name is "Deal score" (0–100).
+    // vocabulary; the one public name is "Deal score" (0–100). The pattern
+    // spans a line break: the share page's upgrade block wrapped the name
+    // over two JSX lines and a single-space pattern read past it.
     const violations: string[] = [];
     for (const file of customerSurfaceFiles()) {
       const visibleSource = withoutComments(readFileSync(file, "utf8"));
-      const match = visibleSource.match(/\bScreening Index\b/i);
+      const match = visibleSource.match(/\bScreening\s+Index\b/i);
       if (match) violations.push(`${relative(ROOT, file)}: ${match[0]}`);
     }
 
