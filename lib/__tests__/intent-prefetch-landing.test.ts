@@ -427,8 +427,8 @@ const RENDERED: Record<
       "/pricing#plans",
       "/for-buy-and-hold",
       "/for-house-hackers",
-      "/for-brrrr",
-      "/for-flippers",
+      "/blog/brrrr-method-explained",
+      "/blog/70-percent-rule-house-flipping",
     ],
   },
   "app/for-investors/page.tsx": {

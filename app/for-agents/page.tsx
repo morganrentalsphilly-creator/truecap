@@ -626,34 +626,32 @@ export default async function ForAgentsPage() {
             }
           >
             {/* The other personas, on the close's soft rule (FinalCta's
-                investor cue). /for-brrrr and /for-flippers are reachable
-                only from here; keep them out of shared chrome. */}
+                investor cue). BRRRR and fix-and-flip go to their guides, which
+                are in the sitemap: /for-brrrr and /for-flippers are noindex
+                and left out of it, so a link from this indexable page would
+                break the link graph. */}
             {/* Each link holds its trailing punctuation (nowrap), so a line
-                never starts with ", and". */}
+                never starts with a comma or a full stop. */}
             <p className="mt-6 border-t border-rule-soft pt-2.5 text-base text-muted-foreground">
               Investing yourself as well? See TrueCap for{" "}
-              <span className="whitespace-nowrap">
-                <IntentPrefetchLink href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
-                  buy-and-hold
-                </IntentPrefetchLink>
-                ,
-              </span>{" "}
+              <IntentPrefetchLink href="/for-buy-and-hold" className="tc-link -my-3 inline-block py-3">
+                buy-and-hold
+              </IntentPrefetchLink>{" "}
+              and{" "}
               <span className="whitespace-nowrap">
                 <IntentPrefetchLink href="/for-house-hackers" className="tc-link -my-3 inline-block py-3">
                   house hackers
                 </IntentPrefetchLink>
                 ,
               </span>{" "}
-              <span className="whitespace-nowrap">
-                <IntentPrefetchLink href="/for-brrrr" className="tc-link -my-3 inline-block py-3">
-                  BRRRR operators
-                </IntentPrefetchLink>
-                ,
-              </span>{" "}
+              or read{" "}
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="tc-link -my-3 inline-block py-3">
+                the BRRRR guide
+              </IntentPrefetchLink>{" "}
               and{" "}
               <span className="whitespace-nowrap">
-                <IntentPrefetchLink href="/for-flippers" className="tc-link -my-3 inline-block py-3">
-                  fix-and-flippers
+                <IntentPrefetchLink href="/blog/70-percent-rule-house-flipping" className="tc-link -my-3 inline-block py-3">
+                  the 70% rule guide
                 </IntentPrefetchLink>
                 .
               </span>
