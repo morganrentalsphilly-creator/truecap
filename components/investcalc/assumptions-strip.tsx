@@ -48,9 +48,14 @@ import {
   type TemplateAssumptionSource,
 } from "@/lib/template-form-patch";
 import { getStrategyByKey } from "@/lib/investor-strategies";
+import { shouldPromptForHoa } from "@/components/investcalc/address-shape";
 import { cn } from "@/lib/utils";
 
 const PULSE_MS = 1600;
+
+/** A chip the strip renders: one from buildAssumptionChips, or the strip's
+ *  own HOA prompt (which has no entry in the lib's id union). */
+type StripChip = Omit<AssumptionChip, "id"> & { id: string };
 
 type Props = {
   form: UseFormReturn<InvestmentFormValues>;
@@ -239,7 +244,32 @@ export function AssumptionsStrip({
     "extras",
     "property",
   ];
-  const renderChip = (chip: AssumptionChip) => {
+  // HOA chip, only for an address with a unit number ("#209", "Apt 2B")
+  // while HOA is still $0 and its field has not been visited. HOA sits in
+  // the collapsed expense panel, so a condo's first result modeled no dues
+  // and nothing on the first screen said so. Not a required input: the chip
+  // opens the panel on the HOA field and goes away once dues are entered or
+  // the field has been visited. The expense card repeats it as a caution
+  // line (operating-expenses-section.tsx).
+  const hoaChip: StripChip | null = shouldPromptForHoa({
+    address: values.address,
+    hoaMonthly: values.hoaMonthly,
+    hoaFieldVisited: Boolean(
+      sourceTouchedFields.hoaMonthly ||
+        (form.formState.touchedFields as Record<string, unknown>).hoaMonthly,
+    ),
+  })
+    ? {
+        id: "hoa-unit",
+        label: "HOA $0/mo",
+        badge: { kind: "default", text: "add dues if any" },
+        target: "expenses",
+        focusFieldId: "hoaMonthly",
+        pulseKey: null,
+      }
+    : null;
+
+  const renderChip = (chip: StripChip) => {
     const opensAdvanced = advancedTargets.includes(chip.target);
     const isExpanded =
       chip.target === "expenses"
@@ -334,6 +364,7 @@ export function AssumptionsStrip({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {beforeExtras.map(renderChip)}
+        {hoaChip ? renderChip(hoaChip) : null}
         {extrasChip ? renderChip(extrasChip) : null}
       </div>
 
