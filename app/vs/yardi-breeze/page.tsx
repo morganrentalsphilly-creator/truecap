@@ -2,7 +2,9 @@
  * /vs/yardi-breeze — competitor comparison landing page.
  *
  * Target queries: "yardi breeze alternative", "yardi breeze vs buildium", "yardi breeze pricing", "yardi breeze review".
- * Yardi Breeze is the small-business version of Yardi's enterprise property management suite — designed for 1-100 residential units. Direct competitor to Buildium and Rentec Direct.
+ * Yardi Breeze is Yardi's property management software. Competitor cells were checked in
+ * October 2026 against yardibreeze.com/residential-features/ (features and pricing); Yardi
+ * publishes no unit range, so the page ties its advice to the $100 monthly minimum.
  */
 
 import type { Metadata } from "next";
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
     description:
-      "Yardi Breeze is small-landlord PM software. TrueCap is the pre-purchase underwrite. Different stages.",
+      "Yardi Breeze is property management software. TrueCap is the pre-purchase underwrite. Different stages.",
     url: "/vs/yardi-breeze",
     type: "website",
     images: [
@@ -91,13 +93,13 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    yardibreeze: "Not modeled",
+    yardibreeze: "Not on Yardi Breeze's published feature list",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    yardibreeze: "Not modeled",
+    yardibreeze: "Not on Yardi Breeze's published feature list",
     winner: "truecap",
   },
   {
@@ -115,13 +117,13 @@ const MATRIX: Row[] = [
   {
     feature: "Tenant + lease management",
     truecap: "No",
-    yardibreeze: "Yes — designed for 1-100 units",
+    yardibreeze: "Yes: applications, screening and leases online",
     winner: "yardibreeze",
   },
   {
     feature: "Online rent collection",
     truecap: "No",
-    yardibreeze: "Yes — ACH + card",
+    yardibreeze: "Yes: debit card, credit card and ACH",
     winner: "yardibreeze",
   },
   {
@@ -133,31 +135,33 @@ const MATRIX: Row[] = [
   {
     feature: "Owner / partner portals",
     truecap: "No",
-    yardibreeze: "Yes — multi-owner statements",
+    yardibreeze: "Yes: owner reports by email or secure portal",
     winner: "yardibreeze",
   },
   {
     feature: "Full GL accounting",
     truecap: "Forward projection only",
-    yardibreeze: "Yes — chart of accounts, balance sheet, 1099s",
+    yardibreeze: "Yes: general ledger, financial statements and 1099 e-file",
     winner: "yardibreeze",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    yardibreeze: "No — paid only (demo available)",
+    yardibreeze: "No free plan listed; demo available",
     winner: "truecap",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)",
+    yardibreeze:
+      "Residential: $1 per unit per month, $100 monthly minimum, annual agreement (as of October 2026)",
     winner: "tie",
   },
   {
-    feature: "Built for solo investors (1-30 doors)",
-    truecap: "Yes",
-    yardibreeze: "Yes — 1-100 sweet spot",
+    feature: "Who it is for",
+    truecap: "Agents with investor clients, and buy-and-hold investors",
+    yardibreeze:
+      "Owners and managers of residential, commercial, affordable, self storage, association and manufactured housing portfolios",
     winner: "tie",
   },
 ];
@@ -193,11 +197,11 @@ export default function VsYardiBreezePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Yardi Breeze is the small-business version of Yardi&apos;s
-            enterprise PM platform — built for residential landlords managing
-            1-100 units. Tenant management, rent collection, accounting, owner
-            reports. TrueCap models the first-year economics of properties you
-            are considering. Different stages, complementary tools.
+            Yardi Breeze is Yardi&apos;s property management software: tenant
+            management, rent collection, accounting, owner reports. Residential
+            pricing starts at $1 per unit per month with a $100 monthly minimum.
+            TrueCap models the first-year economics of properties you are
+            considering. Different stages, complementary tools.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -244,8 +248,8 @@ export default function VsYardiBreezePage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>
-                  You haven&apos;t yet reached 1-5 units (Yardi Breeze starts to
-                  make sense above that).
+                  You own a few units: residential Breeze bills a $100 monthly
+                  minimum whatever your unit count.
                 </li>
                 <li>You want a free tier — no commitment.</li>
               </ul>
@@ -255,14 +259,17 @@ export default function VsYardiBreezePage() {
                 Use Yardi Breeze when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You own 5-100 units and need PM-grade ops + accounting.</li>
+                <li>
+                  You manage enough units to carry a $100 monthly minimum and
+                  need operations and accounting in one tool.
+                </li>
                 <li>
                   You need rent collection, lease management, work orders, owner
                   reports.
                 </li>
                 <li>
-                  You want Yardi-level data quality but priced for small
-                  portfolios.
+                  You want general ledger accounting, financial statements and
+                  1099 e-file.
                 </li>
                 <li>You may manage on behalf of other owners.</li>
               </ul>
@@ -291,17 +298,16 @@ export default function VsYardiBreezePage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Yardi Breeze details based on publicly available product info as of
-            2026. See{" "}
+            Yardi Breeze details checked in October 2026 against{" "}
             <a
-              href="https://yardibreeze.com"
+              href="https://www.yardibreeze.com/residential-features/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              yardibreeze.com
-            </a>{" "}
-            for their current state.
+              Yardi Breeze&apos;s residential features and pricing page
+            </a>
+            . See Yardi Breeze for current plans.
           </p>
         </Section>
 
@@ -322,7 +328,7 @@ export default function VsYardiBreezePage() {
               </li>
               <li>
                 <strong>Operate in Yardi Breeze.</strong> Rent comes in, expenses
-                get logged, owner reports build themselves.
+                get logged, owner reports go out by email or portal.
               </li>
               <li>
                 <strong>Annual review in TrueCap.</strong> Pull Yardi Breeze
@@ -338,7 +344,8 @@ export default function VsYardiBreezePage() {
               >
                 How to calculate NOI
               </IntentPrefetchLink>{" "}
-              rebuilds the number Yardi Breeze reports after the fact, and{" "}
+              rebuilds the number your financial statements show after the
+              fact, and{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="tc-link"
@@ -358,7 +365,11 @@ export default function VsYardiBreezePage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Yardi Breeze" items={YARDI_BREEZE_FAQ} />
+        <ComparisonFaq
+          competitorName="Yardi Breeze"
+          items={YARDI_BREEZE_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -366,9 +377,9 @@ export default function VsYardiBreezePage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -439,8 +450,8 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     answer: (
       <>
         No — different stages. Yardi Breeze operates rentals you own. TrueCap
-        underwrites rentals you&apos;re considering buying. Landlords with 5-100
-        units typically use both.
+        underwrites rentals you&apos;re considering buying. The two fit one
+        after the other: TrueCap before you buy, Yardi Breeze once you own.
       </>
     ),
   },
@@ -448,10 +459,10 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Yardi Breeze vs Buildium — which one?",
     answer: (
       <>
-        Close call. Yardi Breeze inherits Yardi&apos;s enterprise data quality +
-        reporting at small-business pricing. Buildium has a slightly cleaner UX
-        and a larger ecosystem of integrations. Both serve 5-100 unit landlords.
-        Pricing structures differ; demo both before committing.
+        We don&apos;t rank property management software. Yardi Breeze publishes
+        residential pricing of $1 per unit per month with a $100 monthly
+        minimum on an annual agreement (as of October 2026). Compare that with
+        Buildium&apos;s pricing page for your unit count before committing.
       </>
     ),
   },
@@ -459,10 +470,11 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Does Yardi Breeze have a free tier?",
     answer: (
       <>
-        No — paid only with a demo. Pricing starts around $1-2/unit/month with a
-        $100 minimum (as of 2026), which means even with 1 unit you&apos;d pay
-        $100/month. For solo landlords below 50 units, TurboTenant or Avail
-        (both free) are often more practical entry points.
+        Yardi Breeze lists no free plan; it offers a demo. Residential Breeze
+        is $1 per unit per month with a $100 monthly minimum on an annual
+        agreement (as of October 2026), so an owner with one unit pays the
+        $100 minimum. TurboTenant publishes a free plan if you manage a few
+        units yourself.
       </>
     ),
   },
@@ -470,9 +482,11 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Can Yardi Breeze underwrite new deals?",
     answer: (
       <>
-        No — it&apos;s operational only. Pre-purchase underwriting (cap rate,
-        DSCR, cash flow, projection) needs a separate calculator like TrueCap,
-        DealCheck, or your spreadsheet.
+        Yardi Breeze&apos;s published feature list covers managing properties
+        you own: leasing, rent collection, accounting, owner tools and
+        maintenance. It lists no pre-purchase deal analysis. Pre-purchase
+        underwriting (cap rate, DSCR, cash flow, projection) needs a separate
+        calculator like TrueCap, DealCheck, or your spreadsheet.
       </>
     ),
   },
@@ -480,9 +494,12 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "When should I upgrade from TurboTenant to Yardi Breeze?",
     answer: (
       <>
-        Typical signal: 10+ units, you want owner reports for partners or LPs,
-        and you&apos;ve outgrown TurboTenant&apos;s accounting features. Below
-        that threshold, the $100/mo minimum at Yardi Breeze isn&apos;t worth it.
+        Start from the price. Residential Breeze bills a $100 monthly minimum
+        on an annual agreement, the same for 1 unit or 100. It earns that when
+        you need what its feature list adds, such as general ledger
+        accounting, owner reports and 1099 e-file. TurboTenant&apos;s paid
+        plans start at $149 a year for up to 10 units (both as of October
+        2026).
       </>
     ),
   },
