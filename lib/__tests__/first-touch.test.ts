@@ -172,7 +172,7 @@ describe("landingSection", () => {
 
 /**
  * Go-to-market audit 2026-10, row P2-112: a paid click to /for-agents was
- * stored as paid_search.other. The two persona pages ads point at get their
+ * stored as paid_search.other. The agent and investor landing pages get their
  * own sections, under names the cookie value pattern accepts.
  */
 describe("the agent and investor landing pages", () => {
