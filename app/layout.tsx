@@ -10,6 +10,7 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { TrueCapVercelAnalytics } from "@/components/analytics/vercel-analytics";
 import { OverlayRecovery } from "@/components/ui/overlay-recovery";
 import { getSiteUrl } from "@/lib/site-url";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 import { oneTimePdfReturnBootstrapScript } from "@/lib/one-time-pdf-return";
 import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
 import "./globals.css";
@@ -95,8 +96,7 @@ export const metadata: Metadata = {
     title: "TrueCap | Rental Deal Decision Engine",
     description:
       "See whether a rental fits your Buy Box and the highest price that still meets your targets — every assumption labeled and editable.",
-    siteName: "TrueCap",
-    locale: "en_US",
+    ...OPEN_GRAPH_BASE,
     url: siteUrl,
     images: [
       {

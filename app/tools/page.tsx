@@ -37,6 +37,7 @@ import {
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators",
@@ -44,13 +45,13 @@ export const metadata: Metadata = {
     "Free, no-signup rental property utilities for mortgage payments, rent-to-price screens, vacancy, closing costs, rehab budgets, ARV, and more.",
   alternates: { canonical: "/tools" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Real Estate Calculators",
     description: `${CALCULATOR_COUNT_WORD} free rental property calculators — ${CALCULATOR_NAMES_LIST}. No signup.`,
     url: "/tools",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap free real estate calculators" }],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function ToolsLandingPage() {

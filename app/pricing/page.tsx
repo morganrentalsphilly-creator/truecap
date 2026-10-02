@@ -72,6 +72,7 @@ import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
 import { cn } from "@/lib/utils";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
@@ -79,16 +80,14 @@ export const metadata: Metadata = {
   description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap pricing — Screen free, know your offer with Pro",
     description:
       "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
     url: "/pricing",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 // FREE_FEATURES + PRO_FEATURES lists were lifted into the toggle

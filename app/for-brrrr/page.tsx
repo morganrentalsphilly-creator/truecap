@@ -28,6 +28,7 @@ import { Header } from "@/components/investcalc/header";
 // scroll. The hero's actions keep next/link's default; /analyze never
 // prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
@@ -36,21 +37,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   alternates: { canonical: "/for-brrrr" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "BRRRR planning resources — TrueCap",
     description:
       "Work through rehab, DSCR, and stabilized rental returns in the analyzer and ARV in its own calculator, with a clear line around what TrueCap doesn't model.",
     url: "/for-brrrr",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap BRRRR planning resources",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 const RESOURCES = [

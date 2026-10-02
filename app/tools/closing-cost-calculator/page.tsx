@@ -18,6 +18,7 @@ import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Closing Cost Calculator — Every Line Item",
@@ -33,13 +34,13 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/closing-cost-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Closing Cost Calculator — Every Line Item",
     description: "Compute closing costs on a rental property purchase. Every line item broken out.",
     url: "/tools/closing-cost-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap closing cost calculator" }],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS: { q: string; a: string }[] = [

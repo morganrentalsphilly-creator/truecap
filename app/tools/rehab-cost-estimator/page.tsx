@@ -12,6 +12,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
@@ -24,17 +25,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rehab-cost-estimator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Rehab Cost Estimator — Budget by Sq Ft",
     description:
       "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus how to turn a directional estimate into real contractor bids.",
     url: "/tools/rehab-cost-estimator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rehab cost estimator" }],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/home.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS = [
