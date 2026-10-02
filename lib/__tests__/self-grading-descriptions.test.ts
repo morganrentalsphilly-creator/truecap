@@ -86,12 +86,13 @@ describe("a page description does not grade its own comparison", () => {
     }
   });
 
+  // "The honest math on housing cost" describes the subject, not the post,
+  // so the rule is the grade next to the thing graded.
+  const selfGradedPost =
+    /\b(?:honest|fair|unbiased)\s+(?:\d+-way\s+|20\d\d\s+)?(?:comparison|side-by-side|ranking|review|roundup|look|take|verdict)\b/i;
+
   it("keeps a self-graded comparison, ranking or review out of every blog DESCRIPTION", () => {
-    // "The honest math on housing cost" describes the subject, not the post,
-    // so the rule is the grade next to the thing graded.
     const graded: string[] = [];
-    const selfGradedPost =
-      /\b(?:honest|fair|unbiased)\s+(?:\d+-way\s+|20\d\d\s+)?(?:comparison|side-by-side|ranking|review|roundup|look|take|verdict)\b/i;
     for (const slug of BLOG_SLUGS) {
       const page = readFileSync(join(BLOG_DIR, slug, "page.tsx"), "utf8");
       const description = new RegExp(String.raw`const DESCRIPTION\s*=\s*${STRING}`).exec(page)?.[1];
@@ -99,5 +100,18 @@ describe("a page description does not grade its own comparison", () => {
       if (selfGradedPost.test(description)) graded.push(`${slug}: ${description}`);
     }
     expect(graded).toEqual([]);
+  });
+
+  it("keeps it out of the blog registry's excerpts and the topic hubs' descriptions", () => {
+    // An excerpt prints on /blog, the topic hubs, the feed and every
+    // related-posts block; a topic description is /blog/topics/<slug>'s meta
+    // description and visible intro. Both said "Honest ..." after the posts
+    // themselves had stopped.
+    for (const file of ["lib/blog-posts.ts", "lib/blog-topics.ts"]) {
+      const source = readFileSync(join(ROOT, file), "utf8");
+      const strings = [...source.matchAll(new RegExp(STRING, "g"))].map((m) => m[1]);
+      expect(strings.length, file).toBeGreaterThan(20);
+      expect(strings.filter((text) => selfGradedPost.test(text)), file).toEqual([]);
+    }
   });
 });

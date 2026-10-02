@@ -505,7 +505,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "best-rental-property-calculator-for-brrrr",
     title: "Best rental property calculator for BRRRR investors (2026)",
     excerpt:
-      "Honest 2026 ranking of the best calculators for BRRRR — TrueCap, DealCheck, BiggerPockets, and what makes a BRRRR-specific calculator different from a standard rental analyzer.",
+      "A 2026 ranking of the best calculators for BRRRR — TrueCap, DealCheck, BiggerPockets, and what makes a BRRRR-specific calculator different from a standard rental analyzer.",
     readingTimeMinutes: 9,
     publishedAt: "2026-06-07",
     available: true,
@@ -514,7 +514,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "best-rental-analysis-tool-for-house-hackers",
     title: "Best rental analysis tool for house hackers (2026)",
     excerpt:
-      "Honest 2026 ranking of the best calculators for house hackers — TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting requires that standard rental calculators miss.",
+      "A 2026 ranking of the best calculators for house hackers — TrueCap, DealCheck, BiggerPockets, and what owner-occupant underwriting requires that standard rental calculators miss.",
     readingTimeMinutes: 8,
     publishedAt: "2026-06-07",
     available: true,
@@ -524,7 +524,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "Best short-term rental analysis tool 2026: 6 tools STR investors compare",
     excerpt:
-      "Honest 2026 ranking of the best STR analysis tools — AirDNA for revenue data, TrueCap for underwriting, Mashvisor for market discovery, plus PMS platforms STR investors evaluate.",
+      "A 2026 ranking of the best STR analysis tools — AirDNA for revenue data, TrueCap for underwriting, Mashvisor for market discovery, plus PMS platforms STR investors evaluate.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -534,7 +534,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins?",
     excerpt:
-      "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.",
+      "A 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,
@@ -571,7 +571,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "hostfully-vs-hostaway-vs-guesty",
     title: "Hostfully vs Hostaway vs Guesty: which STR PMS wins in 2026?",
     excerpt:
-      "Honest 3-way comparison of Hostfully, Hostaway, and Guesty — channel managers, automation, pricing tiers, and which fits 1, 10, or 100 short-term rentals.",
+      "A 3-way comparison of Hostfully, Hostaway, and Guesty: channel managers, automation, pricing tiers, and which fits 1, 10, or 100 short-term rentals.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,
