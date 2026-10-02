@@ -197,8 +197,7 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
       </h3>
       <p className="mt-1.5 max-w-[64ch] text-sm leading-relaxed text-muted-foreground">
         A review path for Buy Box criteria, editable assumptions, sensitivity,
-        due diligence, and adviser questions. It does not replace property-level
-        verification or tax, legal, lending, or investment advice.
+        due diligence, and adviser questions.
       </p>
       {captured ? (
         <CapturedState downloadUrl={downloadUrl} />
