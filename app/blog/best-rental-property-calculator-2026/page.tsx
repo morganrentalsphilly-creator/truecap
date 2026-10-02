@@ -113,13 +113,13 @@ const RANKED_CALCULATORS = [
     url: "/vs/biggerpockets-calculator",
     pricing: "Bundled with BiggerPockets Pro ~$390/year (~$32.50/mo)",
     pros: [
-      "Bundled with the BiggerPockets community (forums, courses, books, podcasts)",
-      "Printable PDF reports built for sharing with lenders or partners (Pro members only)",
-      "Solid BRRRR + flip + buy-and-hold support",
+      "Bundled with the BiggerPockets community (forums, books, podcasts)",
+      "Printable PDF reports built for sharing with lenders or partners",
+      "Separate BRRRR and fix-and-flip calculators alongside the rental calculator",
     ],
     cons: [
-      "Calculator alone isn't the value — you're really paying for the community",
-      "Free tier is more limited than TrueCap's",
+      "Unlimited calculator access is one of several Pro benefits BiggerPockets lists, with a forum badge, discounted BPCON tickets and partner perks",
+      "Its calculator form says results unlock with Pro or a 7-day free trial; a sign-up prompt on its house hacking guide mentions 5 free calculator reports",
     ],
     pickIf:
       "You're already paying for BiggerPockets for the community and the calculator is a bonus.",
@@ -255,10 +255,15 @@ const CITATIONS = [
     url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
   },
   { phrase: "~$390/year (~$32.50/mo)", url: "https://www.biggerpockets.com/pro-membership" },
-  { phrase: "forums, courses, books, podcasts", url: "https://www.biggerpockets.com/" },
+  { phrase: "forums, books, podcasts", url: "https://www.biggerpockets.com/" },
   { phrase: "Printable PDF reports", url: "https://www.biggerpockets.com/rental-property-calculator" },
-  { phrase: "BRRRR + flip + buy-and-hold support", url: "https://www.biggerpockets.com/rental-property-calculator" },
-  { phrase: "Free tier is more limited", url: "https://www.biggerpockets.com/rental-property-calculator" },
+  { phrase: "BRRRR and fix-and-flip calculators", url: "https://www.biggerpockets.com/rental-property-calculator" },
+  { phrase: "one of several Pro benefits", url: "https://www.biggerpockets.com/pro-membership" },
+  { phrase: "results unlock with Pro or a 7-day free trial", url: "https://www.biggerpockets.com/analysis/rentals/new" },
+  {
+    phrase: "mentions 5 free calculator reports",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+  },
   { phrase: "$39.99–$99.99/month billed annually", url: "https://www.mashvisor.com/pricing" },
   { phrase: "heatmaps start on the Standard plan", url: "https://www.mashvisor.com/pricing" },
   { phrase: "occupancy + ADR data", url: "https://www.mashvisor.com/airbnb-data" },
@@ -361,6 +366,14 @@ const SOURCES = [
   {
     title: "BiggerPockets, Rental Property Calculator",
     url: "https://www.biggerpockets.com/rental-property-calculator",
+  },
+  {
+    title: "BiggerPockets, Rental Property Report (calculator form)",
+    url: "https://www.biggerpockets.com/analysis/rentals/new",
+  },
+  {
+    title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
   },
   { title: "Mashvisor, Plans & Pricing", url: "https://www.mashvisor.com/pricing" },
   { title: "Mashvisor, Airbnb Data & Analytics", url: "https://www.mashvisor.com/airbnb-data" },

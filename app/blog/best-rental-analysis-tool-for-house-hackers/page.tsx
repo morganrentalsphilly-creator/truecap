@@ -104,7 +104,7 @@ const TOOLS = [
       "A free Rent vs. Buy vs. House Hack calculator download from its house-hacking guide (BiggerPockets sign-up required)",
     ],
     freeGates: [
-      "Calculator alone doesn't justify $390/yr unless you use the community",
+      "Its calculator form says results unlock with Pro or a 7-day free trial; a sign-up prompt on its house hacking guide mentions 5 free calculator reports",
     ],
     pickIf:
       "You're already paying for BiggerPockets and want to adapt its bundled rental calculator for a house hack.",
@@ -178,6 +178,11 @@ const CITATIONS = [
   { phrase: "BP Pro ~$390/yr", url: "https://www.biggerpockets.com/pro-membership" },
   { phrase: "Pro rental property calculator", url: "https://www.biggerpockets.com/rental-property-calculator" },
   { phrase: "House-hacking articles and forum discussion", url: "https://www.biggerpockets.com/blog/house-hacking" },
+  { phrase: "results unlock with Pro or a 7-day free trial", url: "https://www.biggerpockets.com/analysis/rentals/new" },
+  {
+    phrase: "mentions 5 free calculator reports",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+  },
   {
     phrase: "Rent vs. Buy vs. House Hack calculator download",
     url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
@@ -263,6 +268,10 @@ const SOURCES = [
   { title: "DealCheck, home page (iOS and Android apps)", url: "https://dealcheck.io/" },
   { title: "BiggerPockets, Pro membership", url: "https://www.biggerpockets.com/pro-membership" },
   { title: "BiggerPockets, House Hacking articles", url: "https://www.biggerpockets.com/blog/house-hacking" },
+  {
+    title: "BiggerPockets, Rental Property Report (calculator form)",
+    url: "https://www.biggerpockets.com/analysis/rentals/new",
+  },
   {
     title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
     url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",

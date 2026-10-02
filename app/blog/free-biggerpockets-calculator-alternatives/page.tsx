@@ -8,13 +8,15 @@
  * "TrueCap vs BiggerPockets" phrasing; this post targets the
  * "free alternatives" listicle pattern the SERP actually rewards.
  *
- * The premise is BiggerPockets' published access terms: the calculators
- * are a Pro feature after a 7-day free trial ($39/mo or $390/yr, checked
- * September 2026; no current official page states a free-report count).
- * Honesty rules baked in:
- * TrueCap listed first but disclosed as ours; the other five are real,
- * genuinely free options described fairly, and BP gets a "when Pro is
- * worth it" section.
+ * The premise is what BiggerPockets itself says about access, and it says
+ * two things: its rental calculator form unlocks results with Pro or a
+ * 7-day free trial, and a sign-up prompt on its house hacking guide
+ * mentions 5 free calculator reports (both rendered 2 October 2026; Pro is
+ * $39/mo or $390/yr on its membership page). The post states both and does
+ * not say which one a free account gets.
+ * Rules baked in:
+ * TrueCap listed first but disclosed as ours; the other five are real
+ * free options, and BP gets a "when Pro is worth it" section.
  *
  * Schema: Article + Breadcrumb + ItemList + FAQPage.
  */
@@ -40,7 +42,7 @@ import { PostSources } from "@/components/blog/post-sources";
 const SLUG = "free-biggerpockets-calculator-alternatives";
 const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
 const DESCRIPTION =
-  "BiggerPockets' calculators are a Pro feature ($390/yr after a 7-day trial). Six genuinely free alternatives for 2026 — and what each free tier covers.";
+  "BiggerPockets' calculator form unlocks results with Pro or a 7-day trial; a sign-up prompt mentions 5 free reports. Six free alternatives and what each covers.";
 const PUBLISHED_AT = "2026-07-14";
 const MODIFIED_AT = lastmodFor("/blog/free-biggerpockets-calculator-alternatives") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 10;
@@ -95,7 +97,7 @@ const TOOLS: Tool[] = [
     url: "/vs/biggerpockets-calculator",
     pricing: "Free core; paid Pro — see live pricing",
     disclosure:
-      "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — without a paid membership. The side-by-side comparison shows where BiggerPockets still wins.",
+      "Full disclosure: TrueCap is our tool. We put it first because the free tier runs a rental analysis with no account and no report count. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
       "Editable HUD rent + FRED mortgage-rate benchmarks; manual local property tax",
@@ -244,7 +246,7 @@ const TOOLS: Tool[] = [
 const FAQ_ITEMS = [
   {
     q: "How many free reports does the BiggerPockets calculator give you?",
-    a: "BiggerPockets' current calculator pages don't state a free-report allowance; they offer a 7-day free trial, and unlimited calculator use requires BiggerPockets Pro at $39/month or $390/year (as of September 2026). Pro also bundles forum perks, a BPCON ticket discount, partner software (RentRedi, Baselane) and lender/insurance discounts — the calculator is one piece of a membership, not a standalone product.",
+    a: "BiggerPockets says two things. Its rental calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Its membership page lists unlimited calculator access under Pro at $39/month or $390/year (as of October 2026). Pro also bundles a forum badge, discounted BPCON tickets, partner software (RentRedi, Baselane) and lender and insurance discounts, so the calculator is one piece of a membership.",
   },
   {
     q: "Is there a truly free alternative to the BiggerPockets rental calculator?",
@@ -252,11 +254,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is BiggerPockets Pro worth $390 a year just for the calculators?",
-    a: "For the calculators alone, usually not — free tools now cover the same underwriting math. Pro is worth it when you'd use the rest of the bundle: the community for partner and lender introductions, the included partner software, and the lender, insurance and materials discounts. If you're a Pro member who only opens the calculator, that's the sign to price out alternatives.",
+    a: "It depends on which benefits you'd use. BiggerPockets lists unlimited calculator access as one Pro benefit among several: a forum badge, discounted BPCON tickets, partner software (RentRedi, Baselane) and lender, insurance and materials discounts. If the calculator is the only part you'd use, compare it with the free tools above before you renew.",
   },
   {
     q: "Can I keep using BiggerPockets for free without the calculators?",
-    a: "Yes. The forums, most blog content, and a limited set of features stay available on the free membership. Plenty of investors read the forums for free and run their numbers in a separate free calculator — the two aren't a package deal.",
+    a: "Yes. BiggerPockets' membership page offers a free account to learn and connect, and its sign-up prompt says an account unlocks the community forums and newsletter, plus 5 free calculator reports. You can read the forums on a free account and run your numbers in a separate free calculator.",
   },
 ];
 
@@ -346,24 +348,39 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               {TITLE_PLAIN}
             </h1>
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              The BiggerPockets calculators are good — the catch is that
-              they&apos;re a Pro feature. BiggerPockets offers a{" "}
+              BiggerPockets says two things about free access to its
+              calculators. Its{" "}
+              <a
+                href="https://www.biggerpockets.com/analysis/rentals/new"
+                className="font-semibold text-primary hover:underline"
+              >
+                rental calculator form
+              </a>{" "}
+              says results unlock with Pro or a{" "}
               <a
                 href="https://www.biggerpockets.com/investment-calculators"
                 className="font-semibold text-primary hover:underline"
               >
                 7-day free trial
               </a>
-              , and after that the calculators sit behind BiggerPockets Pro at{" "}
+              , and a sign-up prompt on its{" "}
               <a
-                href="https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY"
+                href="https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy"
+                className="font-semibold text-primary hover:underline"
+              >
+                house hacking guide
+              </a>{" "}
+              mentions 5 free calculator reports. Its membership page lists
+              unlimited calculator access under BiggerPockets Pro at{" "}
+              <a
+                href="https://www.biggerpockets.com/membership-types"
                 className="font-semibold text-primary hover:underline"
               >
                 $39/month or $390/year
               </a>{" "}
-              (as of September 2026). Here are six genuinely free alternatives —
-              including one we make, clearly labeled — plus an honest note on
-              when Pro is actually the right buy.
+              (as of October 2026). Here are six free alternatives, including
+              one we make (clearly labeled), plus a note on when Pro is the
+              right buy.
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
               Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
@@ -533,21 +550,19 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
 
             <h2>When BiggerPockets Pro is actually worth it</h2>
             <p>
-              The fair version: BiggerPockets Pro isn&apos;t a calculator
-              subscription, it&apos;s a membership that happens to include
-              calculators. If you use the forums for partner, lender, or
-              contractor introductions, want the partner-lender and insurance
-              discounts, or want the{" "}
+              BiggerPockets Pro isn&apos;t a calculator subscription,
+              it&apos;s a membership that includes calculators. If you use the
+              forums for partner, lender, or contractor introductions, want the
+              partner-lender and insurance discounts, or want the{" "}
               <a
                 href="https://www.biggerpockets.com/pro-membership"
                 className="font-semibold text-primary hover:underline"
               >
                 bundled partner software
               </a>
-              , $390/year can pay for itself before you ever open the rental
-              calculator. Buy it for the
-              ecosystem. If the calculator is the only part you&apos;d use, the
-              free tools above cover the same math — our{" "}
+              , the membership covers more than the calculators. If the
+              calculator is the only part you&apos;d use, compare it with the
+              free tools above. Our{" "}
               <Link
                 href="/vs/biggerpockets-calculator"
                 className="font-semibold text-primary hover:underline"
@@ -622,12 +637,20 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
           <PostSources
             sources={[
               {
+                title: "BiggerPockets, Rental Property Report (calculator form)",
+                url: "https://www.biggerpockets.com/analysis/rentals/new",
+              },
+              {
                 title: "BiggerPockets, Real Estate Investment Calculators",
                 url: "https://www.biggerpockets.com/investment-calculators",
               },
               {
-                title: "BiggerPockets, Pro membership checkout (monthly and annual prices, 7-day free trial)",
-                url: "https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY",
+                title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+                url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+              },
+              {
+                title: "BiggerPockets, Membership types (Pro monthly and annual prices, 7-day free trial)",
+                url: "https://www.biggerpockets.com/membership-types",
               },
               {
                 title: "DealCheck, Plans & Pricing",

@@ -163,7 +163,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is BiggerPockets' rental property calculator free?",
-    a: "The current official BiggerPockets rental-property-calculator page presents calculator results as a Pro feature. Access, trial, and membership terms can change, so verify both the official calculator page and Pro page before choosing it as a free option.",
+    a: "BiggerPockets says two things. Its rental calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports. Access, trial, and membership terms can change, so verify both the official calculator page and Pro page before choosing it as a free option.",
   },
   {
     q: "What's the catch with TrueCap's free tier?",
@@ -229,8 +229,12 @@ const CITATIONS = [
     url: "https://www.zillow.com/mortgage-calculator/",
   },
   {
-    phrase: "presents calculator results as a Pro feature",
-    url: "https://www.biggerpockets.com/rental-property-calculator",
+    phrase: "results unlock with Pro or a 7-day free trial",
+    url: "https://www.biggerpockets.com/analysis/rentals/new",
+  },
+  {
+    phrase: "mentions 5 free calculator reports",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
   },
 ];
 
@@ -310,6 +314,14 @@ const SOURCES = [
   { title: "Google Workspace, Google Sheets", url: "https://workspace.google.com/products/sheets/" },
   { title: "BiggerPockets, Resources (free downloads)", url: "https://www.biggerpockets.com/resources" },
   { title: "Zillow, Mortgage Calculator", url: "https://www.zillow.com/mortgage-calculator/" },
+  {
+    title: "BiggerPockets, Rental Property Report (calculator form)",
+    url: "https://www.biggerpockets.com/analysis/rentals/new",
+  },
+  {
+    title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+  },
 ];
 
 export default function BestFreeRentalPropertyCalculator2026Post() {
