@@ -118,6 +118,13 @@ describe("offer trust language", () => {
 
     const agentPage = read("app/for-agents/page.tsx");
     expect(agentPage).toContain("An account keeps up to 12 Buy Boxes in total");
+
+    // /vs/dealcheck's "Investor clients (agents)" row said "a client roster
+    // with a Buy Box per client" and stated neither limit anywhere on the page.
+    const vsDealcheck = read("app/vs/dealcheck/page.tsx");
+    expect(vsDealcheck).toContain("(up to 100 clients)");
+    expect(vsDealcheck).toContain("(up to 12 per account)");
+    expect(vsDealcheck).not.toMatch(/a Buy Box per client/i);
   });
 
   it("discloses every live data processor and optional third-party client data", () => {
