@@ -10,9 +10,17 @@
  *
  * Runs AFTER lib/sentry-url-scrubber.ts in each hook and visits the same
  * fields that scrubber does (request URL, query and headers, breadcrumbs,
- * messages, exception text, extra, contexts, tags, spans), so it only ever
- * sees plain event data. Like that scrubber it does not visit stack frames.
- * `utm_*` and every other parameter are left as they were.
+ * messages, exception text, stack frames, extra, contexts, tags, spans), so
+ * it only ever sees plain event data. `utm_*` and every other parameter are
+ * left as they were, except a parameter whose value carried a click id of
+ * its own (lib/analytics/ad-click-ids.ts says how that value is rewritten).
+ *
+ * Stack frames: an error thrown by an inline script, or inside `eval`, names
+ * the page URL as the frame's `filename` and `abs_path`, with its query. The
+ * frames of every exception and thread are walked, and so is
+ * `debug_meta.images[].code_file`, which the SDK copies from the frame path
+ * and Sentry matches against it to find the source map: both go through the
+ * same function, so they still agree afterwards.
  */
 
 import type { Event } from "@sentry/nextjs";
@@ -20,6 +28,7 @@ import {
   isAdClickIdParameter,
   stripAdClickIds,
   stripAdClickIdsFromBareQuery,
+  stripAdClickIdsFromParameterValue,
 } from "@/lib/analytics/ad-click-ids";
 
 /** Span and request attributes that hold a query string with no "?" in front. */
@@ -63,15 +72,35 @@ function stripDeep(
 
 type QueryString = NonNullable<Event["request"]>["query_string"];
 
+/** A parsed value can carry a click id of its own: `{ next: "/?gclid=x" }`. */
+function stripParsedValue<V>(value: V): V {
+  return typeof value === "string"
+    ? (stripAdClickIdsFromParameterValue(value) as V)
+    : value;
+}
+
 function stripQueryString(query: QueryString): QueryString {
   if (typeof query === "string") return stripAdClickIdsFromBareQuery(query);
   if (!query || typeof query !== "object") return query;
   if (Array.isArray(query)) {
-    return query.filter(([name]) => !isAdClickIdParameter(name));
+    return query
+      .filter(([name]) => !isAdClickIdParameter(name))
+      .map(([name, value]): [string, string] => [name, stripParsedValue(value)]);
   }
   return Object.fromEntries(
-    Object.entries(query).filter(([name]) => !isAdClickIdParameter(name)),
+    Object.entries(query)
+      .filter(([name]) => !isAdClickIdParameter(name))
+      .map(([name, value]) => [name, stripParsedValue(value)]),
   );
+}
+
+type Frames = NonNullable<
+  NonNullable<NonNullable<Event["exception"]>["values"]>[number]["stacktrace"]
+>["frames"];
+
+/** Every string field of every frame: `filename`, `abs_path`, context lines, `vars`. */
+function stripFrames(frames: Frames): Frames {
+  return frames ? (stripDeep(frames) as Frames) : frames;
 }
 
 type SpanLike = { data: Record<string, unknown>; description?: string };
@@ -135,6 +164,19 @@ export function stripAdClickIdsFromSentryEvent<T extends Event>(event: T): T {
     if (typeof exception.value === "string") {
       exception.value = stripAdClickIds(exception.value);
     }
+    if (exception.stacktrace?.frames) {
+      exception.stacktrace.frames = stripFrames(exception.stacktrace.frames);
+    }
+  }
+  for (const thread of event.threads?.values ?? []) {
+    if (thread.stacktrace?.frames) {
+      thread.stacktrace.frames = stripFrames(thread.stacktrace.frames);
+    }
+  }
+  if (event.debug_meta?.images) {
+    event.debug_meta.images = stripDeep(
+      event.debug_meta.images,
+    ) as typeof event.debug_meta.images;
   }
   if (event.extra) event.extra = stripDeep(event.extra) as typeof event.extra;
   if (event.contexts) {
