@@ -33,7 +33,7 @@ export type BlogOgConfig = {
   section: string;
   /** Short topic shown as a chip above the headline (e.g. "DSCR"). */
   tag: string;
-  /** Post title — pass the page's metadata title verbatim. */
+  /** Post headline: the post's H1 (TITLE, TITLE_PLAIN or ARTICLE.title). Not the SERP title, which the loop's title pass rewrites on its own. */
   title: string;
   /** Short footer-left subline (the "what's inside" teaser). */
   subline: string;
