@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     description:
-      "DealMachine finds leads with property data and driving for dollars. TrueCap underwrites them. Different jobs.",
+      "DealMachine is property and owner data, lead lists and driving for dollars. TrueCap underwrites the leads you choose.",
     url: "/vs/dealmachine",
     type: "website",
   },
