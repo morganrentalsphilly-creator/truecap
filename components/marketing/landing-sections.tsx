@@ -496,7 +496,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What does the auto-fill provide?",
-    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate starts from FRED's national 30-year benchmark, not an investor lender quote. Property tax is a local number: enter the annual bill or a reviewed rate. Until you do, the model labels its 1.1% tax assumption as a default to replace. Swap every starting assumption for property-specific evidence before you act on a decision.",
+    a: "Rent starts from a HUD benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such), not a property-specific rent comp. The rate starts from FRED's national 30-year benchmark, not an investor lender quote. Property tax is a local number: enter the annual bill or a reviewed rate. Until you do, the model labels its 1.1% tax assumption as a default to replace. Swap every starting assumption for property-specific evidence before you act on a decision.",
   },
   {
     q: "Is TrueCap really free?",

@@ -137,7 +137,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: `Rent uses a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior} Replace every screening assumption with property-specific evidence before relying on the result.`,
+    a: `Rent uses a HUD benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior} Replace every screening assumption with property-specific evidence before relying on the result.`,
   },
 ];
 
