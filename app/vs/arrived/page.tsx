@@ -82,10 +82,10 @@ const MATRIX: Row[] = [
   { feature: "Deal score (0–100)", truecap: "Free — 0–100 score with factor breakdown", arrived: "Not applicable", winner: "truecap" },
   { feature: "Minimum to start", truecap: "A down payment on a whole property", arrived: "$100 minimum investment", winner: "arrived" },
   { feature: "Time commitment", truecap: "Active — you find, underwrite, close, manage (or hire PM)", arrived: "Passive: Arrived manages the properties", winner: "arrived" },
-  { feature: "Liquidity", truecap: "Low — property sale takes months", arrived: "Hold until Arrived sells the property, or sell shares to other Arrived investors", winner: "tie" },
+  { feature: "Liquidity", truecap: "Low — property sale takes months", arrived: "Meant to be held for the full hold period; after a 6-month hold, property shares can be sold to other Arrived investors and fund shares can be submitted for redemption, subject to availability, approval and program terms", winner: "tie" },
   { feature: "Control over property choice", truecap: "Total — you pick everything", arrived: "Curated by Arrived; you pick from their listings", winner: "truecap" },
   { feature: "Cash flow vs growth", truecap: "You design — fixed-rate mortgage, cash-flow focused", arrived: "Monthly dividends, plus potential appreciation when a property is sold", winner: "tie" },
-  { feature: "Tax reporting", truecap: "Not modeled in TrueCap; direct owners arrange taxpayer-specific reporting", arrived: "Arrived prepares tax forms for its investors", winner: "tie" },
+  { feature: "Tax reporting", truecap: "Not modeled in TrueCap; direct owners arrange taxpayer-specific reporting", arrived: "See Arrived's help center for tax questions", winner: "tie" },
   { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", arrived: "A one-time sourcing fee in the offering price, plus a quarterly AUM fee that varies by product", winner: "tie" },
 ];
 
@@ -163,7 +163,7 @@ export default function VsArrivedPage() {
                 <li>You want direct ownership and control of the property.</li>
                 <li>You want direct-property control and will verify depreciation, interest, and any 1031 eligibility with tax professionals.</li>
                 <li>You&apos;re willing to do the underwriting + sourcing work yourself.</li>
-                <li>You have $20k+ in capital and want to deploy in one property at a time.</li>
+                <li>You have the capital for a down payment and want to deploy it in one property at a time.</li>
               </ul>
             </div>
             <div className="min-w-0">
@@ -217,7 +217,11 @@ export default function VsArrivedPage() {
             <a href="https://arrived.com" target="_blank" rel="noopener" className="tc-link">
               arrived.com
             </a>{" "}
-            for current offerings and risks.
+            for current offerings and risks, and{" "}
+            <a href="https://help.arrived.com/en/collections/2577365-taxes" target="_blank" rel="noopener" className="tc-link">
+              Arrived&apos;s help center
+            </a>{" "}
+            for tax questions.
           </p>
         </Section>
 

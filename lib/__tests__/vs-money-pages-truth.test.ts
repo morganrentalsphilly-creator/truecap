@@ -134,6 +134,17 @@ describe("the comparison pages about financial products", () => {
     it("carries the approved tax sentence and the neutral side-by-side sentence", () => {
       expect(text).toContain("You're fine without direct control of depreciation or a 1031 exchange.");
       expect(text).toContain("You can hold direct properties and Arrived shares side by side.");
+      // The TL;DR line is the page's only tax statement about Arrived: the tax row points to Arrived.
+      const taxCell = /feature: "Tax reporting",[^}]*arrived: "([^"]*)"/.exec(text);
+      expect(taxCell?.[1]).toMatch(/^See Arrived/);
+    });
+
+    it("gives the hold period and the conditions on selling or redeeming Arrived shares", () => {
+      // arrived.com: hold for the full hold period; after a 6-month hold, the
+      // secondary market is "subject to availability, liquidity, and program terms".
+      const row = /feature: "Liquidity",[^}]*arrived: "([^"]*)"/.exec(text);
+      expect(row?.[1]).toMatch(/6-month hold/);
+      expect(row?.[1]).toMatch(/subject to [^"]*program terms/);
     });
   });
 
@@ -164,6 +175,16 @@ describe("the comparison pages about financial products", () => {
       expect(text).not.toMatch(/8\s?-\s?12\s?%/);
       expect(text).not.toMatch(/historical(?:ly)? [^.]{0,40}returns? of/i);
     });
+  });
+
+  it("puts no unsourced capital figure on the reader of /vs/arrived or /vs/fundrise", () => {
+    // "$20k+" and "~$20-50k" had no source; the pages say "a down payment".
+    const FIGURE = /\$\d+(?:\s?-\s?\d+)?k\b/i;
+    for (const slug of ["arrived", "fundrise"] as const) {
+      expect(page(slug), slug).not.toMatch(FIGURE);
+    }
+    expect("You have $20k+ to deploy").toMatch(FIGURE);
+    expect("A down payment on a whole property (~$20-50k typical)").toMatch(FIGURE);
   });
 
   it("prints a percentage about Arrived or Fundrise only for a fee", () => {
