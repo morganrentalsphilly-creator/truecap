@@ -174,6 +174,108 @@ describe("tool social cards say only what the tool does", () => {
   });
 });
 
+describe("copy about the rehab estimator matches its controls", () => {
+  // The estimator card has three number fields (square feet, baths,
+  // contingency) and a checkbox per work item. Each item's cost is fixed
+  // text: lib/rehab-estimator.ts accepts per-item `overrides`, and no UI
+  // passes any. Until 2026-10 six sentences said otherwise: /vs/bricked
+  // ("editable default line items", "default line items you adjust
+  // yourself"), the tool page ("every line is editable", "defaults you can
+  // override", "editable ... defaults" twice), the card's own caption
+  // ("defaults you can edit") and llms-full.txt ("editable work categories").
+  // The rule lifts itself the day the card reads `overrides`: adding that
+  // field is a product decision, and then the claim is true.
+  const code = (path: string) =>
+    read(path)
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:])\/\/.*$/gm, "$1");
+  const CARD = "components/investcalc/rehab-estimator-card.tsx";
+  const takesPerLineAmounts = () => /\boverrides\b/.test(code(CARD));
+
+  /** "The defaults / lines / items are editable", in the forms the site used. */
+  const EDITABLE_CLAIMS = [
+    /\beditable\b[^.]{0,80}\b(?:defaults?|line[- ]items?|lines?|work (?:items?|categories))\b/i,
+    /\b(?:defaults?|line[- ]items?|lines?|work (?:items?|categories))\b[^.]{0,80}\b(?:(?:is|are) editable|you (?:can )?(?:edit|override|adjust|change))\b/i,
+    /\bevery line is editable\b/i,
+    /\breplace (?:each|every|any) line\b/i,
+  ];
+  const claims = (text: string) => {
+    const flat = text.replace(/\s+/g, " ");
+    return EDITABLE_CLAIMS.flatMap((rule) => {
+      const hit = flat.match(rule);
+      return hit ? [hit[0]] : [];
+    });
+  };
+
+  it("reads the retired sentences as claims and the current ones as none", () => {
+    for (const retired of [
+      "A free rehab cost estimator with editable default line items",
+      "rehab cost estimator uses default line items you adjust yourself.",
+      "not current market pricing or a survey of contractors, and every line is editable.",
+      "Mid-market defaults you can override.",
+      "This tool ships with editable TrueCap planning defaults for every common rehab work item.",
+      "Free renovation cost estimator with editable square-foot and per-room defaults",
+      "Directional planning defaults you can edit",
+      "An educational square-foot calculation across editable work categories.",
+      "Editable defaults. Replace each line with your own bid.",
+    ]) {
+      expect(claims(retired), retired).not.toEqual([]);
+    }
+    for (const current of [
+      "default line items you switch on or off, with the square footage, bath count and contingency you set",
+      "Each item carries a planning default: switch items on or off and set the square footage, bath count and contingency.",
+      "Defaults to the property values if available; type your own numbers to change them.",
+      // The analyzer's rehab budget is a field the visitor types: still sayable.
+      "Editable rehab and acquisition-cost assumptions",
+    ]) {
+      expect(claims(current), current).toEqual([]);
+    }
+  });
+
+  it("the estimator's own surfaces do not call its defaults or lines editable", () => {
+    expect(read("app/tools/rehab-cost-estimator/page.tsx")).toContain("<RehabEstimatorCard />");
+    if (takesPerLineAmounts()) return;
+    for (const file of [
+      CARD,
+      "app/tools/rehab-cost-estimator/page.tsx",
+      "app/tools/rehab-cost-estimator/opengraph-image.tsx",
+    ]) {
+      expect(claims(code(file)), file).toEqual([]);
+    }
+    // llms-full.txt describes every calculator in one file (the closing-cost
+    // entry really is an editable line-item total), so read the rehab entry.
+    const llms = code("app/llms-full.txt/route.ts");
+    const entryAt = llms.indexOf('"rehab-cost-estimator": {');
+    expect(entryAt).toBeGreaterThan(-1);
+    const entry = llms.slice(entryAt, llms.indexOf("},", entryAt));
+    expect(entry).toContain("description:");
+    expect(claims(entry)).toEqual([]);
+  });
+
+  it("no other page says it either: every sentence that names rehab is checked", () => {
+    if (takesPerLineAmounts()) return;
+    const offenders: string[] = [];
+    let sentencesRead = 0;
+    for (const dir of ["app", "components", "lib"]) {
+      const root = join(process.cwd(), dir);
+      for (const file of readdirSync(root, { recursive: true }) as string[]) {
+        if (!/\.tsx?$/.test(file) || file.includes("__tests__")) continue;
+        const source = code(`${dir}/${file}`);
+        if (!/rehab|renovation/i.test(source)) continue;
+        // One "sentence" per full stop, quote-closed string or JSX block
+        // edge: enough to keep a claim and the word "rehab" together.
+        for (const sentence of source.replace(/\s+/g, " ").split(/(?<=[.!?])\s|",|`,|<\/(?:p|li|h[1-6]|span|div)>/)) {
+          if (!/rehab|renovation/i.test(sentence)) continue;
+          sentencesRead += 1;
+          for (const hit of claims(sentence)) offenders.push(`${dir}/${file}: ${hit}`);
+        }
+      }
+    }
+    expect(sentencesRead).toBeGreaterThan(50);
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name", () => {
   // ARV x multiplier - repairs is a rule of thumb. TrueCap's Offer Ceiling is
   // the highest modeled price satisfying explicitly adopted targets under the
