@@ -169,8 +169,8 @@ merged):
   not in these figures.
 - TBT was measured on a machine shared with other jobs, so it is noisier
   than LCP.
-- PageSpeed Insights uses the simulated method and showed 3.2 to 4.6 s for
-  these pages on the same day.
+- PageSpeed Insights uses the simulated method and on the same day showed
+  3.8 s for `/`, 3.5 s for `/for-agents` and 3.8 s for `/pricing`.
 - Locally `/pricing` has a TTFB of about 7 s in every run, before and
   after: it is the one dynamic page (it reads the session and Stripe display
   prices, which the isolated env points at nothing and waits out). That is
