@@ -2,7 +2,7 @@
  * /vs/lodgify — competitor comparison landing page.
  *
  * Target queries: "lodgify alternative", "lodgify vs hostaway", "lodgify pricing", "lodgify review", "small str software".
- * Lodgify is short-term rental software for small operators — direct-booking website builder, channel manager, reservation system. More accessible than Hostfully / Hostaway / Guesty for 1-10 STRs.
+ * Lodgify is short-term rental software for hosts and property managers: direct-booking website builder, channel manager, reservation system (lodgify.com/pricing).
  */
 
 import type { Metadata } from "next";
@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
   description:
-    "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Honest comparison plus how 1-10 unit STR investors use both.",
+    "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Honest comparison plus how the two fit together.",
   keywords: [
     "lodgify alternative",
     "lodgify vs hostaway",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     description:
-      "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Different stages.",
+      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Different stages.",
     url: "/vs/lodgify",
     type: "website",
     images: [
@@ -74,7 +74,7 @@ type Row = {
   feature: string;
   truecap: string;
   lodgify: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -87,50 +87,54 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, editable rent input",
-    lodgify: "Not modeled",
-    winner: "truecap",
+    lodgify:
+      "Not among Lodgify's plan features; its site links a vacation rental calculator and an Airbnb calculator",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    lodgify: "Not modeled",
+    lodgify: "Not among Lodgify's listed plan features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap:
       "Editable HUD rent and FRED rate benchmarks; manual local property tax",
-    lodgify: "Not applicable",
+    lodgify: "Not among Lodgify's listed plan features",
     winner: "truecap",
   },
   {
     feature: "Direct-booking website builder",
     truecap: "No",
-    lodgify: "Yes — branded site builder",
+    lodgify:
+      "Yes, from the Starter plan: no-code website builder and booking widget",
     winner: "lodgify",
   },
   {
     feature: "Channel manager (Airbnb, Vrbo, Booking)",
     truecap: "No",
-    lodgify: "Yes — unified inbox + calendar",
+    lodgify:
+      "Yes: unified calendar and inbox for Airbnb, Vrbo and Booking.com on every plan",
     winner: "lodgify",
   },
   {
     feature: "Guest messaging",
     truecap: "No",
-    lodgify: "Yes — automated messages",
+    lodgify:
+      "Unified inbox on every plan; automated messages on Professional and Ultimate",
     winner: "lodgify",
   },
   {
     feature: "Reservation system",
     truecap: "No",
-    lodgify: "Yes — built-in calendar + payments",
+    lodgify:
+      "Yes: unified calendar on every plan; custom rates and payments from Starter",
     winner: "lodgify",
   },
   {
     feature: "Sweet spot",
     truecap: "1-30 doors, solo investor underwriting",
-    lodgify: "1-10 STRs, solo operator",
+    lodgify: "Hosts and property managers",
     winner: "tie",
   },
   {
@@ -145,7 +149,6 @@ const MATRIX: Row[] = [
     truecap: "Free core; paid Pro — see live pricing",
     lodgify:
       "Paid Basic, Starter, Professional, and Ultimate plans — see live pricing",
-    winner: "truecap",
   },
 ];
 
@@ -157,7 +160,7 @@ export default function VsLodgifyPage() {
     name: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     url: `${siteUrl}/vs/lodgify`,
     description:
-      "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Honest comparison plus how 1-10 unit STR investors use both.",
+      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Honest comparison plus how the two fit together.",
     dateModified: lastmodFor("/vs/lodgify"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -269,7 +272,8 @@ export default function VsLodgifyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Lodgify plan and trial details can change. See{" "}
+            Lodgify plans and features were checked against its pricing page in
+            October 2026. Plan and trial details can change. See{" "}
             <a
               href="https://www.lodgify.com/pricing/"
               target="_blank"
@@ -285,7 +289,7 @@ export default function VsLodgifyPage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How solo STR hosts use both
+            How TrueCap and Lodgify fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -341,7 +345,11 @@ export default function VsLodgifyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Lodgify" items={LODGIFY_FAQ} />
+        <ComparisonFaq
+          competitorName="Lodgify"
+          items={LODGIFY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -349,10 +357,10 @@ export default function VsLodgifyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -423,7 +431,7 @@ const LODGIFY_FAQ: FaqItem[] = [
       <>
         No — different stages. Lodgify manages STRs you already own. TrueCap
         underwrites whether to buy the property as an STR in the first place.
-        Solo STR hosts use both.
+        They cover different stages, so a host can use both.
       </>
     ),
   },
