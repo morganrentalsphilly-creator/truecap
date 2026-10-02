@@ -79,7 +79,8 @@ describe("llms.txt lists what the sitemap lists", () => {
     const hubNames = new Map(
       [...hub.matchAll(/slug:\s*"([^"]+)",\s*competitor:\s*"([^"]+)"/g)].map((m) => [m[1], m[2]]),
     );
-    expect(hubNames.size).toBeGreaterThanOrEqual(38);
+    // No fixed count, as in the cases above: the rule is the loop below.
+    expect(hubNames.size).toBeGreaterThan(0);
     for (const link of sectionLinks(await llms(), "Comparison pages")) {
       const slug = link.path.replace(/^\/vs\//, "");
       const hubName = hubNames.get(slug);

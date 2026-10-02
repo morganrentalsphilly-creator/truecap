@@ -63,8 +63,11 @@ describe("the display cut's fallback face", () => {
     // next/font names that family "<font family> Fallback". If a Next upgrade
     // changes the name, the face above matches nothing and headings fall back
     // to the normal-width face again: update the family name with it.
-    expect(read("node_modules/next/dist/build/webpack/loaders/next-font-loader/postcss-next-font.js")).toContain(
-      "formatFamily(`${fontFamily} Fallback`)",
-    );
+    const loader = read("node_modules/next/dist/build/webpack/loaders/next-font-loader/postcss-next-font.js");
+    expect(loader).toContain("formatFamily(`${fontFamily} Fallback`)");
+    // The call alone is not enough: the loader's header comment still says it
+    // hashes family names. Today formatFamily only quotes the name; if it
+    // hashes again, the hand-written "Archivo Fallback" face matches nothing.
+    expect(loader).toMatch(/const formatFamily = \(family\)=>\{\s*return `'\$\{family\}'`;/);
   });
 });
