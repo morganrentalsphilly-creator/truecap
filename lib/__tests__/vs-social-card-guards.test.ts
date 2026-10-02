@@ -140,6 +140,7 @@ describe("the /vs social cards", () => {
       appfolio: (n) => new RegExp(`\\b${n}[- ]unit`),
       cozy: (n) => new RegExp(`\\bmid-${n}\\b`),
     };
+    expect(Object.keys(ON_PAGE).sort(), "every ALLOWED slug needs its on-page pattern").toEqual(Object.keys(ALLOWED).sort());
     for (const card of CARDS) {
       const numbers = card.tagline.match(/\d[\d,.]*/g) ?? [];
       expect(numbers, `${card.slug}: ${card.tagline}`).toEqual(ALLOWED[card.slug] ?? []);
