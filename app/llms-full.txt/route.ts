@@ -111,7 +111,7 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> =
       formula:
         "Vacancy rate = (Vacant days × Daily rent + Turnover cost) ÷ Annual gross rent",
       description:
-        "An effective-vacancy calculation from entered vacant days, rent, and turnover cost. It does not supply a national or seller-pro-forma benchmark; use dated property- and market-specific evidence.",
+        "An effective-vacancy calculation from entered vacant days, rent, and turnover cost, graded against fixed rule-of-thumb bands. Use dated property- and market-specific evidence for the deal itself.",
     },
   };
 
