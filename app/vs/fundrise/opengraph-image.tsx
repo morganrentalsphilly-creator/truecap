@@ -3,8 +3,10 @@
  * serves this file as its og:image and twitter:image. Drawn by the shared
  * template, lib/og/vs-og-template.tsx.
  *
- * The competitor rows on /vs/fundrise wait on a decision (report row P1-20),
- * so this card says only what TrueCap does.
+ * The line restates the page's lede and its Open Graph description: what
+ * Fundrise offers, in the words of fundrise.com as rendered on 2026-10-02,
+ * and what TrueCap does. It carries no return, fee or minimum figure and
+ * does not call Fundrise a REIT.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
@@ -17,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Fundrise",
     tagline:
-      "TrueCap underwrites whole rental properties you buy and own directly, from assumptions you can edit.",
+      "Fundrise offers funds that hold private real estate, private credit and venture capital. TrueCap underwrites whole rental properties you buy and own directly.",
     slug: "fundrise",
   });
 }
