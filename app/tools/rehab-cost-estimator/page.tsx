@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     ...OPEN_GRAPH_BASE,
     title: "Free Rehab Cost Estimator — Budget by Sq Ft",
     description:
-      "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus how to turn a directional estimate into real contractor bids.",
+      "Estimate rehab cost in seconds with planning defaults for common work items. Plus how to turn a directional estimate into real contractor bids.",
     url: "/tools/rehab-cost-estimator",
     type: "website",
   },
@@ -103,12 +103,12 @@ export default function RehabEstimatorPage() {
               Rehab Cost Estimator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Sq-ft-based pricing for every common rehab work item — paint,
-              flooring, kitchens, baths, roofs, HVAC, electrical, plumbing.
-              Each item carries a planning default: switch items on or off and
-              set the square footage, bath count and contingency. Use it for
-              early scope and budget triage before committing to detailed
-              contractor bids.
+              Planning defaults for common rehab work items: interior paint
+              and flooring by the square foot, baths per bath, and kitchens,
+              roofs, HVAC, electrical and plumbing as flat amounts. Switch
+              items on or off and set the square footage, bath count and
+              contingency. Use it for early scope and budget triage before
+              committing to detailed contractor bids.
             </p>
           </header>
 
@@ -124,8 +124,8 @@ export default function RehabEstimatorPage() {
             <p>
               You can&apos;t screen a property that needs work without a renovation
               number. You also can&apos;t get a real contractor bid on every
-              property you&apos;re considering. An early sq-ft-based
-              estimator is directional enough to filter the universe of
+              property you&apos;re considering. An early planning
+              estimate is directional enough to filter the universe of
               potential deals down to the 10% worth a real bid.
             </p>
             <p>
@@ -210,8 +210,8 @@ export default function RehabEstimatorPage() {
             <p>
               Permits, dumpster rentals, temporary power, project management
               fees, lockbox + key copies — soft costs add up to 5-10% on top
-              of the materials and labor estimate. The defaults in this
-              tool roll those in.
+              of the materials and labor estimate. This tool has no line
+              for them: budget them separately or raise the contingency.
             </p>
             <h3>3. Underestimating bath multiplication</h3>
             <p>
