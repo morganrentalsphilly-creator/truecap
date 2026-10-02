@@ -78,7 +78,7 @@ const MATRIX: Row[] = [
   { feature: "Diversification", truecap: "One property at a time", fundrise: "Across many properties + asset types", winner: "fundrise" },
   { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
   { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "tie" },
-  { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Quarterly distributions from fund returns", winner: "tie" },
+  { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Distributions set by each fund; see Fundrise's site", winner: "tie" },
   { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", fundrise: "Not applicable", winner: "truecap" },
 ];
@@ -111,7 +111,7 @@ export default function VsFundrisePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Fundrise is one of the most popular non-traded REITs — pool your money with thousands of other investors into diversified real estate funds (commercial + multifamily + residential). TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
+            Fundrise is a non-traded REIT platform: you pool your money with other investors into diversified real estate funds (commercial + multifamily + residential). TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -213,10 +213,10 @@ export default function VsFundrisePage() {
                 <strong>If you want full control + tax benefits → direct ownership.</strong> TrueCap helps you underwrite; you arrange financing + take title.
               </li>
               <li>
-                <strong>If you want passive exposure with low minimums → Fundrise.</strong> Pick a Fundrise plan, set a recurring contribution, collect quarterly distributions.
+                <strong>If you want passive exposure with low minimums → Fundrise.</strong> Pick a Fundrise plan, set a recurring contribution, collect distributions.
               </li>
               <li>
-                <strong>If you want both → split the portfolio.</strong> Most diversified investors keep 1-3 direct rentals (cash flow + tax) AND some money in Fundrise (diversification + passive). TrueCap helps with the direct side.
+                <strong>If you want both → split the portfolio.</strong> You can hold direct rentals and pooled funds side by side. TrueCap helps with the direct side.
               </li>
             </ul>
             <p>
@@ -246,9 +246,9 @@ export default function VsFundrisePage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
+              the Offer Ceiling, co-branded share links and PDF reports; see live pricing for current terms.
               No card to start.
             </>
           }
@@ -334,7 +334,7 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Is Fundrise really passive?",
     answer: (
       <>
-        Yes — Fundrise handles everything (acquisition, financing, management, distributions). You contribute capital + collect quarterly distributions. The tradeoff is you give up control over individual property decisions and pay ~1% in fees plus underlying expense ratios.
+        Yes — Fundrise handles everything (acquisition, financing, management, distributions). You contribute capital + collect distributions. The tradeoff is you give up control over individual property decisions and pay ~1% in fees plus underlying expense ratios.
       </>
     ),
   },

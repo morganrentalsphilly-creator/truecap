@@ -173,7 +173,7 @@ export default function VsCozyPage() {
             applications, rent collection — until Apartments.com acquired and
             shut it down in 2022. If you landed here looking for an alternative,
             the honest answer is: no single tool replaced it. TrueCap covers
-            pre-purchase underwriting (a Cozy didn&apos;t do that), and
+            pre-purchase underwriting (Cozy didn&apos;t do that), and
             you&apos;d pair it with TurboTenant, Avail, or RentRedi for the
             operations Cozy used to handle. Here&apos;s the breakdown.
           </p>
@@ -289,8 +289,7 @@ export default function VsCozyPage() {
               <li>
                 <strong>Pre-purchase underwriting.</strong> TrueCap&apos;s free
                 core screen covers editable cap rate, DSCR, and cash flow;
-                released projections appear only when your evaluation or plan
-                access includes them.
+                10-year projections are a Pro feature.
               </li>
               <li>
                 <strong>
@@ -352,9 +351,9 @@ export default function VsCozyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
