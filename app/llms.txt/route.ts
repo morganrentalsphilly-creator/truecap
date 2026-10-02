@@ -51,7 +51,6 @@ import {
 } from "@/lib/calculator-registry";
 import {
   DATA_SOURCE_FACTS,
-  FOUR_ACQUISITION_ANSWERS,
   getPlanFacts,
   getProductAvailabilityFacts,
   PRODUCT_POSITIONING,
@@ -70,8 +69,11 @@ export const revalidate = 3600;
 /**
  * Every /vs comparison page in the sitemap (COMPARISON_PATHS in
  * app/sitemap.ts), in its order, with the competitor named as the /vs hub
- * names it (COMPARISONS in app/vs/page.tsx). This section was seven
- * hand-typed lines while the sitemap listed 38 pages.
+ * names it (COMPARISONS in app/vs/page.tsx), without the hub's trailing
+ * parenthetical: the hub's "Cozy.co (shut down)" is listed here as
+ * "Cozy.co", because a line here says nothing about a competitor beyond its
+ * name. This section was seven hand-typed lines while the sitemap listed 38
+ * pages.
  * lib/__tests__/llms-txt-coverage.test.ts holds the two lists together: a
  * comparison page added to or removed from the sitemap fails there until
  * this list matches, and a name that differs from the hub's fails too.
@@ -262,15 +264,18 @@ export async function GET() {
 
   // /for-agents exists only where Agent Pro is sold: without its Stripe
   // Price the page permanently redirects to /pricing (and leaves the sitemap
-  // and the footer), so it is listed on the same condition. Both new lines
-  // are assembled from lib/product-facts.ts, not restated here.
+  // and the footer), so it is listed on the same condition. The /for-agents
+  // line is assembled from lib/product-facts.ts; the /for-investors line
+  // restates that page's own heading and four questions (WHAT_YOU_GET in
+  // app/for-investors/page.tsx), and lib/__tests__/llms-txt-coverage.test.ts
+  // reads the page to hold the two together.
   const personasSection = [
     ...(availability.agentPro
       ? [
           `- [TrueCap for real estate agents](${siteUrl}/for-agents): For agents with investor clients. ${planFacts.agentPro}`,
         ]
       : []),
-    `- [TrueCap for rental investors](${siteUrl}/for-investors): Four answers before an offer: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
+    `- [TrueCap for rental investors](${siteUrl}/for-investors): Free screens the deal; Pro answers four questions on every deal: does it meet your Buy Box, what is your Offer Ceiling, what could make it fail, and can you defend it.`,
     `- [TrueCap for buy-and-hold investors](${siteUrl}/for-buy-and-hold): Cash flow modeling for long-term rentals.`,
     `- [BRRRR education](${siteUrl}/blog/brrrr-method-explained): An assumption-led walkthrough of the buy, rehab, rent, and refinance sequence.`,
     `- [TrueCap for house hackers](${siteUrl}/for-house-hackers): Owner-occupant FHA 3.5% strategy.`,
