@@ -135,7 +135,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Free tier",
-    truecap: "Yes — core residential underwriting",
+    truecap: "Yes: core residential underwriting",
     reonomy: "No free tier (free trial on request)",
     winner: "truecap",
   },
