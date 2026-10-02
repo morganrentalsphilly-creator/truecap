@@ -466,9 +466,10 @@ const MASHVISOR_FAQ: FaqItem[] = [
         Mashvisor has Airbnb occupancy and nightly-rate data built in; TrueCap
         does not. TrueCap is built around the long-term rental underwrite: DSCR,
         sensitivity, and an Offer Ceiling for your targets. If STR is your
-        primary strategy, Mashvisor + TrueCap together cover both halves of the
-        job. If you&apos;re long-term buy and hold, TrueCap covers the per-deal
-        underwrite.
+        primary strategy, Mashvisor supplies the market data; TrueCap&apos;s
+        short-term rental mode is a beta revenue screen that works from the
+        nightly rate and occupancy you enter. If you&apos;re long-term buy and
+        hold, TrueCap covers the per-deal underwrite.
       </>
     ),
   },

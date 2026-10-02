@@ -142,6 +142,9 @@ describe("comparison claim truth", () => {
     );
     // The short-term mode is live as a beta revenue screen, so "coming" was untrue.
     expect(read("app/vs/mashvisor/page.tsx")).not.toMatch(/STR-specific fields coming/i);
+    // Nor that TrueCap covers the short-term half of the job: its short-term
+    // mode is a beta revenue screen, as the six short-term pages say.
+    expect(read("app/vs/mashvisor/page.tsx")).not.toMatch(/cover both halves/i);
   });
 
   it("keeps comparison articles live-priced and appropriately qualified", () => {
