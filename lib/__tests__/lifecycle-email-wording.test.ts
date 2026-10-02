@@ -34,6 +34,10 @@ describe("lifecycle content wording", () => {
     ["says 'a Offer Ceiling'", /\ba Offer Ceiling\b/],
     ["mentions a Stripe Price or the catalog check", /Stripe Price|catalog-verified/i],
     ["sells a 10-deal habit or 'full Pro'", /10-deal|\bfull Pro\b/i],
+    ["uses the build word 'entitled'", /\bentitled\b/i],
+    // Live /pricing (2026-10-02) has no immediate-charge or campaign-offer
+    // wording; it says checkout shows the exact charge before you confirm.
+    ["points at immediate-charge terms or a campaign offer on /pricing", /immediate-charge|campaign offer/i],
   ])("no email %s", (_label, pattern) => {
     const hits = contentFiles.filter((file) => pattern.test(read(file)));
     expect(hits).toEqual([]);
