@@ -94,7 +94,7 @@ const MATRIX: Row[] = [
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    airdna: "Forward-looking demand data and occupancy forecasts",
+    airdna: "Future demand data on the Market Research plan",
     winner: "tie",
   },
   {
@@ -107,14 +107,14 @@ const MATRIX: Row[] = [
   {
     feature: "STR revenue projection (ADR + occupancy)",
     truecap: "Editable input only",
-    airdna: "Yes, Rentalizer projects revenue from comparable listings",
+    airdna: "Yes: Rentalizer projects revenue from comparable listings",
     winner: "airdna",
   },
   {
     feature: "Comparable STR listings nearby",
     truecap: "No",
     airdna:
-      "Yes, comparable listings in Rentalizer; custom comp sets on Market Research",
+      "Yes: comparable listings in Rentalizer; custom comp sets on Market Research",
     winner: "airdna",
   },
   {

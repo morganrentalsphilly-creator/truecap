@@ -115,14 +115,14 @@ const MATRIX: Row[] = [
     feature: "Rental listing distribution",
     truecap: "No",
     avail:
-      "Yes, syndicated to Realtor.com, Redfin, Zumper and other sites (19 in total, per Avail)",
+      "Yes: syndicated to Realtor.com, Redfin, Zumper and other sites (19 in total, per Avail)",
     winner: "avail",
   },
   {
     feature: "Online rental application",
     truecap: "No",
     avail:
-      "Yes, standard application on the free plan; custom questions on Unlimited Plus",
+      "Yes: standard application on the free plan; custom questions on Unlimited Plus",
     winner: "avail",
   },
   {
@@ -141,7 +141,7 @@ const MATRIX: Row[] = [
     feature: "Online rent collection",
     truecap: "No",
     avail:
-      "Yes, bank transfer and card; on the free plan tenants pay $2.50 per bank transfer, waived on Unlimited Plus",
+      "Yes: bank transfer and card; on the free plan tenants pay $2.50 per bank transfer, waived on Unlimited Plus",
     winner: "avail",
   },
   {
@@ -160,19 +160,19 @@ const MATRIX: Row[] = [
   {
     feature: "Free tier covers core job",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    avail: "Yes, listings, state-specific leases, online rent collection",
+    avail: "Yes: listings, state-specific leases, online rent collection",
     winner: "tie",
   },
   {
     feature: "Starting values (rent, rate, tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    avail: "Its calculator uses the address to pull in some data",
+    avail: "Its calculator tries to pull in some data from the address",
     winner: "tie",
   },
   {
     feature: "Multi-property dashboard",
     truecap: "Yes — portfolio rollup of saved deals",
-    avail: "Yes, unlimited units on one account",
+    avail: "Yes: unlimited units on one account",
     winner: "tie",
   },
   {
