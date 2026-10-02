@@ -226,9 +226,13 @@ describe("Input Confidence v1.1", () => {
     expect(byKey(result, "rent").sourceClass).toBe("market-benchmark");
     expect(byKey(result, "rent").sourceLabel).toContain("HUD Rent Benchmark");
     expect(byKey(result, "interestRate").sourceClass).toBe("market-benchmark");
+    // The rate is FRED's own figure, unchanged: the label names FRED and the
+    // reason does not call it a TrueCap estimate (audit row P2-151).
     expect(byKey(result, "interestRate").sourceLabel).toBe(
-      "TrueCap estimated market rate",
+      "FRED 30-year rate benchmark",
     );
+    expect(byKey(result, "interestRate").reason).not.toMatch(/TrueCap estimate/i);
+    expect(byKey(result, "interestRate").reason).toContain("FRED");
     expect(byKey(result, "interestRate").reason).toContain("as of 2026-08-13");
     expect(byKey(result, "interestRate").reason).toContain("methodology");
     expect(byKey(result, "propertyTax")).toMatchObject({
