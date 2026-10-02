@@ -39,6 +39,12 @@ const CARDS: Card[] = readdirSync(VS_DIR)
     };
   });
 
+/**
+ * A page's `openGraph: { … }` or `twitter: { … }` object as written, braces
+ * balanced one level deep (an `images` array of objects would still fit).
+ */
+const SOCIAL_BLOCK = /\b(?:openGraph|twitter):\s*\{(?:[^{}]|\{[^{}]*\})*\}/g;
+
 const bySlug = (slug: string): Card => {
   const card = CARDS.find((c) => c.slug === slug);
   if (!card) throw new Error(`no card for /vs/${slug}`);
@@ -70,6 +76,36 @@ describe("the /vs social cards", () => {
     const template = readFileSync(join(ROOT, "lib/og/vs-og-template.tsx"), "utf8");
     expect(template).not.toMatch(/honest comparison/i);
     expect(template).not.toMatch(/footerLeft=/);
+  });
+
+  it("has no self-grading line beside it in the link preview", () => {
+    // A link preview prints og:description next to the card (and Next fills
+    // twitter:description from it when the page sets none). A description
+    // that calls the page honest or fair grades a comparison the reader has
+    // not seen yet, and it sat beside cards that had stopped doing so.
+    for (const card of CARDS) {
+      const page = readFileSync(join(VS_DIR, card.slug, "page.tsx"), "utf8");
+      const social = [...page.matchAll(SOCIAL_BLOCK)].map((block) => block[0]).join("\n");
+      expect(social, card.slug).toContain("openGraph:");
+      const descriptions = [...social.matchAll(/\bdescription:\s*"((?:[^"\\]|\\.)*)"/g)].map(
+        (m) => m[1],
+      );
+      expect(descriptions.length, card.slug).toBeGreaterThan(0);
+      for (const description of descriptions) {
+        expect(description, card.slug).not.toMatch(/\bhonest(?:ly)?\b|\bfair\b|\bunbiased\b/i);
+      }
+    }
+  });
+
+  it("repeats the card line as the preview text where the old line contradicted it", () => {
+    // Three previews said beside the card what the card had stopped saying:
+    // "Different jobs" about PropStream and BatchLeads, which both publish
+    // rental calculators, and "Honest comparison" on RentCast.
+    for (const slug of ["propstream", "batchleads", "rentcast"]) {
+      const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8");
+      const openGraph = [...page.matchAll(SOCIAL_BLOCK)].find((block) => block[0].startsWith("openGraph"));
+      expect(openGraph?.[0] ?? "", slug).toContain(`"${bySlug(slug).tagline}"`);
+    }
   });
 
   it("states no number about a competitor that is not listed here with its source", () => {
