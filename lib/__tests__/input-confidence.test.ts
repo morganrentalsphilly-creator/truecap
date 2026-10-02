@@ -361,7 +361,52 @@ describe("Input Confidence v1.1", () => {
       values: current,
       provenance: restored.provenance,
     });
+    // Re-anchored on purpose (review of P0-02): the stored context is
+    // restored unchanged (above), and its "VA avg" detail, the area name the
+    // statewide fallback is given, now picks the statewide label.
     expect(byKey(reopened, "rent").sourceLabel).toBe(
+      "HUD Rent Benchmark (statewide average)",
+    );
+    expect(byKey(reopened, "rent").reason).toMatch(/statewide average/i);
+    // Label and reason only: the score is the one a flagged record gets.
+    const flagged = buildInputConfidence({
+      values: current,
+      provenance: {
+        monthlyRent: {
+          source: "hud-fmr",
+          fetchedAt: "2026",
+          detail: "VA avg",
+          overridden: false,
+          stateAverage: true,
+        },
+      },
+    });
+    expect(reopened.score).toBe(flagged.score);
+    expect(byKey(reopened, "rent").earnedPoints).toBe(
+      byKey(flagged, "rent").earnedPoints,
+    );
+
+    // A context stored before the flag for a matched county keeps the
+    // county label.
+    const countyLegacy = buildInputConfidence({
+      values: current,
+      provenance: {
+        monthlyRent: {
+          source: "hud-fmr",
+          fetchedAt: "2026",
+          detail: "Franklin County",
+          overridden: false,
+        },
+      },
+    }).sourceContext;
+    const countyReopened = buildInputConfidence({
+      values: current,
+      provenance: restoreInputConfidenceSourceContext(
+        JSON.parse(JSON.stringify(countyLegacy)),
+        current,
+      ).provenance,
+    });
+    expect(byKey(countyReopened, "rent").sourceLabel).toBe(
       "HUD Rent Benchmark (county)",
     );
   });

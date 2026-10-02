@@ -78,12 +78,23 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     expect(e[0]!.short).not.toMatch(/FMR/);
   });
 
-  it("keeps the area label for a stored provenance written before the flag existed", () => {
-    const e = buildAssumptionEntries(
+  // Re-anchored on purpose (review of P0-02): a provenance stored before the
+  // flag existed still carries the fallback's "<ST> avg" area name, so it is
+  // labeled statewide; one for a matched county keeps the county label.
+  it("reads a stored provenance written before the flag existed from its detail", () => {
+    const statewide = buildAssumptionEntries(
       { monthlyRent: { source: "hud-fmr", detail: "VA avg", fetchedAt: "2026" } },
       false,
     );
-    expect(e[0]).toMatchObject({
+    expect(statewide[0]).toMatchObject({
+      source: "HUD rent benchmark (statewide average)",
+      short: "HUD statewide",
+    });
+    const county = buildAssumptionEntries(
+      { monthlyRent: { source: "hud-fmr", detail: "Roanoke County", fetchedAt: "2026" } },
+      false,
+    );
+    expect(county[0]).toMatchObject({
       source: "HUD rent benchmark (county)",
       short: "HUD FMR",
     });

@@ -197,17 +197,35 @@ describe("statewide HUD rent fallback label", () => {
     expect(dc.fields.monthlyRent).not.toHaveProperty("stateAverage");
   });
 
-  it("a saved deal written before the flag existed still parses and keeps the area label", () => {
+  it("a saved deal written before the flag existed still parses, keeps its stored fields, and is labeled from its detail", () => {
     const parsed = normalizeDataConfidence({
       level: "medium",
       fields: { monthlyRent: { source: "hud-fmr", verified: false, detail: "VA avg", fetchedAt: "2026" } },
       computedAt: "2026-09-01T00:00:00.000Z",
     });
     const rent = parsed!.fields.monthlyRent!;
-    expect(rent).not.toHaveProperty("stateAverage");
-    expect(dataConfidenceSourceLabel(rent.source, { stateAverage: rent.stateAverage })).toBe(
+    // The stored record is read as it was saved: no flag is added to it.
+    expect(rent).toEqual({ source: "hud-fmr", verified: false, detail: "VA avg", fetchedAt: "2026" });
+    // Re-anchored on purpose (review of P0-02): "VA avg" is the area name
+    // enrich-property gives the statewide fallback, so the badge, which
+    // passes the detail, no longer calls this figure a county benchmark.
+    expect(
+      dataConfidenceSourceLabel(rent.source, { stateAverage: rent.stateAverage, detail: rent.detail }),
+    ).toBe("HUD rent benchmark (statewide average)");
+    // A pre-flag record for a matched county keeps the county label.
+    const county = normalizeDataConfidence({
+      level: "medium",
+      fields: { monthlyRent: { source: "hud-fmr", verified: false, detail: "Franklin County", fetchedAt: "2026" } },
+      computedAt: "2026-09-01T00:00:00.000Z",
+    })!.fields.monthlyRent!;
+    expect(dataConfidenceSourceLabel(county.source, { stateAverage: county.stateAverage, detail: county.detail })).toBe(
       "HUD rent benchmark (county)",
     );
+    // Only the exact "<ST> avg" shape on a HUD source counts.
+    expect(dataConfidenceSourceLabel("hud-fmr", { detail: "va avg" })).toBe("HUD rent benchmark (county)");
+    expect(dataConfidenceSourceLabel("hud-fmr", { detail: "Ohio avg" })).toBe("HUD rent benchmark (county)");
+    expect(dataConfidenceSourceLabel("rentcast-estimate", { detail: "OH avg" })).toBe("RentCast market-rent estimate");
+    expect(dataConfidenceSourceLabel("fred", { detail: "VA avg" })).toBe("FRED owner-occupied rate benchmark");
     // A non-boolean or misplaced flag is ignored rather than trusted.
     const odd = normalizeDataConfidence({
       level: "medium",

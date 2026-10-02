@@ -42,7 +42,8 @@ export type FieldProvenance = {
   /** True when the HUD rent is the statewide fallback: the unweighted mean of
    *  HUD's county and metro-area rows for the state, used when the address
    *  matched no county (or the matched row had no figure). Absent on records
-   *  stored before the flag existed, which keep the area label. */
+   *  stored before the flag existed; the label reads those from `detail`
+   *  ("<ST> avg"), see isStatewideHudRent. */
   stateAverage?: boolean;
 };
 
@@ -101,28 +102,56 @@ export function dataConfidenceFieldLabel(f: DataConfidenceField): string {
  *  of HUD's county and metro-area rows for the state. */
 export const HUD_STATEWIDE_RENT_LABEL = "HUD rent benchmark (statewide average)";
 
+type RentProvenanceLike =
+  | { source: DataConfidenceSource; stateAverage?: boolean; detail?: string }
+  | null
+  | undefined;
+
+const isHudSource = (s: DataConfidenceSource) =>
+  s === "hud-fmr" || s === "hud-safmr";
+
 /**
- * True when a rent provenance record is the statewide HUD fallback. The flag
- * only ever accompanies a HUD source; a record stored before the flag existed
- * has none and reads as an area figure, as it always did.
+ * The area name enrich-property gives the statewide fallback: the state's
+ * 2-letter code (its input schema forces one) and " avg", e.g. "VA avg". No
+ * HUD county or metro-area name has this shape.
  */
-export function isStatewideHudRent(
-  provenance:
-    | { source: DataConfidenceSource; stateAverage?: boolean }
-    | null
-    | undefined,
-): boolean {
+const STATEWIDE_HUD_DETAIL = /^[A-Z]{2} avg$/;
+
+/**
+ * True when the record itself carries the statewide flag. Code that builds or
+ * parses a stored record uses this one, so a record keeps exactly what it was
+ * saved with.
+ */
+export function hasStatewideHudFlag(provenance: RentProvenanceLike): boolean {
+  return provenance?.stateAverage === true && isHudSource(provenance.source);
+}
+
+/**
+ * True when a rent provenance record is the statewide HUD fallback, for the
+ * label. A record saved before the flag existed has none, but it still holds
+ * the area name the fallback is given ("VA avg"), so that name counts too:
+ * the label changes, the stored record and every number do not (P0-02).
+ */
+export function isStatewideHudRent(provenance: RentProvenanceLike): boolean {
+  if (!provenance || !isHudSource(provenance.source)) return false;
   return (
-    provenance?.stateAverage === true &&
-    (provenance.source === "hud-fmr" || provenance.source === "hud-safmr")
+    provenance.stateAverage === true ||
+    (typeof provenance.detail === "string" &&
+      STATEWIDE_HUD_DETAIL.test(provenance.detail))
   );
 }
 
 export function dataConfidenceSourceLabel(
   s: DataConfidenceSource,
-  opts?: { stateAverage?: boolean },
+  opts?: { stateAverage?: boolean; detail?: string },
 ): string {
-  if (isStatewideHudRent({ source: s, stateAverage: opts?.stateAverage })) {
+  if (
+    isStatewideHudRent({
+      source: s,
+      stateAverage: opts?.stateAverage,
+      detail: opts?.detail,
+    })
+  ) {
     return HUD_STATEWIDE_RENT_LABEL;
   }
   return SOURCE_LABELS[s] ?? s;
@@ -164,7 +193,7 @@ export function buildDataConfidence(
             fetchedAt: entry.fetchedAt ?? null,
             verified: false,
             detail: entry.detail,
-            ...(isStatewideHudRent(entry) ? { stateAverage: true } : {}),
+            ...(hasStatewideHudFlag(entry) ? { stateAverage: true } : {}),
           };
     }
   }

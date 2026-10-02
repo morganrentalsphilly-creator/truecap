@@ -8,6 +8,7 @@
  */
 
 import {
+  hasStatewideHudFlag,
   isStatewideHudRent,
   type EnrichmentProvenanceInput,
 } from "./data-confidence";
@@ -353,9 +354,10 @@ function normalizedProvenance(
       ...(typeof item.overridden === "boolean"
         ? { overridden: item.overridden }
         : {}),
-      // HUD statewide fallback (P0-02). Kept only when true, so a context
-      // stored before the flag existed normalizes to the same object.
-      ...(isStatewideHudRent(item) ? { stateAverage: true } : {}),
+      // HUD statewide fallback (P0-02). Kept only when the flag is set, so a
+      // context stored before the flag existed normalizes to the same object;
+      // the label reads such a context from its "<ST> avg" detail.
+      ...(hasStatewideHudFlag(item) ? { stateAverage: true } : {}),
     };
   }
   return output;
