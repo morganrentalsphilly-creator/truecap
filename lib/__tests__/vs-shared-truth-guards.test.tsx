@@ -154,9 +154,13 @@ const usageClaim = (source: string): string | null => {
 /**
  * Files that still carried a quantified usage line when this guard was
  * written (origin/main ed1890d). Each is rewritten in the same fix train by
- * the change that owns that page or social card; delete a path here as its
- * sweep lands, and delete the list when the last one has. Every other /vs
- * file, the hub and the shared frame are held to the rule today.
+ * the change that owns that page or social card. The list only shrinks: the
+ * last test in the block below fails, naming the path, as soon as a listed
+ * file no longer carries such a line, so an entry cannot outlive its sweep
+ * and go on exempting a file where the claim could come back. Delete the
+ * path it names, and delete the list (and that test) when the last one has
+ * gone. Every other /vs file, the hub and the shared frame are held to the
+ * rule today.
  */
 const USAGE_SWEEP_PENDING: ReadonlySet<string> = new Set([
   "app/vs/airdna/opengraph-image.tsx",
@@ -227,6 +231,13 @@ describe("no /vs surface states how many people use the tools", () => {
       .filter(([, claim]) => claim !== null)
       .map(([file, claim]) => `${file}: ${claim}`);
     expect(violations).toEqual([]);
+  });
+
+  it("keeps the pending list honest: a file whose sweep has landed comes off it", () => {
+    const swept = [...USAGE_SWEEP_PENDING].filter(
+      (file) => !existsSync(join(ROOT, file)) || usageClaim(read(file)) === null,
+    );
+    expect(swept, "no quantified usage line is left in these files: delete them from USAGE_SWEEP_PENDING").toEqual([]);
   });
 });
 
