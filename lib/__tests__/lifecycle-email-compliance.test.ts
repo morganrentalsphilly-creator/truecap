@@ -309,12 +309,17 @@ describe("the lifecycle unsubscribe link", () => {
     const url = buildLifecycleUnsubscribeUrl(SITE, uid(1))!;
     const page = await unsubscribeGet(new Request(url));
     expect(page.status).toBe(200);
-    expect(await page.text()).toContain("Unsubscribe from TrueCap marketing emails?");
+    expect(await page.text()).toContain(
+      "Unsubscribe from TrueCap account emails (onboarding, tips, offers and feedback requests)?",
+    );
     expect(mocks.setMarketingOptOut).not.toHaveBeenCalled();
 
     const done = await unsubscribePost(new Request(url, { method: "POST", body: "List-Unsubscribe=One-Click" }));
     expect(done.status).toBe(200);
     expect(mocks.setMarketingOptOut).toHaveBeenCalledWith(db.admin, uid(1));
+    // The account opt-out does not stop a checklist or playbook sequence;
+    // the page must not say it does.
+    expect(await done.text()).toContain("Checklist and playbook emails have their own unsubscribe link.");
   });
 
   it("does not say unsubscribed when the opt-out was not stored", async () => {
@@ -360,7 +365,10 @@ describe("every lifecycle email carries the unsubscribe link and the postal addr
     const out = await renderLifecycleEmail(due[0]!, SITE, { unsubscribeUrl: null, postalAddress: null });
     expect(out!.html).not.toContain("/email/unsubscribe");
     expect(out!.html).not.toContain(TEST_POSTAL_ADDRESS);
-    expect(out!.html).toMatch(/Manage email preferences<\/a><\/p>/);
+    // The /settings link names the page; it is not an email opt-out.
+    expect(out!.html).toMatch(/Account settings<\/a><\/p>/);
+    expect(out!.html).not.toContain("Manage email preferences");
+    expect(out!.text).toContain(`Account settings: ${SITE}/settings`);
     expect(out!.text).not.toContain("Unsubscribe");
   });
 });

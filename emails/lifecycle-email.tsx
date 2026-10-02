@@ -10,7 +10,8 @@
  * sender's postal address. Both come from the caller
  * (lib/email/lifecycle-compliance.ts builds the link per user; the address is
  * read from EMAIL_POSTAL_ADDRESS). Neither has a default here: an address is
- * never typed in this file, and a sender that has no address does not send.
+ * never typed in this file, and a marketing sender that has no address does
+ * not send. The one billing notice (trial_day10) has no unsubscribe link.
  *
  * Brand mirrors emails/rate-alert.tsx — #5248D4 primary, white card on
  * #F1F5F9, "TrueCap." wordmark.
@@ -32,6 +33,19 @@ const BRAND = "#5248D4";
 const INK = "#0F172A";
 const SUB = "#475569";
 
+/**
+ * Footer lines shared by the HTML template and the plain-text part
+ * (lib/email/render-lifecycle.ts), so the two cannot drift apart.
+ */
+export const LIFECYCLE_FOOTER_REASON =
+  "You're getting this email because you have a TrueCap account.";
+/**
+ * Label of the /settings link. It names the page, not email control: the
+ * lifecycle emails are stopped by the Unsubscribe link, and the alert and
+ * summary toggles on that page hide until their migrations are applied.
+ */
+export const LIFECYCLE_SETTINGS_LABEL = "Account settings";
+
 export type LifecycleEmailProps = {
   preheader: string;
   headline: string;
@@ -40,7 +54,7 @@ export type LifecycleEmailProps = {
   ctaUrl: string;
   signatureNote?: string | null;
   siteUrl: string;
-  /** Link to /settings, where alert and summary emails are switched on or off. */
+  /** Link to /settings (account settings; not an email opt-out). */
   manageUrl: string;
   /**
    * Signed one-click opt-out (/email/unsubscribe). Present on every marketing
@@ -138,7 +152,7 @@ export default function LifecycleEmail({
           >
             TrueCap · Underwrite rentals in 60 seconds
             <br />
-            You&apos;re getting this email because you have a TrueCap account.
+            {LIFECYCLE_FOOTER_REASON}
             <br />
             {unsubscribeUrl ? (
               <>
@@ -152,7 +166,7 @@ export default function LifecycleEmail({
               </>
             ) : null}
             <Link href={manageUrl} style={{ color: SUB, textDecoration: "underline" }}>
-              Manage email preferences
+              {LIFECYCLE_SETTINGS_LABEL}
             </Link>
             {postalAddress ? (
               <>

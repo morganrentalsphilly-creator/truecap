@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   const series =
     recipient.kind === "drip"
       ? "TrueCap checklist and playbook emails"
-      : "TrueCap marketing emails";
+      : "TrueCap account emails (onboarding, tips, offers and feedback requests)";
   return page(
     `<h1 style="font-size:1.25rem">Unsubscribe from ${series}?</h1><p>Product and billing notices still arrive. Nothing changes until you confirm.</p><form method="post" action="/email/unsubscribe"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="font:inherit;padding:.5rem 1rem">Unsubscribe</button></form>`,
     200,
@@ -103,5 +103,8 @@ export async function POST(request: Request) {
   } catch {
     return reply("Could not update your preference right now. Please try this link again.", 503);
   }
-  return reply("You're unsubscribed from TrueCap marketing emails. Product and billing notices still arrive.", 200);
+  // profiles.marketing_opt_out stops the lifecycle emails and the feedback
+  // request. It does not reach a checklist or playbook sequence (keyed by
+  // email address, with its own signed link), so the page says so.
+  return reply("You're unsubscribed from TrueCap account emails: onboarding, tips, offers and feedback requests. Product and billing notices still arrive. Checklist and playbook emails have their own unsubscribe link.", 200);
 }

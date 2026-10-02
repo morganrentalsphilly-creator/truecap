@@ -21,7 +21,10 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { render } from "@react-email/render";
-import LifecycleEmail from "@/emails/lifecycle-email";
+import LifecycleEmail, {
+  LIFECYCLE_FOOTER_REASON,
+  LIFECYCLE_SETTINGS_LABEL,
+} from "@/emails/lifecycle-email";
 import type { DueLifecycleEmail } from "@/lib/lifecycle-emails";
 
 const LIFECYCLE_DIR = path.join(process.cwd(), "emails", "lifecycle-content");
@@ -122,9 +125,9 @@ function toPlainText(
     "",
     `${c.ctaText}: ${c.ctaUrl}`,
   ];
-  lines.push("", "You're getting this email because you have a TrueCap account.");
+  lines.push("", LIFECYCLE_FOOTER_REASON);
   if (footer.unsubscribeUrl) lines.push(`Unsubscribe: ${footer.unsubscribeUrl}`);
-  lines.push(`Manage email preferences: ${manageUrl}`);
+  lines.push(`${LIFECYCLE_SETTINGS_LABEL}: ${manageUrl}`);
   if (footer.postalAddress) lines.push(footer.postalAddress);
   return lines.join("\n");
 }
