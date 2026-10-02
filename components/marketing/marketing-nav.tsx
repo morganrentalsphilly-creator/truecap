@@ -55,7 +55,7 @@ import {
 } from "@/components/ui/sheet";
 
 const LEARN_LINKS: { label: string; href: string; hint: string }[] = [
-  { label: "How we calculate", href: "/methodology", hint: "Every formula, shown" },
+  { label: "How we calculate", href: "/methodology", hint: "The core formulas, shown" },
   { label: "Free calculators", href: "/tools", hint: "Mortgage, GRM, vacancy, rehab…" },
   { label: "Compare tools", href: "/vs", hint: "TrueCap vs the alternatives" },
   { label: "Guides", href: "/blog", hint: "How to underwrite, explained" },
