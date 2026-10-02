@@ -78,7 +78,8 @@ type Row = {
 const MATRIX: Row[] = [
   {
     feature: "Primary audience",
-    truecap: "Solo / small-portfolio STR investors (1-30 doors)",
+    truecap:
+      "Real estate agents with investor clients, and rental investors deciding what to offer",
     guesty: "Lite: 1-3 listings; Pro: 4-199; Enterprise: 200+",
     winner: "tie",
   },
@@ -153,7 +154,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Built for small operators",
-    truecap: "Yes — 1-30 doors",
+    truecap: "Yes, there is no minimum: you can analyze a single purchase",
     guesty: "Yes — Lite is published for 1-3 listings",
     winner: "tie",
   },
@@ -190,8 +191,11 @@ export default function VsGuestyPage() {
             Guesty is short-term rental property management software for
             post-purchase operations. Its published plan ranges include Lite for
             1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is a
-            pre-purchase underwriting calculator. The products address different
-            stages of the lifecycle.
+            pre-purchase underwriting calculator. TrueCap&apos;s Short-term
+            Rental mode is a beta revenue screen: it models revenue as nightly
+            rate × occupancy and does not fully model platform fees, turnover,
+            lodging tax, seasonality, or local STR eligibility. The products
+            address different stages of the lifecycle.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -235,8 +239,8 @@ export default function VsGuestyPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You own 1-30 STR properties and want to underwrite the next
-                  one.
+                  You are deciding whether to buy the next property and what
+                  to offer.
                 </li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
                 <li>You want a free core underwriting tier.</li>
@@ -314,8 +318,8 @@ export default function VsGuestyPage() {
           <div className={VS_PROSE}>
             <ol>
               <li>
-                <strong>Underwrite + buy 1-5 STRs with TrueCap.</strong> Solo
-                investor workflow.
+                <strong>Underwrite each purchase in TrueCap.</strong> Run the
+                numbers before you close.
               </li>
               <li>
                 <strong>Pick an operations tool once you own listings.</strong>{" "}
@@ -374,6 +378,7 @@ export default function VsGuestyPage() {
         <ComparisonFaq
           competitorName="Guesty"
           items={GUESTY_FAQ}
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}

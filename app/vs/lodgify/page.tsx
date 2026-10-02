@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
   description:
-    "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Honest comparison plus how the two fit together.",
+    "Lodgify is STR software for hosts and property managers. TrueCap underwrites the deal before you buy. How the two fit together.",
   keywords: [
     "lodgify alternative",
     "lodgify vs hostaway",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     description:
-      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Different stages.",
+      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the deal before you buy. Different stages.",
     url: "/vs/lodgify",
     type: "website",
   },
@@ -130,7 +130,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Sweet spot",
-    truecap: "1-30 doors, solo investor underwriting",
+    truecap:
+      "Real estate agents with investor clients, and rental investors deciding what to offer",
     lodgify: "Hosts and property managers",
     winner: "tie",
   },
@@ -157,7 +158,7 @@ export default function VsLodgifyPage() {
     name: "Lodgify vs TrueCap (2026): STR PM vs Deal Math",
     url: `${siteUrl}/vs/lodgify`,
     description:
-      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the STR deal before. Honest comparison plus how the two fit together.",
+      "Lodgify is STR software for hosts and property managers. TrueCap underwrites the deal before you buy. How the two fit together.",
     dateModified: lastmodFor("/vs/lodgify"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -181,7 +182,11 @@ export default function VsLodgifyPage() {
             managers — direct-booking website, channel manager across Airbnb /
             Vrbo / Booking, and reservation tools. TrueCap is a pre-purchase
             underwriting calculator that helps investors screen an STR
-            acquisition. Different stages, potentially complementary tools.
+            acquisition. TrueCap&apos;s Short-term Rental mode is a beta revenue
+            screen: it models revenue as nightly rate × occupancy and does not
+            fully model platform fees, turnover, lodging tax, seasonality, or
+            local STR eligibility. Different stages, potentially complementary
+            tools.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -459,10 +464,11 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Can TrueCap model STR revenue?",
     answer: (
       <>
-        Yes, indirectly — every input is editable. Plug a conservative monthly
-        STR revenue (gross income ÷ 12, discounted for vacancy + cleaning +
-        STR-specific operating costs) into the rent field. TrueCap doesn&apos;t
-        pull AirDNA or Mashvisor data automatically — you&apos;d use those
+        Yes, in two ways. Plug a conservative monthly STR revenue (gross income
+        ÷ 12, discounted for vacancy + cleaning + STR-specific operating costs)
+        into the rent field, or use the Short-term Rental mode, a beta revenue
+        screen that takes a nightly rate and occupancy. TrueCap doesn&apos;t
+        pull AirDNA or Mashvisor data automatically; you&apos;d use those
         alongside.
       </>
     ),

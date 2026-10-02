@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Mashvisor (STR)",
     tagline:
-      "Short-term rentals: Mashvisor's market and property data compared with a TrueCap deal decision on your own numbers.",
+      "Short-term rentals: Mashvisor's market and property data, and TrueCap's beta revenue screen for a deal on your own numbers.",
     slug: "mashvisor-for-short-term-rentals",
   });
 }
