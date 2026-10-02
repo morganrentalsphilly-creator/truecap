@@ -57,9 +57,8 @@ export const metadata: Metadata = {
       "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA-input workflow, and tax-model limitations.",
     url: "/vs/dealcheck-for-short-term-rentals",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck for short-term rentals" }],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "dealcheck" | "tie";

@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "Hostfully runs your STR after closing. TrueCap underwrites the deal before. Different stages of the STR lifecycle.",
     url: "/vs/hostfully",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Hostfully",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "hostfully" | "tie";

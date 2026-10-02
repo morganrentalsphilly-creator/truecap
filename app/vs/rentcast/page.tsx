@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "RentCast estimates rent + property value. TrueCap underwrites the full deal. Honest comparison.",
     url: "/vs/rentcast",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs RentCast",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "rentcast" | "tie";

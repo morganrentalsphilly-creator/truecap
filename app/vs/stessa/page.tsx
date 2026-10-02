@@ -64,11 +64,8 @@ export const metadata: Metadata = {
       "Both support acquisition analysis; Stessa also offers listing discovery and owned-property operations.",
     url: "/vs/stessa",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Stessa" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "stessa" | "tie";

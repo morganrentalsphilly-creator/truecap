@@ -63,16 +63,8 @@ export const metadata: Metadata = {
       "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
     url: "/vs/buildium",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Buildium",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "buildium" | "tie";
