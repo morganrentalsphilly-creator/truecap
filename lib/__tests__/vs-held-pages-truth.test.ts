@@ -219,12 +219,13 @@ describe("the /vs hub's lines for the held pages match the pages", () => {
   it("does not say TrueCap underwrites a short-term rental as such, or list AirDNA as an input", () => {
     // lib/investor-strategies.ts labels the short-term type "Beta revenue
     // screen only", so a hub line says TrueCap underwrites "the deal", not
-    // "the STR deal" (the cards follow the same rule). A line that names the
+    // "the STR deal" (the cards' guard in vs-social-card-guards.test.ts is
+    // stricter: nothing after "TrueCap" names STRs). A line that names the
     // beta screen for what it is still passes.
     for (const slug of ["guesty", "hostaway", "hostfully", "lodgify", "airdna"]) {
       const { tagline } = hubEntry(slug);
       expect(tagline, slug).toContain("TrueCap");
-      expect(tagline, slug).not.toMatch(/underwrit\w* (?:the|an?|your|every|each) (?:STRs?|short-term)\b/i);
+      expect(tagline, slug).not.toMatch(/underwrit\w*\s+(?:(?:the|an?|your|every|each)\s+)?(?:STRs?|short-term)\b/i);
     }
     // There is no AirDNA integration: the reader types AirDNA's numbers in.
     expect(hub).not.toMatch(/AirDNA inputs|using AirDNA/i);
