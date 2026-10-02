@@ -350,8 +350,8 @@ export default function VsHostawayPage() {
                 short-term rental underwriting playbook
               </IntentPrefetchLink>{" "}
               covers the STR-specific adjustments — seasonality, cleaning, and
-              turnover. When you want all three computed from an address instead
-              of by hand, run the full{" "}
+              turnover. When you want cap rate, DSCR and cash flow computed from an
+              address instead of by hand, run the full{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"

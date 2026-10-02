@@ -66,7 +66,7 @@ type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "LTR + STR scenario comparison", truecap: "Save separate scenarios; side-by-side comparison is Pro", dealcheck: "Duplicate the deal and compare, subject to plan caps", winner: "tie" },
-  { feature: "ADR + occupancy input model", truecap: "Short-term Rental mode (beta): a nightly rate and occupancy you set, or a monthly figure in the rent field", dealcheck: "Editable rent field; gross rent can be entered on a daily or weekly basis", winner: "tie" },
+  { feature: "ADR + occupancy input model", truecap: "A nightly rate and occupancy you set (Short-term Rental mode, beta), or a monthly figure in the rent field", dealcheck: "Editable rent field; gross rent can be entered on a daily or weekly basis", winner: "tie" },
   { feature: "Seasonal occupancy curve modeling", truecap: "Not modeled: the beta mode takes one blended nightly rate and occupancy; compare manual scenarios", dealcheck: "Not listed in its short-term rental help article", winner: "tie" },
   { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "No AirDNA or Mashvisor integration listed on its integrations page", winner: "tie" },
   { feature: "Bonus depreciation / STR tax eligibility", truecap: "No tax-specific module; review with a qualified professional", dealcheck: "Verify the current calculator scope and eligibility limits", winner: "tie" },
@@ -74,7 +74,7 @@ const MATRIX: Row[] = [
   { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes, operating expenses are customizable", winner: "tie" },
   { feature: "Higher utilities + cleaning fees", truecap: "Partly: a utilities field, a maintenance %, a turnover reserve and an other-fixed-expense line; no cleaning or platform-fee line", dealcheck: "Yes, custom operating expenses for cleaning and upkeep", winner: "dealcheck" },
   { feature: "Mobile UX", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
-  { feature: "Free tier covers STR underwriting", truecap: "Yes — core cap rate / CoC / DSCR / cash flow", dealcheck: "Yes — Rental Cash Flow for Airbnbs is included on Starter", winner: "tie" },
+  { feature: "Free tier covers STR underwriting", truecap: "Yes — core cap rate / CoC / DSCR / cash flow", dealcheck: "Yes, its Rental Cash Flow Calculator, which covers Airbnbs, is included on Starter", winner: "tie" },
 ];
 
 const NICHE_FAQ: FaqItem[] = [
@@ -82,7 +82,7 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Which is better for short-term rentals — TrueCap or DealCheck?",
     answer: (
       <>
-        Both work. TrueCap&apos;s Short-term Rental mode is a beta revenue screen that models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow for Airbnbs calculator and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
+        Both work. TrueCap&apos;s Short-term Rental mode is a beta revenue screen that models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow Calculator, which covers Airbnbs, and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
       </>
     ),
   },
@@ -90,7 +90,7 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Can TrueCap model AirDNA revenue projections?",
     answer: (
       <>
-        Yes — every input in TrueCap is editable. Pull AirDNA&apos;s projected monthly revenue (annual ÷ 12, discounted for vacancy + cleaning + STR opex), plug it into the rent field, run the full cap rate / DSCR / cash flow analysis. Same approach works in DealCheck.
+        Yes — every input in TrueCap is editable. Pull AirDNA&apos;s projected monthly revenue (annual ÷ 12), plug it into the rent field, enter your operating costs in the expense fields, and run the full cap rate / DSCR / cash flow analysis. Same approach works in DealCheck.
       </>
     ),
   },
@@ -200,7 +200,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
                 Use DealCheck when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You manage many STRs on mobile at properties.</li>
+                <li>You analyze properties on your phone: DealCheck has iOS and Android apps.</li>
                 <li>You&apos;re already a DealCheck Plus or Pro subscriber.</li>
                 <li>You prefer DealCheck&apos;s listing-import workflow for STR sourcing.</li>
               </ul>
@@ -227,7 +227,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            DealCheck publishes Rental Cash Flow for Airbnbs and professional reports on
+            DealCheck publishes its Rental Cash Flow Calculator, which covers Airbnbs, and professional reports on
             Starter, subject to plan limits. See{" "}
             <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener" className="tc-link">
               DealCheck&apos;s official pricing page

@@ -81,9 +81,26 @@ describe("the six short-term rental comparison pages", () => {
       for (const cell of cells) {
         if (!/nightly rate|\bADR\b/i.test(cell)) continue;
         expect(cell, `${slug}: ${cell}`).toMatch(/\bbeta\b/);
+        // The mode hides and clears the rent field, so a cell must not credit
+        // the mode with it ("Short-term Rental mode (beta): ..., or a monthly
+        // figure in the rent field").
+        expect(cell, `${slug}: ${cell}`).not.toMatch(/Short-term Rental mode \(beta\):.*\brent field\b/);
       }
     }
     expect(flat("dealcheck-for-short-term-rentals")).not.toMatch(/TrueCap models a blended ADR/);
+    const unit = readFileSync(
+      join(process.cwd(), "components/investcalc/single-family-unit-section.tsx"),
+      "utf8",
+    );
+    expect(unit).toContain("const showRent = incomeMounted && !strMode;");
+  });
+
+  it("promises no computed seasonality, cleaning or turnover", () => {
+    // /vs/hostaway said the analyzer computes "all three" (seasonality,
+    // cleaning and turnover) from an address; the mode takes one blended
+    // nightly rate and occupancy and has no cleaning line.
+    expect(flat("hostaway")).not.toMatch(/all three computed/i);
+    expect(flat("hostaway")).toContain("When you want cap rate, DSCR and cash flow computed");
   });
 
   it("claims no audience size and gives no rule of thumb without a source", () => {
@@ -94,6 +111,10 @@ describe("the six short-term rental comparison pages", () => {
       expect(page.match(/\bsolo[- ]investor\b|small-portfolio STR/i)?.[0] ?? null, slug).toBeNull();
       // "75% of expected gross STR revenue / 12".
       expect(page.match(/\d+% of expected/i)?.[0] ?? null, slug).toBeNull();
+      // Vacancy and the percentage expenses apply to the rent field
+      // (lib/calc-analysis.ts), so revenue discounted for them first counts
+      // them twice.
+      expect(page.match(/discounted for vacancy/i)?.[0] ?? null, slug).toBeNull();
     }
   });
 

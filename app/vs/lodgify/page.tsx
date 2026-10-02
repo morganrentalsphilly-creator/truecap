@@ -464,10 +464,10 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Can TrueCap model STR revenue?",
     answer: (
       <>
-        Yes, in two ways. Plug a conservative monthly STR revenue (gross income
-        ÷ 12, discounted for vacancy + cleaning + STR-specific operating costs)
-        into the rent field, or use the Short-term Rental mode, a beta revenue
-        screen that takes a nightly rate and occupancy. TrueCap doesn&apos;t
+        Yes, in two ways. Enter your expected monthly STR revenue in the rent
+        field and put vacancy and operating costs in the expense fields. Or use
+        the Short-term Rental mode, a beta revenue screen that takes a nightly
+        rate and occupancy. TrueCap doesn&apos;t
         pull AirDNA or Mashvisor data automatically; you&apos;d use those
         alongside.
       </>
