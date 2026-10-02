@@ -116,6 +116,28 @@ describe("the comparison pages about financial products", () => {
     });
   });
 
+  it("the blog post that compares Baselane says what /vs/baselane says about deposit insurance", () => {
+    // /blog/stessa-vs-avail-vs-baselane answered "Is Baselane really
+    // FDIC-insured?" with "Yes, through its bank partner" and called the
+    // account "FDIC-insured business checking", while Baselane's pages say it
+    // "is not an FDIC-insured bank" (phase5/x-vs-money/evidence/baselane-pricing.txt).
+    const post = visible(read("app/blog/stessa-vs-avail-vs-baselane/page.tsx"));
+    expect(post).not.toMatch(/FDIC-insured (?:business|bank|checking|account)/i);
+    expect(post).not.toMatch(/FDIC-insured through/i);
+    expect(post).not.toMatch(/a: `Yes, through its bank partner/);
+    for (const sentence of [
+      "Baselane is a financial technology company, not a bank.",
+      "Banking is provided by Thread Bank, Member FDIC.",
+      "Deposits can qualify for up to \\$3,000,000 in FDIC coverage through Thread Bank's deposit sweep program, up to \\$250,000 at each program bank.",
+      "Baselane says the threshold can change.",
+    ]) {
+      expect(post).toContain(sentence);
+    }
+    expect(post).toContain(
+      "https://support.baselane.com/hc/en-us/articles/25483539080603-Is-my-Baselane-account-FDIC-insured",
+    );
+  });
+
   describe("/vs/arrived", () => {
     const text = page("arrived");
 
