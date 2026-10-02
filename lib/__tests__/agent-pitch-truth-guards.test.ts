@@ -74,7 +74,11 @@ describe("what the agent pitch says the client receives", () => {
     const view = copy("components/investcalc/read-only-analysis-view.tsx");
     expect(view).toContain('"Preliminary underwriting"');
     expect(view).toContain("did not capture an adopted target");
-    const body = CLIENT_RECEIVES.find((item) => item.key === "numbers")?.body ?? "";
+    const numbers = CLIENT_RECEIVES.find((item) => item.key === "numbers");
+    // The title sits outside the condition, so it may not list the decision
+    // as something every share shows.
+    expect(numbers?.title).not.toMatch(/^the decision\b/i);
+    const body = numbers?.body ?? "";
     const condition = body.indexOf("When the deal was screened against a Buy Box or targets you chose");
     expect(condition).toBeGreaterThan(-1);
     expect(body.indexOf("meets the targets at asking")).toBeGreaterThan(condition);

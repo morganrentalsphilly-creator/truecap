@@ -51,7 +51,7 @@ export const CLIENT_RECEIVES: readonly ClientReceivesItem[] = [
   },
   {
     key: "numbers",
-    title: "The decision and the numbers behind it",
+    title: "The numbers behind the decision",
     body: "Shared from a Pro or Agent Pro account, the page shows cash flow, cash-on-cash, cap rate and DSCR, the three inputs that move cash flow most, and a sensitivity grid with the rent, vacancy and rate you used. When the deal was screened against a Buy Box or targets you chose, it also shows whether the deal meets the targets at asking and the Offer Ceiling with those targets. The PDF lists the inputs, including property tax, insurance and financing.",
   },
   {
