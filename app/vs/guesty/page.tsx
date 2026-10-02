@@ -94,49 +94,52 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    guesty: "Not modeled",
+    guesty: "Not listed among its plan features",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    guesty: "Not modeled",
+    guesty: "Not listed among its plan features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    guesty: "Not applicable",
+    guesty: "Not listed among its plan features",
     winner: "truecap",
   },
   {
     feature: "Channel manager (Airbnb/Vrbo/Booking)",
     truecap: "No",
-    guesty: "Yes — plan-specific capabilities",
+    guesty:
+      "Yes, Lite syncs Airbnb, Booking.com and Vrbo; Pro syncs 60+ channels",
     winner: "guesty",
   },
   {
     feature: "Multi-owner portal + accounting",
     truecap: "No",
-    guesty: "Yes — owner statements + revenue splits",
+    guesty:
+      "Owners portal and customizable owner statements on Pro and Enterprise, not on Lite; Trust Accounting is an add-on",
     winner: "guesty",
   },
   {
     feature: "Open API for custom integrations",
     truecap: "No",
-    guesty: "Yes — full REST API",
+    guesty: "Yes on Pro and Enterprise; not on Lite",
     winner: "guesty",
   },
   {
     feature: "AI assistant + automation",
     truecap: "No",
-    guesty: "Yes — Guesty AI for guest messaging",
+    guesty: "Yes, ReplyAI guest messaging, listed as freemium on every plan",
     winner: "guesty",
   },
   {
-    feature: "Dynamic pricing integrations",
+    feature: "Dynamic pricing",
     truecap: "No",
-    guesty: "Yes — full ecosystem",
+    guesty:
+      "Yes, Guesty PriceOptimizer; see its pricing page for how each plan includes it",
     winner: "guesty",
   },
   {
@@ -261,7 +264,10 @@ export default function VsGuestyPage() {
                   You need channel management, automation, or plan-specific API
                   access.
                 </li>
-                <li>You have a team that needs role-based access control.</li>
+                <li>
+                  You want phone support and a dedicated customer success
+                  manager (Pro and Enterprise).
+                </li>
               </ul>
             </div>
           </div>
@@ -288,8 +294,7 @@ export default function VsGuestyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Guesty details based on publicly available product info as of 2026.
-            See{" "}
+            Guesty details were checked against{" "}
             <a
               href="https://www.guesty.com/pricing/"
               target="_blank"
@@ -298,14 +303,15 @@ export default function VsGuestyPage() {
             >
               Guesty&apos;s official pricing page
             </a>{" "}
-            for their current state.
+            and its plan comparison table in October 2026. Features and prices
+            can change.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            When STR investors graduate to Guesty
+            Where Guesty fits after you buy
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -314,10 +320,9 @@ export default function VsGuestyPage() {
                 investor workflow.
               </li>
               <li>
-                <strong>
-                  Use Lodgify / Hostfully / Hostaway for ops as you scale.
-                </strong>{" "}
-                Mid-market tools that fit 1-50 STRs.
+                <strong>Pick an operations tool once you own listings.</strong>{" "}
+                Compare Lodgify, Hostfully, Hostaway, and Guesty on the listing
+                count each plan is built for.
               </li>
               <li>
                 <strong>
@@ -327,9 +332,10 @@ export default function VsGuestyPage() {
                 capabilities.
               </li>
               <li>
-                <strong>Keep TrueCap for new acquisitions.</strong> Guesty
-                doesn&apos;t underwrite. Still need TrueCap or similar for the
-                next property.
+                <strong>Keep TrueCap for new acquisitions.</strong>{" "}
+                Guesty&apos;s plan features cover operations after purchase, so
+                you still need TrueCap or similar to underwrite the next
+                property.
               </li>
             </ol>
             <p>
@@ -367,7 +373,11 @@ export default function VsGuestyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Guesty" items={GUESTY_FAQ} />
+        <ComparisonFaq
+          competitorName="Guesty"
+          items={GUESTY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -375,9 +385,9 @@ export default function VsGuestyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -480,9 +490,10 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Does Guesty underwrite deals?",
     answer: (
       <>
-        No — it&apos;s purely operational. You&apos;d use TrueCap or a
-        spreadsheet for pre-purchase underwriting, then ingest the property into
-        Guesty post-closing.
+        Guesty&apos;s plan features cover operations after purchase: channels,
+        guest messaging, owner tools, and pricing. Purchase underwriting is not
+        among the features it lists. You&apos;d use TrueCap or a spreadsheet
+        before buying, then add the property to Guesty after closing.
       </>
     ),
   },
