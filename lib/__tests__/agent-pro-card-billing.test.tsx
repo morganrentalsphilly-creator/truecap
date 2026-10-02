@@ -69,12 +69,12 @@ function agentCard(html: string): string {
  * is checked for the period it shows, and read on its own.
  */
 const OTHER_PERIOD_LINE =
-  / <span data-pricing-other-period="" class="block md:hidden">or <span class="font-mono tabular-nums">([^<]*)<\/span>([^<]*)<\/span>/;
+  / <span data-pricing-other-period="" class="block md:hidden">or pay <span class="font-mono tabular-nums">([^<]*)<\/span>([^<]*)<\/span>/;
 
 function otherPeriodText(card: string): string {
   const match = OTHER_PERIOD_LINE.exec(card);
   expect(match, "the card's other-period line").not.toBeNull();
-  return `or ${match?.[1]}${match?.[2]}`;
+  return `or pay ${match?.[1]}${match?.[2]}`;
 }
 
 function withoutOtherPeriod(card: string): string {
@@ -90,7 +90,7 @@ describe("/pricing Agent Pro card", () => {
     // The monthly figure appears only in the phone-only "or" line under the
     // price; the card itself (headline, note, sign-up) is on Annual.
     expect(otherPeriodText(whole)).toBe(
-      `or ${formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)}/month billed monthly`,
+      `or pay ${formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)}/month billed monthly`,
     );
     const card = withoutOtherPeriod(whole);
     expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
