@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
   description:
-    "RentCast estimates rent and property value. TrueCap underwrites the full deal — including the rent. Honest side-by-side and how they complement each other.",
+    "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. Honest side-by-side and how they fit.",
   keywords: [
     "rentcast alternative",
     "rentcast vs rentometer",
@@ -183,7 +183,7 @@ export default function VsRentcastPage() {
     name: "RentCast vs TrueCap (2026): Rent Data vs Deal Math",
     url: `${siteUrl}/vs/rentcast`,
     description:
-      "RentCast estimates rent and property value. TrueCap underwrites the full deal — including the rent. Honest side-by-side and how they complement each other.",
+      "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace. Honest side-by-side and how they fit.",
     dateModified: lastmodFor("/vs/rentcast"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
