@@ -67,6 +67,12 @@ import {
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
 import { MultiFamilyUnitsSection } from "./multi-family-units-section";
 import { ListingLinkInput } from "./listing-link-input";
+import { extractListingLink } from "./supported-listing-sites";
+import {
+  isCityOnlyAddress,
+  STREET_ADDRESS_REQUIRED_MESSAGE,
+  streetAddressPlaceholder,
+} from "./address-shape";
 import { PreRunCriteriaEditor } from "./pre-run-criteria-editor";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
@@ -1372,6 +1378,9 @@ export function InvestCalcPage({
   // binding secret and draft survive Stripe only in same-tab sessionStorage;
   // neither reaches the URL.
   const [isPdfPurchaseDialogOpen, setIsPdfPurchaseDialogOpen] = useState(false);
+  /** A market page's city ("Columbus, OH"), shown as the address field's
+   *  placeholder. It is context for the visitor, never the property. */
+  const [addressAreaHint, setAddressAreaHint] = useState<string | null>(null);
   const pdfPurchaseTriggerRef = useRef<HTMLElement | null>(null);
   // One no-signup result is server-bound to its exact released inputs. This
   // state controls only presentation; Offer Ceiling and PDF actions verify the
@@ -1930,6 +1939,7 @@ export function InvestCalcPage({
       persistedInputConfidenceSourceContextRef.current = null;
       persistedInputConfidenceAddressRef.current = null;
       setAppliedFinancingProfile(null);
+      setAddressAreaHint(null);
       setHasUnsavedChanges(false);
       setIsCalculating(false);
       isCalculatingRef.current = false;
@@ -2123,6 +2133,14 @@ export function InvestCalcPage({
   // provenance — the hero/listing path otherwise leaked the prior address's
   // sourcing into the data-confidence badge + saved deal.
   const lastEnrichedAddressRef = useRef<string | null>(null);
+  /**
+   * The place whose most recent lookup failed outright (network rejection or
+   * a stale Server Action). The toaster shows one toast at a time, so a
+   * caller that follows the lookup with its own guidance toast reads this to
+   * say the lookup failed in that toast instead of silently replacing the
+   * failure notice. Cleared at the start of every lookup.
+   */
+  const failedEnrichmentPlaceRef = useRef<SelectedAddress | null>(null);
   // Geo facts of that same enrichment, kept so the swap-clear below can tell
   // "same property, different formatting" (typed commit → Google re-pick of
   // the identical address) from a real move. The normalized FULL address +
@@ -2315,6 +2333,7 @@ export function InvestCalcPage({
       // typed-address commit, hero/listing handoff, bedrooms watcher), so an
       // identity compare after the roundtrip detects a newer selection.
       const enrichGeneration = forkGenerationRef.current;
+      failedEnrichmentPlaceRef.current = null;
       // New address → clear the previous address's captured provenance + market
       // rent BEFORE repopulating, so the confidence badge can't attribute the
       // old "from <addr>" sourcing to this deal (every enrichment path, incl.
@@ -2435,6 +2454,7 @@ export function InvestCalcPage({
         // the analyzer stuck in a loading state. Enrichment is optional: keep
         // the user's explicit values authoritative and let them continue.
         console.warn("[property enrichment] lookup failed:", error);
+        failedEnrichmentPlaceRef.current = place;
         if (!opts?.silent) {
           toast({
             title: "Property lookup unavailable",
@@ -3705,7 +3725,8 @@ export function InvestCalcPage({
   // rent, and either an active-listing asking price or a clearly labeled AVM
   // estimate from RentCast. Then it moves the user to review and run.
   const handleListingUrl = useCallback(() => {
-    const parsed = parseListingUrl(listingUrl);
+    // A share sheet pastes a sentence and then the link; read the link.
+    const parsed = parseListingUrl(extractListingLink(listingUrl) ?? listingUrl);
     if (!parsed) {
       setListingUrlError(true);
       return;
@@ -5370,8 +5391,35 @@ export function InvestCalcPage({
           );
         }
       }
-      if (handoff.address !== undefined)
-        form.setValue("address", handoff.address);
+      // A handed-off "address" is one of two things. A market page hands
+      // over its city ("Columbus, OH") as context: written into the field it
+      // read as a property, the run button went live and typing a street
+      // appended to it ("Columbus, OH123 Main St"). That becomes the field's
+      // hint and the field stays empty. Anything else is a property address.
+      const handoffAddress = handoff.address;
+      const handoffAddressIsArea =
+        handoffAddress !== undefined && isCityOnlyAddress(handoffAddress);
+      if (handoffAddress !== undefined) {
+        if (handoffAddressIsArea) setAddressAreaHint(handoffAddress);
+        else form.setValue("address", handoffAddress);
+      }
+      // The homepage hero is a plain GET form until it hydrates, so a submit
+      // in that window arrives here as an address and nothing else. It used
+      // to fill the field and stop: no rate lookup, no area rent once
+      // bedrooms were typed. Hand it to the same handler the hydrated hero
+      // uses so the two paths behave alike. A handoff that carries its own
+      // numbers (a calculator, a promoted shortlist row) keeps today's
+      // prefill-only contract.
+      const handoffIsAddressOnly =
+        handoffAddress !== undefined &&
+        !handoffAddressIsArea &&
+        handoff.purchasePrice === undefined &&
+        handoff.monthlyRent === undefined &&
+        handoff.bedrooms === undefined &&
+        handoff.interestRate === undefined &&
+        handoff.propertyTaxPct === undefined &&
+        handoff.propertyType === undefined &&
+        handoff.strategy === undefined;
       if (handoff.purchasePrice !== undefined)
         form.setValue("purchasePrice", handoff.purchasePrice);
       if (handoff.bedrooms !== undefined)
@@ -5400,6 +5448,12 @@ export function InvestCalcPage({
         // a pre-filled form with no numbers anywhere (same contract as the
         // draft restore below: preview yes, full auto-run no).
         recomputeOutputsFromFormRef.current();
+        if (handoffIsAddressOnly && handoffAddress !== undefined) {
+          heroAnalyzeHandlerRef.current?.({
+            token: `query:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            address: handoffAddress,
+          });
+        }
       });
       return;
     }
@@ -5955,6 +6009,21 @@ export function InvestCalcPage({
   };
 
   const onSubmit = async (validated: InvestmentFormValues) => {
+    // Enter in a field submits the form without passing through the primary
+    // action's own address check, so the same rule is enforced here: a bare
+    // city never reaches the run (or the no-signup decision claim below).
+    if (
+      !isAuthenticated &&
+      !pendingSampleRunRef.current &&
+      isCityOnlyAddress(validated.address)
+    ) {
+      form.setError("address", {
+        type: "manual",
+        message: STREET_ADDRESS_REQUIRED_MESSAGE,
+      });
+      focusInvalidField("address");
+      return;
+    }
     const pendingEnrichment = addressEnrichmentPromiseRef.current;
     if (pendingEnrichment) {
       if (deferredRunAfterEnrichmentRef.current) return;
@@ -8541,7 +8610,7 @@ export function InvestCalcPage({
       shouldTouch: true,
     });
 
-    const landOnPrice = (missedAutofill = false) => {
+    const landOnPrice = (missedAutofill = false, lookupFailed = false) => {
       const missingFields = getListingImportMissingFields({
         propertyType: form.getValues("propertyType"),
         purchasePrice: form.getValues("purchasePrice"),
@@ -8579,6 +8648,30 @@ export function InvestCalcPage({
           description:
             "Couldn't auto-detect the location from that address — type the price below, or pick a suggestion as you type for full auto-fill.",
         });
+      } else if (lookupFailed) {
+        // The lookup itself failed. Its own "Property lookup unavailable"
+        // toast was on screen for one tick before the guidance toast below
+        // replaced it (the toaster keeps one), so the visitor typed bedrooms,
+        // got no rent, kept the starting rate and was never told why. Say it
+        // in the toast that stays.
+        const priceMissing = isEmptyNumber(form.getValues("purchasePrice"));
+        toast({
+          title: "Property lookup unavailable",
+          description: priceMissing
+            ? "The current rate and area rent could not be fetched, so neither was filled in. Add the asking price, the rent and your interest rate, then run the analysis."
+            : "The current rate and area rent could not be fetched, so neither was filled in. Add the rent and check the interest rate, then run the analysis.",
+          variant: "warning",
+        });
+        if (!priceMissing) {
+          requestAnimationFrame(() => {
+            try {
+              form.setFocus("monthlyRent");
+            } catch {
+              /* field may be unmounted for some property types - non-fatal */
+            }
+          });
+          return;
+        }
       } else {
         // Enrichment ran but couldn't finish the screen (usually: no bedroom
         // count yet, so no HUD rent → no estimated price). Landing here
@@ -8788,7 +8881,7 @@ export function InvestCalcPage({
         return;
       }
 
-      landOnPrice();
+      landOnPrice(false, failedEnrichmentPlaceRef.current === place);
     })();
   };
 
@@ -9147,7 +9240,15 @@ export function InvestCalcPage({
     );
   const showEmptyStateSampleLine =
     isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
-  const hasPropertyAvailable = Boolean(watchedAddress?.trim());
+  // A city and state alone ("Columbus, OH") is a place, not a property. For
+  // a visitor without an account a run on it would spend the one no-signup
+  // decision on an address that can never be the deal, so it counts as "no
+  // address yet" for the run label and for the run. Signed-in work is not
+  // touched: a saved deal labelled by its city still recalculates.
+  const addressIsAreaOnly =
+    !isAuthenticated && isCityOnlyAddress(watchedAddress);
+  const hasPropertyAvailable =
+    Boolean(watchedAddress?.trim()) && !addressIsAreaOnly;
   const needsAddressForFullAnalysis =
     !hasPropertyAvailable &&
     (hasMeaningfulInput ||
@@ -9322,7 +9423,16 @@ export function InvestCalcPage({
     withoutOfferCeiling?: boolean;
   }) => {
     if (needsAddressForFullAnalysis) {
-      void form.trigger("address");
+      if (addressIsAreaOnly) {
+        // The schema accepts any five characters, so validation alone would
+        // focus the field and say nothing.
+        form.setError("address", {
+          type: "manual",
+          message: STREET_ADDRESS_REQUIRED_MESSAGE,
+        });
+      } else {
+        void form.trigger("address");
+      }
       focusInvalidField("address");
       return;
     }
@@ -9909,6 +10019,11 @@ export function InvestCalcPage({
                   <PropertyDetailsSection
                     form={form}
                     chrome="bare"
+                    addressPlaceholder={
+                      addressAreaHint
+                        ? streetAddressPlaceholder(addressAreaHint)
+                        : undefined
+                    }
                     onAddressSelected={handleAddressSelected}
                     onAutofillFromAddress={handleAutofillFromAddress}
                     isAutofilling={isAutofilling}
