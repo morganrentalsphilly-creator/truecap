@@ -100,7 +100,7 @@ const FAQS: { q: string; a: string }[] = [
     // Agent-first (2026-09): the audience question leads, and its answer
     // leads with the agent workflow. Facts per lib/agent-faqs.ts.
     q: "Is this for agents, investors, or both?",
-    a: "Both, and the analyzer is the same. Agents with investor clients use Agent Pro to keep a Buy Box per client, screen each listing against it, and send a co-branded decision memo the client can open without an account and rerun with their own assumptions. Investors use the same analyzer, with Pro, for deals they are buying themselves.",
+    a: "Both, and the analyzer is the same. Agents with investor clients use Agent Pro to assign Buy Boxes to clients (up to 12 per account), screen each listing against the client's Buy Box, and send a co-branded decision memo the client can open without an account and rerun with their own assumptions. Investors use the same analyzer, with Pro, for deals they are buying themselves.",
   },
   {
     q: "Is TrueCap really free?",
@@ -116,7 +116,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Cancel from your profile in one click. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
+    a: "Yes. Cancel anytime from your profile. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
   },
   {
     q: "How does the free trial work?",
@@ -613,7 +613,10 @@ export default async function PricingPage() {
         <PricingValueStack agentProConfigured={agentProConfigured} />
 
         {/* What each tier produces — REAL screenshots from the sample flow
-            (Phase 4). One per tier; Agent Pro only when it is sold. Set as
+            (Phase 4). One per tier; Agent Pro only when it is sold. The
+            Agent Pro shot is a capture of the /sample-decision-memo page
+            (public/product/manifest.json), not of the co-branded share page
+            or PDF, and its caption says so. Set as
             documents (a 1px rule, no browser chrome), captions kept. From
             768px the shots sit side by side in one shared frame box
             (SHOT_FRAME), so the frames and captions line up whatever each
@@ -650,17 +653,21 @@ export default async function PricingPage() {
                 shot={MEMO_SHOT}
                 frame="document"
                 className={SHOT_FRAME}
-                alt="Agent Pro: the written decision memo for the sample deal — the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
-                caption={<><strong className="font-semibold text-foreground">Agent Pro.</strong> The memo you hand a client.</>}
+                alt="Agent Pro: the sample decision memo page for the sample deal, with the decision at asking, the Offer Ceiling with its targets, cash flow, cap rate, cash-on-cash and DSCR, what could break the decision, and what to verify next"
+                caption={<><strong className="font-semibold text-foreground">Agent Pro.</strong> The sample decision memo page. Your client&apos;s co-branded share link and PDF are laid out differently.</>}
               />
             ) : null}
           </div>
         </Section>
 
         {/* One honest comparison (docs/site-overhaul.md Phase 9). The
-            DealCheck figures are its published monthly tiers, checked
-            against dealcheck.io/pricing on 2026-09-06; they live in
-            DEALCHECK_COMPARISON so this file holds no amounts. */}
+            DealCheck figures live in DEALCHECK_COMPARISON so this file holds
+            no amounts. As rendered on dealcheck.io/pricing on 2026-10-01 they
+            are the per-month prices under yearly billing (paying monthly
+            costs more); the heading does not say so yet, and changing it
+            waits on the founder (the constants are in the pricing module).
+            Branding on DealCheck's PDF reports is a DealCheck Pro feature;
+            every plan exports the report itself. */}
         <Section
           data-pricing-comparison
           aria-labelledby="pricing-dealcheck-title"
@@ -675,7 +682,7 @@ export default async function PricingPage() {
               Box fit, downside stress test, and a memo. If you only need metrics,
               DealCheck or a spreadsheet is fine.
               {agentProConfigured
-                ? " For agents: DealCheck gives you a branded PDF on any plan, including free. Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
+                ? " Every DealCheck plan exports a PDF report; putting your own name and logo on it needs DealCheck Pro. For agents, Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
                 : ""}
             </p>
             <IntentPrefetchLink
