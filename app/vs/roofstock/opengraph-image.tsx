@@ -3,8 +3,10 @@
  * serves this file as its og:image and twitter:image. Drawn by the shared
  * template, lib/og/vs-og-template.tsx.
  *
- * The competitor rows on /vs/roofstock wait on a decision (report row P1-31),
- * so this card says only what TrueCap does.
+ * The line restates the page and its Open Graph description: Roofstock's
+ * "Explore Properties" link opens Stessa's marketplace, titled "Investment
+ * Properties Powered by Roofstock" (roofstock.com and stessa.com, rendered
+ * 2026-10-02; report row P1-31).
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
@@ -17,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Roofstock",
     tagline:
-      "TrueCap models a potential rental purchase from assumptions you can inspect and replace.",
+      "Roofstock's property listings now open on Stessa's marketplace. TrueCap models the purchase from assumptions you can inspect and replace.",
     slug: "roofstock",
   });
 }

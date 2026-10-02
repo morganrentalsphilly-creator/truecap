@@ -3,9 +3,15 @@
  *
  * Target queries: "Roofstock alternative", "Roofstock vs ...",
  * "Roofstock fees", "Roofstock analyzer", "is Roofstock worth it".
- * Roofstock's individual-investor offering and transaction terms can change.
- * TrueCap is a separate underwriting model investors can use to review a
- * property with their own assumptions.
+ * What Roofstock offers an individual buyer today, as roofstock.com and
+ * stessa.com rendered on 2026-10-02: its "Explore Properties" link opens
+ * Stessa's marketplace ("Investment Properties Powered by Roofstock"), and
+ * roofstock.com presents three brands, Mynd (property management), Stessa
+ * (landlord software) and RentPrep (tenant screening). The page must agree
+ * with /blog/roofstock-vs-mashvisor-vs-propstream, which is sourced the same
+ * way. A row is marked for one side only where the other side's cell states a
+ * checked fact. TrueCap is a separate underwriting model investors can use to
+ * review a property with their own assumptions.
  */
 
 import type { Metadata } from "next";
@@ -50,7 +56,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Roofstock vs TrueCap (2026): Verify the Numbers",
   description:
-    "Compare Roofstock's current individual-investor services with TrueCap's separate, assumption-driven rental underwriting workflow.",
+    "Roofstock now sends individual buyers to Stessa's marketplace, with Mynd for management and RentPrep for screening. See where TrueCap's own underwrite fits.",
   keywords: [
     "roofstock alternative",
     "roofstock vs truecap",
@@ -63,7 +69,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Roofstock vs TrueCap (2026): Verify the Numbers",
     description:
-      "Roofstock offers services for individual real-estate investors. TrueCap provides a separate, assumption-driven underwrite.",
+      "Roofstock's property listings now open on Stessa's marketplace. TrueCap models the purchase from assumptions you can inspect and replace.",
     url: "/vs/roofstock",
     type: "website",
   },
@@ -78,104 +84,117 @@ type Row = {
   winner: Verdict;
 };
 
+// Every Roofstock cell restates roofstock.com, Stessa's marketplace pages or
+// Stessa's help center as rendered on 2026-10-02 (the sources are linked under
+// the table). A row favors one side only where the other side's cell states a
+// checked fact; a cell that can only point at the vendor is a tie.
 const MATRIX: Row[] = [
   {
     feature: "Primary purpose",
     truecap: "Per-deal underwriting calculator",
     roofstock:
-      "Individual-investor real-estate services; confirm current offering",
+      "Services for residential investors: listings on Stessa's marketplace, Mynd for property management, RentPrep for tenant screening",
     winner: "tie",
   },
   {
     feature: "Cost to use",
     truecap: "Free core and paid Pro — see live pricing",
-    roofstock: "Service and transaction dependent — confirm current terms",
+    roofstock:
+      "Marketplace listings open without an account; see Stessa, Mynd and RentPrep for each service's pricing",
     winner: "tie",
   },
   {
     feature: "Underwriting perspective",
     truecap: "Separate model using editable assumptions",
-    roofstock: "Materials and analysis vary by current service",
+    roofstock:
+      "Stessa's marketplace projects rent and returns from its own inputs, which you can replace",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR",
     truecap: "Calculated from the assumptions entered",
-    roofstock: "Confirm the metrics included in the current offering",
-    winner: "truecap",
+    roofstock:
+      "Gross yield, cap rate and cash on cash on marketplace listing cards",
+    winner: "tie",
   },
   {
     feature: "Editable assumptions",
     truecap: "Rent, vacancy, management, reserves, taxes, financing, and more",
-    roofstock: "Depends on the current product or transaction workflow",
-    winner: "truecap",
+    roofstock:
+      "Offer price, financing, rent and operating costs in the marketplace calculator",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent, expense, appreciation, and equity scenarios",
-    roofstock: "Confirm the analysis included in the current offering",
-    winner: "truecap",
+    roofstock:
+      "The marketplace calculator shows projected cash flow, cap rate and ROI",
+    winner: "tie",
   },
   {
     feature: "Sensitivity grid (stress test)",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
-    roofstock: "Not modeled",
-    winner: "truecap",
+    roofstock:
+      "Stessa's Stress Test report models rent collection scenarios against your cash reserves",
+    winner: "tie",
   },
   {
     feature: "Deal score with breakdown",
     truecap: "Free — 0–100 score with subscore drill-down",
-    roofstock: "Confirm any rating methodology in the current offering",
-    winner: "truecap",
+    roofstock: "Neighborhood, school and crime scores on each listing",
+    winner: "tie",
   },
   {
     feature: "Starting data sources",
     truecap:
       "Editable HUD rent and FRED rate benchmarks; manual local property tax",
-    roofstock: "Review the sources and dates in the relevant materials",
+    roofstock:
+      "Stessa's rent estimates and comps, with default property tax, insurance and HOA estimates",
     winner: "tie",
   },
   {
     feature: "Transaction services",
     truecap: "No — analysis only",
-    roofstock: "Depends on the current individual-investor service",
+    roofstock:
+      "The marketplace connects you with a vetted local agent who helps negotiate, inspect and close",
     winner: "roofstock",
   },
   {
     feature: "Property discovery",
     truecap:
       "No inventory; analyze a supported address or enter inputs manually",
-    roofstock: "Depends on the current individual-investor service",
+    roofstock:
+      "Listings on Stessa's marketplace, with buy box filters and alerts",
     winner: "roofstock",
   },
   {
     feature: "Property management connection",
     truecap: "Not included",
-    roofstock: "Confirm availability and terms for the property",
+    roofstock: "Mynd, Roofstock's full-service property management brand",
     winner: "roofstock",
   },
   {
     feature: "Property coverage",
     truecap: "Supported U.S. addresses with manual input fallback",
-    roofstock: "Service and property dependent",
-    winner: "truecap",
+    roofstock: "Listings across the U.S., per Stessa's help center",
+    winner: "tie",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free read-only public link; Pro adds co-branding",
-    roofstock: "Confirm what can be shared from the current service",
-    winner: "truecap",
+    roofstock: "See Stessa's marketplace for what a listing lets you share",
+    winner: "tie",
   },
   {
     feature: "PDF report export",
     truecap: "Included with Pro",
-    roofstock: "Confirm available documents for the current service",
-    winner: "truecap",
+    roofstock: "See Stessa's marketplace for its report options",
+    winner: "tie",
   },
   {
     feature: "Mobile-first UX",
     truecap: "PWA — install to home screen",
-    roofstock: "Mobile-friendly web app",
+    roofstock: "Stessa has iOS and Android apps",
     winner: "tie",
   },
 ];
@@ -188,7 +207,7 @@ export default function VsRoofstockPage() {
     name: "Roofstock vs TrueCap (2026): Verify the Numbers",
     url: `${siteUrl}/vs/roofstock`,
     description:
-      "Side-by-side comparison of TrueCap (underwriting calculator) and Roofstock (turnkey rental marketplace).",
+      "Side-by-side comparison of TrueCap, a rental underwriting calculator, and Roofstock, whose services for individual investors run through Stessa's marketplace, Mynd and RentPrep.",
     dateModified: lastmodFor("/vs/roofstock"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -207,19 +226,22 @@ export default function VsRoofstockPage() {
         <VsHero>
           <h1 className={VS_H1}>
             TrueCap vs Roofstock:{" "}
-            marketplace vs independent underwrite
+            investor services vs your own underwrite
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Roofstock&apos;s current site offers services for individual
-            real-estate investors. TrueCap is a separate calculator: it does not
-            sell or certify a property, but it lets you model a potential
-            acquisition using assumptions you can inspect and replace. Confirm
-            Roofstock&apos;s current service and transaction terms directly.
+            Roofstock&apos;s Explore Properties link now opens Stessa&apos;s
+            investment-property marketplace, and roofstock.com points individual
+            investors to three brands: Mynd for property management, Stessa for
+            landlord software and RentPrep for tenant screening. TrueCap is a
+            separate calculator: it does not sell or certify a property, but it
+            lets you model a potential acquisition using assumptions you can
+            inspect and replace. Confirm Roofstock&apos;s current service and
+            transaction terms directly.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
-              Underwrite a Roofstock listing
+              Analyze a deal free
             </AnalyzeCtaLink>
             <Link
               href="/pricing"
@@ -259,19 +281,19 @@ export default function VsRoofstockPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You want an independent underwrite of a Roofstock listing.
+                  You want your own underwrite of a listing you found on
+                  Stessa&apos;s marketplace, where Roofstock now sends buyers.
                 </li>
                 <li>
-                  You want to compare a Roofstock deal to a non-Roofstock deal
-                  head-to-head.
+                  You want to run a marketplace listing and a deal from
+                  anywhere else through the same model.
                 </li>
                 <li>
                   You want to replace third-party assumptions with
                   property-specific evidence and test a range.
                 </li>
                 <li>
-                  You want a 10-year cash-flow and equity projection, not a
-                  year-one snapshot.
+                  You want a 10-year cash-flow and equity projection (Pro).
                 </li>
                 <li>
                   You want a Deal score with a transparent breakdown.
@@ -284,16 +306,16 @@ export default function VsRoofstockPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  Its current individual-investor service matches the
-                  transaction or ownership support you need.
+                  You want to browse listings with investor metrics: its
+                  Explore Properties link opens Stessa&apos;s marketplace.
                 </li>
                 <li>
-                  You have reviewed the current fees, agreements, diligence
-                  materials, and service providers.
+                  You want a vetted local agent to help negotiate, inspect and
+                  close.
                 </li>
                 <li>
-                  You understand which work Roofstock performs and which remains
-                  your responsibility.
+                  You want full-service property management (Mynd) or tenant
+                  screening (RentPrep).
                 </li>
                 <li>
                   You have independently verified the property-specific
@@ -318,9 +340,9 @@ export default function VsRoofstockPage() {
             Feature-by-feature
           </SectionHeading>
           <p className={VS_INTRO}>
-            TrueCap provides an underwriting model; Roofstock&apos;s current
-            individual-investor services should be confirmed on its official
-            site.
+            TrueCap provides an underwriting model. The Roofstock column is
+            what roofstock.com and Stessa&apos;s marketplace pages said in
+            October 2026; confirm current details on those sites.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
             <VsMatrixTable
@@ -334,8 +356,7 @@ export default function VsRoofstockPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Roofstock details based on publicly available product info as of
-            2026. See{" "}
+            Roofstock details are from{" "}
             <a
               href="https://www.roofstock.com/investment-solutions/individual-investors"
               target="_blank"
@@ -343,8 +364,35 @@ export default function VsRoofstockPage() {
               className="tc-link"
             >
               Roofstock&apos;s official individual-investor page
+            </a>
+            ,{" "}
+            <a
+              href="https://www.stessa.com/investment-properties"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              Stessa&apos;s marketplace
+            </a>
+            , its{" "}
+            <a
+              href="https://www.stessa.com/investment-property-marketplace/"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              marketplace overview
             </a>{" "}
-            for their current state.
+            and{" "}
+            <a
+              href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              Stessa&apos;s help center
+            </a>
+            , read in October 2026.
           </p>
         </Section>
 
@@ -378,9 +426,10 @@ export default function VsRoofstockPage() {
                 range.
               </li>
               <li>
-                <strong>Run the sensitivity grid (free on your first decision).</strong> If the deal
-                changes across lower rent, higher vacancy, and higher-rate
-                scenarios. The grid is decision support, not a forecast.
+                <strong>Run the sensitivity grid (free on your first decision).</strong> See how
+                the deal changes across lower-rent, higher-vacancy and
+                higher-rate scenarios. The grid is decision support, not a
+                forecast.
               </li>
               <li>
                 <strong>Review the Deal score and its inputs.</strong> It is a
@@ -389,7 +438,7 @@ export default function VsRoofstockPage() {
               </li>
             </ol>
             <p>
-              Want a faster read on a Roofstock listing? The free{" "}
+              Want a faster read on a marketplace listing? The free{" "}
               <IntentPrefetchLink
                 href="/tools/gross-rent-multiplier-calculator"
                 className="tc-link"
@@ -430,12 +479,19 @@ export default function VsRoofstockPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Roofstock" items={ROOFSTOCK_FAQ} />
+        {/* reviewedDate: every Roofstock cell, link and FAQ statement on this
+            page was compared with roofstock.com, Stessa's marketplace pages
+            and Stessa's help center as rendered on 2026-10-02. */}
+        <ComparisonFaq
+          competitorName="Roofstock"
+          items={ROOFSTOCK_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
           headingId="vs-close-heading"
-          heading={<>Pressure-test your next Roofstock deal — free.</>}
+          heading={<>Underwrite the next listing on your own assumptions.</>}
           lede={
             <>
               Free covers the core underwrite and plain read-only share links. Pro
@@ -510,11 +566,12 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
     question: "Is TrueCap a Roofstock alternative?",
     answer: (
       <>
-        Not directly — they solve different problems. Roofstock is a current
-        individual-investor services vary by offering. TrueCap is a separate
-        calculator for supported properties and manually entered assumptions.
-        The tools may complement each other, but neither replaces
-        property-specific diligence.
+        Not directly. They solve different problems. Roofstock offers services
+        for residential investors: property listings through Stessa&apos;s
+        marketplace, property management through Mynd and tenant screening
+        through RentPrep. TrueCap is a separate calculator for supported
+        properties and manually entered assumptions. The tools may complement
+        each other, but neither replaces property-specific diligence.
       </>
     ),
   },
@@ -545,7 +602,8 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
     question: "Can TrueCap analyze any Roofstock listing?",
     answer: (
       <>
-        For supported U.S. addresses, paste the address into TrueCap. If lookup
+        Roofstock&apos;s listings now open on Stessa&apos;s marketplace. For
+        supported U.S. addresses, paste the address into TrueCap. If lookup
         data is unavailable, enter the property inputs manually. HUD rent and
         FRED rate are editable screening benchmarks; property tax is a manual
         local input. Replace them with property-specific evidence.
@@ -556,11 +614,13 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
     question: "Should I trust the Roofstock pro-forma cap rate?",
     answer: (
       <>
-        Recalculate it from the documented inputs. Confirm how income, vacancy,
-        taxes, insurance, management, maintenance, utilities, and reserves are
-        defined, then replace them with current evidence and test a range.
-        TrueCap&apos;s result is also only as reliable as the assumptions
-        entered.
+        Stessa&apos;s marketplace, which Roofstock powers, shows a cap rate on
+        its listing cards, and its calculator starts from default estimates
+        for property taxes, insurance and HOA fees. Recalculate it from the
+        documented inputs. Confirm how income, vacancy, taxes, insurance,
+        management, maintenance, utilities, and reserves are defined, then
+        replace them with current evidence and test a range. TrueCap&apos;s
+        result is also only as reliable as the assumptions entered.
       </>
     ),
   },
@@ -577,4 +637,3 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
     ),
   },
 ];
-

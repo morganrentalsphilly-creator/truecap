@@ -12,6 +12,17 @@
  * on 2021-08-11 that Cozy had moved; its 2020 tenant screening page named
  * Experian for credit reports and Checkr for background checks. The page is
  * kept as an explainer of what replaced Cozy, with every row a tie.
+ *
+ * /vs/roofstock (report row P1-31). The page called Roofstock a "turnkey
+ * rental marketplace" and offered to "Underwrite a Roofstock listing", while
+ * roofstock.com's own "Explore Properties" link opens Stessa's marketplace
+ * ("Investment Properties Powered by Roofstock") and the site presents three
+ * brands: Mynd, Stessa and RentPrep. Eight rows put a check beside TrueCap
+ * and a cross beside Roofstock over cells that said only "Confirm …" or
+ * "Depends …", and FAQ 1 held a broken sentence that also shipped in the
+ * FAQPage JSON-LD. The page is rewritten around what roofstock.com and
+ * stessa.com rendered on 2026-10-02, and agrees with
+ * /blog/roofstock-vs-mashvisor-vs-propstream.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -80,5 +91,65 @@ describe("/vs/cozy says when and where Cozy went", () => {
     // site", which is gone. Pass a date only after Apartments.com's current
     // pages were read as rendered and the note fits a retired product.
     expect(page).toMatch(/<ComparisonFaq competitorName="Cozy" items=\{COZY_FAQ\} \/>/);
+  });
+});
+
+describe("/vs/roofstock describes what Roofstock offers an individual buyer today", () => {
+  const page = read("app/vs/roofstock/page.tsx");
+  const card = read("app/vs/roofstock/opengraph-image.tsx");
+  const text = flat(page);
+
+  it("drops the stale marketplace premise from the H1, the hero button, the close and the JSON-LD", () => {
+    expect(text).not.toMatch(/turnkey rental marketplace/i);
+    expect(text).not.toMatch(/marketplace vs independent underwrite/i);
+    expect(text).not.toContain("Underwrite a Roofstock listing");
+    expect(text).not.toMatch(/Pressure-test your next Roofstock deal/i);
+    // The hero button is the site's plain analyzer call.
+    expect(text).toMatch(/analyticsSource="vs_hero"[^>]*>\s*Analyze a deal free\s*<\/AnalyzeCtaLink>/);
+  });
+
+  it("says where the listings are, and names the three brands", () => {
+    expect(text).toContain("Explore Properties link now opens Stessa's investment-property marketplace");
+    expect(page).toContain('href="https://www.stessa.com/investment-properties"');
+    for (const brand of ["Mynd", "Stessa", "RentPrep"]) expect(text).toContain(brand);
+  });
+
+  it("marks a row for one side only over a cell that states a fact", () => {
+    const rows = [...page.matchAll(/roofstock:\s*"((?:[^"\\]|\\.)*)",\s*winner:\s*"([a-z]+)"/g)].map((m) => ({
+      cell: m[1],
+      winner: m[2],
+    }));
+    expect(rows.length).toBeGreaterThanOrEqual(12);
+    for (const row of rows) {
+      // The hedges the audit found under a TrueCap check and a Roofstock cross.
+      expect(row.cell, row.cell).not.toMatch(/^(?:Confirm|Depends|Review the)\b|dependent\b|^Not modeled$/i);
+      // A cell that only points at the vendor scores nothing.
+      if (/^See /.test(row.cell)) expect(row.winner, row.cell).toBe("tie");
+    }
+    // Stessa's Roofstock-powered listings show cap rate and cash on cash, so
+    // that row cannot favor TrueCap.
+    const capRate = /feature: "Cap rate \/ CoC \/ DSCR",[\s\S]*?winner: "([a-z]+)"/.exec(page);
+    expect(capRate?.[1]).toBe("tie");
+  });
+
+  it("does not restore the broken FAQ sentence", () => {
+    expect(text).not.toContain("Roofstock is a current individual-investor services vary by offering");
+    expect(text).toContain(
+      "Roofstock offers services for residential investors: property listings through Stessa's marketplace, property management through Mynd and tenant screening through RentPrep.",
+    );
+  });
+
+  it("carries the same line on its card and in its Open Graph description", () => {
+    const line =
+      "Roofstock's property listings now open on Stessa's marketplace. TrueCap models the purchase from assumptions you can inspect and replace.";
+    expect(card).toContain(`"${line}"`);
+    expect(page).toContain(`"${line}"`);
+  });
+
+  it("agrees with the sourced blog post about where Roofstock sends buyers", () => {
+    const post = flat(read("app/blog/roofstock-vs-mashvisor-vs-propstream/page.tsx"));
+    expect(post).toContain("https://www.stessa.com/investment-properties");
+    expect(post).toMatch(/where Roofstock now sends buyers/);
+    expect(text).toMatch(/where Roofstock now sends buyers/);
   });
 });
