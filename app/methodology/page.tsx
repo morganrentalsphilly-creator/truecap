@@ -355,12 +355,18 @@ export default function MethodologyPage() {
             forecast. Verify achievable rent with current comparable evidence.
           </p>
           <p>
-            The lookup follows HUD&apos;s latest API response; the UI
-            records the returned year and whether the value came from an FMR
-            area or a ZIP-level SAFMR. The FY 2026 source page notes revised
-            FMRs effective May 21, 2026. Provider availability and geographic
-            matching can fail, in which case TrueCap leaves rent for the user to
-            enter.
+            The lookup follows HUD&apos;s latest API response. The rent is
+            ZIP-level when available, otherwise the HUD Fair Market Rent area;
+            when an address has no county match, a statewide HUD figure, labeled
+            as such. The statewide figure is the unweighted average of
+            HUD&apos;s county and metro-area figures for the state and bedroom
+            count, and it is also used when HUD&apos;s row for the matched area
+            has no figure for that bedroom count. It is not a Fair Market Rent
+            for any one area and is coarser than a local benchmark, so replace
+            it first. The UI records the returned year and which of the three
+            the value is. The FY 2026 source page notes revised FMRs effective
+            May 21, 2026. If HUD&apos;s service is unavailable or returns no
+            figures for the state, TrueCap leaves rent for the user to enter.
           </p>
 
           <h3>Mortgage benchmark — FRED 30-year fixed</h3>

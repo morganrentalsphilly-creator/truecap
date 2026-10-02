@@ -599,8 +599,8 @@ export default function HowToEstimateRentPost() {
               </Link>{" "}
               does the first pass for you: enter the address and, if the rent
               field is blank, it fills in HUD&apos;s Fair Market Rent as a
-              labeled placeholder rent (a labeled statewide average where HUD
-              has no local match), layers in
+              labeled placeholder rent (when an address has no county match,
+              a statewide HUD figure, labeled as such), layers in
               vacancy and reserves, and returns cap rate, cash flow, DSCR, and a
               Buy Box fit in one pass. Replace that placeholder with the rent
               your comps support, and the comp work sets your number instead of

@@ -605,7 +605,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMRs are used in several housing programs, including as an input to Housing Choice Voucher payment standards.",
     whyItMatters:
-      "FMR is an area benchmark, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can prefill it from HUD, but you should replace it with current comparable leases and property-specific program figures where applicable.",
+      "FMR is an area benchmark, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can prefill a HUD benchmark: ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such. Replace it with current comparable leases and property-specific program figures where applicable.",
     howToCheck:
       "Confirm the figure on HUD's own site for the fiscal year, the area, and the bedroom count, and note whether a small-area rent applies to the ZIP code. Then replace it: pull current listings and, better, signed leases for comparable units within a mile, and ask a local property manager what the unit would actually lease for in its current condition. Use the comparable rent in the analysis and keep the HUD figure only as a reference point.",
     related: ["vacancy", "rentGrowth"],

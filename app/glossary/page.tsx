@@ -261,7 +261,7 @@ const CURATED: Term[] = [
     term: "Fair Market Rent",
     also: ["FMR"],
     definition:
-      "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMR is an area benchmark used in several housing programs, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can start with a HUD benchmark, ZIP-level when available and otherwise at the broader FMR area; replace it with current comparable leases and property-specific program figures where applicable.",
+      "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMR is an area benchmark used in several housing programs, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can start with a HUD benchmark: ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such. Replace it with current comparable leases and property-specific program figures where applicable.",
   },
   {
     slug: "principal-paydown",

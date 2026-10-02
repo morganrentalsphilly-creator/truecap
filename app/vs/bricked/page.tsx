@@ -138,9 +138,9 @@ const MATRIX: Row[] = [
   {
     feature: "Rent data",
     truecap:
-      "HUD area benchmark — ZIP-level when available, otherwise broader FMR area",
-    bricked: "Not the focus",
-    winner: "truecap",
+      "HUD benchmark: ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such",
+    bricked: "A rental offer calculator with a monthly rent line",
+    winner: "tie",
   },
   {
     feature: "Try without signup",
