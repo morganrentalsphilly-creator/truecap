@@ -36,6 +36,42 @@ describe("parseListingUrl", () => {
     expect(r!.zip).toBe("78701");
     expect(r!.address).toContain("123 Main St");
     expect(r!.address).toContain("78701");
+    // The listing id after the ZIP ("M12345-67890") is not part of the address.
+    expect(r!.address).toBe("123 Main St Austin TX 78701");
+  });
+
+  it("returns null for a Realtor.com link that carries only a listing id", () => {
+    expect(
+      parseListingUrl("https://www.realtor.com/realestateandhomes-detail/M1234567890"),
+    ).toBeNull();
+  });
+
+  it("parses Trulia /home/ and /p/ links without the listing id", () => {
+    const home = parseListingUrl(
+      "https://www.trulia.com/home/1536-richmond-ave-columbus-oh-43203-33825793",
+    );
+    expect(home).toEqual({
+      address: "1536 richmond ave columbus oh 43203",
+      state: "OH",
+      zip: "43203",
+      source: "trulia",
+    });
+    // A unit number repeated in the slug stays; only the trailing id goes.
+    expect(
+      parseListingUrl(
+        "https://www.trulia.com/home/1324-hildreth-ave-1324-columbus-oh-43203-448460054",
+      )?.address,
+    ).toBe("1324 hildreth ave 1324 columbus oh 43203");
+    const p = parseListingUrl(
+      "https://www.trulia.com/p/ny/bronx/895-tiffany-st-bronx-ny-10459--2008893028",
+    );
+    expect(p?.source).toBe("trulia");
+    expect(p?.address).toBe("895 tiffany st bronx ny 10459");
+    expect(p?.zip).toBe("10459");
+    // The older /homedetails/ shape still parses through the shared branch.
+    expect(
+      parseListingUrl("https://www.trulia.com/homedetails/100-Test-St-Springfield-IL-62701/12345")?.address,
+    ).toBe("100 Test St Springfield IL 62701");
   });
 
   it("parses a Homes.com property URL", () => {
