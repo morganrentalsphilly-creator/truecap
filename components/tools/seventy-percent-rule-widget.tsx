@@ -20,12 +20,16 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { Sparkles } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { computeRuleMaxOffer } from "@/components/tools/max-offer-math";
+import {
+  validateToolNumber,
+  type ToolNumberBounds,
+} from "@/lib/public-tool-validation";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -34,6 +38,60 @@ const num = (s: string) => {
 
 const fmt = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+
+// What the fields accept, as on the ARV calculator (the two widgets share the
+// rule's arithmetic). A negative or out-of-range value gets a visible,
+// announced error under its field and the result is withheld; the arithmetic
+// is unchanged for every value inside these bounds.
+const PRICE_MAX = 100_000_000;
+
+/** Blank is not an error: no ARV yet shows the empty state, blank repairs are $0. */
+const optionalFieldError = (
+  raw: string,
+  bounds: ToolNumberBounds,
+): string | null =>
+  raw.trim() === "" ? null : validateToolNumber(raw, bounds).error;
+
+/** The error line under a field; role="alert" so it is read when it appears. */
+function FieldError({ id, error }: { id: string; error: string | null }) {
+  if (!error) return null;
+  return (
+    <p id={id} role="alert" className="mt-1.5 text-sm text-destructive-text">
+      {error}
+    </p>
+  );
+}
+
+export type SeventyPercentRuleRawInputs = {
+  arv: string;
+  repairs: string;
+  multiplier: string;
+};
+
+/** The message for each field as typed, or null while it is in range. */
+export function seventyPercentRuleFieldErrors(
+  raw: SeventyPercentRuleRawInputs,
+): Record<keyof SeventyPercentRuleRawInputs, string | null> {
+  return {
+    arv: optionalFieldError(raw.arv, {
+      label: "After-repair value",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    repairs: optionalFieldError(raw.repairs, {
+      label: "Repair costs",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    // The rule needs a multiplier: blank is an error here, and so is 0.
+    multiplier: validateToolNumber(raw.multiplier, {
+      label: "Rule multiplier",
+      min: 0,
+      minExclusive: true,
+      max: 100,
+    }).error,
+  };
+}
 
 /** The multiplier ladder from the 70-percent-rule post's situation table. */
 const LADDER = [60, 65, 70, 75] as const;
@@ -46,7 +104,14 @@ export function SeventyPercentRuleWidget() {
   const [repairs, setRepairs] = useState("45000");
   const [multiplier, setMultiplier] = useState("70");
 
+  const errors = useMemo(
+    () => seventyPercentRuleFieldErrors({ arv, repairs, multiplier }),
+    [arv, repairs, multiplier],
+  );
+  const hasErrors = Object.values(errors).some((error) => error !== null);
+
   const result = useMemo(() => {
+    if (hasErrors) return null;
     const a = num(arv);
     if (a <= 0) return null;
     const mult = num(multiplier);
@@ -61,7 +126,7 @@ export function SeventyPercentRuleWidget() {
       mao: computeRuleMaxOffer(a, pct, rep),
     }));
     return { arv: a, mult, mao, spread, ladder };
-  }, [arv, repairs, multiplier]);
+  }, [hasErrors, arv, repairs, multiplier]);
 
   // Never seed this heuristic into the analyzer as a verified purchase price.
   const handoffHref = buildAnalyzerHandoffUrl(
@@ -93,11 +158,19 @@ export function SeventyPercentRuleWidget() {
                 id="seventypct-arv"
                 type="number"
                 inputMode="numeric"
+                min={0}
+                max={PRICE_MAX}
                 value={arv}
                 onChange={(e) => setArv(e.target.value)}
-                className="pl-7 border-input bg-background"
+                aria-invalid={errors.arv ? true : undefined}
+                aria-describedby={errors.arv ? "seventypct-arv-error" : undefined}
+                className={cn(
+                  "pl-7 border-input bg-background",
+                  errors.arv && "border-destructive",
+                )}
               />
             </div>
+            <FieldError id="seventypct-arv-error" error={errors.arv} />
             <p className="text-xs text-muted-foreground mt-1.5">
               What the property sells for <em>after</em> the rehab. Don&apos;t
               have it? Build it from sold comps with the{" "}
@@ -127,11 +200,21 @@ export function SeventyPercentRuleWidget() {
                 id="seventypct-repairs"
                 type="number"
                 inputMode="numeric"
+                min={0}
+                max={PRICE_MAX}
                 value={repairs}
                 onChange={(e) => setRepairs(e.target.value)}
-                className="pl-7 border-input bg-background"
+                aria-invalid={errors.repairs ? true : undefined}
+                aria-describedby={
+                  errors.repairs ? "seventypct-repairs-error" : undefined
+                }
+                className={cn(
+                  "pl-7 border-input bg-background",
+                  errors.repairs && "border-destructive",
+                )}
               />
             </div>
+            <FieldError id="seventypct-repairs-error" error={errors.repairs} />
           </div>
 
           <div>
@@ -147,14 +230,27 @@ export function SeventyPercentRuleWidget() {
                 type="number"
                 inputMode="decimal"
                 step="1"
+                min={0}
+                max={100}
                 value={multiplier}
                 onChange={(e) => setMultiplier(e.target.value)}
-                className="pr-8 border-input bg-background"
+                aria-invalid={errors.multiplier ? true : undefined}
+                aria-describedby={
+                  errors.multiplier ? "seventypct-multiplier-error" : undefined
+                }
+                className={cn(
+                  "pr-8 border-input bg-background",
+                  errors.multiplier && "border-destructive",
+                )}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                 %
               </span>
             </div>
+            <FieldError
+              id="seventypct-multiplier-error"
+              error={errors.multiplier}
+            />
             <p className="text-xs text-muted-foreground mt-1.5">
               70% is the classic center. Cheap houses (&lt;~$150k ARV) push
               toward 60&ndash;65%; expensive houses with light rehabs can
@@ -165,7 +261,27 @@ export function SeventyPercentRuleWidget() {
 
         {/* Output */}
         <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-between">
-          {result === null ? (
+          {/* One polite status line when the result changes, for screen
+              readers; the visible figures below stay as they were. */}
+          <span
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {hasErrors
+              ? "Fix the highlighted inputs to calculate the price screen."
+              : result === null
+                ? "Enter the after-repair value to see the 70%-rule price screen."
+                : result.mao > 0
+                  ? `70%-rule price screen ${fmt(result.mao)}.`
+                  : "No feasible price screen at this multiplier."}
+          </span>
+          {hasErrors ? (
+            <p className="text-sm text-muted-foreground">
+              Fix the highlighted inputs to calculate the price screen.
+            </p>
+          ) : result === null ? (
             <p className="text-sm text-muted-foreground">
               Enter the after-repair value to see the 70%-rule price screen.
             </p>
@@ -183,7 +299,10 @@ export function SeventyPercentRuleWidget() {
                       : "text-[var(--metric-negative)]",
                   )}
                 >
-                  {fmt(result.mao)}
+                  {/* No price when repairs use up the whole allowance: the
+                      sentence below says so, and the figure is a placeholder,
+                      never a negative price. */}
+                  {result.mao > 0 ? fmt(result.mao) : "—"}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {result.mult}% of ARV − repairs, rounded down to a $500 step.
@@ -255,15 +374,23 @@ export function SeventyPercentRuleWidget() {
         </div>
       </div>
 
+      {/* One plain action, then one line saying what does not carry over
+          (the 1% rule widget's pattern). */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        aria-describedby="seventypct-handoff-note"
+        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
       >
-        <Sparkles className="w-4 h-4" />
-        Open the rental analyzer with a separately verified purchase
-        price
+        Open the rental analyzer
       </AnalyzerHandoffLink>
+      <p
+        id="seventypct-handoff-note"
+        className="mt-2 text-pretty text-sm text-muted-foreground"
+      >
+        The price screen above is a rule of thumb and does not carry over.
+        Enter the price you are evaluating.
+      </p>
     </div>
   );
 }

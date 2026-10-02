@@ -12,8 +12,8 @@
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
 import { validateToolNumber } from "@/lib/public-tool-validation";
@@ -244,16 +244,24 @@ export function BreakEvenCalculatorWidget() {
         ) : null}
       </div>
 
+      {/* One plain action, then one line saying what is free and what is not
+          (the 1% rule widget's pattern). Nothing typed here carries over, and
+          the label does not say it does. */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
+        aria-describedby="be-handoff-note"
+        className={cn(buttonVariants({ size: "cta" }), "mt-5 w-full sm:w-auto")}
       >
-        <Sparkles className="w-4 h-4" />
-        Run the free core property screen; projections appear when your access
-        includes them
-        <ArrowUpRight className="w-4 h-4" />
+        Run the full analysis
       </AnalyzerHandoffLink>
+      <p
+        id="be-handoff-note"
+        className="mt-2 text-pretty text-sm text-muted-foreground"
+      >
+        Cap rate, CoC, DSCR and cash flow are free in TrueCap. The 10-year
+        projection is a Pro feature.
+      </p>
     </div>
   );
 }
