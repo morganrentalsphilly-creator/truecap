@@ -89,7 +89,7 @@ function card(html: string, id: "pro" | "agent-pro"): string {
 /** The figure a card shows: its DM Mono price, the period beside it, the note under it. */
 function shownFigures(cardHtml: string): PlanPeriodFigures & { other: string } {
   const price =
-    /<span class="font-mono text-section-sm[^"]*">([^<]*)<\/span><span class="text-base text-muted-foreground">([^<]*)<\/span><\/p><p class="mt-1\.5 text-sm text-muted-foreground">([^<]*)<span data-pricing-other-period="" class="block md:hidden">or <span class="font-mono tabular-nums">([^<]*)<\/span>([^<]*)<\/span><\/p>/.exec(
+    /<span class="font-mono text-section-sm[^"]*">([^<]*)<\/span><span class="text-base text-muted-foreground">([^<]*)<\/span><\/p><p class="mt-1\.5 text-sm text-muted-foreground">([^<]*)<span data-pricing-other-period="" class="block md:hidden">or pay <span class="font-mono tabular-nums">([^<]*)<\/span>([^<]*)<\/span><\/p>/.exec(
       cardHtml,
     );
   expect(price, "price, period, note and the other-period line").not.toBeNull();
@@ -100,12 +100,12 @@ function shownFigures(cardHtml: string): PlanPeriodFigures & { other: string } {
     // The Pro card appends its annual saving after " · "; the note opens
     // with the billing term.
     subline: note.trim().split(" · ")[0],
-    other: `or ${otherTop}${otherRest}`,
+    other: `or pay ${otherTop}${otherRest}`,
   };
 }
 
 const lineOf = (figures: PlanPeriodFigures) =>
-  `or ${figures.priceTop}${figures.priceSub} ${figures.subline}`;
+  `or pay ${figures.priceTop}${figures.priceSub} ${figures.subline}`;
 
 describe("/pricing: the other billing period on phones", () => {
   it("reads both periods from the catalog when Stripe's price is missing", () => {
@@ -195,7 +195,7 @@ describe("/pricing: the other billing period on phones", () => {
       createElement(OtherPeriodLine, { figures: paidPlanFigures(null, null, AGENT).monthly }),
     );
     expect(html).toBe(
-      `<span data-pricing-other-period="" class="block md:hidden">or <span class="font-mono tabular-nums">${formatPublicUsd(
+      `<span data-pricing-other-period="" class="block md:hidden">or pay <span class="font-mono tabular-nums">${formatPublicUsd(
         PUBLIC_AGENT_PRO_MONTHLY_USD,
       )}</span>/month billed monthly</span>`,
     );

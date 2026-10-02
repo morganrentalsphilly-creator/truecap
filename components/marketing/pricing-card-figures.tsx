@@ -78,10 +78,15 @@ export function paidPlanFigures(
 }
 
 /**
- * One line under the figure already shown: "or", the other period's figure
- * in DM Mono (it is compared with the price above it), its period and its
- * billing term. Phones only: hidden from 768px, where the cards share a row
- * and the toggle that switches them sits right above it.
+ * One line under the figure already shown: "or pay", the other period's
+ * figure in DM Mono (it is compared with the price above it), its period and
+ * its billing term. Phones only: hidden from 768px, where the cards share a
+ * row and the toggle that switches them sits right above it.
+ *
+ * "or pay", not a bare "or": on the Pro card the note before this line ends
+ * with the annual saving, and read as one run of text (a screen reader,
+ * copied text) "Save $60/yr or $29.99/month" could be taken for a second
+ * saving.
  */
 export function OtherPeriodLine({
   figures,
@@ -92,7 +97,7 @@ export function OtherPeriodLine({
 }) {
   return (
     <span data-pricing-other-period="" className={cn("block md:hidden", className)}>
-      or <LedgerFigure>{figures.priceTop}</LedgerFigure>
+      or pay <LedgerFigure>{figures.priceTop}</LedgerFigure>
       {figures.priceSub} {figures.subline}
     </span>
   );

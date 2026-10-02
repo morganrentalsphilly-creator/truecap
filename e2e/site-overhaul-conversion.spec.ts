@@ -242,10 +242,11 @@ test("pricing page holds together at 375, 768, and 1440 with annual as the defau
     }));
     expect(overflow.documentWidth, `overflow at ${width}`).toBeLessThanOrEqual(overflow.viewportWidth + 1);
     await expect(page.getByText(/Overpaying by 3% on a \$250,000 rental costs \$7,500/)).toBeVisible();
-    // Annual is the default and the effective monthly figure is shown.
+    // Annual is the default and the plan cards show the effective monthly
+    // figure (the hero's chooser also carries an annual line, phone-only).
     const annualToggle = page.getByRole("button", { name: /annual/i }).first();
     await expect(annualToggle).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText(/billed annually/i).first()).toBeVisible();
+    await expect(page.locator("#plans").getByText(/billed annually/i).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /how this compares to DealCheck|DealCheck/i }).first()).toHaveAttribute(
       "href",
       "/vs/dealcheck",
