@@ -124,6 +124,32 @@ describe("llms.txt lists what the sitemap lists", () => {
     expect(personas).toContain("/for-investors");
   });
 
+  it("describes /for-investors by the four questions that page lists", async () => {
+    // The line once read "Four answers before an offer: … What to verify",
+    // a fourth answer the linked page does not list, and left out that the
+    // page attaches all four to Pro. The page file is the source: its
+    // heading and the terms of WHAT_YOU_GET.
+    const page = readFileSync(join(process.cwd(), "app/for-investors/page.tsx"), "utf8");
+    expect(page).toContain("Free screens the deal. Pro answers four questions on every deal.");
+    const block = /const WHAT_YOU_GET = \[([\s\S]*?)\n\];/.exec(page)?.[1] ?? "";
+    const questions = [...block.matchAll(/term:\s*"([^"]+)"/g)].map((m) => m[1] ?? "");
+    expect(questions).toHaveLength(4);
+    const line = sectionLinks(await llms(), "Investor personas").find((link) => link.path === "/for-investors");
+    expect(line).toBeDefined();
+    const said = line?.rest ?? "";
+    expect(said).toContain("Free screens the deal; Pro answers four questions on every deal: ");
+    for (const question of questions) {
+      // "Does it meet my Buy Box?" on the page is "does it meet your Buy Box" here.
+      const restated = (question.charAt(0).toLowerCase() + question.slice(1))
+        .replace(/\?$/, "")
+        .replace(/\bmy\b/g, "your")
+        .replace(/\bI\b/g, "you");
+      expect(said, question).toContain(restated);
+    }
+    // Nothing the page does not list.
+    if (!page.includes("What to verify")) expect(said).not.toContain("What to verify");
+  });
+
   it("describes the glossary by what every term has", async () => {
     const { GLOSSARY } = await import("@/lib/glossary");
     const terms = Object.values(GLOSSARY);
