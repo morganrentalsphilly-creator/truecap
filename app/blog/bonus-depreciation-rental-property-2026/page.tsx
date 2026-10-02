@@ -229,10 +229,9 @@ export default function BlogPost() {
             price of a rental building.
           </p>
           <p>
-            This is educational content, not tax advice — every strategy here
-            has real eligibility tests and audit risk. Run anything you&apos;re
-            considering past a CPA who works with real estate investors before
-            you act on it.
+            Every strategy here has real eligibility tests and audit risk. Run
+            anything you&apos;re considering past a CPA who works with real
+            estate investors before you act on it.
           </p>
 
           <div className="not-prose my-6 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
@@ -724,7 +723,7 @@ export default function BlogPost() {
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            This article is educational. TrueCap&apos;s released analyzer models
+            This article is educational. TrueCap&apos;s analyzer models
             property cash flow, financing, and Pro pre-tax cash-flow/equity
             projections. It does not compute depreciation deductions, after-tax
             cash flow, recapture, or exit-tax outcomes; use a qualified tax
