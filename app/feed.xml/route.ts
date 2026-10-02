@@ -73,7 +73,7 @@ export async function GET() {
     <title>TrueCap Blog — Rental Property Analysis &amp; Underwriting</title>
     <link>${siteUrl}/blog</link>
     <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
-    <description>Original long-form content on rental property analysis, real estate math, BRRRR strategy, DSCR loans, tax concepts, and underwriting from the team behind TrueCap.</description>
+    <description>Original long-form content on rental property analysis, real estate math, BRRRR strategy, DSCR loans, tax concepts, and underwriting from TrueCap.</description>
     <language>en-us</language>
 ${lastBuildDate ? `    <lastBuildDate>${lastBuildDate}</lastBuildDate>\n` : ""}    <generator>TrueCap (Next.js)</generator>
 ${items}
