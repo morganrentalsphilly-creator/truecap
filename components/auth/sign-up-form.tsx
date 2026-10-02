@@ -35,7 +35,11 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { hasPendingSaveIntent } from "@/lib/save-intent";
-import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+} from "@/lib/product-access";
 import {
   formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
@@ -281,7 +285,8 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
         </h2>
         <p className="mt-1 text-sm text-foreground">$0 today · no card</p>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          Complete three Pro deal analyses and one full comparison.{" "}
+          Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deal analyses and{" "}
+          {PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison.{" "}
           {/* An agent who arrives from an Agent Pro CTA is told, before the
               account exists, what the trial leaves out: the same sentence
               /for-agents puts beside that CTA (lib/entitlements.ts: the
