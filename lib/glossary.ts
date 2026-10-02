@@ -148,7 +148,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     formula:
       "IRR solves for the rate where the sum of discounted cash flows (including exit) equals zero.",
     example:
-      "Invest $80k. Collect $7k/yr cash flow for 10 years. Sell for $480k (paying off $260k mortgage = $220k proceeds). IRR ≈ 14.5%.",
+      "Invest $80k. Collect $7k/yr cash flow for 10 years. Sell for $480k (paying off $260k mortgage = $220k proceeds). IRR ≈ 16.7%.",
     whyItMatters:
       "IRR captures the FULL return story: monthly cash flow + principal paydown + appreciation + exit value, all rolled into one annualized number. It's the right metric for wealth-builders.",
     related: ["coc", "cashFlow", "appreciation"],
@@ -549,7 +549,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "building-value",
     category: "fundamental",
     definition:
-      "Portion of purchase price allocated to depreciable building (not land). Defaults to 80% for SFR; land value varies by market.",
+      "Portion of purchase price allocated to depreciable building (not land). Land value varies by market.",
     whyItMatters:
       "A supported allocation to depreciable building affects the modeled depreciation deduction. The allocation must be grounded in the property's facts; a default percentage is only an input assumption, and passive-loss and other limits determine the actual tax effect.",
     howToCheck:

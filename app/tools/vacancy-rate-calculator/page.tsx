@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is a good vacancy rate for rental property?",
-    a: "National average on long-term residential rentals runs 7-9%. Anything under 5% is aggressive — that assumes 18 days or less of vacancy per year, which is unusual outside of high-demand urban cores. For underwriting, use 8% as a default unless you have hard local data showing lower.",
+    a: "The Census Bureau's Housing Vacancy Survey put the national rental vacancy rate at 7.3% in the second quarter of 2026. Anything under 5% is aggressive — that assumes 18 days or less of vacancy per year, which is unusual outside of high-demand urban cores. For underwriting, use 8% as a default unless you have hard local data showing lower.",
   },
   {
     q: "How do you calculate vacancy rate?",
@@ -103,7 +103,7 @@ export default function VacancyRateCalculatorPage() {
     featureList: [
       "Convert vacant days into effective vacancy rate",
       "Include turnover costs in the calculation",
-      "Benchmark against market vacancy data",
+      "Result graded against fixed rule-of-thumb vacancy bands",
     ],
   });
 
@@ -143,8 +143,18 @@ export default function VacancyRateCalculatorPage() {
           Rental Property Vacancy Rate Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          National average vacancy on residential rentals runs 7-9%. Most
-          listing brochures quote 5%. The gap is where deals quietly fail.
+          The Census Bureau&apos;s{" "}
+          <a
+            href="https://www.census.gov/housing/hvs/index.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-primary hover:underline"
+          >
+            Housing Vacancy Survey
+          </a>{" "}
+          put the national rental vacancy rate at 7.3% in the second quarter
+          of 2026. Most listing brochures quote 5%. The gap is where deals
+          quietly fail.
           This calculator converts vacant days + turnover cost into the true
           effective vacancy rate to use in your underwrite.
         </p>
@@ -263,7 +273,12 @@ export default function VacancyRateCalculatorPage() {
         <ToolEmbedInvite slug="vacancy-rate-calculator" />
 
 
-        <ToolsConversionCta calculatorName="Vacancy rate calculator" />
+        {/* Own hook: the shared default still says "released", a build word
+            the voice guide keeps out of customer copy (docs/voice.md rule 6). */}
+        <ToolsConversionCta
+          calculatorName="Vacancy rate calculator"
+          hook="Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
+        />
         <RelatedContent kind="tool" slug="vacancy-rate-calculator" title="Vacancy Rate Calculator" className="mt-10" />
       </main>
       <SiteFooter />

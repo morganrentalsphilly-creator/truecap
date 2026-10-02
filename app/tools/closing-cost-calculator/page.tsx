@@ -175,7 +175,12 @@ export default function ClosingCostCalculatorPage() {
         <ToolEmbedInvite slug="closing-cost-calculator" />
 
 
-        <ToolsConversionCta calculatorName="Closing cost calculator" />
+        {/* Own hook: the shared default still says "released", a build word
+            the voice guide keeps out of customer copy (docs/voice.md rule 6). */}
+        <ToolsConversionCta
+          calculatorName="Closing cost calculator"
+          hook="Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
+        />
         <RelatedContent kind="tool" slug="closing-cost-calculator" title="Closing Cost Calculator" className="mt-10" />
       </main>
       <SiteFooter />
