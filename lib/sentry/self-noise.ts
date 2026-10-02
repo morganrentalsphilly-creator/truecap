@@ -10,11 +10,14 @@
  * DSN, so a blocked checkout or an unbound paid event would have raised no
  * alert either.
  *
- * Dropping this one message in beforeSend (lib/sentry/client-init.ts) stops
- * the site spending its own quota. Sentry stays on, tracesSampleRate and the
- * ignoreErrors list are untouched, and every other captureMessage still
- * reaches Sentry. If PostHog comes off hold and the alert is wanted back,
- * send it once per deployment from the server instead of once per page view.
+ * This one message is now dropped in two places. captureMessageLazy
+ * (lib/sentry/lazy.ts), the helper lib/analytics.ts calls, returns before it
+ * loads the SDK, so nothing is sent or counted. beforeSend
+ * (lib/sentry/client-init.ts) is the backstop for any other caller. Sentry
+ * stays on, tracesSampleRate and the ignoreErrors list are untouched, and
+ * every other captureMessage still reaches Sentry. If PostHog comes off hold
+ * and the alert is wanted back, send it once per deployment from the server
+ * instead of once per page view.
  *
  * The prefix must keep matching the literal in lib/analytics.ts;
  * lib/__tests__/sentry-self-noise.test.ts reads that file and fails if the
