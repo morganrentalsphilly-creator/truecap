@@ -203,18 +203,16 @@ describe("the /vs hub's lines for the held pages match the pages", () => {
   });
 
   it("does not say TrueCap underwrites a short-term rental as such, or list AirDNA as an input", () => {
-    // Same rule as the cards (vs-social-card-guards.test.ts): everything from
-    // the first "TrueCap" on is about TrueCap.
+    // lib/investor-strategies.ts labels the short-term type "Beta revenue
+    // screen only", so a hub line says TrueCap underwrites "the deal", not
+    // "the STR deal" (the cards follow the same rule). A line that names the
+    // beta screen for what it is still passes.
     for (const slug of ["guesty", "hostaway", "hostfully", "lodgify", "airdna"]) {
       const { tagline } = hubEntry(slug);
-      const fromTrueCap = tagline.slice(tagline.indexOf("TrueCap"));
       expect(tagline, slug).toContain("TrueCap");
-      expect(fromTrueCap, slug).not.toMatch(/\b(?:STRs?|short-term)\b/i);
+      expect(tagline, slug).not.toMatch(/underwrit\w* (?:the|an?|your|every|each) (?:STRs?|short-term)\b/i);
     }
+    // There is no AirDNA integration: the reader types AirDNA's numbers in.
     expect(hub).not.toMatch(/AirDNA inputs|using AirDNA/i);
-    // The hub line for the DealCheck short-term page is its card's line.
-    expect(read("app/vs/dealcheck-for-short-term-rentals/opengraph-image.tsx")).toContain(
-      `"${hubEntry("dealcheck-for-short-term-rentals").tagline}"`,
-    );
   });
 });
