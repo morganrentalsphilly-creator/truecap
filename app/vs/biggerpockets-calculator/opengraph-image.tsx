@@ -1,16 +1,15 @@
 /**
- * Dynamic OG image for /vs/biggerpockets-calculator. Auto-detected by Next.js App Router
- * convention; overrides any images: [...] declared in the route's
- * metadata.
+ * Social card for /vs/biggerpockets-calculator. The page sets no images of its own, so Next
+ * serves this file as its og:image and twitter:image. Drawn by the shared
+ * template, lib/og/vs-og-template.tsx.
  *
- * Implementation lives in the shared template at
- * lib/og/vs-og-template.tsx — this file is just the per-competitor
- * config wrapper so all 10 /vs OG images stay visually consistent.
+ * The tagline restates what /vs/biggerpockets-calculator and the /vs hub say today. When the
+ * page changes a fact, change this line with it.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const alt = "TrueCap vs BiggerPockets — honest comparison";
+export const alt = "TrueCap vs BiggerPockets Calculator";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

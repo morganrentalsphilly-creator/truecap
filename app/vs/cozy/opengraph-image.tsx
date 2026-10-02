@@ -1,15 +1,15 @@
 /**
- * Dynamic OG image for /vs/cozy. Auto-detected by Next.js App Router
- * convention; overrides any images: [...] declared in the route's
- * metadata.
+ * Social card for /vs/cozy. The page sets no images of its own, so Next
+ * serves this file as its og:image and twitter:image. Drawn by the shared
+ * template, lib/og/vs-og-template.tsx.
  *
- * Implementation lives in the shared template at
- * lib/og/vs-og-template.tsx.
+ * The competitor rows on /vs/cozy wait on a decision (report row P1-18),
+ * so this card says only what TrueCap does.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const alt = "TrueCap vs Cozy — honest comparison";
+export const alt = "TrueCap vs Cozy";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Cozy",
     tagline:
-      "Cozy.co shut down in 2022. TrueCap underwrites deals; pair with TurboTenant for the ops Cozy used to do.",
+      "TrueCap covers pre-purchase underwriting: cash flow, cap rate, cash-on-cash return and DSCR before you make an offer.",
     slug: "cozy",
   });
 }

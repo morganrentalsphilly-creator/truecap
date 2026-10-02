@@ -1,15 +1,15 @@
 /**
- * Dynamic OG image for /vs/rentec-direct. Auto-detected by Next.js App Router
- * convention; overrides any images: [...] declared in the route's
- * metadata.
+ * Social card for /vs/rentec-direct. The page sets no images of its own, so Next
+ * serves this file as its og:image and twitter:image. Drawn by the shared
+ * template, lib/og/vs-og-template.tsx.
  *
- * Implementation lives in the shared template at
- * lib/og/vs-og-template.tsx.
+ * The tagline restates what /vs/rentec-direct and the /vs hub say today. When the
+ * page changes a fact, change this line with it.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const alt = "TrueCap vs Rentec Direct — honest comparison";
+export const alt = "TrueCap vs Rentec Direct";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Rentec Direct",
     tagline:
-      "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the deal before. Different stages.",
+      "Rentec Direct is property management software for landlords and property managers. TrueCap underwrites the deal before you buy. Different stages.",
     slug: "rentec-direct",
   });
 }
