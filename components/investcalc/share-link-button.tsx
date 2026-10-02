@@ -865,7 +865,13 @@ export function ShareLinkButton({
                 This dialog manages share links across your account, including
                 links from unsaved edits and deals you later remove. Older
                 links remain available through Load older links.{" "}
-                Links also expire automatically. {" "}
+                {/* The period is the public_shares.expires_at default (180
+                    days, migration 20260817150658) and cannot be set here.
+                    lib/public-share.ts also returns not-found for a link
+                    whose stored standard version is not the current one. */}
+                A link expires 180 days after it is created. When TrueCap
+                updates its underwriting standard, earlier links stop opening:
+                rerun the deal and share a new link.{" "}
                 Still treat one like a document you chose to share.
               </>
             )}
