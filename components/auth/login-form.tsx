@@ -201,7 +201,7 @@ export function LoginForm() {
                   autoComplete="email"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="h-12 px-4 text-base md:text-base"
+                  className="h-12 px-4 text-base lg:text-base"
                   {...field}
                 />
               </FormControl>
@@ -231,7 +231,7 @@ export function LoginForm() {
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     disabled={isSubmitting}
-                    className="h-12 pl-4 pr-12 text-base md:text-base"
+                    className="h-12 pl-4 pr-12 text-base lg:text-base"
                     {...field}
                   />
                 </FormControl>

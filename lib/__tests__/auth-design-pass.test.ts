@@ -84,7 +84,9 @@ describe("the auth screens are on the ledger tokens", () => {
       // site that passes its own background, border or radius is how the
       // fields went gray (bg-background behind FormControl) and 8px.
       expect(tag).not.toMatch(/\bbg-|\bborder-|\brounded-|\bshadow-|placeholder:/);
-      expect(tag).toMatch(/className="h-12 (?:px-4|pl-4 pr-12) text-base md:text-base"/);
+      // lg:text-base, not md:text-base: the primitive steps down to 14px at
+      // lg (components/ui/input.tsx), and only the same variant overrides it.
+      expect(tag).toMatch(/className="h-12 (?:px-4|pl-4 pr-12) text-base lg:text-base"/);
     }
   });
 

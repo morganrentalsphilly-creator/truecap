@@ -261,7 +261,7 @@ export function HeroAddressForm({
             hasError={Boolean(addressError)}
             errorId={errorId}
             required
-            inputClassName="h-12 rounded-md bg-field px-4 text-base md:text-base"
+            inputClassName="h-12 rounded-md bg-field px-4 text-base lg:text-base"
             onPlaceSelected={(place) => {
               // Capture the picked suggestion's parsed components so the
               // analyzer's enrichment (HUD/FRED) has state/county/zip.

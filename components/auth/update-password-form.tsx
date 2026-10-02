@@ -124,7 +124,7 @@ export function UpdatePasswordForm() {
                     autoComplete="new-password"
                     placeholder="Enter your new password"
                     disabled={isSubmitting}
-                    className="h-12 pl-4 pr-12 text-base md:text-base"
+                    className="h-12 pl-4 pr-12 text-base lg:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -158,7 +158,7 @@ export function UpdatePasswordForm() {
                     autoComplete="new-password"
                     placeholder="Confirm your new password"
                     disabled={isSubmitting}
-                    className="h-12 pl-4 pr-12 text-base md:text-base"
+                    className="h-12 pl-4 pr-12 text-base lg:text-base"
                     {...field}
                   />
                 </FormControl>
