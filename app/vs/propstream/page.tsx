@@ -226,6 +226,7 @@ export default function VsPropstreamPage() {
           <ProductShot
             shot="verdict"
             frame="document"
+            priority
             sizes="(min-width: 768px) 768px, 100vw"
             className="max-w-3xl"
             alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, and DSCR"
