@@ -63,16 +63,8 @@ export const metadata: Metadata = {
       "Landlord Studio manages rentals you own. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/landlord-studio",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Landlord Studio",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "landlordstudio" | "tie";

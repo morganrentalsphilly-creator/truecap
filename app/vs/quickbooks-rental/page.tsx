@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "QuickBooks is general-purpose accounting. TrueCap is pre-purchase underwriting. Different stages.",
     url: "/vs/quickbooks-rental",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs QuickBooks for rentals",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "quickbooksrental" | "tie";

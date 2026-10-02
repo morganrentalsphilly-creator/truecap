@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "Baselane is rental banking + bookkeeping after closing. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/baselane",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Baselane",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "baselane" | "tie";

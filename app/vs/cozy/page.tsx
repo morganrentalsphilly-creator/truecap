@@ -62,11 +62,8 @@ export const metadata: Metadata = {
       "Cozy.co shut down in 2022. TrueCap underwrites deals; here's what replaces Cozy's other features.",
     url: "/vs/cozy",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Cozy" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "cozy" | "tie";

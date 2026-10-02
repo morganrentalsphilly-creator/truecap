@@ -62,11 +62,8 @@ export const metadata: Metadata = {
       "Reonomy is commercial RE intelligence + owner data. TrueCap is residential underwriting. Different asset classes.",
     url: "/vs/reonomy",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Reonomy" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "reonomy" | "tie";

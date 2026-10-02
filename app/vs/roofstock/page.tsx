@@ -66,16 +66,8 @@ export const metadata: Metadata = {
       "Roofstock offers services for individual real-estate investors. TrueCap provides a separate, assumption-driven underwrite.",
     url: "/vs/roofstock",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Roofstock",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "roofstock" | "tie";

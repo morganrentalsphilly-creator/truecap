@@ -63,16 +63,8 @@ export const metadata: Metadata = {
       "Rentec Direct is property management software for landlords and property managers. TrueCap underwrites the deal before you buy. Different stages.",
     url: "/vs/rentec-direct",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Rentec Direct",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "rentecdirect" | "tie";

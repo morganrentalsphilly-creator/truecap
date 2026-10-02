@@ -66,16 +66,8 @@ export const metadata: Metadata = {
       "Address-to-underwrite workflow vs a mature rental-analysis and native mobile ecosystem.",
     url: "/vs/dealcheck",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs DealCheck",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Row = { workflow: string; truecap: string; dealcheck: string };

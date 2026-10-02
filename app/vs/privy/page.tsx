@@ -62,11 +62,8 @@ export const metadata: Metadata = {
       "Privy sources deals on MLS data. TrueCap underwrites the deals. Different jobs in the same workflow.",
     url: "/vs/privy",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Privy" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "privy" | "tie";

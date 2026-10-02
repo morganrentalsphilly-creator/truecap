@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "DealMachine finds leads with property data and driving for dollars. TrueCap underwrites them. Different jobs.",
     url: "/vs/dealmachine",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs DealMachine",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "dealmachine" | "tie";

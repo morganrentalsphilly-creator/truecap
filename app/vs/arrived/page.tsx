@@ -59,9 +59,8 @@ export const metadata: Metadata = {
       "Arrived = fractional shares of rental properties. TrueCap = underwriting whole properties you own directly. Different models.",
     url: "/vs/arrived",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Arrived" }],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "arrived" | "tie";

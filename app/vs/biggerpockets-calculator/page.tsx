@@ -67,16 +67,8 @@ export const metadata: Metadata = {
       "Address-first decision workflow vs a detailed calculator inside a broader investor ecosystem.",
     url: "/vs/biggerpockets-calculator",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs BiggerPockets Calculator",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Row = { workflow: string; truecap: string; bp: string };
