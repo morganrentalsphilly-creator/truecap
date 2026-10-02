@@ -167,15 +167,37 @@ export const LANDING_SECTIONS = [
   "vs",
   "pricing",
   "analyze",
+  "for_agents",
+  "for_investors",
   "other",
 ] as const;
 
 export type LandingSection = (typeof LANDING_SECTIONS)[number];
 
 const SECTION_SET = new Set<string>(LANDING_SECTIONS);
+
+/**
+ * The two persona landing pages ads point at. Their path segments carry a
+ * hyphen, which the cookie value pattern below does not allow (lower-case
+ * letters and underscores only), so each maps to an underscore name. Stored
+ * as it is, `paid_search.for-agents` would fail to parse and the record would
+ * be dropped at sign-up.
+ */
+function personaSection(segment: string): LandingSection | null {
+  if (segment === "for-agents") return "for_agents";
+  if (segment === "for-investors") return "for_investors";
+  return null;
+}
+
 /** Sections that name a first path segment ("/home" is not the homepage). */
 const SEGMENT_SECTIONS = new Set<string>(
-  LANDING_SECTIONS.filter((section) => section !== "home" && section !== "other"),
+  LANDING_SECTIONS.filter(
+    (section) =>
+      section !== "home" &&
+      section !== "other" &&
+      section !== "for_agents" &&
+      section !== "for_investors",
+  ),
 );
 
 export function isLandingSection(value: unknown): value is LandingSection {
@@ -186,7 +208,8 @@ export function landingSection(pathname: string): LandingSection {
   const path = pathname.split(/[?#]/, 1)[0] ?? "";
   if (path === "/" || path === "") return "home";
   const first = (path.split("/")[1] ?? "").toLowerCase();
-  return SEGMENT_SECTIONS.has(first) ? (first as LandingSection) : "other";
+  if (SEGMENT_SECTIONS.has(first)) return first as LandingSection;
+  return personaSection(first) ?? "other";
 }
 
 // ── The tc_ft cookie ────────────────────────────────────────────────
@@ -198,7 +221,7 @@ export type FirstTouch = {
 
 export const FIRST_TOUCH_COOKIE = "tc_ft";
 export const FIRST_TOUCH_COOKIE_MAX_AGE_SECONDS = 90 * 24 * 60 * 60;
-/** Longest legal value is "external_referral.glossary" (26 chars). */
+/** Longest legal value is "external_referral.for_investors" (31 chars). */
 const MAX_COOKIE_VALUE_LENGTH = 40;
 const COOKIE_VALUE_RE = /^([a-z_]{1,24})\.([a-z_]{1,16})$/;
 
