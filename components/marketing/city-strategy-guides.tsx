@@ -23,7 +23,7 @@
  * constant brings the links back on both city render paths.
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getCombosForCity } from "@/lib/city-strategy-combos";
 import { isLinkablePath } from "@/lib/seo/link-policy";
 
@@ -50,13 +50,13 @@ export function CityStrategyGuides({
       </p>
       <div className="flex flex-wrap gap-2 text-sm">
         {combos.map((c) => (
-          <Link
+          <IntentPrefetchLink
             key={c.strategy}
             href={`/markets/${c.citySlug}/${c.strategy}`}
             className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             {c.strategyLabel} in {c.cityName}
-          </Link>
+          </IntentPrefetchLink>
         ))}
       </div>
     </section>

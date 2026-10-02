@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { formatIsoDate, type SourceLink } from "@/lib/markets/data-copy";
 import { cn } from "@/lib/utils";
 
@@ -77,12 +77,12 @@ export function SourceMethodologyBox({
         {sources.length > 0
           ? "Figures with a source can be checked against the pages listed here. "
           : null}
-        <Link
+        <IntentPrefetchLink
           href="/methodology"
           className="underline decoration-dotted underline-offset-2 hover:text-foreground"
         >
           See our full methodology
-        </Link>
+        </IntentPrefetchLink>
         .
       </p>
     </section>
