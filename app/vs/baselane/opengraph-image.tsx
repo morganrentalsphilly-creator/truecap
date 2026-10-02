@@ -3,8 +3,9 @@
  * serves this file as its og:image and twitter:image. Drawn by the shared
  * template, lib/og/vs-og-template.tsx.
  *
- * The competitor rows on /vs/baselane wait on a decision (report row P0-05),
- * so this card says only what TrueCap does.
+ * The line restates the page's lede and its Open Graph description: what
+ * Baselane is (checked against baselane.com on 2026-10-02) and what TrueCap
+ * does. It carries no price, limit or coverage figure.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
@@ -17,7 +18,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Baselane",
     tagline:
-      "TrueCap is the pre-purchase underwrite: cash flow, cap rate, cash-on-cash return and DSCR before you make an offer.",
+      "Baselane is banking and bookkeeping for rentals you own. TrueCap is the pre-purchase underwrite: cash flow, cap rate and DSCR before you offer.",
     slug: "baselane",
   });
 }

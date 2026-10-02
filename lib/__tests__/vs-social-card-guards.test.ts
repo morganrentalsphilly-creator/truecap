@@ -184,7 +184,7 @@ describe("the /vs social cards", () => {
      * repeats none of the claims. When a row closes, take the slug off this
      * list in the commit that rewrites the page and its card.
      */
-    const WAITING = ["arrived", "baselane", "cozy", "fundrise", "roofstock"];
+    const WAITING = ["arrived", "cozy", "fundrise", "roofstock"];
     for (const slug of WAITING) {
       const { tagline, competitor } = bySlug(slug);
       expect(tagline, slug).toMatch(/^TrueCap /);
