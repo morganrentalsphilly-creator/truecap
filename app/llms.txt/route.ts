@@ -70,7 +70,7 @@ export const revalidate = 3600;
  * Every /vs comparison page in the sitemap (COMPARISON_PATHS in
  * app/sitemap.ts), in its order, with the competitor named as the /vs hub
  * names it (COMPARISONS in app/vs/page.tsx), without the hub's trailing
- * parenthetical: the hub's "Cozy.co (shut down)" is listed here as
+ * parenthetical: the hub's "Cozy.co (moved to Apartments.com)" is listed here as
  * "Cozy.co", because a line here says nothing about a competitor beyond its
  * name. This section was seven hand-typed lines while the sitemap listed 38
  * pages.
