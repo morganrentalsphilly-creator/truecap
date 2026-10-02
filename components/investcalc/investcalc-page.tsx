@@ -2094,6 +2094,19 @@ export function InvestCalcPage({
   };
 
   /**
+   * "Did someone enter a number here?" for fields where 0 is a real answer
+   * (a studio has 0 bedrooms; an owner's unit rents for 0). An untouched
+   * `valueAsNumber` input holds NaN, which `!= null` counts as a value.
+   */
+  const hasEnteredNumber = (v: unknown): boolean => {
+    if (typeof v === "number") return Number.isFinite(v);
+    if (typeof v === "string") {
+      return v.trim() !== "" && Number.isFinite(Number(v));
+    }
+    return false;
+  };
+
+  /**
    * Holds the address components from the most recent autocomplete
    * selection. We keep this around so we can re-fire the HUD rent lookup
    * once the user fills in the bedroom count (selection order is
@@ -2622,6 +2635,25 @@ export function InvestCalcPage({
         visiblePreviousAddress;
       if (!previousAddress) return true;
 
+      // A typed address reaches here on blur or Enter with the field already
+      // holding the text being committed. With no selected place and no
+      // completed analysis, that text is the only "previous address", so
+      // there is no earlier property to protect. A ZIP-less identity never
+      // equals itself in isSameAutofillProperty (the ZIP strictness there is
+      // deliberate for provenance), which opened this dialog on a first visit
+      // and offered to erase a price and rent that belong to this address.
+      // The same holds when the address typed again is, word for word, the
+      // one already committed: the same text is not a new property.
+      const committedIdentity = normalizeAutofillPropertyAddress(
+        nextPlace.formattedAddress,
+      );
+      if (
+        committedIdentity !== null &&
+        normalizeAutofillPropertyAddress(previousAddress) === committedIdentity
+      ) {
+        return true;
+      }
+
       const previousPlace =
         selectedPreviousPlace ??
         (() => {
@@ -2664,16 +2696,16 @@ export function InvestCalcPage({
         !isEmptyNumber(currentValues.avgDailyRate) ||
         !isEmptyNumber(currentValues.rehabBudget) ||
         !isEmptyNumber(currentValues.strategyArv) ||
-        currentValues.bedrooms != null ||
-        currentValues.bathrooms != null ||
-        currentValues.sqft != null ||
+        hasEnteredNumber(currentValues.bedrooms) ||
+        hasEnteredNumber(currentValues.bathrooms) ||
+        hasEnteredNumber(currentValues.sqft) ||
         currentValues.units?.some(
           (unit) =>
-            unit.monthlyRent != null ||
-            unit.stabilizedMonthlyRent != null ||
-            unit.bedrooms != null ||
-            unit.bathrooms != null ||
-            unit.sqft != null,
+            hasEnteredNumber(unit.monthlyRent) ||
+            hasEnteredNumber(unit.stabilizedMonthlyRent) ||
+            hasEnteredNumber(unit.bedrooms) ||
+            hasEnteredNumber(unit.bathrooms) ||
+            hasEnteredNumber(unit.sqft),
         ),
       );
       if (!hasPropertySpecificValues) return true;
