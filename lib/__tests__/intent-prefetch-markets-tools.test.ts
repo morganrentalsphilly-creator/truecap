@@ -70,6 +70,12 @@ describe("P2-91: market, state and older calculator pages prefetch on intent", (
     // (and in its embed frame) and links the ARV calculator, so the page
     // prefetched that route as soon as the widget was in view.
     "components/tools/seventy-percent-rule-widget.tsx",
+    // Two shared blocks every market and state page mounts: the strategy
+    // chips under a city page and the methodology link in the sources box.
+    // As default links they prefetched /markets/<city>/<strategy> and
+    // /methodology as soon as they scrolled into view.
+    "components/marketing/city-strategy-guides.tsx",
+    "components/marketing/source-methodology-box.tsx",
   ];
 
   it.each(PAGES)("%s", (path) => {
@@ -89,6 +95,12 @@ describe("P2-91: market, state and older calculator pages prefetch on intent", (
     expect(hub).toMatch(
       /<IntentPrefetchLink\s+href=\{`\/markets\/\$\{city\.slug\}`\}\s+data-market-city-link=""/,
     );
+  });
+
+  it("the markets hub names itself on its analyzer link, as the city and state templates do", () => {
+    const hub = code("app/markets/page.tsx");
+    expect(hub).toMatch(/<Link\s+href="\/analyze\?from=markets-hub" prefetch=\{false\}/);
+    expect(hub).not.toContain('href="/analyze"');
   });
 
   it("reads tags the way the rule assumes", () => {
