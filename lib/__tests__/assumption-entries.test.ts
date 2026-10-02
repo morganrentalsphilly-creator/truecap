@@ -53,6 +53,50 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     expect(e[0]!.source).toBe("HUD rent benchmark (ZIP)");
   });
 
+  // Audit row P0-02: an address with no county match gets the statewide HUD
+  // fallback. The strip used to call it "HUD rent benchmark (county)".
+  it("labels the statewide HUD fallback as statewide, never as a county or FMR figure", () => {
+    const e = buildAssumptionEntries(
+      {
+        monthlyRent: {
+          source: "hud-fmr",
+          detail: "VA avg",
+          fetchedAt: "2026",
+          stateAverage: true,
+        },
+      },
+      false,
+    );
+    expect(e[0]).toMatchObject({
+      label: "Rent",
+      source: "HUD rent benchmark (statewide average)",
+      short: "HUD statewide",
+      freshness: "HUD 2026",
+      manual: false,
+    });
+    expect(e[0]!.source).not.toMatch(/county|ZIP/);
+    expect(e[0]!.short).not.toMatch(/FMR/);
+  });
+
+  it("keeps the area label for a stored provenance written before the flag existed", () => {
+    const e = buildAssumptionEntries(
+      { monthlyRent: { source: "hud-fmr", detail: "VA avg", fetchedAt: "2026" } },
+      false,
+    );
+    expect(e[0]).toMatchObject({
+      source: "HUD rent benchmark (county)",
+      short: "HUD FMR",
+    });
+  });
+
+  it("an overridden statewide fill is the user's entry, not a HUD figure", () => {
+    const e = buildAssumptionEntries(
+      { monthlyRent: { source: "hud-fmr", stateAverage: true, overridden: true } },
+      false,
+    );
+    expect(e[0]).toMatchObject({ source: "You entered it", manual: true });
+  });
+
   it("never relabels a RentCast estimate as HUD in the compact summary", () => {
     const e = buildAssumptionEntries(
       {

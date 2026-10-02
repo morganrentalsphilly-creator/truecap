@@ -3,6 +3,7 @@ import {
   buildDataConfidence,
   computeConfidenceLevel,
   confidenceLabel,
+  dataConfidenceSourceLabel,
   describeConfidenceGap,
   normalizeDataConfidence,
   shouldPreserveStoredDataConfidence,
@@ -142,6 +143,82 @@ describe("normalizeDataConfidence", () => {
     });
     expect(parsed?.fields.monthlyRent).toBeUndefined();
     expect(parsed?.fields.interestRate?.source).toBe("fred");
+  });
+});
+
+// Audit row P0-02: an address with no county match gets the statewide HUD
+// fallback, which the badge used to call "HUD rent benchmark (county)".
+describe("statewide HUD rent fallback label", () => {
+  it("keeps the area labels when there is no statewide flag", () => {
+    expect(dataConfidenceSourceLabel("hud-fmr")).toBe("HUD rent benchmark (county)");
+    expect(dataConfidenceSourceLabel("hud-safmr")).toBe("HUD rent benchmark (ZIP)");
+    expect(dataConfidenceSourceLabel("hud-fmr", { stateAverage: false })).toBe("HUD rent benchmark (county)");
+  });
+
+  it("labels a flagged HUD rent as a statewide average, never as a county figure", () => {
+    const label = dataConfidenceSourceLabel("hud-fmr", { stateAverage: true });
+    expect(label).toBe("HUD rent benchmark (statewide average)");
+    expect(label).not.toMatch(/county|ZIP/);
+    // The flag means nothing on a non-HUD source.
+    expect(dataConfidenceSourceLabel("fred", { stateAverage: true })).toBe("FRED owner-occupied rate benchmark");
+    expect(dataConfidenceSourceLabel("manual", { stateAverage: true })).toBe("You entered it");
+  });
+
+  it("carries the flag into the stored object and back out of it", () => {
+    const dc = buildDataConfidence(
+      { monthlyRent: { source: "hud-fmr", detail: "OH avg", fetchedAt: "2026", stateAverage: true }, interestRate: { source: "fred" } },
+      complete,
+    );
+    expect(dc.fields.monthlyRent).toEqual({
+      source: "hud-fmr",
+      fetchedAt: "2026",
+      verified: false,
+      detail: "OH avg",
+      stateAverage: true,
+    });
+    expect(dc.fields.interestRate).not.toHaveProperty("stateAverage");
+    // The level rule is untouched: a benchmark is never High.
+    expect(dc.level).toBe("medium");
+
+    const parsed = normalizeDataConfidence(JSON.parse(JSON.stringify(dc)));
+    expect(parsed?.fields.monthlyRent?.stateAverage).toBe(true);
+    const rent = parsed!.fields.monthlyRent!;
+    expect(dataConfidenceSourceLabel(rent.source, { stateAverage: rent.stateAverage })).toBe(
+      "HUD rent benchmark (statewide average)",
+    );
+  });
+
+  it("an overridden statewide fill becomes a manual estimate with no flag", () => {
+    const dc = buildDataConfidence(
+      { monthlyRent: { source: "hud-fmr", stateAverage: true, overridden: true } },
+      complete,
+    );
+    expect(dc.fields.monthlyRent?.source).toBe("manual");
+    expect(dc.fields.monthlyRent).not.toHaveProperty("stateAverage");
+  });
+
+  it("a saved deal written before the flag existed still parses and keeps the area label", () => {
+    const parsed = normalizeDataConfidence({
+      level: "medium",
+      fields: { monthlyRent: { source: "hud-fmr", verified: false, detail: "VA avg", fetchedAt: "2026" } },
+      computedAt: "2026-09-01T00:00:00.000Z",
+    });
+    const rent = parsed!.fields.monthlyRent!;
+    expect(rent).not.toHaveProperty("stateAverage");
+    expect(dataConfidenceSourceLabel(rent.source, { stateAverage: rent.stateAverage })).toBe(
+      "HUD rent benchmark (county)",
+    );
+    // A non-boolean or misplaced flag is ignored rather than trusted.
+    const odd = normalizeDataConfidence({
+      level: "medium",
+      fields: {
+        monthlyRent: { source: "hud-fmr", verified: false, stateAverage: "yes" },
+        interestRate: { source: "fred", verified: false, stateAverage: true },
+      },
+      computedAt: "2026-09-01T00:00:00.000Z",
+    });
+    expect(odd!.fields.monthlyRent).not.toHaveProperty("stateAverage");
+    expect(odd!.fields.interestRate).not.toHaveProperty("stateAverage");
   });
 });
 

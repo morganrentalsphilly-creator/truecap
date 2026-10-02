@@ -19,7 +19,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Database, Pencil } from "lucide-react";
-import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
+import {
+  HUD_STATEWIDE_RENT_LABEL,
+  isStatewideHudRent,
+  type EnrichmentProvenanceInput,
+} from "@/lib/data-confidence";
 import { cn } from "@/lib/utils";
 
 type StripEntry = {
@@ -53,18 +57,24 @@ export function buildAssumptionEntries(
       label: "Rent",
       ...(rent && !rent.overridden
         ? {
+            // A statewide fallback is checked first: it is neither a county
+            // nor a ZIP figure, and must not be labeled as one (P0-02).
             source:
               rent.source === "rentcast-estimate"
                 ? "RentCast market-rent estimate"
-                : rent.source === "hud-safmr"
-                  ? "HUD rent benchmark (ZIP)"
-                  : "HUD rent benchmark (county)",
+                : isStatewideHudRent(rent)
+                  ? HUD_STATEWIDE_RENT_LABEL
+                  : rent.source === "hud-safmr"
+                    ? "HUD rent benchmark (ZIP)"
+                    : "HUD rent benchmark (county)",
             short:
               rent.source === "rentcast-estimate"
                 ? "RentCast"
-                : rent.source === "hud-safmr"
-                  ? "HUD SAFMR"
-                  : "HUD FMR",
+                : isStatewideHudRent(rent)
+                  ? "HUD statewide"
+                  : rent.source === "hud-safmr"
+                    ? "HUD SAFMR"
+                    : "HUD FMR",
             manual: false,
             ...(rent.fetchedAt
               ? {

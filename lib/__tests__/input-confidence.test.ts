@@ -243,6 +243,129 @@ describe("Input Confidence v1.1", () => {
     expect(result.stage).not.toBe("offer-ready");
   });
 
+  // Audit row P0-02: an address with no county match gets the statewide HUD
+  // fallback. "Verify next" and the PDF's "Current source" column used to
+  // call it "HUD Rent Benchmark (county)".
+  it("labels the statewide HUD fallback as statewide without changing its class or score", () => {
+    const area = buildInputConfidence({
+      values: values(),
+      provenance: {
+        monthlyRent: { source: "hud-fmr", fetchedAt: "2026", overridden: false },
+      },
+    });
+    const statewide = buildInputConfidence({
+      values: values(),
+      provenance: {
+        monthlyRent: {
+          source: "hud-fmr",
+          fetchedAt: "2026",
+          detail: "VA avg",
+          overridden: false,
+          stateAverage: true,
+        },
+      },
+    });
+
+    expect(byKey(area, "rent").sourceLabel).toBe("HUD Rent Benchmark (county)");
+    expect(byKey(statewide, "rent").sourceLabel).toBe(
+      "HUD Rent Benchmark (statewide average)",
+    );
+    expect(byKey(statewide, "rent").sourceLabel).not.toMatch(/county|ZIP/);
+    expect(byKey(statewide, "rent").reason).toMatch(/statewide average/i);
+    expect(byKey(statewide, "rent").reason).toMatch(/not a figure for this address's county or ZIP/i);
+    // Label and reason only: the class, the weight and the score do not move.
+    expect(byKey(statewide, "rent").sourceClass).toBe("market-benchmark");
+    expect(byKey(statewide, "rent").weight).toBe(byKey(area, "rent").weight);
+    expect(byKey(statewide, "rent").earnedPoints).toBe(
+      byKey(area, "rent").earnedPoints,
+    );
+    expect(byKey(statewide, "rent").verifyAction).toBe(
+      byKey(area, "rent").verifyAction,
+    );
+    expect(statewide.score).toBe(area.score);
+    expect(statewide.stage).toBe(area.stage);
+  });
+
+  it("keeps the statewide flag through a save and reopen, and drops it with an override", () => {
+    const current = values();
+    const saved = buildInputConfidence({
+      values: current,
+      provenance: {
+        monthlyRent: {
+          source: "hud-fmr",
+          fetchedAt: "2026",
+          detail: "VA avg",
+          overridden: false,
+          stateAverage: true,
+        },
+        interestRate: { source: "fred", fetchedAt: "2026-09-18", overridden: false },
+      },
+    });
+    expect(saved.sourceContext.provenance.monthlyRent).toMatchObject({
+      source: "hud-fmr",
+      stateAverage: true,
+    });
+    // The flag never leaks onto a field it does not describe.
+    expect(saved.sourceContext.provenance.interestRate).not.toHaveProperty(
+      "stateAverage",
+    );
+
+    const restored = restoreInputConfidenceSourceContext(
+      JSON.parse(JSON.stringify(saved.sourceContext)),
+      current,
+    );
+    expect(restored.provenance.monthlyRent?.stateAverage).toBe(true);
+    const reopened = buildInputConfidence({
+      values: current,
+      provenance: restored.provenance,
+    });
+    expect(byKey(reopened, "rent").sourceLabel).toBe(
+      "HUD Rent Benchmark (statewide average)",
+    );
+
+    const overridden = buildInputConfidence({
+      values: current,
+      provenance: {
+        monthlyRent: { source: "hud-fmr", overridden: true, stateAverage: true },
+      },
+    });
+    expect(byKey(overridden, "rent").sourceLabel).toBe("Your entered rent");
+  });
+
+  it("reopens a source context stored before the statewide flag existed", () => {
+    const current = values();
+    const legacy = buildInputConfidence({
+      values: current,
+      provenance: {
+        monthlyRent: {
+          source: "hud-fmr",
+          fetchedAt: "2026",
+          detail: "VA avg",
+          overridden: false,
+        },
+      },
+    }).sourceContext;
+    expect(legacy.provenance.monthlyRent).not.toHaveProperty("stateAverage");
+
+    const restored = restoreInputConfidenceSourceContext(
+      JSON.parse(JSON.stringify(legacy)),
+      current,
+    );
+    expect(restored.provenance.monthlyRent).toEqual({
+      source: "hud-fmr",
+      fetchedAt: "2026",
+      detail: "VA avg",
+      overridden: false,
+    });
+    const reopened = buildInputConfidence({
+      values: current,
+      provenance: restored.provenance,
+    });
+    expect(byKey(reopened, "rent").sourceLabel).toBe(
+      "HUD Rent Benchmark (county)",
+    );
+  });
+
   it("treats an overridden benchmark as a user estimate, not automatic verification", () => {
     const result = buildInputConfidence({
       values: values({ monthlyRent: 2_950, interestRate: 7.4 }),

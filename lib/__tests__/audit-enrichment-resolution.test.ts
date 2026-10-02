@@ -3,7 +3,20 @@
  * with the network stubbed. Complements the browser tests in
  * e2e/audit-analyzer-autofill.spec.ts (which use the loopback mock server).
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { buildAssumptionEntries } from "@/components/investcalc/assumptions-source-strip";
+import { enrichmentRentSourceLabel } from "@/components/investcalc/enrichment-receipt";
+import {
+  buildDataConfidence,
+  dataConfidenceSourceLabel,
+  normalizeDataConfidence,
+  type EnrichmentProvenanceInput,
+} from "@/lib/data-confidence";
+import { buildInputConfidence } from "@/lib/input-confidence";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { EnrichPropertyResult } from "../../app/actions/enrich-property";
 
 const hudState = {
   data: {
@@ -21,6 +34,66 @@ const hudSafmr = {
 const fredOk = { observations: [{ date: "2026-09-18", value: "6.42" }] };
 
 type Handler = (url: string, init?: RequestInit) => Promise<Response> | Response;
+
+/**
+ * The rent provenance the analyzer keeps for a single-family fill: the same
+ * mapping as the capture in components/investcalc/investcalc-page.tsx
+ * (source, county as detail, year as fetchedAt, and the statewide flag only
+ * when the action set it). The source scan below pins that the page still
+ * does this.
+ */
+function rentProvenanceFor(out: EnrichPropertyResult): EnrichmentProvenanceInput {
+  const rent = out.meta.rent;
+  if (!rent) return {};
+  return {
+    monthlyRent: {
+      source: rent.source,
+      detail: rent.county,
+      fetchedAt: String(rent.year),
+      overridden: false,
+      ...(rent.stateAverage ? { stateAverage: true } : {}),
+    },
+  };
+}
+
+/** The four places the analyzer names the rent source (audit row P0-02). */
+function rentSourceLabels(out: EnrichPropertyResult) {
+  const provenance = rentProvenanceFor(out);
+  const strip = buildAssumptionEntries(provenance, false)[0]!;
+  const stored = normalizeDataConfidence(
+    JSON.parse(JSON.stringify(buildDataConfidence(provenance, { hasRent: true, hasPrice: true }))),
+  )!.fields.monthlyRent!;
+  const inputConfidence = buildInputConfidence({
+    values: {
+      propertyType: "single-family",
+      address: "1 Test St, Columbus, OH 43215, USA",
+      purchasePrice: 250_000,
+      monthlyRent: out.monthlyRent,
+      yearBuilt: 1990,
+      units: [],
+      downPaymentPct: 20,
+      interestRate: 6.42,
+      loanTermYears: 30,
+      maintenancePct: 10,
+      vacancyPct: 5,
+      mgmtPct: 8,
+      capexPct: 5,
+      buildingValuePct: 85,
+      depreciationYears: 27.5,
+      expenseGrowthPct: 2.5,
+      rentGrowthPct: 2.5,
+      insuranceInputMode: "percent",
+    } as Partial<InvestmentFormValues> as InvestmentFormValues,
+    provenance,
+  }).fields.find((field) => field.key === "rent")!;
+  return {
+    strip: strip.source,
+    stripShort: strip.short,
+    confidenceBadge: dataConfidenceSourceLabel(stored.source, { stateAverage: stored.stateAverage }),
+    inputConfidence: inputConfidence.sourceLabel,
+    receipt: enrichmentRentSourceLabel(out.meta.rent!.source, out.meta.rent!.stateAverage),
+  };
+}
 
 function transport(handler: Handler) {
   return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -65,6 +138,13 @@ describe("audit: enrichPropertyAction", () => {
     expect(out.meta.mortgageRate).toEqual({ source: "fred", asOf: "2026-09-18" });
     expect(out.monthlyRent).toBe(2150);
     expect(out.meta.rent).toMatchObject({ source: "hud-safmr", zip: "43215", county: "Franklin County", year: 2026 });
+    expect(rentSourceLabels(out)).toEqual({
+      strip: "HUD rent benchmark (ZIP)",
+      stripShort: "HUD SAFMR",
+      confidenceBadge: "HUD rent benchmark (ZIP)",
+      inputConfidence: "HUD Rent Benchmark (ZIP)",
+      receipt: "HUD SAFMR",
+    });
   });
 
   it("falls back to the county figure when the ZIP is not in the SAFMR table", async () => {
@@ -82,6 +162,14 @@ describe("audit: enrichPropertyAction", () => {
     expect(out.monthlyRent).toBe(1850);
     expect(out.meta.rent?.source).toBe("hud-fmr");
     expect(out.meta.rent?.stateAverage).toBeUndefined();
+    // A matched county keeps the area labels: only the statewide fallback changes.
+    expect(rentSourceLabels(out)).toEqual({
+      strip: "HUD rent benchmark (county)",
+      stripShort: "HUD FMR",
+      confidenceBadge: "HUD rent benchmark (county)",
+      inputConfidence: "HUD Rent Benchmark (county)",
+      receipt: "HUD FMR",
+    });
   });
 
   it("uses the state average, and says so, when only state + ZIP are known (typed address)", async () => {
@@ -95,8 +183,67 @@ describe("audit: enrichPropertyAction", () => {
     );
     const enrich = await freshAction();
     const out = await enrich({ state: "OH", zip: "43215", bedrooms: 3 });
+    // The number is the unweighted mean of the state's HUD rows (1850 and
+    // 1650), which is what the word "average" in the label refers to.
     expect(out.monthlyRent).toBe(1750);
     expect(out.meta.rent).toMatchObject({ source: "hud-fmr", stateAverage: true, county: "OH avg" });
+
+    // Audit row P0-02: the same result used to read "HUD rent benchmark
+    // (county)" on the strip and both confidence labels and "HUD FMR" on the
+    // receipt. All four now say statewide, and none says county, ZIP or FMR.
+    const labels = rentSourceLabels(out);
+    expect(labels).toEqual({
+      strip: "HUD rent benchmark (statewide average)",
+      stripShort: "HUD statewide",
+      confidenceBadge: "HUD rent benchmark (statewide average)",
+      inputConfidence: "HUD Rent Benchmark (statewide average)",
+      receipt: "HUD statewide average",
+    });
+    for (const label of Object.values(labels)) {
+      expect(label).not.toMatch(/county|ZIP|FMR/);
+    }
+  });
+
+  it("uses the same statewide figure and label when the matched county has no value for the bedroom count", async () => {
+    vi.stubGlobal(
+      "fetch",
+      transport((url) => {
+        if (url.includes("/fred/")) return Response.json(fredOk);
+        if (url.includes("/statedata/OH"))
+          return Response.json({
+            data: {
+              year: 2026,
+              counties: [
+                { county_name: "Franklin County", fips_code: "3904999999", smallarea_status: "0", "Two-Bedroom": 1350 },
+                { county_name: "Cuyahoga County", fips_code: "3903599999", smallarea_status: "0", "Three-Bedroom": 1650, "Two-Bedroom": 1200 },
+              ],
+              metroareas: [{ name: "Columbus, OH HUD Metro FMR Area", code: "METRO18140M18140", "Three-Bedroom": 1950 }],
+            },
+          });
+        return new Response("nope", { status: 404 });
+      }),
+    );
+    const enrich = await freshAction();
+    const out = await enrich({ state: "OH", county: "Franklin", zip: "43215", bedrooms: 3 });
+    // Mean of the two rows that carry a three-bedroom figure (1650 and 1950).
+    expect(out.monthlyRent).toBe(1800);
+    expect(out.meta.rent).toMatchObject({ source: "hud-fmr", stateAverage: true, county: "OH avg" });
+    expect(rentSourceLabels(out).strip).toBe("HUD rent benchmark (statewide average)");
+  });
+
+  const read = (file: string) => readFileSync(join(process.cwd(), file), "utf8").replace(/\s+/g, " ");
+
+  it("the analyzer carries the statewide flag from the lookup to every label", () => {
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    // Single-family capture, straight from the action's meta.
+    expect(analyzer).toContain("...(enrichment.meta.rent?.stateAverage ? { stateAverage: true } : {}),");
+    // Multi-family per-unit capture.
+    expect(analyzer).toContain("if (result.meta.rent?.stateAverage === true) { filledRentStateAverage = true; }");
+    // Capture to provenance payload (strip, confidence labels, drafts, save).
+    expect(analyzer).toContain("...(capture.monthlyRent.stateAverage ? { stateAverage: true } : {}),");
+    // The badge passes the stored flag to the label.
+    const badge = read("components/investcalc/data-confidence-badge.tsx");
+    expect(badge).toContain("dataConfidenceSourceLabel(p.source, { stateAverage: p.stateAverage, })");
   });
 
   it("clamps 5+ bedrooms to the four-bedroom figure and skips HUD without bedrooms", async () => {

@@ -12,6 +12,32 @@ describe("autofill source receipt", () => {
     expect(enrichmentRentSourceLabel("hud-safmr")).toBe("HUD SAFMR");
   });
 
+  // Audit row P0-02: the receipt called the statewide fallback "HUD FMR".
+  it("names the statewide HUD fallback with the toast's own words", () => {
+    expect(enrichmentRentSourceLabel("hud-fmr", true)).toBe(
+      "HUD statewide average",
+    );
+    // No flag (an older capture, or an area figure): the area label stands.
+    expect(enrichmentRentSourceLabel("hud-fmr", false)).toBe("HUD FMR");
+    expect(enrichmentRentSourceLabel("hud-fmr", undefined)).toBe("HUD FMR");
+    // The flag belongs to HUD fills only.
+    expect(enrichmentRentSourceLabel("rentcast-estimate", true)).toBe(
+      "RentCast estimate",
+    );
+  });
+
+  it("passes the capture's statewide flag to both receipt lines", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components/investcalc/enrichment-receipt.tsx"),
+      "utf8",
+    );
+    expect(
+      source.match(
+        /enrichmentRentSourceLabel\(capture\.monthlyRent\.source, capture\.monthlyRent\.stateAverage\)/g,
+      ),
+    ).toHaveLength(2);
+  });
+
   it("does not duplicate or overclaim template provenance", () => {
     const source = readFileSync(
       join(process.cwd(), "components/investcalc/enrichment-receipt.tsx"),
