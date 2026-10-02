@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
-describe("P2-51:the three-way comparison's footnote links are underlined", () => {
+describe("P2-51: the three-way comparison's footnote links are underlined", () => {
   it("uses tc-link on the four links in 'Access and pricing change.'", () => {
     const post = read("app/blog/dealcheck-vs-biggerpockets-vs-truecap/page.tsx");
     const start = post.indexOf("Access and pricing change. Check the official");
