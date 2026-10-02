@@ -5,8 +5,17 @@
  *
  * Every answer is checked against a runtime fact; the source is noted so a
  * product change can find the sentence it invalidates:
- *   - share links need no account and are read-only, expiring, revocable, and
- *     hide the exact address unless included (app/s/[token], share-link-button)
+ *   - share links need no account and are read-only, revocable, and hide the
+ *     exact address unless included (app/s/[token], share-link-button); they
+ *     expire after 180 days (public_shares.expires_at default) and stop
+ *     opening when the underwriting standard version changes
+ *     (lib/public-share.ts resolvePublicShare)
+ *   - the share page shows the decision, the Offer Ceiling with its targets,
+ *     four metrics and three drivers; it does NOT show where an input came
+ *     from, and the rerun copies values without their source labels
+ *     (lib/client-receives.ts has the detail). No answer may promise the
+ *     client source labels until the share page renders them
+ *     (lib/__tests__/agent-pitch-truth-guards.test.ts).
  *   - co-branding renders logo, brand color and "Shared by" on the share page,
  *     and a "Prepared by" block on the PDF; TrueCap's name stays
  *     (lib/agent-share.ts, shared-deal-shell.tsx, lib/pdf-generator.ts);
@@ -37,15 +46,15 @@ export type MarketingFaq = { q: string; a: string };
 export const AGENT_FAQS: readonly MarketingFaq[] = [
   {
     q: "My investor clients run their own numbers. Why would I need this?",
-    a: "They will, and they should. Agent Pro is for screening and presenting against their criteria, so what you send already fits. The client gets the whole model with every assumption labeled, and can rerun it with their own numbers in the free analyzer.",
+    a: "They will, and they should. Agent Pro is for screening and presenting against their criteria, so what you send already fits. The client gets the decision, the Offer Ceiling and the numbers behind them, and can rerun the deal with their own numbers in the free analyzer.",
   },
   {
     q: "Am I giving investment advice?",
-    a: "No. TrueCap applies published formulas to labeled inputs. You supply the property facts; the client sees the sources, can change every assumption, and makes the decision. Every share page and report carries the not-investment-advice disclaimer.",
+    a: "No. TrueCap applies published formulas to labeled inputs. You supply the property facts; the client can rerun the deal in the free analyzer and change every assumption, and the decision is theirs. Every share page and report carries the not-investment-advice disclaimer.",
   },
   {
     q: "Do my clients need a TrueCap account to view what I send?",
-    a: "No. A share link opens without signing in. It is read-only, it expires, you can revoke it, and it hides the exact address unless you choose to include it. A client only needs an account to save a private copy.",
+    a: "No. A share link opens without signing in. It is read-only, it expires after 180 days, you can revoke it, and it hides the exact address unless you choose to include it. When TrueCap updates its underwriting standard, earlier links stop opening: rerun the deal and share a new link. A client only needs an account to save a private copy.",
   },
   {
     q: "What does the client see? Is it my branding or TrueCap's?",
@@ -69,11 +78,11 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "My brokerage already gives me tools.",
-    a: "Brokerage stacks are CRM, transaction management, and e-signature. None of them screen a listing against a client's Buy Box or compute the client's Offer Ceiling, the highest price that still meets that client's targets.",
+    a: "TrueCap does not replace a CRM, transaction management, or e-signature. It screens a listing against a client's Buy Box and computes the client's Offer Ceiling, the highest price that still meets that client's targets. If your brokerage's tools already do that, you do not need TrueCap for it.",
   },
   {
     q: "Will clients trust software numbers?",
-    a: "The output shows which criterion the decision hinges on (the biggest gap or the tightest margin against the client's targets) and what has to be true for the deal to work, so it starts the conversation rather than ending it. Every source is labeled and every assumption is theirs to change.",
+    a: "The output shows which criterion the decision hinges on (the biggest gap or the tightest margin against the client's targets) and what has to be true for the deal to work, so it starts the conversation rather than ending it. Every assumption is theirs to change: one click copies the deal's numbers into the free analyzer.",
   },
   {
     q: "Does it work on my phone at a showing?",
@@ -87,6 +96,6 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "Can I cancel?",
-    a: "Yes. Cancel from your profile in one click. Agent Pro stays active until the end of the period you've paid for, then the account downgrades to Free and your saved work stays readable.",
+    a: "Yes. Cancel anytime from your profile. Agent Pro stays active until the end of the period you've paid for, then the account downgrades to Free and your saved work stays readable.",
   },
 ];
