@@ -14,8 +14,9 @@ financing, expenses) and gets a full underwrite in seconds: whether the
 deal meets a Buy Box (the client's or the investor's targets), the Offer
 Ceiling (the highest price that still meets them), cash flow, cap rate,
 cash-on-cash, DSCR, a Deal score and 10-year projections, plus a
-shareable read-only link. An agent can keep a roster of clients, each
-with their own Buy Box, and send a co-branded report. The homepage
+shareable read-only link. An agent can keep a roster of clients, assign
+Buy Boxes to them (capped per account by `MAX_BUY_BOXES` in
+`app/actions/user-buy-boxes.ts`) and send a co-branded report. The homepage
 speaks to the agent first; `PRODUCT.md` and `docs/voice.md` carry the
 approved hero.
 
@@ -415,7 +416,7 @@ and use Next.js's built-in convention. There are 130 card files. All but
 one are a few lines of configuration (headline, tagline, slug) handed to
 a shared template in `lib/og/`: `blog-og-template.tsx` (73 posts),
 `vs-og-template.tsx` (38 comparison pages), `tool-og-template.tsx`
-(12 calculators) and `persona-og-template.tsx` (/analyze, /pricing and
+(11 tool pages and the /tools hub) and `persona-og-template.tsx` (/analyze, /pricing and
 the four persona pages). Every template draws on one frame,
 `lib/og/newsprint.tsx` (Newsprint paper, Archivo, DM Mono).
 
