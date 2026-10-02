@@ -59,8 +59,13 @@ describe("public calculator validation and claims", () => {
       expect(source, path).toContain("ToolNumberField");
       expect(source, path).toContain("validateToolNumber");
       expect(source, path).toContain('role="status"');
-      expect(source, path).toContain("min-h-11");
+      // The analyzer handoff is at least 44px tall: a text link carries
+      // min-h-11; the break-even widget's is the cta button (48px, below).
+      expect(source, path).toMatch(
+        /min-h-11|buttonVariants\(\{ size: "cta" \}\)/,
+      );
     }
+    expect(read("components/ui/button.tsx")).toMatch(/cta: 'min-h-12 /);
   });
 
   it("keeps the quick tools factual instead of recommending an investment", () => {

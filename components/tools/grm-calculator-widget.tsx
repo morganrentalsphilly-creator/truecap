@@ -13,8 +13,8 @@
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -175,16 +175,24 @@ export function GrmCalculatorWidget() {
         </div>
       </div>
 
+      {/* One plain action, then one line saying what is free and what is not
+          (the 1% rule widget's pattern). The label claims no carry-over: a
+          partner's iframe opens the analyzer without these numbers. */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        aria-describedby="grm-handoff-note"
+        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
       >
-        <Sparkles className="w-4 h-4" />
-        Run the free core analysis; projections appear when your access includes
-        them
-        <ArrowUpRight className="w-4 h-4" />
+        Run the full analysis
       </AnalyzerHandoffLink>
+      <p
+        id="grm-handoff-note"
+        className="mt-2 text-pretty text-sm text-muted-foreground"
+      >
+        Cap rate, CoC, DSCR and cash flow are free in TrueCap. The 10-year
+        projection is a Pro feature.
+      </p>
     </div>
   );
 }

@@ -16,7 +16,10 @@
  *   figure in DM Mono over the ledger's double rule (LedgerTotal, no draw:
  *   the homepage keeps the site's one motion), then the verdict and a note.
  *   The figure is in ink; green and orange belong to the verdict, and only
- *   when it is a pass or miss against a rule (LedgerVerdict).
+ *   when it is a pass or miss against a rule (LedgerVerdict). The block is a
+ *   polite live region, read whole (label, figure, verdict, note) when an
+ *   edit changes it; the text is not duplicated for screen readers, because
+ *   the e2e specs find the figure and the verdict by their one text node.
  * - ToolFormula: a formula printed between rules (2px ink above, the rule
  *   below), in the text face at 600, left-aligned, with an optional worked
  *   example. A formula written in words ("Monthly rent ≥ 1% of purchase
@@ -74,7 +77,11 @@ export function ToolResult({
   className?: string;
 }) {
   return (
-    <div className={cn("min-w-0", className)}>
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      className={cn("min-w-0", className)}
+    >
       <p className="text-sm leading-snug font-semibold text-foreground">{label}</p>
       {/* The color sits on the line, not on LedgerTotal: cn (tailwind-merge)
           reads the custom text-key-sm as a text color, so a color class

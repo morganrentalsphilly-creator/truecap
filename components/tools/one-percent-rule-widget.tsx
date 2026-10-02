@@ -21,6 +21,42 @@ import { ToolFrame, ToolResult } from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import { validateToolNumber } from "@/lib/public-tool-validation";
+
+// What the two fields accept. The upper bounds are the analyzer's own
+// (lib/analyzer-handoff.ts), so a value this widget takes is one the handoff
+// can carry.
+const PRICE_BOUNDS = {
+  label: "Purchase price",
+  min: 0,
+  minExclusive: true,
+  max: 100_000_000,
+} as const;
+const RENT_BOUNDS = {
+  label: "Monthly rent",
+  min: 0,
+  minExclusive: true,
+  max: 1_000_000,
+} as const;
+
+/**
+ * A cleared field is not an error: the result's own line already asks for
+ * both numbers. Zero, a negative or an out-of-range value is, and gets a
+ * visible, announced message under the field.
+ */
+const fieldError = (
+  raw: string,
+  bounds: typeof PRICE_BOUNDS | typeof RENT_BOUNDS,
+): string | null =>
+  raw.trim() === "" ? null : validateToolNumber(raw, bounds).error;
+
+/** The message for each field as typed, or null while it is in range. */
+export function onePercentRuleFieldErrors(raw: { price: string; rent: string }) {
+  return {
+    price: fieldError(raw.price, PRICE_BOUNDS),
+    rent: fieldError(raw.rent, RENT_BOUNDS),
+  };
+}
 
 const num = (s: string) => {
   const n = Number(s);
@@ -31,6 +67,12 @@ export function OnePercentRuleWidget() {
   const [price, setPrice] = useState("180000");
   const [rent, setRent] = useState("1900");
 
+  const { price: priceError, rent: rentError } = onePercentRuleFieldErrors({
+    price,
+    rent,
+  });
+  const hasFieldError = priceError !== null || rentError !== null;
+
   // `ratio` is NULL when there is nothing to divide by — never 0.
   //
   // It used to fall back to 0, so clearing the pre-filled price (the most
@@ -40,12 +82,15 @@ export function OnePercentRuleWidget() {
   // asserting a wrong verdict is the worst possible first touch, and this is an
   // organic-entry page.
   const { ratio, passes } = useMemo(() => {
+    // No ratio from a value the fields reject (rent in the trillions over a
+    // $1 price used to print a sixteen-digit percentage and "Passes").
+    if (hasFieldError) return { ratio: null, passes: false };
     const p = num(price);
     const r = num(rent);
     if (!(p > 0) || !(r > 0)) return { ratio: null, passes: false };
     const value = (r / p) * 100;
     return { ratio: value, passes: value >= 1 };
-  }, [price, rent]);
+  }, [hasFieldError, price, rent]);
   const hasResult = ratio !== null;
 
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
@@ -67,17 +112,21 @@ export function OnePercentRuleWidget() {
             id="onepct-price"
             label="Purchase price"
             prefix="$"
+            min={0}
+            max={PRICE_BOUNDS.max}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            error={null}
+            error={priceError}
           />
           <ToolNumberField
             id="onepct-rent"
             label="Monthly rent"
             prefix="$"
+            min={0}
+            max={RENT_BOUNDS.max}
             value={rent}
             onChange={(e) => setRent(e.target.value)}
-            error={null}
+            error={rentError}
           />
         </div>
 
@@ -99,11 +148,13 @@ export function OnePercentRuleWidget() {
             ) : null
           }
           note={
-            !hasResult
-              ? "Enter a purchase price and monthly rent to calculate."
-              : passes
-                ? "Run a full underwrite — this property may cash-flow well."
-                : "Either this is an appreciation play, or the price is too high relative to rent."
+            hasFieldError
+              ? "Fix the highlighted input to calculate."
+              : !hasResult
+                ? "Enter a purchase price and monthly rent to calculate."
+                : passes
+                  ? "Run a full underwrite — this property may cash-flow well."
+                  : "Either this is an appreciation play, or the price is too high relative to rent."
           }
         />
       </div>
