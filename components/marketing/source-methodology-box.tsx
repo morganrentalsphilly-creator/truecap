@@ -14,12 +14,16 @@ import { cn } from "@/lib/utils";
  * <Disclaimer /> (in SiteFooter) carries the not-advice statement; this box
  * does not repeat it (docs/voice.md rule 3).
  *
- * The closing line states only what the box itself shows: where the sourced
- * figures come from and when they were retrieved. It used to read "Reviewed
- * by the TrueCap team", which named no reviewer, no review and no date, on a
- * site that says elsewhere that one person builds TrueCap. Do not bring back
- * a reviewer or a team claim here; lib/__tests__/markets-states-data-first
- * renders every market and state page and fails on one.
+ * The closing line states only what a reader can do with the box: check a
+ * sourced figure against the listed page. It does not say the figures were
+ * retrieved from those pages on the listed dates, because most market pages'
+ * HUD rents were fetched from the HUD FMR API on the day the dating line
+ * gives, and the listed HUD documentation page (same figures) was read later.
+ * It used to read "Reviewed by the TrueCap team", which named no reviewer, no
+ * review and no date, on a site that says elsewhere that one person builds
+ * TrueCap. Do not bring back a reviewer or a team claim here;
+ * lib/__tests__/markets-states-data-first renders every market and state
+ * page and fails on one.
  */
 export function SourceMethodologyBox({
   dataAsOf,
@@ -71,7 +75,7 @@ export function SourceMethodologyBox({
       ) : null}
       <p className="mt-2">
         {sources.length > 0
-          ? "Figures with a source come from the pages listed here, retrieved on the dates shown. "
+          ? "Figures with a source can be checked against the pages listed here. "
           : null}
         <Link
           href="/methodology"
