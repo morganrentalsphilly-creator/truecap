@@ -636,15 +636,17 @@ export function initAnalytics(): Promise<PostHog | null> {
       // prod for months (the key was never added to Vercel env) with zero
       // symptoms — same silent-config-drift class as the Resend-audience
       // and Stripe-price incidents. In production this is a config bug,
-      // not a valid state: page once per session via Sentry (identical
-      // messages dedupe into one issue with a counter).
+      // not a valid state. While PostHog is on hold the key is absent on
+      // purpose, so the notice below is dropped in lib/sentry/lazy.ts and
+      // again in beforeSend (lib/sentry/self-noise.ts): it used one Sentry
+      // error-quota event per page load. When PostHog comes off hold, send
+      // the alert once per deployment from the server.
       //
       // Through lib/sentry/lazy.ts, never a dynamic import of the SDK itself:
       // webpack cannot see which members a dynamically imported namespace
       // uses, so that one line kept the SDK's ENTIRE barrel (Replay, rrweb,
       // Feedback, every AI / feature-flag integration) in the chunks every
-      // page loads on idle. The lazy helper also inits the SDK first, so the
-      // message is no longer dropped when it fires before the idle loader.
+      // page loads on idle.
       if (process.env.NODE_ENV === "production") {
         void captureMessageLazy(
           "[analytics] NEXT_PUBLIC_POSTHOG_KEY missing from the production build — funnel is blind",
