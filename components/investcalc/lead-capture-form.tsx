@@ -10,16 +10,17 @@
  *
  * What the form says must match what happens to the message (2026-10
  * go-to-market audit, row P1-67). It is always saved to the agent's dashboard.
- * It is emailed to the agent only while LEAD_NOTIFICATIONS_MODE is live, which
- * the server-rendered share shell reads and passes in as `agentEmailed`. So
+ * It is emailed to the agent only while LEAD_NOTIFICATIONS_MODE is live and a
+ * mail key is set, which the server-rendered share shell reads and passes in
+ * as `agentEmailed`. So
  * the copy never promises a reply, says TrueCap emails the agent only when
  * that is on, and shows the agent's own contact details, which the share page
  * already loads, so a client is not left waiting on a message nobody was told
  * about.
  *
- * `agentEmailed` is the mode, not the outcome of one send. The action returns
- * ok once the row is saved, whether or not the owner email went out (no mail
- * key, no owner address and a refused send all end in ok). So the headline
+ * `agentEmailed` is the configuration, not the outcome of one send. The action
+ * returns ok once the row is saved, whether or not the owner email went out
+ * (no owner address and a refused send both end in ok). So the headline
  * reports the save in both modes, and the live copy states the rule ("emails
  * them a notice when a new message arrives"), never that this message was sent.
  */
@@ -201,9 +202,10 @@ export function LeadCaptureForm({
   agentName: string;
   dealAddress?: string;
   accentColor?: string | null;
-  /** True only when the server will also email this message to the agent
-   *  (LEAD_NOTIFICATIONS_MODE=live, read in shared-deal-shell.tsx). Defaults
-   *  to false so a caller that forgets it cannot overclaim. */
+  /** True only when the server is set to also email this message to the agent
+   *  (LEAD_NOTIFICATIONS_MODE=live with RESEND_API_KEY set, read in
+   *  shared-deal-shell.tsx). Defaults to false so a caller that forgets it
+   *  cannot overclaim. */
   agentEmailed?: boolean;
   contact?: LeadFormAgentContact | null;
 }) {

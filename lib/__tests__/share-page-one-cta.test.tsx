@@ -286,6 +286,33 @@ describe("the lead form says what happens to the message", () => {
     expect(code(FORM)).not.toContain("process.env");
   });
 
+  it("does not say TrueCap emails the agent when the mode is live and no mail key is set", () => {
+    // The action's notifyOwner returns before sending when RESEND_API_KEY is
+    // absent. With the mode live and no key, "TrueCap emails them a notice"
+    // would be false for every message, so the shell asks for both.
+    expect(code("app/actions/capture-deal-lead.ts")).toContain(
+      "const resendKey = process.env.RESEND_API_KEY; if (!resendKey) return;",
+    );
+    expect(code(SHELL)).toContain(
+      '=== "live" && Boolean(process.env.RESEND_API_KEY?.trim())',
+    );
+  });
+
+  it("keeps the two fields and the send button at least 44px tall", () => {
+    const form = code(FORM);
+    // Each opening tag up to its own className (an onChange arrow holds a
+    // ">", so the tag cannot be read with [^>]).
+    const controls = [
+      ...form.matchAll(/<input required type="email"(?:(?!<)[\s\S])*?className="([^"]*)"/g),
+      ...form.matchAll(/<input type="text" value=\{name\}(?:(?!<)[\s\S])*?className="([^"]*)"/g),
+      ...form.matchAll(/<button type="submit"(?:(?!<)[\s\S])*?className="([^"]*)"/g),
+    ].map((m) => m[1]);
+    expect(controls).toHaveLength(3);
+    for (const className of controls) {
+      expect(className.split(" ")).toContain("min-h-11");
+    }
+  });
+
   it("links only a usable phone, email and http(s) website", () => {
     expect(agentContactLinks(null)).toEqual([]);
     expect(

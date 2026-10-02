@@ -39,17 +39,20 @@ export type SharedDealLeadCapture = {
 };
 
 /**
- * Whether a client's message is also emailed to the agent. The same test as
- * notificationsLive() in app/actions/capture-deal-lead.ts, which decides the
- * send: the form's confirmation may say TrueCap emails the agent only when
- * this is true (row P1-67). It is the mode, not proof that one message went
- * out, so the confirmation states the rule and reports only the save.
- * lib/__tests__/share-page-one-cta.test.tsx holds the two expressions together.
+ * Whether a client's message is also emailed to the agent. The mode test is
+ * the same as notificationsLive() in app/actions/capture-deal-lead.ts, which
+ * decides the send, and the mail key is checked because that action's
+ * notifyOwner returns without sending when RESEND_API_KEY is absent: with the
+ * mode live and no key, no agent is emailed. The form's confirmation may say
+ * TrueCap emails the agent only when this is true (row P1-67). It is the
+ * configuration, not proof that one message went out, so the confirmation
+ * states the rule and reports only the save.
+ * lib/__tests__/share-page-one-cta.test.tsx holds the expressions together.
  */
 function leadNotificationsLive(): boolean {
   return (
     (process.env.LEAD_NOTIFICATIONS_MODE ?? "off").trim().toLowerCase() ===
-    "live"
+      "live" && Boolean(process.env.RESEND_API_KEY?.trim())
   );
 }
 
