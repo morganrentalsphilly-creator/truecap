@@ -30,6 +30,10 @@ import {
   scrubSentryRequestHeaders,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
+import {
+  stripAdClickIdsFromSentryEvent,
+  stripAdClickIdsFromSentrySpan,
+} from "@/lib/sentry/ad-click-ids";
 import { isPerPageLoadConfigNotice } from "@/lib/sentry/self-noise";
 
 export function initSentryClient(): void {
@@ -77,12 +81,16 @@ export function initSentryClient(): void {
     );
   },
 
+  // Each hook scrubs credentials first (lib/sentry-url-scrubber.ts), then
+  // removes ad click ids as a separate step (lib/sentry/ad-click-ids.ts):
+  // traces run without cookie consent, so a paid landing's gclid must not
+  // ride along in the page URL, the Referer or a fetch span.
   beforeSendSpan(span) {
-    return scrubSentrySpanUrl(span);
+    return stripAdClickIdsFromSentrySpan(scrubSentrySpanUrl(span));
   },
 
   beforeSendTransaction(event) {
-    return scrubSentryEventSensitiveData(event);
+    return stripAdClickIdsFromSentryEvent(scrubSentryEventSensitiveData(event));
   },
 
   // Final privacy boundary for anything an integration or explicit capture
@@ -114,7 +122,7 @@ export function initSentryClient(): void {
     if (event.request && "data" in event.request) {
       event.request.data = "[scrubbed]";
     }
-    return event;
+    return stripAdClickIdsFromSentryEvent(event);
   },
 
   // Filter out benign noise errors that don't represent real bugs.
