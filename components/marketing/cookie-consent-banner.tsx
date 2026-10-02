@@ -182,10 +182,17 @@ export function CookieConsentBanner() {
       data-cookie-consent-banner=""
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
     >
-      {/* Compact single row on phones: text + buttons side by side (~60px
-          tall), so the bar never reaches the hero's primary action in a
-          375×667 first viewport. Full copy from sm:. */}
-      <div className="mx-auto flex max-w-6xl flex-row items-center gap-2 sm:gap-4">
+      {/* Compact single row on phones: text + buttons side by side, so the
+          bar never reaches the hero's primary action in a 375×667 first
+          viewport. Full copy from sm:. The bar's height is set by the 44px
+          buttons, not by the text: the Privacy link keeps its 44px hit area
+          (min-h-11) and gives the height back with -my-3.5, so the line it
+          sits on stays one text line tall. Before that the link's line was
+          44px, which made the bar 80px on a phone (99px at 360px) and 88px
+          wherever the desktop sentence wrapped. Measured with the link
+          fixed: 61px from 360px to 414px, 69px from 768px, and the desktop
+          sentence on one line from 1080px. */}
+      <div className="mx-auto flex max-w-6xl flex-row items-center gap-1.5 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center">
           <p className="text-sm leading-snug text-foreground">
             <strong className="font-semibold">We use cookies</strong>
@@ -194,7 +201,7 @@ export function CookieConsentBanner() {
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="tc-link inline-flex min-h-11 min-w-11 items-center font-medium"
+                className="tc-link -my-3.5 inline-flex min-h-11 min-w-11 items-center font-medium"
               >
                 Privacy
               </Link>
@@ -206,7 +213,7 @@ export function CookieConsentBanner() {
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
-                className="tc-link inline-flex min-h-11 min-w-11 items-center font-medium"
+                className="tc-link -my-3.5 inline-flex min-h-11 min-w-11 items-center font-medium"
               >
                 privacy policy
               </Link>
@@ -214,18 +221,18 @@ export function CookieConsentBanner() {
             </span>
           </p>
         </div>
-        <div className="flex shrink-0 gap-1.5 sm:gap-3">
+        <div className="flex shrink-0 gap-1 sm:gap-2">
           <button
             type="button"
             onClick={handleReject}
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-4 sm:text-base"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-4 sm:text-base"
           >
             Reject
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-base"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-base"
           >
             <span className="sm:hidden">Accept</span>
             <span className="hidden sm:inline">Accept all</span>
