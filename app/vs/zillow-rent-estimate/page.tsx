@@ -1,5 +1,12 @@
 /**
- * /vs/zillow-rent-estimate — TrueCap vs Zillow Zestimate Rent.
+ * /vs/zillow-rent-estimate — TrueCap vs Zillow's Rent Zestimate.
+ *
+ * Zillow answers automated clients with a bot check, so nothing about Zillow
+ * on this page could be re-read from zillow.com in October 2026. The Zillow
+ * column therefore says only what Zillow's linked explanation of the Rent
+ * Zestimate says (a starting-point rent estimate from public data and similar
+ * local listings) and what follows from that definition. The page passes no
+ * review date to ComparisonFaq.
  *
  * Target queries: "zillow rent estimate accuracy", "zillow rent vs",
  * "zestimate alternative", "how accurate is zillow rent", "better than
@@ -110,65 +117,48 @@ const MATRIX: Row[] = [
   {
     feature: "Full deal underwrite",
     truecap:
-      "Free core metrics; Pro adds 10-year projections and advanced scenarios",
-    zillow: "No — rent and listing context, not a full acquisition underwrite",
+      "Free core metrics; Pro adds 10-year projections, sensitivity and the Offer Ceiling",
+    zillow: "The Rent Zestimate is a rent estimate: one input to an underwrite",
     winner: "truecap",
   },
   {
     feature: "Property tax input",
     truecap:
       "Manual local bill or reviewed rate; blank inputs use a disclosed generic fallback",
-    zillow: "Listing/public-record context; verify the post-sale tax basis",
+    zillow:
+      "Not part of the Rent Zestimate; verify the post-sale tax basis with the county",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR computation",
     truecap: "Computed live with editable assumptions",
-    zillow: "Not in scope",
+    zillow: "Not part of the Rent Zestimate",
     winner: "truecap",
   },
   {
-    feature: "Free to use",
-    truecap: "Yes — unlimited free analyses",
-    zillow: "Yes — free",
-    winner: "tie",
-  },
-  {
-    feature: "Mobile usable",
-    truecap: "Mobile-first responsive",
-    zillow: "Strong mobile app",
-    winner: "tie",
-  },
-  {
-    feature: "Listing data integration",
-    truecap:
-      "Address lookup plus editable rent/rate benchmarks and a manual local tax input",
-    zillow: "Full consumer listing database with property details",
-    winner: "zillow",
-  },
-  {
-    feature: "Photo / virtual tour",
-    truecap: "Not in scope — TrueCap is analysis, not browsing",
-    zillow: "Yes — extensive photos + tours",
+    feature: "Listings, photos and tours",
+    truecap: "Not in scope: TrueCap analyzes an address you bring",
+    zillow: "See Zillow for listings, photos and tours",
     winner: "zillow",
   },
   {
     feature: "Save deals + portfolio rollup",
     truecap:
       "Free saves up to 5 deals; Pro adds unlimited saves, portfolio rollup + comparison",
-    zillow: "Save listings but no portfolio analysis",
+    zillow: "Not part of the Rent Zestimate",
     winner: "truecap",
   },
   {
     feature: "Shareable analysis URL",
     truecap: "Free — read-only public URL for the available analysis",
-    zillow: "Share listing URL only",
+    zillow: "Not part of the Rent Zestimate",
     winner: "truecap",
   },
   {
     feature: "Underwriting context",
-    truecap: "Free — core economics + Buy Box fit",
-    zillow: "Rent estimate only",
+    truecap:
+      "Core economics and the Deal score free; Buy Box fit on your first decision, then with Pro",
+    zillow: "A rent estimate; the underwrite happens elsewhere",
     winner: "truecap",
   },
 ];
@@ -200,7 +190,7 @@ export default function VsZillowRentPage() {
         <VsHero>
           <h1 className={VS_H1}>
             TrueCap vs Zillow Rent Estimate:{" "}
-            why the &quot;Zestimate Rent&quot; isn&apos;t enough for investors
+            why the Rent Zestimate isn&apos;t enough for investors
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
@@ -491,7 +481,7 @@ const ZILLOW_FAQ: FaqItem[] = [
       <>
         Yes — paste the property address into TrueCap and you get the editable
         HUD area benchmark for that location and bedroom count. The rent field
-        is editable, so if you see a Zillow Zestimate you trust more for that
+        is editable, so if you see a Rent Zestimate you trust more for that
         specific listing, type it in and the full underwrite updates in real
         time.
       </>
@@ -514,11 +504,11 @@ const ZILLOW_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap takes rent, expenses, financing, and tax assumptions and runs
-        cap rate, cash-on-cash, DSCR, and monthly cash flow, then shows
-        Buy Box fit against your targets. The free analyzer also
-        includes a Deal score (0–100) with factor breakdown.
-        Zillow stops at the rent number — you have to do everything downstream
-        by hand.
+        cap rate, cash-on-cash, DSCR, and monthly cash flow. The free analyzer
+        also includes a Deal score (0–100) with factor breakdown. Buy Box fit
+        against your targets is free on your first decision, then with Pro.
+        The Rent Zestimate is a rent number; the rest of the underwrite
+        happens downstream of it.
       </>
     ),
   },
