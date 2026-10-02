@@ -5,13 +5,17 @@
  *   /s/[token]    opaque server-backed shares (payload in public_shares)
  *
  * Extracted from the /d/ page so the two routes cannot drift: same banner,
- * same read-only view, same lead capture/upsell, same disclaimer footer.
+ * same read-only view, same lead capture, same disclaimer footer.
  * Server component — callers do the decoding/resolution + verification and
  * hand this only trusted, ready-to-render data.
+ *
+ * TrueCap asks the visitor for one thing, once: the "Analyze a deal free"
+ * block the read-only view renders below the Disclaimer. The banner and the
+ * footer name TrueCap and carry no call to action, and nothing here repeats
+ * the upsell (2026-10 go-to-market audit, rows P1-45 and P2-137).
  */
 
 import Link from "next/link";
-import { ArrowUpRight, Lock } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { PublicAgentBranding } from "@/lib/agent-share";
 import type { ReportComps } from "@/lib/report-comps";
@@ -33,6 +37,20 @@ export type SharedDealLeadCapture = {
   sig?: string;
   opaqueShareToken?: string;
 };
+
+/**
+ * Whether a client's message is also emailed to the agent. The same test as
+ * notificationsLive() in app/actions/capture-deal-lead.ts, which decides the
+ * send: the form's confirmation may say the agent was emailed only when this
+ * is true (row P1-67). lib/__tests__/share-page-one-cta.test.tsx holds the two
+ * expressions together.
+ */
+function leadNotificationsLive(): boolean {
+  return (
+    (process.env.LEAD_NOTIFICATIONS_MODE ?? "off").trim().toLowerCase() ===
+    "live"
+  );
+}
 
 export function SharedDealShell({
   values,
@@ -124,12 +142,8 @@ export function SharedDealShell({
           Shared via{" "}
           <Link href="/" className="font-bold underline underline-offset-2">
             TrueCap
-          </Link>{" "}
-          — view-only. Run your own free analysis at{" "}
-          <Link href="/" className="font-bold underline underline-offset-2">
-            usetruecap.com
           </Link>
-          .
+          . View only.
         </div>
       )}
 
@@ -141,9 +155,6 @@ export function SharedDealShell({
         className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16"
       >
         <header className="mb-6 sm:mb-8">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
-            Shared analysis
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
             {values.address}
           </h1>
@@ -194,51 +205,37 @@ export function SharedDealShell({
           specialistAnalysisCaptured={specialistAnalysisCaptured}
           analyzerStrategyKey={analyzerStrategyKey}
           copyShareToken={copyShareToken}
+          // The agent's form sits above the Disclaimer and above TrueCap's
+          // own block, so on a co-branded page the client reaches the agent
+          // before TrueCap's promo (row P1-67).
+          leadForm={
+            agent && leadCapture ? (
+              <LeadCaptureForm
+                shareSurface={leadCapture.shareSurface}
+                ownerId={leadCapture.ownerId}
+                dealId={leadCapture.dealId}
+                valuesHash={leadCapture.valuesHash}
+                sig={leadCapture.sig}
+                opaqueShareToken={leadCapture.opaqueShareToken}
+                agentName={agent.displayName}
+                dealAddress={values.address}
+                accentColor={agent.primaryColor}
+                agentEmailed={leadNotificationsLive()}
+                contact={{
+                  name: agent.contactName,
+                  email: agent.contactEmail,
+                  phone: agent.contactPhone,
+                  website: agent.contactWebsite,
+                }}
+              />
+            ) : null
+          }
         />
 
-        {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
-        {agent && leadCapture ? (
-          <LeadCaptureForm
-            shareSurface={leadCapture.shareSurface}
-            ownerId={leadCapture.ownerId}
-            dealId={leadCapture.dealId}
-            valuesHash={leadCapture.valuesHash}
-            sig={leadCapture.sig}
-            opaqueShareToken={leadCapture.opaqueShareToken}
-            agentName={agent.displayName}
-            dealAddress={values.address}
-            accentColor={agent.primaryColor}
-          />
-        ) : (
-          <div className="mt-6 rounded-2xl border border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6">
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="font-bold text-foreground">
-                  See 10-year cash-flow and equity projections, an Offer
-                  Ceiling, downside sensitivity, and the Deal score
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  The full analysis with multi-year cash flow and equity
-                  projections, target review, and downside checks is free to
-                  start. Run this property in your own account — your edits stay
-                  private.
-                </p>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline"
-                >
-                  Start free at usetruecap.com
-                  <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* One disclaimer per page (docs/voice.md rule 3): the analysis view
-            above renders <Disclaimer />, so this footer carries only the
-            brand line. */}
+            above renders <Disclaimer /> and, below it, the page's one
+            TrueCap call to action, so this footer carries only the brand
+            line. */}
         <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
           <p>
             Built with{" "}
