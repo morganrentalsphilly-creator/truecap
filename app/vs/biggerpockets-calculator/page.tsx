@@ -149,8 +149,9 @@ export default function VsBiggerPocketsCalculatorPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            BiggerPockets has run a real estate investing community since 2004.
-            Their calculator is solid. We built TrueCap because we
+            BiggerPockets dates to 2004 and pairs its calculators with a large
+            investor community. Their calculator is solid. We built TrueCap
+            because we
             wanted an address-first workflow that connects the initial screen to
             Buy Box fit, an Offer Ceiling, downside, and presentation.
             BiggerPockets may be the better choice when its community and
@@ -334,7 +335,8 @@ export default function VsBiggerPocketsCalculatorPage() {
                 or events.
               </li>
               <li>
-                You want the BiggerPockets name on the report you share.
+                You already share BiggerPockets reports with partners or
+                lenders and they do the job.
               </li>
               <li>
                 You already have all your historical deals in BP and don&apos;t
