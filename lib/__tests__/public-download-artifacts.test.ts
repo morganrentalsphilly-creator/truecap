@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { strFromU8, unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
+import { GLOSSARY } from "@/lib/glossary";
 
 const ROOT = process.cwd();
 const workbookPath = path.join(
@@ -41,6 +42,29 @@ describe("public downloadable artifacts", () => {
     expect(xml).toContain(
       "scheduled loan balance, cash-flow and modeled-equity planning",
     );
+  });
+
+  it("states no withdrawn default or benchmark on the workbook's Quick Reference sheet (P1-36)", () => {
+    const xml = workbookXml();
+
+    // Property tax is never auto-filled from a state rate; the workbook's own
+    // input (sheet 1, B12) starts at 1.1% of price.
+    expect(xml).not.toContain("Defaults to your state");
+    expect(xml).not.toMatch(
+      /Most buy-and-hold investors target|Typical: 5–6% in Tier-1|typically require 20-25% down/,
+    );
+    // The four corrected cells: B15 names the workbook's own placeholder, and
+    // C5, C6 and B18 are the glossary's sentences, so the file and
+    // /glossary cannot disagree.
+    const cell = (ref: string) =>
+      xml.match(new RegExp(`<x:c r="${ref}" t="str"><x:v>([^<]*)</x:v></x:c>[\\s\\S]*TRUECAP VERDICT BANDS`))?.[1];
+    expect(cell("B15")).toBe(
+      "Annual property tax as a percent of value. This workbook starts at 1.1% of price as a placeholder; replace it with the local annual bill or a reviewed local effective rate.",
+    );
+    expect(xml).toMatch(/<x:c r="A12"[^>]*><x:v>Property tax \(% of price \/ yr\)<\/x:v><\/x:c><x:c r="B12"[^>]*><x:v>1\.1<\/x:v>/);
+    expect(cell("C5")).toBe(GLOSSARY.capRate.benchmark);
+    expect(cell("C6")).toBe(GLOSSARY.coc.benchmark);
+    expect(cell("B18")).toBe(GLOSSARY.downPayment.definition);
   });
 
   it("keeps specialist recommendations out of the market pack and its generator", () => {
