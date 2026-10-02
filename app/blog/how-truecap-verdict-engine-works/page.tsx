@@ -202,9 +202,9 @@ export default function HowVerdictEngineWorksPost() {
               the modeled numbers.
             </p>
             <p>
-              The whole engine is open — the source code is at{" "}
-              <code>lib/verdict.ts</code> in the codebase that powers this site.
-              This post explains the thresholds with the same numbers the
+              The classifier&apos;s thresholds live in one file,{" "}
+              <code>lib/verdict.ts</code>, in the codebase that powers this
+              site. This post explains them with the same numbers the
               production code uses.
             </p>
 
