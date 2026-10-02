@@ -360,7 +360,7 @@ describe("unsubscribe endpoint", () => {
     const token = mintSignedToken("marketing-unsubscribe", { u: "11111111-2222-4333-8444-555555555555" })!;
     const response = await GET(new Request(`https://usetruecap.com/email/unsubscribe?token=${token}`));
     expect(response.status).toBe(200);
-    expect(await response.text()).toContain("marketing emails");
+    expect(await response.text()).toContain("account emails (onboarding, tips, offers and feedback requests)");
     expect(mocks.setMarketingOptOut).not.toHaveBeenCalled();
     expect(mocks.admin).not.toHaveBeenCalled();
   });
