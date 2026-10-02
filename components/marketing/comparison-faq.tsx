@@ -33,7 +33,7 @@
  * 64ch. Nothing but the answer follows the summary inside a details row:
  * lib/__tests__/structured-data-f4.test.tsx reads that text as the visible
  * answer. The sources note is a Note, the price answer a ruled block (no
- * card), and the analyzer bridge follows them.
+ * card), then one line for agents and the analyzer bridge.
  *
  * The sources note prints a review date only when the page passes
  * `reviewedDate` (see the prop). There is no shared default: one constant
@@ -43,10 +43,12 @@
 
 import { Fragment, isValidElement, type ReactNode } from "react";
 import { DisclosureMark } from "@/components/ledger/ledger-parts";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Note } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { JsonLd } from "@/components/seo/json-ld";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 export type FaqItem = {
   /** Question — phrased exactly as a comparison-shopper would type it. */
@@ -125,6 +127,12 @@ export function ComparisonFaq({
    */
   reviewedDate?: string;
 }) {
+  // /for-agents redirects to /pricing while Agent Pro's Stripe Price is
+  // absent, and the link-graph guard forbids linking a redirect
+  // (lib/__tests__/internal-link-graph.test.tsx), so the agent line renders
+  // only where the persona page does (the footer resolves its link the same
+  // way).
+  const agentProConfigured = isAgentProConfigured();
   const schema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -216,6 +224,23 @@ export function ComparisonFaq({
             process, and existing tools.
           </p>
         </div>
+
+        {/* One line for agents: the comparison pages otherwise speak only
+            to investors. It states what the catalog's client_buy_box
+            feature does (lib/entitlements-catalog.ts; the roster and the
+            one-client-per-deal screening are spelled out on /for-agents).
+            An inline link in a sentence, through IntentPrefetchLink like
+            every /vs link below the hero. */}
+        {agentProConfigured ? (
+          <p className="mt-6 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground">
+            Screening listings for investor clients?{" "}
+            <IntentPrefetchLink href="/for-agents" className="tc-link">
+              TrueCap for agents
+            </IntentPrefetchLink>{" "}
+            keeps a client roster and screens a deal against that client&apos;s
+            Buy Box.
+          </p>
+        ) : null}
 
         {/* Analyzer bridge (2026-08 offer rollout) — the comparison's real
             answer is running your own deal; this reaches all 40 /vs pages.
