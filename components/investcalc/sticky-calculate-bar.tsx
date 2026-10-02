@@ -18,6 +18,7 @@ import { ArrowUpRight, Calculator, ChevronUp, Loader2 } from "lucide-react";
 
 import type { LivePreviewSnapshot } from "./live-verdict-panel";
 import { formatDscr } from "@/lib/financial-presentation";
+import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -160,6 +161,37 @@ export function StickyCalculateBar({
     pastFold && formInView && !submitInView && !(hasResults && resultsInView);
   const rendered = visible || isCalculating;
 
+  // The cookie banner is fixed to the same bottom edge one layer above this
+  // bar (z-50 over z-40), so on a first visit the run action sat fully behind
+  // it and could not be tapped until the visitor answered the banner. While
+  // the banner is open the bar sits on top of it instead: its bottom offset
+  // is the banner's measured height, and it returns to the edge the moment a
+  // choice is made. The marketing bar yields to the banner by hiding; the
+  // run action is the page's one job, so it stays.
+  const cookieBannerOpen = useCookieBannerOpen();
+  const [cookieBannerHeight, setCookieBannerHeight] = useState(0);
+  useEffect(() => {
+    if (!cookieBannerOpen || !rendered) {
+      setCookieBannerHeight(0);
+      return;
+    }
+    const banner = document.querySelector<HTMLElement>(
+      "[data-cookie-consent-banner]",
+    );
+    if (!banner) {
+      setCookieBannerHeight(0);
+      return;
+    }
+    const measure = () =>
+      setCookieBannerHeight(Math.ceil(banner.getBoundingClientRect().height));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(banner);
+    return () => observer.disconnect();
+  }, [cookieBannerOpen, rendered]);
+  const aboveCookieBanner = cookieBannerHeight > 0;
+
   // Compact verdict readout: pre-results only (caller also gates the prop),
   // never while the spinner has taken over the bar, and never while the
   // in-form LiveVerdictPanel it mirrors is on screen (BROWSER-4).
@@ -189,7 +221,16 @@ export function StickyCalculateBar({
   return (
     <div
       data-sticky-calc-bar=""
-      className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85"
+      data-above-cookie-banner={aboveCookieBanner ? "" : undefined}
+      // The banner below already carries the safe-area inset, so the bar
+      // keeps only its own 8px while it sits on top of it.
+      style={aboveCookieBanner ? { bottom: cookieBannerHeight } : undefined}
+      className={cn(
+        "lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85",
+        aboveCookieBanner
+          ? "pb-2"
+          : "pb-[max(env(safe-area-inset-bottom),0.5rem)]",
+      )}
       role="presentation"
     >
       {contextLabel ? (

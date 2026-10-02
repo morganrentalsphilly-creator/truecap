@@ -50,3 +50,46 @@ describe("inline error text uses the text-safe red (P1-72, P1-46)", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("the cookie banner's height is set by its buttons (P2-74, P2-46)", () => {
+  const banner = read("components/marketing/cookie-consent-banner.tsx");
+
+  it("the Privacy link keeps a 44px hit area without growing its line", () => {
+    const links = banner.split('data-cookie-privacy-link=""').slice(1);
+    expect(links).toHaveLength(2);
+    for (const link of links) {
+      const tag = link.slice(0, link.indexOf(">"));
+      // 44px box, 28px handed back: the margin box (16px) fits inside one
+      // 19.25px line, so the line it sits on is not 44px tall.
+      expect(tag).toContain("-my-3.5 inline-flex min-h-11 min-w-11");
+    }
+  });
+
+  it("the choices stay 44px tall", () => {
+    expect(banner.match(/min-h-11/g)?.length).toBeGreaterThanOrEqual(5);
+  });
+});
+
+describe("the phone run bar is never hidden behind the cookie banner (P2-75, P2-46)", () => {
+  const bar = read("components/investcalc/sticky-calculate-bar.tsx");
+
+  it("reads the banner's state and sits on top of it while it is open", () => {
+    expect(bar).toContain(
+      'import { useCookieBannerOpen } from "@/lib/use-cookie-banner";',
+    );
+    expect(bar).toContain("const cookieBannerOpen = useCookieBannerOpen();");
+    expect(bar).toContain('"[data-cookie-consent-banner]"');
+    expect(bar).toContain(
+      "style={aboveCookieBanner ? { bottom: cookieBannerHeight } : undefined}",
+    );
+    // It must stay a bar that shows, not one that hides while the banner is up.
+    expect(bar).not.toMatch(/!\s*cookieBannerOpen\s*&&/);
+    expect(bar).not.toMatch(/&&\s*!\s*cookieBannerOpen/);
+  });
+
+  it("the banner it measures still carries the attribute it looks for", () => {
+    expect(read("components/marketing/cookie-consent-banner.tsx")).toContain(
+      'data-cookie-consent-banner=""',
+    );
+  });
+});
