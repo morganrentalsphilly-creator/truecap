@@ -25,8 +25,13 @@ const archivo = Archivo({
   // width, from this one file. With `axes`, next/font loads the full weight
   // range, so no `weight` list here.
   axes: ["wdth"],
-  // Text renders at once in the metric-matched fallback, then swaps: no
-  // invisible text on slow connections, no layout shift on swap.
+  // Text renders at once in a fallback face, then swaps: no invisible text
+  // on slow connections. The face next/font generates here ("Archivo
+  // Fallback", local Arial at 98.7%) is matched to Archivo at normal width
+  // only; the 82% display cut has its own face under the same family name
+  // in globals.css, which depends on this option staying on. The swap is not
+  // shift-free: on a slow first visit a long paragraph can still gain or
+  // lose a line when Archivo arrives.
   display: "swap",
   adjustFontFallback: true,
   // The homepage H1 is the LCP element; preload the face that draws it.
