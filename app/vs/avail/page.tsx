@@ -52,7 +52,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Avail vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "Avail manages your rentals after closing. TrueCap underwrites them before. Honest side-by-side of when each fits, plus how DIY landlords use both together.",
+    "Avail manages your rentals after closing. TrueCap underwrites them before. Honest side-by-side of when each fits, plus how the two fit together.",
   keywords: [
     "avail alternative",
     "avail vs truecap",
@@ -88,19 +88,21 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    avail: "Not modeled",
-    winner: "truecap",
+    avail:
+      "Avail publishes a rental property calculator (cap rate, cash-on-cash, debt coverage ratio, IRR, GRM)",
+    winner: "tie",
   },
   {
     feature: "Cash flow projection",
     truecap: "Pro — 10-year with rent + expense + appreciation",
-    avail: "Not modeled",
+    avail:
+      "Its calculator lists monthly income and an IRR based on a growth-rate input; no year-by-year projection is listed",
     winner: "truecap",
   },
   {
     feature: "Sensitivity grid",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
-    avail: "Not modeled",
+    avail: "No sensitivity output is listed; you change the inputs and re-run",
     winner: "truecap",
   },
   {
@@ -112,13 +114,15 @@ const MATRIX: Row[] = [
   {
     feature: "Rental listing distribution",
     truecap: "No",
-    avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",
+    avail:
+      "Yes, syndicated to Realtor.com, Redfin, Zumper and other sites (19 in total, per Avail)",
     winner: "avail",
   },
   {
     feature: "Online rental application",
     truecap: "No",
-    avail: "Yes — customizable forms",
+    avail:
+      "Yes, standard application on the free plan; custom questions on Unlimited Plus",
     winner: "avail",
   },
   {
@@ -136,7 +140,8 @@ const MATRIX: Row[] = [
   {
     feature: "Online rent collection",
     truecap: "No",
-    avail: "Yes — ACH (free) and card",
+    avail:
+      "Yes, bank transfer and card; on the free plan tenants pay $2.50 per bank transfer, waived on Unlimited Plus",
     winner: "avail",
   },
   {
@@ -148,25 +153,26 @@ const MATRIX: Row[] = [
   {
     feature: "Pricing (entry tier)",
     truecap: "Free for underwriting",
-    avail: "Free Unlimited tier + Unlimited Plus ~$7/unit/mo (as of 2026)",
+    avail:
+      "Free Unlimited plan; Unlimited Plus $9 per unit per month (as of October 2026)",
     winner: "tie",
   },
   {
     feature: "Free tier covers core job",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    avail: "Yes — listing, basic lease, ACH rent collection",
+    avail: "Yes, listings, state-specific leases, online rent collection",
     winner: "tie",
   },
   {
     feature: "Starting values (rent, rate, tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    avail: "Not applicable",
-    winner: "truecap",
+    avail: "Its calculator uses the address to pull in some data",
+    winner: "tie",
   },
   {
     feature: "Multi-property dashboard",
     truecap: "Yes — portfolio rollup of saved deals",
-    avail: "Yes — multi-unit ops dashboard",
+    avail: "Yes, unlimited units on one account",
     winner: "tie",
   },
   {
@@ -206,10 +212,9 @@ export default function VsAvailPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Avail is the DIY-landlord stack: list the unit, screen tenants, sign
-            a state-compliant lease, collect rent online, handle maintenance.
+            a state-specific lease, collect rent online, handle maintenance.
             TrueCap models whether the reviewed assumptions produce cash flow.
-            Many independent landlords use TrueCap during due diligence and
-            Avail after closing.
+            TrueCap fits due diligence; Avail fits what comes after closing.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -271,7 +276,10 @@ export default function VsAvailPage() {
                   Online rental applications + TransUnion-powered screening.
                 </li>
                 <li>State-specific lease templates with online signing.</li>
-                <li>Online rent collection (ACH is free).</li>
+                <li>
+                  Online rent collection (tenants pay $2.50 per bank transfer on
+                  the free plan; no fee on Unlimited Plus).
+                </li>
                 <li>Tenant maintenance requests + ongoing ops.</li>
               </ul>
             </div>
@@ -309,17 +317,17 @@ export default function VsAvailPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Avail details based on publicly available product info as of 2026.
-            See{" "}
+            Avail details checked against avail.com&apos;s pricing, rental
+            listings, and rental property calculator pages in October 2026. See{" "}
             <a
-              href="https://www.avail.co"
+              href="https://www.avail.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              avail.co
+              Avail&apos;s pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
@@ -354,8 +362,9 @@ export default function VsAvailPage() {
                 state-specific lease online.
               </li>
               <li>
-                <strong>Collect rent + handle ops in Avail.</strong> ACH rent
-                collection is free; tenants submit maintenance requests through
+                <strong>Collect rent + handle ops in Avail.</strong> Rent
+                collection is included; on the free plan the tenant pays $2.50
+                per bank transfer. Tenants submit maintenance requests through
                 the portal.
               </li>
               <li>
@@ -400,7 +409,11 @@ export default function VsAvailPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Avail" items={AVAIL_FAQ} />
+        <ComparisonFaq
+          competitorName="Avail"
+          items={AVAIL_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -408,8 +421,8 @@ export default function VsAvailPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow
-              and plain read-only share links. Pro adds 10-year cash-flow and
+              TrueCap free covers cap rate, CoC, DSCR, monthly cash flow, and
+              plain read-only share links. Pro adds 10-year cash-flow and
               equity projections, sensitivity, Offer Ceiling, co-branding, and
               included PDFs. New one-time PDF checkout is temporarily unavailable.
               No card to start.
@@ -484,7 +497,7 @@ const AVAIL_FAQ: FaqItem[] = [
         No — they cover different stages. Avail is post-purchase landlord
         operations: listing, screening, leases, rent collection, maintenance.
         TrueCap is pre-purchase underwriting: cap rate, CoC, DSCR, projection,
-        Deal score. Most independent landlords end up using both.
+        Deal score. The two cover different stages and can be used together.
       </>
     ),
   },
@@ -503,10 +516,11 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Is Avail free? Is TrueCap?",
     answer: (
       <>
-        Avail&apos;s &quot;Unlimited&quot; tier is free for landlords and
-        includes listings, lease signing, and ACH rent collection.
-        &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for advanced
-        features. TrueCap is free for core underwriting math; Pro adds 10-year
+        Avail&apos;s &quot;Unlimited&quot; plan is free for landlords and
+        includes listings, lease signing, and online rent collection; on that
+        plan tenants pay $2.50 per bank transfer. &quot;Unlimited Plus&quot; is
+        $9 per unit per month (as of October 2026) and waives the bank-transfer
+        fee. TrueCap is free for core underwriting math; Pro adds 10-year
         cash-flow and equity projections, sensitivity, co-branded share links,
         and included PDFs. New one-time PDF checkout is temporarily unavailable;
         see TrueCap&apos;s live pricing page for current terms.
@@ -517,12 +531,13 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Does Avail's calculator replace TrueCap?",
     answer: (
       <>
-        Avail has some basic financial views in their landlord dashboard (rent
-        collected, payment history) but they don&apos;t do underwriting — no cap
-        rate, no DSCR, no 10-year projection, no sensitivity, no Screening
-        Index. Their financial views are for what&apos;s happening on properties
-        you own. TrueCap models what will happen on properties you&apos;re
-        considering.
+        Avail publishes a rental property calculator; its page says it
+        calculates cap rate, cash-on-cash return, debt coverage ratio, IRR, and
+        gross rent multiplier from the inputs you enter. TrueCap starts from
+        labeled values (an editable HUD rent benchmark and the FRED rate) and
+        adds a Deal score. Your first complete decision also shows the Offer
+        Ceiling, the highest price that still meets your targets; Pro keeps it
+        on every deal, with the sensitivity grid and a 10-year projection.
       </>
     ),
   },
@@ -530,12 +545,11 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Avail is owned by Realtor.com — does that matter?",
     answer: (
       <>
-        Functionally not much for most landlords — Realtor.com acquired Avail in
-        2020 and the product has continued. It does mean listings distribute
-        well through Realtor.com&apos;s reach. TrueCap is independent, which
-        some investors prefer for underwriting because we have no listing-side
-        incentive (we don&apos;t benefit from any deal happening — only from
-        giving you a good number on it).
+        Functionally not much: the operator of Realtor.com acquired Avail in
+        December 2020 and the product has continued. It does mean Avail
+        listings are syndicated to Realtor.com. TrueCap is independent, with no
+        listing-side incentive (we don&apos;t benefit from any deal happening,
+        only from giving you a good number on it).
       </>
     ),
   },
