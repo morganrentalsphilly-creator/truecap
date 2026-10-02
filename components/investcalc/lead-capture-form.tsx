@@ -12,10 +12,16 @@
  * go-to-market audit, row P1-67). It is always saved to the agent's dashboard.
  * It is emailed to the agent only while LEAD_NOTIFICATIONS_MODE is live, which
  * the server-rendered share shell reads and passes in as `agentEmailed`. So
- * the copy never promises a reply, says the agent was emailed only when that
- * is on, and shows the agent's own contact details, which the share page
+ * the copy never promises a reply, says TrueCap emails the agent only when
+ * that is on, and shows the agent's own contact details, which the share page
  * already loads, so a client is not left waiting on a message nobody was told
  * about.
+ *
+ * `agentEmailed` is the mode, not the outcome of one send. The action returns
+ * ok once the row is saved, whether or not the owner email went out (no mail
+ * key, no owner address and a refused send all end in ok). So the headline
+ * reports the save in both modes, and the live copy states the rule ("emails
+ * them a notice when a new message arrives"), never that this message was sent.
  */
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -126,8 +132,10 @@ export function AgentContactLine({
 /**
  * What the client reads after sending. It states what happened to the message
  * and never what the agent will do: TrueCap cannot promise someone else's
- * reply. "Emailed" is said only when the server reported that the
- * notification is on.
+ * reply. The headline reports the save, the one thing the action establishes
+ * before it returns ok. That TrueCap emails the agent is said only when the
+ * server reported the notification is on, and as the rule, not as the result
+ * of this send.
  */
 export function LeadCaptureConfirmation({
   agentName,
@@ -150,13 +158,11 @@ export function LeadCaptureConfirmation({
         />
       </div>
       <p className="font-bold text-foreground">
-        {agentEmailed
-          ? `Your message was sent to ${agentName}.`
-          : `Your message is saved for ${agentName}.`}
+        {`Your message is saved for ${agentName}.`}
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
         {agentEmailed
-          ? "TrueCap emails them each new message and keeps it on their dashboard. They can reply to the email you gave."
+          ? "It is on their TrueCap dashboard, and TrueCap emails them a notice when a new message arrives. They can reply to the email you gave."
           : "It is on their TrueCap dashboard, where they can read it the next time they sign in. TrueCap has not emailed them."}
       </p>
       <AgentContactLine
