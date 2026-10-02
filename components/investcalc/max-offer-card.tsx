@@ -257,7 +257,7 @@ export function MaxOfferCard({
             <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
           {targetErrors.capRate ? (
-            <p id={`${capRateId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${capRateId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.capRate}
             </p>
           ) : null}
@@ -284,7 +284,7 @@ export function MaxOfferCard({
             <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
           {targetErrors.cocReturn ? (
-            <p id={`${cocId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${cocId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.cocReturn}
             </p>
           ) : null}
@@ -311,7 +311,7 @@ export function MaxOfferCard({
             />
           </div>
           {targetErrors.monthlyCashFlow ? (
-            <p id={`${cashFlowId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${cashFlowId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.monthlyCashFlow}
             </p>
           ) : null}
@@ -339,7 +339,7 @@ export function MaxOfferCard({
             className="h-11 border-input bg-background"
           />
           {targetErrors.dscr ? (
-            <p id={`${dscrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${dscrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.dscr}
             </p>
           ) : null}
@@ -366,7 +366,7 @@ export function MaxOfferCard({
             <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
           {targetErrors.minIrrPct ? (
-            <p id={`${irrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${irrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.minIrrPct}
             </p>
           ) : null}
@@ -393,7 +393,7 @@ export function MaxOfferCard({
             />
           </div>
           {targetErrors.maxCashRequired ? (
-            <p id={`${maxCashRequiredId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${maxCashRequiredId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.maxCashRequired}
             </p>
           ) : null}
@@ -422,7 +422,7 @@ export function MaxOfferCard({
             />
           </div>
           {targetErrors.maxPurchasePrice ? (
-            <p id={`${maxPurchasePriceId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+            <p id={`${maxPurchasePriceId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive-text">
               {targetErrors.maxPurchasePrice}
             </p>
           ) : null}

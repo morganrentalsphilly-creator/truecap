@@ -486,7 +486,7 @@ export function MultiFamilyUnitsSection({
         </p>
       ) : null}
       {typeof unitsArrayErrorMessage === "string" && (
-        <p className="mt-3 text-xs text-destructive">
+        <p className="mt-3 text-xs text-destructive-text">
           {unitsArrayErrorMessage}
         </p>
       )}
