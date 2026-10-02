@@ -123,8 +123,11 @@ export default function MarketsIndexPage() {
             the labeled starting assumptions, and get cap rate, cash flow, and
             DSCR. Every assumption is editable.
           </p>
+          {/* The hub names itself as the city and state templates do
+              (market-page, state-page). It travels as from, not utm_source:
+              this is a hop inside the site. Nothing reads the value. */}
           <Link
-            href="/analyze" prefetch={false}
+            href="/analyze?from=markets-hub" prefetch={false}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             Run a deal free →
