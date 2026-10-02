@@ -26,7 +26,7 @@ test("empty hero submit focuses the field, shows the helper, and stays put", asy
   await expect(
     form.getByRole("alert").filter({
       hasText:
-        "Paste an address or a Zillow, Redfin, Realtor.com, or Homes.com link",
+        "Paste an address or a Zillow, Redfin, Realtor.com, Homes.com, or Trulia link",
     }),
   ).toBeVisible();
   await expect(form.getByRole("link", { name: "try the sample deal", exact: true })).toBeVisible();

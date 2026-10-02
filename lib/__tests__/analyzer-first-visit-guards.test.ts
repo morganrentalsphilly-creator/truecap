@@ -126,15 +126,15 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
   const hero = read("components/marketing/hero-address-form.tsx");
   const help = read("components/investcalc/listing-link-input.tsx");
 
-  it("names the same four sites in the helper, the error and the analyzer help", () => {
+  it("names the same five sites in the helper, the error and the analyzer help", () => {
     expect(SUPPORTED_LISTING_SITES_TEXT).toBe(
-      "Zillow, Redfin, Realtor.com, or Homes.com",
+      "Zillow, Redfin, Realtor.com, Homes.com, or Trulia",
     );
     expect(HERO_EMPTY_HELPER).toBe(
-      "Paste an address or a Zillow, Redfin, Realtor.com, or Homes.com link",
+      "Paste an address or a Zillow, Redfin, Realtor.com, Homes.com, or Trulia link",
     );
     expect(HERO_LISTING_ERROR).toBe(
-      "Paste a supported Zillow, Redfin, Realtor.com, or Homes.com property link",
+      "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link",
     );
     expect(help).toContain("{SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts");
     // No site list typed by hand anywhere else in the two surfaces.
@@ -163,12 +163,17 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
         "https://www.realtor.com/realestateandhomes-detail/100-Test-St_Springfield_IL_62701_M12345-67890",
       "Homes.com":
         "https://www.homes.com/property/100-Test-St-Springfield-IL-62701/id-987/",
+      // trulia.com/home/<street>-<city>-<state>-<zip>-<id>, lower case, as
+      // read on Trulia's search page in a normal browser on 2026-10-02.
+      Trulia:
+        "https://www.trulia.com/home/100-test-st-springfield-il-62701-10372535",
     };
     const sources: Record<(typeof SUPPORTED_LISTING_SITES)[number], string> = {
       Zillow: "zillow",
       Redfin: "redfin",
       "Realtor.com": "realtor",
       "Homes.com": "homes",
+      Trulia: "trulia",
     };
     expect(Object.keys(links)).toEqual([...SUPPORTED_LISTING_SITES]);
     for (const [site, link] of Object.entries(links)) {
@@ -188,11 +193,11 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
   });
 
   it("names Trulia only once the parser reads the links Trulia serves", () => {
-    // Trulia property links are trulia.com/home/<address>-<id> as they
-    // appear in search-engine results (2026-10-02); trulia.com answered 403
-    // to an automated load, so no Trulia page was read. The parser's Trulia
+    // Trulia property links are trulia.com/home/<address>-<id>: read on
+    // Trulia's own search page in a normal browser on 2026-10-02
+    // (trulia.com answers 403 to an automated load). The parser's Trulia
     // branch reads that shape and drops the listing id
-    // (lib/__tests__/listing-url.test.ts).
+    // (lib/__tests__/listing-url.test.ts), so Trulia is named.
     // This holds the rule from the other side: if that branch ever stops
     // reading it, the generic fallback would put the id into Property
     // Address, and Trulia must not be on the list of named sites then.
@@ -205,6 +210,18 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
       "Trulia",
     );
     expect(namesTrulia && !readsTruliaLinks).toBe(false);
+    // And today both hold: it is named, and its links are read.
+    expect(namesTrulia).toBe(true);
+    expect(readsTruliaLinks).toBe(true);
+  });
+
+  it("/vs/dealcheck names the same sites as the list", () => {
+    // The comparison page types the sites in a sentence of its own; it named
+    // four while the parser read five.
+    const vs = read("app/vs/dealcheck/page.tsx").replace(/\s+/g, " ");
+    expect(vs).toContain(
+      `You can paste a ${SUPPORTED_LISTING_SITES.slice(0, -1).join(", ")} or ${SUPPORTED_LISTING_SITES.at(-1)} link`,
+    );
   });
 
   it("finds the link inside share-sheet text, so the sentence is not the address", () => {
