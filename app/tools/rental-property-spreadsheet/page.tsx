@@ -88,7 +88,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's actually in the spreadsheet?",
-    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for Buy Box fit.",
+    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the screening bands TrueCap uses to group a modeled result as Strong, Solid, Mixed, Marginal, or Negative.",
   },
   {
     q: "Why do NOI and DSCR exclude the CapEx reserve?",
@@ -265,9 +265,11 @@ export default function RentalPropertySpreadsheetPage() {
             <p>
               The defaults are honest, not optimistic: 5% vacancy, 8%
               management, 10% maintenance, and a 5% CapEx reserve — the same
-              starting assumptions the TrueCap analyzer uses. Zero them out if
-              you must, but know that&apos;s the underwrite you&apos;re
-              changing, not the formula.
+              starting assumptions the TrueCap analyzer uses. Property tax
+              starts at 1.1% of the price, a placeholder to replace with the
+              parcel&apos;s actual bill. Zero the reserves out if you must, but
+              know that&apos;s the underwrite you&apos;re changing, not the
+              formula.
             </p>
 
             <h3>Tab 2 — 10-Year Projection</h3>
@@ -284,24 +286,18 @@ export default function RentalPropertySpreadsheetPage() {
               Plain-English definitions and &ldquo;what&apos;s a good
               number&rdquo; benchmarks for every metric in the workbook — cap
               rate, cash-on-cash, DSCR, NOI, the 1% rule, and each expense
-              reserve — plus the exact bands TrueCap&apos;s Buy Box
-              classifier uses to group modeled results as Strong, Solid, Mixed,
-              Marginal, or Negative. It&apos;s the tab to hand someone who asks
-              &ldquo;wait, what&apos;s DSCR?&rdquo;
+              reserve — plus the exact screening bands TrueCap uses to group
+              modeled results as Strong, Solid, Mixed, Marginal, or Negative.
+              Those bands are a rule of thumb, not your Buy Box fit. It&apos;s
+              the tab to hand someone who asks &ldquo;wait, what&apos;s
+              DSCR?&rdquo;
             </p>
 
             <h2 className="text-2xl sm:text-3xl">A worked example</h2>
             <p>
-              The spreadsheet ships pre-filled with the same example deal we
-              underwrite in the{" "}
-              <Link
-                href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
-              >
-                TrueCap analyzer
-              </Link>
-              : a $250,000 single-family rental at $2,400/mo rent, bought with
-              20% down at 6.75% on a 30-year loan. With honest reserves, that
+              The spreadsheet ships with a worked example deal: a $250,000
+              single-family rental at $2,400/mo rent, bought with 20% down at
+              6.75% on a 30-year loan. With honest reserves, that
               deal produces roughly <strong>$97/mo of cash flow</strong> — not
               the $770/mo you&apos;d get by skipping vacancy, management,
               maintenance, and CapEx the way many listings do. The same workbook
