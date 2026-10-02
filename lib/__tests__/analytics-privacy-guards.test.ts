@@ -136,7 +136,7 @@ describe("analytics privacy guards", () => {
           path: "/tools/cap-rate-calculator",
           search: "gclid=Cj0KCQjw-private-click-id&gbraid=0AAAAA-private&msclkid=private-msclkid",
           secrets: ["Cj0K", "click-id", "0AAAAA", "msclkid", "gclid"],
-          // Paid, not organic: the ads' Final URLs carry no UTM parameters.
+          // Paid, not organic: the click id marks it even without the ads' utm_medium suffix.
           expected: "paid_search.tools",
         },
         {

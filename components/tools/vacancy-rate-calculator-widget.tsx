@@ -5,9 +5,9 @@
  *
  * Computes effective vacancy rate from annual vacant days OR from a
  * monthly basis. Also reverses the math to show the rent loss in dollars.
- * Vacancy is one of the most under-modeled line items in rental pro
- * formas — most sellers quote 5% but the honest national average runs
- * 7-9%.
+ * The page quotes one sourced national figure (the Census Bureau's Housing
+ * Vacancy Survey, app/tools/vacancy-rate-calculator/page.tsx); keep unsourced
+ * vacancy figures out of this file so they are not copied back into it.
  */
 
 import { useMemo, useState } from "react";

@@ -1,6 +1,7 @@
 /**
  * Shared template for the persona pages' opengraph-image.tsx cards
- * (/for-buy-and-hold, /for-house-hackers, /for-brrrr, /for-flippers), on the
+ * (/for-investors, /for-buy-and-hold, /for-house-hackers, /for-brrrr,
+ * /for-flippers), on the
  * Newsprint frame (lib/og/newsprint.tsx). Each wrapper passes its page's own
  * H1 and hero subhead, so the card cannot drift from the page (the old cards
  * had: one still advertised a retired capability, others said "released").
