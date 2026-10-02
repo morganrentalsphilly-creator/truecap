@@ -11,8 +11,8 @@
  * (components/marketing/pricing-toggle-plans.tsx).
  *
  * sessionStorage, not the URL: /pricing's query string already carries
- * ?billing=checkout_cancelled and ?checkout=<plan>, and the canonical URL
- * stays clean. It is a display preference only. It holds one of two words,
+ * ?billing=checkout_cancelled, and the canonical URL stays clean. It is a
+ * display preference only. It holds one of two words,
  * is never sent anywhere, changes no amount and selects nothing at checkout
  * beyond what the pressed segment already shows on the cards.
  *
