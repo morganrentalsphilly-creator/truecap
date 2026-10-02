@@ -164,6 +164,9 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
       const hit = /\banalyzer\b[^."]{0,160}\b70%[- ]rule\b/i.exec(prose);
       if (hit) offenders.push(`${file}: ${hit[0]}`);
     }
-    expect(offenders).toEqual([]);
+    expect(
+      offenders,
+      "a sentence names the analyzer and then the 70% rule before a full stop; say what the 70% rule calculator does in its own sentence, and what the analyzer does in another",
+    ).toEqual([]);
   });
 });
