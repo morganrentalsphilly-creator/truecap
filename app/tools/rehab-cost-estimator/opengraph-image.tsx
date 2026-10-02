@@ -5,8 +5,8 @@
  *
  * The drawing is the shared template (lib/og/tool-og-template.tsx). The chips
  * are passed here and say only what is true of this tool: it is free and it
- * needs no account. The template's default chips include "Live data", which
- * no tool on this template shows.
+ * needs no account. The template has no default chips: a card that passes
+ * none draws none.
  *
  * The line says what the tool on the page does: you tick work items, set the
  * square footage, the bath count and a contingency, and read a total. The
