@@ -138,9 +138,34 @@ describe("performance contract", () => {
     const home = lhci.ci.assert.assertMatrix[0].assertions;
     expect(home["categories:accessibility"][0]).toBe("error");
     expect(home["cumulative-layout-shift"][0]).toBe("error");
-    expect(home["largest-contentful-paint"]).toEqual(["warn", { maxNumericValue: 2500 }]);
-    expect(home["total-blocking-time"]).toEqual(["warn", { maxNumericValue: 200 }]);
+    expect(home["largest-contentful-paint"]).toEqual(["warn", { maxNumericValue: 2500, aggregationMethod: "median" }]);
+    expect(home["total-blocking-time"]).toEqual(["warn", { maxNumericValue: 200, aggregationMethod: "median" }]);
     expect(read(".github/workflows/ci.yml")).toContain("@lhci/cli");
+  });
+
+  // Simulated throttling reported 1.8 to 4.4 s of LCP for the same page and
+  // hid the font-swap shift (the unthrottled load has the font before first
+  // paint), so the job applies the throttle and reads the median of three
+  // runs. LHCI's default aggregation is "optimistic": the best of the three.
+  it("measures a really throttled load: applied throttling, three runs, medians", () => {
+    const lhci = JSON.parse(read("lighthouserc.json")) as {
+      ci: {
+        collect: { url: string[]; numberOfRuns: number; settings: { throttlingMethod: string } };
+        assert: { assertMatrix: Array<{ matchingUrlPattern: string; assertions: Record<string, [string, Record<string, unknown>]> }> };
+      };
+    };
+    expect(lhci.ci.collect.settings.throttlingMethod).toBe("devtools");
+    expect(lhci.ci.collect.numberOfRuns).toBe(3);
+    // /pricing is where the headline re-wrapped at the font swap (0.199).
+    expect(lhci.ci.collect.url.map((u) => new URL(u).pathname)).toEqual(["/", "/analyze", "/pricing"]);
+    expect(lhci.ci.assert.assertMatrix).toHaveLength(3);
+    for (const { matchingUrlPattern, assertions } of lhci.ci.assert.assertMatrix) {
+      expect(assertions["cumulative-layout-shift"], matchingUrlPattern).toEqual([
+        "error",
+        { maxNumericValue: 0.05, aggregationMethod: "median" },
+      ]);
+      expect(assertions["categories:accessibility"], matchingUrlPattern).toEqual(["error", { minScore: 0.95 }]);
+    }
   });
 
   // The homepage's largest paint is the ledger's text since the 2026-09

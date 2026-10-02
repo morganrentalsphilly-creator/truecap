@@ -116,39 +116,65 @@ which the branch merged; the sweep applied the same rule to every rebuilt
 page and shared part, and `AnalyzerHandoffLink` now never prefetches
 `/analyze` (its 20 callers had prefetched the analyzer bundle as soon as the link came into view, in the first screen of every calculator page).
 
-### Lighthouse 12.8.2 (mobile preset unless marked)
+### Lighthouse 12.8.2
 
-Medians of 3 runs each on the final build. "Before" is the baseline at
-`de81b02` (`../baseline/`): medians of 3 for `/`, a single run for
-`/for-agents` and `/pricing` (the only runs the baseline kept).
+Desktop preset, medians of 3 runs each on the final build. "Before" is the
+baseline at `de81b02` (`../baseline/`), which kept desktop runs for `/`
+only.
 
 | Page | Perf | A11y | Best practices | SEO | LCP | CLS | TBT |
 |---|---|---|---|---|---|---|---|
-| `/` mobile, before | 0.86 | 1.00 | 0.96 | 1.00 | 4.1 s | 0.003 | 40 ms |
-| **`/` mobile, after** | **0.90** | **1.00** | 0.96 | 1.00 | **3.61 s** | **0.000** | 24 ms |
 | `/` desktop, before | 1.00 | 1.00 | 0.96 | 1.00 | 0.80 s | 0.002 | 0 ms |
 | **`/` desktop, after** | **1.00** | **1.00** | 0.96 | 1.00 | **0.74 s** | **0.000** | 0 ms |
-| `/for-agents` mobile, before | 0.91 | 0.97 | 0.96 | 1.00 | 3.5 s | 0.003 | 38 ms |
-| **`/for-agents` mobile, after** | **0.89** | **1.00** | 0.96 | 1.00 | **3.76 s** | **0.002** | 17 ms |
 | **`/for-agents` desktop, after** | **1.00** | **1.00** | 0.96 | 1.00 | **0.80 s** | 0.001 | 0 ms |
-| `/pricing` mobile, before | 0.80 | 1.00 | 0.96 | 1.00 | 3.6 s | 0.003 | 37 ms |
-| **`/pricing` mobile, after** | **0.81** | **1.00** | 0.96 | 1.00 | **3.61 s** | **0.002** | 27 ms |
 | **`/pricing` desktop, after** | **0.90** | **1.00** | 0.96 | 1.00 | **0.72 s** | 0.001 | 0 ms |
 
-- Accessibility is 1.00 on every page; `/for-agents` was 0.97 (the PR #147
+- The mobile runs on the same build scored accessibility 1.00, best
+  practices 0.96 and SEO 1.00 on `/`, `/for-agents` and `/pricing`.
+  Accessibility on `/for-agents` was 0.97 at the baseline (the PR #147
   labels at 4.2:1 on blue, now gone).
 - Best practices is 0.96 everywhere for one local-only reason: the
   `/_vercel/insights` script 404s outside Vercel.
-- `/for-agents` mobile LCP is 3.76 s against the baseline's single run of
-  3.5 s. The LCP element is the same in both (the hero paragraph: text, no
-  image), all of it render delay after a 0.45 s TTFB; the after runs spread
-  3.76 to 4.15 s and checkpoint 3 measured the homepage's own spread at
-  3.8 to 5.5 s, so this sits inside run-to-run noise. It is on the
-  TODO(verify) list for production with more runs.
-- `/pricing` mobile TTFB is ~7 s locally in every run, before and after: it
-  is the one dynamic page (it reads the session and Stripe display prices,
-  which the isolated env points at nothing and waits out). The page's own
-  render is fast; production TTFB is the number that matters there.
+
+#### Mobile performance, with the throttle applied
+
+This table replaces the mobile performance figures this README first
+carried: LCP 3.61 s on `/`, 3.76 s on `/for-agents` and 3.61 s on
+`/pricing`, against a baseline of 4.1, 3.5 and 3.6 s. Those came from
+Lighthouse's simulated throttling, which on this site reports anything from
+1.8 to 4.4 s for the same page: the simulated LCP follows how much
+JavaScript happened to finish before the paint in the unthrottled load, not
+when the page paints. The go-to-market audit re-measured with the throttle
+applied (`--throttling-method=devtools`: Slow 4G, 4x CPU).
+
+Lighthouse 12.8.2, mobile 412x823, cold cache, consent unset, medians of 3
+runs each against production on 2026-10-02 (`main` at `ed1890d`, this pass
+merged):
+
+| Page | Perf | LCP | CLS | TBT |
+|---|---|---|---|---|
+| `/` | 0.94 | 1.93 s | 0.033 | 219 ms |
+| `/for-agents` | 0.95 | 1.91 s | 0.002 | 183 ms |
+| `/pricing` | 0.87 | 1.90 s | 0.199 | 152 ms |
+
+- There is no "before" row: the baseline build was only run with simulated
+  throttling, so what this pass did to mobile LCP was not measured.
+- The LCP element is text on all three pages (the hero paragraph on `/` and
+  `/for-agents`, the H1 on `/pricing`). It paints less than 0.4 s after the
+  stylesheet lands.
+- The 0.199 on `/pricing` is the H1 losing a line when Archivo arrives
+  after first paint on a slow connection: the fallback face was matched to
+  normal-width Archivo, and headings use the 82% display cut. A fallback
+  face for the display cut was added to `app/globals.css` afterwards; it is
+  not in these figures.
+- TBT was measured on a machine shared with other jobs, so it is noisier
+  than LCP.
+- PageSpeed Insights uses the simulated method and showed 3.2 to 4.6 s for
+  these pages on the same day.
+- Locally `/pricing` has a TTFB of about 7 s in every run, before and
+  after: it is the one dynamic page (it reads the session and Stripe display
+  prices, which the isolated env points at nothing and waits out). That is
+  why its mobile figures are read from production.
 
 ### Slop scores
 
