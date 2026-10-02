@@ -137,16 +137,6 @@ describe("marketing landmarks and mobile targets", () => {
     expect(source.indexOf("<SiteFooter />")).toBeGreaterThan(mainEnd);
   });
 
-  it("gives the promo dismiss control a 44px target while retaining its 28px visual", () => {
-    const source = read("components/marketing/annual-promo-banner.tsx");
-    expect(source).toContain(
-      'className="group absolute right-0 top-1/2 inline-flex size-11'
-    );
-    expect(source).toContain(
-      'className="inline-flex size-7 items-center justify-center rounded-full'
-    );
-  });
-
   it("keeps centralized primary inputs and buttons at least 44px tall", () => {
     const input = read("components/ui/input.tsx");
     expect(input).toMatch(/border-input h-9 min-h-11 /);

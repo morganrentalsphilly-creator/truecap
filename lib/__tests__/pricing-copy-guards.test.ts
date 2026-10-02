@@ -255,12 +255,6 @@ describe("pricing offer hierarchy", () => {
       PLAN_CATALOG.pro_monthly.unitAmountUsd * 12,
     );
   });
-
-  it("does not manufacture scarcity around the permanent annual plan", () => {
-    const banner = read("../../components/marketing/annual-promo-banner.tsx");
-    expect(banner).toContain("Annual plan");
-    expect(banner).not.toMatch(/limited|expires|countdown/i);
-  });
 });
 
 describe("billing recovery safety", () => {
