@@ -46,8 +46,9 @@ describe("P2-91: market, state and older calculator pages prefetch on intent", (
   // Scrolling /markets at 390px requested 105 to 137 route payloads (about
   // 0.9 MB): every city link was a default next/link. Links now go through
   // IntentPrefetchLink (hover or keyboard focus); the only plain next/link
-  // left on these pages is /analyze with prefetch={false}, which the
-  // analyzer guards read as <Link>.
+  // left in these files is /analyze with prefetch={false}, which the
+  // analyzer guards read as <Link>. The list is files, not rendered pages:
+  // a block a page mounts from elsewhere is covered only if it is listed.
   const PAGES = [
     "app/markets/page.tsx",
     "app/markets/[city]/page.tsx",
@@ -65,6 +66,10 @@ describe("P2-91: market, state and older calculator pages prefetch on intent", (
     "app/tools/vacancy-rate-calculator/page.tsx",
     "app/tools/rehab-cost-estimator/page.tsx",
     "app/tools/rental-property-spreadsheet/page.tsx",
+    // A widget, not a page: it renders on /tools/70-percent-rule-calculator
+    // (and in its embed frame) and links the ARV calculator, so the page
+    // prefetched that route as soon as the widget was in view.
+    "components/tools/seventy-percent-rule-widget.tsx",
   ];
 
   it.each(PAGES)("%s", (path) => {
