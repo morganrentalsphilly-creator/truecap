@@ -14,8 +14,8 @@
  * Trulia page was read to confirm them. Naming it here also means
  * re-anchoring the three strings the guards and two e2e specs pin.
  * `lib/__tests__/analyzer-first-visit-guards.test.ts` checks that a link
- * from each named site parses, and that Trulia is never named while the
- * parser cannot read its links.
+ * from each named site parses, and that Trulia is never named unless the
+ * parser reads that link shape without the listing id.
  */
 export const SUPPORTED_LISTING_SITES = [
   "Zillow",
