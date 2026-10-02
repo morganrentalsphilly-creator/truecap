@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { updatePasswordAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import {
@@ -85,15 +85,15 @@ export function UpdatePasswordForm() {
 
   if (sessionReady === false) {
     return (
-      <div className="space-y-4 text-center">
-        <p className="text-sm leading-relaxed text-muted-foreground">
+      <div className="space-y-4">
+        <p className="text-base leading-relaxed text-muted-foreground">
           You need a valid reset link to set a new password. Request a new link from the forgot
           password page.
         </p>
-        <Button variant="outline" className="h-12 w-full rounded-xl" asChild>
+        <Button variant="outline" size="cta" className="w-full" asChild>
           <Link href="/auth/forgot-password">Forgot password</Link>
         </Button>
-        <Button variant="ghost" className="h-12 w-full rounded-xl" asChild>
+        <Button variant="ghost" size="cta" className="w-full" asChild>
           <Link href="/auth/login">Sign in</Link>
         </Button>
       </div>
@@ -115,17 +115,16 @@ export function UpdatePasswordForm() {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs font-semibold text-foreground">New password</FormLabel>
+            <FormItem>
+              <FormLabel>New password</FormLabel>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <FormControl>
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Enter your new password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 pl-4 pr-12 text-base md:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -138,7 +137,7 @@ export function UpdatePasswordForm() {
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-              <FormDescription id="new-password-policy" className="text-xs">
+              <FormDescription id="new-password-policy">
                 {PASSWORD_POLICY_TEXT}
               </FormDescription>
               <FormMessage />
@@ -150,17 +149,16 @@ export function UpdatePasswordForm() {
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs font-semibold text-foreground">Confirm password</FormLabel>
+            <FormItem>
+              <FormLabel>Confirm password</FormLabel>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <FormControl>
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Confirm your new password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 pl-4 pr-12 text-base md:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -184,7 +182,8 @@ export function UpdatePasswordForm() {
 
         <Button
           type="submit"
-          className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
+          size="cta"
+          className="w-full"
           disabled={isSubmitting}
         >
           {isSubmitting ? (

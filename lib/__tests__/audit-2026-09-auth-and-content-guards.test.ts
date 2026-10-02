@@ -87,7 +87,9 @@ describe("billing and trial surfaces say one thing once", () => {
   it("the auth shell shows one logo per breakpoint and no medallion", () => {
     const shell = read("components/auth/auth-shell.tsx");
     expect(shell).not.toContain("Building2");
-    expect(shell).toMatch(/text-center sm:mb-12 lg:hidden">\s*<AppLogo/);
+    // One AppLogo for every width (the photo aside that carried a second one
+    // is gone), so no breakpoint can show the mark twice.
+    expect(shell.match(/<AppLogo\b/g)).toHaveLength(1);
   });
 });
 

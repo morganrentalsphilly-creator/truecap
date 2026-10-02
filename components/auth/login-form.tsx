@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { internalNextPathOrNull, loginSchema, safeInternalNextPath, type LoginInput } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
@@ -181,15 +181,10 @@ export function LoginForm() {
           recognize and trust this faster than entering credentials. */}
       <GoogleAuthButton disabled={isSubmitting} />
 
-      <div className="relative" role="separator" aria-label="or sign in with email">
-        <div aria-hidden className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-            or
-          </span>
-        </div>
+      <div className="flex items-center gap-3" role="separator" aria-label="or sign in with email">
+        <span aria-hidden className="h-px flex-1 bg-border" />
+        <span className="text-sm text-muted-foreground">or</span>
+        <span aria-hidden className="h-px flex-1 bg-border" />
       </div>
 
       <Form {...form}>
@@ -198,21 +193,18 @@ export function LoginForm() {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs font-semibold text-foreground">Email</FormLabel>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <FormControl>
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  className="h-12 px-4 text-base md:text-base"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -222,25 +214,24 @@ export function LoginForm() {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem className="space-y-2">
+            <FormItem>
               <div className="flex items-center justify-between gap-2">
-                <FormLabel className="text-xs font-semibold text-foreground">Password</FormLabel>
+                <FormLabel>Password</FormLabel>
                 <Link
                   href="/auth/forgot-password"
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-medium text-primary hover:underline"
+                  className="tc-link -mr-2 inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-sm font-medium"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <FormControl>
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
+                    className="h-12 pl-4 pr-12 text-base md:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -259,22 +250,22 @@ export function LoginForm() {
         />
 
         {unconfirmedEmail ? (
-          <div className="rounded-xl border border-caution/30 bg-caution-light p-3 text-xs text-caution-text">
+          <div className="bg-band px-4 py-3 text-sm text-foreground">
             <p className="font-semibold">
-              Your email <span className="font-mono">{unconfirmedEmail}</span> isn&apos;t confirmed yet.
+              Your email <span className="break-words">{unconfirmedEmail}</span> isn&apos;t confirmed yet.
             </p>
-            <p className="mt-0.5 leading-relaxed text-caution-text">
+            <p className="mt-0.5 leading-relaxed text-muted-foreground">
               Check your inbox + spam folder, or resend the confirmation link.
             </p>
             <button
               type="button"
               onClick={handleResendConfirmation}
               disabled={isResending}
-              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-caution-light px-3 py-2 text-2xs font-bold uppercase tracking-wide text-caution-text hover:bg-caution-light focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-caution disabled:opacity-50"
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-input px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-background disabled:opacity-50"
             >
               {isResending ? (
                 <>
-                  <Loader2 className="size-3 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   Sending…
                 </>
               ) : (
@@ -287,14 +278,14 @@ export function LoginForm() {
         {signInError ? (
           <div
             role="alert"
-            className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground"
+            className="rounded-md border border-destructive px-4 py-3 text-sm text-foreground"
           >
-            <p className="font-semibold text-destructive">Sign in failed</p>
+            <p className="font-semibold text-destructive-text">Sign in failed</p>
             <p className="mt-0.5 leading-relaxed">{signInError}</p>
             {/password/i.test(signInError) ? (
               <Link
                 href="/auth/forgot-password"
-                className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
+                className="tc-link mt-1 inline-flex min-h-11 items-center font-semibold"
               >
                 Reset your password
               </Link>
@@ -306,7 +297,8 @@ export function LoginForm() {
 
         <Button
           type="submit"
-          className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
+          size="cta"
+          className="w-full"
           disabled={isSubmitting || (captchaEnabled && !captchaUnavailable && !captchaToken)}
         >
           {isSubmitting ? (
@@ -319,7 +311,7 @@ export function LoginForm() {
           )}
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           No account?{" "}
           <Link
             href={
@@ -327,7 +319,7 @@ export function LoginForm() {
                 ? `/auth/sign-up?next=${encodeURIComponent(safeNextPath)}`
                 : "/auth/sign-up"
             }
-            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-primary hover:underline"
+            className="tc-link inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium"
           >
             Sign up
           </Link>

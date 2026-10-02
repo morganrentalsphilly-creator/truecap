@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { requestPasswordResetAction } from "@/app/actions/auth";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schema";
 import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
@@ -71,15 +71,12 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="space-y-5 text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-positive-light text-positive">
-          <CheckCircle2 className="size-7" />
-        </div>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          If an account exists for <strong>{form.getValues("email")}</strong>, we sent a password
+      <div className="space-y-5">
+        <p className="bg-band px-4 py-3 text-base leading-relaxed text-foreground">
+          If an account exists for <strong className="break-words">{form.getValues("email")}</strong>, we sent a password
           reset link. Check your inbox and spam folder.
         </p>
-        <Button variant="outline" className="h-12 w-full rounded-xl" asChild>
+        <Button variant="outline" size="cta" className="w-full" asChild>
           <Link href="/auth/login">Back to sign in</Link>
         </Button>
       </div>
@@ -93,21 +90,18 @@ export function ForgotPasswordForm() {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs font-semibold text-foreground">Email</FormLabel>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <FormControl>
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    disabled={isSubmitting}
-                    className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  className="h-12 px-4 text-base md:text-base"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -116,7 +110,8 @@ export function ForgotPasswordForm() {
 
         <Button
           type="submit"
-          className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
+          size="cta"
+          className="w-full"
           disabled={isSubmitting || (captchaEnabled && !captchaUnavailable && !captchaToken)}
         >
           {isSubmitting ? (
@@ -128,9 +123,9 @@ export function ForgotPasswordForm() {
             "Send reset link"
           )}
         </Button>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Remembered it?{" "}
-          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+          <Link href="/auth/login" className="tc-link inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium">
             Sign in
           </Link>
         </p>
