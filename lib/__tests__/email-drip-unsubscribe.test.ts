@@ -79,7 +79,8 @@ beforeEach(() => {
   mocks.admin.mockImplementation(() => db.admin);
   mocks.claim.mockResolvedValue({ allowed: true, emailBucketKey: "bucket" });
   mocks.release.mockResolvedValue(undefined);
-  mocks.setMarketingOptOut.mockResolvedValue(undefined);
+  // The real function resolves true once the opt-out is stored.
+  mocks.setMarketingOptOut.mockResolvedValue(true);
   sent = [];
   transport = vi.fn<typeof fetch>(async (url, init) => {
     if (url === "https://api.resend.com/emails") {
@@ -409,6 +410,14 @@ describe("unsubscribe endpoint", () => {
     expect((await POST(unsubscribeRequest("POST", `https://usetruecap.com/email/unsubscribe?token=${token}`))).status).toBe(200);
     expect(mocks.setMarketingOptOut).toHaveBeenCalledWith(db.admin, userId);
     expect(db.tables.email_suppressions).toHaveLength(0);
+  });
+  it("does not confirm an account opt-out that was not stored", async () => {
+    // setMarketingOptOut resolves false when the column is not there yet.
+    mocks.setMarketingOptOut.mockResolvedValue(false);
+    const token = mintSignedToken("marketing-unsubscribe", { u: "11111111-2222-4333-8444-555555555555" })!;
+    const response = await POST(unsubscribeRequest("POST", `https://usetruecap.com/email/unsubscribe?token=${token}`));
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("You're unsubscribed");
   });
   it("rejects malformed hashes even when called without the route", async () => {
     expect(await suppressDripEmail(db.admin, "invalid", "mock-key")).toMatchObject({ suppressed: false, failed: 1 });

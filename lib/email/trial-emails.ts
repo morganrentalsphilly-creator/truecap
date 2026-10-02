@@ -17,6 +17,18 @@ import "server-only";
  * emails/lifecycle-email.tsx template from JSON content files, and
  * best-effort: a failure logs to Sentry and releases the claim so a Stripe
  * retry can try again; it never breaks webhook processing.
+ *
+ * The two emails are different kinds of mail:
+ *   - trial_day1 is a product pitch (how to use Pro during the trial). It is
+ *     marketing mail, so it also has to pass the lifecycle send gate
+ *     (lib/email/lifecycle-compliance.ts): EMAIL_POSTAL_ADDRESS set, a signed
+ *     unsubscribe link for this user, and the user not opted out
+ *     (profiles.marketing_opt_out). When any of those fails it is not
+ *     claimed and not scheduled, and one line is logged.
+ *   - trial_day10 is a billing notice: it tells a subscriber to check the
+ *     date and amount of an upcoming charge. Its sending rule is unchanged,
+ *     it is sent to opted-out users too, and it carries no unsubscribe link
+ *     (the postal address is printed when one is set).
  */
 
 import { promises as fs } from "node:fs";
@@ -25,19 +37,58 @@ import * as Sentry from "@sentry/nextjs";
 import { render } from "@react-email/render";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import LifecycleEmail from "@/emails/lifecycle-email";
+import {
+  buildLifecycleUnsubscribeHeaders,
+  buildLifecycleUnsubscribeUrl,
+  describeLifecycleBlock,
+  lifecycleSendGate,
+  readEmailPostalAddress,
+  resolveLifecycleMode,
+} from "@/lib/email/lifecycle-compliance";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 const CONTENT_DIR = path.join(process.cwd(), "emails", "lifecycle-content");
 
+/** `pitch: true` is marketing mail and must pass the lifecycle send gate. */
 const TRIAL_EMAILS = [
-  { emailKey: "trial_day1", file: "trial-day1.json", delayDays: 1 },
-  { emailKey: "trial_day10", file: "trial-day10.json", delayDays: 10 },
+  { emailKey: "trial_day1", file: "trial-day1.json", delayDays: 1, pitch: true },
+  { emailKey: "trial_day10", file: "trial-day10.json", delayDays: 10, pitch: false },
 ] as const;
 
 function lifecycleEmailsLive(): boolean {
-  return (
-    (process.env.LIFECYCLE_EMAILS_MODE ?? "off").trim().toLowerCase() === "live"
-  );
+  return resolveLifecycleMode() === "live";
+}
+
+/**
+ * Why the pitch email may not go to this user, or null when it may. The
+ * opt-out must be read as `false`: an unreadable opt-out or a missing profile
+ * row is a no.
+ */
+async function pitchBlock(
+  admin: SupabaseClient,
+  siteUrl: string,
+  userId: string,
+): Promise<string | null> {
+  const gate = lifecycleSendGate(siteUrl);
+  if (!gate.open) return describeLifecycleBlock(gate.reason);
+  if (!buildLifecycleUnsubscribeUrl(siteUrl, userId)) {
+    return describeLifecycleBlock("unsubscribe_unsignable");
+  }
+  try {
+    const { data, error } = await admin
+      .from("profiles")
+      .select("marketing_opt_out")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) return "the marketing opt-out could not be read";
+    if (!data) return "the user has no profile row";
+    if ((data as { marketing_opt_out?: boolean | null }).marketing_opt_out !== false) {
+      return "the user opted out of marketing email";
+    }
+  } catch {
+    return "the marketing opt-out could not be read";
+  }
+  return null;
 }
 
 type Content = {
@@ -99,11 +150,28 @@ export async function scheduleTrialOnboardingEmails(
     process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"
   ).replace(/\/+$/, "");
   const manageUrl = `${siteUrl}/settings`;
+  const postalAddress = readEmailPostalAddress();
+  const unsubscribeUrl = buildLifecycleUnsubscribeUrl(siteUrl, input.userId);
+  const pitchBlockedBy = await pitchBlock(admin, siteUrl, input.userId);
 
   let scheduled = 0;
   let skipped = 0;
 
   for (const item of TRIAL_EMAILS) {
+    // The pitch is marketing mail: no address, no signed link or an opt-out
+    // means it is neither claimed nor scheduled.
+    if (item.pitch && (pitchBlockedBy || !unsubscribeUrl || !postalAddress)) {
+      console.log(
+        `[lifecycle] BLOCKED — ${item.emailKey} not scheduled: ${
+          pitchBlockedBy ?? describeLifecycleBlock("postal_address_missing")
+        }`,
+      );
+      skipped += 1;
+      continue;
+    }
+    // Only the pitch carries the unsubscribe link and its headers.
+    const itemUnsubscribeUrl = item.pitch ? unsubscribeUrl : null;
+
     // Claim first — the unique (user_id, email_key) row is the idempotency
     // contract shared with the lifecycle cron.
     const { error: claimError } = await admin
@@ -160,6 +228,8 @@ export async function scheduleTrialOnboardingEmails(
           signatureNote: content.signature_note ?? null,
           siteUrl,
           manageUrl,
+          unsubscribeUrl: itemUnsubscribeUrl,
+          postalAddress,
         }),
       );
       const res = await fetch("https://api.resend.com/emails", {
@@ -177,6 +247,9 @@ export async function scheduleTrialOnboardingEmails(
           scheduled_at: new Date(
             Date.now() + item.delayDays * 24 * 60 * 60 * 1000,
           ).toISOString(),
+          ...(itemUnsubscribeUrl
+            ? { headers: buildLifecycleUnsubscribeHeaders(itemUnsubscribeUrl) }
+            : {}),
           tags: [{ name: "purpose", value: "lifecycle" }],
         }),
         signal: AbortSignal.timeout(10_000),

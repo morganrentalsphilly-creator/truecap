@@ -11,6 +11,11 @@
  * cta_text, cta_url, signature_note?):
  *   welcome / pro_nudge / winback -> emails/lifecycle-content/*.json
  *   drip day N                    -> emails/daily-campaign-content/day-NN.json
+ *
+ * The footer (unsubscribe link, postal address) is passed in by the sender,
+ * which gets both from lib/email/lifecycle-compliance.ts. This module reads
+ * no environment and signs nothing, so scripts/render-lifecycle-emails.ts can
+ * render every email with no secret and no network.
  */
 
 import { promises as fs } from "node:fs";
@@ -30,6 +35,17 @@ type RawContent = {
   cta_text?: unknown;
   cta_url?: unknown;
   signature_note?: unknown;
+};
+
+/**
+ * What the footer of one email carries. A real send always has both values
+ * (the send gate refuses otherwise); a dry preview may have neither.
+ */
+export type LifecycleEmailFooter = {
+  /** Signed account opt-out URL for this recipient. */
+  unsubscribeUrl: string | null;
+  /** The sender's postal address, from EMAIL_POSTAL_ADDRESS. */
+  postalAddress: string | null;
 };
 
 export type LifecycleEmailContent = {
@@ -94,22 +110,30 @@ export async function loadLifecycleContent(
   }
 }
 
-function toPlainText(c: LifecycleEmailContent, manageUrl: string): string {
-  return [
+function toPlainText(
+  c: LifecycleEmailContent,
+  manageUrl: string,
+  footer: LifecycleEmailFooter
+): string {
+  const lines = [
     c.headline,
     "",
     ...c.body,
     "",
     `${c.ctaText}: ${c.ctaUrl}`,
-    "",
-    `Manage email preferences: ${manageUrl}`,
-  ].join("\n");
+  ];
+  lines.push("", "You're getting this email because you have a TrueCap account.");
+  if (footer.unsubscribeUrl) lines.push(`Unsubscribe: ${footer.unsubscribeUrl}`);
+  lines.push(`Manage email preferences: ${manageUrl}`);
+  if (footer.postalAddress) lines.push(footer.postalAddress);
+  return lines.join("\n");
 }
 
 /** Render a due lifecycle email to { subject, html, text }, or null if content is missing. */
 export async function renderLifecycleEmail(
   due: DueLifecycleEmail,
-  siteUrl: string
+  siteUrl: string,
+  footer: LifecycleEmailFooter
 ): Promise<{ subject: string; html: string; text: string } | null> {
   const content = await loadLifecycleContent(due);
   if (!content) return null;
@@ -124,7 +148,9 @@ export async function renderLifecycleEmail(
       signatureNote: content.signatureNote,
       siteUrl,
       manageUrl,
+      unsubscribeUrl: footer.unsubscribeUrl,
+      postalAddress: footer.postalAddress,
     })
   );
-  return { subject: content.subject, html, text: toPlainText(content, manageUrl) };
+  return { subject: content.subject, html, text: toPlainText(content, manageUrl, footer) };
 }
