@@ -523,7 +523,8 @@ export default async function ForAgentsPage() {
             all you need, DealCheck Pro covers that. Agent Pro is for
             screening each listing against a specific client&apos;s Buy Box,
             showing that client&apos;s Offer Ceiling, and sending a co-branded
-            decision memo with the assumptions and the risks intact. Check
+            decision memo that carries the numbers and what could break the
+            deal. Check
             DealCheck&apos;s current pricing on its own site; the{" "}
             <IntentPrefetchLink href="/vs/dealcheck" className="tc-link">
               full comparison
