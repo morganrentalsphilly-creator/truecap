@@ -95,11 +95,23 @@ function DialogContent({
   )
 }
 
+/**
+ * The close button is 44px square at top-4 right-4 (the global button floor
+ * in app/globals.css), so it reaches 36px into the content box of a p-6
+ * dialog. Below sm the header is centred, and a title as wide as the dialog
+ * ("PDF reports are included with Pro" at 390px) ran under it. max-sm:px-10
+ * keeps that column clear; the same space on the left keeps the centred
+ * title on the dialog's centre line. From sm the header is left-aligned and
+ * keeps its full width.
+ */
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn('flex flex-col gap-2 text-center sm:text-left', className)}
+      className={cn(
+        'flex flex-col gap-2 text-center max-sm:px-10 sm:text-left',
+        className,
+      )}
       {...props}
     />
   )
@@ -125,7 +137,12 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('text-lg leading-none font-semibold', className)}
+      // Below sm a title can wrap inside the header's reserved columns; two
+      // lines at leading-none touch, and balance avoids a one-word last line.
+      className={cn(
+        'text-lg leading-none font-semibold text-balance max-sm:leading-tight',
+        className,
+      )}
       {...props}
     />
   )
