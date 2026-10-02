@@ -8,6 +8,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics/site-events";
 
 type Props = {
   className?: string;
@@ -22,7 +23,10 @@ export function AnalyzeCtaLink({ className, analyticsSource, href = "/analyze", 
       href={href}
       prefetch={false}
       className={className}
-      onClick={() => trackEvent("homepage_primary_cta", { source: analyticsSource })}
+      onClick={() => {
+        trackEvent("homepage_primary_cta", { source: analyticsSource });
+        track("primary_cta_clicked", { source: analyticsSource });
+      }}
     >
       {children}
     </Link>

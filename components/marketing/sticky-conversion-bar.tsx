@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { trackEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics/site-events";
 
 const STORAGE_KEY = "truecap_home_sticky_dismissed";
 
@@ -105,7 +106,10 @@ export function StickyConversionBar() {
         <Link
           href="/analyze"
           prefetch={false}
-          onClick={() => trackEvent("homepage_primary_cta", { source: "sticky_bar" })}
+          onClick={() => {
+            trackEvent("homepage_primary_cta", { source: "sticky_bar" });
+            track("primary_cta_clicked", { source: "sticky_bar" });
+          }}
           className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-base"
         >
           {/* The primary CTA's wording, as everywhere on the site. Phones
