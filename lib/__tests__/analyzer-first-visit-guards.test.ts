@@ -449,7 +449,7 @@ describe("Export PDF on the sample does not talk about a purchase shutdown (P2-3
   it("has a sample variant without the one-time-purchase and payment copy", () => {
     expect(dialog).toContain("sample = false,");
     expect(dialog).toContain(
-      "The sample's full report is on this page. Exporting a report as a PDF needs a Pro plan.",
+      "The sample's full report is on this page. A PDF of it comes with a Pro plan.",
     );
     const shutdown = dialog.indexOf("Already purchased a one-time report?");
     const payments = dialog.indexOf("Payments are processed by Stripe.");
