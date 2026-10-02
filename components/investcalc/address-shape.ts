@@ -69,12 +69,15 @@ export function streetAddressPlaceholder(area: string): string {
 }
 
 /**
- * A unit token: "209", "2B", "12-3", "B", "A1". Deliberately not any word,
- * so "Unit St" or "Suite Ave" in a street name is not read as a unit.
+ * A unit token: "209", "2B", "12-3", "B", "A1". The keyword must be followed
+ * by a dot, a space, "#" or a digit, so "Unity St", "Step Rd", "Embassy
+ * Suites Dr" and "Unit St" are not read as a unit. Without that separator
+ * the keyword ran straight into a single letter ("Unit" + "y"), and an
+ * address on Unity St was told it had a unit number.
  */
 const UNIT_TOKEN = "(?:\\d+[A-Za-z]?(?:-[A-Za-z0-9]+)?|[A-Za-z]\\d*)";
 const UNIT_DESIGNATOR = new RegExp(
-  `(?:^|[\\s,])(#\\s?[A-Za-z0-9][A-Za-z0-9-]*|(?:apt|apartment|unit|ste|suite)\\.?\\s*#?\\s?${UNIT_TOKEN})(?=[\\s,]|$)`,
+  `(?:^|[\\s,])(#\\s?[A-Za-z0-9][A-Za-z0-9-]*|(?:apt|apartment|unit|ste|suite)(?:\\.\\s*|\\s+|(?=[#\\d]))#?\\s?${UNIT_TOKEN})(?=[\\s,]|$)`,
   "i",
 );
 
