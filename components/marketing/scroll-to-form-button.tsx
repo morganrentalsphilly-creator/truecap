@@ -20,6 +20,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { scrollBehavior } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics/site-events";
 
 type Props = {
   /** Element ID to scroll to when a form is present (defaults to "main"). */
@@ -47,6 +48,7 @@ export function ScrollToFormButton({
   const handleClick = () => {
     if (analyticsSource) {
       trackEvent("homepage_primary_cta", { source: analyticsSource });
+      track("primary_cta_clicked", { source: analyticsSource });
     }
     // Safe-guard — server-rendered first paint may briefly render this
     // before hydration; window is always defined by the time onClick can

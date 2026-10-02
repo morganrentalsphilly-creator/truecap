@@ -158,6 +158,29 @@ describe("primary CTA clicks", () => {
     expect(vercelTrack).toHaveBeenCalledWith("primary_cta_clicked", { source: "content_inline_cta" });
   });
 
+  it("fires beside homepage_primary_cta at every call site", () => {
+    const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+    for (const [path, expected] of [
+      ["components/marketing/hero-address-form.tsx", 2],
+      ["components/marketing/sticky-conversion-bar.tsx", 1],
+      ["components/marketing/analyze-cta-link.tsx", 1],
+      ["components/marketing/scroll-to-form-button.tsx", 1],
+    ] as const) {
+      const source = read(path);
+      expect(source.match(/trackEvent\("homepage_primary_cta"/g) ?? [], path).toHaveLength(expected);
+      expect(source.match(/track\("primary_cta_clicked"/g) ?? [], path).toHaveLength(expected);
+    }
+  });
+
+  it("counts one hero sample click once: only /analyze?sample=1 sends sample_viewed", () => {
+    // Row P2-110: the hero link sent sample_viewed on click and the analyzer
+    // entry sent it again on mount, so hero traffic was counted twice.
+    const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+    expect(read("components/marketing/hero-address-form.tsx")).not.toContain('track("sample_viewed"');
+    const entry = read("components/marketing/analyze-entry-from-query.tsx");
+    expect(entry.match(/track\("sample_viewed", \{ source: "link" \}\)/g)).toHaveLength(1);
+  });
+
   it("fires beside the PostHog event on the content pages' analyzer button", () => {
     const link = readFileSync(join(process.cwd(), "components/analytics/tracked-content-cta-link.tsx"), "utf8");
     expect(link).toContain('trackEvent("content_cta_clicked", {');
