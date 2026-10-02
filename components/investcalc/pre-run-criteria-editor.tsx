@@ -163,7 +163,7 @@ export function PreRunCriteriaEditor({
                 <p
                   id={errorId}
                   role="alert"
-                  className="mt-1 text-xs font-medium text-destructive"
+                  className="mt-1 text-xs font-medium text-destructive-text"
                 >
                   {validation.errors[field]}
                 </p>
@@ -173,7 +173,7 @@ export function PreRunCriteriaEditor({
         })}
       </div>
       {validation.formError ? (
-        <p role="alert" className="text-xs font-medium text-destructive">
+        <p role="alert" className="text-xs font-medium text-destructive-text">
           Choose at least one criterion before calculating an Offer Ceiling.
         </p>
       ) : null}

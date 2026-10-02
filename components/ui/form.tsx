@@ -100,7 +100,7 @@ function FormLabel({
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn('data-[error=true]:text-destructive', className)}
+      className={cn('data-[error=true]:text-destructive-text', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -162,7 +162,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
       // never announce them (matches form-field-helpers.tsx). Static helper
       // children rendered without an error stay a plain <p>.
       role={error ? 'alert' : undefined}
-      className={cn('text-destructive text-sm', className)}
+      className={cn('text-destructive-text text-sm', className)}
       {...props}
     >
       {body}
