@@ -103,8 +103,9 @@ const CURATED: Term[] = [
     also: ["Capitalization rate"],
     definition:
       "Annual NOI divided by purchase price. Cap rate measures the property's earning power as if you owned it free-and-clear, with no mortgage. Stripping out financing makes it the right metric for comparing properties to each other and to alternatives like bonds.",
-    benchmark:
-      "6-10% is healthy in cash-flow markets (Midwest, Sun Belt secondary). 4-6% in balanced markets. 3-5% in coastal Tier-1 where appreciation does the heavy lifting.",
+    // Read from lib/glossary.ts, so the hub cannot state a range the term
+    // page withdraws (it used to: "6-10% is healthy in cash-flow markets").
+    benchmark: GLOSSARY.capRate.benchmark,
     postPath: "/blog/what-is-a-good-cap-rate",
   },
   {

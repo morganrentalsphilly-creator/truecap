@@ -83,4 +83,14 @@ describe("glossary hub ↔ lib/glossary.ts", () => {
     expect(HUB_SRC).toMatch(/const TERMS: Term\[\] = \(\(\) => \{/);
     expect(HUB_SRC).toContain("Object.values(GLOSSARY)");
   });
+
+  it("the hub's cap rate benchmark is the term page's own, not a range typed on the hub", () => {
+    // The hub said "6-10% is healthy in cash-flow markets (Midwest, Sun Belt
+    // secondary) ..." while /glossary/cap-rate said no universal range is a
+    // property fact. It now reads the lib's sentence, so the two cannot differ.
+    expect(HUB_SRC).toContain("benchmark: GLOSSARY.capRate.benchmark,");
+    expect(HUB_SRC).not.toMatch(/healthy in cash-flow markets \(Midwest/);
+    expect(HUB_SRC).not.toMatch(/coastal Tier-1 where appreciation/);
+    expect(GLOSSARY.capRate.benchmark).toMatch(/^No universal range/);
+  });
 });

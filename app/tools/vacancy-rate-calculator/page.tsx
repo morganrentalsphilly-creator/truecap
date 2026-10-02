@@ -19,11 +19,12 @@ import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+import { CURRENT_DEFAULT_FACTS } from "@/lib/product-facts";
 
 export const metadata: Metadata = {
   title: "Free Vacancy Rate Calculator — Effective Rate",
   description:
-    "Free vacancy rate calculator. Convert vacant days + turnover cost into an effective rate, with realistic benchmarks sellers often under-quote.",
+    "Free vacancy rate calculator. Convert vacant days and turnover cost into an effective vacancy rate, graded against fixed rule-of-thumb bands.",
   keywords: [
     "vacancy rate calculator",
     "rental vacancy rate",
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     ...OPEN_GRAPH_BASE,
     title: "Free Vacancy Rate Calculator — Effective Rate",
     description:
-      "Compute effective vacancy rate on a rental property — including turnover cost. Honest vacancy modeling for accurate cash flow.",
+      "Compute the effective vacancy rate on a rental property, including turnover cost, for the vacancy line in your cash flow model.",
     url: "/tools/vacancy-rate-calculator",
     type: "website",
   },
@@ -62,23 +63,23 @@ const HVS_RENTAL_VACANCY = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is a good vacancy rate for rental property?",
-    a: `The Census Bureau's Housing Vacancy Survey put the national rental vacancy rate at ${HVS_RENTAL_VACANCY.rate} in ${HVS_RENTAL_VACANCY.period}. Anything under 5% is aggressive — that assumes 18 days or less of vacancy per year, which is unusual outside of high-demand urban cores. For underwriting, use 8% as a default unless you have hard local data showing lower.`,
+    a: `The Census Bureau's Housing Vacancy Survey put the national rental vacancy rate at ${HVS_RENTAL_VACANCY.rate} in ${HVS_RENTAL_VACANCY.period}. That is one national figure, not a target for a single property. This calculator grades its result against fixed rule-of-thumb bands, not market data: under 5% reads "Aggressive (low)", 5% to under 8% "Realistic", 8% to under 12% "Conservative", and 12% or more "Distressed". TrueCap's analyzer starts at ${CURRENT_DEFAULT_FACTS.vacancy} vacancy as an editable default; replace it with recent vacancy on comparable units in your submarket.`,
   },
   {
     q: "How do you calculate vacancy rate?",
-    a: "Vacancy rate = (annual vacancy loss ÷ annual gross potential rent) × 100. Annual vacancy loss = (vacant days × daily rent) + turnover costs (cleaning, repairs, listing fees). The calculator above does this math automatically. A 5% vacancy assumption is optimistic; model 7-9% to be safe.",
+    a: "Vacancy rate = (annual vacancy loss ÷ annual gross potential rent) × 100. Annual vacancy loss = (vacant days × daily rent) + turnover costs (cleaning, repairs, listing fees). The calculator above does this math automatically.",
   },
   {
     q: "What's included in vacancy loss?",
-    a: "Two components: (1) lost rent during the actual vacant days between tenants, and (2) turnover cost — cleaning, paint touch-up, minor repairs, listing fees, and the property manager's lease-up fee (typically half a month's rent or 50% of one month's rent). Skipping turnover costs makes your vacancy rate look 1-2 percentage points lower than reality.",
+    a: "Two components: (1) lost rent during the actual vacant days between tenants, and (2) turnover cost: cleaning, paint touch-up, minor repairs, listing fees, and any lease-up fee a property manager charges. Leaving turnover cost out understates the effective rate.",
   },
   {
-    q: "Why do sellers under-quote vacancy?",
-    a: "Because lower vacancy = higher pro forma cap rate = higher asking price. A 5% vacancy quoted instead of 8% can lift a property's apparent NOI by $400-700/yr on a $20k-rent rental — which inflates the asking price by $5-10k at a 7% cap. Always re-underwrite with your own vacancy assumption.",
+    q: "How much does the vacancy assumption change the numbers?",
+    a: "On a rental with $20,000 of annual gross rent, moving the vacancy assumption from 8% to 5% adds $600 a year to modeled NOI. At a 7% cap rate, $600 of NOI is about $8,600 of value. Re-run any pro forma with your own vacancy assumption.",
   },
   {
     q: "Does vacancy rate vary by market?",
-    a: "Yes. Tertiary markets and single-employer towns run 9-12%. Stable mid-tier cities run 6-9%. High-demand urban cores (Brooklyn, Boston, SF) can run 3-5%. Class C properties consistently run higher vacancy than Class A, even in the same city. Always use realistic numbers for your specific submarket — your local property manager can give you 12-month historical vacancy on comparable units.",
+    a: "Yes. Vacancy varies by property, lease terms, submarket, season and management, so a national figure is not a local one. Ask a local property manager for 12-month historical vacancy on comparable units in your submarket, and use that.",
   },
 ];
 
@@ -108,7 +109,7 @@ export default function VacancyRateCalculatorPage() {
     slug: "vacancy-rate-calculator",
     name: "Vacancy Rate Calculator",
     description:
-      "Free vacancy rate calculator for rental properties. Convert vacant days + turnover cost into a true effective vacancy rate. Plus what a realistic vacancy assumption looks like — most sellers under-quote it.",
+      "Free vacancy rate calculator for rental properties. Convert vacant days + turnover cost into an effective vacancy rate, graded against fixed rule-of-thumb bands.",
     featureList: [
       "Convert vacant days into effective vacancy rate",
       "Include turnover costs in the calculation",
@@ -174,28 +175,29 @@ export default function VacancyRateCalculatorPage() {
 
         <section className="mt-12">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
-            How to model vacancy honestly
+            How to model vacancy
           </h2>
           <p className="text-base leading-relaxed text-foreground">
-            Three rules that separate honest underwriters from sellers&apos; pro
-            formas:
+            Three checks before you settle on a vacancy assumption:
           </p>
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
             <li>
-              <strong>Include turnover cost.</strong> Even a 14-day vacancy
-              with $400 of cleaning + paint costs 18-21 days of equivalent
-              lost rent. Most brochures count only the vacant days.
+              <strong>Include turnover cost.</strong> At $1,500 a month, a
+              14-day vacancy with $400 of cleaning and paint costs as much as
+              about 22 vacant days. Counting only the vacant days leaves that
+              out.
             </li>
             <li>
-              <strong>Match to property class.</strong> Class A urban-core
-              properties: 4-6%. Class B mid-tier: 7-9%. Class C and tertiary
-              markets: 10-12%. Single-employer towns: even higher.
+              <strong>Match the property.</strong> Vacancy varies by property,
+              lease terms, submarket, season and management. A national or
+              metro figure is a starting point, not the number for one
+              building.
             </li>
             <li>
-              <strong>Verify with a local PM.</strong> Property managers will
-              quote 12-month historical vacancy on comparable units in your
-              submarket. That number always beats Zillow rent estimates and
-              the seller&apos;s pro forma.
+              <strong>Verify with a local PM.</strong> Ask a property manager
+              for 12-month historical vacancy on comparable units in your
+              submarket, and use it in place of the figure in a seller&apos;s
+              pro forma.
             </li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
@@ -220,8 +222,9 @@ export default function VacancyRateCalculatorPage() {
             >
               cap rate
             </IntentPrefetchLink>
-            . Under-modeling vacancy by 3 points inflates cap rate by 0.3-0.5
-            points — enough to make a marginal deal look like a winner.
+            . On a property whose annual rent is 12% of its price,
+            understating vacancy by 3 points overstates the cap rate by about
+            a third of a point.
           </p>
         </section>
 

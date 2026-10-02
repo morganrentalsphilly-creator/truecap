@@ -21,7 +21,7 @@ import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
-  title: "Free Closing Cost Calculator — Every Line Item",
+  title: "Free Closing Cost Calculator — Line-Item Estimate",
   description:
     "Free closing cost calculator for rental purchases. Enter origination, title, transfer tax, escrow, prepaids, and due-diligence estimates.",
   keywords: [
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/closing-cost-calculator" },
   openGraph: {
     ...OPEN_GRAPH_BASE,
-    title: "Free Closing Cost Calculator — Every Line Item",
-    description: "Compute closing costs on a rental property purchase. Every line item broken out.",
+    title: "Free Closing Cost Calculator — Line-Item Estimate",
+    description: "Estimate closing costs on a rental property purchase from the line items you enter, with each one broken out.",
     url: "/tools/closing-cost-calculator",
     type: "website",
   },
@@ -133,7 +133,7 @@ export default function ClosingCostCalculatorPage() {
         <section className="mt-12">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">What closing costs include</h2>
           <p className="text-base leading-relaxed text-foreground">
-            Closing costs fall into four buckets:
+            Closing costs fall into five buckets:
           </p>
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
             <li><strong>Lender charges:</strong> origination, discount points, processing, underwriting, and other charges shown on the written estimate.</li>
