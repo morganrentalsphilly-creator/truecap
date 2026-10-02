@@ -254,6 +254,28 @@ describe("audit: enrichPropertyAction", () => {
     expect(rentSourceLabels(out).strip).toBe("HUD rent benchmark (statewide average)");
   });
 
+  it("flags the multi-family unit benchmarks as statewide when they are the state average", async () => {
+    vi.stubGlobal(
+      "fetch",
+      transport((url) => {
+        if (url.includes("/fred/")) return Response.json(fredOk);
+        if (url.includes("/statedata/OH")) return Response.json(hudState);
+        if (url.includes("/fmr/data/3904999999")) return Response.json(hudSafmr);
+        return new Response("nope", { status: 404 });
+      }),
+    );
+    const enrich = await freshAction();
+    // No county: every bedroom count is the state average, and the figures
+    // are the same means the single-family fill uses.
+    const statewide = await enrich({ state: "OH", zip: "43215", propertyType: "multi-family", unitBedrooms: [2, 3] });
+    expect(statewide.fmrByBedrooms).toEqual({ 2: 1275, 3: 1750 });
+    expect(statewide.meta.unitRents).toEqual({ source: "hud-fmr", county: "OH avg", year: 2026, stateAverage: true });
+    // A matched county keeps the area sourcing and carries no flag.
+    const local = await enrich({ state: "OH", county: "Franklin", zip: "43215", propertyType: "multi-family", unitBedrooms: [2, 3] });
+    expect(local.fmrByBedrooms).toEqual({ 2: 1600, 3: 2150 });
+    expect(local.meta.unitRents).toEqual({ source: "hud-safmr", county: "Franklin County", year: 2026, zip: "43215" });
+  });
+
   const read = (file: string) => readFileSync(join(process.cwd(), file), "utf8").replace(/\s+/g, " ");
 
   it("the analyzer carries the statewide flag from the lookup to every label", () => {
