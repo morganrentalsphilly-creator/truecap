@@ -18,6 +18,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { deriveStateFromAddress } from "@/lib/buy-box";
+import { withTypedUnit } from "@/components/investcalc/address-shape";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
@@ -434,7 +435,14 @@ export function AddressAutocomplete({
 
       if (place.formattedAddress) {
         typedSinceCommitRef.current = false;
-        form.setValue("address", place.formattedAddress, {
+        // Suggestions name the building. A unit the visitor typed ("#209")
+        // goes back in after the street line, the way the ZIP is backfilled
+        // from the typed text below.
+        const pickedAddress = withTypedUnit(
+          place.formattedAddress,
+          selectedFromValue,
+        );
+        form.setValue("address", pickedAddress, {
           shouldDirty: true,
           shouldTouch: true,
           shouldValidate: true,
@@ -463,7 +471,7 @@ export function AddressAutocomplete({
           // becoming an unhandled rejection in the browser.
           void Promise.resolve(
             onPlaceSelected({
-              formattedAddress: place.formattedAddress,
+              formattedAddress: pickedAddress,
               ...components,
             })
           ).catch((err) => {
@@ -475,7 +483,10 @@ export function AddressAutocomplete({
       if (selectionId !== selectionRequestRef.current) return;
       console.warn("[AddressAutocomplete] failed to resolve place:", err);
       // Fall back to the prediction text
-      const text = prediction.text?.toString();
+      const predictionText = prediction.text?.toString();
+      const text = predictionText
+        ? withTypedUnit(predictionText, selectedFromValue)
+        : predictionText;
       if (text) {
         typedSinceCommitRef.current = false;
         form.setValue("address", text, {
