@@ -231,6 +231,17 @@ describe("the hero keeps text typed before hydration (P2-34)", () => {
     expect(hero).toContain("address: preHydrationAddress,");
     expect(hero).not.toContain('defaultValues: { address: "" }');
   });
+
+  it("reads only on the first mount of a page load, never on a client navigation", () => {
+    const hero = read("components/marketing/hero-address-form.tsx");
+    // A later mount can find the page being left still in the document.
+    expect(hero).toContain(
+      'if (typeof document === "undefined" || firstHydrationDone) return "";',
+    );
+    const effect = hero.indexOf("firstHydrationDone = true;");
+    expect(effect).toBeGreaterThan(hero.indexOf("useEffect(() => {"));
+    expect(hero.match(/firstHydrationDone = true;/g)).toHaveLength(1);
+  });
 });
 
 describe("a city is context, not a property (P2-45)", () => {
