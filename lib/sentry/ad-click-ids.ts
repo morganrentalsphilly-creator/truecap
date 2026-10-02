@@ -1,7 +1,7 @@
 /**
- * Ad click ids (gclid, gbraid, wbraid, dclid, msclkid) out of browser Sentry
- * payloads. See lib/analytics/ad-click-ids.ts for why this is its own step
- * and not an entry in the sensitive-parameter list.
+ * Ad click ids (gclid, gbraid, wbraid, dclid, msclkid) out of Sentry
+ * payloads: browser, server and edge. See lib/analytics/ad-click-ids.ts for
+ * why this is its own step and not an entry in the sensitive-parameter list.
  *
  * Sentry traces run without cookie consent. In the 2026-10 audit's Reject
  * run 12 of 17 envelopes carried the landing URL's gclid: in `request.url`,

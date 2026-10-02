@@ -37,8 +37,9 @@ events receive no caller-supplied properties.
   fixed taxonomy `direct`, `organic_search`, `organic_ai`, `organic_social`,
   `paid_search`, `paid_social`, `email`, `external_referral`, or `campaign`,
   plus a coarse landing section (`home`, `blog`, `tools`, `markets`, `states`,
-  `glossary`, `vs`, `pricing`, `analyze`, or `other`, from the landing path's
-  first segment). Raw UTM values, referrer hosts, landing paths, and queries
+  `glossary`, `vs`, `pricing`, `analyze`, `for_agents`, `for_investors`, or
+  `other`, from the landing path's first segment; `/for-agents` and
+  `/for-investors` map to the two underscore names). Raw UTM values, referrer hosts, landing paths, and queries
   are neither stored nor merged into later events; only `referral_source` is
   merged. An explicit in-product source such as `opaque_share` or `embed`
   overrides first touch on that event only. Classification lives in
