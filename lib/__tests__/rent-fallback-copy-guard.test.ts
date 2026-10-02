@@ -88,10 +88,14 @@ const AREA_FILL_FILES = [
   "components/marketing/landing-sections.tsx",
   "lib/product-facts.ts",
   "lib/agent-faqs.ts",
+  // The sources note every /vs page prints, and two more TrueCap cells.
+  "components/marketing/comparison-faq.tsx",
+  "app/vs/stessa/page.tsx",
+  "app/blog/best-rental-property-calculator-2026/page.tsx",
 ];
 const AREA_FILL = [
   /\bHUD area (?:rent )?benchmark\b/i,
-  /\bHUD area rent\b/i,
+  /\bHUD area[- ]rent\b/i,
   /\beditable area benchmark\b/i,
   /\bArea rent and a national\b/,
   /HUD Fair Market Rent as an editable area benchmark/i,
