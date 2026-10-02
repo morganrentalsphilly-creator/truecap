@@ -86,9 +86,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-07-13",
     category: "Feature",
-    title: "Your buy box now answers 'so what price WOULD work?'",
+    title: "Your Buy Box now answers 'so what price WOULD work?'",
     description:
-      "When a deal fails your buy box, the verdict card now solves for the highest price that clears your criteria, right on the live analyzer. The Offer Ceiling stress-test also seeds its targets from your buy box instead of generic defaults.",
+      "When a deal fails your Buy Box, the verdict card now solves for the highest price that clears your criteria, right on the live analyzer. The Offer Ceiling stress-test also seeds its targets from your Buy Box instead of generic defaults.",
   },
   {
     date: "2026-07-13",
@@ -116,7 +116,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "The Verdict Ledger — the analysis reads top-down like an answer",
     description:
-      "Full results redesign: one answer card up top (verdict, Deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
+      "Full results redesign: one answer card up top (verdict, Deal score, the three numbers that decide it), then an accordion ledger of everything else (cash flow waterfall, 10-year view, stress tests), each row openable without losing your place.",
   },
   {
     date: "2026-07-05",
@@ -135,9 +135,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-07-02",
     category: "Feature",
-    title: "Your buy box everywhere",
+    title: "Your Buy Box everywhere",
     description:
-      "Buy-box fit badges now appear on My Deals, the dashboard, compare, and shared links; the Pro PDF carries your box so lenders see your criteria. Plus: CSV export of My Deals, a lender-reserves note on cash-to-close, and an HUD rent reality-check for multi-family units.",
+      "Buy Box fit badges now appear on My Deals, the dashboard, compare, and shared links; the Pro PDF carries your box so lenders see your criteria. Plus: CSV export of My Deals, a lender-reserves note on cash-to-close, and an HUD rent reality-check for multi-family units.",
   },
   {
     date: "2026-07-02",
@@ -165,7 +165,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "New analyses pre-fill from your saved defaults",
     description:
-      "If you've set personal defaults on /settings (vacancy %, mgmt %, maintenance %, financing, growth rates), every new analysis now opens pre-filled with those values instead of the generic engine defaults. Server-side fetch on the homepage means no flash of generic values before yours overlay. Applies to fresh analyses and to 'New Analysis' resets.",
+      "If you've set personal defaults on /settings (vacancy %, mgmt %, maintenance %, financing, growth rates), every new analysis now opens pre-filled with those values instead of the generic engine defaults. Applies to fresh analyses and to 'New Analysis' resets.",
   },
   {
     date: "2026-05-24",
@@ -193,7 +193,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Deal notes on every saved deal",
     description:
-      "Free-text notes per saved deal — seller context, agent commentary, inspector findings, your offer reasoning. Saves automatically on blur. Lives at the top of the analysis dashboard when you re-open a saved deal.",
+      "Free-text notes per saved deal — seller context, agent commentary, inspector findings, your offer reasoning. Saves automatically on blur. Open the Notes row when you re-open a saved deal.",
   },
   {
     date: "2026-05-24",
@@ -235,7 +235,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Loan amortization mini-view",
     description:
-      "Click 'Loan amortization' inside the Cash Flow tab to see a year-by-year breakdown of interest paid, principal paid, and ending loan balance. Collapsed by default so the dashboard stays clean. Self-hides on cash purchases.",
+      "Click 'Loan amortization' in the results to see a year-by-year breakdown of interest paid, principal paid, and ending loan balance. Collapsed by default so the dashboard stays clean. Self-hides on cash purchases.",
   },
   {
     date: "2026-05-24",
@@ -276,7 +276,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Starter strategy templates",
     description:
-      "Five prebuilt starting points — Long-term rental, House hack, FHA 3.5% owner-occupant, BRRRR, Short-term rental — each opens the template editor pre-populated with strategy-correct defaults (down %, rate, vacancy, mgmt fee, depreciation years, etc.). Customize once, save, reuse on every deal. Eliminates the blank-page problem on the templates surface.",
+      "Prebuilt starting points, among them Long-term rental, House hack, FHA 3.5% owner-occupant and Short-term rental. Each opens the template editor pre-populated with starter defaults (down %, rate, vacancy, mgmt fee). Customize once, save, reuse on every deal.",
   },
   {
     date: "2026-05-24",
@@ -345,7 +345,7 @@ const ENTRIES: Entry[] = [
     category: "Improvement",
     title: "Post-analysis signup prompt for anonymous users",
     description:
-      "After a free analysis, anonymous visitors now see a 'Save [your address] for later' card with one-tap Google signup. Soft conversion ask — even users not ready for Pro can save their work and come back.",
+      "After a free analysis, anonymous visitors now see a card offering to save the deal, with one-tap Google signup. Soft conversion ask — even users not ready for Pro can save their work and come back.",
   },
   {
     date: "2026-05-24",
@@ -366,7 +366,7 @@ const ENTRIES: Entry[] = [
     category: "Improvement",
     title: "Auto-save calculator drafts",
     description:
-      "Your inputs are now saved automatically as you type. Get distracted, close the tab, come back tomorrow — your draft is restored with a banner that names the address. Includes a one-click 'Start fresh' for shared devices.",
+      "Your inputs are now saved automatically as you type. Get distracted, close the tab, come back tomorrow, and your draft is restored with a banner that names the address. Includes a one-click 'Start fresh' for shared devices.",
   },
   {
     date: "2026-05-24",
@@ -378,9 +378,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-23",
     category: "Improvement",
-    title: "Try a sample deal — one-click demo",
+    title: "One-click sample deal",
     description:
-      "Cold visitors see a 'Try a sample deal' button next to the analyzer's H1. One click pre-fills a sample Philadelphia rental and runs the full analysis.",
+      "A 'See the sample deal' link under the homepage address form opens the analyzer, pre-fills a sample Philadelphia rental and runs the full analysis.",
   },
   {
     date: "2026-05-23",
@@ -449,12 +449,11 @@ export default function ChangelogPage() {
           <p className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3 text-sm leading-relaxed text-foreground">
             This archive preserves historical release notes. Each note
             describes the product on its date; features, pages, counts and
-            plan limits may have changed since, and notes about features
-            that were later withdrawn have been removed. Some older entries
-            describe modules that aren&apos;t offered right now,
-            including tax-specific, modeled-exit, BRRRR, and fix-and-flip views.
-            Check the current pricing and product screens for present
-            availability.
+            plan limits may have changed since. Notes about some withdrawn
+            features have been removed; other entries still describe modules
+            that aren&apos;t offered right now, including tax-specific,
+            modeled-exit, BRRRR, and fix-and-flip views. Check the current
+            pricing and product screens for present availability.
           </p>
         </header>
 
@@ -512,8 +511,8 @@ export default function ChangelogPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
             Your first full decision needs no account. A free account
-            {FREE_SAVE_LIMIT ? ` saves ${FREE_SAVE_LIMIT} deals and` : ""} opens
-            the dashboard.
+            {FREE_SAVE_LIMIT ? ` saves ${FREE_SAVE_LIMIT} deals` : " saves deals"} in
+            My Deals.
           </p>
           <Link
             href="/auth/sign-up"
