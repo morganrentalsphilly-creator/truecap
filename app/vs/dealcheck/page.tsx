@@ -99,14 +99,14 @@ const MATRIX: Row[] = [
     workflow: "Purchase criteria",
     truecap: "Buy Box checks the analysis inside the decision flow.",
     dealcheck:
-      "Custom purchase criteria screen properties against saved thresholds.",
+      "Custom purchase criteria screen properties against saved thresholds; the full set of criteria needs Plus or Pro.",
   },
   {
     workflow: "Offer Ceiling",
     truecap:
       "Offer Ceiling is connected to your Buy Box targets: the highest price that still meets them.",
     dealcheck:
-      "Its Offer Calculator calculates offers from configurable buying criteria.",
+      "Its Offer Calculator calculates offers from configurable buying criteria on the Plus and Pro plans.",
   },
   {
     workflow: "Downside",
@@ -123,9 +123,9 @@ const MATRIX: Row[] = [
   {
     workflow: "Investor clients (agents)",
     truecap:
-      "Agent Pro adds a client roster with a Buy Box per client, deal assignment, and client-report share links that open without an account; co-branded share pages and PDFs are in Pro and Agent Pro, with TrueCap's name kept.",
+      "Agent Pro adds a client roster (up to 100 clients) and Buy Boxes you assign to clients (up to 12 per account), deal assignment, and client-report share links that open without an account; co-branded share pages and PDFs are in Pro and Agent Pro, with TrueCap's name kept.",
     dealcheck:
-      "Branded PDF reports are published on its plans, including the free one; check its site for how client criteria and sharing work.",
+      "Every DealCheck plan exports a PDF report; putting your own name and logo on it needs DealCheck Pro. Check its site for how client criteria and sharing work.",
   },
   {
     workflow: "Best fit",
@@ -244,8 +244,8 @@ export default function VsDealCheckPage() {
                   You already have a paid DealCheck plan and the muscle memory.
                 </li>
                 <li>
-                  You want a tool with a longer track record in the BRRRR
-                  community.
+                  You want a tool with a longer track record and BRRRR
+                  analysis.
                 </li>
               </ul>
             </div>
@@ -300,7 +300,7 @@ export default function VsDealCheckPage() {
             >
               Offer Calculator
             </a>
-            , and{" "}
+            ,{" "}
             <a
               href="https://help.dealcheck.io/en/articles/2259844-screening-properties-with-custom-investment-criteria"
               target="_blank"
@@ -308,8 +308,17 @@ export default function VsDealCheckPage() {
               className="tc-link"
             >
               custom criteria
+            </a>
+            , and{" "}
+            <a
+              href="https://help.dealcheck.io/en/articles/2047720-how-to-export-property-reports"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tc-link"
+            >
+              report export
             </a>{" "}
-            documentation on August 15, 2026. Features and prices can change.
+            documentation in October 2026. Features and prices can change.
           </p>
         </Section>
 
@@ -378,7 +387,7 @@ export default function VsDealCheckPage() {
         <ComparisonFaq
           competitorName="DealCheck"
           items={DEALCHECK_FAQ}
-          reviewedDate="August 15, 2026"
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
@@ -539,9 +548,10 @@ const DEALCHECK_FAQ: FaqItem[] = [
     question: "Which is better for an agent with investor clients?",
     answer: (
       <>
-        It depends on the job. DealCheck gives you a branded PDF report on its
-        plans, including the free one, so if all you need is a branded
-        calculator PDF for a client, DealCheck is fine. TrueCap Agent Pro is
+        It depends on the job. Every DealCheck plan exports a PDF report;
+        putting your own name and logo on it needs DealCheck Pro. If all you
+        need is a calculator PDF for a client, DealCheck covers that. TrueCap
+        Agent Pro is
         for screening each listing against a specific client&apos;s Buy Box,
         showing that client&apos;s Offer Ceiling, and sending a co-branded
         decision memo the client can open without an account and rerun with
