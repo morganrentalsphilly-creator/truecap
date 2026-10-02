@@ -185,6 +185,10 @@ export function HeroAddressForm({
       trackEvent("homepage_primary_cta", {
         source: isHero ? "hero_listing" : "final_listing",
       });
+      // Cookieless twin (docs/analytics.md): trackEvent is PostHog-only.
+      track("primary_cta_clicked", {
+        source: isHero ? "hero_listing" : "final_listing",
+      });
       dispatchHeroAnalyze({
         token: `listing:${newToken()}`,
         address: parsed.address,
@@ -210,6 +214,9 @@ export function HeroAddressForm({
       entry_kind: "address",
     });
     trackEvent("homepage_primary_cta", {
+      source: isHero ? "hero_address" : "final_address",
+    });
+    track("primary_cta_clicked", {
       source: isHero ? "hero_address" : "final_address",
     });
     dispatchHeroAnalyze({
@@ -301,9 +308,11 @@ export function HeroAddressForm({
             prefetch={false}
             data-hero-sample-link=""
             onClick={() => {
+              // sample_viewed is sent once, by /analyze?sample=1 when it
+              // mounts (analyze-entry-from-query.tsx). Sending it here too
+              // counted every hero click twice.
               trackEvent("hero_sample_clicked");
               trackEvent("hero_sample_opened");
-              track("sample_viewed", { source: "hero" });
             }}
             className="tc-link inline-flex min-h-11 items-center font-medium"
           >
