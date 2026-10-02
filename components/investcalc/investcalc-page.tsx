@@ -5391,28 +5391,12 @@ export function InvestCalcPage({
           );
         }
       }
-      // A handed-off "address" is one of two things. A market page hands
-      // over its city ("Columbus, OH") as context: written into the field it
-      // read as a property, the run button went live and typing a street
-      // appended to it ("Columbus, OH123 Main St"). That becomes the field's
-      // hint and the field stays empty. Anything else is a property address.
+      // A handoff that carries an address and nothing else is one of two
+      // things. (One that also carries numbers, such as a calculator or a
+      // promoted shortlist row, keeps today's prefill-only contract below.)
       const handoffAddress = handoff.address;
-      const handoffAddressIsArea =
-        handoffAddress !== undefined && isCityOnlyAddress(handoffAddress);
-      if (handoffAddress !== undefined) {
-        if (handoffAddressIsArea) setAddressAreaHint(handoffAddress);
-        else form.setValue("address", handoffAddress);
-      }
-      // The homepage hero is a plain GET form until it hydrates, so a submit
-      // in that window arrives here as an address and nothing else. It used
-      // to fill the field and stop: no rate lookup, no area rent once
-      // bedrooms were typed. Hand it to the same handler the hydrated hero
-      // uses so the two paths behave alike. A handoff that carries its own
-      // numbers (a calculator, a promoted shortlist row) keeps today's
-      // prefill-only contract.
-      const handoffIsAddressOnly =
+      const handoffCarriesOnlyAddress =
         handoffAddress !== undefined &&
-        !handoffAddressIsArea &&
         handoff.purchasePrice === undefined &&
         handoff.monthlyRent === undefined &&
         handoff.bedrooms === undefined &&
@@ -5420,6 +5404,23 @@ export function InvestCalcPage({
         handoff.propertyTaxPct === undefined &&
         handoff.propertyType === undefined &&
         handoff.strategy === undefined;
+      // A market page hands over its city ("Columbus, OH") as context.
+      // Written into the field it read as a property: the run button went
+      // live and typing a street appended to it ("Columbus, OH123 Main St").
+      // It becomes the field's hint and the field stays empty.
+      const handoffAddressIsArea =
+        handoffCarriesOnlyAddress && isCityOnlyAddress(handoffAddress);
+      // The homepage hero is a plain GET form until it hydrates, so a submit
+      // in that window arrives here as a street address and nothing else. It
+      // used to fill the field and stop: no rate lookup, no area rent once
+      // bedrooms were typed. It goes to the same handler the hydrated hero
+      // uses (in the microtask below) so the two paths behave alike.
+      const handoffIsAddressOnly =
+        handoffCarriesOnlyAddress && !handoffAddressIsArea;
+      if (handoffAddress !== undefined) {
+        if (handoffAddressIsArea) setAddressAreaHint(handoffAddress);
+        else form.setValue("address", handoffAddress);
+      }
       if (handoff.purchasePrice !== undefined)
         form.setValue("purchasePrice", handoff.purchasePrice);
       if (handoff.bedrooms !== undefined)

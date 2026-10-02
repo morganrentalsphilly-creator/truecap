@@ -273,6 +273,11 @@ describe("a city is context, not a property (P2-45)", () => {
       "const handoff = analyzerHandoff;",
       "// No edit-handoff payload.",
     );
+    // Only a handoff that is nothing but a city: one that also carries
+    // numbers keeps its label in the field.
+    expect(handoff).toContain(
+      "handoffCarriesOnlyAddress && isCityOnlyAddress(handoffAddress);",
+    );
     expect(handoff).toContain(
       "if (handoffAddressIsArea) setAddressAreaHint(handoffAddress);",
     );
@@ -325,7 +330,7 @@ describe("the GET fallback and a failed lookup behave like the scripted hero pat
       "const handoff = analyzerHandoff;",
       "// No edit-handoff payload.",
     );
-    expect(handoff).toContain("const handoffIsAddressOnly =");
+    expect(handoff).toContain("const handoffCarriesOnlyAddress =");
     for (const field of [
       "purchasePrice",
       "monthlyRent",
@@ -337,7 +342,9 @@ describe("the GET fallback and a failed lookup behave like the scripted hero pat
     ]) {
       expect(handoff).toContain(`handoff.${field} === undefined`);
     }
-    expect(handoff).toContain("!handoffAddressIsArea &&");
+    expect(handoff).toContain(
+      "handoffCarriesOnlyAddress && !handoffAddressIsArea;",
+    );
     const call = handoff.indexOf("heroAnalyzeHandlerRef.current?.({");
     expect(call).toBeGreaterThan(-1);
     // After the programmatic-reset flag drops, as a user action would be.
