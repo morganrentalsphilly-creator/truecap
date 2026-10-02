@@ -439,9 +439,12 @@ textarea,
    bg-background to a field because the page background used to be white;
    on the paper that turned every analyzer field gray. A field that asks for
    the page background gets the field white instead. Same layer, higher
-   specificity, so a caller's other bg-* choice still wins. */
+   specificity, so a caller's other bg-* choice still wins.
+   form-control: FormControl (components/ui/form.tsx) is a Slot whose
+   data-slot replaces the field's own, so a field inside a FormField never
+   carried data-slot="input" and stayed gray. */
 @layer utilities {
-  :is([data-slot="input"], [data-slot="select-trigger"], textarea).bg-background {
+  :is([data-slot="input"], [data-slot="select-trigger"], [data-slot="form-control"], textarea).bg-background {
     background-color: var(--field);
   }
 }
