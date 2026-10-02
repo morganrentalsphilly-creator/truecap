@@ -113,11 +113,20 @@ const HEADING_ID = "comparison-faq-heading";
 export function ComparisonFaq({
   competitorName,
   items,
+  retired,
   reviewedDate,
 }: {
   /** "DealCheck", "Stessa", "Excel", etc. Used in the section heading. */
   competitorName: string;
   items: FaqItem[];
+  /**
+   * The competitor's product is no longer offered (/vs/cozy: Cozy moved to
+   * Apartments.com in mid-2021), so its rows restate the vendor's archived
+   * site. The note says so instead of sending the reader to a live site, and
+   * the price block drops its "check <vendor>'s live pricing" clause: there
+   * is no live pricing to check.
+   */
+  retired?: boolean;
   /**
    * The date this page's competitor claims were checked, as the note prints
    * it ("October 2026", "August 27, 2026"). Pass it only after every
@@ -183,7 +192,12 @@ export function ComparisonFaq({
           <span className="font-semibold text-foreground">
             Sources &amp; methodology:
           </span>{" "}
-          {reviewedDate ? (
+          {retired ? (
+            <>
+              {competitorName} is no longer offered; the rows about{" "}
+              {competitorName} describe it as its own archived site did.
+            </>
+          ) : reviewedDate ? (
             <>
               Feature and pricing rows reflect {competitorName}&apos;s publicly
               listed information, last reviewed {reviewedDate}. Vendors change
@@ -215,8 +229,17 @@ export function ComparisonFaq({
             On price, plainly
           </h3>
           <p className="mt-3 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground">
-            Tools in this space run from free to well above TrueCap — check{" "}
-            {competitorName}&apos;s live pricing for their current number. What
+            Tools in this space run from free to well above TrueCap
+            {retired ? (
+              "."
+            ) : (
+              <>
+                {" "}
+                — check {competitorName}&apos;s live pricing for their current
+                number.
+              </>
+            )}{" "}
+            What
             TrueCap&apos;s price buys is the decision layer, not more calculation:
             an Offer Ceiling for your targets, Buy Box fit with reasons, the downside stress test, and assumptions
             that are source-labeled instead of silently defaulted. Whether that

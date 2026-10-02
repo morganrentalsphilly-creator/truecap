@@ -105,6 +105,24 @@ describe("the /vs sources note prints a review date only when the page passes on
     expect(note).not.toContain("may be out of date");
   });
 
+  it("sends no reader to a retired product's live site or live pricing", () => {
+    const html = renderToStaticMarkup(<ComparisonFaq competitorName="Acme" retired items={ITEMS} />);
+    const note = sourcesNote(html);
+    expect(note).toContain("Acme is no longer offered; the rows about Acme describe it as its own archived site did.");
+    expect(note).not.toMatch(/vendor's own site|may be out of date|last reviewed/);
+    const text = html.replace(/<[^>]+>/g, "").replace(/&#x27;|&apos;/g, "'").replace(/\s+/g, " ");
+    expect(text).toContain("Tools in this space run from free to well above TrueCap. What TrueCap");
+    expect(text).not.toContain("live pricing");
+    // A live vendor keeps the pointer.
+    const live = renderToStaticMarkup(<ComparisonFaq competitorName="Acme" items={ITEMS} />)
+      .replace(/<[^>]+>/g, "")
+      .replace(/&#x27;|&apos;/g, "'")
+      .replace(/\s+/g, " ");
+    expect(live).toContain("Tools in this space run from free to well above TrueCap — check Acme's live pricing for their current number. What TrueCap");
+    // /vs/cozy is the one retired product and says so.
+    expect(read("app/vs/cozy/page.tsx")).toContain('<ComparisonFaq competitorName="Cozy" items={COZY_FAQ} retired />');
+  });
+
   it("keeps the note a Note, never a heading", () => {
     const html = renderToStaticMarkup(<ComparisonFaq competitorName="Acme" items={ITEMS} />);
     expect(html).not.toMatch(/<h[1-6][^>]*>[^<]*Sources/);
