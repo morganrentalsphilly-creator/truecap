@@ -666,10 +666,9 @@ export default async function PricingPage() {
 
         {/* One honest comparison (docs/site-overhaul.md Phase 9). The
             DealCheck figures live in DEALCHECK_COMPARISON so this file holds
-            no amounts. As rendered on dealcheck.io/pricing on 2026-10-01 they
+            no amounts. As rendered on dealcheck.io/pricing on 2026-10-02 they
             are the per-month prices under yearly billing (paying monthly
-            costs more); the heading does not say so yet, and changing it
-            waits on the founder (the constants are in the pricing module).
+            costs more), so the heading says "a month, billed yearly".
             Branding on DealCheck's PDF reports is a DealCheck Pro feature;
             every plan exports the report itself. */}
         <Section
@@ -679,7 +678,7 @@ export default async function PricingPage() {
           <div className="max-w-3xl">
             <SectionHeading id="pricing-dealcheck-title">
               How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
-              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro)
+              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro a month, billed yearly)
             </SectionHeading>
             <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
               DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
