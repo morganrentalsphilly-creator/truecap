@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     "roofstock analyzer",
     "roofstock fees",
     "is roofstock worth it",
-    "turnkey rental analyzer",
+    "roofstock listing analyzer",
   ],
   alternates: { canonical: "/vs/roofstock" },
   openGraph: {

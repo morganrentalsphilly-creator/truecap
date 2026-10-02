@@ -1,7 +1,7 @@
 /**
  * /vs/cozy — competitor comparison landing page.
  *
- * Target queries: "cozy alternative", "cozy.co alternative", "cozy shut down replacement", "what replaced cozy", "free landlord platform like cozy".
+ * Target queries: "cozy alternative", "cozy.co alternative", "cozy replacement", "what replaced cozy", "free landlord platform like cozy".
  * Cozy.co was property management software for landlords (listings, screening,
  * rent collection). CoStar Group, the owner of Apartments.com, bought it in
  * November 2018 and Cozy moved to Apartments.com in mid-2021. The page is kept
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   keywords: [
     "cozy alternative",
     "cozy.co alternative",
-    "cozy shut down replacement",
+    "cozy replacement",
     "what replaced cozy",
     "free landlord platform like cozy",
   ],
