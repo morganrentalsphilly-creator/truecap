@@ -92,7 +92,8 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, editable rent input for STR scenarios",
-    hostaway: "Not among Hostaway's listed features",
+    hostaway:
+      "Not among Hostaway's listed features; its free tools cover Airbnb fees and rental arbitrage profit",
     winner: "truecap",
   },
   {
