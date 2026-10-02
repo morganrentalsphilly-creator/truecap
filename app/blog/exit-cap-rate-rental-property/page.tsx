@@ -40,7 +40,7 @@ const TITLE_PLAIN =
 // window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
 const SERP_TITLE = "Exit cap rate: how to pick the number (2026)";
 const DESCRIPTION =
-  "Projected sale price = exit-year NOI ÷ the exit cap rate a future buyer pays. Why it drives your sale price and IRR more than any input, plus a worked 2026 example.";
+  "Projected sale price = exit-year NOI ÷ the exit cap rate a future buyer pays. Why it drives your sale price and IRR, plus a worked 2026 example.";
 const PUBLISHED_AT = "2026-07-08";
 const MODIFIED_AT = lastmodFor("/blog/exit-cap-rate-rental-property") ?? PUBLISHED_AT;
 const READING_TIME = 11;
