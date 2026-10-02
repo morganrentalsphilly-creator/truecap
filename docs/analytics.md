@@ -42,6 +42,38 @@ Vercel Web Analytics is cookieless and runs on every page (`components/analytics
 
 `cookie_consent_choice` is how the consent rate is read: granted divided by granted plus denied, over the same seven days. A visitor who never answers the banner sends neither, and an answer given on one of the pages above is not counted.
 
+## Ad URLs
+
+Every ad's Final URL carries `utm_medium`, written exactly as below:
+
+| Where the ad runs | `utm_medium` | First-touch source it is stored as |
+| --- | --- | --- |
+| Search ads (Google Ads, Microsoft Ads) | `cpc` | `paid_search` |
+| Meta ads (Facebook, Instagram) | `paid_social` | `paid_social` |
+
+The convention follows what `classifyFirstTouchReferralSource` in `lib/first-touch.ts` already does with a landing. Its rules, in the order the code applies them:
+
+1. A referrer on a sign-in host (`accounts.google.*`, `myaccount.google.*`, `accounts.youtube.*`, `supabase.co` and its subdomains) is a sign-in round trip, not a landing. Nothing is recorded.
+2. A click id in the query (`gclid`, `gbraid`, `wbraid`, `dclid` or `msclkid`; only its presence is read) gives `paid_search`, whatever the referrer or `utm_medium` says.
+3. `utm_medium` of `cpc`, `ppc`, `paid_search` or `paidsearch` gives `paid_search`.
+4. `utm_medium` of `paid_social`, `paidsocial` or `social_paid` gives `paid_social`.
+5. `email` or `newsletter` gives `email`. `organic` gives `organic_ai` when the referrer is an AI host and `organic_search` otherwise. `social` gives `organic_social`. `referral` gives `external_referral`.
+6. Any other non-empty `utm_medium` gives `campaign`.
+7. With no `utm_medium`, the referrer host decides. No referrer, or our own host, is `direct`. A webmail host is `email`, an AI host `organic_ai`, a search host `organic_search`, a social host `organic_social`, and any other host `external_referral`.
+
+`recordFirstTouchLanding` in `lib/analytics.ts` lower-cases the value and compares it whole. It does not trim it, so `cpc` followed by a space, or `paid-social`, falls to rule 6 and is stored as `campaign`.
+
+Why each value matters:
+
+- Search. With auto-tagging on, the ad platform adds a click id and rule 2 already stores the landing as `paid_search`. `utm_medium=cpc` gives the same answer when the click id is not there, for example with auto-tagging switched off.
+- Meta. `fbclid` is not read: it is not in `AD_CLICK_ID_PARAMS`, and `lib/__tests__/first-touch.test.ts` pins that, with the note that Facebook adds it to unpaid links too. That rule is unchanged. A Meta ad click without `utm_medium` therefore falls to rule 7. The October 2026 audit measured it on production: `organic_social` with an `l.facebook.com` referrer, `direct` with no referrer. `utm_medium=paid_social` is what stores a Meta ad click as `paid_social`.
+
+What the convention does not give you:
+
+- The first-touch record holds a source category and a landing section, nothing else: the `tc_ft` cookie once cookies are accepted, then `app_metadata.tc_first_touch` at sign-up. `utm_source`, `utm_campaign`, `utm_content` and `utm_term` are never read or stored by it. The campaign and the keyword are not kept.
+- Nothing in the repository counts paid sign-ups from the record. Its one reader, `seo/scripts/signups.ts`, counts `organic_search` and `organic_ai` only.
+- The other `utm_*` parameters are free to use. They are kept in the page URL sent to Vercel Web Analytics; only the click ids are removed from it (see Consent above).
+
 ## Verifying locally
 
 Run the site, open the console after a sample run, and read `window.__tcEvents`. The Playwright spec `e2e/site-overhaul-conversion.spec.ts` asserts `analysis_started` and `analysis_completed` on the sample flow; `lib/__tests__/stripe-webhook-route-binding.test.ts` asserts `checkout_completed` from the webhook.
