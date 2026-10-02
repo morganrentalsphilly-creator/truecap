@@ -67,6 +67,19 @@ describe("public downloadable artifacts", () => {
     expect(cell("B18")).toBe(GLOSSARY.downPayment.definition);
   });
 
+  it("describes the Quick Reference sheet as it is on the download page", () => {
+    // Column C ("What's a good number") holds a note for four terms, and two of
+    // those notes say there is no universal range or target, so the page may
+    // not promise a good-number benchmark for every metric.
+    const page = readFileSync(path.join(ROOT, "app/tools/rental-property-spreadsheet/page.tsx"), "utf8")
+      .replace(/&ldquo;|&rdquo;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/\s+/g, " ");
+    expect(page).not.toMatch(/benchmarks for every metric/i);
+    expect(page).not.toMatch(/"what's a good number" benchmarks/i);
+    expect(page).toContain("a note on judging cap rate, cash-on-cash, cash flow and DSCR");
+  });
+
   it("keeps specialist recommendations out of the market pack and its generator", () => {
     const pdf = readFileSync(packPath).toString("latin1");
     const generator = readFileSync(

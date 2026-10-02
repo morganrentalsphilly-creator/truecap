@@ -82,7 +82,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's actually in the spreadsheet?",
-    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the screening bands TrueCap uses to group a modeled result as Strong, Solid, Mixed, Marginal, or Negative.",
+    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions for every metric, a note on judging cap rate, cash-on-cash, cash flow and DSCR, plus the screening bands TrueCap uses to group a modeled result as Strong, Solid, Mixed, Marginal, or Negative.",
   },
   {
     q: "Why do NOI and DSCR exclude the CapEx reserve?",
@@ -277,10 +277,10 @@ export default function RentalPropertySpreadsheetPage() {
 
             <h3>Tab 3 — Quick Reference</h3>
             <p>
-              Plain-English definitions and &ldquo;what&apos;s a good
-              number&rdquo; benchmarks for every metric in the workbook — cap
+              Plain-English definitions for every metric in the workbook (cap
               rate, cash-on-cash, DSCR, NOI, the 1% rule, and each expense
-              reserve — plus the exact screening bands TrueCap uses to group
+              reserve), a note on judging cap rate, cash-on-cash, cash flow and
+              DSCR, plus the exact screening bands TrueCap uses to group
               modeled results as Strong, Solid, Mixed, Marginal, or Negative.
               Those bands are a rule of thumb, not your Buy Box fit. It&apos;s
               the tab to hand someone who asks &ldquo;wait, what&apos;s
