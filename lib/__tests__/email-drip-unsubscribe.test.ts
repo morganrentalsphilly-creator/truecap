@@ -284,8 +284,14 @@ describe("playbook sequence without a postal address", () => {
     vi.stubEnv("EMAIL_POSTAL_ADDRESS", value);
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const result = await captureLeadMagnetEmail({ email: EMAIL });
-    // Not an error for the visitor: the playbook needs no email.
-    expect(result).toEqual({ ok: true, scheduledCount: 0, downloadUrl: "https://usetruecap.com/playbook" });
+    // Never a success: an ok result makes the form say "Check your inbox",
+    // and no email is coming. The visitor gets the true note and the link.
+    expect(result).toEqual({
+      ok: false,
+      code: "CONFIG_MISSING",
+      message: "Email sending isn't configured yet, but the direct link below still works.",
+      downloadUrl: "https://usetruecap.com/playbook",
+    });
     expect(transport).not.toHaveBeenCalled();
     expect(mocks.claim).not.toHaveBeenCalled();
     expect(mocks.admin).not.toHaveBeenCalled();
