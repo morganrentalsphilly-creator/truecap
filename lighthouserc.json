@@ -10,7 +10,7 @@
         "preset": "perf",
         "formFactor": "mobile",
         "screenEmulation": { "mobile": true, "width": 390, "height": 844, "deviceScaleFactor": 2, "disabled": false },
-        "throttlingMethod": "devtools",
+        "throttlingMethod": "simulate",
         "onlyCategories": ["performance", "accessibility"]
       }
     },
