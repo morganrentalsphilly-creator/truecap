@@ -58,7 +58,7 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "What does the client see? Is it my branding or TrueCap's?",
-    a: "Co-branded, not white-label. With branding set up (included in Pro and Agent Pro), the share page carries your logo, your brand color, and “Shared by” your name or company, plus a form the client can use to message you. The PDF adds your tagline and a “Prepared by” block with your name, email, phone, and website. TrueCap's name stays on the page and in the report as the methodology behind the numbers.",
+    a: "Co-branded, not white-label. With branding set up (included in Pro and Agent Pro), the share page carries your logo, your brand color, and “Shared by” your name or company, plus a form the client can use to message you and the phone, email and website you saved. The PDF adds your tagline and a “Prepared by” block with the same contact details. TrueCap's name stays on the page and in the report as the methodology behind the numbers.",
   },
   {
     q: "Can I keep different criteria for different investor clients?",
