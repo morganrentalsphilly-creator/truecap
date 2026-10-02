@@ -14,8 +14,9 @@ import { describe, expect, it, vi } from "vitest";
  *     statement that the Offer Ceiling is paid for the person reading
  *   - no eyebrow above the page heading and no arrow suffix
  *   - the tab title carries the brand once
- *   - the lead form's confirmation says the agent was emailed only when the
- *     server reports that lead notifications are live, never promises a
+ *   - the lead form's confirmation reports the save, says TrueCap emails the
+ *     agent only when the server reports that lead notifications are live
+ *     (as the rule, never that this message was sent), never promises a
  *     reply, and shows the agent's own contact details
  *   - the agent's leads card sits above the deal sections on the dashboard
  *     and counts every lead, not the rows it fetched
@@ -224,7 +225,7 @@ describe("the lead form says what happens to the message", () => {
     expect(html).toContain('href="https://www.example.com/team"');
   });
 
-  it("says the agent is emailed only when the server reports it", () => {
+  it("says TrueCap emails the agent only when the server reports the mode is live, as the rule and never as the result of this send", () => {
     const html = renderToStaticMarkup(
       <LeadCaptureConfirmation
         agentName="Reyes Realty"
@@ -232,8 +233,14 @@ describe("the lead form says what happens to the message", () => {
         contact={null}
       />,
     );
-    expect(html).toContain("Your message was sent to Reyes Realty.");
-    expect(html).toContain("TrueCap emails them each new message");
+    // The action returns ok once the row is saved, whether or not the owner
+    // email went out, so the headline reports the save in both modes.
+    expect(html).toContain("Your message is saved for Reyes Realty.");
+    expect(html).toContain(
+      "TrueCap emails them a notice when a new message arrives",
+    );
+    expect(html).not.toMatch(/was sent/);
+    expect(code(FORM)).not.toMatch(/was sent/);
     expect(html).not.toContain("has not emailed");
     expect(html).not.toMatch(/expect a reply|will be in touch|will follow up/i);
     expect(html).not.toContain("data-agent-contact");
