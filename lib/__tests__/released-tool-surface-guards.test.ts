@@ -201,9 +201,9 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
 
   // The 70% rule post's social card. Its post stopped calling the rule of
   // thumb an Offer Ceiling; the card still printed "How to calculate a
-  // 70%-rule Offer Ceiling" (2026-10 audit). It is held to the Offer Ceiling
-  // rule only, not to the exact price-screen name: a card's headline is short
-  // and may be the post's own title.
+  // 70%-rule Offer Ceiling" (2026-10 audit). This list feeds the Offer
+  // Ceiling check below; a file may also sit in HEURISTIC_SURFACES, which
+  // holds it to the price-screen name as well.
   const RULE_OF_THUMB_CARDS = [
     "app/blog/70-percent-rule-house-flipping/opengraph-image.tsx",
   ];
