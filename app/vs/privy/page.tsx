@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
   description:
-    "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how investors use both.",
+    "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit together.",
   keywords: [
     "privy alternative",
     "privy real estate",
@@ -70,74 +70,69 @@ export const metadata: Metadata = {
 };
 
 type Verdict = "truecap" | "privy" | "tie";
-type Row = { feature: string; truecap: string; privy: string; winner: Verdict };
+type Row = { feature: string; truecap: string; privy: string; winner?: Verdict };
 
 const MATRIX: Row[] = [
   {
     feature: "Primary purpose",
     truecap: "Per-deal underwriting calculator",
-    privy: "Investor MLS search + filtering",
+    privy: "Deal sourcing and property analysis on direct MLS data feeds",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    privy: "Listing-level cap rate estimates",
-    winner: "truecap",
+    privy: "Not advertised on privy.pro",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    privy: "Not modeled",
-    winner: "truecap",
+    privy: "Not advertised on privy.pro",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    privy: "MLS-pulled property data",
-    winner: "truecap",
+    privy: "Direct MLS data feeds and nationwide public records",
+    winner: "tie",
   },
   {
     feature: "Investor-filtered MLS search",
     truecap: "No",
-    privy: "Yes — cash flow, rehab, motivated",
+    privy: "Yes: by strategy (rental, fix-and-flip, teardown)",
     winner: "privy",
   },
   {
     feature: "Sale + rent comps",
     truecap: "One free lookup; Pro includes 50 per month; no AVM",
-    privy: "Yes — MLS-derived comp set",
+    privy: "Yes: comparable transactions and rental comp tables",
     winner: "privy",
   },
   {
     feature: "Motivated-seller flagging on MLS",
     truecap: "No",
-    privy: "Yes — DOM + price reduction signals",
-    winner: "privy",
+    privy: "Not advertised on privy.pro",
   },
   {
     feature: "Off-market lead generation",
     truecap: "No",
-    privy: "Limited (MLS-focused)",
-    winner: "privy",
+    privy: "Not advertised on privy.pro",
   },
   {
     feature: "Mortgage + financing math",
     truecap: "Yes — PITI + DSCR + amortization",
-    privy: "Not included",
-    winner: "truecap",
+    privy: "Not advertised on privy.pro",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    privy: "Trial only; paid from ~$99/mo (as of 2026)",
-    winner: "truecap",
+    privy:
+      "No free tier; 30-day money-back guarantee; from $97/mo billed monthly or $78/mo billed annually (as of October 2026)",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    privy: "~$99/mo + setup fees",
-    winner: "truecap",
+    privy:
+      "One Market $97/mo, Three States $149/mo, Nationwide $249/mo billed monthly; 20% less billed annually (as of October 2026)",
   },
 ];
 
@@ -149,7 +144,7 @@ export default function VsPrivyPage() {
     name: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     url: `${siteUrl}/vs/privy`,
     description:
-      "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how investors use both.",
+      "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit together.",
     dateModified: lastmodFor("/vs/privy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -169,11 +164,12 @@ export default function VsPrivyPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Privy is an investor-focused MLS search tool — pull on-market
-            listings filtered by investor criteria like cash flow potential,
-            rehab condition, days on market, and motivated-seller signals.
-            TrueCap is the underwriting calculator that runs the per-deal math
-            on whatever Privy surfaces. Different jobs in the same workflow.
+            Privy is a real estate investment platform built on direct MLS data
+            feeds and public records: it surfaces listings that match a strategy
+            (rental, fix-and-flip, teardown) and shows comparable transactions
+            and rental comp tables. TrueCap is the underwriting calculator that
+            runs the per-deal math on whatever Privy surfaces. Different jobs in
+            the same workflow.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -231,16 +227,16 @@ export default function VsPrivyPage() {
               <ul className={VS_TLDR_LIST}>
                 <li>You actively search MLS for investor-friendly deals.</li>
                 <li>
-                  You want investor-specific filters (cash flow, rehab
-                  condition, motivated signals).
+                  You want deals surfaced by strategy (rental, fix-and-flip,
+                  teardown).
                 </li>
                 <li>
                   You don&apos;t have direct MLS access through an agent
                   license.
                 </li>
                 <li>
-                  You&apos;re doing fix-and-flip or BRRRR and need
-                  rehab-condition flagging.
+                  You&apos;re doing fix-and-flip and want before-and-after data
+                  on completed flips.
                 </li>
               </ul>
             </div>
@@ -268,7 +264,9 @@ export default function VsPrivyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Privy details based on publicly available product info as of 2026.
+            Privy prices and features were checked against its public pages in
+            October 2026. The product itself sits behind a login, so rows
+            marked &ldquo;Not advertised on privy.pro&rdquo; are not scored.
             See{" "}
             <a
               href="https://www.privy.pro/"
@@ -278,26 +276,24 @@ export default function VsPrivyPage() {
             >
               privy.pro
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How active investors use both
+            How TrueCap and Privy fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
               <li>
-                <strong>Search MLS in Privy with investor filters.</strong> Filter
-                by cap rate threshold, rehab condition, DOM, price reductions,
-                etc.
+                <strong>Find a listing in Privy.</strong> Set your market and
+                strategy; Privy surfaces listings that match.
               </li>
               <li>
-                <strong>Surface a property worth a closer look.</strong> Privy
-                shows you a listing-level cap rate estimate based on its
-                assumptions.
+                <strong>Pick a property worth a closer look.</strong> Privy shows
+                comparable transactions and rental comp tables for it.
               </li>
               <li>
                 <strong>Underwrite in TrueCap.</strong> Paste the address to start
@@ -307,10 +303,10 @@ export default function VsPrivyPage() {
               </li>
               <li>
                 <strong>
-                  Compare TrueCap&apos;s cap rate to Privy&apos;s estimate.
+                  Check your rent input against Privy&apos;s rental comps.
                 </strong>{" "}
-                If they diverge, dig into the assumptions — usually the difference
-                is rent (Privy uses optimistic rent) or expense ratios.
+                If they disagree, settle the rent before you trust the cash flow,
+                then review the expense assumptions.
               </li>
               <li>
                 <strong>Review the Offer Ceiling in TrueCap Pro.</strong> It works
@@ -319,7 +315,7 @@ export default function VsPrivyPage() {
               </li>
             </ol>
             <p>
-              Curious how TrueCap lands on a different number than Privy?{" "}
+              Want to see where the cap rate comes from?{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-calculate-cap-rate"
                 className="tc-link"
@@ -354,10 +350,10 @@ export default function VsPrivyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -428,7 +424,7 @@ const PRIVY_FAQ: FaqItem[] = [
       <>
         No — they solve different problems. Privy is investor-focused MLS search
         and filtering. TrueCap is per-deal underwriting once you have an
-        address. Many active MLS-sourcing investors use both.
+        address. They sit at different steps, so an investor can use both.
       </>
     ),
   },
@@ -436,10 +432,10 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Privy vs PropStream — which one?",
     answer: (
       <>
-        Different focuses. Privy is on-market MLS data with investor filters.
-        PropStream is off-market lead generation (skip-tracing, motivated-seller
-        lists, direct mail). If you source through the MLS, Privy. If you source
-        off-market via mail / cold call, PropStream. Some investors run both.
+        Different focuses. Privy works from direct MLS data feeds and public
+        records to surface deals by strategy. PropStream is built around lead
+        lists, skip tracing, and direct mail. Pick by how you source: listed
+        deals, or direct-to-owner outreach.
       </>
     ),
   },
@@ -447,11 +443,12 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Why use Privy if I already have MLS access through an agent?",
     answer: (
       <>
-        If you already have MLS access, Privy&apos;s value is more limited — its
-        strength is the investor-specific filtering on top of MLS data, not the
-        MLS data itself. If you&apos;re comfortable using Realtor.com / Zillow /
-        your agent&apos;s MLS portal and applying investor logic mentally, Privy
-        may not add enough.
+        Privy&apos;s site describes what it adds on top of MLS data: its
+        Comparative Search, before-and-after data on completed flips, and rental
+        comp tables. Whether that is worth a subscription depends on how many
+        deals you screen. If you&apos;re comfortable using your agent&apos;s
+        MLS portal and applying investor logic yourself, compare the two before
+        you subscribe.
       </>
     ),
   },
@@ -459,22 +456,27 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Does Privy underwrite deals?",
     answer: (
       <>
-        Sort of — it shows listing-level cap rate estimates and rehab condition
-        flags, while TrueCap adds editable financing, DSCR, sensitivity, and a
-        cash-flow and equity projection for a shortlisted property. TrueCap does
-        not currently expose a tax-specific module.
+        Privy&apos;s site describes property analysis with comparable
+        transactions, before-and-after data, and rental comp tables. It does not
+        advertise a cap rate, DSCR, or financing calculator. TrueCap models
+        editable financing, DSCR, sensitivity, and a cash-flow and equity
+        projection for a shortlisted property. TrueCap does not currently expose
+        a tax-specific module.
       </>
     ),
   },
   {
-    question: "Is Privy worth $99/month?",
+    question: "Is Privy worth the subscription?",
     answer: (
       <>
-        Depends on volume. If you&apos;re actively sourcing MLS deals across
-        multiple markets and don&apos;t have agent-grade MLS access, the
-        investor filters pay off in time saved. If you have a great agent and
-        look at 1-3 deals a month, Privy is overkill — TrueCap&apos;s free tier
-        + your agent&apos;s MLS access cover the workflow.
+        It depends on volume. Privy&apos;s One Market plan is $97 a month billed
+        monthly or $78 a month billed annually, with a 30-day money-back
+        guarantee (as of October 2026). If you&apos;re actively sourcing MLS
+        deals across multiple markets and don&apos;t have agent-grade MLS
+        access, deal sourcing by strategy can save search time. If you have an
+        agent who sends you listings and you look at 1-3 deals a month,
+        TrueCap&apos;s free tier plus your agent&apos;s MLS access may cover
+        the workflow.
       </>
     ),
   },
