@@ -17,7 +17,7 @@
  * presentation reads canonical AnalysisResult fields directly; it owns no
  * payment, cash-flow, cash-required, CoC, or DSCR reconstruction.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,23 @@ export function MortgageScenarioCompare({
   isPro: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  // Opening swaps the trigger for the panel and closing swaps it back, so
+  // the control that was pressed unmounts both times and focus fell to
+  // <body>. Move it to the surface that replaced it: the panel on open, the
+  // trigger on close. The ref flag keeps the first render from taking focus.
+  const panelRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const moveFocusRef = useRef(false);
+  useEffect(() => {
+    if (!moveFocusRef.current) return;
+    moveFocusRef.current = false;
+    if (open) panelRef.current?.focus({ preventScroll: true });
+    else triggerRef.current?.focus();
+  }, [open]);
+  const changeOpen = (next: boolean) => {
+    moveFocusRef.current = true;
+    setOpen(next);
+  };
 
   // If this is a cash purchase there's no mortgage to compare. Self-hide.
   if (!values || result.loanAmount <= 0 || result.monthlyPayment <= 0) return null;
@@ -67,9 +84,11 @@ export function MortgageScenarioCompare({
               Compare 25% down, a 15-year term, and DSCR loans without rebuilding the model.
             </span>
           </div>
+          {/* min-h-11: a link is not covered by the global 44px button
+              floor, and at h-8 this was the one 32px control on the result. */}
           <Link
             href="/pricing"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:opacity-90"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:opacity-90"
           >
             Compare loan structures
           </Link>
@@ -85,8 +104,9 @@ export function MortgageScenarioCompare({
   if (!open) {
     return (
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => changeOpen(true)}
         aria-label="Open the compare financing scenarios panel"
         className="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30 sm:p-4"
       >
@@ -113,8 +133,11 @@ export function MortgageScenarioCompare({
 
   return (
     <section
+      ref={panelRef}
+      // -1: a programmatic focus target, not a tab stop, so it takes no ring.
+      tabIndex={-1}
       aria-label="Mortgage scenario comparison"
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-2xl border border-border bg-card p-4 outline-none sm:p-5"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
@@ -129,7 +152,7 @@ export function MortgageScenarioCompare({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => setOpen(false)}
+          onClick={() => changeOpen(false)}
           aria-label="Close comparison"
           className="size-10 p-0"
         >

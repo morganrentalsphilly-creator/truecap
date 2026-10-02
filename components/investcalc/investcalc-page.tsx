@@ -1570,7 +1570,14 @@ export function InvestCalcPage({
     // stale-data warning, and form values are never discarded.
     recomputeOutputsFromFormRef.current();
     setIsEditingAssumptions(false);
-    requestAnimationFrame(scrollToAnalysisResults);
+    requestAnimationFrame(() => {
+      scrollToAnalysisResults();
+      // "Done editing" unmounts with the edit banner. Hand focus to the
+      // results region, the same target a fresh run focuses.
+      document
+        .querySelector<HTMLElement>("[data-analysis-results='true']")
+        ?.focus({ preventScroll: true });
+    });
   }, [scrollToAnalysisResults]);
 
   const handleInputTabClick = useCallback(
@@ -9657,8 +9664,10 @@ export function InvestCalcPage({
             <button
               type="button"
               onClick={handleTrySampleDeal}
+              // No aria-label: the two visible lines are the name. The old
+              // label joined them with "and", so the accessible name did not
+              // contain the visible text (WCAG 2.5.3).
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a sample rental and preview a sample Pro report"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -9878,7 +9887,13 @@ export function InvestCalcPage({
             {isEditingAssumptions && analysisResult ? (
               <section
                 aria-label="Editing analysis assumptions"
-                className="rounded-2xl border border-primary/25 bg-background/95 p-4 shadow-lg backdrop-blur sm:sticky sm:top-2 sm:z-30"
+                // Programmatic focus target: "Edit assumptions" unmounts its
+                // own button, so focus moves here and the next Tab reaches
+                // "Done editing". A -1 tabindex is not a control and takes no
+                // ring (app/globals.css).
+                data-editing-assumptions-banner="true"
+                tabIndex={-1}
+                className="rounded-2xl border border-primary/25 bg-background/95 p-4 shadow-lg outline-none backdrop-blur sm:sticky sm:top-2 sm:z-30"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
@@ -10839,6 +10854,16 @@ export function InvestCalcPage({
                           behavior: scrollBehavior(),
                           block: "start",
                         });
+                      // The results (and the button that was just pressed)
+                      // are unmounted in edit mode; without this, focus fell
+                      // to <body>. A caller that wants a specific field
+                      // (Review criteria, a verification input) focuses it in
+                      // a later frame and wins.
+                      document
+                        .querySelector<HTMLElement>(
+                          '[data-editing-assumptions-banner="true"]',
+                        )
+                        ?.focus({ preventScroll: true });
                     });
                   }}
                   onReviewVerificationInput={handleReviewVerificationInput}

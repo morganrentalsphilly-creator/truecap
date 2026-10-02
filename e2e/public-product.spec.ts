@@ -5,6 +5,13 @@ import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { EMBEDDABLE_CALCULATORS } from "../lib/calculator-registry";
 import { CANONICAL_SITE_URL } from "../lib/site-url";
 
+// The analyzer's sample button is named by its two visible lines. It carries
+// no aria-label: the old one ("Try a sample rental and preview a sample Pro
+// report") did not contain the visible text (WCAG 2.5.3). The whitespace
+// between the lines depends on how the name is computed, hence \s*.
+const SAMPLE_BUTTON_NAME =
+  /^Try a sample rental\s*Preview a sample Pro report$/;
+
 const VIEWPORTS = [
   { width: 390, height: 844 },
   { width: 768, height: 1024 },
@@ -668,8 +675,7 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   );
   await expect(
     page.getByRole("button", {
-      name: "Try a sample rental and preview a sample Pro report",
-      exact: true,
+      name: SAMPLE_BUTTON_NAME,
     }),
   ).toBeVisible();
 });
@@ -735,8 +741,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(acceptCookies).toBeVisible();
   await acceptCookies.click();
   const sampleButton = page.getByRole("button", {
-    name: "Try a sample rental and preview a sample Pro report",
-    exact: true,
+    name: SAMPLE_BUTTON_NAME,
   });
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
   await sampleButton.click();
@@ -1057,8 +1062,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
 
   await page
     .getByRole("button", {
-      name: "Try a sample rental and preview a sample Pro report",
-      exact: true,
+      name: SAMPLE_BUTTON_NAME,
     })
     .click();
   const nextDeal = page.getByRole("button", {

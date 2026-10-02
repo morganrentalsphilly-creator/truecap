@@ -108,7 +108,9 @@ export function DrillRow({
               ) : null}
             </span>
             {summary ? (
-              <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+              // Two lines, not one: at 390px a single truncated line cut
+              // "— verify assumptions" off the projections summary.
+              <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                 {summary}
               </span>
             ) : null}
