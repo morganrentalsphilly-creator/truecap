@@ -188,9 +188,11 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
   });
 
   it("names Trulia only once the parser reads the links Trulia serves", () => {
-    // Trulia property links are trulia.com/home/<address>-<id> (seen on
-    // trulia.com results, 2026-10-02). The parser's Trulia branch reads that
-    // shape and drops the listing id (lib/__tests__/listing-url.test.ts).
+    // Trulia property links are trulia.com/home/<address>-<id> as they
+    // appear in search-engine results (2026-10-02); trulia.com answered 403
+    // to an automated load, so no Trulia page was read. The parser's Trulia
+    // branch reads that shape and drops the listing id
+    // (lib/__tests__/listing-url.test.ts).
     // This holds the rule from the other side: if that branch ever stops
     // reading it, the generic fallback would put the id into Property
     // Address, and Trulia must not be on the list of named sites then.
