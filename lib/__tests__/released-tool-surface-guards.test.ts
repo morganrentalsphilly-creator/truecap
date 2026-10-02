@@ -178,11 +178,13 @@ describe("copy about the rehab estimator matches its controls", () => {
   // The estimator card has three number fields (square feet, baths,
   // contingency) and a checkbox per work item. Each item's cost is fixed
   // text: lib/rehab-estimator.ts accepts per-item `overrides`, and no UI
-  // passes any. Until 2026-10 six sentences said otherwise: /vs/bricked
+  // passes any. Until 2026-10 nine sentences said otherwise: /vs/bricked
   // ("editable default line items", "default line items you adjust
   // yourself"), the tool page ("every line is editable", "defaults you can
-  // override", "editable ... defaults" twice), the card's own caption
-  // ("defaults you can edit") and llms-full.txt ("editable work categories").
+  // override", "editable TrueCap planning defaults", and "editable ...
+  // defaults" in its two descriptions), the card's own caption ("defaults
+  // you can edit"), /methodology ("editable illustrative planning amounts")
+  // and llms-full.txt ("editable work categories").
   // The rule lifts itself the day the card reads `overrides`: adding that
   // field is a product decision, and then the claim is true.
   const code = (path: string) =>
