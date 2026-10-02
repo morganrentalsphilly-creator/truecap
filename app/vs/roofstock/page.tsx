@@ -100,7 +100,7 @@ const MATRIX: Row[] = [
     feature: "Cost to use",
     truecap: "Free core and paid Pro — see live pricing",
     roofstock:
-      "Marketplace listings open without an account; see Stessa, Mynd and RentPrep for each service's pricing",
+      "Marketplace listings can be browsed without an account; see Stessa, Mynd and RentPrep for each service's pricing",
     winner: "tie",
   },
   {
