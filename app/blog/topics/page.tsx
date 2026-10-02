@@ -13,6 +13,7 @@ import { isLinkablePath } from "@/lib/seo/link-policy";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 /** How many hubs there are, in words; derived so the copy can't drift from lib/blog-topics.ts. */
 const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
     "TrueCap's rental investing guides by topic, from underwriting and financing to tax, strategy, markets, and due diligence.",
   alternates: { canonical: "/blog/topics" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap Blog — browse by topic",
     description:
       "Rental investing guides by topic, from underwriting and financing to tax and due diligence.",

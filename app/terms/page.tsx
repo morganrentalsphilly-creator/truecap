@@ -15,6 +15,7 @@ import {
   PRODUCT_EVALUATION_DAYS,
 } from "@/lib/product-access";
 import { Header } from "@/components/investcalc/header";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
   // social, but absence flags as a gap in any SEO crawler and a sane
   // social card if someone does post the link is cheap to provide.
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap Terms of Service",
     description:
       "The rules that govern your use of TrueCap and usetruecap.com.",

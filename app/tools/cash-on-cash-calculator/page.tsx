@@ -15,6 +15,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/cash-on-cash-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Cash-on-Cash Calculator — Mortgage Built In",
     description:
       "Compute cash-on-cash return in seconds. Walks through purchase, financing, rent, and expenses — no spreadsheet needed.",

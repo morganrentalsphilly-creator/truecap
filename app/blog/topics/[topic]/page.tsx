@@ -21,6 +21,7 @@ import { getGlossaryEntryBySlug } from "@/lib/glossary";
 import { isLinkablePath } from "@/lib/seo/link-policy";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const dynamicParams = false;
 
@@ -41,6 +42,7 @@ export async function generateMetadata({
     description: topic.description,
     alternates: { canonical: `/blog/topics/${topic.slug}` },
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: `${topic.title} — TrueCap`,
       description: topic.description,
       url: `/blog/topics/${topic.slug}`,

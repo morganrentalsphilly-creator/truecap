@@ -25,6 +25,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -40,6 +41,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/cap-rate-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Cap Rate Calculator — What's a Good Cap Rate",
     description:
       "Calculate cap rate in seconds. Includes plain-English guidance on what counts as a good cap rate, how to compute NOI, and common investor mistakes.",

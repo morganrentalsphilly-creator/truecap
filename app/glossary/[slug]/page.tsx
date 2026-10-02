@@ -32,6 +32,7 @@ import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { glossaryTermSetRef } from "@/lib/seo/glossary-ld";
 import { isLinkablePath, linkableToolFor } from "@/lib/seo/link-policy";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -77,6 +78,7 @@ export async function generateMetadata({
     ],
     alternates: { canonical: `/glossary/${entry.slug}` },
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: `${entry.term} — what it is, how to calculate it`,
       description: description.slice(0, 200),
       url: `/glossary/${entry.slug}`,

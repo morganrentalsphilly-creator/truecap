@@ -50,6 +50,7 @@ import {
   PUBLISH_DELAY_HOURS,
 } from "@/lib/testimonials/rules";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const revalidate = 3600;
 
@@ -61,6 +62,7 @@ export function generateMetadata(): Metadata {
     description: description,
     alternates: { canonical: "/reviews" },
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: "TrueCap Proof & methodology",
       description,
       url: "/reviews",

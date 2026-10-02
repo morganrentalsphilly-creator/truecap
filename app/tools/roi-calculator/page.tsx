@@ -20,6 +20,7 @@ import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -35,6 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/roi-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Rental Property ROI Calculator — Total Return",
     description:
       "Model cash flow, principal paydown, and appreciation assumptions in one simple annual ROI estimate.",

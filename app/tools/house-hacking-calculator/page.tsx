@@ -28,6 +28,7 @@ import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/house-hacking-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free House Hacking Calculator — Live for Less",
     description:
       "Live in one unit, rent the rest. See what's left of the mortgage payment after tenant rent — plus the honest after-reserves number.",

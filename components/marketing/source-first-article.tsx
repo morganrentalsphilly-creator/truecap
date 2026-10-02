@@ -38,6 +38,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export type SourceFirstArticleIdentity = {
   slug: string;
@@ -61,6 +62,7 @@ export function buildSourceFirstArticleMetadata(
     description: article.description,
     alternates: { canonical: `/blog/${article.slug}` },
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: seoTitle,
       description: article.description,
       url: `/blog/${article.slug}`,

@@ -23,6 +23,7 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { Header } from "@/components/investcalc/header";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Changelog",
@@ -37,6 +38,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: "/changelog" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "TrueCap Changelog",
     description:
       "What's new in TrueCap — features, improvements, fixes, and content.",

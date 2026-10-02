@@ -47,12 +47,14 @@ import {
 import { CANONICAL_HOST, CANONICAL_SITE_URL, getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { cn } from "@/lib/utils";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Embed TrueCap Calculators on Your Site (Free)",
   description: `Embed ${EMBEDDABLE_COUNT} of TrueCap's free real estate calculators on your blog, agent website, or course platform. Copy-paste iframe code. Auto-resizing. Free to use.`,
   alternates: { canonical: "/embed" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Embed free real estate calculators — TrueCap",
     description: `${EMBEDDABLE_COUNT} free embeddable calculators for real estate blogs, agent sites, and educational platforms.`,
     url: "/embed",

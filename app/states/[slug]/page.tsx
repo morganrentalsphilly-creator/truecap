@@ -56,6 +56,7 @@ import { stateFactsFor } from "@/lib/seo/state-facts";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export async function generateStaticParams() {
   return Object.values(STATES).map((state) => ({ slug: state.slug }));
@@ -87,6 +88,7 @@ export async function generateMetadata({
     // Thin state pages stay crawlable but unindexed.
     robots: isStateIndexable(state.slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title,
       description,
       url: `/states/${state.slug}`,

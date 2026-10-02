@@ -36,6 +36,7 @@ import { AUTHOR_BIO } from "@/lib/author";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: { absolute: "About TrueCap" },
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
     "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
   alternates: { canonical: "/about" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "About TrueCap",
     description:
       "How TrueCap is built by one rental investor, and why the analyzer uses editable assumptions, conservative defaults, and transparent formulas.",

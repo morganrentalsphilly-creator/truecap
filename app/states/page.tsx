@@ -15,6 +15,7 @@ import { linkableStates } from "@/lib/seo/link-policy";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Rental-property verification guides by state",
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/states" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Rental-property verification guides by state",
     description: `${STATE_COUNT} source-first state verification guides.`,
     url: "/states",
