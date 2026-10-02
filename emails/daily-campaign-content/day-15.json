@@ -7,7 +7,7 @@
   "body": [
     "The 1% rule compares monthly rent with purchase price. A $200,000 property at $2,000 monthly rent meets the ratio, but that says nothing by itself about expenses, financing, condition, evidence quality, or whether the property fits your rules.",
     "A property can meet the ratio and still miss a selected cash-flow or DSCR threshold; another can miss the ratio and fit a different target under verified inputs. Use the shortcut only to decide what deserves a fuller preliminary model.",
-    "Enter borrower-specific written loan terms when available. TrueCap's starting mortgage-rate value is an editable FRED national owner-occupied benchmark, not today's investor quote or lender approval. Treat cap rate, cash-on-cash, DSCR, and any entitled projection as separate modeled evidence.",
+    "Enter borrower-specific written loan terms when available. TrueCap's starting mortgage-rate value is an editable FRED national owner-occupied benchmark, not today's investor quote or lender approval. Treat cap rate, cash-on-cash, DSCR, and any projection your plan includes as separate modeled evidence.",
     "TrueCap calculates the preliminary metrics under the assumptions shown. The methodology page explains the formulas, starting benchmarks, editable inputs, and limits so you can verify what is under the hood."
   ],
   "cta_text": "Read the methodology",
