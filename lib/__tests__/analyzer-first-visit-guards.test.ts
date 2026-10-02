@@ -182,14 +182,18 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
       expect(parsed?.zip, site).toBe("62701");
       // No listing id (a run of six or more digits) lands in the address.
       expect(parsed?.address, site).not.toMatch(/\d{6,}/);
+      // Nor Realtor.com's "M12345-67890", whose digit runs are shorter.
+      expect(parsed?.address, site).not.toMatch(/\bM\d{4,}/);
     }
   });
 
   it("names Trulia only once the parser reads the links Trulia serves", () => {
     // Trulia property links are trulia.com/home/<address>-<id> (seen on
-    // trulia.com results, 2026-10-02). Until the parser's Trulia branch
-    // reads that shape, the generic fallback returns the address with the
-    // listing id attached, and that string goes into Property Address as is.
+    // trulia.com results, 2026-10-02). The parser's Trulia branch reads that
+    // shape and drops the listing id (lib/__tests__/listing-url.test.ts).
+    // This holds the rule from the other side: if that branch ever stops
+    // reading it, the generic fallback would put the id into Property
+    // Address, and Trulia must not be on the list of named sites then.
     const parsed = parseListingUrl(
       "https://www.trulia.com/home/100-test-st-springfield-il-62701-33825793",
     );
