@@ -10,8 +10,9 @@ import { CLIENT_RECEIVES } from "@/lib/client-receives";
  * (2026-10 go-to-market audit, rows P0-01, P0-13, P1-04, P1-09, P1-12).
  *
  * The share page (components/investcalc/read-only-analysis-view.tsx) shows
- * the decision, the Offer Ceiling with its targets, four metrics and three
- * drivers. It does not show where an input came from, the rerun hands the
+ * four metrics and three drivers, and, when the share captured targets, the
+ * decision and the Offer Ceiling with those targets. It does not show where
+ * an input came from or list tax, insurance or down payment, the rerun hands the
  * analyzer values without their source labels, and the PDF's per-input source
  * table is off (lib/report-data-builder.ts). Until that changes, no sentence
  * here may promise the client source labels. A statement about a competitor
@@ -48,7 +49,7 @@ describe("what the agent pitch says the client receives", () => {
 
   it("does not promise the client source labels the share page does not render", () => {
     const promises =
-      /sees the sources|every number labeled|benchmark or entered|every assumption (?:is )?labeled|every source is labeled|every assumption visible|assumptions with their sources/i;
+      /sees the sources|every number labeled|benchmark or entered|every assumption (?:is )?labeled|every source is labeled|every assumption visible|assumptions with their sources|labeled assumptions|assumptions and the risks intact/i;
     expect(data).not.toMatch(promises);
     for (const file of AGENT_PITCH_FILES) {
       expect(copy(file), file).not.toMatch(promises);
@@ -61,6 +62,24 @@ describe("what the agent pitch says the client receives", () => {
     expect(numbers?.body).toContain("The PDF lists the inputs");
     const rerun = CLIENT_RECEIVES.find((item) => item.key === "rerun");
     expect(rerun?.body).toContain("without source labels");
+    // With the address hidden (the Share dialog's default) the rerun drops
+    // the address and the analyzer asks for one.
+    expect(rerun?.body).toContain("when the address is hidden, they enter the property address");
+  });
+
+  it("promises the decision and the Offer Ceiling only for a share that captured targets", () => {
+    // A share with no adopted target reads "Preliminary underwriting" and
+    // Offer Ceiling "Unavailable" (read-only-analysis-view.tsx), so the list
+    // may name the two only behind the condition.
+    const view = copy("components/investcalc/read-only-analysis-view.tsx");
+    expect(view).toContain('"Preliminary underwriting"');
+    expect(view).toContain("did not capture an adopted target");
+    const body = CLIENT_RECEIVES.find((item) => item.key === "numbers")?.body ?? "";
+    const condition = body.indexOf("When the deal was screened against a Buy Box or targets you chose");
+    expect(condition).toBeGreaterThan(-1);
+    expect(body.indexOf("meets the targets at asking")).toBeGreaterThan(condition);
+    expect(body.indexOf("the Offer Ceiling with those targets")).toBeGreaterThan(condition);
+    expect(body.slice(0, condition)).not.toMatch(/Offer Ceiling|meets the targets/);
   });
 
   it("states the share link's 180-day expiry wherever it says the link expires", () => {
@@ -144,6 +163,18 @@ describe("TrueCap's own product on the money and persona pages", () => {
     for (const file of ["app/for-house-hackers/page.tsx", "app/for-buy-and-hold/page.tsx"]) {
       expect(copy(file), file).not.toContain("Hit Calculate");
     }
+  });
+
+  it("states the Buy Box cap as the action that enforces it does", () => {
+    // The cap is a private constant in a "use server" file, so the copy
+    // cannot import it: a change there must fail here and reach the copy.
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = 12");
+    expect(copy("app/pricing/page.tsx")).toContain(
+      "assign Buy Boxes to clients (up to 12 per account)",
+    );
+    expect(copy("components/marketing/landing-sections.tsx")).toContain(
+      "Buy Boxes you assign to clients (up to 12 per account)",
+    );
   });
 
   it("does not promise one-click cancellation", () => {
