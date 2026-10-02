@@ -11,6 +11,7 @@ import {
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { activeAnonymousDecisionGrantMatches } from "@/lib/anonymous-decision-grant";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 
 const usageSchema = z.discriminatedUnion("kind", [
   z
@@ -185,7 +186,7 @@ export async function consumeProductEvaluationUsageAction(
 
   const reason = typeof row?.reason === "string" ? row.reason : "not_eligible";
   if (reason === "expired") {
-    return { ok: false, code: "EXPIRED", message: "Your 21-day free trial has ended." };
+    return { ok: false, code: "EXPIRED", message: `Your ${PRODUCT_EVALUATION_DAYS}-day free trial has ended.` };
   }
   if (reason.endsWith("limit_reached")) {
     return { ok: false, code: "LIMIT_REACHED", message: "This free-trial allowance has been used." };
