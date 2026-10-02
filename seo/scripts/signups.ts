@@ -51,7 +51,7 @@ export const FIRST_TOUCH_SOURCES: readonly string[] = [
   "campaign",
 ];
 export const ORGANIC_SOURCES: readonly string[] = ["organic_search", "organic_ai"];
-export const LANDING_SECTIONS: readonly string[] = ["home", "blog", "tools", "markets", "states", "glossary", "vs", "pricing", "analyze", "other"];
+export const LANDING_SECTIONS: readonly string[] = ["home", "blog", "tools", "markets", "states", "glossary", "vs", "pricing", "analyze", "for_agents", "for_investors", "other"];
 
 /** landing_page for each section's rows: its root path ("(other)" is not a path). */
 export const SECTION_ROOTS: Readonly<Record<string, string>> = {
@@ -64,6 +64,8 @@ export const SECTION_ROOTS: Readonly<Record<string, string>> = {
   vs: "/vs",
   pricing: "/pricing",
   analyze: "/analyze",
+  for_agents: "/for-agents",
+  for_investors: "/for-investors",
   other: "(other)",
 };
 

@@ -145,6 +145,18 @@ describe("landingSection", () => {
     ["/vs/dealcheck", "vs"],
     ["/pricing", "pricing"],
     ["/analyze", "analyze"],
+    ["/for-agents", "for_agents"],
+    ["/for-agents?gclid=TEST_AUDIT_ONLY_DO_NOT_COUNT", "for_agents"],
+    ["/For-Agents/", "for_agents"],
+    ["/for-investors", "for_investors"],
+    ["/for-investors#pricing", "for_investors"],
+    // Only the real, hyphenated paths map: the underscore names are section
+    // tokens, not routes, and the other persona pages stay in "other".
+    ["/for_agents", "other"],
+    ["/for_investors", "other"],
+    ["/for-house-hackers", "other"],
+    ["/for-buy-and-hold", "other"],
+    ["/for-agents-and-brokers", "other"],
     ["/Blog/Upper-Case", "blog"],
     ["/home", "other"],
     ["/other", "other"],
@@ -155,6 +167,63 @@ describe("landingSection", () => {
     ["/blogger", "other"],
   ])("%s → %s", (path, section) => {
     expect(landingSection(path)).toBe(section);
+  });
+});
+
+/**
+ * Go-to-market audit 2026-10, row P2-112: a paid click to /for-agents was
+ * stored as paid_search.other. The two persona pages ads point at get their
+ * own sections, under names the cookie value pattern accepts.
+ */
+describe("the agent and investor landing pages", () => {
+  it("pins the section list", () => {
+    expect([...LANDING_SECTIONS]).toEqual([
+      "home",
+      "blog",
+      "tools",
+      "markets",
+      "states",
+      "glossary",
+      "vs",
+      "pricing",
+      "analyze",
+      "for_agents",
+      "for_investors",
+      "other",
+    ]);
+  });
+
+  it.each([
+    ["/for-agents?gclid=TEST_AUDIT_ONLY_DO_NOT_COUNT", "paid_search", "paid_search.for_agents"],
+    ["/for-investors?utm_medium=cpc", "paid_search", "paid_search.for_investors"],
+    ["/for-investors", "external_referral", "external_referral.for_investors"],
+  ] as const)("%s as %s is stored as %s and read back", (path, source, cookie) => {
+    const section = landingSection(path);
+    const value = serializeFirstTouchCookie({ source, section });
+    expect(value).toBe(cookie);
+    expect(parseFirstTouchCookie(value)).toEqual({ source, section });
+  });
+
+  it("never stores the hyphenated path segment", () => {
+    for (const raw of ["for-agents", "for-investors"]) {
+      expect(LANDING_SECTIONS as readonly string[]).not.toContain(raw);
+      expect(serializeFirstTouchCookie({ source: "paid_search", section: raw })).toBeNull();
+      expect(parseFirstTouchCookie(`paid_search.${raw}`)).toBeNull();
+    }
+  });
+
+  it("keeps every token inside the cookie pattern's limits", () => {
+    // COOKIE_VALUE_RE: source up to 24 lower-case letters or underscores,
+    // section up to 16; a longer or hyphenated token would never parse.
+    for (const section of LANDING_SECTIONS) expect(section).toMatch(/^[a-z_]{1,16}$/);
+    for (const source of FIRST_TOUCH_REFERRAL_SOURCES) expect(source).toMatch(/^[a-z_]{1,24}$/);
+    const longest = Math.max(
+      ...FIRST_TOUCH_REFERRAL_SOURCES.flatMap((source) =>
+        LANDING_SECTIONS.map((section) => `${source}.${section}`.length),
+      ),
+    );
+    expect(longest).toBe("external_referral.for_investors".length);
+    expect(longest).toBeLessThanOrEqual(40);
   });
 });
 
