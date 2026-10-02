@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { TwoPercentRuleWidget } from "@/components/tools/two-percent-rule-widget";
@@ -122,12 +123,12 @@ export default function TwoPercentRuleCalculatorPage() {
         >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               2% Rule Calculator
             </h1>
@@ -174,19 +175,19 @@ export default function TwoPercentRuleCalculatorPage() {
               was achievable in decent neighborhoods. A decade-plus of price
               appreciation without proportional rent growth moved the mainstream
               screening bar down to 1% — which is why the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="text-primary font-semibold hover:underline"
               >
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               is the practical first filter today, and the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/1-percent-rule-rental-property"
                 className="text-primary font-semibold hover:underline"
               >
                 1% rule guide
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               covers how to read it by market type.
             </p>
             <p>
@@ -225,12 +226,12 @@ export default function TwoPercentRuleCalculatorPage() {
             <p>
               The same logic applies to unusually high cap rates — a theme our
               guide to{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/what-is-a-good-cap-rate"
                 className="text-primary font-semibold hover:underline"
               >
                 what counts as a good cap rate
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               covers: high yield prices in high risk. No rent-to-price band is a
               verdict; the bands are prompts for the next question.
             </p>
@@ -244,12 +245,12 @@ export default function TwoPercentRuleCalculatorPage() {
               vacancy, maintenance, or management — the exact costs that are
               usually elevated in the neighborhoods where 2% ratios appear.
               Stack the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/50-percent-rule-rentals"
                 className="text-primary font-semibold hover:underline"
               >
                 50% rule
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               on top for a 3-second expense check: if half the rent disappears
               into operating costs, does the deal still clear your mortgage
               payment?
@@ -275,12 +276,12 @@ export default function TwoPercentRuleCalculatorPage() {
               loop. When a property clears whatever bar your market supports,
               run the real numbers: actual tax bill, real insurance quote,
               verified rent comps, and the full return stack — cash flow,{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/glossary/cap-rate"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
-              </Link>
+              </IntentPrefetchLink>
               , cash-on-cash, DSCR. TrueCap does that from a typed address in
               about two minutes, starting from an editable HUD rent benchmark
               while keeping property tax as a manual local input, so the

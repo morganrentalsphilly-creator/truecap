@@ -15,6 +15,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { SeventyPercentRuleWidget } from "@/components/tools/seventy-percent-rule-widget";
@@ -117,12 +118,12 @@ export default function SeventyPercentRuleCalculatorPage() {
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               70% Rule Calculator
             </h1>
@@ -167,7 +168,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               framing is the single most important thing to understand
               about the rule, and it&apos;s why the full worked flip
               P&amp;L in our{" "}
-              <Link href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</Link>{" "}
+              <IntentPrefetchLink href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</IntentPrefetchLink>{" "}
               is worth ten minutes before your first offer.
             </p>
 
@@ -187,12 +188,12 @@ export default function SeventyPercentRuleCalculatorPage() {
             <p>
               If you don&apos;t have an ARV yet, build one from your comps
               with the{" "}
-              <Link href="/tools/arv-calculator" className="text-primary font-semibold hover:underline">ARV calculator</Link>{" "}
+              <IntentPrefetchLink href="/tools/arv-calculator" className="text-primary font-semibold hover:underline">ARV calculator</IntentPrefetchLink>{" "}
               — it computes the price-per-square-foot average, sanity-checks
               the result against the comps&apos; actual sale range, and
               runs this same max-offer math on the way out. And price the
               rehab input honestly with the{" "}
-              <Link href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">rehab cost estimator</Link>{" "}
+              <IntentPrefetchLink href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">rehab cost estimator</IntentPrefetchLink>{" "}
               — a guessed repair number turns the rule&apos;s output into
               a guess with a decimal point.
             </p>
@@ -278,7 +279,7 @@ export default function SeventyPercentRuleCalculatorPage() {
               won&apos;t cash-flow at the refinanced payment, it isn&apos;t
               a BRRRR — it&apos;s a flip you accidentally kept. Model the
               full cycle with the{" "}
-              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>, and
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</IntentPrefetchLink>, and
               check the rental math in the{" "}
               <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
               — cap rate and DSCR together — before you commit.

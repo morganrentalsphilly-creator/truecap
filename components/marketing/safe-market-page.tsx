@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { CheckCircle2, MapPin } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { BlogByline } from "@/components/marketing/blog-byline";
@@ -135,23 +135,23 @@ export function MarketBreadcrumb({
     <nav aria-label="Breadcrumb" className="mb-6 text-xs">
       <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
         <li>
-          <Link href="/" className="hover:text-foreground">
+          <IntentPrefetchLink href="/" className="hover:text-foreground">
             Home
-          </Link>
+          </IntentPrefetchLink>
         </li>
         <li aria-hidden="true">›</li>
         <li>
-          <Link href="/markets" className="hover:text-foreground">
+          <IntentPrefetchLink href="/markets" className="hover:text-foreground">
             Markets
-          </Link>
+          </IntentPrefetchLink>
         </li>
         <li aria-hidden="true">›</li>
         {stateSlug ? (
           <>
             <li>
-              <Link href={`/states/${stateSlug}`} className="hover:text-foreground">
+              <IntentPrefetchLink href={`/states/${stateSlug}`} className="hover:text-foreground">
                 {stateName}
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
           </>
@@ -621,9 +621,9 @@ export function MarketRelatedReading({
       </p>
       <div className="flex flex-wrap gap-2 text-sm">
         {glossary.map((link) => (
-          <Link key={link.href} href={link.href} className={chip}>
+          <IntentPrefetchLink key={link.href} href={link.href} className={chip}>
             {link.label}
-          </Link>
+          </IntentPrefetchLink>
         ))}
       </div>
       {blog.length > 0 ? (
@@ -634,12 +634,12 @@ export function MarketRelatedReading({
           <ul className="space-y-1.5 text-sm">
             {blog.map((link) => (
               <li key={link.href}>
-                <Link
+                <IntentPrefetchLink
                   href={link.href}
                   className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
                 >
                   {link.label} →
-                </Link>
+                </IntentPrefetchLink>
               </li>
             ))}
           </ul>
@@ -665,12 +665,12 @@ export function MarketStateGuideLink({
   return (
     <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
       For {stateName} data, see the{" "}
-      <Link
+      <IntentPrefetchLink
         href={`/states/${stateSlug}`}
         className="font-semibold text-primary hover:underline"
       >
         {stateName} guide
-      </Link>
+      </IntentPrefetchLink>
       .
     </p>
   );
@@ -693,13 +693,13 @@ export function MarketNearby({ slug }: { slug: string }) {
   const chips = (markets: MarketLink[]) => (
     <div className="flex flex-wrap gap-2 text-sm">
       {markets.map((market) => (
-        <Link
+        <IntentPrefetchLink
           key={market.slug}
           href={`/markets/${market.slug}`}
           className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           {market.name}, {market.stateCode}
-        </Link>
+        </IntentPrefetchLink>
       ))}
     </div>
   );

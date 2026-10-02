@@ -8,7 +8,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getSiteUrl } from "@/lib/site-url";
 import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -76,12 +76,12 @@ export default function GrmCalculatorPage() {
           className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
         >
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               GRM Calculator
             </h1>
@@ -106,19 +106,19 @@ export default function GrmCalculatorPage() {
               into the 8 worth actually underwriting, in about 90 seconds.
               That&apos;s why it&apos;s the first metric every experienced
               investor reaches for — read{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/gross-rent-multiplier-explained"
                 className="font-semibold text-primary hover:underline"
               >
                 gross rent multiplier explained
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               for the full primer, and pair it with the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/1-percent-rule-calculator"
                 className="font-semibold text-primary hover:underline"
               >
                 1% rule calculator
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               as a second fast screen.
             </p>
 

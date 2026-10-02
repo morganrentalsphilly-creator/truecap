@@ -19,6 +19,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { ArvCalculatorWidget } from "@/components/tools/arv-calculator-widget";
@@ -127,12 +128,12 @@ export default function ArvCalculatorPage() {
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               ARV Calculator (After-Repair Value + 70% Rule)
             </h1>
@@ -229,7 +230,7 @@ export default function ArvCalculatorPage() {
             <p>
               The full walk-through — including the adjustment discipline and
               what to do when comps are thin — is in our guide on{" "}
-              <Link href="/blog/how-to-calculate-arv" className="text-primary font-semibold hover:underline">how to calculate ARV</Link>.
+              <IntentPrefetchLink href="/blog/how-to-calculate-arv" className="text-primary font-semibold hover:underline">how to calculate ARV</IntentPrefetchLink>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">A worked example</h2>
@@ -316,9 +317,9 @@ export default function ArvCalculatorPage() {
               roughly 12–14% of ARV and your profit is the remaining 16–17%.
               The full ledger — where every dollar of the spread goes on a
               real flip — is worked through in our{" "}
-              <Link href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</Link>.
+              <IntentPrefetchLink href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</IntentPrefetchLink>.
               Already have an ARV and just want the rule? The dedicated{" "}
-              <Link href="/tools/70-percent-rule-calculator" className="text-primary font-semibold hover:underline">70% rule calculator</Link>{" "}
+              <IntentPrefetchLink href="/tools/70-percent-rule-calculator" className="text-primary font-semibold hover:underline">70% rule calculator</IntentPrefetchLink>{" "}
               runs the same max-offer math with the offer at 60, 65, 70,
               and 75% side by side.
             </p>
@@ -370,7 +371,7 @@ export default function ArvCalculatorPage() {
               then solve the offer backward from your real costs and required
               profit before you sign. The other input matters just as much —
               build the repair number line by line with the{" "}
-              <Link href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">rehab cost estimator</Link>{" "}
+              <IntentPrefetchLink href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">rehab cost estimator</IntentPrefetchLink>{" "}
               rather than guessing a round number, and add a 10–25%
               contingency for what demolition reveals.
             </p>
@@ -381,7 +382,7 @@ export default function ArvCalculatorPage() {
               and 70%-rule screen; it does not model a renovation-to-refinance
               lifecycle. As educational context, buy-and-hold investors may use
               the same ARV with a different destination. On a{" "}
-              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR</Link>,
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR</IntentPrefetchLink>,
               you refinance the finished rental instead of selling it, and a
               cash-out refinance limit on a single-family investment property
               depends on the lender, program, borrower, property, seasoning,
@@ -395,7 +396,7 @@ export default function ArvCalculatorPage() {
               stabilized rental. The roughly five-point gap between the 70%
               you paid and the 75% you can refinance is the room the
               transaction costs may need — review the full list of inputs in the{" "}
-              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>.
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</IntentPrefetchLink>.
             </p>
             <p>
               One caution before you count on that refinance: the appraisal is
