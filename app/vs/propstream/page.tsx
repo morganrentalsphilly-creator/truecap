@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PropStream vs TrueCap (2026): Find vs Underwrite",
     description:
-      "PropStream finds leads. TrueCap underwrites them. Different jobs in the same workflow — most investors use both.",
+      "PropStream finds leads. TrueCap underwrites them. Different jobs in the same workflow.",
     url: "/vs/propstream",
     type: "website",
     images: [
@@ -79,7 +79,7 @@ type Row = {
   feature: string;
   truecap: string;
   propstream: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -92,80 +92,85 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    propstream: "Not modeled",
-    winner: "truecap",
+    propstream:
+      "Rental ROI Calculator and Analysis Wizard (cash flow, cap rate) on every plan",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    propstream: "Not modeled",
-    winner: "truecap",
+    propstream:
+      "Its Rental ROI Calculator forecasts long-term returns; the horizon is not published",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    propstream: "Not applicable",
+    propstream: "Not among PropStream's listed features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    propstream: "Property data only — no underwriting",
-    winner: "truecap",
+    propstream:
+      "Property and MLS data, with built-in rental and flip calculators",
+    winner: "tie",
   },
   {
     feature: "Skip tracing",
     truecap: "No",
-    propstream: "Yes — owner phone + email lookup",
+    propstream:
+      "Yes: free on Pro and Elite; a per-contact add-on on Essentials",
     winner: "propstream",
   },
   {
     feature: "Motivated-seller lists",
     truecap: "No",
-    propstream: "Yes — pre-foreclosure, probate, vacant, tax delinquent",
+    propstream:
+      "Yes: 20 Lead Lists, including pre-foreclosures, tax liens and vacant properties",
     winner: "propstream",
   },
   {
     feature: "Public records data",
     truecap: "Limited (HUD FMR + FRED)",
-    propstream: "Yes — 150M+ properties",
+    propstream: "Yes: over 160 million public records (as of October 2026)",
     winner: "propstream",
   },
   {
     feature: "List builder / direct mail integration",
     truecap: "No",
-    propstream: "Yes — full marketing stack",
+    propstream:
+      "Yes: marketing campaigns on every plan; direct mail included on Pro and Elite, an add-on on Essentials",
     winner: "propstream",
   },
   {
     feature: "Mobile-first UX",
     truecap: "Yes — PWA installable",
-    propstream: "Mobile app exists",
+    propstream: "iOS and Android app",
     winner: "tie",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    propstream: "~$99/mo (as of 2026), no real free tier",
-    winner: "truecap",
+    propstream:
+      "Essentials $99, Pro $199, Elite $699 a month billed monthly (as of October 2026)",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    propstream: "No — paid only",
+    propstream: "No free plan; a 7-day free trial with 50 free leads",
     winner: "truecap",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    propstream: "Internal-only data",
-    winner: "truecap",
+    propstream:
+      "Not among PropStream's listed features; its analysis and comps export as PDF reports",
   },
   {
     feature: "PDF deal report",
     truecap: "Included with Pro",
-    propstream: "Not the use case",
-    winner: "truecap",
+    propstream: "Yes: Analysis Wizard and comps PDF reports on every plan",
+    winner: "tie",
   },
 ];
 
@@ -200,11 +205,12 @@ export default function VsPropstreamPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            PropStream is the heavyweight in real-estate lead generation — skip
-            tracing, list-pulling, motivated-seller filters across 150M+
-            properties. TrueCap underwrites the user-reviewed assumptions for an
-            individual lead. Different jobs: PropStream sources; TrueCap models
-            the economics.
+            PropStream is real estate lead-generation software: lead lists, skip
+            tracing, and marketing across more than 160 million property
+            records, with built-in rental and flip calculators. TrueCap
+            underwrites one deal in depth from assumptions you review: Buy Box
+            fit, an Offer Ceiling from your own targets, and source-labeled
+            starting values.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -251,7 +257,8 @@ export default function VsPropstreamPage() {
                   flows.
                 </li>
                 <li>
-                  You want a defensible analysis to send to a lender or partner.
+                  You want an analysis you can share with a partner as a
+                  read-only link.
                 </li>
                 <li>
                   You don&apos;t need to source leads — you have a deal in hand.
@@ -266,10 +273,10 @@ export default function VsPropstreamPage() {
               <ul className={VS_TLDR_LIST}>
                 <li>You source off-market deals as part of your strategy.</li>
                 <li>
-                  You need motivated-seller lists (pre-foreclosure, probate,
-                  vacant).
+                  You need lead lists (pre-foreclosures, tax liens, vacant
+                  properties).
                 </li>
-                <li>You want owner phone / email for direct outreach.</li>
+                <li>You want skip tracing for direct outreach.</li>
                 <li>
                   You&apos;re spending real money on direct mail or cold call
                   campaigns.
@@ -300,31 +307,30 @@ export default function VsPropstreamPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            PropStream details based on publicly available product info as of
-            2026. See{" "}
+            PropStream plans, prices and features were checked against its
+            pricing page in October 2026. See{" "}
             <a
-              href="https://propstream.com"
+              href="https://www.propstream.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              propstream.com
+              propstream.com/pricing
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How most investors use both
+            How TrueCap and PropStream fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
               <li>
-                <strong>Source the deal in PropStream.</strong> Build
-                motivated-seller lists; skip-trace; pull contact info; send mail
-                or text.
+                <strong>Source the deal in PropStream.</strong> Build lead lists;
+                skip-trace; pull contact info; send mail or email.
               </li>
               <li>
                 <strong>Get a callback / motivated seller responds.</strong> Now
@@ -378,7 +384,11 @@ export default function VsPropstreamPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="PropStream" items={PROPSTREAM_FAQ} />
+        <ComparisonFaq
+          competitorName="PropStream"
+          items={PROPSTREAM_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -386,10 +396,10 @@ export default function VsPropstreamPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -458,10 +468,12 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Is TrueCap a PropStream alternative?",
     answer: (
       <>
-        Not really — they solve different problems. PropStream finds
-        motivated-seller leads with skip-tracing and public-records data.
-        TrueCap underwrites a specific property once you have an address. Most
-        serious investors use both: PropStream to source, TrueCap to underwrite.
+        Partly. PropStream is built to find leads, with lead lists, skip tracing,
+        and public-records data, and it includes rental and flip calculators.
+        TrueCap is built for one property once you have an address: DSCR,
+        sensitivity, Buy Box fit, and an Offer Ceiling from your own targets.
+        The two can be used in turn: PropStream to source, TrueCap to
+        underwrite.
       </>
     ),
   },
@@ -480,12 +492,13 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Is PropStream worth $99/month?",
     answer: (
       <>
-        It depends on volume. If you send direct mail to 1,000+ addresses a
-        month or run a wholesaling operation, the lists and skip-tracing pay for
-        themselves quickly. If you&apos;re a buy-and-hold investor who buys 1-3
-        properties a year through MLS or your network, PropStream is overkill —
-        the data you need (rent, tax, property details) is already in TrueCap or
-        your MLS access.
+        It depends on volume. Essentials is $99 a month billed monthly (as of
+        October 2026). If you send direct mail to 1,000+ addresses a month or
+        run a wholesaling operation, lead lists and skip tracing are the core of
+        the work. If you&apos;re a buy-and-hold investor who buys 1-3 properties
+        a year through MLS or your network, you may not need lead generation: a
+        rent benchmark and a rate are in TrueCap, and the tax bill and property
+        details come from the listing or your MLS access.
       </>
     ),
   },
@@ -505,11 +518,19 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "What's the best PropStream alternative for finding deals?",
     answer: (
       <>
-        If you specifically want lead generation, look at DealMachine
-        (mobile-first driving for dollars), BatchLeads (similar volume to
-        PropStream, sometimes cheaper), or Reonomy (commercial-leaning). TrueCap
-        isn&apos;t in that category — we&apos;re the underwriting layer
-        you&apos;d use after any of those finds you a property.
+        If you specifically want lead generation, look at DealMachine (it has a
+        driving-for-dollars app) or Reonomy (a commercial property data
+        platform). BatchLeads is now a PropStream product:{" "}
+        <a
+          href="https://batchleads.io/blog/propstream-announces-acquisition-of-batchleads-and-batchdialer-enhancing-its-ai-powered-real-estate-data-and-lead-generation-solutions"
+          target="_blank"
+          rel="noopener"
+          className="tc-link"
+        >
+          PropStream announced the acquisition in July 2025
+        </a>
+        . TrueCap isn&apos;t in that category — we&apos;re the underwriting
+        layer you&apos;d use after any of those finds you a property.
       </>
     ),
   },
