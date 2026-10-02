@@ -775,30 +775,20 @@ textarea,
 /* ============================================================
    Taste-skill "Balanced" motion (MOTION_INTENSITY ~5).
 
-   Two delivery mechanisms, both transform/opacity only (GPU-cheap),
-   both degrading SAFE:
+   One delivery mechanism, transform/opacity only (GPU-cheap):
 
-   1. Scroll-driven reveals (.tc-reveal / .tc-reveal-fade) ride the CSS
-      view() timeline. Browsers without animation-timeline support
-      (Safari, Firefox, and every crawler today) get NO animation and
-      render the final, fully-visible state — content is never hidden
-      behind an unsupported feature or JavaScript. Zero JS, zero CLS.
+   Load-in cascade (.tc-rise-in + .tc-delay-*) plays once on mount,
+   for above-the-fold hero elements that are always seen.
 
-   2. Load-in cascade (.tc-rise-in + .tc-delay-*) plays once on mount,
-      for above-the-fold hero elements that are always seen.
+   The scroll-driven reveal classes were removed on 2026-10-02: they tied
+   an element's opacity to its scroll position, so the /states card grid
+   loaded at 39% to 53% opacity on a phone and failed AA contrast until
+   the reader scrolled. DESIGN.md retires them from marketing pages; do
+   not bring back a class that makes content opacity follow scroll.
 
-   prefers-reduced-motion users get neither (the global reduce block
-   above collapses durations; the @supports reveals are additionally
-   gated on no-preference here as belt-and-suspenders).
+   prefers-reduced-motion users get no load-in either (the global reduce
+   block above collapses durations).
    ============================================================ */
-@keyframes tc-reveal-rise {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes tc-reveal-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
 @keyframes tc-rise-in {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -840,21 +830,6 @@ body[data-truecap-results-mode="true"] .truecap-marketing-tail {
 
 body[data-truecap-results-mode="true"] [data-marketing-mobile-nav] {
   display: none !important;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .tc-reveal {
-      animation: tc-reveal-rise both;
-      animation-timeline: view();
-      animation-range: entry 2% cover 26%;
-    }
-    .tc-reveal-fade {
-      animation: tc-reveal-fade both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 22%;
-    }
-  }
 }
 
 /* Disclosure markers.

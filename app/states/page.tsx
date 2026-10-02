@@ -75,7 +75,7 @@ export default function StatesIndexPage() {
           timelines, or landlord rankings.
         </p>
 
-        <div className="tc-reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {linkableStates(Object.values(STATES))
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((s) => (
