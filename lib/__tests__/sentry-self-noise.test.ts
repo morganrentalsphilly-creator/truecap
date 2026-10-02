@@ -117,7 +117,9 @@ describe("the per-page-load PostHog notice no longer spends the Sentry error quo
     expect(options.enabled).toBe(process.env.NEXT_PUBLIC_SENTRY_DISABLED !== "1");
     expect(options.tracesSampleRate).toBe(1);
     const patterns = options.ignoreErrors.map((pattern) => pattern.source);
-    expect(patterns).toHaveLength(12);
+    // At least the twelve triaged ones: appending a pattern is the approved
+    // way to silence new noise (CLAUDE.md 3.9), removing one is not.
+    expect(patterns.length).toBeGreaterThanOrEqual(12);
     for (const expected of [
       "Acquiring an exclusive Navigator LockManager lock",
       "lock:sb-.*-auth-token",
