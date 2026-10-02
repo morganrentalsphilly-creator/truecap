@@ -15,11 +15,13 @@ import { strFromU8, unzipSync } from "fflate";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { GET as getFeed } from "@/app/feed.xml/route";
+import GlossaryTermPage from "@/app/glossary/[slug]/page";
 import { GET as getLlmsFull } from "@/app/llms-full.txt/route";
 import { GET as getLlmsTxt } from "@/app/llms.txt/route";
 import MethodologyPage from "@/app/methodology/page";
 import ToolsLandingPage from "@/app/tools/page";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import { GLOSSARY } from "@/lib/glossary";
 import { decodeEntities } from "../../seo/scripts/lib/html.ts";
 
@@ -217,6 +219,66 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     expect(read("app/tools/vacancy-rate-calculator/page.tsx")).toContain(
       "Result graded against fixed rule-of-thumb vacancy bands",
     );
+  });
+});
+
+describe("glossary: 'Where it shows up in TrueCap' says only what the analyzer does", () => {
+  // The metric sentence is one string for 13 entries. It used to say the
+  // analyzer computes the metric on every run, uses your targets for it in
+  // Buy Box fit and the Offer Ceiling, and prints it in the memo and the PDF.
+  // That was false for four entries and too broad for three more.
+  const mainText = async (slug: string) =>
+    text(mainOf(renderToStaticMarkup(await GlossaryTermPage({ params: Promise.resolve({ slug }) }))));
+  const metricSlugs = Object.values(GLOSSARY)
+    .filter((entry) => entry.category === "metric")
+    .map((entry) => entry.slug);
+  const termOf = (slug: string) => Object.values(GLOSSARY).find((entry) => entry.slug === slug)!.term;
+
+  it("reads all the metric entries", () => {
+    expect(metricSlugs.length).toBeGreaterThanOrEqual(13);
+    for (const slug of ["tax-savings", "after-tax-cash-flow", "operating-expense-ratio", "equity-multiple", "grm"]) {
+      expect(metricSlugs).toContain(slug);
+    }
+  });
+
+  it("renders no in-product block and no 'run the math' call on the tax entries while the tax view is unavailable", async () => {
+    if (isFeatureReleased("tax_strategy")) return;
+    for (const slug of ["tax-savings", "after-tax-cash-flow"]) {
+      const page = await mainText(slug);
+      // The entry itself says the module is not offered.
+      expect(page, slug).toMatch(/does not currently expose/);
+      expect(page, slug).not.toContain("shows up in TrueCap");
+      expect(page, slug).not.toMatch(/computes this metric/i);
+      expect(page, slug).not.toContain(`Ready to run the ${termOf(slug)} math`);
+      expect(page, slug).toContain("Ready to run a real deal?");
+    }
+  });
+
+  it("renders no in-product block for a metric the results view does not show", async () => {
+    // Nothing computes an operating expense ratio; the equity multiple is
+    // computed for Compare only.
+    for (const slug of ["operating-expense-ratio", "equity-multiple"]) {
+      const page = await mainText(slug);
+      expect(page, slug).not.toContain("shows up in TrueCap");
+      expect(page, slug).not.toMatch(/computes this metric/i);
+      expect(page, slug).not.toContain(`Ready to run the ${termOf(slug)} math`);
+    }
+    const analyzerSource = ["lib/calc-analysis.ts", "components/investcalc/analysis-dashboard.tsx"].map(read).join("\n");
+    expect(analyzerSource).not.toMatch(/operating[- ]expense[- ]ratio|\bOER\b|equityMultiple/i);
+  });
+
+  it("claims no target, memo or PDF use on any metric entry", { timeout: 30_000 }, async () => {
+    let withBlock = 0;
+    for (const slug of metricSlugs) {
+      const page = await mainText(slug);
+      const at = page.indexOf(`Where ${termOf(slug)} shows up in TrueCap`);
+      if (at === -1) continue;
+      withBlock += 1;
+      const block = page.slice(at, at + 400);
+      expect(block, slug).toContain("computes this metric on every run");
+      expect(block, slug).not.toMatch(/uses your targets for it|decision memo and the PDF/i);
+    }
+    expect(withBlock).toBe(metricSlugs.length - 4);
   });
 });
 
