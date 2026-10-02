@@ -123,7 +123,15 @@ export function LoanAmortizationView({
         </span>
       </summary>
 
-      <ScrollX label="Table" className="mt-4 overflow-x-auto">
+      {/* cue + stickyFirstColumn: up to 390px the table is wider than the
+          card, and at 360px "Ending balance" read "$20". This head has no
+          band, so the pinned Year head stays on the card like its rows. */}
+      <ScrollX
+        label="Table"
+        cue
+        stickyFirstColumn
+        className="mt-4 overflow-x-auto [&_table_th:first-child]:bg-card"
+      >
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
