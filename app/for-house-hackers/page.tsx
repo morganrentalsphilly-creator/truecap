@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 const USE_CASES: readonly RuledListItem[] = [
   {
     term: "Owner-occupant math, not investor math",
-    detail: "Select 'Owner-occupant' propertyType. The engine knows you live in one unit (no rent), so the deal scoring uses the right break-even bands instead of investor-style cash-flow thresholds.",
+    detail: "Choose the Owner Occupant property type. The engine knows you live in one unit (no rent), so the deal scoring uses the right break-even bands instead of investor-style cash-flow thresholds.",
   },
   {
     term: "FHA 3.5% down — modeled correctly",
@@ -78,13 +78,13 @@ const USE_CASES: readonly RuledListItem[] = [
   },
 ];
 
-// A real sequence (clone, paste, set rents, calculate, save, then the
+// A real sequence (clone, paste, set rents, run, save, then the
 // separate move-out scenario), so it is numbered.
 const WORKFLOW_STEPS = [
   "Open Templates (Pro) and clone the 'House hack' or 'FHA 3.5% owner-occupant' starter — the defaults are already shaped for your strategy.",
   "Paste the listing address (the engine handles 2-4 unit multi-family automatically).",
   "Set per-unit rent for the units you'll rent out. Leave your-unit rent at $0.",
-  "Hit Calculate — see your monthly out-of-pocket (the gap between rent collected and total carrying cost). Owner-occupant scoring uses the right break-even bands.",
+  "Run the analysis to see your monthly out-of-pocket (the gap between rent collected and total carrying cost). Owner-occupant scoring uses the right break-even bands.",
   "Save the live-in underwrite as its own base decision.",
   "Create a separate full-rental scenario with your unit rented. TrueCap does not automatically switch occupancy in a future year; compare the two explicit scenarios and verify the later market rent.",
 ] as const;

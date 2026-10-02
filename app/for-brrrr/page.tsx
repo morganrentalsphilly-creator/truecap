@@ -32,13 +32,13 @@ import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link"
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
   description:
-    "Research a BRRRR deal stage by stage in the TrueCap analyzer — rehab budget, ARV, DSCR, and stabilized rental returns. An integrated BRRRR lifecycle model isn't offered right now.",
+    "Research a BRRRR deal stage by stage with TrueCap: rehab budget, DSCR, and stabilized rental returns in the analyzer, and ARV in its own calculator. An integrated BRRRR lifecycle model isn't offered right now.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/for-brrrr" },
   openGraph: {
     title: "BRRRR planning resources — TrueCap",
     description:
-      "Work through rehab, ARV, DSCR, and stabilized rental returns in the analyzer, with a clear line around what it doesn't model.",
+      "Work through rehab, DSCR, and stabilized rental returns in the analyzer and ARV in its own calculator, with a clear line around what TrueCap doesn't model.",
     url: "/for-brrrr",
     type: "website",
     images: [
@@ -89,7 +89,7 @@ export default function ForBrrrrPage() {
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
           title="Research each stage without pretending it is one finished model."
-          lede="TrueCap's analyzer covers rehab budget, ARV, DSCR, and stabilized rental returns as separate steps. Its integrated BRRRR lifecycle analysis—including acquisition financing, refinance proceeds, capital recovery, and post-refinance returns—isn't offered right now."
+          lede="TrueCap's analyzer covers rehab budget, DSCR, and stabilized rental returns as separate steps, and ARV has its own calculator. Its integrated BRRRR lifecycle analysis—including acquisition financing, refinance proceeds, capital recovery, and post-refinance returns—isn't offered right now."
         >
           {/* The scope boundary, in ink on the rule directly under the lede:
               it is the page's reason to exist, not a disclaimer. Note sets a
