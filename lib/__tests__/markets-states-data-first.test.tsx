@@ -607,6 +607,12 @@ describe("F8 bespoke metros: indexable on HUD rows with the same framing", () =>
     expect(html).toContain('data-sources-box=""');
     expect(html).toContain('data-market-fmr=""');
     expect(html).toMatch(/<a[^>]*href="\/about"/);
+    // The analyzer link hands over the city as a hint, not as the address:
+    // the field arrives empty with the placeholder "Street address in
+    // <City, ST>", and a city alone is refused. The sentence beside the link
+    // used to say "Start with <City, ST> in the address field."
+    expect(html).not.toContain("in the address field");
+    expect(html).toMatch(/Start with a street address in [A-Z][A-Za-z .]+, [A-Z]{2}\./);
   });
 });
 
