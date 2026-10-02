@@ -2,7 +2,9 @@
  * /vs/rentspree — competitor comparison landing page.
  *
  * Target queries: "rentspree alternative", "rentspree vs", "rentspree pricing", "rentspree review", "tenant screening service".
- * RentSpree is tenant screening + rental applications, popular with realtors who run rentals for clients. TransUnion-backed screening reports. Different audience than TrueCap but agents look at both.
+ * RentSpree is a rental platform for agents and landlords: listings, applications,
+ * TransUnion screening reports and rent collection. Competitor cells were checked in
+ * October 2026 against rentspree.com/pricing and rentspree.com/calculators.
  */
 
 import type { Metadata } from "next";
@@ -86,19 +88,21 @@ const MATRIX: Row[] = [
   {
     feature: "Primary use",
     truecap: "Pre-purchase underwriting (cap rate, DSCR, cash flow)",
-    rentspree: "Tenant screening + rental applications",
+    rentspree:
+      "Listings, rental applications, tenant screening and online rent collection",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    rentspree: "Not modeled",
+    rentspree:
+      "A free cap rate calculator on its site; no deal analysis on its plan comparison",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    rentspree: "Not modeled",
+    rentspree: "Not on RentSpree's plan comparison",
     winner: "truecap",
   },
   {
@@ -116,37 +120,41 @@ const MATRIX: Row[] = [
   {
     feature: "Tenant credit / criminal reports",
     truecap: "No",
-    rentspree: "Yes — TransUnion-backed",
+    rentspree: "Yes: credit report and background check from TransUnion",
     winner: "rentspree",
   },
   {
     feature: "Online rental applications",
     truecap: "No",
-    rentspree: "Yes — customizable",
+    rentspree: "Yes, on every plan, including the free Basic plan",
     winner: "rentspree",
   },
   {
     feature: "Eviction records check",
     truecap: "No",
-    rentspree: "Yes — court records",
+    rentspree: "Yes: eviction history from TransUnion in each report",
     winner: "rentspree",
   },
   {
     feature: "Agent / brokerage workflow",
-    truecap: "Yes — agent persona page exists",
-    rentspree: "Yes — built for realtor-managed rentals",
+    truecap:
+      "Agent Pro adds a client roster and Buy Boxes you assign to clients (up to 12 per account)",
+    rentspree:
+      "RentSpree PRO is sold for real estate agents: profile page, reviews and reference checks",
     winner: "tie",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    rentspree: "Yes — tenant pays for screening (typical)",
+    rentspree:
+      "Yes: Basic is $0 a month with listings, applications and online rent collection; screening is charged per report",
     winner: "tie",
   },
   {
     feature: "Pricing model",
     truecap: "Free core; paid Pro — see live pricing",
-    rentspree: "Tenant typically pays $30-40 per application",
+    rentspree:
+      "$39.99 or $49.99 per screening report, paid by the applicant or the landlord; paid plans from $6.99 a month billed annually (as of October 2026)",
     winner: "tie",
   },
   {
@@ -188,12 +196,11 @@ export default function VsRentspreePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            RentSpree is the go-to tenant screening service for real-estate
-            agents and small landlords — TransUnion credit + criminal + eviction
-            reports, online rental applications, agent-friendly workflow.
-            TrueCap models the property&apos;s pre-purchase economics from
-            user-reviewed assumptions. Different jobs. Many agents and investors
-            use both.
+            RentSpree is a rental platform for agents and landlords: listings,
+            rental applications, TransUnion screening reports and online rent
+            collection. TrueCap models the property&apos;s pre-purchase
+            economics from user-reviewed assumptions. Different jobs; an agent
+            or investor can use both.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -291,17 +298,16 @@ export default function VsRentspreePage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            RentSpree details based on publicly available product info as of
-            2026. See{" "}
+            RentSpree details checked in October 2026 against{" "}
             <a
-              href="https://rentspree.com"
+              href="https://www.rentspree.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              rentspree.com
-            </a>{" "}
-            for their current state.
+              RentSpree&apos;s pricing page
+            </a>
+            . See RentSpree for current plans and fees.
           </p>
         </Section>
 
@@ -314,8 +320,8 @@ export default function VsRentspreePage() {
             <ol>
               <li>
                 <strong>Underwrite the deal in TrueCap.</strong> Either you (the
-                agent) or your buyer client runs the address. Generates a
-                defensible analysis to share.
+                agent) or your buyer client runs the address. The result is an
+                analysis with labeled sources that you can share.
               </li>
               <li>
                 <strong>Buyer makes the offer + closes.</strong> TrueCap&apos;s
@@ -323,18 +329,17 @@ export default function VsRentspreePage() {
               </li>
               <li>
                 <strong>List the unit + accept applications in RentSpree.</strong>{" "}
-                Agent or owner posts the listing; applicants submit + pay for
-                their own screening.
+                Agent or owner posts the listing; applicants apply, and you
+                choose whether they pay for the screening report.
               </li>
               <li>
                 <strong>Review screening reports + select a tenant.</strong>{" "}
-                TransUnion-backed credit, criminal, eviction records arrive in
-                your inbox.
+                The report covers credit, background and eviction history from
+                TransUnion.
               </li>
               <li>
-                <strong>Sign the lease.</strong> RentSpree integrates with several
-                lease providers; pair with TurboTenant or Avail for state-specific
-                templates.
+                <strong>Sign the lease.</strong> RentSpree&apos;s paid plans let
+                you upload a lease and collect e-signatures.
               </li>
             </ol>
             <p>
@@ -358,7 +363,11 @@ export default function VsRentspreePage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="RentSpree" items={RENTSPREE_FAQ} />
+        <ComparisonFaq
+          competitorName="RentSpree"
+          items={RENTSPREE_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -366,9 +375,9 @@ export default function VsRentspreePage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -438,10 +447,11 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Is TrueCap a RentSpree alternative?",
     answer: (
       <>
-        No — different jobs. RentSpree is tenant screening + rental applications
-        for properties you own or manage. TrueCap is pre-purchase underwriting
-        for properties you&apos;re considering buying. Agents who help clients
-        with both ends of the workflow often use both.
+        No — different jobs. RentSpree is listings, rental applications, tenant
+        screening and rent collection for properties you own or manage. TrueCap
+        is pre-purchase underwriting for properties you&apos;re considering
+        buying. An agent who helps clients with both ends of the workflow can
+        use both.
       </>
     ),
   },
@@ -450,9 +460,8 @@ const RENTSPREE_FAQ: FaqItem[] = [
     answer: (
       <>
         No — we don&apos;t pull credit, criminal, or eviction reports.
-        That&apos;s FCRA-regulated and outside our scope. For tenant screening,
-        RentSpree, TurboTenant, Avail, RentRedi, or TransUnion direct are the
-        right tools.
+        That&apos;s FCRA-regulated and outside our scope. RentSpree,
+        TurboTenant and RentRedi all sell tenant screening.
       </>
     ),
   },
@@ -460,10 +469,13 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Is RentSpree really free?",
     answer: (
       <>
-        It&apos;s free for the landlord/agent — the tenant typically pays $30-40
-        per screening package. RentSpree also offers premium tiers for agents
-        that bundle additional tools (e-signature, listing syndication, etc.)
-        starting around $20/month.
+        The Basic plan is $0 a month and includes listing syndication, rental
+        applications and online rent collection. A screening report costs
+        $39.99 (standard) or $49.99 (comprehensive), and you choose whether the
+        applicant or you pay. Paid plans run from $6.99 a month (Landlord PRO,
+        billed annually) to $19.99 a month (RentSpree PRO, billed monthly).
+        RentSpree charges the landlord $3 per recurring rent payment, waived on
+        Landlord PRO. Prices as of October 2026.
       </>
     ),
   },
@@ -471,11 +483,13 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "RentSpree vs TurboTenant — which one?",
     answer: (
       <>
-        TurboTenant bundles screening into a broader landlord stack (listings,
-        applications, leases, rent collection). RentSpree is more focused on
-        screening + applications and is popular with realtors managing rentals
-        on behalf of clients. Both are reasonable for small landlords; agents
-        lean RentSpree.
+        Both cover listings, applications, screening and online rent
+        collection on a free plan. TurboTenant&apos;s paid plans add
+        state-specific leases and e-signatures (Essentials) and accounting
+        tools (Pro). RentSpree&apos;s Landlord PRO adds e-signatures, financial
+        reporting and maintenance requests, and RentSpree PRO adds tools for
+        real estate agents. Compare both pricing pages for the features you
+        need.
       </>
     ),
   },
@@ -483,10 +497,10 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Can a realtor use both TrueCap + RentSpree?",
     answer: (
       <>
-        Yes — that&apos;s a common combination. Use TrueCap to underwrite + send
-        a deal analysis to your buyer client at the showing; use RentSpree to
-        screen tenants once they own the property and it&apos;s time to fill the
-        unit. Both are agent-friendly.
+        Yes. Use TrueCap to underwrite + send a deal analysis to your buyer
+        client at the showing; use RentSpree to screen tenants once they own
+        the property and it&apos;s time to fill the unit. Both sell a plan
+        built for agents.
       </>
     ),
   },
