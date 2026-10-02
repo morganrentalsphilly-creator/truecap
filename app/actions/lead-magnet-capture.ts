@@ -19,6 +19,12 @@
  *   - Honeypot field; every interpolated value escaped.
  *   - DUPLICATE pretends success (no subscription oracle) and still returns
  *     the download link — the asset is the reward either way.
+ *
+ * Postal address: every email in the sequence prints the sender's postal
+ * address (EMAIL_POSTAL_ADDRESS) next to the unsubscribe link, because the
+ * day-5 email is a Pro pitch. While that variable is unset the action sends
+ * and schedules NOTHING: it returns the playbook link as a success, spends no
+ * capture slot, reads no table and logs one line. No address is typed here.
  */
 
 import { headers } from "next/headers";
@@ -38,6 +44,7 @@ import {
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
 import { escapeHtml } from "@/lib/html-escape";
+import { readEmailPostalAddress } from "@/lib/email/lifecycle-compliance";
 
 const RESOURCE_PATH = "/playbook";
 
@@ -113,12 +120,13 @@ const SEQUENCE: Array<{
   },
 ];
 
-function wrapHtml(inner: string, unsubscribeUrl: string): string {
+function wrapHtml(inner: string, unsubscribeUrl: string, postalAddress: string): string {
   return `<!doctype html><html><body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 560px; margin: 0 auto; padding: 24px 16px;">
     ${inner}
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0 12px" />
     <p style="font-size: 12px; color: #6b7280;">TrueCap · labeled, editable rental screening assumptions ·
-    <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6b7280">unsubscribe</a></p>
+    <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6b7280">unsubscribe</a><br />
+    ${escapeHtml(postalAddress)}</p>
   </body></html>`;
 }
 
@@ -142,6 +150,16 @@ export async function captureLeadMagnetEmail(input: {
 
   // Honeypot tripped → pretend it worked, send nothing.
   if (parsed.data.website && parsed.data.website.trim().length > 0) {
+    return { ok: true, scheduledCount: 0, downloadUrl };
+  }
+  // No postal address, no email: nothing is sent or scheduled, no capture
+  // slot is spent and no table is read. The playbook needs no email, so the
+  // visitor still gets the link and this is not an error for them.
+  const postalAddress = readEmailPostalAddress();
+  if (!postalAddress) {
+    console.log(
+      "[lead-magnet] BLOCKED — nothing sent or scheduled: EMAIL_POSTAL_ADDRESS is not set",
+    );
     return { ok: true, scheduledCount: 0, downloadUrl };
   }
   const email = parsed.data.email;
@@ -260,7 +278,7 @@ export async function captureLeadMagnetEmail(input: {
       from,
       to: [email],
       subject: item.subject,
-      html: wrapHtml(item.build(ctx), unsubscribeUrl),
+      html: wrapHtml(item.build(ctx), unsubscribeUrl, postalAddress),
       reply_to: replyTo,
       tags: [{ name: "purpose", value: "lead-magnet" }],
       headers: buildDripUnsubscribeHeaders({ unsubscribeUrl, mailbox: unsubscribeMailbox }),

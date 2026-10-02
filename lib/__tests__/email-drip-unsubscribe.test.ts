@@ -62,6 +62,9 @@ function makeDatabase() {
 }
 
 const EMAIL = "reader@example.com";
+// A made-up value for tests only: the playbook sequence prints the sender's
+// postal address (EMAIL_POSTAL_ADDRESS) and sends nothing without one.
+const TEST_POSTAL_ADDRESS = "TEST ADDRESS (not real), 000 Example Road, Nowhere, ZZ 00000";
 const HASH = hashDripEmail(EMAIL);
 const FUTURE = "2030-01-01T00:00:00.000Z";
 let db: ReturnType<typeof makeDatabase>;
@@ -75,6 +78,7 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://usetruecap.com");
   vi.stubEnv("POST_ANALYSIS_COUPON_CODE", "WELCOME");
   vi.stubEnv("POST_ANALYSIS_COUPON_ID", "mock-coupon");
+  vi.stubEnv("EMAIL_POSTAL_ADDRESS", TEST_POSTAL_ADDRESS);
   db = makeDatabase();
   mocks.admin.mockImplementation(() => db.admin);
   mocks.claim.mockResolvedValue({ allowed: true, emailBucketKey: "bucket" });
@@ -141,6 +145,8 @@ describe.each(captureCases)("$name capture", ({ name, capture, count }) => {
       expect(mail.headers).toMatchObject({ "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" });
       expect((mail.headers as Record<string, string>)["List-Unsubscribe"]).toContain(`<${unsubscribeUrl}>`);
       expect(mail.html).toContain(`href="${unsubscribeUrl}"`);
+      // The playbook sequence prints the postal address in every email.
+      if (name === "lead-magnet") expect(mail.html).toContain(TEST_POSTAL_ADDRESS);
     }
     expect(db.tables.email_drip_schedules).toHaveLength(count);
     expect(db.tables.email_drip_schedules![0]).toMatchObject({ email_hash: HASH, surface: name, resend_id: "message-1", scheduled_at: null });
@@ -270,6 +276,29 @@ describe.each(captureCases)("$name capture", ({ name, capture, count }) => {
     expect(sent).toHaveLength(2);
     expect(db.tables.email_drip_schedules![1]?.cancelled_at).toEqual(expect.any(String));
     expect(transport.mock.calls.some(([url]) => String(url).endsWith("message-2/cancel"))).toBe(true);
+  });
+});
+
+describe("playbook sequence without a postal address", () => {
+  it.each([undefined, "", "   "])("sends and schedules nothing, spends no slot, and still hands over the link (%j)", async value => {
+    vi.stubEnv("EMAIL_POSTAL_ADDRESS", value);
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const result = await captureLeadMagnetEmail({ email: EMAIL });
+    // Not an error for the visitor: the playbook needs no email.
+    expect(result).toEqual({ ok: true, scheduledCount: 0, downloadUrl: "https://usetruecap.com/playbook" });
+    expect(transport).not.toHaveBeenCalled();
+    expect(mocks.claim).not.toHaveBeenCalled();
+    expect(mocks.admin).not.toHaveBeenCalled();
+    expect(db.operations).toHaveLength(0);
+    expect(log.mock.calls.map(([line]) => line)).toEqual([
+      "[lead-magnet] BLOCKED — nothing sent or scheduled: EMAIL_POSTAL_ADDRESS is not set",
+    ]);
+    log.mockRestore();
+  });
+  it("still validates the submitted email first", async () => {
+    vi.stubEnv("EMAIL_POSTAL_ADDRESS", "");
+    expect(await captureLeadMagnetEmail({ email: "not-an-email" })).toMatchObject({ ok: false, code: "VALIDATION_ERROR" });
+    expect(transport).not.toHaveBeenCalled();
   });
 });
 
