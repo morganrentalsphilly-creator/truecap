@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignUpForm } from "@/components/auth/sign-up-form";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "Create account",
-  description:
-    "Create a TrueCap account to unlock your Offer Ceiling and start your 21-day free Pro evaluation. No card.",
+  description: `Create a TrueCap account to unlock your Offer Ceiling and start your ${PRODUCT_EVALUATION_DAYS}-day free Pro evaluation. No card.`,
   alternates: { canonical: "/auth/sign-up" },
   robots: { index: false, follow: false },
 };
