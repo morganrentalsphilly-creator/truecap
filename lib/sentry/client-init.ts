@@ -30,6 +30,7 @@ import {
   scrubSentryRequestHeaders,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
+import { isPerPageLoadConfigNotice } from "@/lib/sentry/self-noise";
 
 export function initSentryClient(): void {
   if (initialized) return;
@@ -87,6 +88,11 @@ export function initSentryClient(): void {
   // Final privacy boundary for anything an integration or explicit capture
   // attaches despite default PII collection being disabled.
   beforeSend(event) {
+    // The site's own per-page-load configuration notice (PostHog key absent
+    // while PostHog is on hold) cost one error-quota event per page view and
+    // helped exhaust the quota on 2026-10-01. Drop that one message; every
+    // other event continues. See lib/sentry/self-noise.ts.
+    if (isPerPageLoadConfigNotice(event)) return null;
     // Checkout/OAuth capabilities must not survive in an error event's URL or
     // parsed query string. This runs before transport even if React never
     // mounted (for example, an early hydration exception).
