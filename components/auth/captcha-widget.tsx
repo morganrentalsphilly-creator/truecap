@@ -140,9 +140,9 @@ export function CaptchaWidget({
           onTokenRef.current(null);
           onUnavailableRef.current?.();
         },
-        // Pinned light, not "auto": the auth card is hard-coded white
-        // (auth-shell bg-white) and the site ships light-only, so an OS-dark
-        // visitor got a jarring black box in the middle of a white form.
+        // Pinned light, not "auto": the auth page is the light paper
+        // (auth-shell bg-background) and the site ships light-only, so an
+        // OS-dark visitor got a jarring black box in the middle of a light form.
         theme: "light",
         size: "flexible",
       });

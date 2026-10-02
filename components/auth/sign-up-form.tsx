@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { resendConfirmationAction, signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
@@ -224,14 +224,11 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
 
   if (confirmationSentTo) {
     return (
-      <div role="status" className="space-y-5 text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-positive-light text-positive">
-          <CheckCircle2 className="size-7" aria-hidden />
-        </div>
-        <h2 className="text-lg font-bold text-foreground">
+      <div role="status" className="space-y-5">
+        <h2 className="text-xl font-semibold text-foreground">
           Confirm your email to finish
         </h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-base leading-relaxed text-muted-foreground">
           We sent a confirmation link to{" "}
           <strong className="text-foreground">{confirmationSentTo}</strong>.
           Open it to activate your account
@@ -241,7 +238,8 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
         <Button
           type="button"
           variant="outline"
-          className="h-12 w-full rounded-xl"
+          size="cta"
+          className="w-full"
           onClick={handleResendConfirmation}
           disabled={isResending}
         >
@@ -259,7 +257,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           <Link
             href="/analyze"
             prefetch={false}
-            className="inline-flex min-h-11 items-center font-medium text-primary hover:underline"
+            className="tc-link inline-flex min-h-11 items-center font-medium"
           >
             run a free analysis
           </Link>{" "}
@@ -273,17 +271,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
     <div className="space-y-5">
       <section
         aria-labelledby="evaluation-summary-title"
-        className="rounded-xl border border-primary/25 bg-primary/5 p-4"
+        className="border-y border-border py-4"
       >
-        <p className="text-3xs font-bold uppercase tracking-widest text-primary">
-          $0 today · no card
-        </p>
         <h2
           id="evaluation-summary-title"
-          className="mt-1 text-base font-bold text-foreground"
+          className="text-lg font-semibold text-foreground"
         >
           Your {PRODUCT_EVALUATION_DAYS}-day free trial
         </h2>
+        <p className="mt-1 text-sm text-foreground">$0 today · no card</p>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           Complete three Pro deal analyses and one full comparison.{" "}
           {/* An agent who arrives from an Agent Pro CTA is told, before the
@@ -298,14 +294,14 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           }
         </p>
         {reviewedPlanFromQuery ? (
-          <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-lg bg-card p-2.5">
+          <dl className="mt-3 grid grid-cols-2 gap-x-6 border-t border-rule-soft pt-3 text-sm">
+            <div>
               <dt className="text-muted-foreground">Plan you reviewed</dt>
               <dd className="mt-0.5 font-semibold text-foreground">
                 {selectedPlanName} · {selectedBilling}
               </dd>
             </div>
-            <div className="rounded-lg bg-card p-2.5">
+            <div>
               <dt className="text-muted-foreground">
                 Only if you subscribe later
               </dt>
@@ -316,7 +312,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             </div>
           </dl>
         ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground">
             Pro is {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month or{" "}
             {formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}/year — only if you
             subscribe after the trial.
@@ -326,7 +322,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       {hasPendingDeal ? (
         <div
           role="status"
-          className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground"
+          className="bg-band px-4 py-3 text-sm text-foreground"
         >
           <p className="font-semibold">
             Your underwriting is waiting on this device.
@@ -346,18 +342,13 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       />
 
       <div
-        className="relative"
+        className="flex items-center gap-3"
         role="separator"
         aria-label="or sign up with email"
       >
-        <div aria-hidden className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-            or
-          </span>
-        </div>
+        <span aria-hidden className="h-px flex-1 bg-border" />
+        <span className="text-sm text-muted-foreground">or</span>
+        <span aria-hidden className="h-px flex-1 bg-border" />
       </div>
 
       <Form {...form}>
@@ -370,25 +361,20 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel className="text-xs font-semibold text-foreground">
-                  Email
-                </FormLabel>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <FormControl>
-                    <Input
-                      type="email"
-                      autoComplete="email"
-                      required
-                      aria-required="true"
-                      placeholder="you@example.com"
-                      disabled={isSubmitting}
-                      className="h-12 rounded-xl border-border bg-background pl-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    autoComplete="email"
+                    required
+                    aria-required="true"
+                    placeholder="you@example.com"
+                    disabled={isSubmitting}
+                    className="h-12 px-4 text-base md:text-base"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -398,12 +384,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel className="text-xs font-semibold text-foreground">
-                  Password
-                </FormLabel>
+              <FormItem>
+                <FormLabel>Password</FormLabel>
                 <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <FormControl>
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -413,7 +396,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       placeholder="Create a password"
                       disabled={isSubmitting}
                       aria-describedby="password-policy"
-                      className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
+                      className="h-12 pl-4 pr-12 text-base md:text-base"
                       {...field}
                     />
                   </FormControl>
@@ -432,7 +415,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                     )}
                   </button>
                 </div>
-                <FormDescription id="password-policy" className="text-xs">
+                <FormDescription id="password-policy">
                   {PASSWORD_POLICY_TEXT}
                 </FormDescription>
                 <FormMessage />
@@ -444,12 +427,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel className="text-xs font-semibold text-foreground">
-                  Confirm password
-                </FormLabel>
+              <FormItem>
+                <FormLabel>Confirm password</FormLabel>
                 <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <FormControl>
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
@@ -458,7 +438,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       aria-required="true"
                       placeholder="Confirm your password"
                       disabled={isSubmitting}
-                      className="h-12 rounded-xl border-border bg-background px-11 text-base sm:text-sm shadow-sm placeholder:text-muted-foreground/70"
+                      className="h-12 pl-4 pr-12 text-base md:text-base"
                       {...field}
                     />
                   </FormControl>
@@ -487,9 +467,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           {submitError ? (
             <div
               role="alert"
-              className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground"
+              className="rounded-md border border-destructive px-4 py-3 text-sm text-foreground"
             >
-              <p className="font-semibold text-destructive">Sign up failed</p>
+              <p className="font-semibold text-destructive-text">Sign up failed</p>
               <p className="mt-0.5 leading-relaxed">{submitError}</p>
               {/already exists|signing in/i.test(submitError) ? (
                 <Link
@@ -498,7 +478,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       ? `/auth/login?next=${encodeURIComponent(safeNextPath)}`
                       : "/auth/login"
                   }
-                  className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
+                  className="tc-link mt-1 inline-flex min-h-11 items-center font-semibold"
                 >
                   Sign in instead
                 </Link>
@@ -511,18 +491,18 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             onUnavailable={() => setCaptchaUnavailable(true)}
           />
 
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             By creating an account, you agree to the{" "}
             <Link
               href="/terms"
-              className="font-medium text-primary hover:underline"
+              className="tc-link font-medium"
             >
               Terms
             </Link>{" "}
             and acknowledge the{" "}
             <Link
               href="/privacy"
-              className="font-medium text-primary hover:underline"
+              className="tc-link font-medium"
             >
               Privacy Policy
             </Link>
@@ -531,7 +511,8 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
 
           <Button
             type="submit"
-            className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.22)] hover:bg-primary/95"
+            size="cta"
+            className="w-full"
             disabled={
               isSubmitting ||
               (captchaEnabled && !captchaUnavailable && !captchaToken)
@@ -549,7 +530,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             )}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href={
@@ -557,7 +538,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                   ? `/auth/login?next=${encodeURIComponent(safeNextPath)}`
                   : "/auth/login"
               }
-              className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-primary hover:underline"
+              className="tc-link inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium"
             >
               Sign in
             </Link>

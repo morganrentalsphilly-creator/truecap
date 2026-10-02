@@ -1,5 +1,6 @@
-import {Calculator, Database, ShieldCheck} from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
+import { RuledList } from "@/components/marketing/page-parts";
+import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { cn } from "@/lib/utils";
 
 type AuthShellProps = {
@@ -14,22 +15,28 @@ type AuthShellProps = {
 
 const trustItems = [
   {
-    icon: Calculator,
     title: "Screen the deal",
     description: "See cash flow, cap rate, CoC, DSCR, Buy Box fit, and a Deal score.",
   },
   {
-    icon: Database,
     title: "Transparent starting data",
     description: "HUD rent and FRED rate benchmarks are labeled and editable. Property tax stays a manual, locally verified input.",
   },
   {
-    icon: ShieldCheck,
     title: "Private saved work",
     description: "Authenticated access, owner-scoped saved data and privacy controls.",
   },
 ];
 
+/**
+ * The sign-in, sign-up and password screens (DESIGN.md "Token strategy": the
+ * auth screens read the same tokens as the rest of the site). Paper page, the
+ * site's page container, one logo on the header's single bottom rule, and
+ * from 1024px the homepage hero's 5/7 grid: the form in the narrow column,
+ * the supporting copy as a ruled list in the wide one. No card, no photo and
+ * nothing that glows or floats; white is the fields only.
+ * lib/__tests__/auth-design-pass.test.ts pins this.
+ */
 export function AuthShell({
   title,
   description,
@@ -40,89 +47,62 @@ export function AuthShell({
   className,
 }: AuthShellProps) {
   return (
-    <main id="main" className="min-h-[100dvh] bg-white px-4 py-8 text-foreground sm:px-6 lg:bg-[#eef4f8] lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-6xl flex-col items-center justify-center">
-        {/* Phones and tablets get this logo; on lg+ the illustrated aside
-            carries its own, so the page never shows the mark twice. */}
-        <div className="mb-8 flex flex-col items-center text-center sm:mb-12 lg:hidden">
-          <AppLogo
-            priority
-            className="items-center"
-            imageClassName="object-center"
-            subtitleClassName="mt-2 text-sm sm:text-base"
-          />
+    <main id="main" className="min-h-[100dvh] bg-background text-foreground">
+      <div className={PAGE_CONTAINER}>
+        {/* One logo at every width, so the page never shows the mark twice.
+            Its tagline shows below lg only, where the aside is hidden. */}
+        <div className="border-b border-border py-3 sm:py-4">
+          <AppLogo priority subtitleClassName="mt-1 text-sm lg:hidden" />
         </div>
 
-        <section
+        <div
           className={cn(
-            "grid w-full max-w-[930px] overflow-hidden bg-white lg:rounded-[22px] lg:border lg:border-border/80 lg:bg-card lg:shadow-[0_24px_70px_rgba(15,23,42,0.12)] lg:grid-cols-[1fr_1fr]",
+            "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-16 pt-8 sm:pt-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16",
             className
           )}
         >
-          <aside className="relative hidden min-h-[610px] overflow-hidden bg-[#07162d] bg-[url('/home2.jpg')] bg-cover bg-center p-9 text-white lg:block">
-            <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(5,15,32,0.94),rgba(9,26,52,0.84)_48%,rgba(11,29,58,0.64)),radial-gradient(circle_at_85%_20%,rgba(46,97,255,0.22),transparent_32%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,transparent,rgba(4,14,31,0.96))]" />
-            <div className="relative z-10 flex h-full flex-col">
-              <AppLogo
-                href="/"
-                onDark
-                subtitle=""
-                className="mb-16"
-                imageClassName="object-left"
-              />
-
-              <div className="max-w-[300px]">
-                <p className="text-3xl font-semibold leading-tight tracking-tight text-white">
-                  {panelTitle}
+          <div className="w-full max-w-md">
+            <div className="mb-8">
+              <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
+                {title}
+              </h1>
+              {description ? (
+                <p className="mt-3 text-pretty text-base text-muted-foreground">
+                  {description}
                 </p>
-                <p className="mt-6 text-sm leading-relaxed text-white/78">{panelDescription}</p>
-              </div>
-
-              <div className="m-10 space-y-7">
-                {trustItems.map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/25 text-white shadow-[0_12px_32px_rgba(0,112,196,0.25)]">
-                      <item.icon className="size-5" />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-white">{item.title}</span>
-                      <span className="mt-1 block text-xs leading-relaxed text-white/72">
-                        {item.description}
-                      </span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-auto flex items-center gap-2 text-2xs text-white/76">
-                <ShieldCheck className="size-4" />
-                <span>Authenticated access</span>
-                <span className="text-white/35">•</span>
-                <span>Owner-scoped saved data</span>
-                <span className="text-white/35">•</span>
-                <span>Privacy controls</span>
-              </div>
+              ) : null}
             </div>
-          </aside>
 
-          <div className="flex min-h-0 items-center justify-center px-1 py-4 sm:min-h-[540px] sm:px-9 sm:py-8 lg:min-h-[610px] lg:px-14">
-            <div className="w-full max-w-[350px]">
-              <div className="mb-8 text-center lg:text-left">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  {title}
-                </h1>
-                {description ? (
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                    {description}
-                  </p>
-                ) : null}
-              </div>
-
-              {children}
-              {footer ? <div className="pt-5 text-center text-sm text-muted-foreground">{footer}</div> : null}
-            </div>
+            {children}
+            {footer ? <div className="pt-5 text-sm text-muted-foreground">{footer}</div> : null}
           </div>
-        </section>
+
+          <aside className="hidden min-w-0 lg:block">
+            <h2 className="font-display max-w-[30ch] text-balance text-2xl text-foreground">
+              {panelTitle}
+            </h2>
+            <p className="mt-3 max-w-[52ch] text-pretty text-base text-muted-foreground">
+              {panelDescription}
+            </p>
+
+            <RuledList
+              className="mt-8"
+              items={trustItems.map((item) => ({
+                key: item.title,
+                term: item.title,
+                detail: item.description,
+              }))}
+            />
+
+            <p className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span>Authenticated access</span>
+              <span aria-hidden="true">•</span>
+              <span>Owner-scoped saved data</span>
+              <span aria-hidden="true">•</span>
+              <span>Privacy controls</span>
+            </p>
+          </aside>
+        </div>
       </div>
     </main>
   );
