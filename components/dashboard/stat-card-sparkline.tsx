@@ -8,6 +8,7 @@
  */
 
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 
 export default function StatCardSparkline({
   spark,
@@ -18,6 +19,9 @@ export default function StatCardSparkline({
   color: string;
   gradientId: string;
 }) {
+  // Recharts animates from JavaScript, which the reduced-motion CSS rule
+  // cannot stop, so the mark is told directly (as the analyzer's charts are).
+  const animate = !usePrefersReducedMotion();
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={spark}>
@@ -27,7 +31,7 @@ export default function StatCardSparkline({
             <stop offset="100%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} />
+        <Area isAnimationActive={animate} type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} />
       </AreaChart>
     </ResponsiveContainer>
   );
