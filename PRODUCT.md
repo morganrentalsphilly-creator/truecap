@@ -185,5 +185,5 @@ and the labeled sources (HUD FMR, FRED rate, TrueCap default, Your input)
 WCAG 2.1 AA is the standard [brief][repo]: 44×44px minimum hit areas enforced
 globally, color tokens tuned for AA on their intended surfaces, a visible 3px
 focus ring, `prefers-reduced-motion` respected, a skip-to-content link, pinch
-zoom to 5×, and a Lighthouse CI gate requiring accessibility ≥ 0.95 on / and
-/analyze. Serious and critical axe violations block a release.
+zoom to 5×, and a Lighthouse CI gate requiring accessibility ≥ 0.95 on /,
+/analyze and /pricing. Serious and critical axe violations block a release.

@@ -104,7 +104,7 @@ final_source_code/
 │   ├── s/[token]/                # Current opaque, revocable shared-deal viewer
 │   ├── d/[encoded]/              # Legacy stateless viewer; decode compatibility only
 │   │   ├── page.tsx
-│   │   └── opengraph-image.tsx   # edge runtime, dynamic OG card
+│   │   └── opengraph-image.tsx   # static, privacy-safe card; never decodes the link
 │   ├── dashboard/                # Pro dashboard (entitlement-gated)
 │   ├── saved-analyses/           # Pro saved deals
 │   ├── compare/                  # Pro deal compare
@@ -112,7 +112,7 @@ final_source_code/
 │   ├── tools/<tool>/             # Free-tier marketing calculators (cap-rate,
 │   │                             # cash-on-cash, brrrr, dscr, etc.) — each
 │   │                             # has its own opengraph-image.tsx
-│   ├── blog/<slug>/              # Static blog posts (+ OG images for some)
+│   ├── blog/<slug>/              # Static blog posts, each with an opengraph-image.tsx
 │   ├── markets/<city>/           # SEO city pages
 │   ├── states/                   # State landing pages
 │   ├── glossary/                 # Glossary
@@ -357,19 +357,17 @@ it bypasses the plan layer.
 
 `lib/calc-analysis.ts` exports `calculateAnalysis(values) → AnalysisResult`.
 Every page that shows numbers (`investcalc-page.tsx`, `read-only-analysis-view.tsx`,
-the OG image at `app/d/[encoded]/opengraph-image.tsx`, the PDF generator,
-deal-score, dashboard rollups, etc.) calls this function. Do not
-duplicate cash-flow / cap-rate / DSCR math in a component.
+the PDF generator, deal-score, dashboard rollups, etc.) calls this
+function. Do not duplicate cash-flow / cap-rate / DSCR math in a component.
 
 Verdict thresholds (Strong / Solid / Mixed / Marginal / Negative, and
 the "Strong Buy / Buy / Neutral / Risky / Avoid" tier) live in
 `lib/verdict.ts`. **There is no second classifier to keep in sync.**
-`app/d/[encoded]/opengraph-image.tsx` used to carry its own copy, it
-drifted on cash purchases — the share card said "Strong Buy" while the
-page said otherwise — and it was deleted in favour of importing
-`getDealTier` from `lib/verdict.ts`. That file now says "Don't
-reintroduce a local classifier"; this section previously told you to
-maintain one, which is how the bug would come back.
+`app/d/[encoded]/opengraph-image.tsx` used to carry its own copy, and it
+drifted on cash purchases: the share card said "Strong Buy" while the
+page said otherwise. That card is now static and shows no verdict or
+number at all (§3.6), so nothing outside `lib/verdict.ts` classifies a
+deal. Don't reintroduce a local classifier; import `getDealTier`.
 
 Cash purchases are a load-bearing edge case: `monthlyPayment <= 0`
 means DSCR is undefined. `calc-analysis` returns 0 for DSCR in that
@@ -476,8 +474,9 @@ export type SharePayload = {
 - `decodeShareLink(encoded)` remains the legacy read entry point. Do not add a
   new caller to `encodeShareLink`; current creation must use the authenticated
   opaque mint action.
-- The `/d/[encoded]` route + its OG image both call `decodeShareLink`
-  then re-validate via `investmentFormSchema.safeParse`.
+- The `/d/[encoded]` route calls `decodeShareLink`, then re-validates via
+  `releasedInvestmentFormSchema.safeParse`. Its OG image never decodes the
+  link (§3.6).
 - **Never modify the legacy payload format** without keeping backwards-compatible
   decoding. Existing links in the wild rely on `v: 1`. New fields go on
   `meta` (optional) or behind a new `v: 2` decoder that runs alongside
@@ -630,7 +629,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `app/api/dashboard/search-suggestions/route.ts` — dashboard search autocomplete.
 - `app/auth/callback/route.ts` — Supabase OAuth callback.
 - `app/auth/sign-out/route.ts` — sign-out handler.
-- `app/d/[encoded]/page.tsx` + `opengraph-image.tsx` — public share link viewer + OG card.
+- `app/d/[encoded]/page.tsx` + `opengraph-image.tsx` — legacy share link viewer + its static, privacy-safe card (§3.6).
 
 ### Frontend entry points
 
@@ -685,20 +684,22 @@ When adding a fourth such feature, replicate this layout. Shared shells
 3. **Modifying `calc-analysis.ts` math without testing every property type.**
    The function handles single-family, multi-family, owner-occupant,
    and cash purchases (where `monthlyPayment <= 0` and DSCR is N/A).
-   Smoke-test each path; `verdict.ts` and `app/d/[encoded]/opengraph-image.tsx`
-   also branch on `isCashPurchase`. Vitest tests in `lib/__tests__/`
-   cover some of this — extend them when you touch the math.
+   Smoke-test each path; `verdict.ts`, `deal-score.ts`, the PDF generator
+   and the report builders also branch on `isCashPurchase`. Vitest tests in
+   `lib/__tests__/` cover some of this — extend them when you touch the math.
 
 4. **Adding new properties to Sentry events without checking for PII.**
    Default PII collection is off and shared URLs are scrubbed, but explicit
    `extra` values still leave the app. Never attach email, address, financial
    inputs, or bearer links; use opaque IDs where possible.
 
-5. **Changing the OG image schema without updating every social card.**
-   `/d/[encoded]/opengraph-image.tsx`, the per-tool OG images under
-   `app/tools/<tool>/opengraph-image.tsx`, and blog OG images all share
-   visual conventions (brand bar, type tile layout). If you change the
-   brand color or layout language, sweep all of them.
+5. **Changing the social card look in one file.** The blog, /vs, tool and
+   persona cards and the two route-handler cards (`app/og/home`,
+   `app/og/for-agents`) all draw on one frame, `lib/og/newsprint.tsx`,
+   through the templates in `lib/og/` (§3.6): change the palette or layout
+   there, not in a card file. The legacy `/d/[encoded]/opengraph-image.tsx`
+   is the one card with its own inline styles; if the brand color or layout
+   language changes, update it by hand.
 
 6. **Using `console.log` for production debugging.** Sentry log
    forwarding is dev-only (`enableLogs: process.env.NODE_ENV !== "production"`).
