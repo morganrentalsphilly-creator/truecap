@@ -41,6 +41,12 @@ import {
   formatPricingEvaluationAllowance,
   type PricingEvaluationSummary,
 } from "@/lib/pricing-evaluation";
+import {
+  browserSessionStorage,
+  readStoredBillingPeriod,
+  storeBillingPeriod,
+  type BillingPeriod,
+} from "@/components/marketing/pricing-period-storage";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -186,9 +192,25 @@ export function PricingTogglePlans({
   // visitor sees the lower monthly number AND the real charge. A current
   // monthly subscriber opens on Monthly so their exact card is visibly marked
   // Current; the toggle remains under their control.
-  const [period, setPeriod] = useState<"monthly" | "annual">(
+  const [period, setPeriod] = useState<BillingPeriod>(
     activePaidPlanSlug?.endsWith("_monthly") ? "monthly" : "annual"
   );
+
+  // The visitor's own choice survives leaving the page and coming back in
+  // the same tab (pricing-period-storage.ts): Back from sign-up kept the
+  // scroll position and reset Monthly to Annual, a price change nobody asked
+  // for. Read after mount, so the server and first client render agree. A
+  // subscriber keeps the rule above: their page opens on their own plan's
+  // period, whatever they pressed earlier.
+  useEffect(() => {
+    if (activePaidPlanSlug != null) return;
+    const stored = readStoredBillingPeriod(browserSessionStorage());
+    if (stored) setPeriod(stored);
+  }, [activePaidPlanSlug]);
+  const choosePeriod = (next: BillingPeriod) => {
+    setPeriod(next);
+    storeBillingPeriod(browserSessionStorage(), next);
+  };
 
   // Top of the pricing-page funnel — fire once on mount so we can measure
   // pricing_view → pro_checkout_started (checkout fires server-side in
@@ -314,7 +336,7 @@ export function PricingTogglePlans({
         <button
           type="button"
           aria-pressed={period === "monthly"}
-          onClick={() => setPeriod("monthly")}
+          onClick={() => choosePeriod("monthly")}
           className={cn(
             PERIOD_BUTTON,
             period === "monthly" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
@@ -325,7 +347,7 @@ export function PricingTogglePlans({
         <button
           type="button"
           aria-pressed={period === "annual"}
-          onClick={() => setPeriod("annual")}
+          onClick={() => choosePeriod("annual")}
           className={cn(
             PERIOD_BUTTON,
             period === "annual" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
