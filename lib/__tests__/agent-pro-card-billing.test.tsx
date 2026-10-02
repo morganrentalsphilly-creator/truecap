@@ -62,37 +62,12 @@ function agentCard(html: string): string {
   return html.slice(start, end);
 }
 
-/**
- * The phone-only line under the price that names the OTHER billing period
- * (components/marketing/pricing-card-figures.tsx). It is the one place a card
- * on Annual may carry the monthly figure, so it is taken out before the card
- * is checked for the period it shows, and read on its own.
- */
-const OTHER_PERIOD_LINE =
-  / <span data-pricing-other-period="" class="block md:hidden">or pay <span class="font-mono tabular-nums">([^<]*)<\/span>([^<]*)<\/span>/;
-
-function otherPeriodText(card: string): string {
-  const match = OTHER_PERIOD_LINE.exec(card);
-  expect(match, "the card's other-period line").not.toBeNull();
-  return `or pay ${match?.[1]}${match?.[2]}`;
-}
-
-function withoutOtherPeriod(card: string): string {
-  return card.replace(OTHER_PERIOD_LINE, "");
-}
-
 describe("/pricing Agent Pro card", () => {
   it("opens on Annual with the catalog's annual figures when Stripe's price is missing", () => {
     const html = renderPlans();
     // The page opens on Annual (the toggle's pressed segment).
     expect(html).toMatch(/aria-pressed="true"[^>]*>Annual/);
-    const whole = agentCard(html);
-    // The monthly figure appears only in the phone-only "or" line under the
-    // price; the card itself (headline, note, sign-up) is on Annual.
-    expect(otherPeriodText(whole)).toBe(
-      `or pay ${formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)}/month billed monthly`,
-    );
-    const card = withoutOtherPeriod(whole);
+    const card = agentCard(html);
     expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
     expect(card).toContain(`billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`);
     expect(card).not.toContain("billed monthly");
