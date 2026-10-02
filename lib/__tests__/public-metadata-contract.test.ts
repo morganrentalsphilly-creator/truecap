@@ -132,13 +132,25 @@ describe("priority public metadata", () => {
     // Both cards were added in 2026-10 (their card URLs returned 404). A card
     // is copy nobody re-reads when the page changes, so each is held to its
     // page here: the /analyze card's line is the page's own Open Graph
-    // description, and the /pricing card builds its headline and its trial
-    // sentence from the constants the page reads, in the page's words.
+    // description without its address clause, and the /pricing card builds
+    // its headline and its trial sentence from the constants the page reads,
+    // in the page's words.
+    //
+    // The address clause stays off the card. With no account an address
+    // alone fills no numbers: the form asks for the price and the bedrooms
+    // next (2026-10 audit). The page's description still carries the clause
+    // while its site-wide wording is decided; a card added now must not
+    // repeat it. When that wording is settled, the card takes it and this
+    // pin moves with it.
     const analyzeCard = read("app/analyze/opengraph-image.tsx");
     const analyzePage = metadataSource("app/analyze/page.tsx");
     const analyzeLine =
-      "Cash flow, DSCR, and the highest price that still meets your targets, from an address. No account.";
-    expect(analyzeCard).toContain(analyzeLine);
+      "Cash flow, DSCR, and the highest price that still meets your targets";
+    expect(analyzeCard).toContain(`${analyzeLine}. No account.`);
+    expect(withoutComments(analyzeCard)).not.toMatch(
+      /from (?:an|one|a single|just an) address/i,
+    );
+    // Once in the page's openGraph description, once in its twitter one.
     expect(analyzePage.split(analyzeLine)).toHaveLength(3);
 
     const pricingCard = read("app/pricing/opengraph-image.tsx");
