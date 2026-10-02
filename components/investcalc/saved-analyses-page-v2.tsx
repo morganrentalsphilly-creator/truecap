@@ -4487,7 +4487,11 @@ export function SavedAnalysesPage({
                 </>
               ) : initialItems.length === 0 ? (
                 /* Brand-new user - never saved a deal. Welcome them
-                   instead of showing a search-y "no results" state. */
+                   instead of showing a search-y "no results" state. The copy
+                   promises only what a Free account gets: updating a saved
+                   deal needs a paid plan (app/actions/saved-analyses.ts,
+                   ENTITLEMENT_SAVE) and compare_deals is a Pro feature
+                   (lib/entitlements-catalog.ts), so both are named as Pro. */
                 <>
                   <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Sparkles className="w-5 h-5" />
@@ -4499,8 +4503,8 @@ export function SavedAnalysesPage({
                     Run a property through the analyzer and click{" "}
                     <strong className="text-foreground">Save</strong> on the
                     dashboard. Saved deals show up here with a portfolio rollup,
-                    so you can compare, edit, and revisit any deal you&apos;re
-                    considering.
+                    so you can revisit any deal you&apos;re considering. Pro
+                    adds editing and comparison.
                   </p>
                   <Button
                     asChild
