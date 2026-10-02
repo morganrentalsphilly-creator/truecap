@@ -559,6 +559,9 @@ const provenanceFieldSchema = z.object({
   fetchedAt: z.string().max(40).nullish(),
   detail: z.string().max(160).optional(),
   overridden: z.boolean().optional(),
+  // Declared, or zod strips it: the HUD statewide-fallback flag has to reach
+  // the stored provenance so a saved deal keeps the statewide label (P0-02).
+  stateAverage: z.boolean().optional(),
 });
 const saveProvenanceSchema = z
   .object({

@@ -246,6 +246,14 @@ describe("audit: enrichPropertyAction", () => {
     expect(badge).toContain("dataConfidenceSourceLabel(p.source, { stateAverage: p.stateAverage, })");
   });
 
+  it("the save action keeps the statewide flag in the stored provenance", () => {
+    // The save action validates provenance with a zod object, which strips
+    // any key it does not declare. Without this line a saved deal loses the
+    // flag and reopens as "HUD rent benchmark (county)".
+    const save = read("app/actions/saved-analyses.ts");
+    expect(save).toMatch(/const provenanceFieldSchema = z\.object\(\{[^}]*stateAverage: z\.boolean\(\)\.optional\(\),[^}]*\}\);/);
+  });
+
   it("clamps 5+ bedrooms to the four-bedroom figure and skips HUD without bedrooms", async () => {
     const fetchSpy = transport((url) => {
       if (url.includes("/fred/")) return Response.json(fredOk);
