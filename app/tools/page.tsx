@@ -149,17 +149,18 @@ export default function ToolsLandingPage() {
           <section aria-labelledby="tools-how" className="max-w-[68ch]">
             <SectionHeading id="tools-how">How these fit the full analysis</SectionHeading>
             <p className="mt-4 text-pretty text-lg leading-relaxed">
-              Each calculator answers one question with one formula: is the rent
-              in range for the price, what does the loan cost, what does a rule
-              of thumb say before you spend an hour on a listing. They are
-              deliberately narrow. When you want the whole picture, the analyzer
-              runs every one of these numbers together on the same assumptions
-              &mdash; cash flow after reserves, DSCR, cap rate, cash-on-cash
-              return, Buy Box fit, and the Offer Ceiling &mdash; and shows which
-              inputs move the decision most. Several calculators can hand their
-              values straight into it, so nothing you typed here is typed twice.
-              Every formula is the same one the analyzer uses and is published on
-              the methodology page.
+              Each calculator answers one question: is the rent in range for the
+              price, what does the loan cost, what does a rule of thumb say
+              before you spend an hour on a listing. They are deliberately
+              narrow. When you want the whole picture, the analyzer underwrites
+              the deal on one set of assumptions: cash flow after reserves,
+              DSCR, cap rate, cash-on-cash return, Buy Box fit, and the Offer
+              Ceiling. It also shows which inputs move the decision most.
+              Several calculators carry the price or rent you typed into the
+              analyzer, so you do not type those twice. The analyzer&apos;s
+              core formulas (cap rate, cash-on-cash return, DSCR and the
+              mortgage payment) are published on the{" "}
+              <IntentPrefetchLink href="/methodology" className="tc-link">methodology page</IntentPrefetchLink>.
             </p>
           </section>
           <section aria-labelledby="learn-the-math" className="mt-12 max-w-[68ch] sm:mt-16">

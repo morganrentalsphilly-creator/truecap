@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TrueCap Methodology — how we compute the numbers",
     description:
-      "The exact formulas, data sources, and conventions TrueCap uses to underwrite rental properties.",
+      "The core formulas, data sources, and conventions TrueCap uses to underwrite rental properties.",
     url: "/methodology",
     type: "website",
     images: [
@@ -125,9 +125,9 @@ export default function MethodologyPage() {
           </div>
           <ul className="space-y-2 text-sm text-foreground sm:text-base">
             <li>
-              <strong>Math is published and versioned.</strong> We use common
-              rental-underwriting formulas and state our conventions where
-              lenders or investors may differ. No hidden score arithmetic.
+              <strong>The core formulas are published and versioned.</strong>{" "}
+              We use common rental-underwriting formulas and state our
+              conventions where lenders or investors may differ.
             </li>
             <li>
               <strong>Benchmarks are labeled as benchmarks.</strong> HUD Fair
@@ -237,7 +237,7 @@ export default function MethodologyPage() {
             Current Deal score method: v
             {TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}. The score is
             versioned independently from the TrueCap Underwriting Standard v
-            {TRUECAP_UNDERWRITING_STANDARD_VERSION}
+            {TRUECAP_UNDERWRITING_STANDARD_VERSION}{" "}
             financial formulas; changing the score method does not change the
             cash-flow result.
           </p>
@@ -578,7 +578,7 @@ export default function MethodologyPage() {
             <li>
               <strong>Cash purchases (no loan):</strong> DSCR shows &ldquo;
               {NO_DEBT_SERVICE_DSCR_LABEL}&rdquo; instead of dividing by zero.
-              Cash-on- cash uses total cash purchase amount as the denominator.
+              Cash-on-cash uses total cash purchase amount as the denominator.
             </li>
             <li>
               <strong>Owner-occupant units:</strong> in house-hack scenarios, we
