@@ -12,6 +12,11 @@ import { describe, expect, it } from "vitest";
  * and nothing made them touch the card. These checks tie the two files
  * together: a card on the shared template, a headline the post carries, and
  * no figure the post does not print.
+ *
+ * The weekly SEO loop runs the whole suite on its patched tree (verify-build
+ * in .github/workflows/seo-weekly.yml), so a patch that retitles a post or
+ * drops a figure has to change the card in the same patch. Card files are
+ * inside the loop's fence (seo/config.json paths.agentAllow).
  */
 
 const ROOT = process.cwd();
@@ -68,12 +73,13 @@ const plain = (title: string) =>
  * Cards whose headline is not one of the post's titles. Each pins the
  * headline and names the phrase in the post that carries it; when a rewrite
  * drops the phrase, or the headline changes, the card has to be re-read
- * against the post.
+ * against the post. The phrase comes from the H1 or the body, never from the
+ * meta description alone, which the loop's title pass rewrites on its own.
  */
 const OWN_HEADLINES: Record<string, { headline: string; carriedBy: string }> = {
   "2-percent-rule-vs-1-percent-rule": {
     headline: "One screen, two bars: which one applies in 2026?",
-    carriedBy: "the same rent-to-price screen at two bars",
+    carriedBy: "the same rent-to-price screen at two different bars",
   },
   "70-percent-rule-house-flipping": {
     headline: "How to calculate a 70%-rule price screen",
@@ -105,7 +111,7 @@ const OWN_HEADLINES: Record<string, { headline: string; carriedBy: string }> = {
   },
   "return-on-equity-rental-property": {
     headline: "What is your rental's equity actually earning?",
-    carriedBy: "what the equity trapped in a rental earns today",
+    carriedBy: "actually earning right now",
   },
 };
 

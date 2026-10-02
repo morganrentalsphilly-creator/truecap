@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Rules of thumb",
     tag: "50% rule",
-    title: "The 50% rule for rentals: still useful in 2026?",
+    title: "The 50% rule for rentals: is it still useful in 2026?",
     subline: "Where the shortcut works · where it breaks · what to use instead",
   });
 }
