@@ -84,10 +84,12 @@ const WEBMAIL_REFERRER_RE =
 /**
  * Auto-tagging parameters an ad platform appends to every paid click: Google
  * Ads (`gclid`, and `gbraid`/`wbraid` on iOS), Google Marketing Platform
- * (`dclid`) and Microsoft Ads (`msclkid`). TrueCap's ads use Final URLs with
- * no UTM parameters (google-ads/ad-copy.md), so without this a paid click from
- * google.com or bing.com classified as organic search. Only the parameter's
- * PRESENCE is read; its value is never read, stored or sent.
+ * (`dclid`) and Microsoft Ads (`msclkid`). TrueCap's ad Final URLs carry no
+ * query string; the campaign's Final URL suffix adds `utm_medium=cpc`
+ * (google-ads/README.md). Without this check, a paid click from google.com or
+ * bing.com that arrives without that suffix classified as organic search.
+ * Only the parameter's PRESENCE is read; its value is never read, stored or
+ * sent.
  */
 export const AD_CLICK_ID_PARAMS = [
   "gclid",

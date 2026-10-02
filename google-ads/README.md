@@ -136,14 +136,15 @@ converts: no search-term data is in this repository.
   sitelink. They are the keys of `HISTORICAL_TOOL_REDIRECTS` in
   `lib/historical-tool-redirects.ts`, mirrored by `RETIRED_TOOL_REDIRECTS` in
   `next.config.mjs`. `check-ad-copy.mjs` reads that list and fails on a match.
-- Final URLs carry no query string and no UTM parameters. With auto-tagging
-  on, Google adds its click id, and `lib/first-touch.ts` counts a landing that
-  carries a click id (`gclid`, `gbraid`, `wbraid`, `dclid`, `msclkid`) as paid
-  search. It also counts `utm_medium=cpc` as paid search. If you add UTM
-  parameters, put them in the campaign's Final URL suffix and leave the Final
-  URLs as they are:
+- Final URLs carry no query string. Set each campaign's Final URL suffix
+  (required by `docs/analytics.md`, "Ad URLs"):
   `utm_source=google&utm_medium=cpc&utm_campaign=agents_search` for the agents
-  campaign, `...&utm_campaign=investors_search` for the investors campaign.
+  campaign, `utm_source=google&utm_medium=cpc&utm_campaign=investors_search`
+  for the investors campaign; leave the Final URLs as they are.
+  `lib/first-touch.ts` counts `utm_medium=cpc` as paid search. With
+  auto-tagging on, Google also adds its click id, and a landing that carries
+  one (`gclid`, `gbraid`, `wbraid`, `dclid`, `msclkid`) is counted as paid
+  search too.
 - The same module records the landing section, `for_agents` or
   `for_investors`, in the first-touch cookie once the visitor has accepted
   cookies, and the server copies it to the account at sign-up. That is how a
@@ -214,9 +215,10 @@ decided.
   file named another ID; the code does not load it.
 - One conversion reaches Google Ads: a paid subscription, `paid_subscribed` in
   `lib/analytics/track-conversion.ts`. `signup`, `calc_completed`,
-  `pdf_exported` and `deal_saved` have no conversion label, so Google Ads
-  receives nothing for them; they are pushed to the data layer as
-  `tc_<name>` events.
+  `pdf_exported` and `deal_saved` have no conversion label, so the code sends
+  Google Ads no conversion for them; they are pushed to the data layer as
+  `tc_<name>` events, and whether Tag Manager (`GTM-TCBNRMBG`) forwards any
+  of them is set in Tag Manager, not in this repository.
 - To report another conversion, create the conversion action in Google Ads
   and put its label in the `LABELS` map in that file.
 
@@ -228,11 +230,13 @@ These are the founder's steps in the Google Ads account.
       removed from the account's assets. Pausing leaves them reusable.
 - [ ] Each ad group holds only the text in `ad-copy.md`.
 - [ ] `node google-ads/check-ad-copy.mjs` passes on the day of launch.
-- [ ] `/for-agents` shows the Agent Pro prices, not a waitlist, before the
-      agents campaign runs.
+- [ ] `/for-agents` opens and shows the Agent Pro prices (it redirects to
+      `/pricing` when Agent Pro is not configured) before the agents campaign
+      runs.
 - [ ] The negative keyword list is added to both campaigns, and the copy
       matches the position of the `free` switch.
 - [ ] Auto-tagging is on.
+- [ ] The Final URL suffix with `utm_medium=cpc` is set on both campaigns.
 - [ ] Budget, bids and bid strategy are set. This kit sets none of them: the
       repository holds no conversion-rate, retention or cost-per-click data to
       set them from. The break-even rule is the usual one: a click is worth
@@ -248,5 +252,6 @@ them.
 
 The image that is left was drawn in May 2026. Its metric tiles are sample
 figures, it uses the earlier brand colors, and its button reads "Try the free
-calculator", so it does not match the `free` switch as it stands. Check it
-against the current product before using it.
+calculator →": the word does not match the `free` switch as it stands, and
+the arrow is one `DESIGN.md` bars on buttons. Check it against the current
+product before using it.
