@@ -78,4 +78,13 @@ describe("persona and tier pages are reachable", () => {
   it("the Agent Pro page still exists to be linked to", () => {
     expect(existsSync(join(root, "app/for-agents/page.tsx"))).toBe(true);
   });
+
+  // /for-brrrr and /for-flippers are noindex and left out of the sitemap. A
+  // link to either from a listed page fails the link graph, but only where
+  // Agent Pro is configured (that is when /for-agents renders), which CI is
+  // not: so hold it in the source. Their readers go to the guides instead.
+  it.each(["/for-brrrr", "/for-flippers"])("no page links to the noindex %s", (href) => {
+    expect(read(`app${href}/page.tsx`)).toContain("robots: { index: false, follow: false }");
+    expect(inboundLinks(href)).toEqual([]);
+  });
 });
