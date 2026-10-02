@@ -531,8 +531,7 @@ export default function MethodologyPage() {
             We multiply the signed taxable amount by the entered marginal rate
             (24% default): a loss produces an illustrative benefit and positive
             taxable income produces an illustrative liability. TrueCap does not
-            assume every paper loss can offset other income. This is planning
-            math, not tax advice.
+            assume every paper loss can offset other income.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">

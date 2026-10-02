@@ -565,7 +565,7 @@ const STESSA_FAQ: FaqItem[] = [
         Yes — every TrueCap user can generate a public read-only share link for
         free; Pro adds co-branding and includes the multi-page PDF. Reports
         reflect the analysis fields available for that deal and can support an
-        accountant&apos;s independent review; they are not tax advice.
+        accountant&apos;s independent review.
       </>
     ),
   },
