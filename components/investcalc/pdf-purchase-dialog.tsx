@@ -22,12 +22,20 @@ interface PdfPurchaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   returnFocusRef?: RefObject<HTMLElement | null>;
+  /**
+   * The export was asked for on the sample deal. A first-time visitor on the
+   * sample has bought nothing, so the one-time-purchase notice, the recovery
+   * note for past buyers and the payment line do not apply to them; the
+   * dialog says where the sample's report is and what a PDF needs.
+   */
+  sample?: boolean;
 }
 
 export function PdfPurchaseDialog({
   open,
   onOpenChange,
   returnFocusRef,
+  sample = false,
 }: PdfPurchaseDialogProps) {
   const { proOfferName } = getMarketingOfferConfig();
   return (
@@ -47,7 +55,9 @@ export function PdfPurchaseDialog({
         <DialogHeader>
           <DialogTitle>PDF reports are included with Pro</DialogTitle>
           <DialogDescription>
-            One-time report purchases are temporarily unavailable.
+            {sample
+              ? "The sample's full report is on this page. Exporting a report as a PDF needs a Pro plan."
+              : "One-time report purchases are temporarily unavailable."}
           </DialogDescription>
         </DialogHeader>
 
@@ -76,38 +86,43 @@ export function PdfPurchaseDialog({
             </span>
           </Link>
 
-          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-2xs leading-relaxed text-muted-foreground">
-            <p>
-              <strong className="text-foreground">
-                Already purchased a one-time report?
-              </strong>{" "}
-              Existing paid claims and recovery remain supported. This temporary
-              shutdown affects new purchases only.
-            </p>
-            <p className="mt-1.5">
-              Need help? Email{" "}
-              <a
-                href="mailto:hello@usetruecap.com"
-                className="font-semibold text-primary hover:underline"
-              >
-                hello@usetruecap.com
-              </a>
-              . Purchase is subject to our{" "}
-              <Link
-                href="/terms"
-                className="font-semibold text-primary hover:underline"
-              >
-                Terms
-              </Link>
-              .
-            </p>
-          </div>
+          {sample ? null : (
+            <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-2xs leading-relaxed text-muted-foreground">
+              <p>
+                <strong className="text-foreground">
+                  Already purchased a one-time report?
+                </strong>{" "}
+                Existing paid claims and recovery remain supported. This temporary
+                shutdown affects new purchases only.
+              </p>
+              <p className="mt-1.5">
+                Need help? Email{" "}
+                <a
+                  href="mailto:hello@usetruecap.com"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  hello@usetruecap.com
+                </a>
+                . Purchase is subject to our{" "}
+                <Link
+                  href="/terms"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Terms
+                </Link>
+                .
+              </p>
+            </div>
+          )}
         </div>
 
-        <p className="text-2xs leading-relaxed text-muted-foreground">
-          Payments are processed by Stripe. Calculations are estimates based on
-          your current inputs; verify assumptions independently before acting.
-        </p>
+        {sample ? null : (
+          <p className="text-2xs leading-relaxed text-muted-foreground">
+            Payments are processed by Stripe. Calculations are estimates based
+            on your current inputs; verify assumptions independently before
+            acting.
+          </p>
+        )}
       </DialogContent>
     </Dialog>
   );
