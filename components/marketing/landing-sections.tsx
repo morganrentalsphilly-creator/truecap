@@ -184,7 +184,7 @@ export function BuiltByInvestor() {
           offer: what price actually makes this property work? The same
           analyzer now serves agents who screen and present deals for investor
           clients. The defaults lean conservative, every assumption is
-          editable, and every formula is published.
+          editable, and the core formulas are published.
         </p>
         <p className="mt-3 flex flex-wrap gap-x-6 text-base">
           <IntentPrefetchLink href="/about" className="tc-link inline-flex min-h-11 items-center">
@@ -398,8 +398,12 @@ export function VsCompetitors() {
               <li className="border-b border-rule-soft py-2.5">
                 Its Offer Calculator and custom purchase-criteria workflow.
               </li>
+              {/* The shared DealCheck sentence (dealcheck.io/pricing as
+                  rendered 2026-10-01: "Property Reports with Custom
+                  Branding" is unavailable on Starter and Plus). */}
               <li className="border-b border-rule-soft py-2.5">
-                A branded PDF report on every plan, including free.
+                Every DealCheck plan exports a PDF report; putting your own
+                name and logo on it needs DealCheck Pro.
               </li>
             </ul>
             <p className="mt-3 max-w-[64ch] text-pretty text-sm leading-relaxed text-muted-foreground">
@@ -450,9 +454,9 @@ export function VsCompetitors() {
                 sequence.
               </li>
               <li className="border-b border-rule-soft py-2.5">
-                Screening for investor clients: a Buy Box per client,
-                client-report links that open without an account, and a
-                co-branded decision memo.
+                Screening for investor clients: Buy Boxes you assign to
+                clients (up to 12 per account), client-report links that open
+                without an account, and a co-branded decision memo.
               </li>
             </ul>
           </div>
@@ -504,7 +508,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Can I edit the assumptions?",
-    a: "Yes. Every number is editable. TrueCap starts rent and rate from labeled HUD and FRED benchmarks, keeps property tax as your local input, and marks every default so you can replace it. Change financing, expenses, and growth under “Improve accuracy,” then rerun.",
+    a: "Yes. Every number is editable. TrueCap starts rent and rate from labeled HUD and FRED benchmarks, keeps property tax as your local input, and marks every default so you can replace it. Change financing, expenses, and growth under “Review assumptions,” then rerun.",
   },
   {
     q: "When should I upgrade to Pro?",
@@ -682,7 +686,7 @@ export function DataSourcesSection() {
           Visible sources. Editable assumptions.
         </SectionHeading>
         <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
-          TrueCap labels sourced benchmarks and manual fallbacks, and keeps
+          TrueCap labels sourced benchmarks and its own defaults, and keeps
           every assumption editable. Start fast, then replace starting values
           with verified property facts, local comps, and lender terms.
         </p>
@@ -730,8 +734,11 @@ export function DataSourcesSection() {
 // ───────────────────────────────────────── What the client receives
 /**
  * What the agent's client receives (DESIGN.md "Homepage structure" 4): the
- * real memo screenshot shown as a document, with the co-branding facts
- * beside it. The facts are the /for-agents list (lib/client-receives.ts).
+ * co-branding facts (the /for-agents list, lib/client-receives.ts) beside a
+ * capture shown as a document. The capture is the /sample-decision-memo
+ * page (public/product/manifest.json), so it is captioned as the sample page:
+ * it is not the share page or the PDF the client receives, and the caption
+ * must not say so until a real co-branded capture replaces it.
  */
 export function ClientReceivesSection() {
   return (
@@ -741,7 +748,7 @@ export function ClientReceivesSection() {
           <SectionHeading id="client-receives-heading">What your client receives</SectionHeading>
           <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
             No account on their side, nothing hidden on yours. Branding is set
-            up once in your profile and applies to every link and report.
+            up once in Settings and applies to every link and report.
           </p>
           <dl className="mt-8 border-t-2 border-foreground">
             {CLIENT_RECEIVES.map((item) => (
@@ -758,10 +765,10 @@ export function ClientReceivesSection() {
           shot={MEMO_SHOT}
           frame="document"
           sizes="(min-width: 1024px) 480px, 100vw"
-          alt="TrueCap's written decision memo for the sample deal: the decision, the Offer Ceiling with its targets, the labeled assumptions, and what to verify next"
+          alt="TrueCap's sample decision memo page for the sample deal: the decision at asking, the Offer Ceiling with its targets, cash flow, cap rate, cash-on-cash and DSCR, what could break the decision, and what to verify next"
           caption={
             <>
-              The decision memo, generated from the free sample deal.{" "}
+              The sample decision memo page, computed from the free sample deal. The share link and PDF your client receives are laid out differently.{" "}
               <IntentPrefetchLink href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
                 Read the full sample memo
               </IntentPrefetchLink>
