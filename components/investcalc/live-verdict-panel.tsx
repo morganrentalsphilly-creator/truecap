@@ -193,8 +193,8 @@ export function LiveVerdictPanel({
           {assumptionBasis ? (
             <p className="mb-3 text-2xs leading-snug text-muted-foreground">
               Key assumptions shown: {assumptionBasis}. Price, rent, financing,
-              taxes, and all expenses are included; review them before relying
-              on this screen.
+              taxes, and the expense assumptions on this form are included;
+              review them before relying on this screen.
             </p>
           ) : null}
           <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">

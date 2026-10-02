@@ -28,12 +28,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { shouldPromptForHoa } from "@/components/investcalc/address-shape";
 import {
   FieldError,
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
-import { GLOSSARY } from "@/lib/glossary";
 import { useTapTooltip } from "@/components/investcalc/use-tap-tooltip";
+import { GLOSSARY } from "@/lib/glossary";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
@@ -63,10 +64,10 @@ const inputClassName =
 const OPERATING_EXPENSES_DETAILS_ID = "operating-expenses-details";
 
 function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
-  // If a glossary term is provided, build the tooltip content from the
   // Controlled so a tap opens it: a plain Radix tooltip closes on click, and
   // these (i) buttons opened nothing on a phone (see use-tap-tooltip.ts).
   const tip = useTapTooltip();
+  // If a glossary term is provided, build the tooltip content from the
   // shared glossary so updates flow to one source of truth. Custom
   // `tooltip` prop still wins when explicitly provided.
   const glossaryEntry = term ? GLOSSARY[term] : undefined;
@@ -91,8 +92,8 @@ function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
       <TooltipTrigger asChild>
         <button
           type="button"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
           {...tip.triggerProps}
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
           aria-label={`${label} guidance`}
         >
           <Info aria-hidden="true" className="size-3.5" />
@@ -180,10 +181,10 @@ export function OperatingExpensesSection({
   onDetailsOpenChange,
 }: OperatingExpensesSectionProps) {
   const [internalDetailsOpen, setInternalDetailsOpen] = useState(false);
-  const showAdvanced = detailsOpen ?? internalDetailsOpen;
   // Same tap-to-open contract as FieldHelpTooltip, for the one guidance
   // button written inline (the interest-deduction switch row).
   const interestHelp = useTapTooltip();
+  const showAdvanced = detailsOpen ?? internalDetailsOpen;
   const setDetailsOpen = (open: boolean) => {
     if (detailsOpen === undefined) {
       setInternalDetailsOpen(open);
@@ -212,7 +213,7 @@ export function OperatingExpensesSection({
     register,
     control,
     watch,
-    formState: { errors },
+    formState: { errors, touchedFields, dirtyFields },
   } = form;
 
   const propertyTaxPct = watch("propertyTaxPct");
@@ -220,6 +221,19 @@ export function OperatingExpensesSection({
   const propertyTaxAnnual = watch("propertyTaxAnnual");
   const propertyType = watch("propertyType");
   const utilitiesMonthly = watch("utilitiesMonthly");
+  // HOA prompt for an address with a unit number ("#209", "Apt 2B"): the HOA
+  // field lives in the collapsed panel and starts at $0, so a condo's first
+  // result modeled no dues and nothing asked for them. A nudge, never a
+  // required input: it goes away once dues are entered or the field has been
+  // visited (a visitor who leaves it at 0 has answered). The "Review
+  // assumptions" strip shows the same prompt as a chip.
+  const showHoaPrompt = shouldPromptForHoa({
+    address: watch("address"),
+    hoaMonthly: watch("hoaMonthly"),
+    hoaFieldVisited: Boolean(
+      touchedFields.hoaMonthly || dirtyFields.hoaMonthly,
+    ),
+  });
   const insuranceInputMode = watch("insuranceInputMode");
   const insurancePct = watch("insurancePct");
   const insuranceMonthly = watch("insuranceMonthly");
@@ -458,6 +472,35 @@ export function OperatingExpensesSection({
               className="inline-flex min-h-11 items-center font-semibold text-caution-text underline underline-offset-2 hover:text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-caution"
             >
               Add utilities
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {showHoaPrompt ? (
+        <div
+          data-hoa-unit-prompt=""
+          className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
+          <div className="min-w-0 text-xs leading-relaxed text-caution-text">
+            <span className="font-semibold">HOA dues are $0.</span> This
+            address has a unit number. If the building charges condo or HOA
+            dues, add the monthly amount.{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setDetailsOpen(true);
+                // Post-commit tick: the advanced panel must be unhidden
+                // before a focus() on the input can land.
+                setTimeout(
+                  () => document.getElementById("hoaMonthly")?.focus(),
+                  60,
+                );
+              }}
+              className="inline-flex min-h-11 items-center font-semibold text-caution-text underline underline-offset-2 hover:text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-caution"
+            >
+              Add HOA dues
             </button>
           </div>
         </div>
@@ -1323,6 +1366,7 @@ export function OperatingExpensesSection({
                         <TooltipTrigger asChild>
                           <button
                             type="button"
+                            {...interestHelp.triggerProps}
                             className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                             aria-label="Include interest deduction guidance"
                           >
@@ -1366,4 +1410,3 @@ export function OperatingExpensesSection({
     </div>
   );
 }
-                            {...interestHelp.triggerProps}

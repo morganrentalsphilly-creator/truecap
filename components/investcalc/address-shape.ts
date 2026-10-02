@@ -67,3 +67,73 @@ export const STREET_ADDRESS_REQUIRED_MESSAGE =
 export function streetAddressPlaceholder(area: string): string {
   return `Street address in ${area.trim()}`;
 }
+
+/**
+ * A unit token: "209", "2B", "12-3", "B", "A1". Deliberately not any word,
+ * so "Unit St" or "Suite Ave" in a street name is not read as a unit.
+ */
+const UNIT_TOKEN = "(?:\\d+[A-Za-z]?(?:-[A-Za-z0-9]+)?|[A-Za-z]\\d*)";
+const UNIT_DESIGNATOR = new RegExp(
+  `(?:^|[\\s,])(#\\s?[A-Za-z0-9][A-Za-z0-9-]*|(?:apt|apartment|unit|ste|suite)\\.?\\s*#?\\s?${UNIT_TOKEN})(?=[\\s,]|$)`,
+  "i",
+);
+
+/**
+ * The unit designator in an address as the visitor wrote it ("#209",
+ * "Apt 2B", "Unit 5", "Ste 100"), or null when there is none.
+ */
+export function addressUnitDesignator(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const match = UNIT_DESIGNATOR.exec(value);
+  return match ? match[1].trim() : null;
+}
+
+/** The house number an address starts with ("444", "12B"), or null. */
+function leadingHouseNumber(value: string): string | null {
+  return /^\s*(\d+[A-Za-z]?)\b/.exec(value)?.[1]?.toLowerCase() ?? null;
+}
+
+/**
+ * Keep the unit a visitor typed when they pick an address suggestion.
+ *
+ * Google's suggestions for "444 N Front St #209, Columbus, OH 43215" name
+ * the building, and picking one replaced the field's text, so two units in
+ * one building became the same deal name. When the typed text carries a unit
+ * designator that the picked address lacks, and both start with the same
+ * house number (the pick is the building that was typed, not a neighbour or
+ * a business on the street), the unit goes back in after the street line:
+ * "444 N Front St #209, Columbus, OH 43215, USA". Otherwise the picked
+ * address is returned unchanged.
+ */
+export function withTypedUnit(pickedAddress: string, typedAddress: unknown): string {
+  const unit = addressUnitDesignator(typedAddress);
+  if (!unit || typeof typedAddress !== "string") return pickedAddress;
+  if (addressUnitDesignator(pickedAddress)) return pickedAddress;
+  const typedNumber = leadingHouseNumber(typedAddress);
+  if (!typedNumber || typedNumber !== leadingHouseNumber(pickedAddress)) {
+    return pickedAddress;
+  }
+  const comma = pickedAddress.indexOf(",");
+  if (comma === -1) return `${pickedAddress.trimEnd()} ${unit}`;
+  return `${pickedAddress.slice(0, comma).trimEnd()} ${unit}${pickedAddress.slice(comma)}`;
+}
+
+/**
+ * Should the form ask about HOA dues?
+ *
+ * Yes while the address carries a unit designator (a condo or co-op is
+ * likely), HOA is still $0 or blank, and the visitor has not been to the HOA
+ * field. It drives a prompt and a chip, never a required input: a visitor
+ * who visits the field and leaves 0 has answered, and the prompt goes away.
+ */
+export function shouldPromptForHoa(input: {
+  address: unknown;
+  hoaMonthly: unknown;
+  hoaFieldVisited: boolean;
+}): boolean {
+  if (input.hoaFieldVisited) return false;
+  const hoa =
+    typeof input.hoaMonthly === "number" ? input.hoaMonthly : Number.NaN;
+  if (Number.isFinite(hoa) && hoa > 0) return false;
+  return addressUnitDesignator(input.address) !== null;
+}
