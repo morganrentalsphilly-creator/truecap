@@ -653,6 +653,39 @@ describe("F8 byline, sources box and dating line", () => {
     expect(box).toContain("Worcester, MA HUD Metro FMR Area");
     expect(box).toMatch(/href="https:\/\/www\.huduser\.gov\/portal\/datasets\/fmr\/fmrs\/FY2026_code\/2026summary\.odn\?fips=2502782000/);
   });
+
+  it("closes the box on what it shows (sources and retrieval dates), never on a reviewer or a team", { timeout: 60_000 }, async () => {
+    // The box used to end "Reviewed by the TrueCap team." on all 195 data
+    // pages: no reviewer, review or date stood behind it, and the site says
+    // elsewhere that one person builds TrueCap. The closing line now claims
+    // only that sourced figures come from the listed pages on the dates shown,
+    // so every listed source must carry its retrieval date for it to be true.
+    const pages: Array<[string, string]> = [];
+    for (const market of ALL_MARKETS) pages.push([`/markets/${market.slug}`, await renderCity(market.slug)]);
+    for (const slug of Object.keys(STATES)) pages.push([`/states/${slug}`, await renderState(slug)]);
+    expect(pages).toHaveLength(195);
+    for (const [path, html] of pages) {
+      const start = html.indexOf('data-sources-box=""');
+      expect(start, path).toBeGreaterThan(-1);
+      const box = html.slice(html.indexOf(">", start) + 1, html.indexOf("</section>", start));
+      const boxText = text(box);
+      expect(boxText, path).not.toMatch(/reviewed by|\bteam\b/i);
+      expect(boxText, path).toContain(
+        "Figures with a source come from the pages listed here, retrieved on the dates shown. See our full methodology.",
+      );
+      expect(box, path).toMatch(/<a[^>]*href="\/methodology"/);
+      const items = [...box.matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]!));
+      expect(items.length, path).toBeGreaterThan(0);
+      for (const item of items) {
+        expect(item, `${path}: a listed source without its retrieval date`).toMatch(/, retrieved [A-Z][a-z]+ \d{1,2}, \d{4}$/);
+      }
+    }
+    // The whole page, not only the box: no data page credits a team.
+    for (const [path, html] of pages) {
+      const main = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+      expect(text(main), path).not.toMatch(/reviewed by the truecap team|the team behind truecap/i);
+    }
+  });
 });
 
 describe("F8 verify-locally copy: instructions, not unsourced claims", () => {

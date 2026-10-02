@@ -517,7 +517,7 @@ export function MarketLocalData({
   );
 }
 
-/** The page's sources box: the dating line, every cited source, the reviewer. */
+/** The page's sources box: the dating line, every cited source, the closing line. */
 export function MarketSources({ data }: { data: MarketPageData }) {
   return (
     <SourceMethodologyBox
