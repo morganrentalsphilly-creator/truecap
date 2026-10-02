@@ -1,8 +1,8 @@
 /**
  * 3-way comparison blog post.
  *
- * Captures the high-intent "X vs Y vs Z" search demand by giving an
- * honest matrix of how three competitors stack up, with TrueCap framed
+ * Captures the high-intent "X vs Y vs Z" search demand by giving a
+ * matrix of how three competitors stack up, with TrueCap framed
  * appropriately — sometimes the answer, sometimes the upstream / downstream
  * layer the other three don't address.
  *
@@ -32,7 +32,7 @@ const TITLE =
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "DealCheck vs BiggerPockets vs TrueCap (2026)";
 const DESCRIPTION =
-  "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.";
+  "A 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = lastmodFor("/blog/dealcheck-vs-biggerpockets-vs-truecap") ?? PUBLISHED_AT;
 const READING_TIME_MIN = 11;
@@ -66,11 +66,11 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Which is cheapest — DealCheck, BiggerPockets, or TrueCap?`,
-    a: `TrueCap's core analyzer and DealCheck Starter can both be used without a paid subscription, although their features and usage limits differ. BiggerPockets currently presents its rental-calculator results as a Pro feature. Paid prices change, so compare each official pricing page for the current total and included features.`,
+    a: `TrueCap's core analyzer and DealCheck Starter can both be used without a paid subscription, although their features and usage limits differ. BiggerPockets' rental calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports. Paid prices change, so compare each official pricing page for the current total and included features.`,
   },
   {
     q: `Which has the best free tier?`,
-    a: `TrueCap is a strong fit when the priority is unlimited core analyses without signup: cap rate, cash-on-cash, DSCR, NOI, monthly cash flow, and editable starting assumptions are included. DealCheck Starter requires an account and includes its core calculators and professional reports, with up to 15 saved properties and other published limits. BiggerPockets currently presents calculator results as a Pro feature.`,
+    a: `TrueCap is a strong fit when the priority is unlimited core analyses without signup: cap rate, cash-on-cash, DSCR, NOI, monthly cash flow, and editable starting assumptions are included. DealCheck Starter requires an account and includes its core calculators and professional reports, with up to 15 saved properties and other published limits. BiggerPockets says two things: its calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports.`,
   },
   {
     q: `Does TrueCap have native iOS and Android apps like DealCheck?`,
@@ -177,14 +177,21 @@ export default function ThreeWayComparisonPost() {
               >
                 Starter includes professional interactive and PDF reports with published usage limits
               </a>
-              . <strong>BiggerPockets Calculator</strong> currently presents its results as a{" "}
+              . <strong>BiggerPockets Calculator</strong> comes with the BiggerPockets Pro membership: its{" "}
               <a
-                href="https://www.biggerpockets.com/rental-property-calculator"
+                href="https://www.biggerpockets.com/analysis/rentals/new"
                 className="font-semibold text-primary hover:underline"
               >
-                BiggerPockets Pro feature
-              </a>
-              . <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
+                calculator form
+              </a>{" "}
+              says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its{" "}
+              <a
+                href="https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy"
+                className="font-semibold text-primary hover:underline"
+              >
+                house hacking guide
+              </a>{" "}
+              mentions 5 free calculator reports. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
             </p>
           </section>
 
@@ -233,7 +240,7 @@ export default function ThreeWayComparisonPost() {
             <div>
               <ul>
                 <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
-                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator whose results are currently presented as a BiggerPockets Pro membership feature alongside broader community and educational resources.</li>
+                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator that comes with the BiggerPockets Pro membership, alongside broader community and educational resources.</li>
                 <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
               </ul>
             </div>
@@ -244,7 +251,7 @@ export default function ThreeWayComparisonPost() {
               <ul>
                 <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
                 <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
-                <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
+                <li><strong>BiggerPockets calculator</strong> — its calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Check the official calculator and Pro pages because access terms can change.</li>
               </ul>
               <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>
             </div>
@@ -325,6 +332,14 @@ export default function ThreeWayComparisonPost() {
               {
                 title: "DealCheck, Plans & Pricing",
                 url: "https://dealcheck.io/pricing/",
+              },
+              {
+                title: "BiggerPockets, Rental Property Report (calculator form)",
+                url: "https://www.biggerpockets.com/analysis/rentals/new",
+              },
+              {
+                title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+                url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
               },
               {
                 title: "BiggerPockets, Rental Property Calculator",
