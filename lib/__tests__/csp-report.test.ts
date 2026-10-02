@@ -1,4 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/csp-report/route";
 
@@ -246,5 +248,90 @@ describe("CSP report-only collector", () => {
       })
     );
     expect(response.status).toBe(204);
+  });
+});
+
+/**
+ * Go-to-market audit 2026-10, rows P2-90 and P2-109: the report-only policy
+ * must list the Google Ads origins the audit captured, so a consented page
+ * view posts no report and enforcing the policy later does not stop
+ * conversion tracking. Only the four captured origins, each under the
+ * directive it was captured in, and nothing wider.
+ */
+describe("report-only CSP and the Google Ads tag", () => {
+  const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+  const config = read("next.config.mjs");
+  const directive = (name: string): string[] => {
+    const line = config.match(new RegExp(`"${name} ([^"]+)"`))?.[1];
+    expect(line, `${name} missing from cspReportOnly`).toBeDefined();
+    return line!.split(" ");
+  };
+  /** The sources of a directive that belong to Google's ad stack. */
+  const adsSources = (name: string): string[] =>
+    directive(name)
+      .filter((source) => /doubleclick|googleadservices|google\.com|googlesyndication/.test(source))
+      .sort();
+
+  it("allows the tag's script and its three beacon origins, and no wider pattern", () => {
+    expect(adsSources("script-src")).toEqual(["https://googleads.g.doubleclick.net"]);
+    expect(adsSources("connect-src")).toEqual([
+      "https://ad.doubleclick.net",
+      "https://www.google.com",
+      "https://www.googleadservices.com",
+    ]);
+  });
+
+  it("keeps every source the policy had before the Ads origins were added", () => {
+    for (const source of [
+      "'self'",
+      "'unsafe-inline'",
+      "'unsafe-eval'",
+      "https://va.vercel-scripts.com",
+      "https://*.googletagmanager.com",
+      "https://*.googleapis.com",
+      "https://js.stripe.com",
+      "https://*.posthog.com",
+      "https://challenges.cloudflare.com",
+    ]) {
+      expect(directive("script-src"), source).toContain(source);
+    }
+    for (const source of [
+      "'self'",
+      "https://*.supabase.co",
+      "wss://*.supabase.co",
+      "https://*.posthog.com",
+      "https://*.sentry.io",
+      "https://*.googleapis.com",
+      "https://api.stripe.com",
+      "https://challenges.cloudflare.com",
+    ]) {
+      expect(directive("connect-src"), source).toContain(source);
+    }
+    expect(directive("script-src")).toHaveLength(10);
+    expect(directive("connect-src")).toHaveLength(11);
+  });
+
+  it("covers every report the collector drops, so that list hides nothing the policy would block", () => {
+    // Each entry is an origin and the directive it is dropped under; the
+    // policy must allow that origin in that same directive.
+    const route = read("app/api/csp-report/route.ts");
+    const start = route.indexOf("const KNOWN_GOOGLE_ADS_ORIGINS");
+    expect(start, "KNOWN_GOOGLE_ADS_ORIGINS missing from the collector").toBeGreaterThan(-1);
+    const block = route.slice(start, route.indexOf("]);", start));
+    const dropped = [...block.matchAll(/\["(https:\/\/[^"]+)", "(script-src|connect-src)"\]/g)].map(
+      (match) => [match[1], match[2]] as const,
+    );
+    expect(dropped).toHaveLength(4);
+    for (const [origin, name] of dropped) {
+      expect(directive(name), `${name} ${origin}`).toContain(origin);
+    }
+  });
+
+  it("stays report-only", () => {
+    expect(config).toContain('key: "Content-Security-Policy-Report-Only", value: cspReportOnly');
+    expect(config).not.toContain('key: "Content-Security-Policy", value: cspReportOnly');
+    // The only enforced policy in the file is the embed routes' framing rule.
+    expect(config.match(/key: "Content-Security-Policy"/g)).toHaveLength(1);
+    expect(config).toContain('{ key: "Content-Security-Policy", value: "frame-ancestors *" }');
   });
 });
