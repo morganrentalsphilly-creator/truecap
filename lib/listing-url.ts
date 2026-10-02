@@ -151,6 +151,19 @@ export function parseListingUrl(raw: string): ParsedListing | null {
     .filter(Boolean)
     .map((s) => s.trim());
 
+  // Trulia: /home/<address-slug>-<id> and /p/<st>/<city>/<address-slug>--<id>.
+  // The listing id is the trailing run of six or more digits; without this
+  // branch the generic fallback returned it as part of the address.
+  if (host.includes("trulia.")) {
+    const hi = segs.indexOf("home");
+    const slug =
+      hi >= 0 ? segs[hi + 1] : segs[0] === "p" ? segs.at(-1) : undefined;
+    if (slug) {
+      const out = finalize(slug.replace(/-+\d{6,}$/, ""), "trulia");
+      if (out) return out;
+    }
+  }
+
   // Zillow / Trulia: /homedetails/<address-slug>/<id>_zpid/
   if (host.includes("zillow.") || host.includes("trulia.")) {
     const i = segs.indexOf("homedetails");
@@ -171,7 +184,11 @@ export function parseListingUrl(raw: string): ParsedListing | null {
       i >= 0 ? (segs[i].includes("_") ? segs[i] : segs[i + 1]) : undefined;
     if (slug) {
       // Underscore-separated: street(dashes), City, ST, ZIP, id…
-      const parts = slug.split("_").filter(Boolean);
+      // The id part ("M12345-67890") is not address text.
+      const parts = slug
+        .split("_")
+        .filter(Boolean)
+        .filter((part) => !/^M\d[\d-]*$/i.test(part));
       const out = finalize(parts.join(" ").replace(/-/g, " "), "realtor");
       if (out) return out;
     }
