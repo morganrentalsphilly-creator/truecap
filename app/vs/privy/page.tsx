@@ -166,8 +166,7 @@ export default function VsPrivyPage() {
             feeds and public records: it surfaces listings that match a strategy
             (rental, fix-and-flip, teardown) and shows comparable transactions
             and rental comp tables. TrueCap is the underwriting calculator that
-            runs the per-deal math on whatever Privy surfaces. Different jobs in
-            the same workflow.
+            runs the per-deal math on whatever Privy surfaces.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>

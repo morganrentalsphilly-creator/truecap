@@ -122,6 +122,12 @@ describe("the /vs social cards", () => {
     for (const slug of ["propstream", "batchleads", "dealmachine", "mashvisor", "privy"]) {
       expect(openGraphOf(slug), slug).not.toMatch(/different jobs|finds the leads?\b/i);
     }
+    // Two ledes said it under the H1 until the 2026-10 integration pass,
+    // beside cards that credit the vendor with property analysis.
+    for (const slug of ["mashvisor", "privy"]) {
+      const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8").replace(/\s+/g, " ");
+      expect(page, slug).not.toMatch(/different jobs/i);
+    }
   });
 
   it("states no number about a competitor that is not listed here with its source", () => {
