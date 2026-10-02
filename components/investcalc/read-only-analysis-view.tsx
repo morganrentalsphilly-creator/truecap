@@ -8,15 +8,18 @@
  * validated frozen specialist snapshot; they never recompute historical
  * BRRRR or fix-and-flip results in the browser.
  *
- * Hides the four Pro-gated tabs (10-year, tax strategy, exit scenarios,
- * Screening Index) - those become upgrade prompts on the parent page.
+ * Leaves out the paid tabs (10-year, tax strategy, exit scenarios). The page
+ * asks for TrueCap once, in one block below the Disclaimer, under the site's
+ * primary label "Analyze a deal free". The rerun button and the copy action
+ * are the recipient's own next steps on this deal and stay where they are.
  */
 
 import Link from "next/link";
 import { Disclaimer } from "@/components/marketing/disclaimer";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
@@ -99,6 +102,10 @@ interface ReadOnlyAnalysisViewProps {
   /** Raw capability from /s only. It is sent only to the auth-gated copy
    * action for a fresh revocation/expiry check and never attached to events. */
   copyShareToken?: string;
+  /** The agent's message form on a co-branded share. Rendered above the
+   * Disclaimer and above TrueCap's own block, so the client reaches the
+   * agent first. */
+  leadForm?: ReactNode;
 }
 
 const fmtCash = (n: number) =>
@@ -245,12 +252,9 @@ function FrozenSpecialistAnalysis({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-3xs font-extrabold uppercase tracking-widest text-primary">
-            Frozen strategy analysis
-          </p>
           <h2
             id="recorded-specialist-analysis-title"
-            className="mt-1 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl"
+            className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl"
           >
             {title}
           </h2>
@@ -644,6 +648,7 @@ export function ReadOnlyAnalysisView({
   specialistAnalysisCaptured = false,
   analyzerStrategyKey = "buy-hold",
   copyShareToken,
+  leadForm = null,
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
   const [copyPending, setCopyPending] = useState(false);
@@ -781,12 +786,9 @@ export function ReadOnlyAnalysisView({
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
           <div>
-            <p className="text-2xs font-extrabold uppercase tracking-widest text-muted-foreground">
-              Decision
-            </p>
             <h2
               id="shared-decision-title"
-              className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+              className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
             >
               {decisionLabel}
             </h2>
@@ -1039,7 +1041,7 @@ export function ReadOnlyAnalysisView({
           >
             {copyPending
               ? "Copying to your account…"
-              : "Copy this analysis to your account →"}
+              : "Copy this analysis to your account"}
           </button>
         ) : null}
         <button
@@ -1053,14 +1055,14 @@ export function ReadOnlyAnalysisView({
           )}
         >
           {addressIncluded
-            ? "Run this property with your assumptions →"
-            : "Run these assumptions with a property you choose →"}
+            ? "Run this property with your assumptions"
+            : "Run these assumptions with a property you choose"}
         </button>
       </div>
       {copyError ? (
         <p
           role="alert"
-          className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive-text"
         >
           {copyError}
         </p>
@@ -1114,56 +1116,47 @@ export function ReadOnlyAnalysisView({
             and strategy scenarios without rewriting this historical record.
           </p>
         </section>
-      ) : (
-        <section
-          className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6"
-          aria-labelledby="shared-pro-analysis-title"
-        >
-          <h2
-            id="shared-pro-analysis-title"
-            className="text-base font-bold text-foreground"
-          >
-            {specialistModelsEnabled
-              ? "Exact Offer Ceiling, sensitivity, and advanced strategy modeling are paid tools"
-              : "Exact Offer Ceiling and sensitivity are paid tools"}
-          </h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            This free shared view includes the deal&rsquo;s core underwriting.
-            Open the property in TrueCap to tune assumptions or unlock the
-            advanced decision tools.
-          </p>
-          <Link
-            href="/analyze?utm_source=shared_deal&utm_medium=pro_gate"
-            prefetch={false}
-            className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
-          >
-            Analyze this property in TrueCap →
-          </Link>
-        </section>
-      )}
+      ) : null}
 
-      {/* Viral loop: this public share page is seen by partners, lenders,
-          and other investors. Convert them into TrueCap users. */}
-      <Link
-        href="/analyze?utm_source=shared_deal&utm_medium=share_link"
-        prefetch={false}
-        className="block rounded-2xl bg-primary p-6 sm:p-8 text-center text-primary-foreground no-underline transition-opacity hover:opacity-90"
-      >
-        <p className="text-lg sm:text-xl font-extrabold">
-          Analyzed with TrueCap
-        </p>
-        <p className="mt-1 text-sm sm:text-base opacity-90">
-          Run your own rental deal free. Cap rate, cash flow, and DSCR from just
-          an address in 60 seconds.
-        </p>
-        <span className="mt-4 inline-block rounded-xl bg-primary-foreground px-4 py-2.5 text-sm font-bold text-primary">
-          Try TrueCap free →
-        </span>
-      </Link>
+      {/* An unpaid owner's share used to stack three TrueCap blocks from
+          here down: one that called the Offer Ceiling and the sensitivity grid
+          paid, one promo, and a third in the page shell that called the full
+          analysis free. A visitor's first complete decision needs no account
+          and includes the Offer Ceiling (app/actions/offer-ceiling.ts), so
+          the first of those was false for the person reading it. One block
+          below the Disclaimer now says it once (rows P2-136 and P2-137). */}
+
+      {leadForm}
 
       {/* THE disclaimer (docs/voice.md rule 3) — this page is shared to
           lenders/partners/clients and has no SiteFooter, so it mounts here. */}
-      <Disclaimer className="mt-4 px-2 text-center" />
+      <Disclaimer className="mx-auto mt-4 px-2 text-center" />
+
+      {/* The page's one TrueCap call to action, under the site's primary
+          label. It opens the analyzer and promises nothing about this
+          property: the rerun button above is the one that carries the deal. */}
+      <section
+        aria-labelledby="shared-truecap-cta-title"
+        className="border-t border-border pt-5 text-center"
+      >
+        <h2
+          id="shared-truecap-cta-title"
+          className="text-base font-bold text-foreground"
+        >
+          Run your own deal in TrueCap
+        </h2>
+        <p className="mx-auto mt-1 max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
+          Your first complete decision needs no account or card. It includes
+          cash flow, cap rate, cash-on-cash, DSCR and the Offer Ceiling.
+        </p>
+        <Link
+          href="/analyze?utm_source=shared_deal&utm_medium=share_link"
+          prefetch={false}
+          className={cn(buttonVariants({ size: "cta" }), "mt-4")}
+        >
+          Analyze a deal free
+        </Link>
+      </section>
     </div>
   );
 }
