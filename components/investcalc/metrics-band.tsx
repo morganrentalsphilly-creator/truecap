@@ -43,8 +43,26 @@ export function cashFlowSubLabel(
   return cashFlowBenchmarkLabel(r.netCashFlow);
 }
 
+/**
+ * Whole dollars for a metric tile. The engine never rounds cash flow, so a
+ * bare toLocaleString() printed "+$554.043" under a decision card that says
+ * $554/mo, and a comma-decimal browser read it as "+$554,043". Round here,
+ * pin the locale, and let the caller take the sign from the same rounded
+ * value so a figure that rounds to zero never prints as "-$0".
+ */
+function roundedDollars(n: number): number {
+  const rounded = Math.round(n);
+  // Math.round(-0.4) is -0; normalise it so the sign test below is plain.
+  return rounded === 0 ? 0 : rounded;
+}
+
 function fmt(n: number) {
-  return `$${Math.abs(n).toLocaleString()}`;
+  return `$${Math.abs(roundedDollars(n)).toLocaleString("en-US")}`;
+}
+
+/** "+$554" / "-$120"; a value that rounds to zero is "+$0". */
+function signedDollars(n: number): string {
+  return `${roundedDollars(n) < 0 ? "-" : "+"}${fmt(n)}`;
 }
 
 function MetricCard({
@@ -216,11 +234,7 @@ export function buildMetricTiles({
         )}
         glossaryTerm="cashFlow"
         value={
-          displayResult
-            ? displayResult.netCashFlow >= 0
-              ? `+${fmt(displayResult.netCashFlow)}`
-              : `-${fmt(displayResult.netCashFlow)}`
-            : "—"
+          displayResult ? signedDollars(displayResult.netCashFlow) : "—"
         }
         sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
         // Matches the caption's bands (lib/strategy-lens-outcome cashFlowMetric):
@@ -365,9 +379,7 @@ export function buildMetricTiles({
         label={sourcedLabel("After-Tax CF", "base")}
         glossaryTerm="afterTaxCF"
         value={
-          result
-            ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}`
-            : "—"
+          result ? signedDollars(result.afterTaxCF) : "—"
         }
         sub="/mo"
         // No threshold caption on this tile, so no verdict colour — only the
@@ -387,9 +399,7 @@ export function buildMetricTiles({
         label={sourcedLabel("Annual CF", "base")}
         glossaryTerm="cashFlow"
         value={
-          result
-            ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}`
-            : "—"
+          result ? signedDollars(result.annualCashFlow) : "—"
         }
         sub="/yr"
         // Same as after-tax: annualising a monthly figure adds no threshold.
@@ -412,7 +422,7 @@ export function buildMetricTiles({
         // the color can't claim "primary-good" for a negative.
         value={
           result
-            ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}`
+            ? `${roundedDollars(result.taxSavingsMonthly) < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}`
             : "—"
         }
         sub={
