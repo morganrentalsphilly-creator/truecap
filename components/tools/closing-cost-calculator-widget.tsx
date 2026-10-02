@@ -3,8 +3,7 @@
 /**
  * Standalone closing cost calculator widget.
  *
- * Closing costs on investment property typically run 2-5% of purchase
- * price. The widget lets users adjust each line item (origination,
+ * The widget lets users adjust each line item (origination,
  * title, recording, taxes, escrow, prepaid items) to see how the
  * total moves.
  */

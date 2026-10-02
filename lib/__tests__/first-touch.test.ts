@@ -91,8 +91,9 @@ describe("classifyFirstTouchReferralSource", () => {
   });
 
   it("counts an auto-tagged ad click as paid search, never organic", () => {
-    // TrueCap's Google Ads Final URLs carry no UTM parameters, so the click id
-    // is the only thing that tells a paid google.com / bing.com visit apart.
+    // TrueCap's Google Ads Final URLs carry no UTM parameters; the campaign's
+    // Final URL suffix adds utm_medium=cpc, and the click id still marks a
+    // paid google.com / bing.com visit when the suffix is missing.
     expect(classify("www.google.com", "", true)).toBe("paid_search");
     expect(classify("www.bing.com", "", true)).toBe("paid_search");
     expect(classify("", "", true)).toBe("paid_search");

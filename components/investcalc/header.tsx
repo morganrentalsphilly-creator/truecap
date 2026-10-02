@@ -363,9 +363,7 @@ export function Header({
     {/* Announcement bar - Pro upgrade prompt. Only shown to AUTHENTICATED
         free users (who can actually 'upgrade'). Suppressed for cold
         visitors because 'upgrade' doesn't apply when they don't have an
-        account yet. No other bar sits above this one today: the annual
-        promo banner (components/marketing/annual-promo-banner.tsx) is
-        mounted nowhere.
+        account yet. No other bar sits above this one.
         DESIGN.md (2026-09 design pass): a paper strip on a bottom rule with
         one Signal Blue link, not a full-bleed blue band, and no Zap
         ornament. Copy unchanged and shown at the same breakpoints as
