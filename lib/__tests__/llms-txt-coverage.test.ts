@@ -82,6 +82,20 @@ describe("llms.txt lists what the sitemap lists", () => {
     expect(personas).toContain("/for-investors");
   });
 
+  it("describes the glossary by what every term has", async () => {
+    const { GLOSSARY } = await import("@/lib/glossary");
+    const terms = Object.values(GLOSSARY);
+    const everyTermHasBoth = terms.every((term) => term.formula && term.example);
+    const everyDefinitionIsOneSentence = terms.every((term) => term.definition.trim().split(/(?<=[.!?])\s+/).length === 1);
+    const text = await llms();
+    // The old line promised "one-sentence definitions, formulas, and worked
+    // examples"; most definitions run to two sentences and most terms have
+    // neither a formula nor an example.
+    if (!everyDefinitionIsOneSentence) expect(text).not.toMatch(/one-sentence definitions/);
+    if (!everyTermHasBoth) expect(text).not.toMatch(/glossary with [^\n]*definitions, formulas, and worked examples/);
+    expect(text).toContain(`${terms.length}-term glossary with a definition for each term`);
+  });
+
   it("links only pages the sitemap lists from those two sections", async () => {
     vi.stubEnv("STRIPE_PRICE_AGENT_PRO_MONTHLY", "price_test_agent_pro_monthly");
     const inSitemap = new Set(sitemapPaths());
