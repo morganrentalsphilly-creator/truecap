@@ -373,8 +373,8 @@ export default function VsCozyPage() {
               >
                 cash-on-cash return
               </IntentPrefetchLink>
-              , and DSCR — all free, the way Cozy&apos;s core features were. Our
-              guide on{" "}
+              , and DSCR. All of that is free, as Cozy&apos;s core features
+              were. Our guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
