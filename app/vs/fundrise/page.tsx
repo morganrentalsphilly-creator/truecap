@@ -78,7 +78,7 @@ const MATRIX: Row[] = [
   { feature: "Diversification", truecap: "One property at a time", fundrise: "Across many properties + asset types", winner: "fundrise" },
   { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
   { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "tie" },
-  { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "Distributions set by each fund; see Fundrise's site", winner: "tie" },
+  { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "See Fundrise's site for how its funds pay distributions", winner: "tie" },
   { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", fundrise: "Not applicable", winner: "truecap" },
 ];
@@ -111,7 +111,7 @@ export default function VsFundrisePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Fundrise is a non-traded REIT platform: you pool your money with other investors into diversified real estate funds (commercial + multifamily + residential). TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
+            Fundrise is an investment platform: you pool your money with other investors into funds it manages, including real estate funds. TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -216,7 +216,7 @@ export default function VsFundrisePage() {
                 <strong>If you want passive exposure with low minimums → Fundrise.</strong> Pick a Fundrise plan, set a recurring contribution, collect distributions.
               </li>
               <li>
-                <strong>If you want both → split the portfolio.</strong> You can hold direct rentals and pooled funds side by side. TrueCap helps with the direct side.
+                <strong>If you want both → split the portfolio.</strong> TrueCap helps with the direct side.
               </li>
             </ul>
             <p>
