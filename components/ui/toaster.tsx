@@ -2,6 +2,7 @@
 
 import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCookieBannerOpen } from '@/lib/use-cookie-banner'
 import {
   Toast,
   ToastClose,
@@ -13,6 +14,12 @@ import {
 
 export function Toaster() {
   const { toasts } = useToast()
+  // The cookie banner is fixed to the bottom edge at z-50 and the toast
+  // viewport sits above it at z-100, so from sm a toast covered the top of
+  // "Reject" and "Accept all" for its five seconds. While the banner is up
+  // the viewport starts 6rem from the bottom: with its 1rem padding the
+  // toast ends 112px up, the height DESIGN.md reserves for the banner.
+  const cookieBannerOpen = useCookieBannerOpen()
 
   return (
     <ToastProvider>
@@ -53,7 +60,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport className={cookieBannerOpen ? 'sm:bottom-24' : undefined} />
     </ToastProvider>
   )
 }
