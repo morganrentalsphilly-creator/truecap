@@ -48,7 +48,7 @@ const FAQS = [
   },
   {
     q: "Should I include holding costs in the rehab budget?",
-    a: "Treat them separately. Rehab cost = labor + materials + permits + dumpster + supervision. Holding costs (mortgage interest, taxes, insurance, and utilities while no rent is coming in) belong in a dated project ledger. TrueCap's integrated BRRRR and fix-and-flip lifecycle models are not currently released.",
+    a: "Treat them separately. Rehab cost = labor + materials + permits + dumpster + supervision. Holding costs (mortgage interest, taxes, insurance, and utilities while no rent is coming in) belong in a dated project ledger. TrueCap does not currently offer integrated BRRRR or fix-and-flip lifecycle models.",
   },
   {
     q: "How do I estimate a kitchen renovation?",
@@ -83,7 +83,6 @@ export default function RehabEstimatorPage() {
       "Free renovation cost estimator with editable square-foot and per-room defaults for cosmetic, kitchen, bath, and systems work.",
     featureList: [
       "Per-sqft + per-room rehab cost estimates",
-      "Light, medium, heavy renovation tiers",
       "Cosmetic, kitchen, bath, and systems work",
     ],
   });
@@ -155,10 +154,9 @@ export default function RehabEstimatorPage() {
               </li>
               <li>
                 <strong>Use the total as your underwriting input.</strong>{" "}
-                Carry the total into your own project ledger; TrueCap&apos;s
-                integrated BRRRR and fix-and-flip models are not currently
-                released. New to
-                the strategy? Start with{" "}
+                Carry the total into your own project ledger; TrueCap does
+                not currently offer integrated BRRRR or fix-and-flip models.
+                New to the strategy? Start with{" "}
                 <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>.
               </li>
             </ol>
@@ -247,14 +245,14 @@ export default function RehabEstimatorPage() {
               The rehab number is one input. Keep acquisition financing,
               construction carry, draws, lease-up, refinance or sale proceeds,
               and every capital contribution in a separate dated ledger. Use
-              TrueCap&apos;s released analyzer only for the stabilized rental case.
+              TrueCap&apos;s analyzer only for the stabilized rental case.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Line-item rehab range by scope of work",
                 "Separate dated ledger for construction-period cash flows",
                 "Contractor bids and contingency replace the early estimate",
-                "Released stabilized-rental screen after renovation",
+                "Stabilized-rental screen after renovation",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -264,7 +262,7 @@ export default function RehabEstimatorPage() {
               ))}
             </ul>
             <Link href="/analyze" prefetch={false} className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              Open the released rental analyzer
+              Open the rental analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
@@ -276,7 +274,7 @@ export default function RehabEstimatorPage() {
           <ToolEmbedInvite slug="rehab-cost-estimator" />
 
 
-          <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the released rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
+          <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
 
           <RelatedContent kind="tool" slug="rehab-cost-estimator" title="Rehab Cost Estimator" className="mt-10" />
 
