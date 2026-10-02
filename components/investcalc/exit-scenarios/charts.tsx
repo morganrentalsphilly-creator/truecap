@@ -17,6 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartCard } from "@/components/investcalc/analysis-panels/shared/chart-card";
+import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -38,6 +39,9 @@ export function ExitScenarioCharts({
 }: {
   years: ExitScenarioYear[];
 }) {
+  // Recharts animates from JavaScript, which the reduced-motion CSS rule
+  // cannot stop, so every mark is told directly.
+  const animate = !usePrefersReducedMotion();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Equity Growth">
@@ -48,6 +52,7 @@ export function ExitScenarioCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="equity"
               stroke="var(--color-equity)"
@@ -67,6 +72,7 @@ export function ExitScenarioCharts({
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Legend content={<ChartLegendContent />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="propertyValue"
               stroke="var(--color-propertyValue)"
@@ -74,6 +80,7 @@ export function ExitScenarioCharts({
               dot={false}
             />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="remainingLoanBalance"
               stroke="var(--color-remainingLoanBalance)"
@@ -92,6 +99,7 @@ export function ExitScenarioCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="totalProfit"
               stroke="var(--color-totalProfit)"
@@ -110,9 +118,9 @@ export function ExitScenarioCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Legend content={<ChartLegendContent />} />
-            <Bar dataKey="netSaleProceeds" stackId="profit" fill="var(--color-netSaleProceeds)" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="cumulativeCashFlow" stackId="profit" fill="var(--color-cumulativeCashFlow)" />
-            <Bar dataKey="cumulativeTaxBenefit" stackId="profit" fill="var(--color-cumulativeTaxBenefit)" />
+            <Bar isAnimationActive={animate} dataKey="netSaleProceeds" stackId="profit" fill="var(--color-netSaleProceeds)" radius={[6, 6, 0, 0]} />
+            <Bar isAnimationActive={animate} dataKey="cumulativeCashFlow" stackId="profit" fill="var(--color-cumulativeCashFlow)" />
+            <Bar isAnimationActive={animate} dataKey="cumulativeTaxBenefit" stackId="profit" fill="var(--color-cumulativeTaxBenefit)" />
           </BarChart>
         </ChartContainer>
       </ChartCard>

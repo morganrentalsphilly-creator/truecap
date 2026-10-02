@@ -43,6 +43,7 @@ import {
   type RecordedSpecialistAnalysisState,
 } from "@/components/investcalc/recorded-specialist-analysis-card";
 import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
+import { scrollBehavior } from "@/lib/utils";
 
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", {
@@ -446,7 +447,10 @@ function ReviewTargetCriteriaButton({
           trigger?.click();
         }
         trigger?.focus({ preventScroll: true });
-        trigger?.scrollIntoView({ behavior: "smooth", block: "center" });
+        trigger?.scrollIntoView({
+          behavior: scrollBehavior(),
+          block: "center",
+        });
       }}
       className="mt-4 min-h-11 rounded-xl"
     >
