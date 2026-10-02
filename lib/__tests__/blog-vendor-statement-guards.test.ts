@@ -53,6 +53,20 @@ describe("BiggerPockets' free allowance is stated the way BiggerPockets states i
     }
   });
 
+  it("does not call BiggerPockets' reports Pro-only in the posts that cite its reports page", () => {
+    // These two posts mention BiggerPockets' reports or prices without
+    // quoting the calculator form, so they are not in BIGGERPOCKETS_PAGES.
+    // "(Pro members only)" contradicted the "5 free calculator reports"
+    // prompt, and the Pro prices are cited to membership-types, which shows
+    // them; the checkout page the BRRRR alternatives post linked showed
+    // neither $39 nor $390 when rendered on 2 October 2026.
+    const brrrr = read("app/blog/best-rental-property-calculator-for-brrrr/page.tsx");
+    expect(brrrr).not.toMatch(/Pro members only/i);
+    const alternatives = read("app/blog/best-dealcheck-alternatives/page.tsx");
+    expect(alternatives).not.toContain("subscriptions/new?plan_id=");
+    expect(alternatives).toContain("https://www.biggerpockets.com/membership-types");
+  });
+
   it("puts the partner perks on the annual plan, where the membership page lists them", () => {
     // membership-types lists calculators, BPCON tickets and the forum badge
     // under Pro Monthly ($39) and the partner perks under Pro Annual ($390).
