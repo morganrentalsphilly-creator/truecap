@@ -68,8 +68,8 @@ const FAQ_ITEMS = [
     a: `Pick based on what you need most. Stessa for accounting (especially if you have existing business banking); its free plan also lists tenant screening, online rent collection, and maintenance tracking. Avail for leasing + online rent collection (especially if you're placing new tenants often). Baselane if you want banking + bookkeeping + rent collection in one platform and don't mind moving your rental banking. You can also pair two of the three.`,
   },
   {
-    q: `Is Baselane really FDIC-insured?`,
-    a: `Yes, through its bank partner. Baselane's banking is provided by Thread Bank, Member FDIC; through Thread Bank's deposit sweep program, deposits can qualify for up to \$3,000,000 in FDIC coverage, up to \$250k at each program bank (Baselane notes the threshold is subject to change). They're a fintech with a bank partner, not a chartered bank themselves — common structure for modern business banking products.`,
+    q: `Is Baselane FDIC-insured?`,
+    a: `Baselane is a financial technology company, not a bank. Banking is provided by Thread Bank, Member FDIC. Deposits can qualify for up to \$3,000,000 in FDIC coverage through Thread Bank's deposit sweep program, up to \$250,000 at each program bank. Baselane says the threshold can change. See Baselane's help-center article on FDIC insurance, listed in the sources below, for the current terms.`,
   },
   {
     q: `Are all three really free?`,
@@ -200,7 +200,7 @@ export default function ThreeWayComparisonPost() {
               <p>This is the closest match. Both do bookkeeping; the main difference is where your rental banking lives.</p>
               <ul>
                 <li><strong>Stessa</strong> <a href="https://www.stessa.com/pricing/">connects your existing bank account(s)</a> — you keep banking wherever you already are (a credit union, your current business checking, etc.), though <a href="https://www.stessa.com/">Stessa also offers its own per-property bank accounts</a>. Transactions auto-categorize into rental-property buckets. Strong reporting + multi-property dashboards.</li>
-                <li><strong>Baselane</strong> bundles a dedicated business checking account per property, FDIC-insured through Thread Bank. <a href="https://www.baselane.com/pricing">Because your rental banking and bookkeeping sit in the same Baselane account, transactions don&apos;t need a separate bank feed to reach the ledger.</a> You&apos;d be moving your rental banking to Baselane.</li>
+                <li><strong>Baselane</strong> bundles a dedicated business checking account per property, with banking services provided by Thread Bank, Member FDIC. <a href="https://www.baselane.com/pricing">Because your rental banking and bookkeeping sit in the same Baselane account, transactions don&apos;t need a separate bank feed to reach the ledger.</a> You&apos;d be moving your rental banking to Baselane.</li>
               </ul>
               <p>If you have rentals across multiple LLCs or already have business banking set up the way you like, Stessa is the less disruptive choice. If you&apos;re starting fresh or willing to switch banks, Baselane&apos;s integrated approach is genuinely faster + simpler.</p>
             </div>
@@ -220,7 +220,7 @@ export default function ThreeWayComparisonPost() {
               <ul>
                 <li><strong>Stessa Essentials</strong> — <a href="https://www.stessa.com/pricing/">Stessa publishes a free entry plan</a> that lists bank feeds, tenant screening, online rent collection, and maintenance tracking, while Schedule E and other features are plan-dependent. Verify the current plan matrix.</li>
                 <li><strong>Avail free</strong> (&quot;Unlimited&quot;) — <a href="https://www.avail.com/pricing">listings on up to 19 sites, applications, lease signing, online rent collection (tenants pay $2.50 per bank transfer on this plan)</a>. Screening costs vary by state, and the landlord chooses whether the applicant or the landlord pays.</li>
-                <li><strong>Baselane free</strong> — FDIC-insured business checking, ACH rent collection, basic bookkeeping. <a href="https://www.baselane.com/pricing">Baselane lists no monthly maintenance, minimum-balance, or account-opening fees on its Core plan.</a></li>
+                <li><strong>Baselane free</strong> — business checking (banking services provided by Thread Bank, Member FDIC), ACH rent collection, basic bookkeeping. <a href="https://www.baselane.com/pricing">Baselane lists no monthly maintenance, minimum-balance, or account-opening fees on its Core plan.</a></li>
               </ul>
               <p>All three have legitimately useful free tiers. The decision isn&apos;t price — it&apos;s which features you need.</p>
             </div>
