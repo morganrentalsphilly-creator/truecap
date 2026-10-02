@@ -305,7 +305,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "fundrise",
     competitor: "Fundrise",
     tagline:
-      "Fundrise is a direct-to-consumer private markets manager: portfolios of real estate, private credit and venture capital. TrueCap underwrites whole properties you'd own directly.",
+      "Fundrise offers funds that hold private real estate, private credit and venture capital (passive). TrueCap underwrites whole properties you'd own directly.",
     group: "Specialized tool",
   },
   {
@@ -362,14 +362,14 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "dealcheck-for-short-term-rentals",
     competitor: "DealCheck for STRs",
     tagline:
-      "Short-term rentals: how TrueCap and DealCheck handle revenue you supply, occupancy assumptions, financing and tax-eligibility limits.",
+      "Short-term rentals: how DealCheck and TrueCap's beta revenue screen handle revenue you supply, occupancy, financing and tax-eligibility limits.",
     group: "Direct alternative",
   },
   {
     slug: "mashvisor-for-short-term-rentals",
     competitor: "Mashvisor for STRs",
     tagline:
-      "STR investor's cut of TrueCap vs Mashvisor: market and property data compared with a deal decision on your own numbers.",
+      "Short-term rentals: Mashvisor's market and property data, and TrueCap's beta revenue screen for a deal on your own numbers.",
     group: "Specialized tool",
   },
   {
