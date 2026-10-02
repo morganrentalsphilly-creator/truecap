@@ -241,7 +241,7 @@ export function ArvCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Open the released rental analyzer with a separately verified purchase
+        Open the rental analyzer with a separately verified purchase
         price
         <ArrowUpRight className="w-4 h-4" />
       </AnalyzerHandoffLink>

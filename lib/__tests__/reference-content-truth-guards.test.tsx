@@ -261,6 +261,23 @@ describe("voice: 'released' is not customer copy on the calculator pages", () =>
   });
 });
 
+describe("voice: 'released' is not customer copy in the shared calculator blocks", () => {
+  // The calculator pages mount these: the shared analyzer CTA (its default
+  // supporting text) and the calculator widgets, whose link labels show on
+  // /tools/arv-calculator, /tools/70-percent-rule-calculator and their embeds.
+  const shared = ["components/marketing/tools-conversion-cta.tsx", ...filesUnder("components/tools")];
+
+  it("reads the shared CTA and every calculator widget", () => {
+    expect(shared).toContain("components/tools/arv-calculator-widget.tsx");
+    expect(shared).toContain("components/tools/seventy-percent-rule-widget.tsx");
+    expect(shared.length).toBeGreaterThan(10);
+  });
+
+  it.each(shared)("%s", (path) => {
+    expect(withoutComments(read(path))).not.toMatch(/\b(?:un)?released\b/i);
+  });
+});
+
 describe("P1-37: the feed credits TrueCap, not a team", () => {
   it("the channel description names no team", async () => {
     const xml = await (await getFeed()).text();

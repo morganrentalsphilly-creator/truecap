@@ -29,7 +29,7 @@ export function ToolsConversionCta({
         utmSource="tool"
         supportingText={
           hook ??
-          "Run the released rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
+          "Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
         }
       />
     </div>
