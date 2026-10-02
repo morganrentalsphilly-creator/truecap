@@ -57,7 +57,7 @@ export const metadata: Metadata = {
       "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA-input workflow, and tax-model limitations.",
     url: "/vs/dealcheck-for-short-term-rentals",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck for Short-Term Rentals — honest comparison" }],
+    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck for short-term rentals" }],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -142,7 +142,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
     <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={structuredData} />
-      <VsBreadcrumbSchema vsPath="/vs/dealcheck-for-short-term-rentals" pageName="TrueCap vs DealCheck for Short-Term Rentals" />
+      <VsBreadcrumbSchema vsPath="/vs/dealcheck-for-short-term-rentals" pageName="TrueCap vs DealCheck for short-term rentals" />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <VsHero>
           <h1 className={VS_H1}>
@@ -256,7 +256,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="DealCheck" items={NICHE_FAQ} reviewedDate="October 2026" />
+        <ComparisonFaq competitorName="DealCheck" items={NICHE_FAQ} />
 
         <CloseSection
           headingId="vs-close-heading"
