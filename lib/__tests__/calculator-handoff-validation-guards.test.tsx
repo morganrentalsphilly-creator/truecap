@@ -253,9 +253,15 @@ describe("P2-48: the mortgage calculator rejects negative and absurd inputs", ()
     // P2-72: the result is a live region. At the defaults it reads the payment.
     const status = /<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">([^<]*)<\/span>/.exec(html)?.[1];
     expect(status).toBe("Estimated monthly payment $2,020. Monthly principal and interest $1,531.");
-    // Bounds reach the DOM, and nothing is in error at the defaults.
+    // Bounds reach the DOM, and nothing is in error at the defaults. Each
+    // bound is typed twice in the widget (the validator above, the field's
+    // min and max here), so all six pairs are pinned: the messages are
+    // asserted from the validator, the attributes from the markup.
     expect(html).toContain('min="0" max="100000000"');
+    expect(html).toContain('min="0" max="100"');
+    expect(html).toContain('min="0" max="30"');
     expect(html).toContain('min="1" max="50"');
+    expect(html.match(/min="0" max="20"/g)).toHaveLength(2);
     expect(html).not.toMatch(INVALID_ATTR);
     expect(html).not.toContain('role="alert"');
   });
@@ -340,10 +346,15 @@ describe("P2-48: the ARV and 70% rule calculators reject negative and absurd inp
     const arv = renderToStaticMarkup(createElement(ArvCalculatorWidget));
     expect(arv).toContain('max="100000000"');
     expect(arv).toContain('max="100000"');
+    // The rule multiplier's ceiling is typed in the validator and on the
+    // field: one copy each, both pinned.
+    expect(arv.match(/min="0" max="100"/g)).toHaveLength(1);
     expect(arv).not.toMatch(INVALID_ATTR);
     expect(arv).not.toContain('role="alert"');
     expect(textOf(arv)).toContain("Estimated ARV $254,223. 70%-rule price screen $132,500.");
     const rule = renderToStaticMarkup(createElement(SeventyPercentRuleWidget));
+    expect(rule.match(/min="0" max="100000000"/g)).toHaveLength(2);
+    expect(rule.match(/min="0" max="100"/g)).toHaveLength(1);
     expect(rule).not.toMatch(INVALID_ATTR);
     expect(rule).not.toContain('role="alert"');
     expect(textOf(rule)).toContain("70%-rule price screen $165,000.");

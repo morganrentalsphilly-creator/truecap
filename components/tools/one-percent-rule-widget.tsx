@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { validateToolNumber } from "@/lib/public-tool-validation";
 
-// What the two fields accept. The upper bounds are the analyzer's own
-// (lib/analyzer-handoff.ts), so a value this widget takes is one the handoff
-// can carry.
+// What the two fields accept. The upper bounds are the analyzer handoff's
+// (lib/analyzer-handoff.ts). The handoff also leaves out a price under
+// $10,000, which this widget still accepts.
 const PRICE_BOUNDS = {
   label: "Purchase price",
   min: 0,
