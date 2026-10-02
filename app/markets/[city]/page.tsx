@@ -52,6 +52,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { isLinkablePath } from "@/lib/seo/link-policy";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 // Candidates only. Anything not currently released is filtered out below, so
 // a market page can never link a reader to a gated tool.
@@ -98,6 +99,7 @@ export async function generateMetadata({
     // A city page without HUD rent is a template, not a page worth ranking.
     robots: isMarketIndexable(data.slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: page.title,
       description: page.description,
       url: `/markets/${data.slug}`,

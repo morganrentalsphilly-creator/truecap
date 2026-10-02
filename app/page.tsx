@@ -46,6 +46,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 // ISR: prerendered at build, regenerated in the background at most
 // hourly. Keeps content edits fresh without giving up edge caching.
@@ -71,6 +72,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.

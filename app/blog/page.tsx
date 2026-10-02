@@ -40,6 +40,7 @@ import { linkablePosts } from "@/lib/seo/link-policy";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Rental Property Investing Blog",
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
     "Practical guides to rental property analysis, financing, cash flow, taxes, and underwriting, with formulas, worked examples, and editable assumptions.",
   alternates: { canonical: "/blog" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Rental Property Investing Blog | TrueCap",
     description:
       "Practical guides to rental property analysis, financing, cash flow, taxes, and underwriting, with formulas, worked examples, and editable assumptions.",

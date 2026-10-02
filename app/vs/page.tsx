@@ -48,6 +48,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 import { VS_HUB_CRUMB } from "@/components/marketing/vs-breadcrumb-schema";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
@@ -61,6 +62,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Rental Property Calculator Comparisons | TrueCap",
     description:
       "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using side-by-side workflow reviews.",

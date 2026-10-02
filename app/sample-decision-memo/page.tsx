@@ -25,6 +25,7 @@ import {
 } from "@/lib/financial-presentation";
 import type { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Sample Rental Decision Memo",
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
     "See an illustrative TrueCap rental acquisition decision, including the Offer Ceiling, targets, downside range, risks, and verification plan.",
   alternates: { canonical: "/sample-decision-memo" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     type: "website",
     url: "/sample-decision-memo",
     title: "Sample Rental Decision Memo | TrueCap",

@@ -67,6 +67,7 @@ import {
 } from "@/lib/public-pricing";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
 const PAGE_DESCRIPTION =
@@ -85,6 +86,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/for-agents" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: `${PAGE_TITLE} | TrueCap`,
     description: PAGE_DESCRIPTION,
     url: "/for-agents",

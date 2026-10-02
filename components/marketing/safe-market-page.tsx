@@ -42,6 +42,7 @@ import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export type SafeMarketPageIdentity = {
   city: string;
@@ -84,6 +85,7 @@ export function buildSafeMarketMetadata({
     // A city page without HUD rent is a template, not a page worth ranking.
     robots: isMarketIndexable(slug) ? undefined : NOINDEX_FOLLOW,
     openGraph: {
+      ...OPEN_GRAPH_BASE,
       title: data.title,
       description: data.description,
       url: `/markets/${slug}`,

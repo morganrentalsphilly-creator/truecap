@@ -23,6 +23,7 @@ import { groupMarketsByStateRange } from "@/lib/content-hub-groups";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
 import { linkableMarkets, linkableStates } from "@/lib/seo/link-policy";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 type Entry = { slug: string; name: string; stateName: string };
 
@@ -49,6 +50,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/markets" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Rental Property Markets by City | TrueCap",
     description: `Browse ${ALL.length}+ U.S. city verification guides and analyze a supported address with editable assumptions.`,
     url: "/markets",

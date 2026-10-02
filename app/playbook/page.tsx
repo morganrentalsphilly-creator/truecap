@@ -29,6 +29,7 @@ import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "The First Offer Playbook",
@@ -36,6 +37,7 @@ export const metadata: Metadata = {
     "An educational path from rental screening to a documented decision: define your Buy Box, verify assumptions, and review your Offer Ceiling with advisers.",
   alternates: { canonical: "/playbook" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "The First Offer Playbook — TrueCap",
     description:
       "Define your Buy Box, source candidates, verify the analysis, review the Offer Ceiling, and make your own documented decision.",

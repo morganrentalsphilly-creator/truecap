@@ -306,19 +306,42 @@ describe("social card contract", () => {
     expect(typed).toEqual([]);
   });
 
-  it("a page with a card outside /vs and /blog carries the site name and locale", () => {
+  it("every page that sets openGraph carries the site name and locale", () => {
     // Page-level openGraph drops og:site_name and og:locale unless the page
-    // spreads the base. The comparison pages and the blog posts are edited by
-    // the weekly SEO loop and take the base in their own pass.
-    const offenders = WITH_CARD.filter(
-      (page) => !/^app\/(?:vs|blog)\//.test(page),
-    ).filter((page) => {
-      const source = visible(page);
-      // The legacy /d share page builds a deliberately bare card.
-      if (page === "app/d/[encoded]/page.tsx") return false;
-      return setsOpenGraph(source) && !source.includes("...OPEN_GRAPH_BASE,");
-    });
+    // spreads the base (2026-10 audit: missing on every sitemap page).
+    //
+    // Two groups wait, each on a decision this test does not make:
+    //   - The comparison pages and blog posts the weekly SEO loop edits
+    //     (app/vs/<slug>, app/blog/<slug>). The loop's verifier refuses any
+    //     edit to a page that imports a module outside its import allow-list
+    //     (seo/config.json `paths.importAllow`), and the base's module is not
+    //     on it. They take the base once it is. Posts built with
+    //     buildSourceFirstArticleMetadata already have it through the builder.
+    //   - The two share pages. What a texted /s or /d link previews as,
+    //     site name included, is an open product decision.
+    const LOOP_EDITED = /^app\/(?:vs|blog)\/[^/[\]]+\/page\.tsx$/;
+    const SHARE_PAGES = new Set([
+      "app/s/[token]/page.tsx",
+      "app/d/[encoded]/page.tsx",
+    ]);
+    const held = (page: string) =>
+      SHARE_PAGES.has(page) ||
+      (LOOP_EDITED.test(page) && page !== "app/blog/topics/page.tsx");
+    const subject = PAGES.filter((page) => setsOpenGraph(visible(page)));
+    expect(subject.length).toBeGreaterThan(150);
+    expect(subject.filter((page) => !held(page)).length).toBeGreaterThan(50);
+    const offenders = subject.filter(
+      (page) => !held(page) && !visible(page).includes("...OPEN_GRAPH_BASE,"),
+    );
     expect(offenders).toEqual([]);
+    // A held page that takes the base early is fine; one that types its own
+    // site name is caught by the root layout test above.
+    for (const [file, name] of [
+      ["components/marketing/source-first-article.tsx", "buildSourceFirstArticleMetadata"],
+      ["components/marketing/safe-market-page.tsx", "buildSafeMarketMetadata"],
+    ] as const) {
+      expect(builder(file, name), name).toContain("...OPEN_GRAPH_BASE,");
+    }
   });
 
   it("each persona card prints its page's own headline and lede", () => {

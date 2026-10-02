@@ -28,6 +28,7 @@ import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { GLOSSARY_TERM_SET_NAME, glossaryTermSetId } from "@/lib/seo/glossary-ld";
 import { BreadcrumbSchema } from "@/components/marketing/breadcrumb-schema";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Real Estate Glossary",
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/glossary" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Real Estate Glossary",
     description:
       "Plain-English definitions of every rental-property analysis term. Cross-linked to the calculators.",
