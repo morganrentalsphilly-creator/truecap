@@ -7,6 +7,25 @@ const WINDOW_MS = 60_000;
 let reportWindowStartedAt = 0;
 let reportCount = 0;
 
+/**
+ * Origins the consent-gated Google Ads tag (components/analytics/
+ * google-measurement.tsx) calls on every consented page view. The report-only
+ * policy in next.config.mjs does not list them yet, so each consented view
+ * posted 4 or 5 reports here and each one became a Sentry event: with the
+ * per-page-load PostHog notice, that is how the site spent its own error
+ * quota (Sentry answered 429 from 2026-10-01). These four are the origins the
+ * 2026-10 audit captured in report bodies; a report naming one of them says
+ * nothing new, so it is answered and not forwarded. Every other origin is
+ * still reported. When the policy gains these hosts the reports stop at the
+ * browser and this list can go.
+ */
+const KNOWN_GOOGLE_ADS_ORIGINS: ReadonlySet<string> = new Set([
+  "https://googleads.g.doubleclick.net",
+  "https://ad.doubleclick.net",
+  "https://www.google.com",
+  "https://www.googleadservices.com",
+]);
+
 type ReportBodyRead =
   | { oversized: true }
   | { oversized: false; body: Record<string, unknown> };
@@ -82,7 +101,6 @@ export async function POST(request: Request) {
   if (Number.isFinite(contentLength) && contentLength > MAX_REPORT_BYTES) {
     return new NextResponse(null, { status: 413 });
   }
-  if (!rateLimitAllowsReport()) return new NextResponse(null, { status: 204 });
 
   try {
     const parsed = await readReportBody(request);
@@ -92,6 +110,18 @@ export async function POST(request: Request) {
       body["csp-report"] && typeof body["csp-report"] === "object"
         ? (body["csp-report"] as Record<string, unknown>)
         : body;
+    const blockedOrigin = safeOrigin(raw["blocked-uri"]);
+    // Known Ads-tag reports are dropped before the limiter counts them, so
+    // they cannot use up the window and push out a report that matters.
+    const forward =
+      !(blockedOrigin && KNOWN_GOOGLE_ADS_ORIGINS.has(blockedOrigin)) &&
+      rateLimitAllowsReport();
+    if (!forward) {
+      return new NextResponse(null, {
+        status: 204,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
     const directive =
       typeof raw["effective-directive"] === "string"
         ? raw["effective-directive"].slice(0, 100)
@@ -102,7 +132,7 @@ export async function POST(request: Request) {
       level: "info",
       tags: { feature: "csp-report", directive },
       extra: {
-        blockedOrigin: safeOrigin(raw["blocked-uri"]),
+        blockedOrigin,
         documentRoute: safeDocumentRoute(raw["document-uri"]),
         sourceOrigin: safeOrigin(raw["source-file"]),
       },
