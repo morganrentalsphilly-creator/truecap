@@ -142,6 +142,29 @@ describe("tool social cards say only what the tool does", () => {
       );
     }
   });
+
+  it("the rehab card calls the defaults editable only if the page's estimator takes overrides", () => {
+    // lib/rehab-estimator.ts accepts per-item `overrides`, but the estimator
+    // the tool page mounts passes none: it has three number fields (square
+    // feet, baths, contingency) and a checkbox per work item, and each item's
+    // amount is fixed text. A card saying "Editable ... Replace each line
+    // with your own bid" promised a control the page does not have.
+    const page = read("app/tools/rehab-cost-estimator/page.tsx");
+    expect(page).toContain("<RehabEstimatorCard />");
+    // Code only: the estimator's header comment mentions overrides it does
+    // not implement, and the card's own comment explains this rule.
+    const code = (path: string) =>
+      read(path)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    const takesOverrides = /\boverrides\b/.test(
+      code("components/investcalc/rehab-estimator-card.tsx"),
+    );
+    if (takesOverrides) return;
+    expect(code("app/tools/rehab-cost-estimator/opengraph-image.tsx")).not.toMatch(
+      /\bedit(?:able|s)?\b|\boverrid|\breplace (?:each|every|any) line\b|your own (?:bid|number|amount)/i,
+    );
+  });
 });
 
 describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name", () => {

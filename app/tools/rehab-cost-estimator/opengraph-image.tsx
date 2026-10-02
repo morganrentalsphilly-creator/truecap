@@ -7,6 +7,12 @@
  * are passed here and say only what is true of this tool: it is free and it
  * needs no account. The template's default chips include "Live data", which
  * no tool on this template shows.
+ *
+ * The line says what the tool on the page does: you tick work items, set the
+ * square footage, the bath count and a contingency, and read a total. The
+ * amounts per item are fixed defaults there (the page's estimator passes no
+ * `overrides` to estimateRehab), so the card does not call them editable.
+ * lib/__tests__/released-tool-surface-guards.test.ts holds it to that.
  */
 
 import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
@@ -19,7 +25,7 @@ export default function Image() {
   return renderToolOgImage({
     name: "Rehab cost estimator",
     tagline:
-      "Editable planning defaults for cosmetic, kitchen, bath and systems work. Replace each line with your own bid.",
+      "Planning defaults for cosmetic, kitchen, bath and systems work. Pick the scope, add a contingency, and get contractor bids before you commit.",
     pills: ["Free", "No signup"],
   });
 }
