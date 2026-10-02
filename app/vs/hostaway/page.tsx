@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "Hostaway manages STRs after closing. TrueCap underwrites the STR deal before. Different stages.",
     url: "/vs/hostaway",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Hostaway",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "hostaway" | "tie";

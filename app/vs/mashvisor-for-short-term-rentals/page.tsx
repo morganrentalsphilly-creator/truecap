@@ -60,16 +60,8 @@ export const metadata: Metadata = {
       "STR-specific TrueCap vs Mashvisor: market scoring vs per-deal underwriting. They do different jobs.",
     url: "/vs/mashvisor-for-short-term-rentals",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Mashvisor for short-term rentals",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "mashvisor" | "tie";

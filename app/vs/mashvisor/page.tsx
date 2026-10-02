@@ -63,16 +63,8 @@ export const metadata: Metadata = {
       "Per-deal underwriting vs market heatmaps + Airbnb data. Different jobs, different price points.",
     url: "/vs/mashvisor",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs Mashvisor",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "mashvisor" | "tie";

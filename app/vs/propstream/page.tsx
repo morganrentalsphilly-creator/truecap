@@ -62,16 +62,8 @@ export const metadata: Metadata = {
       "PropStream finds leads. TrueCap underwrites them. Different jobs in the same workflow.",
     url: "/vs/propstream",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs PropStream",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "propstream" | "tie";

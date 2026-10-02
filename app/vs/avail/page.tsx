@@ -68,11 +68,8 @@ export const metadata: Metadata = {
       "Avail is post-purchase landlord ops. TrueCap is pre-purchase underwriting. Different halves of the DIY-landlord lifecycle.",
     url: "/vs/avail",
     type: "website",
-    images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Avail" },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "avail" | "tie";

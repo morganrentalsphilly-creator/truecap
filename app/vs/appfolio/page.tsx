@@ -63,16 +63,8 @@ export const metadata: Metadata = {
       "AppFolio is post-purchase property management software. TrueCap is pre-purchase rental underwriting.",
     url: "/vs/appfolio",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap vs AppFolio",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 type Verdict = "truecap" | "appfolio" | "tie";
