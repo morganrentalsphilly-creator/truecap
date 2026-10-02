@@ -414,7 +414,9 @@ export function ArvCalculatorWidget() {
       </div>
 
       {/* One plain action, then one line saying what does not carry over
-          (the 1% rule widget's pattern). */}
+          (the 1% rule widget's pattern). The line names the price screen and
+          does not point "above": it also shows while a field is in error or
+          empty, when no price screen is on the page. */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
@@ -427,7 +429,7 @@ export function ArvCalculatorWidget() {
         id={handoffNoteId}
         className="mt-2 text-pretty text-sm text-muted-foreground"
       >
-        The price screen above is a rule of thumb and does not carry over.
+        The 70%-rule price screen is a rule of thumb and does not carry over.
         Enter the price you are evaluating.
       </p>
     </div>

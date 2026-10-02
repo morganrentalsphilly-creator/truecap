@@ -80,8 +80,10 @@ describe("P2-47: calculators hand off with a plain button and one honest line", 
 
   const FREE_NOTE =
     "Cap rate, CoC, DSCR and cash flow are free in TrueCap. The 10-year projection is a Pro feature.";
+  // It names the price screen and does not say "above": the line also shows
+  // while a field is in error or empty, when no price screen is on the page.
   const HEURISTIC_NOTE =
-    "The price screen above is a rule of thumb and does not carry over. Enter the price you are evaluating.";
+    "The 70%-rule price screen is a rule of thumb and does not carry over. Enter the price you are evaluating.";
 
   /** The handoff anchor (the one link to /analyze) and the line it is described by. */
   function handoff(html: string) {
@@ -117,10 +119,13 @@ describe("P2-47: calculators hand off with a plain button and one honest line", 
     expect(label).not.toMatch(/these numbers|this price|this rent/i);
   });
 
-  it.each(HEURISTIC)("%s: 'Open the rental analyzer', then what does not carry over", (_path, Widget) => {
+  it.each(HEURISTIC)("%s: 'Open the rental analyzer', then what does not carry over", (path, Widget) => {
     const { label, note } = handoff(renderToStaticMarkup(createElement(Widget)));
     expect(label).toBe("Open the rental analyzer");
     expect(note).toBe(HEURISTIC_NOTE);
+    // The note is outside the result's branches, so it must read true in the
+    // error and empty states too: it points at no figure.
+    expect(code(path)).not.toMatch(/price screen\s+above/i);
   });
 
   it("the free and Pro halves of the note are what the catalog says", () => {
