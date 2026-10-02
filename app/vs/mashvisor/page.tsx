@@ -126,7 +126,7 @@ const MATRIX: Row[] = [
   {
     feature: "Sale + rent comps",
     truecap:
-      "One free lookup with an account; Pro and Agent Pro include 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
+      "One free lookup with an account; Pro and Agent Pro include up to 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
     mashvisor:
       "Rental comps on Standard and above; comparable sales feed its investment scores",
     winner: "mashvisor",

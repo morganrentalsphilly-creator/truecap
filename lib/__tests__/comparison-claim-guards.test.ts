@@ -123,10 +123,12 @@ describe("comparison claim truth", () => {
     // comps (lib/property-enrichment/rentcast.ts), so the cell these two pages
     // carried, "…; no AVM", was untrue. The allowances are the catalog's.
     const comps = read("lib/entitlements-catalog.ts");
-    expect(comps).toMatch(/comps: \{[^}]*freeLimit: "1 lifetime lookup"[^}]*proLimit: "50\/mo"/);
+    expect(comps).toMatch(
+      /comps: \{[^}]*tiers: \["free", "pro", "agent_pro"\][^}]*freeLimit: "1 lifetime lookup"[^}]*proLimit: "50\/mo"/,
+    );
     for (const file of ["app/vs/mashvisor/page.tsx", "app/vs/privy/page.tsx"]) {
       expect(read(file), file).toContain(
-        "One free lookup with an account; Pro and Agent Pro include 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
+        "One free lookup with an account; Pro and Agent Pro include up to 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
       );
     }
     expect(comparisonCopy).not.toMatch(/\bno AVM\b/i);
@@ -135,6 +137,11 @@ describe("comparison claim truth", () => {
     const rentcast = read("app/vs/rentcast/page.tsx");
     expect(rentcast).not.toContain("Purchase price as user input");
     expect(rentcast).not.toMatch(/\$15-\$74/);
+    expect(rentcast).toContain(
+      "one free lookup with an account, up to 50 per month on Pro and Agent Pro",
+    );
+    // The short-term mode is live as a beta revenue screen, so "coming" was untrue.
+    expect(read("app/vs/mashvisor/page.tsx")).not.toMatch(/STR-specific fields coming/i);
   });
 
   it("keeps comparison articles live-priced and appropriately qualified", () => {
