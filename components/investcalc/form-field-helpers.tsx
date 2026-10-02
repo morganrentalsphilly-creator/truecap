@@ -25,14 +25,21 @@ export function optionalNumberSetValueAs(value: unknown) {
  * updates the message on every change as before, and every other message
  * (required, too large) is never held. The schema and what a run accepts
  * are unchanged: this only decides when the message is shown.
+ *
+ * Only a value the visitor is typing is held (`fieldDirty`). When the page
+ * validates a value it loaded itself, the message shows at once: restoring
+ * a deal saved in an older format resets the form, says "Fix the
+ * highlighted field" and validates, and a reset leaves the field clean.
  */
 export function isMinimumErrorHeldWhileTyping(input: {
   errorType: string | undefined;
+  fieldDirty: boolean;
   fieldTouched: boolean;
   submitCount: number;
 }): boolean {
   return (
     input.errorType === "too_small" &&
+    input.fieldDirty &&
     !input.fieldTouched &&
     input.submitCount === 0
   );
