@@ -314,7 +314,7 @@ export default function VsYardiBreezePage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How small portfolios use both
+            How TrueCap and Yardi Breeze fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>

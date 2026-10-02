@@ -209,10 +209,15 @@ describe("every comparison page (all four page groups and the hub)", () => {
     // together" describe fit and pass. Three patterns, one from each page
     // group that wrote one; vs-shared-truth-guards.test.tsx holds a fourth
     // over the same files and the social cards.
+    // The last pattern here is the same claim with no quantifier: a heading or
+    // description saying a group of people "use both" (as "How DIY landlords
+    // use both" did) presupposes usage nobody measured. "can use both" and
+    // "may use both" still pass.
     const QUANTIFIED = [
       /\b(?:most|many|typically|often|commonly)\b[^.?!]{0,90}\b(?:use|uses|using|run|runs)\s+(?:both|TrueCap)\b|most common combined workflow|common combination|hosts use both/i,
       /\b(?:most|many|typically|commonly|often)\b[^.?!<>{}]{0,90}\b(?:use|uses|using|run|runs|keep|keeps|pair|pairs|end up)\b[^.?!<>{}]{0,60}\b(?:both|TrueCap|together|combination|combined)\b|\b(?:most )?common (?:combination|combined workflow)\b|\bAgents use both\b/i,
       /\b(?:most|many)\s+(?:[\w-]+\s+){0,3}(?:landlords|investors|buyers|agents|hosts|managers)\b[^.]{0,80}\b(?:use|using|run|end up)\b|\b(?:typically|commonly|often)\s+(?:use|used)\b/i,
+      /\b(?:landlords|investors|portfolios|agents|realtors|hosts|managers|operators|buyers)\s+use both\b/i,
     ];
     const claim = (text: string) => QUANTIFIED.map((pattern) => text.match(pattern)?.[0]).find(Boolean) ?? null;
 
@@ -221,6 +226,8 @@ describe("every comparison page (all four page groups and the hub)", () => {
       "Many active off-market buyers use both.",
       "Most diversified investors keep 1-3 direct rentals AND some money in Fundrise, a common combination.",
       "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Often used together.",
+      "How small portfolios use both",
+      "Different jobs in the rental workflow, and how realtors use both.",
     ]) {
       expect(claim(audited), audited).not.toBeNull();
     }
@@ -228,7 +235,9 @@ describe("every comparison page (all four page groups and the hub)", () => {
       "A landlord may use both.",
       "The two cover different stages and can be used together.",
       "Most rows show clear specialization.",
-      "How small portfolios use both",
+      "How TrueCap and Yardi Breeze fit together",
+      "An agent or investor can use both.",
+      "STR investors may use both.",
     ]) {
       expect(claim(plain), plain).toBeNull();
     }
