@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
-TrueCap — 3 ANCHOR posts. Pin these / drive all social traffic to them.
+TrueCap: 2 anchor posts.
 
-  anchor_01_stop_losing_deals.png   — Hook (pain: bad math kills deals)
-  anchor_02_the_walkthrough.png     — Proof (real deal case study)
-  anchor_03_60_seconds.png          — Promise (clean product demo)
+  anchor_01_stop_losing_deals.png   Hook (a spreadsheet beside TrueCap)
+  anchor_03_60_seconds.png          Promise (product demo)
 
-Format: 1080x1080 (Instagram square — standard feed).
-Polish: tight typography, generous whitespace, single focal point per piece.
+anchor_02_the_walkthrough.png and the function that drew it were removed on
+2026-10-02: it told an invented deal in the first person under the label
+"real deal". PRODUCT.md allows no fabricated proof, so do not add a case
+study, a first-person story or a quote here.
+
+The figures in both remaining posts are sample figures, not results.
+
+Format: 1080x1080 (Instagram square, standard feed).
 
 Run:  python3 generate_anchors.py
 """
@@ -229,109 +234,6 @@ def anchor_01_stop_losing_deals():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# ANCHOR #2 — Proof: "Why I walked."
-# Dark theme. Single big deal card. Tighter headline.
-# ═══════════════════════════════════════════════════════════════════════
-def anchor_02_the_walkthrough():
-    canvas = Image.new("RGBA", (CANVAS, CANVAS), DARK_BG)
-    draw = ImageDraw.Draw(canvas)
-
-    # Brand glow background
-    glow = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
-    gd = ImageDraw.Draw(glow)
-    gd.ellipse((-300, -300, 700, 600), fill=(82, 72, 212, 30))
-    glow = glow.filter(ImageFilter.GaussianBlur(80))
-    canvas.alpha_composite(glow)
-
-    # ── Top: kicker + headline ──
-    text(draw, (CANVAS // 2, 64), "REAL DEAL WALKTHROUGH · PHILADELPHIA",
-         F(LATO_BLACK, 13), BRAND_SOFT, anchor="ma")
-
-    text(draw, (CANVAS // 2, 116),
-         "8.2% cap rate on paper.",
-         F(LATO_BLACK, 44), MUTED, anchor="ma")
-    text(draw, (CANVAS // 2, 168),
-         "5.1% in reality.",
-         F(LATO_BLACK, 56), WHITE, anchor="ma")
-    text(draw, (CANVAS // 2, 230),
-         "Here's why I walked.",
-         F(LATO_BLACK, 56), (251, 113, 133), anchor="ma")
-
-    # ── Deal card ──
-    card_x, card_y = 60, 340
-    card_w, card_h = CANVAS - 120, 580
-    shadow_card(canvas, card_x, card_y, card_w, card_h, color=(0,0,0), alpha=80, blur=24)
-    rounded_rect(draw, (card_x, card_y, card_x + card_w, card_y + card_h),
-                 r=22, fill=CARD_DARK, outline=BORDER_DARK, width=1)
-
-    # Property header
-    text(draw, (card_x + 28, card_y + 26), "Fishtown duplex · Philadelphia, PA",
-         F(LATO_BOLD, 19), WHITE, anchor="la")
-    text(draw, (card_x + 28, card_y + 54), "$420k · 1925 build · both units rented",
-         F(LATO_REG, 15), MUTED, anchor="la")
-    verdict_chip(draw, card_x + card_w - 96, card_y + 26, "SKIP", tone="skip")
-
-    # Big metrics row
-    nums_y = card_y + 110
-    nums = [
-        ("Asking",   "$420k", WHITE),
-        ("Cap rate", "5.1%",  AMBER),
-        ("DSCR",     "1.18",  AMBER),
-        ("NCF / mo", "$430",  AMBER),
-    ]
-    col_w = (card_w - 56) // 4
-    for i, (label, val, color) in enumerate(nums):
-        x = card_x + 28 + col_w * i
-        text(draw, (x, nums_y), label, F(LATO_BOLD, 13), MUTED, anchor="la")
-        text(draw, (x, nums_y + 22), val, F(LATO_BLACK, 36), color, anchor="la")
-
-    # Divider
-    div_y = card_y + 210
-    draw.line((card_x + 28, div_y, card_x + card_w - 28, div_y),
-              fill=BORDER_DARK_2, width=1)
-
-    # Section header
-    text(draw, (card_x + 28, div_y + 22), "WHAT THE LISTING DIDN'T TELL YOU",
-         F(LATO_BLACK, 13), BRAND_SOFT, anchor="la")
-
-    # 3 reasons
-    reasons = [
-        ("1", "Seller's insurance was $1,800/yr.",
-              "Your quote: $4,800. Insurer-of-last-resort pricing."),
-        ("2", "Year-1 capex on a 1925 build isn't optional.",
-              "$3,400 reserve before you've collected first month's rent."),
-        ("3", "Real Philly vacancy is 6%, not the 0% in the pro forma.",
-              "Another $2,808/yr the headline cap rate quietly hid."),
-    ]
-    ry = div_y + 56
-    for num, line1, line2 in reasons:
-        # Number circle
-        circle_r = 16
-        cx, cy = card_x + 44, ry + 14
-        draw.ellipse((cx - circle_r, cy - circle_r, cx + circle_r, cy + circle_r), fill=BRAND)
-        text(draw, (cx, cy + 1), num, F(LATO_BLACK, 17), WHITE, anchor="mm")
-        # Text
-        text(draw, (cx + 28, ry), line1, F(LATO_BOLD, 16), WHITE, anchor="la")
-        text(draw, (cx + 28, ry + 24), line2, F(LATO_REG, 14), MUTED_DIM, anchor="la")
-        ry += 68
-
-    # Bottom punchline inside card
-    punch_y = card_y + card_h - 70
-    draw.line((card_x + 28, punch_y - 16, card_x + card_w - 28, punch_y - 16),
-              fill=BORDER_DARK_2, width=1)
-    text(draw, (card_x + 28, punch_y), "+$767/mo of friction the listing hid.",
-         F(LATO_BLACK, 18), WHITE, anchor="la")
-    text(draw, (card_x + 28, punch_y + 28), "TrueCap surfaces all of it in 60 seconds.",
-         F(LATO_REG, 14), MUTED, anchor="la")
-
-    # ── Bottom: brand mark ──
-    truecap_logo(draw, CANVAS // 2 - 52, CANVAS - 56, dark=True)
-
-    canvas.convert("RGB").save("anchor_02_the_walkthrough.png", "PNG", optimize=True)
-    print("✓ anchor_02_the_walkthrough.png")
-
-
-# ═══════════════════════════════════════════════════════════════════════
 # ANCHOR #3 — Promise: "60 seconds. Every number you need."
 # Light theme. Big result card with clean projection chart below.
 # ═══════════════════════════════════════════════════════════════════════
@@ -436,6 +338,5 @@ def anchor_03_60_seconds():
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     anchor_01_stop_losing_deals()
-    anchor_02_the_walkthrough()
     anchor_03_60_seconds()
-    print("\nDone — 3 squares (1080x1080) generated.")
+    print("\nDone: 2 squares (1080x1080) generated.")
