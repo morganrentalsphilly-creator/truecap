@@ -822,7 +822,7 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
             context={`a ${city} property`}
             handoff={{ address }}
             utmSource="market"
-            supportingText={`Start with ${address} in the address field. Review every labeled starting assumption and replace it with property-specific evidence.`}
+            supportingText={`Start with a street address in ${city}, ${stateCode}. Review every labeled starting assumption and replace it with property-specific evidence.`}
           />
         </div>
 
