@@ -505,8 +505,8 @@ const BUILDIUM_FAQ: FaqItem[] = [
         Compare the vendors&apos; current pricing, minimums, accounting,
         resident, owner, maintenance, support, and implementation features.
         AppFolio&apos;s Core plan currently states a 50-unit minimum; Buildium
-        publishes starting prices for its three plans and states no unit
-        minimum.
+        publishes starting prices for its three plans, and its pricing page
+        lists no unit minimum.
       </>
     ),
   },
