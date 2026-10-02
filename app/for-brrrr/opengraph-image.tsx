@@ -13,7 +13,8 @@ export default function Image() {
   return renderPersonaOgImage({
     label: "For BRRRR operators",
     headline: "Research each stage without pretending it is one finished model.",
-    subhead: "TrueCap's analyzer covers rehab budget, ARV, DSCR, and stabilized rental returns as separate steps.",
+    subhead:
+      "TrueCap's analyzer covers rehab budget, DSCR, and stabilized rental returns as separate steps, and ARV has its own calculator.",
     path: "/for-brrrr",
   });
 }

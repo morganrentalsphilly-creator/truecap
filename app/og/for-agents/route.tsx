@@ -10,16 +10,16 @@ import {
 
 /**
  * GET /og/for-agents — the agent landing page's OG card: the agent headline
- * beside the REAL decision memo screenshot from the sample flow
- * (public/product/memo-desktop.png), the artifact an investor client
- * receives, shown as a printed page (a 1px rule, no radius, no shadow).
- * Degrades to the headline alone if the screenshot cannot be loaded, never to
- * a placeholder.
+ * beside a capture of the sample decision memo page
+ * (public/product/memo-desktop.png, shot from /sample-decision-memo), shown
+ * as a printed page (a 1px rule, no radius, no shadow). It is the sample
+ * page, not the co-branded share link or PDF a client receives, which are
+ * laid out differently; the page's og:image alt says the same. Degrades to
+ * the headline alone if the capture cannot be loaded, never to a placeholder.
  *
- * A route handler rather than app/for-agents/opengraph-image.tsx so the
- * page's metadata can point og:image AND twitter:image at one URL (the file
- * convention only sets og:image, and the old card's copy had drifted from
- * the page).
+ * A route handler rather than app/for-agents/opengraph-image.tsx because the
+ * old file card's copy had drifted from the page; the page's metadata points
+ * og:image and twitter:image at this URL.
  */
 
 const HEADLINE = "Send your investor clients deals that already pencil.";
