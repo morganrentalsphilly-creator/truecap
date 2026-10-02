@@ -3,7 +3,7 @@
  *
  * Each block pins one statement the audit found false on the reference
  * surfaces (/methodology, /tools and its calculators, /glossary,
- * /states, the spreadsheet page, /llms.txt, /feed.xml) against the thing it describes:
+ * /states, the spreadsheet page, /llms.txt, /llms-full.txt, /feed.xml) against the thing it describes:
  * a recomputed number, a workbook cell, the rendered page. Where a number is
  * asserted it is recomputed here, so a wrong figure fails even if someone
  * types a different wrong figure.
@@ -15,6 +15,7 @@ import { strFromU8, unzipSync } from "fflate";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { GET as getFeed } from "@/app/feed.xml/route";
+import { GET as getLlmsFull } from "@/app/llms-full.txt/route";
 import { GET as getLlmsTxt } from "@/app/llms.txt/route";
 import MethodologyPage from "@/app/methodology/page";
 import ToolsLandingPage from "@/app/tools/page";
@@ -73,10 +74,13 @@ describe("P1-12: the formula claims match what /methodology publishes", () => {
   });
 
   it("every core formula /tools names has its own heading under 'The core formulas' on /methodology", () => {
-    const core = methodologyHtml.slice(
-      methodologyHtml.indexOf("The core formulas"),
-      methodologyHtml.indexOf("Decision thresholds and Offer Ceiling"),
-    );
+    // Anchor on the two h2 elements, not on the phrase: the lead box above
+    // also says "The core formulas are published and versioned."
+    const start = methodologyHtml.indexOf(">The core formulas</h2>");
+    const end = methodologyHtml.indexOf(">Decision thresholds and Offer Ceiling</h2>");
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    const core = methodologyHtml.slice(start, end);
     const headings = [...core.matchAll(/<h3\b[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => text(m[1]!));
     expect(headings).toEqual([
       "Cap rate",
@@ -199,6 +203,21 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     expect(outside).toContain("href={HVS_RENTAL_VACANCY.href}");
     expect(outside).not.toContain("census.gov");
   });
+
+  it("llms-full.txt describes the vacancy calculator as the page does: graded bands, no denial of a benchmark", async () => {
+    const full = await (await getLlmsFull()).text();
+    const start = full.indexOf("/tools/vacancy-rate-calculator");
+    expect(start).toBeGreaterThan(-1);
+    const entry = full.slice(start, full.indexOf("###", start));
+    // The page opens with a sourced national figure and its structured data
+    // says the result is graded against fixed bands; this entry must not say
+    // the opposite.
+    expect(entry).not.toMatch(/does not supply/i);
+    expect(entry).toContain("graded against fixed rule-of-thumb bands");
+    expect(read("app/tools/vacancy-rate-calculator/page.tsx")).toContain(
+      "Result graded against fixed rule-of-thumb vacancy bands",
+    );
+  });
 });
 
 describe("P1-36: the spreadsheet page describes the workbook it links", () => {
@@ -217,6 +236,12 @@ describe("P1-36: the spreadsheet page describes the workbook it links", () => {
     expect(page).toContain(`$${cell("B11").toLocaleString("en-US")}/mo rent`);
     expect(page).toContain(`${cell("B7")}% down at ${cell("B8")}%`);
     expect(page).toContain(`Property tax starts at ${cell("B12")}% of the price`);
+  });
+
+  it("tells the reader to enter a tax rate, because the workbook's property tax input is a percent of price", () => {
+    const label = sheet1.match(/<x:c r="A12"[^>]*><x:v>([^<]*)<\/x:v>/)![1]!;
+    expect(label).toMatch(/Property tax \(% of price/);
+    expect(page).toContain("replace with the rate from the parcel&apos;s actual bill (annual bill ÷ price, as a percent)");
   });
 
   it("does not present the Strong-to-Negative screening bands as Buy Box fit", () => {
