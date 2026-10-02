@@ -119,7 +119,7 @@ const MATRIX: Row[] = [
     feature: "Skip tracing",
     truecap: "No",
     propstream:
-      "Yes: free on Pro and Elite; a per-contact add-on on Essentials",
+      "Yes: free skip tracing included on Pro and Elite, extra contacts at 10¢ each; 12¢ a contact on Essentials (as of October 2026)",
     winner: "propstream",
   },
   {
@@ -139,7 +139,7 @@ const MATRIX: Row[] = [
     feature: "List builder / direct mail integration",
     truecap: "No",
     propstream:
-      "Yes: marketing campaigns on every plan; direct mail included on Pro and Elite, an add-on on Essentials",
+      "Yes: marketing campaigns on every plan; direct mail is a paid add-on on every plan",
     winner: "propstream",
   },
   {
