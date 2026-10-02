@@ -67,9 +67,9 @@ export const metadata: Metadata = {
     description: PAGE_DESCRIPTION,
     url: "/for-investors",
     type: "website",
-    images: [{ url: "/og/home", width: 1200, height: 630, alt: "TrueCap for rental investors" }],
   },
-  twitter: { card: "summary_large_image", images: ["/og/home"] },
+  // No `images` here or above: the sibling opengraph-image.tsx is the card.
+  twitter: { card: "summary_large_image" },
 };
 
 /** The hero's metric strip, joined with " · " (each item keeps its dot). */
