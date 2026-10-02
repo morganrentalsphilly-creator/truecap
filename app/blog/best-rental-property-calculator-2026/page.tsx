@@ -92,7 +92,8 @@ const RANKED_CALCULATORS = [
     name: "DealCheck",
     bestFor: "Best mobile experience + best listing import",
     url: "/vs/dealcheck",
-    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
+    pricing:
+      "Free Starter; Plus $10/mo and Pro $20/mo billed annually ($14 / $29 billed monthly), as of October 2026",
     pros: [
       "Native iOS and Android apps",
       "Address search that imports property details, value and rent estimates, taxes and photos from public records and listings",
@@ -101,7 +102,7 @@ const RANKED_CALCULATORS = [
     ],
     cons: [
       "Free tier caps saved properties (15 at a time) and requires signup",
-      "Paid tiers mostly raise caps rather than add analysis depth",
+      "Plus and Pro raise the saved-property, photo, comp and template limits and unlock the Purchase Offer Calculator, investment-potential insights and all purchase criteria; custom-branded reports need Pro",
       "Address import pulls property tax amounts and value/rent estimates, but not labeled HUD or FRED benchmarks; refreshed records and listings need Plus or Pro",
     ],
     pickIf:
@@ -120,7 +121,6 @@ const RANKED_CALCULATORS = [
     ],
     cons: [
       "Calculator alone isn't the value — you're really paying for the community",
-      "UX hasn't evolved much in years; mobile is desktop-leaning",
       "Free tier is more limited than TrueCap's",
     ],
     pickIf:
@@ -132,7 +132,7 @@ const RANKED_CALCULATORS = [
     bestFor: "Best for market discovery (heatmaps + neighborhood scoring)",
     url: "/vs/mashvisor",
     pricing:
-      "$49.99–$99.99/month billed annually (Lite, Standard, Professional); Enterprise is custom-priced (as of 2026)",
+      "$39.99–$99.99/month billed annually ($49.99–$119.99 billed quarterly) for Lite, Standard and Professional; Enterprise is custom-priced (as of October 2026)",
     pros: [
       "Neighborhood heatmaps and investment opportunity scores (heatmaps start on the Standard plan)",
       "Strong Airbnb / short-term-rental occupancy + ADR data",
@@ -242,7 +242,7 @@ const FAQ_ITEMS = [
  */
 const CITATIONS = [
   { phrase: "FRED owner-occupied rate", url: "https://www.freddiemac.com/pmms/about-pmms" },
-  { phrase: "Plus $10/mo, Pro $20/mo", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Plus $10/mo and Pro $20/mo billed annually", url: "https://dealcheck.io/pricing/" },
   { phrase: "Native iOS and Android apps", url: "https://dealcheck.io/" },
   {
     phrase: "Address search that imports property details",
@@ -251,7 +251,7 @@ const CITATIONS = [
   { phrase: "site copyright 2015–2026", url: "https://dealcheck.io/features/" },
   { phrase: "projections are listed on every plan", url: "https://dealcheck.io/pricing/" },
   { phrase: "15 at a time", url: "https://dealcheck.io/pricing/" },
-  { phrase: "mostly raise caps", url: "https://dealcheck.io/pricing/" },
+  { phrase: "unlock the Purchase Offer Calculator", url: "https://dealcheck.io/pricing/" },
   {
     phrase: "refreshed records and listings need Plus or Pro",
     url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
@@ -261,7 +261,7 @@ const CITATIONS = [
   { phrase: "Printable PDF reports", url: "https://www.biggerpockets.com/rental-property-calculator" },
   { phrase: "BRRRR + flip + buy-and-hold support", url: "https://www.biggerpockets.com/rental-property-calculator" },
   { phrase: "Free tier is more limited", url: "https://www.biggerpockets.com/rental-property-calculator" },
-  { phrase: "$49.99–$99.99/month billed annually", url: "https://www.mashvisor.com/pricing" },
+  { phrase: "$39.99–$99.99/month billed annually", url: "https://www.mashvisor.com/pricing" },
   { phrase: "heatmaps start on the Standard plan", url: "https://www.mashvisor.com/pricing" },
   { phrase: "occupancy + ADR data", url: "https://www.mashvisor.com/airbnb-data" },
   { phrase: "Rental comps built in", url: "https://www.mashvisor.com/pricing" },
