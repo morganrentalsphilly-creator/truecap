@@ -84,13 +84,14 @@ export function PropertyDetailsSection({
   sampleSlot,
 }: PropertyDetailsSectionProps) {
   const {
-    formState: { errors, touchedFields, submitCount },
+    formState: { errors, dirtyFields, touchedFields, submitCount },
   } = form;
   const bare = chrome === "bare";
-  // The minimum-price message waits for blur or a run attempt; see
-  // isMinimumErrorHeldWhileTyping.
+  // The minimum-price message waits for blur or a run attempt while the
+  // visitor is typing; see isMinimumErrorHeldWhileTyping.
   const purchasePriceError = isMinimumErrorHeldWhileTyping({
     errorType: errors.purchasePrice?.type as string | undefined,
+    fieldDirty: Boolean(dirtyFields.purchasePrice),
     fieldTouched: Boolean(touchedFields.purchasePrice),
     submitCount,
   })

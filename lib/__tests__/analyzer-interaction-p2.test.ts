@@ -205,16 +205,32 @@ describe("the HUD rent check does not grade HUD's own figure (P2-149)", () => {
 });
 
 describe("the minimum-price message waits for blur or a run attempt (P2-150)", () => {
-  it("is held only for a too-small value in a field not yet left and not yet submitted", () => {
-    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldTouched: false, submitCount: 0 })).toBe(true);
-    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldTouched: true, submitCount: 0 })).toBe(false);
-    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldTouched: false, submitCount: 1 })).toBe(false);
+  it("is held only for a too-small value being typed in a field not yet left and not yet submitted", () => {
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldDirty: true, fieldTouched: false, submitCount: 0 })).toBe(true);
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldDirty: true, fieldTouched: true, submitCount: 0 })).toBe(false);
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldDirty: true, fieldTouched: false, submitCount: 1 })).toBe(false);
   });
 
   it("never holds a required or too-large message, or no error at all", () => {
-    expect(isMinimumErrorHeldWhileTyping({ errorType: "invalid_type", fieldTouched: false, submitCount: 0 })).toBe(false);
-    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_big", fieldTouched: false, submitCount: 0 })).toBe(false);
-    expect(isMinimumErrorHeldWhileTyping({ errorType: undefined, fieldTouched: false, submitCount: 0 })).toBe(false);
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "invalid_type", fieldDirty: true, fieldTouched: false, submitCount: 0 })).toBe(false);
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_big", fieldDirty: true, fieldTouched: false, submitCount: 0 })).toBe(false);
+    expect(isMinimumErrorHeldWhileTyping({ errorType: undefined, fieldDirty: true, fieldTouched: false, submitCount: 0 })).toBe(false);
+  });
+
+  // Restoring a deal saved in an older format resets the form, toasts "Fix
+  // the highlighted field" and validates. A reset leaves every field clean
+  // and untouched with no run attempted, so a too-small price that the page
+  // loaded itself was held and nothing was highlighted.
+  it("shows the message at once for a value the page loaded and validated itself", () => {
+    expect(isMinimumErrorHeldWhileTyping({ errorType: "too_small", fieldDirty: false, fieldTouched: false, submitCount: 0 })).toBe(false);
+    const section = read("components/investcalc/property-details-section.tsx");
+    expect(section).toContain("fieldDirty: Boolean(dirtyFields.purchasePrice),");
+    const page = read("components/investcalc/investcalc-page.tsx");
+    const toastAt = page.indexOf("Fix the highlighted field, then Run and re-save.");
+    expect(toastAt).toBeGreaterThan(-1);
+    // The restore path: reset first, then the toast, then the validation.
+    expect(page.lastIndexOf("form.reset(lenient);", toastAt)).toBeGreaterThan(-1);
+    expect(page.slice(toastAt, toastAt + 400)).toContain("void form.trigger();");
   });
 
   it("drives the price field's message, invalid state and red border together", () => {
