@@ -67,11 +67,11 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "Which STR PMS is best for 1-3 short-term rentals?",
-    a: "Guesty Lite is built for 1–3 listings, and Hostfully says it serves hosts from a single listing up; Hostaway steers single-listing hosts to a waitlist. Lodgify and Smoobu are also worth comparing at this size, and if you only list on Airbnb, its own tools may be enough. As you grow, Hostaway (quoted by listing count), Hostfully (Growth plan pitched at 1–50 listings) and Guesty Pro (4–199 listings) all become options.",
+    a: "Guesty Lite is built for 1–3 listings, and Hostfully says it serves hosts from a single listing up; Hostaway keeps a waitlist for markets and portfolio sizes it does not serve yet, so ask before you plan around a single listing. Lodgify and Smoobu are also worth comparing at this size, and if you only list on Airbnb, its own tools may be enough. As you grow, Hostaway (quoted by listing count), Hostfully (Growth plan pitched at 1–50 listings) and Guesty Pro (4–199 listings) all become options.",
   },
   {
     q: "Hostfully vs Hostaway — which one?",
-    a: "Both serve small-to-mid STR operators; Hostfully pitches its plans from 1 listing up, and Hostaway quotes by listing count. Hostfully is generally easier to onboard with stronger guidebook + branding features. Hostaway has tighter channel management and dynamic pricing integrations. Try the demo of both — the UX preference often decides.",
+    a: "Hostfully pitches its plans from 1 listing up, and Hostaway quotes by listing count. Hostfully offers digital guidebooks, the first one free, and a direct-booking site. Hostaway advertises 300+ integrations against Hostfully's 150+. Look at both before you choose.",
   },
   {
     q: "Hostaway vs Guesty — which is more enterprise?",
@@ -278,8 +278,15 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 .
               </li>
               <li>
-                A marketplace of 300+ integrations, including the
-                dynamic-pricing tools PriceLabs, Wheelhouse, and Beyond.
+                <a href="https://www.hostaway.com/">
+                  300+ integrations by Hostaway&apos;s own count
+                </a>
+                . Its{" "}
+                <a href="https://www.hostaway.com/marketplace/">
+                  Marketplace page advertises 200+ partner-built integrations
+                </a>
+                , including the dynamic-pricing tools PriceLabs, Wheelhouse,
+                and Beyond.
               </li>
               <li>
                 Automation —{" "}
@@ -350,7 +357,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               reservation) and Hostfully (from $15 per property per month plus
               a platform fee) publish entry prices;{" "}
               <a href="https://www.hostaway.com/thank-you-waitlist/">
-                Hostaway sends single-listing hosts to a waitlist
+                Hostaway keeps a waitlist for markets and portfolio sizes it
+                does not serve yet
               </a>
               . For mid-market and larger operators, compare quotes — Hostaway
               and Guesty Pro don&apos;t publish prices, and Hostfully starts at
@@ -360,8 +368,9 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <h2>What if you have only 1-3 STRs?</h2>
             <p>
               Guesty Lite is built for 1–3 listings, and Hostfully says it
-              serves hosts with a single listing; Hostaway sends single-listing
-              hosts to a waitlist. Also look at:
+              serves hosts with a single listing; Hostaway keeps a waitlist for
+              markets and portfolio sizes it does not serve yet, so ask before
+              you plan around a single listing. Also look at:
             </p>
             <ul>
               <li>
@@ -453,7 +462,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               <li>
                 <strong>
                   &quot;I have 5-50 STRs and want deep channel management plus
-                  a 300+ integration marketplace.&quot;
+                  300+ integrations.&quot;
                 </strong>{" "}
                 Hostaway.
               </li>
@@ -528,6 +537,10 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 url: "https://www.hostaway.com/glossary/hostaway-marketplace/",
               },
               {
+                title: "Hostaway, Integration Marketplace",
+                url: "https://www.hostaway.com/marketplace/",
+              },
+              {
                 title: "Hostfully, homepage",
                 url: "https://www.hostfully.com/",
               },
@@ -544,7 +557,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 url: "https://www.hostaway.com/features/automation/",
               },
               {
-                title: "Hostaway, waitlist page for single-listing hosts",
+                title: "Hostaway, waitlist page",
                 url: "https://www.hostaway.com/thank-you-waitlist/",
               },
               {
