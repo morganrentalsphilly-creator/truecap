@@ -33,6 +33,7 @@ import {
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
 import { GLOSSARY } from "@/lib/glossary";
+import { useTapTooltip } from "@/components/investcalc/use-tap-tooltip";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
@@ -63,6 +64,9 @@ const OPERATING_EXPENSES_DETAILS_ID = "operating-expenses-details";
 
 function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
   // If a glossary term is provided, build the tooltip content from the
+  // Controlled so a tap opens it: a plain Radix tooltip closes on click, and
+  // these (i) buttons opened nothing on a phone (see use-tap-tooltip.ts).
+  const tip = useTapTooltip();
   // shared glossary so updates flow to one source of truth. Custom
   // `tooltip` prop still wins when explicitly provided.
   const glossaryEntry = term ? GLOSSARY[term] : undefined;
@@ -83,11 +87,12 @@ function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
   if (!content) return null;
 
   return (
-    <Tooltip delayDuration={150}>
+    <Tooltip delayDuration={150} open={tip.open} onOpenChange={tip.onOpenChange}>
       <TooltipTrigger asChild>
         <button
           type="button"
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+          {...tip.triggerProps}
           aria-label={`${label} guidance`}
         >
           <Info aria-hidden="true" className="size-3.5" />
@@ -176,6 +181,9 @@ export function OperatingExpensesSection({
 }: OperatingExpensesSectionProps) {
   const [internalDetailsOpen, setInternalDetailsOpen] = useState(false);
   const showAdvanced = detailsOpen ?? internalDetailsOpen;
+  // Same tap-to-open contract as FieldHelpTooltip, for the one guidance
+  // button written inline (the interest-deduction switch row).
+  const interestHelp = useTapTooltip();
   const setDetailsOpen = (open: boolean) => {
     if (detailsOpen === undefined) {
       setInternalDetailsOpen(open);
@@ -397,7 +405,9 @@ export function OperatingExpensesSection({
                 {expensePctLabel(capexPctEffective)}
               </span>
             </span>
-            <span className="text-xs text-muted-foreground/80 self-center">
+            {/* Full muted ink: at 80% opacity this 12px hint measured 4.48:1
+                on the card, under the 4.5:1 minimum. */}
+            <span className="text-xs text-muted-foreground self-center">
               (all % of rent)
             </span>
           </div>
@@ -1305,7 +1315,11 @@ export function OperatingExpensesSection({
                       >
                         Include Interest Deduction
                       </Label>
-                      <Tooltip delayDuration={150}>
+                      <Tooltip
+                        delayDuration={150}
+                        open={interestHelp.open}
+                        onOpenChange={interestHelp.onOpenChange}
+                      >
                         <TooltipTrigger asChild>
                           <button
                             type="button"
@@ -1352,3 +1366,4 @@ export function OperatingExpensesSection({
     </div>
   );
 }
+                            {...interestHelp.triggerProps}
