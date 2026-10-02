@@ -213,8 +213,8 @@ export default function VsMashvisorPage() {
           <p className={VS_LEDE}>
             Mashvisor is built around market-level data — heatmaps, ZIP-code
             Airbnb occupancy, comps. TrueCap is built around per-deal math —
-            should I actually buy this specific property? Different jobs,
-            different price points. Here&apos;s when to pick which.
+            should I actually buy this specific property? Here&apos;s when to
+            pick which.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -335,7 +335,7 @@ export default function VsMashvisorPage() {
 
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            The honest take
+            Where each one stops
           </SectionHeading>
           <div className={VS_PROSE}>
             <p>
