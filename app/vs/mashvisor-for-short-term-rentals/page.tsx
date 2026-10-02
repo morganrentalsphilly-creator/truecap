@@ -27,6 +27,7 @@ import {
   VS_LEDE,
   VS_LINK_ROW,
   VS_PROSE,
+  VS_SOURCES,
   VS_TLDR_GRID,
   VS_TLDR_LABEL,
   VS_TLDR_LIST,
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mashvisor vs TrueCap for STR Deals (2026)",
     description:
-      "STR-specific TrueCap vs Mashvisor: market scoring vs per-deal underwriting. Most STR investors use both.",
+      "STR-specific TrueCap vs Mashvisor: market scoring vs per-deal underwriting. They do different jobs.",
     url: "/vs/mashvisor-for-short-term-rentals",
     type: "website",
     images: [
@@ -76,14 +77,15 @@ type Row = {
   feature: string;
   truecap: string;
   mashvisor: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
   {
     feature: "Market discovery (heatmaps, scores)",
     truecap: "No",
-    mashvisor: "Yes — STR + LTR by neighborhood",
+    mashvisor:
+      "Yes, on Standard and above: heatmaps and neighborhood analytics for short-term and long-term rentals",
     winner: "mashvisor",
   },
   {
@@ -95,44 +97,46 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    mashvisor: "Listing-level cap rate based on assumed inputs",
-    winner: "truecap",
+    mashvisor:
+      "Cash flow, cap rate and cash-on-cash estimates; editable expenses on Standard and above; DSCR not listed",
+    winner: "tie",
   },
   {
     feature: "Mortgage + financing math (PITI + amortization)",
     truecap: "Yes — full",
-    mashvisor: "Limited",
-    winner: "truecap",
+    mashvisor:
+      "Adjustable financing assumptions in its calculator, and a mortgage calculator",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    mashvisor: "Forward STR revenue forecast",
-    winner: "tie",
+    mashvisor: "Not listed on Mashvisor's plan comparison",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    mashvisor: "Investibility score per property",
+    mashvisor: "Investment Opportunity Score per property",
     winner: "tie",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    mashvisor: "STR-focused; LTR rent estimates included",
+    mashvisor: "Long-term and short-term (Airbnb) rental estimates",
     winner: "tie",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    mashvisor: "Limited free dashboard; full data paid",
+    mashvisor:
+      "No free plan on its pricing page; platform subscriptions have no free trial",
     winner: "truecap",
   },
   {
     feature: "Pricing (paid tier)",
     truecap: "Paid Pro; see live pricing for current rates",
-    mashvisor: "$70-300/mo depending on plan (as of 2026)",
-    winner: "truecap",
+    mashvisor:
+      "$39.99 to $99.99 a month billed annually, or $49.99 to $119.99 billed quarterly (as of October 2026)",
   },
 ];
 
@@ -144,7 +148,7 @@ const NICHE_FAQ: FaqItem[] = [
         Not really — they solve different problems. Mashvisor is STR market
         discovery + revenue projection. TrueCap is the underwriting calculator
         that runs the deal math on top. Mashvisor feeds inputs; TrueCap runs cap
-        rate / DSCR / cash flow. STR investors typically use both.
+        rate / DSCR / cash flow. The two are used at different steps.
       </>
     ),
   },
@@ -152,11 +156,12 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Mashvisor vs AirDNA — which one for STR data?",
     answer: (
       <>
-        AirDNA is more STR-specific and considered the gold standard for ADR,
-        occupancy, and RevPAR data. Mashvisor covers both LTR and STR plus
-        broader market analysis (heatmaps, comparable sales). For STR-primary
-        investors, AirDNA wins on data depth. For investors evaluating LTR vs
-        STR on the same property, Mashvisor&apos;s broader scope wins.
+        AirDNA is STR-specific: its free plan has a limited Rentalizer revenue
+        calculator and market insights, and its Market Research plan adds a
+        customizable Rentalizer, comparable sets, and historical market data.
+        Mashvisor covers both long-term and short-term rentals, with heatmaps
+        and rental comps on its Standard plan and above. Compare each
+        vendor&apos;s current plans for the markets you care about.
       </>
     ),
   },
@@ -164,10 +169,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does Mashvisor do underwriting?",
     answer: (
       <>
-        Sort of — Mashvisor shows listing-level cap rate estimates based on its
-        assumed inputs (rent, vacancy, expenses). TrueCap adds editable
-        financing, DSCR, sensitivity, and a cash-flow and equity projection for
-        a shortlisted property. It does not currently expose a tax-specific
+        Partly. Mashvisor estimates cash flow, cap rate, and cash-on-cash return
+        for a property, and Standard and Professional subscribers can edit
+        expenses and recalculate. TrueCap adds DSCR, sensitivity, an Offer
+        Ceiling for your targets, and a cash-flow and equity projection for a
+        shortlisted property. TrueCap does not currently expose a tax-specific
         module.
       </>
     ),
@@ -185,14 +191,17 @@ const NICHE_FAQ: FaqItem[] = [
     ),
   },
   {
-    question: "Is Mashvisor's $70-300/mo worth it?",
+    question: "Is a Mashvisor subscription worth it?",
     answer: (
       <>
-        If you&apos;re actively scouting STR markets across multiple regions,
-        yes — the data + heatmaps save dozens of hours per month. If you&apos;re
-        a hometown STR investor with 1-2 properties in your local market,
-        Mashvisor is overkill. TrueCap + AirDNA Rentalizer reports ($20-40 per
-        property) are cheaper and more deal-specific.
+        Mashvisor&apos;s priced plans run $39.99 to $99.99 a month billed
+        annually, or $49.99 to $119.99 billed quarterly (as of October 2026). If
+        you&apos;re actively scouting STR markets across multiple regions, the
+        market data and heatmaps replace manual market research. If you invest
+        in one local market with 1-2 properties, you may not need market
+        discovery: TrueCap with AirDNA&apos;s Rentalizer (limited on
+        AirDNA&apos;s free plan, customizable on its paid Market Research plan)
+        may be enough.
       </>
     ),
   },
@@ -276,8 +285,8 @@ export default function VsMashvisorForShortTermRentalsPage() {
                   cash flow on a specific STR.
                 </li>
                 <li>
-                  You want financing math (PITI, amortization) and an
-                  illustrative tax-impact model.
+                  You want financing math (PITI, amortization) on a specific
+                  property.
                 </li>
                 <li>
                   You&apos;re comparing LTR vs STR scenarios on the same
@@ -330,10 +339,23 @@ export default function VsMashvisorForShortTermRentalsPage() {
               }))}
             />
           </ScrollX>
+          <p className={VS_SOURCES}>
+            Mashvisor plans, prices and features were checked against its
+            pricing page in October 2026. See{" "}
+            <a
+              href="https://www.mashvisor.com/pricing"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              mashvisor.com/pricing
+            </a>{" "}
+            for current terms.
+          </p>
           <div className={VS_PROSE}>
             <p>
-              Once Mashvisor hands you an ADR and occupancy figure, the underwrite
-              is on you. Our{" "}
+              Once Mashvisor hands you an ADR and occupancy figure, you can run
+              your own underwrite on it. Our{" "}
               <IntentPrefetchLink
                 href="/blog/short-term-rental-underwriting-playbook"
                 className="tc-link"
@@ -363,13 +385,14 @@ export default function VsMashvisorForShortTermRentalsPage() {
         </Section>
 
         <ComparisonFaq
-          competitorName="Mashvisor (Short-term rentals)"
+          competitorName="Mashvisor"
           items={NICHE_FAQ}
+          reviewedDate="October 2026"
         />
 
         <CloseSection
           headingId="vs-close-heading"
-          heading={<>Underwrite your next Short-term rentals deal — free.</>}
+          heading={<>Underwrite your next short-term rental deal, free.</>}
           lede={
             <>
               Free covers the standard cap rate, CoC, DSCR, cash flow, and plain
