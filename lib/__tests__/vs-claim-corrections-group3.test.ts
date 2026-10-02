@@ -139,20 +139,27 @@ describe("corrected comparison pages (group 3)", () => {
   });
 
   it("states the corrected facts and links the page they were checked against", () => {
+    // Rules, not snapshots of a vendor's sentence: the weekly SEO loop may
+    // rewrite a /vs page when the vendor changes and cannot edit this file
+    // (seo/config.json), so an exact competitor sentence pinned here would
+    // turn its pull request red for a true edit. Each false claim stays out
+    // through RETIRED above; what is asserted here is the vendor link, the
+    // corrected winner mark and the shape of a price cell.
     const landlord = flat("landlord-studio");
-    expect(landlord).toContain("online by card or ACH on every plan, including the free Go plan");
     expect(landlord).toContain("https://www.landlordstudio.com/pricing");
     expect(matrixRows("landlord-studio").find((row) => row.feature === "Rent collection")?.winner).toBe(
       "landlordstudio",
     );
 
-    const hostfully = flat("hostfully");
-    expect(hostfully).toContain("does not offer free trials");
-    expect(hostfully).toContain("https://www.hostfully.com/pricing/");
+    expect(flat("hostfully")).toContain("https://www.hostfully.com/pricing/");
 
-    const hostaway = flat("hostaway");
-    expect(hostaway).toContain("does not publish prices");
-    expect(hostaway).toContain("https://www.hostaway.com/pricing/");
+    // Hostaway publishes no prices, so neither its price row nor its free-tier
+    // row quotes one (the retired cell said "$10-15"). "Dynamic pricing" is a
+    // feature row, not Hostaway's price, and is not read here.
+    const hostawayPriceRows = matrixRows("hostaway").filter((row) => /^(?:pricing|free)\b/i.test(row.feature));
+    expect(hostawayPriceRows.length).toBeGreaterThanOrEqual(2);
+    expect(hostawayPriceRows.every((row) => !/\$\d/.test(row.competitor))).toBe(true);
+    expect(flat("hostaway")).toContain("https://www.hostaway.com/pricing/");
 
     for (const slug of ["mashvisor", "mashvisor-for-short-term-rentals"] as const) {
       expect(flat(slug), slug).toContain("https://www.mashvisor.com/pricing");
@@ -176,7 +183,6 @@ describe("corrected comparison pages (group 3)", () => {
     expect(rentcast.find((row) => row.feature === "PDF deal report")?.winner).toBe("tie");
 
     expect(flat("quickbooks-rental")).toContain("https://quickbooks.intuit.com/pricing/");
-    expect(flat("privy")).toContain("30-day money-back guarantee");
   });
 });
 
