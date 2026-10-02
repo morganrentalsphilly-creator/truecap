@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     description:
-      "Privy sources deals on MLS data. TrueCap underwrites the deals. Different jobs in the same workflow.",
+      "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them.",
     url: "/vs/privy",
     type: "website",
   },

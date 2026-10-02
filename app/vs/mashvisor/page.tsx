@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mashvisor Alternative: Free Deal Analysis (2026)",
     description:
-      "Per-deal underwriting vs market heatmaps + Airbnb data. Different jobs, different price points.",
+      "Mashvisor is rental data for finding markets and properties, with its own property analysis. TrueCap is the deal decision once you've picked an address.",
     url: "/vs/mashvisor",
     type: "website",
   },

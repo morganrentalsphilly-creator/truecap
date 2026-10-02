@@ -97,14 +97,30 @@ describe("the /vs social cards", () => {
     }
   });
 
+  const openGraphOf = (slug: string): string => {
+    const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8");
+    const block = [...page.matchAll(SOCIAL_BLOCK)].find((b) => b[0].startsWith("openGraph"));
+    if (!block) throw new Error(`app/vs/${slug}/page.tsx: no openGraph block`);
+    return block[0];
+  };
+
   it("repeats the card line as the preview text where the old line contradicted it", () => {
-    // Three previews said beside the card what the card had stopped saying:
-    // "Different jobs" about PropStream and BatchLeads, which both publish
-    // rental calculators, and "Honest comparison" on RentCast.
-    for (const slug of ["propstream", "batchleads", "rentcast"]) {
-      const page = readFileSync(join(VS_DIR, slug, "page.tsx"), "utf8");
-      const openGraph = [...page.matchAll(SOCIAL_BLOCK)].find((block) => block[0].startsWith("openGraph"));
-      expect(openGraph?.[0] ?? "", slug).toContain(`"${bySlug(slug).tagline}"`);
+    // Five previews said beside the card what the card had stopped saying:
+    // "Different jobs" about PropStream, BatchLeads, DealMachine and
+    // Mashvisor, which all publish their own rental analysis, and "Honest
+    // comparison" on RentCast.
+    for (const slug of ["propstream", "batchleads", "rentcast", "dealmachine", "mashvisor"]) {
+      expect(openGraphOf(slug), slug).toContain(`"${bySlug(slug).tagline}"`);
+    }
+  });
+
+  it("does not print \"Different jobs\" beside a card whose vendor analyzes properties too", () => {
+    // /vs/privy's card says Privy is "deal sourcing and property analysis".
+    // Its preview is the page's own description, not the card line, so it is
+    // held here with the four above: none frames underwriting as a job the
+    // vendor leaves to TrueCap.
+    for (const slug of ["propstream", "batchleads", "dealmachine", "mashvisor", "privy"]) {
+      expect(openGraphOf(slug), slug).not.toMatch(/different jobs|finds the leads?\b/i);
     }
   });
 
@@ -151,12 +167,12 @@ describe("the /vs social cards", () => {
     expect(text).not.toMatch(/AirDNA inputs|using AirDNA/i);
     // Internal shorthand.
     expect(text).not.toMatch(/\bSTR cut\b/i);
-    // /vs/propstream and /vs/batchleads score rental analysis a tie: both
-    // vendors publish their own rental calculators. Their cards name what
-    // each product is and do not frame underwriting as a job the vendor
-    // leaves to TrueCap.
-    for (const slug of ["propstream", "batchleads"]) {
-      expect(bySlug(slug).tagline, slug).not.toMatch(/different jobs|finds the leads/i);
+    // /vs/propstream, /vs/batchleads and /vs/dealmachine score rental
+    // analysis a tie: each vendor publishes its own rental calculator. Their
+    // cards name what each product is and do not frame underwriting as a job
+    // the vendor leaves to TrueCap.
+    for (const slug of ["propstream", "batchleads", "dealmachine"]) {
+      expect(bySlug(slug).tagline, slug).not.toMatch(/different jobs|finds (?:the )?leads/i);
     }
   });
 
