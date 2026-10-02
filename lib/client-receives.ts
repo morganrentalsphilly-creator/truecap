@@ -9,7 +9,11 @@
  *     expire after 180 days (app/s/[token]; public_shares.expires_at default)
  *   - co-branding renders the logo, brand color and "Shared by" on the share
  *     page and a "Prepared by" block on the PDF (lib/agent-share.ts,
- *     components/investcalc/shared-deal-shell.tsx, lib/pdf-generator.ts)
+ *     components/investcalc/shared-deal-shell.tsx, lib/pdf-generator.ts). The
+ *     share page's message form prints the agent's saved phone, email and
+ *     website as links (AgentContactLine in
+ *     components/investcalc/lead-capture-form.tsx); the PDF block prints the
+ *     same fields
  *   - the share page always shows four metrics and three drivers. The
  *     decision at asking and the Offer Ceiling need an adopted target (a Buy
  *     Box, starter criteria or selected targets): a share that captured none
@@ -47,7 +51,7 @@ export const CLIENT_RECEIVES: readonly ClientReceivesItem[] = [
   {
     key: "memo",
     title: "The decision memo, co-branded",
-    body: "With branding set up, the share page carries your logo, your brand color, and “Shared by” your name or company, with a form the client can use to message you. The PDF adds your tagline and a “Prepared by” block with your name, email, phone, and website. TrueCap's name stays on both as the methodology behind the numbers: co-branded, not white-label.",
+    body: "With branding set up, the share page carries your logo, your brand color, and “Shared by” your name or company, with a form the client can use to message you and the phone, email and website you saved. The PDF adds your tagline and a “Prepared by” block with the same contact details. TrueCap's name stays on both as the methodology behind the numbers: co-branded, not white-label.",
   },
   {
     key: "numbers",

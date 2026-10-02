@@ -314,6 +314,16 @@ describe("the lead form says what happens to the message", () => {
       expect(shell, field).toContain(field);
     }
   });
+
+  it("tells the agent, where they enter them, that those details show on share pages", () => {
+    // The settings form is the only place an agent learns where a saved phone,
+    // email or website appears. It named the PDF alone until the share pages
+    // began printing them next to the message form.
+    const form = code("components/settings/branding-form.tsx");
+    expect(form).toContain(
+      "your phone, email and website appear with the message form on your shared deal pages",
+    );
+  });
 });
 
 describe("the agent's leads card on the dashboard", () => {

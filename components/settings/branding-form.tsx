@@ -273,7 +273,9 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
               Contact details
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Optional. These appear in the Prepared by block on every branded PDF.
+              Optional. These appear in the Prepared by block on every branded PDF,
+              and your phone, email and website appear with the message form on
+              your shared deal pages.
             </p>
           </div>
 
