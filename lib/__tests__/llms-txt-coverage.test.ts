@@ -58,8 +58,12 @@ describe("llms.txt lists what the sitemap lists", () => {
 
   it("counts the comparison pages it lists", async () => {
     const text = await llms();
-    const count = sectionLinks(text, "Comparison pages").length;
-    expect(text).toContain(`  - ${count} side-by-side comparison pages, including TrueCap vs. DealCheck,`);
+    const listed = sectionLinks(text, "Comparison pages");
+    const count = listed.length;
+    // The About line names the first pages of the list it counts, whichever they are.
+    const firstName = listed[0]?.label.replace(/^TrueCap vs\. /, "");
+    expect(firstName).toBeTruthy();
+    expect(text).toContain(`  - ${count} side-by-side comparison pages, including TrueCap vs. ${firstName},`);
     expect(text).toContain(`/vs): All ${count} comparison pages.`);
   });
 
