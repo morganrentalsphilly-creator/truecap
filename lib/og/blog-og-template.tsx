@@ -1,8 +1,10 @@
 /**
  * Shared template for per-post /blog/<slug>/opengraph-image.tsx dynamic OG
- * cards, on the Newsprint frame (lib/og/newsprint.tsx). Wrappers pass the
- * title string from the post's own metadata so the card and the page never
- * drift apart. The SEO loop writes new wrappers against this interface, so
+ * cards, on the Newsprint frame (lib/og/newsprint.tsx). A wrapper restates
+ * its post and nothing else: a title the post carries and only figures the
+ * post prints. lib/__tests__/blog-social-card-truth.test.ts fails when the
+ * two drift apart, so a rewrite of a post updates its card in the same
+ * commit. The SEO loop writes new wrappers against this interface, so
  * BlogOgConfig and the function name stay stable.
  *
  * Constraints (CLAUDE.md §3.6): the next/og JSX subset only, no Tailwind, no
