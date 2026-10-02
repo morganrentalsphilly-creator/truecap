@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Crexi vs TrueCap (2026): Commercial vs Rental",
     description:
-      "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting. Different asset classes.",
+      "Crexi is a commercial real-estate marketplace. TrueCap is residential underwriting. Different asset classes.",
     url: "/vs/crexi",
     type: "website",
     images: [
@@ -293,7 +293,7 @@ export default function VsCrexiPage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            When investors use both
+            Where each one fits
           </SectionHeading>
           <div className={VS_PROSE}>
             <ul>
