@@ -108,12 +108,13 @@ describe("gated calculators expose no public discovery surface", () => {
 });
 
 describe("tool social cards say only what the tool does", () => {
-  // The shared template's default chips are "Live data · No signup · 60
+  // The shared template's default chips were "Live data · No signup · 60
   // seconds". Until 2026-10 every tool card inherited them, so calculators
   // that take typed numbers, and a spreadsheet download, advertised live
-  // data. The same audit found a rehab card claiming "Mid-market 2024-25
-  // contractor pricing" over defaults the code calls illustrative, and
-  // break-even and vacancy cards promising benchmarks neither tool has.
+  // data. The template now defaults to no chips. The same audit found a
+  // rehab card claiming "Mid-market 2024-25 contractor pricing" over
+  // defaults the code calls illustrative, and break-even and vacancy cards
+  // promising benchmarks neither tool has.
   const toolCards = readdirSync(join(process.cwd(), "app/tools"), {
     withFileTypes: true,
   })
@@ -133,6 +134,12 @@ describe("tool social cards say only what the tool does", () => {
       );
       expect(card, file).not.toMatch(/Live data|60 seconds/i);
     }
+  });
+
+  it("the tool card template has no default chips for the next card to inherit", () => {
+    const template = read("lib/og/tool-og-template.tsx");
+    expect(template).toMatch(/\bpills = \[\],/);
+    expect(template).not.toMatch(/Live data|60 seconds/i);
   });
 
   it("no tool card claims contractor pricing or benchmarks the tool does not have", () => {
@@ -199,21 +206,8 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     "app/blog/1-percent-rule-rental-property/page.tsx",
   ];
 
-  // The 70% rule post's social card. Its post stopped calling the rule of
-  // thumb an Offer Ceiling; the card still printed "How to calculate a
-  // 70%-rule Offer Ceiling" (2026-10 audit). This list feeds the Offer
-  // Ceiling check below; a file may also sit in HEURISTIC_SURFACES, which
-  // holds it to the price-screen name as well.
-  const RULE_OF_THUMB_CARDS = [
-    "app/blog/70-percent-rule-house-flipping/opengraph-image.tsx",
-  ];
-
   it("only mentions Offer Ceiling to contrast it with the canonical solver", () => {
-    for (const path of [
-      ...HEURISTIC_SURFACES,
-      ...RULE_OF_THUMB_POSTS,
-      ...RULE_OF_THUMB_CARDS,
-    ]) {
+    for (const path of [...HEURISTIC_SURFACES, ...RULE_OF_THUMB_POSTS]) {
       for (const line of read(path).split("\n")) {
         if (!/Offer Ceiling/.test(line)) continue;
         // Permitted: naming TrueCap's own solver as a DIFFERENT thing.
