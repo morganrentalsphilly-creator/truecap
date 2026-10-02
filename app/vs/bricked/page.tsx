@@ -4,12 +4,12 @@
  * Target queries: "bricked ai alternative", "bricked ai review",
  * "bricked ai pricing", "bricked vs", "ai real estate underwriting".
  * Bricked (bricked.ai) is an AI comps + repair-estimate + ARV tool
- * aimed at flippers, wholesalers, and acquisition teams ($49-199/mo,
- * metered per comp). It does VALUATION; TrueCap does RETURNS. The
- * honest framing — "what it's worth vs what it earns" — is also the
- * one that wins, because their tool genuinely has no cash-flow layer.
- * First-mover note: as of June 2026 Bricked has no comparison content
- * of their own; owning "bricked alternative" early frames the matchup.
+ * aimed at wholesalers, flippers, agents, and acquisition teams. Its
+ * plans are fixed monthly comp quotas (Basic and Growth, checked on
+ * bricked.ai/pricing in October 2026). Its focus is VALUATION and the
+ * offer; TrueCap's is rental RETURNS. Bricked also shows a rental offer
+ * calculator (rent, costs, cash flow) and financing calculators, so no
+ * cell here says it lacks them.
  */
 
 import type { Metadata } from "next";
@@ -100,36 +100,39 @@ const MATRIX: Row[] = [
   {
     feature: "Built for",
     truecap: "Buy-and-hold investors, house-hackers, agents",
-    bricked: "Flippers, wholesalers, acquisition teams",
+    bricked: "Wholesalers, flippers, agents, acquisition teams",
     winner: "tie",
   },
   {
     feature: "Cash flow / cap rate / CoC / DSCR",
     truecap: "Yes — full engine, free tier",
-    bricked: "Not modeled",
-    winner: "truecap",
+    bricked:
+      "A rental offer calculator with monthly rent, costs and cash flow; cap rate, CoC and DSCR are not listed on bricked.ai",
+    winner: "tie",
   },
   {
     feature: "10-year cash-flow + equity projection",
     truecap: "Pro — editable rent, expense, value, and financing assumptions",
-    bricked: "Not modeled",
+    bricked: "Not listed on bricked.ai",
     winner: "truecap",
   },
   {
     feature: "Financing math (PITI, amortization, DSCR)",
     truecap: "Yes — full loan modeling",
-    bricked: "Not included",
-    winner: "truecap",
+    bricked:
+      "Offer calculators for hard money, seller finance and subject-to (loan amount, rate, monthly payment); no amortization schedule or DSCR published",
+    winner: "tie",
   },
   {
     feature: "Comps + ARV / market value",
-    truecap: "Purchase price is user input — no AVM",
-    bricked: "Yes — AI-selected comps from MLS + county data, ARV + CMV",
+    truecap: "One free sale and rent comps lookup; Pro includes up to 50 per month",
+    bricked:
+      "Yes, comps from MLS, county records and public listing sites, with as-is value and ARV",
     winner: "bricked",
   },
   {
     feature: "Repair cost estimates",
-    truecap: "Rehab estimator with sq-ft-based defaults",
+    truecap: "A free rehab cost estimator with editable default line items",
     bricked: "Itemized, ZIP-localized material + labor costs",
     winner: "bricked",
   },
@@ -147,12 +150,6 @@ const MATRIX: Row[] = [
     winner: "truecap",
   },
   {
-    feature: "AI deal Q&A on your numbers",
-    truecap: "Yes — grounded in the computed analysis",
-    bricked: "AI picks comps; no investment Q&A",
-    winner: "truecap",
-  },
-  {
     feature: "Try without signup",
     truecap: "Yes — full analysis, no account",
     bricked: "No — account + 3-day trial",
@@ -167,14 +164,16 @@ const MATRIX: Row[] = [
   {
     feature: "Entry pricing",
     truecap: "Free core; paid Pro with published limits — see live pricing",
-    bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)",
-    winner: "truecap",
+    bricked:
+      "Basic $89 a month, or $69 a month billed yearly, for 100 comps a month; Growth $199 a month, or $149 billed yearly, for 300 (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "PDF + share links",
     truecap: "Read-only share links free; PDFs included with Pro",
-    bricked: "Not the focus",
-    winner: "truecap",
+    bricked:
+      "A PDF report with your logo, or a live link; white-label CMA reports on Growth",
+    winner: "tie",
   },
   {
     feature: "API access",
@@ -216,10 +215,10 @@ export default function VsBrickedPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Bricked is an AI valuation tool — it finds comps, estimates repairs,
-            and prices cash offers for flippers and wholesalers working at
-            volume. TrueCap is a rental-screening calculator — it estimates cash
-            flow, cap rate, CoC, and DSCR from reviewed assumptions. Both say
-            &quot;underwrite in seconds.&quot; They mean different things by it.
+            and prices offers for flippers and wholesalers working at volume.
+            TrueCap is a rental-screening calculator — it estimates cash flow,
+            cap rate, CoC, and DSCR from reviewed assumptions. Both promise
+            underwriting in seconds. They mean different things by it.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -274,8 +273,8 @@ export default function VsBrickedPage() {
                   planning projection.
                 </li>
                 <li>
-                  You analyze a few deals a month and don&apos;t want a $49+
-                  metered plan.
+                  You analyze a few deals a month and don&apos;t need a monthly
+                  comp quota.
                 </li>
               </ul>
             </div>
@@ -321,24 +320,24 @@ export default function VsBrickedPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Bricked details based on publicly available product info, verified
-            June 2026. See{" "}
+            Bricked details checked against bricked.ai and its pricing page in
+            October 2026. See{" "}
             <a
-              href="https://bricked.ai"
+              href="https://bricked.ai/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              bricked.ai
+              Bricked&apos;s pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How the released tools can fit together
+            How the two tools can fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -351,8 +350,8 @@ export default function VsBrickedPage() {
                 <strong>
                   Keep ARV and repair costs in a complete project ledger.
                 </strong>{" "}
-                TrueCap&apos;s integrated BRRRR and flip models are not currently
-                released.
+                TrueCap&apos;s integrated BRRRR and flip models aren&apos;t
+                offered right now.
               </li>
               <li>
                 <strong>Use TrueCap for the stabilized rental screen.</strong>{" "}
@@ -363,8 +362,8 @@ export default function VsBrickedPage() {
               <li>
                 <strong>Stress-test each model.</strong> Vary ARV, rehab,
                 timeline, refinance terms, and later capital contributions in the
-                project ledger; use TrueCap&apos;s released grid for rent,
-                vacancy, and rate sensitivity.
+                project ledger; use TrueCap&apos;s sensitivity grid for rent,
+                vacancy, and rate.
               </li>
             </ol>
             <p>
@@ -387,7 +386,11 @@ export default function VsBrickedPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Bricked" items={BRICKED_FAQ} />
+        <ComparisonFaq
+          competitorName="Bricked"
+          items={BRICKED_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -471,7 +474,7 @@ const BRICKED_FAQ: FaqItem[] = [
       <>
         For rental investors, yes — for wholesalers, not really. Bricked is an
         AI valuation tool: comps, ARV, and repair estimates for people making
-        cash offers at volume. TrueCap is a returns calculator: cash flow, DSCR,
+        offers at volume. TrueCap is a returns calculator: cash flow, DSCR,
         cap rate, sensitivity, and 10-year cash-flow and equity projections for
         people underwriting a rental. If you searched &quot;Bricked
         alternative&quot; because you wanted to review a property&apos;s modeled
@@ -483,11 +486,12 @@ const BRICKED_FAQ: FaqItem[] = [
     question: "Does Bricked calculate cash flow or DSCR?",
     answer: (
       <>
-        No. Bricked produces comps, ARV/market value, repair estimates, and an
-        offer price. It does not model rental income, operating expenses,
-        financing, DSCR, cap rate, cash-on-cash, taxes, or long-term projections
-        — the entire question of what the property earns as a rental is out of
-        its scope. That&apos;s the half TrueCap covers.
+        Partly. Bricked&apos;s offer calculators include a rental view with
+        monthly rent, monthly costs, and monthly cash flow, plus financing
+        views for hard money, seller finance, and subject-to. Its site does not
+        list DSCR, cap rate, cash-on-cash, or a multi-year projection. TrueCap
+        covers those: cap rate, cash-on-cash, and DSCR in the free analyzer, and
+        a 10-year cash-flow and equity projection with Pro.
       </>
     ),
   },
@@ -495,9 +499,11 @@ const BRICKED_FAQ: FaqItem[] = [
     question: "How does Bricked's pricing compare to TrueCap's?",
     answer: (
       <>
-        Bricked starts at $49/month for 100 comps, rising to $199/month for 500
-        (metered, with a 3-day trial and no free tier) — priced for acquisition
-        teams running volume. TrueCap&apos;s core analyzer is free with no
+        Bricked&apos;s Basic plan is $89 a month, or $69 a month billed yearly,
+        for 100 comps a month. Growth is $199 a month, or $149 billed yearly,
+        for 300. Bricked says there are no per-use add-ons; Basic starts with a
+        3-day free trial and there is no free tier (as of October 2026).
+        TrueCap&apos;s core analyzer is free with no
         analysis cap and no account required. Pro adds advanced analysis and
         reporting with published limits, including 50 comp lookups per month and
         comparison of up to four saved deals. PDF reports are included with Pro.
@@ -511,10 +517,10 @@ const BRICKED_FAQ: FaqItem[] = [
     answer: (
       <>
         For precision, likely yes — Bricked aggregates local material and labor
-        pricing by ZIP to produce itemized estimates, while TrueCap&apos;s rehab
-        estimator uses square-footage-based defaults you adjust yourself.
-        TrueCap&apos;s estimator is built for a quick budget inside a hold
-        analysis, not contractor-grade scoping. If repair precision drives your
+        pricing by ZIP to produce itemized estimates, while TrueCap&apos;s free
+        rehab cost estimator uses default line items you adjust yourself.
+        TrueCap&apos;s estimator is built for a quick planning budget, not
+        contractor-grade scoping. If repair precision drives your
         deals (heavy rehabs, flips at volume), Bricked&apos;s approach is
         stronger; plug its number into TrueCap to see what the deal earns after
         the rehab.
@@ -528,10 +534,10 @@ const BRICKED_FAQ: FaqItem[] = [
         If you flip at volume, Bricked&apos;s comps + repair engine fits your
         acquisition workflow. If you flip occasionally — or you&apos;re deciding
         between flipping and holding, use a complete project ledger for the flip
-        and TrueCap&apos;s released core analyzer for the stabilized rental
-        fallback. TrueCap&apos;s integrated fix-and-flip and BRRRR models are
-        not currently released. Choose a released workflow that matches the
-        decision you need.
+        and TrueCap&apos;s core analyzer for the stabilized rental fallback.
+        TrueCap&apos;s integrated fix-and-flip and BRRRR models aren&apos;t
+        offered right now. Choose the workflow that matches the decision you
+        need.
       </>
     ),
   },
