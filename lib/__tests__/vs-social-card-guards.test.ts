@@ -178,13 +178,14 @@ describe("the /vs social cards", () => {
 
   it("keeps a card neutral while its page's competitor rows wait on a decision", () => {
     /**
-     * The competitor claims on these pages are open report rows (P0-05
-     * Baselane, P0-08 Arrived, P1-18 Cozy, P1-20 Fundrise, P1-31 Roofstock).
-     * Until a page is rewritten, its card says only what TrueCap does and
-     * repeats none of the claims. When a row closes, take the slug off this
-     * list in the commit that rewrites the page and its card.
+     * The competitor claims on these pages are open report rows (P1-18 Cozy,
+     * P1-31 Roofstock). Until a page is rewritten, its card says only what
+     * TrueCap does and repeats none of the claims. When a row closes, take
+     * the slug off this list in the commit that rewrites the page and its
+     * card. Baselane (P0-05), Arrived (P0-08) and Fundrise (P1-20) came off
+     * on 2026-10-02; lib/__tests__/vs-money-pages-truth.test.ts holds them.
      */
-    const WAITING = ["cozy", "fundrise", "roofstock"];
+    const WAITING = ["cozy", "roofstock"];
     for (const slug of WAITING) {
       const { tagline, competitor } = bySlug(slug);
       expect(tagline, slug).toMatch(/^TrueCap /);

@@ -2,7 +2,18 @@
  * /vs/fundrise — competitor comparison landing page.
  *
  * Target queries: "fundrise alternative", "fundrise vs arrived", "fundrise review", "fundrise pricing", "passive real estate investing".
- * Fundrise is a non-traded REIT / fractional real-estate investing platform — diversified across commercial, multifamily, residential. Direct competitor to Arrived. Investors evaluate it vs direct ownership.
+ * Fundrise is an investment platform whose funds hold private real estate,
+ * private credit and venture capital. Its own site calls its registered real
+ * estate funds interval funds, not non-traded REITs, so this page does not
+ * use "REIT" for Fundrise anywhere: title, meta, H1, lede, matrix and FAQ
+ * describe it the same way, in Fundrise's words.
+ *
+ * Every Fundrise statement on this page was checked against fundrise.com as
+ * rendered on 2026-10-02 (home, how it works, offerings, client returns). The
+ * page states no return figure, no tax treatment and no account tiers for
+ * Fundrise: it links Fundrise's own pages instead. Do not add one. Change a
+ * Fundrise fact only with the vendor page open, and change the social card
+ * with it.
  */
 
 import type { Metadata } from "next";
@@ -42,9 +53,9 @@ import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Fundrise vs TrueCap (2026): REIT vs Ownership",
+  title: "Fundrise vs TrueCap (2026): Funds vs Ownership",
   description:
-    "Fundrise is a non-traded REIT for passive real estate exposure. TrueCap underwrites whole properties you'd buy yourself. Two different investing models.",
+    "Fundrise offers funds that hold private real estate, private credit and venture capital. TrueCap underwrites whole properties you'd buy yourself.",
   keywords: [
     "fundrise alternative",
     "fundrise vs arrived",
@@ -54,9 +65,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/vs/fundrise" },
   openGraph: {
-    title: "Fundrise vs TrueCap (2026): REIT vs Ownership",
+    title: "Fundrise vs TrueCap (2026): Funds vs Ownership",
     description:
-      "Fundrise = non-traded REIT shares (passive). TrueCap = underwriting whole properties you own directly. Different models.",
+      "Fundrise offers funds that hold private real estate, private credit and venture capital. TrueCap underwrites whole rental properties you buy and own directly.",
     url: "/vs/fundrise",
     type: "website",
   },
@@ -67,18 +78,18 @@ type Verdict = "truecap" | "fundrise" | "tie";
 type Row = { feature: string; truecap: string; fundrise: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Ownership model", truecap: "Direct ownership of whole property", fundrise: "Shares in diversified REIT funds", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", fundrise: "Not applicable (no individual property)", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — per-property rent + expense + appreciation", fundrise: "Fund-level forward returns (historical 8-12%)", winner: "tie" },
+  { feature: "Ownership model", truecap: "Direct ownership of whole property", fundrise: "Shares of funds that Fundrise manages", winner: "tie" },
+  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", fundrise: "Not applicable: you buy fund shares, not a single property", winner: "truecap" },
+  { feature: "10-year projection", truecap: "Pro — per-property rent + expense + appreciation", fundrise: "Fundrise publishes its clients' past returns on its own site", winner: "tie" },
   { feature: "Deal score (0–100)", truecap: "Free — 0–100 score with factor breakdown", fundrise: "Not applicable", winner: "truecap" },
-  { feature: "Minimum to start", truecap: "Down payment on a whole property (~$20-50k)", fundrise: "$10 (Starter), $1k+ for higher tiers", winner: "fundrise" },
-  { feature: "Time commitment", truecap: "Active — you source, underwrite, close, manage (or hire)", fundrise: "Passive — Fundrise allocates capital", winner: "fundrise" },
-  { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Limited — quarterly redemption windows with potential gates", winner: "fundrise" },
-  { feature: "Diversification", truecap: "One property at a time", fundrise: "Across many properties + asset types", winner: "fundrise" },
-  { feature: "Control over property choice", truecap: "Total", fundrise: "None — Fundrise picks deals", winner: "truecap" },
-  { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Some depreciation pass-through (K-1 funds); no 1031 from shares", winner: "tie" },
+  { feature: "Minimum to start", truecap: "A down payment on a whole property", fundrise: "$10", winner: "fundrise" },
+  { feature: "Time commitment", truecap: "Active — you source, underwrite, close, manage (or hire)", fundrise: "Passive: you choose a portfolio strategy and Fundrise manages the funds", winner: "fundrise" },
+  { feature: "Liquidity", truecap: "Low — sale takes months", fundrise: "Quarterly redemptions, subject to limitations", winner: "tie" },
+  { feature: "Diversification", truecap: "One property at a time", fundrise: "Across the assets its funds hold: real estate, private credit and venture capital", winner: "fundrise" },
+  { feature: "Control over property choice", truecap: "Total", fundrise: "You choose a plan or a fund; Fundrise selects the assets", winner: "truecap" },
+  { feature: "Ownership tax treatment", truecap: "Direct-property rules may allow depreciation, interest, or 1031; TrueCap does not determine eligibility", fundrise: "Tax reporting depends on the fund; see Fundrise's own tax documents", winner: "tie" },
   { feature: "Cash flow model", truecap: "You design — fixed-rate mortgage, your CF goes to you", fundrise: "See Fundrise's site for how its funds pay distributions", winner: "tie" },
-  { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% advisory + 0.85% fund management (1% all-in, plus expense ratios)", winner: "tie" },
+  { feature: "Pricing / fees", truecap: "Free core; paid Pro — see live pricing", fundrise: "0.15% annual advisory fee, plus a 0.85% annual asset management fee paid by the funds in its standard portfolios", winner: "tie" },
   { feature: "Free tier (for analysis)", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", fundrise: "Not applicable", winner: "truecap" },
 ];
 
@@ -87,10 +98,10 @@ export default function VsFundrisePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Fundrise vs TrueCap (2026): REIT vs Ownership",
+    name: "Fundrise vs TrueCap (2026): Funds vs Ownership",
     url: `${siteUrl}/vs/fundrise`,
     description:
-      "Fundrise is a non-traded REIT for passive real estate exposure. TrueCap underwrites whole properties you'd buy yourself. Two very different investing models.",
+      "Fundrise offers funds that hold private real estate, private credit and venture capital. TrueCap underwrites whole properties you'd buy yourself.",
     dateModified: lastmodFor("/vs/fundrise"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -106,11 +117,11 @@ export default function VsFundrisePage() {
         <VsHero>
           <h1 className={VS_H1}>
             TrueCap vs Fundrise:{" "}
-            direct ownership vs REIT shares
+            direct ownership vs fund shares
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Fundrise is an investment platform: you pool your money with other investors into funds it manages, including real estate funds. TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. Completely different investing models — but investors deciding between active and passive real estate evaluate both.
+            Fundrise is an investment platform: you buy shares of funds it manages, which hold private real estate, private credit and venture capital. TrueCap is the underwriting calculator for investors buying rental properties directly with their own financing. The investing models are different, and if you are deciding between active and passive real estate you may be weighing both.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -165,9 +176,9 @@ export default function VsFundrisePage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>You want passive real estate exposure with zero work.</li>
-                <li>You want diversification across asset classes (commercial + multifamily + residential).</li>
-                <li>You only have $10-1k to start, not $20k+.</li>
-                <li>You&apos;re fine giving up depreciation control and 1031 for simplicity.</li>
+                <li>You want diversification across asset classes (real estate, private credit and venture capital).</li>
+                <li>You want to start with as little as $10 rather than a down payment.</li>
+                <li>You&apos;re fine without direct control of depreciation or a 1031 exchange.</li>
               </ul>
             </div>
           </div>
@@ -193,12 +204,21 @@ export default function VsFundrisePage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Fundrise details based on publicly available product info as of 2026.
-            See{" "}
+            Fundrise&apos;s minimum, fees and redemption terms were checked
+            against its{" "}
+            <a href="https://fundrise.com/how-it-works" target="_blank" rel="noopener" className="tc-link">
+              how-it-works page
+            </a>{" "}
+            in October 2026. This page repeats no return figure: for past
+            returns see{" "}
+            <a href="https://fundrise.com/client-returns" target="_blank" rel="noopener" className="tc-link">
+              Fundrise&apos;s client returns page
+            </a>
+            , and for tax documents and current offerings see{" "}
             <a href="https://fundrise.com" target="_blank" rel="noopener" className="tc-link">
               fundrise.com
-            </a>{" "}
-            for their current state.
+            </a>
+            .
           </p>
         </Section>
 
@@ -210,10 +230,10 @@ export default function VsFundrisePage() {
           <div className={VS_PROSE}>
             <ul>
               <li>
-                <strong>If you want full control + tax benefits → direct ownership.</strong> TrueCap helps you underwrite; you arrange financing + take title.
+                <strong>If you want full control → direct ownership.</strong> TrueCap helps you underwrite; you arrange financing + take title.
               </li>
               <li>
-                <strong>If you want passive exposure with low minimums → Fundrise.</strong> Pick a Fundrise plan, set a recurring contribution, collect distributions.
+                <strong>If you want passive exposure with low minimums → Fundrise.</strong> Choose a portfolio strategy, set up recurring investments if you want them, and Fundrise manages the funds.
               </li>
               <li>
                 <strong>If you want both → split the portfolio.</strong> TrueCap helps with the direct side.
@@ -238,7 +258,7 @@ export default function VsFundrisePage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Fundrise" items={FUNDRISE_FAQ} />
+        <ComparisonFaq competitorName="Fundrise" items={FUNDRISE_FAQ} reviewedDate="October 2026" />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -318,7 +338,7 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Is TrueCap a Fundrise alternative?",
     answer: (
       <>
-        Not really — completely different investing models. Fundrise sells shares in diversified non-traded REITs (passive). TrueCap is the underwriting calculator for investors buying rentals directly (active). The decision isn&apos;t which to use — it&apos;s which investing model fits you.
+        Not really — completely different investing models. Fundrise offers shares of funds it manages, which hold private real estate, private credit and venture capital (passive). TrueCap is the underwriting calculator for investors buying rentals directly (active). The decision isn&apos;t which to use — it&apos;s which investing model fits you.
       </>
     ),
   },
@@ -326,7 +346,15 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Fundrise vs Arrived — which one?",
     answer: (
       <>
-        Both are passive real estate platforms but with different scopes. Arrived focuses on single-family rentals at the property level (you buy shares of specific houses, $100 minimum). Fundrise is more diversified across commercial + multifamily + residential at the fund level ($10 minimum). For SFR exposure: Arrived. For diversified RE exposure: Fundrise.
+        They work at different levels. Fundrise offers funds it manages across real estate, private credit and venture capital, and says you can start with as little as $10. On Arrived you buy shares of individual rental homes or of its funds, with a $100 minimum investment. TrueCap does not rank them: see{" "}
+        <a href="https://fundrise.com/how-it-works" target="_blank" rel="noopener" className="tc-link">
+          Fundrise&apos;s how-it-works page
+        </a>{" "}
+        and{" "}
+        <a href="https://arrived.com" target="_blank" rel="noopener" className="tc-link">
+          arrived.com
+        </a>{" "}
+        for current offerings, fees and risks.
       </>
     ),
   },
@@ -334,7 +362,11 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Is Fundrise really passive?",
     answer: (
       <>
-        Yes — Fundrise handles everything (acquisition, financing, management, distributions). You contribute capital + collect distributions. The tradeoff is you give up control over individual property decisions and pay ~1% in fees plus underlying expense ratios.
+        Yes, in the sense that Fundrise manages the funds and the assets in them. You choose a portfolio strategy or a fund and contribute capital. The tradeoff is that you do not choose individual properties, and fees apply: Fundrise lists a 0.15% annual advisory fee, says the funds in its standard portfolios pay a 0.85% annual asset management fee, and says its offering circulars describe all fees. See{" "}
+        <a href="https://fundrise.com/how-it-works" target="_blank" rel="noopener" className="tc-link">
+          Fundrise&apos;s how-it-works page
+        </a>{" "}
+        for the current terms.
       </>
     ),
   },
@@ -347,10 +379,14 @@ const FUNDRISE_FAQ: FaqItem[] = [
     ),
   },
   {
-    question: "Can I use Fundrise's projected returns in TrueCap?",
+    question: "Can I compare Fundrise's returns with a TrueCap analysis?",
     answer: (
       <>
-        Not directly — TrueCap models per-property metrics (cap rate, DSCR, cash flow), not REIT fund returns. Fundrise&apos;s historical 8-12% blended returns aren&apos;t comparable to a direct rental&apos;s cash-on-cash because the leverage, tax treatment, and cash-flow timing are different. Evaluate each on its own terms.
+        Not directly. TrueCap models per-property metrics (cap rate, DSCR, cash flow), not fund returns. A fund&apos;s return and a direct rental&apos;s cash-on-cash return are different measures and are not directly comparable. Fundrise publishes its clients&apos; past returns on{" "}
+        <a href="https://fundrise.com/client-returns" target="_blank" rel="noopener" className="tc-link">
+          its client returns page
+        </a>
+        ; TrueCap repeats no figure from it. Evaluate each on its own terms.
       </>
     ),
   },
