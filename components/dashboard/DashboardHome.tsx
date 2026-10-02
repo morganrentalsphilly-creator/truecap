@@ -844,7 +844,7 @@ export function DashboardHome({
   canCompareDeals?: boolean;
   /** Rendered inside the scrolling <main> (e.g. DealLeadsCard, an async server
    *  component passed from the page) so it isn't clipped by the fixed-viewport
-   *  shell on desktop. */
+   *  shell on desktop. Mounted under the page header and its notices. */
   leadsSlot?: ReactNode;
 }) {
   const initials = getInitials(data.user.displayName, data.user.email);
@@ -1140,6 +1140,15 @@ export function DashboardHome({
             </Button>
           </div>
         ) : null}
+
+        {/* Leads from co-branded shared deals — lives INSIDE the scrolling
+            main so it isn't clipped by the fixed-viewport shell on desktop.
+            Self-gates (renders null when there are no leads). It sits here,
+            above every deal section, because a client's message waits on a
+            person: while lead notifications are off this card is the only
+            place the agent learns of it, and it used to be the last thing on
+            the page (2026-10 go-to-market audit, row P1-67). */}
+        {leadsSlot}
 
         {/* ── Decision Center — fact-based comparisons derived from active
             deals: highest Screening Index, first cash-flow-negative deal to
@@ -2026,11 +2035,6 @@ export function DashboardHome({
             ) : null}
           </div>
         ) : null}
-
-        {/* Leads from co-branded shared deals — lives INSIDE the scrolling
-            main so it isn't clipped by the fixed-viewport shell on desktop.
-            Self-gates (renders null when there are no leads). */}
-        {leadsSlot}
       </main>
     </div>
   );
