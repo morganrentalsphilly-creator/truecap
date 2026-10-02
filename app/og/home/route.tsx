@@ -15,8 +15,12 @@ import { formatDscr } from "@/lib/financial-presentation";
  * the engine (lib/sample-deal-ledger.ts, the same pure calculation the page
  * uses; CLAUDE.md §3.6 allows it here). No screenshot, so the card never
  * shows a stale capture. If the ledger cannot be built the card degrades to
- * the headline alone, never to a placeholder. /home.jpg stays the static
- * fallback for surfaces that do not use this route.
+ * the headline alone, never to a placeholder.
+ *
+ * public/home.jpg, the image of every page with no card of its own, is a
+ * snapshot of this card: scripts/render-default-social-card.ts calls this
+ * handler and writes the JPEG. Re-run it when the headline, the sample deal
+ * or the frame changes, so the default card and this one stay the same card.
  *
  * A route handler rather than the app/opengraph-image file convention on
  * purpose: a root-level file image is inherited by every child segment and
