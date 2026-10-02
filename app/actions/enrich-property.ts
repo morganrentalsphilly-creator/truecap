@@ -117,6 +117,9 @@ export type EnrichPropertyResult = {
       county: string;
       year: number;
       zip?: string;
+      /** True when any resolved bedroom count is the statewide mean, so the
+       *  multi-family rent check must not call the benchmark an area FMR. */
+      stateAverage?: boolean;
     };
   };
 };
@@ -160,6 +163,7 @@ export async function enrichPropertyAction(
       county: unitFmrs.county,
       year: unitFmrs.year,
       ...(unitFmrs.zip ? { zip: unitFmrs.zip } : {}),
+      ...(unitFmrs.stateAverage ? { stateAverage: true } : {}),
     };
   }
 
@@ -629,23 +633,32 @@ async function maybeFetchUnitFmrs(
   county: string;
   year: number;
   zip?: string;
+  stateAverage?: true;
 } | null> {
   const distinct = [...new Set((input.unitBedrooms ?? []).map((b) => Math.round(b)))];
   if (distinct.length === 0) return null;
 
   const byBedrooms: Record<number, number> = {};
   let first: { county: string; year: number; zip?: string } | null = null;
+  let stateAverage = false;
   for (const beds of distinct) {
     const rent = await maybeFetchHudRent({ ...input, bedrooms: beds });
     if (!rent) continue;
     byBedrooms[beds] = rent.amount;
+    // Any count that came back as the statewide mean marks the set, so the
+    // rent check never names it an area figure (audit row P0-02).
+    if (rent.stateAverage) stateAverage = true;
     // Coarse sourcing from the first resolved count — counts can
     // individually fall back from ZIP-level to county, but the label
     // ("HUD FMR for <county>") is the same either way.
     if (!first) first = { county: rent.county, year: rent.year, zip: rent.zip };
   }
   if (!first) return null;
-  return { byBedrooms, ...first };
+  return {
+    byBedrooms,
+    ...first,
+    ...(stateAverage ? { stateAverage: true as const } : {}),
+  };
 }
 
 function normalizeCounty(name: string): string {
