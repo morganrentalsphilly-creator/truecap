@@ -1247,7 +1247,7 @@ export function FocusedDecisionSummary({
                       <p
                         id={errorId}
                         role="alert"
-                        className="mt-1 text-xs font-medium text-destructive"
+                        className="mt-1 text-xs font-medium text-destructive-text"
                       >
                         {targetDraftValidation.errors[field]}
                       </p>
@@ -1259,7 +1259,7 @@ export function FocusedDecisionSummary({
             {targetDraftValidation.formError ? (
               <p
                 role="alert"
-                className="mt-3 text-xs font-medium text-destructive"
+                className="mt-3 text-xs font-medium text-destructive-text"
               >
                 {targetDraftValidation.formError}
               </p>

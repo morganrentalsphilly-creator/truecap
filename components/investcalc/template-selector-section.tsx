@@ -428,7 +428,7 @@ export function TemplateSelectorSection({
         </Button>
       </div>
       {mainFormErrors.templateId?.message && (
-        <p id="templateId-error" role="alert" className="text-xs text-destructive">
+        <p id="templateId-error" role="alert" className="text-xs text-destructive-text">
           {mainFormErrors.templateId?.message}
         </p>
       )}
