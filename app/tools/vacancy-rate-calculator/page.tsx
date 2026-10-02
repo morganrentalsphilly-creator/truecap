@@ -164,8 +164,7 @@ export default function VacancyRateCalculatorPage() {
           </a>{" "}
           put the national rental vacancy rate at {HVS_RENTAL_VACANCY.rate} in{" "}
           {HVS_RENTAL_VACANCY.period}. A pro forma that assumes 5% sits below
-          that. The gap is where deals quietly fail.
-          This calculator converts vacant days + turnover cost into the true
+          that. This calculator converts vacant days + turnover cost into an
           effective vacancy rate to use in your underwrite.
         </p>
 

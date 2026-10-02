@@ -217,7 +217,8 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     const page = read("app/tools/vacancy-rate-calculator/page.tsx").replace(/\s+/g, " ");
     // Nothing on file says what sellers quote, what a property class or a
     // kind of town runs, or that 8% is the default to use (the analyzer's
-    // own default is 5%).
+    // own default is 5%). The lede no longer says deals fail below the
+    // national rate or calls the result the "true" rate.
     for (const claim of [
       /under-quote/i,
       /\bhonest/i,
@@ -228,6 +229,8 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
       /tertiary markets/i,
       /always beats/i,
       /most brochures/i,
+      /quietly fail/i,
+      /\btrue effective/i,
     ]) {
       expect(page, String(claim)).not.toMatch(claim);
     }
