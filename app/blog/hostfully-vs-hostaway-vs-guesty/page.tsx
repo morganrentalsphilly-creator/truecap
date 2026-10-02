@@ -169,21 +169,21 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               All three are short-term rental property management systems —
               channel managers, automation, dynamic pricing, cleaning workflows.
               <strong> Hostfully</strong>{" "}
-              <a href="https://www.hostfully.com/pricing/property-management-software/">
+              <a href="https://www.hostfully.com/pricing/property-management-software/" className="tc-link">
                 pitches its plans from 1 listing up
               </a>{" "}
               and offers digital guidebooks and a direct-booking site you can
               brand.
               <strong> Hostaway</strong>{" "}
-              <a href="https://www.hostaway.com/pricing/">
+              <a href="https://www.hostaway.com/pricing/" className="tc-link">
                 quotes each portfolio by listing count
               </a>{" "}
               and{" "}
-              <a href="https://www.hostaway.com/">
+              <a href="https://www.hostaway.com/" className="tc-link">
                 advertises 300+ integrations
               </a>
               .<strong> Guesty</strong> runs from{" "}
-              <a href="https://www.guesty.com/pricing/">
+              <a href="https://www.guesty.com/pricing/" className="tc-link">
                 Lite (1–3 listings) through Pro and Enterprise (200+ listings)
               </a>
               . For solo STR investors with 1-3 properties, Guesty
