@@ -226,7 +226,7 @@ export function StickyCalculateBar({
       // keeps only its own 8px while it sits on top of it.
       style={aboveCookieBanner ? { bottom: cookieBannerHeight } : undefined}
       className={cn(
-        "lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85",
+        "lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 shadow-float-up backdrop-blur supports-[backdrop-filter]:bg-card/85",
         aboveCookieBanner
           ? "pb-2"
           : "pb-[max(env(safe-area-inset-bottom),0.5rem)]",
