@@ -158,8 +158,9 @@ const MATRIX: Row[] = [
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    batchleads: "No share link listed; its free calculator lets you export the data",
-    winner: "truecap",
+    batchleads:
+      "Print-ready comp reports to share with sellers and buyers; its free calculator lets you export the data",
+    winner: "tie",
   },
 ];
 
@@ -195,7 +196,7 @@ export default function VsBatchleadsPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             BatchLeads is a lead-generation + skip-tracing + list-pulling
-            platform — pull motivated-seller lists, get owner contact info, and
+            platform: pull motivated-seller lists, get owner contact info, and
             send direct mail.{" "}
             <a
               href="https://batchleads.io/blog/propstream-announces-acquisition-of-batchleads-and-batchdialer-enhancing-its-ai-powered-real-estate-data-and-lead-generation-solutions"
