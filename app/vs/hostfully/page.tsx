@@ -136,7 +136,8 @@ const MATRIX: Row[] = [
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    hostfully: "No free plan and no free trial; a free demo",
+    hostfully:
+      "No free plan or free trial for its property management software; a free demo",
   },
   {
     feature: "STR-specific underwriting (ADR, occupancy)",
@@ -492,8 +493,9 @@ const HOSTFULLY_FAQ: FaqItem[] = [
         Hostfully prices per property: from $15 per property per month on
         Growth (1 to 50 listings) and from $25 on Pro (1 to 199 listings), each
         plus a platform fee, with Enterprise quoted for 200 or more listings
-        (as of October 2026). There is no free plan. Hostfully says it does not
-        offer free trials and offers a free demo instead. See{" "}
+        (as of October 2026). There is no free plan for the property management
+        software. Hostfully says it does not offer free trials and offers a free
+        demo instead. See{" "}
         <a
           href="https://www.hostfully.com/pricing/"
           target="_blank"
