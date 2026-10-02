@@ -17,12 +17,12 @@ const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 describe("the display cut's fallback face", () => {
   const css = read("app/globals.css");
   const faces = css.match(/@font-face\s*\{[^}]*\}/g) ?? [];
+  const face = faces[0] ?? "";
   const descriptor = (face: string, name: string) =>
     face.match(new RegExp(`(?:^|[;{\\s])${name}:\\s*([^;]+);`))?.[1].trim() ?? null;
 
   it("is the one @font-face in globals.css, in next/font's fallback family at the display cut's width and weight", () => {
     expect(faces).toHaveLength(1);
-    const [face] = faces;
     expect(descriptor(face, "font-family")).toBe('"Archivo Fallback"');
     expect(descriptor(face, "font-stretch")).toBe("82%");
     expect(descriptor(face, "font-weight")).toBe("750");
@@ -39,15 +39,13 @@ describe("the display cut's fallback face", () => {
   });
 
   it("carries the measured size adjustment and Archivo's own ascent and descent", () => {
-    const [face] = faces;
     // Archivo at 82% width and weight 750 against Arial Bold, measured over
     // the site's headings in Chromium: 0.853.
     expect(descriptor(face, "size-adjust")).toBe("85.3%");
     const metrics = (
-      JSON.parse(read("node_modules/next/dist/server/capsize-font-metrics.json")) as Record<
-        string,
-        { ascent: number; descent: number; lineGap: number; unitsPerEm: number }
-      >
+      JSON.parse(read("node_modules/next/dist/server/capsize-font-metrics.json")) as {
+        archivo: { ascent: number; descent: number; lineGap: number; unitsPerEm: number };
+      }
     ).archivo;
     const adjust = 0.853;
     const percent = (value: string | null) => Number((value ?? "").replace("%", ""));
