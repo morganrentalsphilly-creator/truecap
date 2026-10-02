@@ -9,7 +9,8 @@
  *
  * Layout: the wordmark over a heavy rule with "Comparison" beside it,
  * "TrueCap vs <Competitor>" in the display voice, the positioning tagline
- * under it, and the page URL in DM Mono over a soft rule.
+ * under it, and the page URL in DM Mono over a soft rule. The footer carries
+ * the URL alone: the card names the comparison and does not grade it.
  */
 
 import { ImageResponse } from "next/og";
@@ -37,13 +38,13 @@ export async function renderVsOgImage(config: VsOgConfig): Promise<ImageResponse
   const url = `usetruecap.com/vs/${slug}`;
   const fonts = await loadNewsprintFonts({
     display: `TrueCap. vs ${competitor}`,
-    text: `${tagline} Comparison Honest comparison`,
+    text: `${tagline} Comparison`,
     mono: url,
   });
   try {
     return new ImageResponse(
       (
-        <NewsprintFrame label="Comparison" footerLeft="Honest comparison" footerRight={url}>
+        <NewsprintFrame label="Comparison" footerRight={url}>
           <div
             style={{
               display: "flex",
