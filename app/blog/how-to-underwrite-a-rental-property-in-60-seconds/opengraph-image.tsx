@@ -1,173 +1,25 @@
 /**
- * Dynamic OG image for the anchor blog post.
+ * Social card for /blog/how-to-underwrite-a-rental-property-in-60-seconds, on the shared blog template
+ * (lib/og/blog-og-template.tsx, the Newsprint frame). Next serves it as the
+ * post's og:image and twitter:image because the page's metadata sets no
+ * images of its own.
  *
- * When the article gets shared on Twitter / LinkedIn / etc, the
- * preview card uses this image instead of the generic /home.jpg.
- * Specific article preview = materially higher social CTR.
- *
- * Next.js convention: this file is auto-detected and overrides any
- * images: [] declared in generateMetadata for THIS route only.
- *
- * Constraints (next/og):
- *  - Node runtime (Next 16 deprecates the Edge runtime; next/og renders the same under Node)
- *  - JSX subset only (basic divs + inline styles + text)
- *  - No Tailwind classes
- *  - No custom fonts unless we fetch them in the handler
+ * Every line restates the post as it reads today. When the post's title,
+ * figures or sections change, change this card in the same commit
+ * (lib/__tests__/blog-social-card-truth.test.ts checks the figures).
  */
 
-import { ImageResponse } from "next/og";
+import { renderBlogOgImage, OG_SIZE } from "@/lib/og/blog-og-template";
 
-export const alt = "How to underwrite a rental property in 60 seconds — TrueCap";
-export const size = { width: 1200, height: 630 };
+export const alt = "How to screen a rental property in 60 seconds";
+export const size = OG_SIZE;
 export const contentType = "image/png";
 
-const BRAND_BLUE = "#0070c4";
-const TEXT_INK = "#0F172A";
-const TEXT_SUB = "#475569";
-
 export default function Image() {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          background: "#F8FAFC",
-          fontFamily: "system-ui",
-          color: TEXT_INK,
-        }}
-      >
-        {/* top accent bar */}
-        <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
-
-        {/* header row: brand + section label */}
-        <div
-          style={{
-            padding: "40px 64px 0 64px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 32,
-              fontWeight: 800,
-              letterSpacing: "-0.01em",
-              display: "flex",
-            }}
-          >
-            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
-          </div>
-          <div
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: TEXT_SUB,
-              display: "flex",
-            }}
-          >
-            Blog · Guide
-          </div>
-        </div>
-
-        {/* 60 SECONDS pill */}
-        <div
-          style={{
-            padding: "48px 64px 0 64px",
-            display: "flex",
-          }}
-        >
-          <div
-            style={{
-              background: BRAND_BLUE,
-              color: "#FFFFFF",
-              fontSize: 20,
-              fontWeight: 800,
-              padding: "10px 22px",
-              borderRadius: 999,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              display: "flex",
-            }}
-          >
-            60-second underwrite
-          </div>
-        </div>
-
-        {/* headline */}
-        <div
-          style={{
-            padding: "26px 64px 0 64px",
-            display: "flex",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 70,
-              fontWeight: 800,
-              lineHeight: 1.06,
-              letterSpacing: "-0.025em",
-              maxWidth: 1072,
-              display: "flex",
-            }}
-          >
-            How to underwrite a rental property in 60 seconds
-          </div>
-        </div>
-
-        {/* subhead */}
-        <div
-          style={{
-            padding: "22px 64px 0 64px",
-            display: "flex",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 26,
-              color: TEXT_SUB,
-              lineHeight: 1.35,
-              maxWidth: 980,
-              display: "flex",
-            }}
-          >
-            The 5 numbers, 4 metrics, and 2 sanity checks every investor uses
-            to triage a deal — without a spreadsheet.
-          </div>
-        </div>
-
-        {/* footer */}
-        <div
-          style={{
-            marginTop: "auto",
-            padding: "0 64px 40px 64px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            color: TEXT_SUB,
-            fontSize: 20,
-          }}
-        >
-          <div style={{ display: "flex" }}>
-            Cap rate · Cash-on-cash · DSCR · Stress tests
-          </div>
-          <div
-            style={{
-              fontWeight: 700,
-              color: BRAND_BLUE,
-              display: "flex",
-            }}
-          >
-            usetruecap.com/blog
-          </div>
-        </div>
-      </div>
-    ),
-    { ...size }
-  );
+  return renderBlogOgImage({
+    section: "Guide",
+    tag: "60-second screen",
+    title: "How to screen a rental property in 60 seconds",
+    subline: "Five inputs · four modeled metrics · two sanity checks",
+  });
 }
