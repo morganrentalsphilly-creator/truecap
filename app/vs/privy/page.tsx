@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
   description:
-    "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit together.",
+    "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit.",
   keywords: [
     "privy alternative",
     "privy real estate",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     description:
-      "Privy is investor MLS search. TrueCap underwrites the deals. Different jobs in the same workflow.",
+      "Privy sources deals on MLS data. TrueCap underwrites the deals. Different jobs in the same workflow.",
     url: "/vs/privy",
     type: "website",
     images: [
@@ -96,7 +96,7 @@ const MATRIX: Row[] = [
     winner: "tie",
   },
   {
-    feature: "Investor-filtered MLS search",
+    feature: "Deal sourcing by strategy on MLS data",
     truecap: "No",
     privy: "Yes: by strategy (rental, fix-and-flip, teardown)",
     winner: "privy",
@@ -144,7 +144,7 @@ export default function VsPrivyPage() {
     name: "Privy vs TrueCap (2026): Find Deals vs Underwrite",
     url: `${siteUrl}/vs/privy`,
     description:
-      "Privy is investor-focused MLS search. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit together.",
+      "Privy sources deals and analyzes properties on MLS data. TrueCap underwrites the deals once you've found them. Honest comparison and how the two fit.",
     dateModified: lastmodFor("/vs/privy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -422,9 +422,10 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Privy alternative?",
     answer: (
       <>
-        No — they solve different problems. Privy is investor-focused MLS search
-        and filtering. TrueCap is per-deal underwriting once you have an
-        address. They sit at different steps, so an investor can use both.
+        No — they solve different problems. Privy is deal sourcing and property
+        analysis on MLS data and public records. TrueCap is per-deal
+        underwriting once you have an address. They sit at different steps, so
+        an investor can use both.
       </>
     ),
   },
