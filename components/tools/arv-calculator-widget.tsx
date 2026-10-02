@@ -18,7 +18,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -243,7 +243,6 @@ export function ArvCalculatorWidget() {
         <Sparkles className="w-4 h-4" />
         Open the rental analyzer with a separately verified purchase
         price
-        <ArrowUpRight className="w-4 h-4" />
       </AnalyzerHandoffLink>
     </div>
   );
