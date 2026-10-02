@@ -161,7 +161,7 @@ export default function OnePercentRulePost() {
     author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
-    isPartOf: { "@id": `${siteUrl}/blog#blog` },
+    isPartOf: { "@type": "Blog", "@id": `${siteUrl}/blog#blog` },
     image: [`${siteUrl}/home.jpg`],
   };
   const breadcrumbLd = {

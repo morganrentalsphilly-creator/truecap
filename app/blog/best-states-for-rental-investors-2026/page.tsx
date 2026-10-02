@@ -65,7 +65,7 @@ export default function BestStatesPost() {
     author: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: `${siteUrl}/blog/${SLUG}`,
-    isPartOf: { "@id": `${siteUrl}/blog#blog` },
+    isPartOf: { "@type": "Blog", "@id": `${siteUrl}/blog#blog` },
   };
   const breadcrumbLd = {
     "@context": "https://schema.org",
