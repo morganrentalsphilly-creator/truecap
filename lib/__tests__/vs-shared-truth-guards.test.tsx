@@ -127,8 +127,11 @@ describe("the /vs agent line links /for-agents only where that page renders", ()
     expect(html.match(/href="\/for-agents"/g)).toHaveLength(1);
     expect(html).toContain('<a href="/for-agents" data-intent-prefetch="">TrueCap for agents</a>');
     expect(html.replace(/<!-- -->/g, "")).toContain(
-      "Screening listings for investor clients? <a href=\"/for-agents\" data-intent-prefetch=\"\">TrueCap for agents</a> keeps a client roster and screens a deal against that client&#x27;s Buy Box.",
+      "Screening listings for investor clients? <a href=\"/for-agents\" data-intent-prefetch=\"\">TrueCap for agents</a> keeps a client roster and screens each deal against the Buy Box of the client you assign it to.",
     );
+    // The sentence names the client it means: "that client's" had no antecedent
+    // when the line before it spoke only of "clients" and "a roster".
+    expect(html).not.toContain("that client");
     agentPro.configured = false;
   });
 });
