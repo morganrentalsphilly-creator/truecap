@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "DealMachine",
     tagline:
-      "DealMachine finds leads with property data and driving for dollars. TrueCap underwrites them. Different jobs.",
+      "DealMachine is property and owner data, lead lists and driving for dollars. TrueCap underwrites the leads you choose.",
     slug: "dealmachine",
   });
 }
