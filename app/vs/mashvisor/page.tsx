@@ -182,7 +182,7 @@ const MATRIX: Row[] = [
     feature: "Pricing",
     truecap: "Free + monthly Pro on /pricing, no card to start",
     mashvisor:
-      "Three priced plans (Lite, Standard, Professional), about $40 to $120 a month depending on plan and billing period, plus a custom-priced Enterprise plan (as of October 2026)",
+      "Lite, Standard and Professional run $39.99 to $99.99 a month billed annually, or $49.99 to $119.99 billed quarterly; Enterprise is priced on request (as of October 2026)",
   },
 ];
 
