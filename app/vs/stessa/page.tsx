@@ -125,7 +125,7 @@ const MATRIX: Row[] = [
   {
     feature: "Acquisition data context",
     truecap:
-      "Editable HUD area-rent and FRED rate benchmarks; manual local property tax",
+      "Editable HUD rent and FRED rate benchmarks; manual local property tax",
     stessa:
       "Projected rent, public-record tax, insurance estimate, sale/rent comps, and neighborhood metrics",
     winner: "tie",

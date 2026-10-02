@@ -73,7 +73,7 @@ const RANKED_CALCULATORS = [
     pricing: "Free core; paid Pro — see live pricing",
     pros: [
       "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
-      "Editable HUD area-rent + FRED owner-occupied rate benchmarks, with manual local property tax",
+      "Editable HUD rent + FRED owner-occupied rate benchmarks, with manual local property tax",
       "Buy Box fit, with a Deal score",
       "Paid Pro plans add 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and reports; see live pricing for current terms",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
