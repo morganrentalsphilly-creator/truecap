@@ -205,6 +205,12 @@ describe("P1-35: worked numbers are the numbers the stated inputs give", () => {
     );
     expect(outside).toContain("href={HVS_RENTAL_VACANCY.href}");
     expect(outside).not.toContain("census.gov");
+    // No data says what "most listing brochures" quote. The lede instead sets
+    // a 5% assumption beside the sourced rate, which holds only while that
+    // rate is above 5%.
+    expect(page).not.toMatch(/most listing brochures/i);
+    expect(outside).toContain("A pro forma that assumes 5% sits below that.");
+    expect(Number.parseFloat(fields.match(/rate: "(\d+(?:\.\d+)?)%"/)![1]!)).toBeGreaterThan(5);
   });
 
   it("llms-full.txt describes the vacancy calculator as the page does: graded bands, no denial of a benchmark", async () => {
