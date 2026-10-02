@@ -39,6 +39,11 @@ export type FieldProvenance = {
   verified: boolean;
   /** Human detail, e.g. "Philadelphia County" or "30-yr avg". */
   detail?: string;
+  /** True when the HUD rent is the statewide fallback: the unweighted mean of
+   *  HUD's county and metro-area rows for the state, used when the address
+   *  matched no county (or the matched row had no figure). Absent on records
+   *  stored before the flag existed, which keep the area label. */
+  stateAverage?: boolean;
 };
 
 export type DataConfidence = {
@@ -57,6 +62,9 @@ export type EnrichmentProvenanceInput = Partial<
       detail?: string;
       /** User changed the value after auto-fill → becomes an unverified manual estimate. */
       overridden?: boolean;
+      /** HUD rent only: the statewide fallback, not a county, metro or ZIP
+       *  figure (enrich-property's `meta.rent.stateAverage`). */
+      stateAverage?: boolean;
     }
   >
 >;
@@ -88,7 +96,35 @@ export function dataConfidenceFieldLabel(f: DataConfidenceField): string {
   return FIELD_LABELS[f];
 }
 
-export function dataConfidenceSourceLabel(s: DataConfidenceSource): string {
+/** Label for a HUD rent that is the statewide fallback rather than an area
+ *  figure. "Average" is literal: enrich-property returns the unweighted mean
+ *  of HUD's county and metro-area rows for the state. */
+export const HUD_STATEWIDE_RENT_LABEL = "HUD rent benchmark (statewide average)";
+
+/**
+ * True when a rent provenance record is the statewide HUD fallback. The flag
+ * only ever accompanies a HUD source; a record stored before the flag existed
+ * has none and reads as an area figure, as it always did.
+ */
+export function isStatewideHudRent(
+  provenance:
+    | { source: DataConfidenceSource; stateAverage?: boolean }
+    | null
+    | undefined,
+): boolean {
+  return (
+    provenance?.stateAverage === true &&
+    (provenance.source === "hud-fmr" || provenance.source === "hud-safmr")
+  );
+}
+
+export function dataConfidenceSourceLabel(
+  s: DataConfidenceSource,
+  opts?: { stateAverage?: boolean },
+): string {
+  if (isStatewideHudRent({ source: s, stateAverage: opts?.stateAverage })) {
+    return HUD_STATEWIDE_RENT_LABEL;
+  }
   return SOURCE_LABELS[s] ?? s;
 }
 
@@ -128,6 +164,7 @@ export function buildDataConfidence(
             fetchedAt: entry.fetchedAt ?? null,
             verified: false,
             detail: entry.detail,
+            ...(isStatewideHudRent(entry) ? { stateAverage: true } : {}),
           };
     }
   }
@@ -242,6 +279,10 @@ export function normalizeDataConfidence(raw: unknown): DataConfidence | null {
           fetchedAt: typeof fo.fetchedAt === "string" ? fo.fetchedAt : null,
           verified: Boolean(fo.verified),
           detail: typeof fo.detail === "string" ? fo.detail : undefined,
+          ...(fo.stateAverage === true &&
+          (source === "hud-fmr" || source === "hud-safmr")
+            ? { stateAverage: true }
+            : {}),
         };
       }
     }

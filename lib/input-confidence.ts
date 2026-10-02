@@ -7,7 +7,10 @@
  * a probability, prediction, or measure of investment quality.
  */
 
-import type { EnrichmentProvenanceInput } from "./data-confidence";
+import {
+  isStatewideHudRent,
+  type EnrichmentProvenanceInput,
+} from "./data-confidence";
 import type { InvestmentFormValues } from "./investcalc-schema";
 
 /**
@@ -350,6 +353,9 @@ function normalizedProvenance(
       ...(typeof item.overridden === "boolean"
         ? { overridden: item.overridden }
         : {}),
+      // HUD statewide fallback (P0-02). Kept only when true, so a context
+      // stored before the flag existed normalizes to the same object.
+      ...(isStatewideHudRent(item) ? { stateAverage: true } : {}),
     };
   }
   return output;
@@ -638,13 +644,17 @@ export function buildInputConfidence(
                 sourceLabel:
                   rentProvenance.source === "rentcast-estimate"
                     ? "RentCast market-rent estimate"
-                    : rentProvenance.source === "hud-safmr"
-                      ? "HUD Rent Benchmark (ZIP)"
-                      : "HUD Rent Benchmark (county)",
+                    : isStatewideHudRent(rentProvenance)
+                      ? "HUD Rent Benchmark (statewide average)"
+                      : rentProvenance.source === "hud-safmr"
+                        ? "HUD Rent Benchmark (ZIP)"
+                        : "HUD Rent Benchmark (county)",
                 reason:
                   rentProvenance.source === "rentcast-estimate"
                     ? "Automated market estimate, not verified in-place rent or a signed lease."
-                    : "Geographic benchmark, not a property-specific rent comp.",
+                    : isStatewideHudRent(rentProvenance)
+                      ? "Statewide average of HUD's area figures, not a figure for this address's county or ZIP and not a property-specific rent comp."
+                      : "Geographic benchmark, not a property-specific rent comp.",
                 verifyAction: "Verify with local rent comps",
                 offerReadyRequired: true,
               }

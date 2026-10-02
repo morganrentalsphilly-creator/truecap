@@ -33,6 +33,8 @@ export type EnrichmentReceiptCapture = {
     source: string;
     rentFingerprint?: string;
     invalidated?: boolean;
+    /** HUD statewide fallback, not a county, metro or ZIP figure. */
+    stateAverage?: boolean;
   };
   interestRate?: { value: number };
 };
@@ -48,8 +50,19 @@ type Props = {
 
 const fmtPct = (n: number) => String(Number(n.toFixed(2)));
 
-export function enrichmentRentSourceLabel(source: string): string {
+/**
+ * `stateAverage` marks the HUD statewide fallback (the unweighted mean of
+ * HUD's county and metro-area rows for the state). It is not a Fair Market
+ * Rent for any area, so it never wears the FMR or SAFMR label. Same words as
+ * the autofill toast.
+ */
+export function enrichmentRentSourceLabel(
+  source: string,
+  stateAverage?: boolean,
+): string {
   if (source === "rentcast-estimate") return "RentCast estimate";
+  if (stateAverage === true && (source === "hud-fmr" || source === "hud-safmr"))
+    return "HUD statewide average";
   if (source === "hud-safmr") return "HUD SAFMR";
   if (source === "hud-fmr") return "HUD FMR";
   return "market estimate";
@@ -84,7 +97,7 @@ export function EnrichmentReceipt({ form, active, getCapture }: Props) {
     sameNumber(currentRent, capture.monthlyRent.value)
   ) {
     parts.push(
-      `rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo ${enrichmentRentSourceLabel(capture.monthlyRent.source)})`,
+      `rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo ${enrichmentRentSourceLabel(capture.monthlyRent.source, capture.monthlyRent.stateAverage)})`,
     );
   } else if (
     capture.monthlyRent?.rentFingerprint &&
@@ -95,7 +108,7 @@ export function EnrichmentReceipt({ form, active, getCapture }: Props) {
     })
   ) {
     parts.push(
-      `per-unit rents (${enrichmentRentSourceLabel(capture.monthlyRent.source)})`,
+      `per-unit rents (${enrichmentRentSourceLabel(capture.monthlyRent.source, capture.monthlyRent.stateAverage)})`,
     );
   }
 

@@ -874,6 +874,9 @@ type EnrichmentCapture = {
      * silently re-attribute the edited roll merely because another empty unit
      * was subsequently filled from HUD. */
     invalidated?: boolean;
+    /** enrich-property's `meta.rent.stateAverage`: the value is the HUD
+     * statewide fallback, so no surface may label it a county or ZIP figure. */
+    stateAverage?: boolean;
   };
   interestRate?: { source: "fred"; fetchedAt?: string; value: number };
 };
@@ -925,6 +928,7 @@ function buildProvenanceInput(
       detail: capture.monthlyRent.detail,
       fetchedAt: capture.monthlyRent.fetchedAt,
       overridden: rentOverridden,
+      ...(capture.monthlyRent.stateAverage ? { stateAverage: true } : {}),
     };
   }
   return out;
@@ -2593,6 +2597,9 @@ export function InvestCalcPage({
               : undefined,
             value: enrichment.monthlyRent,
             rentFingerprint: unitRentRollFingerprint(form.getValues()),
+            ...(enrichment.meta.rent?.stateAverage
+              ? { stateAverage: true }
+              : {}),
           };
           filled.push(
             `Rent ~$${Math.round(enrichment.monthlyRent).toLocaleString()}/mo ${
@@ -3296,6 +3303,7 @@ export function InvestCalcPage({
         let filledRentSource: "hud-fmr" | "hud-safmr" | null = null;
         let filledRentDetail: string | undefined;
         let filledRentFetchedAt: string | undefined;
+        let filledRentStateAverage = false;
         for (let i = 0; i < pending.length; i++) {
           const { idx } = pending[i];
           const result = results[i];
@@ -3311,6 +3319,9 @@ export function InvestCalcPage({
             filledLines.push(
               `Unit ${idx + 1}: $${Math.round(result.monthlyRent).toLocaleString()}/mo`,
             );
+            if (result.meta.rent?.stateAverage === true) {
+              filledRentStateAverage = true;
+            }
             if (!filledRentSource) {
               filledRentSource = result.meta.rent?.source ?? "hud-fmr";
               filledRentDetail = result.meta.rent?.county;
@@ -3335,6 +3346,12 @@ export function InvestCalcPage({
             rentFingerprint: unitRentRollFingerprint(form.getValues()),
             ...(priorUnitRentCaptureWasInvalidated
               ? { invalidated: true }
+              : {}),
+            // A unit filled earlier at this address keeps its statewide
+            // disclosure when a later fill adds another unit.
+            ...(filledRentStateAverage ||
+            priorRentCapture?.stateAverage === true
+              ? { stateAverage: true }
               : {}),
           };
           // Same disclosure contract as the single-family fill: a statewide
