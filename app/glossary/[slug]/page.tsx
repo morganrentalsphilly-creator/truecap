@@ -104,8 +104,11 @@ export async function generateMetadata({
  * look for the number they just read about.
  */
 const IN_PRODUCT_BY_CATEGORY: Record<GlossaryCategory, string> = {
+  // Only what holds for every metric entry that renders this block: GRM, NOI
+  // and the Deal score are shown but are not Buy Box or Offer Ceiling
+  // targets, so the sentence makes no claim about targets, the memo or the PDF.
   metric:
-    "The analyzer computes this metric on every run from the assumptions you see and can edit, shows it in the results view beside cash flow after reserves and DSCR, and uses your targets for it in Buy Box fit and in the Offer Ceiling — the highest price that still meets those targets. It appears in the written decision memo and the PDF with the same value and the same inputs.",
+    "The analyzer computes this metric on every run from the assumptions you see and can edit, and shows it in the results view.",
   financing:
     "Financing inputs sit in the analyzer's financing section: the rate can start from FRED's national 30-year benchmark and every term is editable. They drive the monthly payment, DSCR, and cash flow after reserves, so a change here moves the verdict and the Offer Ceiling; the results view names the financing assumptions most likely to change the decision.",
   expense:
@@ -117,6 +120,26 @@ const IN_PRODUCT_BY_CATEGORY: Record<GlossaryCategory, string> = {
   fundamental:
     "Property fundamentals are the facts you enter or confirm about the building itself — price, units, bedrooms, square footage — and the analyzer keeps them separate from assumptions. They decide which benchmarks apply (a 3-bedroom rent benchmark, for example) and appear at the top of every results view and memo so the reader knows exactly what was analyzed.",
 };
+
+/**
+ * Metric entries the analyzer's results view does not show, so the category
+ * sentence above ("computes this metric on every run ... shows it in the
+ * results view") would be false on them, and so would a call to "run the
+ * <term> math on a real deal":
+ *   - tax-savings and after-tax-cash-flow: the tax view is not offered
+ *     (tax_strategy is shipped: false in lib/entitlements-catalog.ts), and
+ *     both entries say so in their own text;
+ *   - operating-expense-ratio: nothing in the analyzer computes an OER;
+ *   - equity-multiple: computed for Compare only, not in the results view.
+ * These pages keep their definition, example and checks, and render neither
+ * the "Where it shows up in TrueCap" block nor the term in the analyzer CTA.
+ */
+const METRICS_NOT_IN_THE_RESULTS_VIEW: ReadonlySet<string> = new Set([
+  "tax-savings",
+  "after-tax-cash-flow",
+  "operating-expense-ratio",
+  "equity-multiple",
+]);
 
 export default async function GlossaryTermPage({
   params,
@@ -137,6 +160,10 @@ export default async function GlossaryTermPage({
   // The entry's own calculator, only while it is released (F9): an
   // unreleased tool's toolUrl stays in the data and renders nothing.
   const tool = linkableToolFor(entry.toolUrl);
+  // Where the term shows up in the product: null when it does not.
+  const inProduct = METRICS_NOT_IN_THE_RESULTS_VIEW.has(entry.slug)
+    ? null
+    : IN_PRODUCT_BY_CATEGORY[entry.category];
 
   // ── Schema.org markup ──
   // DefinedTerm: tells Google this is a glossary entry → "what is X" SERPs
@@ -312,7 +339,7 @@ export default async function GlossaryTermPage({
           ) : null}
           <div className="mt-10">
             <SeoAnalyzerCta
-              context={`the ${entry.term} math on a real deal`}
+              context={inProduct ? `the ${entry.term} math on a real deal` : undefined}
               utmSource="glossary"
             />
           </div>
@@ -328,14 +355,16 @@ export default async function GlossaryTermPage({
           </div>
           {/* Where the term shows up in the product (true for every entry in
               its category) + tag-driven related links (Phase 8.4). */}
-          <section className="mt-10" aria-labelledby="in-truecap">
-            <h2 id="in-truecap" className="text-xl font-extrabold text-foreground mb-3">
-              Where {entry.term} shows up in TrueCap
-            </h2>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              {IN_PRODUCT_BY_CATEGORY[entry.category]}
-            </p>
-          </section>
+          {inProduct ? (
+            <section className="mt-10" aria-labelledby="in-truecap">
+              <h2 id="in-truecap" className="text-xl font-extrabold text-foreground mb-3">
+                Where {entry.term} shows up in TrueCap
+              </h2>
+              <p className="text-base leading-relaxed text-muted-foreground">
+                {inProduct}
+              </p>
+            </section>
+          ) : null}
           <RelatedContent kind="glossary" slug={entry.slug} title={entry.term} className="mt-10" />
         </article>
       </main>
