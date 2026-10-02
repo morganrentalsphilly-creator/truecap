@@ -79,7 +79,7 @@ type Row = {
   feature: string;
   truecap: string;
   hostaway: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -92,68 +92,69 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, editable rent input for STR scenarios",
-    hostaway: "Not modeled",
+    hostaway: "Not among Hostaway's listed features",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    hostaway: "Not modeled",
+    hostaway: "Not among Hostaway's listed features",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    hostaway: "Not applicable",
+    hostaway: "Not among Hostaway's listed features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    hostaway: "Not applicable",
+    hostaway: "Not among Hostaway's listed features",
     winner: "truecap",
   },
   {
     feature: "Channel manager (Airbnb, Vrbo, Booking)",
     truecap: "No",
-    hostaway: "Yes — unified inbox + calendar",
+    hostaway: "Yes: channel manager, multi-calendar and unified inbox",
     winner: "hostaway",
   },
   {
     feature: "Guest messaging automation",
     truecap: "No",
-    hostaway: "Yes — full automation suite",
+    hostaway: "Yes: automated messages and AI replies",
     winner: "hostaway",
   },
   {
-    feature: "Dynamic pricing integrations",
+    feature: "Dynamic pricing",
     truecap: "No",
-    hostaway: "Yes — PriceLabs, Wheelhouse, Beyond Pricing",
+    hostaway:
+      "Yes: its own Dynamic Pricing, plus PriceLabs, Wheelhouse and Beyond in its marketplace",
     winner: "hostaway",
   },
   {
     feature: "Cleaning + vendor scheduling",
     truecap: "No",
-    hostaway: "Yes — turnover automation",
+    hostaway:
+      "Yes: automated tasks, plus Turno and Breezeway in its marketplace",
     winner: "hostaway",
   },
   {
     feature: "Mobile app",
     truecap: "PWA",
-    hostaway: "Native iOS + Android",
+    hostaway: "Mobile app",
     winner: "tie",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    hostaway: "No — paid only (~$10-15 per listing/mo as of 2026)",
-    winner: "truecap",
+    hostaway:
+      "No free plan; Hostaway quotes each portfolio and does not publish prices",
   },
   {
     feature: "Pricing model",
     truecap: "Free core; paid Pro — see live pricing",
-    hostaway: "Per-listing pricing, custom enterprise tiers",
-    winner: "tie",
+    hostaway: "Custom quote based on listing count; no public price list",
   },
 ];
 
@@ -188,9 +189,9 @@ export default function VsHostawayPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Hostaway is a leading short-term rental management platform —
-            channel manager across Airbnb / Vrbo / Booking.com, guest messaging
-            automation, dynamic pricing integrations, cleaning workflows.
+            Hostaway is a short-term rental management platform: a channel
+            manager across Airbnb, Vrbo and Booking.com, automated guest
+            messaging, dynamic pricing, and task automation.
             TrueCap models the property&apos;s pre-purchase economics from
             user-reviewed assumptions. Different stages, complementary tools.
           </p>
@@ -249,12 +250,13 @@ export default function VsHostawayPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>You own or are about to own a short-term rental.</li>
-                <li>You manage 3+ STRs and need automation at scale.</li>
+                <li>You host guests and need a channel manager and automation.</li>
                 <li>
                   You want a unified inbox across Airbnb / Vrbo / Booking.com.
                 </li>
                 <li>
-                  You want dynamic pricing + cleaning automation built in.
+                  You want dynamic pricing and task automation in the same
+                  system.
                 </li>
               </ul>
             </div>
@@ -282,24 +284,24 @@ export default function VsHostawayPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Hostaway details based on publicly available product info as of
-            2026. See{" "}
+            Hostaway features were checked against hostaway.com in October
+            2026. Hostaway does not publish prices: its{" "}
             <a
-              href="https://hostaway.com"
+              href="https://www.hostaway.com/pricing/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              hostaway.com
+              pricing page
             </a>{" "}
-            for their current state.
+            is a quote form that starts with your listing count.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How STR investors use both
+            How TrueCap and Hostaway fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -363,7 +365,11 @@ export default function VsHostawayPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Hostaway" items={HOSTAWAY_FAQ} />
+        <ComparisonFaq
+          competitorName="Hostaway"
+          items={HOSTAWAY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -371,10 +377,10 @@ export default function VsHostawayPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -477,10 +483,9 @@ const HOSTAWAY_FAQ: FaqItem[] = [
     question: "Does Hostaway have a free tier?",
     answer: (
       <>
-        No — paid only, with a demo. Pricing is per-listing and varies by
-        features; entry-level pricing has historically been around $10-15 per
-        listing per month with feature add-ons. For 1-2 STRs, Hostaway is often
-        overkill — consider Lodgify or Smoobu first.
+        No. Hostaway has no free plan and does not publish prices: its pricing
+        page is a quote form that starts with how many listings you manage. Ask
+        Hostaway for a quote for your listing count.
       </>
     ),
   },
@@ -488,10 +493,12 @@ const HOSTAWAY_FAQ: FaqItem[] = [
     question: "Can TrueCap model both LTR and STR for the same property?",
     answer: (
       <>
-        Yes — run two separate analyses with different rent inputs. One with HUD
-        FMR (LTR scenario), one with your STR projected monthly revenue (gross
-        income ÷ 12 conservatively discounted). Compare the cap rate / cash flow
-        / DSCR side-by-side and pick the strategy that fits.
+        Yes — run two separate analyses with different rent inputs. One with
+        the long-term rent you can support from leases or comps (the HUD
+        benchmark is only a starting placeholder), one with your STR projected
+        monthly revenue (gross income ÷ 12 conservatively discounted). Then
+        compare the cap rate, cash flow, and DSCR of the two; Pro compares
+        saved deals side by side.
       </>
     ),
   },
