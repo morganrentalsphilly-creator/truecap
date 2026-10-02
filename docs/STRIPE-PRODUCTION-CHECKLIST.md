@@ -4,6 +4,63 @@ This runbook covers settings that are intentionally not changed by repository
 code. Complete it in Stripe Dashboard without replacing Products, Prices, live
 subscriptions, or the pinned API version.
 
+## What this document is, and what it is not
+
+It is a runbook for the presentation settings in Stripe Dashboard (public
+details, Checkout branding, the Product and Price inventory, the Customer
+Portal) and for the Decision Pack refund and dispute path. It was written for
+a branding review. It is not a launch checklist, and passing it does not show
+that billing is ready for paid traffic. Read against the code on 2026-10-02
+(go-to-market audit, row P2-133), it leaves these out:
+
+- **The Stripe account is shared with a second product**
+  (`docs/site-overhaul.md`, Phase 1). On 2026-10-01 the daily reconcile log
+  counted 35 subscriptions on the account, 31 of them the other product's.
+  "Public business name", the support details and the Customer Portal
+  headline below are account-wide settings, so changing them changes them
+  for that product too. The code brands the hosted Checkout page per session
+  and nothing else: it sets no statement descriptor, and it opens the portal
+  without a configuration id, so the account's default portal applies.
+- **Receipts, invoice emails and the statement descriptor are not covered.**
+  The application sends no receipt or confirmation email of its own after a
+  purchase (the webhook can only schedule the legacy trial onboarding
+  sequence, and Checkout is created without a trial). Whether a buyer gets a
+  receipt, what business details it shows, and the name on the card
+  statement are Dashboard settings this document never asks anyone to check.
+- **The webhook event list is partial.** "Return and lifecycle verification"
+  names seven refund and dispute events. The handler
+  (`app/api/stripe/webhooks/route.ts`) dispatches 31 event types, listed
+  below; an endpoint subscribed only to the seven would never deliver a
+  completed Checkout, a subscription change or a paid invoice.
+- **There is no Stripe test mode for this project.** The steps below that say
+  "in test mode" or "a test checkout" cannot be run as written: no test-mode
+  keys are kept, by the founder's decision. They are left as they were
+  written. What may be verified in live mode without a payment has not been
+  decided, so nothing here replaces them.
+
+Event types the webhook handler dispatches, from its `case` labels
+(`lib/__tests__/stripe-checklist-doc.test.ts` fails if this list and the
+handler drift apart):
+
+- Checkout: `checkout.session.completed`,
+  `checkout.session.async_payment_succeeded`, `checkout.session.expired`
+- Subscriptions: `customer.subscription.created`,
+  `customer.subscription.updated`, `customer.subscription.deleted`,
+  `customer.subscription.paused`, `customer.subscription.resumed`,
+  `customer.subscription.trial_will_end`,
+  `customer.subscription.pending_update_applied`,
+  `customer.subscription.pending_update_expired`
+- Invoices: `invoice.paid`, `invoice.payment_succeeded`,
+  `invoice.payment_failed`, `invoice.payment_action_required`,
+  `invoice_payment.paid`
+- Refunds: `charge.refunded`, `charge.refund.updated`, `refund.created`,
+  `refund.updated`
+- Disputes: `charge.dispute.created`, `charge.dispute.updated`,
+  `charge.dispute.closed`, `charge.dispute.funds_withdrawn`,
+  `charge.dispute.funds_reinstated`
+- Catalog: `price.created`, `price.updated`, `price.deleted`,
+  `plan.created`, `plan.updated`, `plan.deleted`
+
 ## Safety rules
 
 - Do not edit, archive, migrate, or recreate the grandfathered $20/month Price.
@@ -112,8 +169,12 @@ protected-rate warning.
 
 ## Return and lifecycle verification
 
-- Subscription success URL returns to
-  `/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`.
+- Subscription success URL is
+  `/api/billing/return?session_id={CHECKOUT_SESSION_ID}`
+  (`app/actions/billing.ts`). That route handler stores the Session id in a
+  short-lived httpOnly cookie and redirects (303) to
+  `/dashboard/new?billing=success`, so the id is never in the URL of the page
+  the buyer lands on (`lib/stripe/checkout-return-cookie.ts`).
 - Subscription cancellation returns to
   `/pricing?billing=checkout_cancelled#plans`.
 - Portal returns to `/profile`; cancel/switch deep links return with their
