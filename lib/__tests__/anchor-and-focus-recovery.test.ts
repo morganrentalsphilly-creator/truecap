@@ -96,6 +96,23 @@ describe("fragment links clear the sticky header", () => {
     expect(read("components/marketing/cookie-consent-banner.tsx")).toContain('data-cookie-consent-banner=""');
   });
 
+  it("keeps focus clear of the run bar stacked on the cookie banner", () => {
+    // On a phone with consent unset the analyzer's run bar sits on top of
+    // the banner. The bar-only rule (4.5rem) has the banner rule's
+    // specificity and comes later, so the stacked state needs its own,
+    // more specific rule, sized for both: banner up to 83px plus bar 65px.
+    const stacked =
+      /html:has\(\[data-cookie-consent-banner\]\):has\(\[data-above-cookie-banner\]\)\s*\{\s*scroll-padding-bottom: calc\(([\d.]+)rem/.exec(
+        css,
+      );
+    expect(stacked, "no scroll padding rule for the run bar stacked on the banner").not.toBeNull();
+    expect(Number(stacked![1]) * 16).toBeGreaterThanOrEqual(83 + 65);
+    // The attribute the rule reads is the one the bar publishes.
+    expect(read("components/investcalc/sticky-calculate-bar.tsx")).toContain(
+      'data-above-cookie-banner={aboveCookieBanner ? "" : undefined}',
+    );
+  });
+
   it("keeps the dashboard override more specific than the base rule", () => {
     // .dashboard-shell #main (0,1,1,1) must still beat #main (0,1,0,0), or the
     // dashboard Topbar case silently regresses to the marketing offset.

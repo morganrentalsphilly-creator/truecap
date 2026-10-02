@@ -607,7 +607,8 @@ textarea,
     scroll-padding-top: 4.5rem;
   }
   /* The bottom bars: the conversion, blog and tools bars (53-57px) and the
-     cookie banner (about 76px on a phone, 100px at desktop widths). */
+     cookie banner (61px at 360-414px wide, 75px at 320px, 83px at 640px,
+     69px from 768px; measured 2026-10-02). */
   html:has([data-sticky-bottom-bar]) {
     scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
@@ -620,6 +621,16 @@ textarea,
   @media (max-width: 1023.9px) {
     html:has([data-sticky-calc-bar]) {
       scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+    /* While the cookie banner is open the analyzer's run bar sits on top of
+       it (data-above-cookie-banner), so both are fixed to the bottom edge:
+       the banner (up to 83px below 1024px) plus the bar (65px), about 148px
+       at most. The rule above has the banner rule's specificity and comes
+       later, so without this one the padding in that state was the bar's
+       4.5rem and a focused field could sit under the stack. Two :has()
+       outrank both single-:has rules whatever their order. */
+    html:has([data-cookie-consent-banner]):has([data-above-cookie-banner]) {
+      scroll-padding-bottom: calc(9.5rem + env(safe-area-inset-bottom));
     }
   }
   #main {
