@@ -143,7 +143,7 @@ const TOOLS: Tool[] = [
       <>
         Free account;{" "}
         <a
-          href="https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY"
+          href="https://www.biggerpockets.com/membership-types"
           className={SOURCE_LINK}
         >
           Pro $39/mo or $390/yr (7-day free trial)
@@ -676,8 +676,8 @@ export default function BestDealCheckAlternativesPost() {
                 url: "https://dealcheck.io/pricing/",
               },
               {
-                title: "BiggerPockets, Pro membership checkout (monthly and annual prices, 7-day free trial)",
-                url: "https://www.biggerpockets.com/subscriptions/new?plan_id=PRO-MEMBERSHIP-MONTHLY",
+                title: "BiggerPockets, Membership types (Pro monthly and annual prices, 7-day free trial)",
+                url: "https://www.biggerpockets.com/membership-types",
               },
               {
                 title: "Stessa, Pricing",

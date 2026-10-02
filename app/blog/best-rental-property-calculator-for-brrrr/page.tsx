@@ -104,7 +104,7 @@ const TOOLS = [
     pricing: "BP Pro ~$390/yr",
     freeCovers: [
       "Standard BRRRR-friendly underwriting",
-      "Printable PDF reports for lenders or partners (Pro members only)",
+      "Printable PDF reports for lenders or partners",
       "Community forums and content on BRRRR strategy",
     ],
     freeGates: [
