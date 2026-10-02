@@ -658,8 +658,12 @@ describe("F8 byline, sources box and dating line", () => {
     // The box used to end "Reviewed by the TrueCap team." on all 195 data
     // pages: no reviewer, review or date stood behind it, and the site says
     // elsewhere that one person builds TrueCap. The closing line now claims
-    // only that sourced figures come from the listed pages on the dates shown,
-    // so every listed source must carry its retrieval date for it to be true.
+    // only that a sourced figure can be checked against a listed page. It does
+    // not say the figures were retrieved from those pages on the listed dates:
+    // 147 market pages' HUD rents came from the HUD FMR API on the day the
+    // dating line gives, and the listed HUD page was read later
+    // (markets-data-bar.test.ts holds the two to the same figures). Every
+    // listed source still carries the day it was read.
     const pages: Array<[string, string]> = [];
     for (const market of ALL_MARKETS) pages.push([`/markets/${market.slug}`, await renderCity(market.slug)]);
     for (const slug of Object.keys(STATES)) pages.push([`/states/${slug}`, await renderState(slug)]);
@@ -670,8 +674,9 @@ describe("F8 byline, sources box and dating line", () => {
       const box = html.slice(html.indexOf(">", start) + 1, html.indexOf("</section>", start));
       const boxText = text(box);
       expect(boxText, path).not.toMatch(/reviewed by|\bteam\b/i);
+      expect(boxText, path).not.toMatch(/retrieved on the dates shown/i);
       expect(boxText, path).toContain(
-        "Figures with a source come from the pages listed here, retrieved on the dates shown. See our full methodology.",
+        "Figures with a source can be checked against the pages listed here. See our full methodology.",
       );
       expect(box, path).toMatch(/<a[^>]*href="\/methodology"/);
       const items = [...box.matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => text(m[1]!));
