@@ -2,7 +2,10 @@
  * /vs/turbotenant — competitor comparison landing page.
  *
  * Target queries: "turbotenant alternative", "turbotenant vs", "turbotenant review", "turbotenant pricing", "free landlord software".
- * TurboTenant is landlord ops — listing, screening, leases, rent collection. Direct competitor to Avail and RentRedi. Strong free tier, popular with small landlords.
+ * TurboTenant is landlord operations software: listing, screening, leases, rent collection.
+ * Competitor cells were checked in October 2026 against turbotenant.com/pricing (plan grid,
+ * renter fees and the yearly price table behind "Starting at"), its listing-sites help
+ * article, its tenant-screening and rent-collection pages and its calculator pages.
  */
 
 import type { Metadata } from "next";
@@ -92,13 +95,14 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    turbotenant: "Not modeled",
-    winner: "truecap",
+    turbotenant:
+      "A free web calculator for cap rate, cash-on-cash, NOI and cash flow, outside the management plans",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    turbotenant: "Not modeled",
+    turbotenant: "Not on TurboTenant's plan comparison",
     winner: "truecap",
   },
   {
@@ -110,49 +114,55 @@ const MATRIX: Row[] = [
   {
     feature: "Sensitivity grid",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
-    turbotenant: "Not modeled",
+    turbotenant: "Not on TurboTenant's plan comparison",
     winner: "truecap",
   },
   {
     feature: "Rental listing distribution",
     truecap: "No",
-    turbotenant: "Yes — syndicated to Zillow, Realtor, etc.",
+    turbotenant:
+      "Yes, on every plan: Realtor.com, Redfin, Rent.com, Zumper and others",
     winner: "turbotenant",
   },
   {
     feature: "Online rental application",
     truecap: "No",
-    turbotenant: "Yes — customizable forms",
+    turbotenant:
+      "Yes, on every plan; custom screening questions on Pro",
     winner: "turbotenant",
   },
   {
     feature: "Tenant screening",
     truecap: "No",
-    turbotenant: "Yes — TransUnion-backed",
+    turbotenant:
+      "Yes, on every plan: a TransUnion credit report with criminal and eviction checks",
     winner: "turbotenant",
   },
   {
     feature: "Online lease signing",
     truecap: "No",
-    turbotenant: "Yes — state-specific templates",
+    turbotenant:
+      "State-specific leases and e-signatures on Essentials and Pro; not on the Free plan",
     winner: "turbotenant",
   },
   {
     feature: "Online rent collection",
     truecap: "No",
-    turbotenant: "Yes — ACH free, card fee",
+    turbotenant:
+      "Yes, on every plan: a $2 renter-paid ACH fee, waived on Pro; cards 3.49%",
     winner: "turbotenant",
   },
   {
     feature: "Maintenance request workflow",
     truecap: "No",
-    turbotenant: "Yes — tenant portal",
+    turbotenant: "Yes, maintenance requests on every plan",
     winner: "turbotenant",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    turbotenant: "Yes — listings + lease + ACH rent collection",
+    turbotenant:
+      "Yes: listings, applications, screening, online rent payments and maintenance requests",
     winner: "tie",
   },
   {
@@ -164,13 +174,15 @@ const MATRIX: Row[] = [
   {
     feature: "Multi-property dashboard",
     truecap: "Yes — portfolio rollup of saved deals",
-    turbotenant: "Yes — multi-unit ops dashboard",
+    turbotenant:
+      "A payments dashboard and lead tracking; the Insights dashboard is on Pro",
     winner: "tie",
   },
   {
     feature: "Pricing (paid tier)",
     truecap: "Paid Pro; see live pricing for current rates and limits",
-    turbotenant: "Premium ~$8-12/mo per unit (as of 2026)",
+    turbotenant:
+      "Essentials from $149 a year and Pro from $199 a year for up to 10 units; higher bands for larger portfolios (as of October 2026)",
     winner: "tie",
   },
 ];
@@ -257,7 +269,8 @@ export default function VsTurbotenantPage() {
                 </li>
                 <li>You want cap rate, DSCR, cash flow, 10-year projection.</li>
                 <li>
-                  You want modeled economics, Buy Box fit, and a Deal score.
+                  You want modeled economics and a Deal score, with Buy Box
+                  fit on your first decision and then with Pro.
                 </li>
                 <li>
                   You&apos;re comparing 2-3 deals side-by-side before deciding.
@@ -277,11 +290,12 @@ export default function VsTurbotenantPage() {
                   TransUnion.
                 </li>
                 <li>
-                  You want online rent collection (ACH free) + maintenance
-                  request tracking.
+                  You want online rent collection + maintenance request
+                  tracking.
                 </li>
                 <li>
-                  You need state-compliant lease templates with e-signature.
+                  You need state-specific leases with e-signature (Essentials
+                  and Pro).
                 </li>
               </ul>
             </div>
@@ -309,17 +323,26 @@ export default function VsTurbotenantPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            TurboTenant details based on publicly available product info as of
-            2026. See{" "}
+            TurboTenant details checked in October 2026 against{" "}
             <a
-              href="https://turbotenant.com"
+              href="https://www.turbotenant.com/pricing/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              turbotenant.com
-            </a>{" "}
-            for their current state.
+              TurboTenant&apos;s pricing page
+            </a>
+            , including the yearly price table behind its &quot;Starting
+            at&quot; link, and its{" "}
+            <a
+              href="https://support.turbotenant.com/en/articles/4004016"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              list of listing sites
+            </a>
+            . See TurboTenant for current plans.
           </p>
         </Section>
 
@@ -349,13 +372,14 @@ export default function VsTurbotenantPage() {
               </li>
               <li>
                 <strong>Set up the property in TurboTenant.</strong> List the
-                unit, accept applications, screen tenants with TransUnion, sign a
-                state-specific lease online.
+                unit, accept applications, screen tenants with a TransUnion
+                credit report, and sign a state-specific lease online
+                (Essentials and Pro).
               </li>
               <li>
-                <strong>Operate in TurboTenant.</strong> Collect rent via ACH
-                (free), handle maintenance requests through the tenant portal,
-                track payment history.
+                <strong>Operate in TurboTenant.</strong> Collect rent online
+                (renters pay a $2 ACH fee unless you are on Pro), handle
+                maintenance requests, track payment history.
               </li>
               <li>
                 <strong>Annual review in TrueCap.</strong> Revisit the saved
@@ -390,7 +414,11 @@ export default function VsTurbotenantPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="TurboTenant" items={TURBOTENANT_FAQ} />
+        <ComparisonFaq
+          competitorName="TurboTenant"
+          items={TURBOTENANT_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -398,9 +426,9 @@ export default function VsTurbotenantPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -473,7 +501,8 @@ const TURBOTENANT_FAQ: FaqItem[] = [
         No — different stages. TurboTenant operates rentals you own (listing,
         screening, leases, rent collection). TrueCap underwrites rentals
         you&apos;re considering buying (cap rate, CoC, DSCR, cash flow,
-        projection). Most DIY landlords end up using both.
+        projection). The two fit one after the other: TrueCap before you buy,
+        TurboTenant once you own.
       </>
     ),
   },
@@ -481,12 +510,14 @@ const TURBOTENANT_FAQ: FaqItem[] = [
     question: "Is TurboTenant really free?",
     answer: (
       <>
-        TurboTenant&apos;s core landlord features (listings, applications, ACH
-        rent collection, basic lease) are free. They monetize through premium
-        add-ons (~$8-12/unit/month for advanced features like financial
-        reporting, maintenance tracking, and faster ACH) and tenant-paid
-        services (screening fees, card payment fees). For most small landlords,
-        the free tier is usable.
+        Yes. TurboTenant&apos;s Free plan covers listings, applications,
+        tenant screening, online rent payments and maintenance requests.
+        The applicant pays the screening fee unless you choose to cover it,
+        and on rent payments renters pay a $2 ACH fee or 3.49% by card. Lease
+        agreements and e-signatures start on Essentials
+        (from $149 a year for up to 10 units); waived ACH fees and accounting
+        tools are on Pro (from $199 a year for up to 10 units). Prices as of
+        October 2026.
       </>
     ),
   },
@@ -496,8 +527,8 @@ const TURBOTENANT_FAQ: FaqItem[] = [
       <>
         No, and we&apos;re not planning to. Rent collection is a regulated
         payments product (NACHA rules, late-fee automation) and tenant screening
-        is FCRA-regulated. We don&apos;t build there. TurboTenant, RentRedi, and
-        Avail all specialize in those workflows.
+        is FCRA-regulated. We don&apos;t build there. TurboTenant and RentRedi
+        both offer those workflows.
       </>
     ),
   },
@@ -505,11 +536,10 @@ const TURBOTENANT_FAQ: FaqItem[] = [
     question: "Is TurboTenant or Avail better?",
     answer: (
       <>
-        Close call. TurboTenant has a stronger free tier; Avail (acquired by
-        Realtor.com) has slightly tighter listing distribution. Both are solid
-        choices for small landlords. The decision usually comes down to feel of
-        the UI — try the free tier of each. TrueCap is upstream of both
-        regardless.
+        We don&apos;t rank them. Compare the plan tables on each
+        vendor&apos;s pricing page for the features you need, such as leases,
+        rent collection fees and listing sites. TrueCap comes before either
+        one: it models the purchase.
       </>
     ),
   },
@@ -518,8 +548,9 @@ const TURBOTENANT_FAQ: FaqItem[] = [
     answer: (
       <>
         The free tiers can cover portions of underwriting and operations. If you
-        need TrueCap Pro or TurboTenant Premium, compare both live pricing pages
-        and add the current rates for the units and features you actually need.
+        need TrueCap Pro or a paid TurboTenant plan (Essentials or Pro), compare
+        both live pricing pages and add the current rates for the units and
+        features you actually need.
       </>
     ),
   },
