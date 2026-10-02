@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PropStream vs TrueCap (2026): Find vs Underwrite",
     description:
-      "PropStream finds leads. TrueCap underwrites them. Different jobs in the same workflow.",
+      "PropStream is property data and lead lists, on and off market. TrueCap underwrites the leads you choose.",
     url: "/vs/propstream",
     type: "website",
   },

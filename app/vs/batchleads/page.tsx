@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
     description:
-      "BatchLeads is lead generation + skip-tracing. TrueCap underwrites the deals. Different jobs.",
+      "BatchLeads is lead lists and skip tracing. TrueCap underwrites the deals.",
     url: "/vs/batchleads",
     type: "website",
   },
