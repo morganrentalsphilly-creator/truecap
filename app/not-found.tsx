@@ -9,9 +9,16 @@
  * Industry rule of thumb: ~30-40% of 404 visits can be recovered with
  * a well-designed page. Worth a few extra lines of JSX.
  *
- * The glossary count is read from the registry, the same list /glossary
- * renders, and is never typed here: it said "33 metrics" while the glossary
- * held 44 terms.
+ * It renders inside the site header and footer like every other public page,
+ * so a mistyped or stale URL still has the navigation and the one Disclaimer
+ * (the footer's). The glossary count is read from the registry, the same
+ * list /glossary renders, and is never typed here: it said "33 metrics"
+ * while the glossary held 44 terms.
+ *
+ * Cost to know about: this is the root layout's not-found boundary, and Next
+ * serializes what it renders into the payload of EVERY route (the 404's text
+ * is in the HTML of /, /pricing and each /embed frame). Keep it to the shared
+ * chrome and this one screen; anything added here is added to every page.
  */
 
 import type { Metadata } from "next";
@@ -26,7 +33,9 @@ import {
   HelpCircle,
   MapPin,
 } from "lucide-react";
+import { Header } from "@/components/investcalc/header";
 import { NotFoundTracker } from "@/components/marketing/not-found-tracker";
+import { SiteFooter } from "@/components/marketing/site-footer";
 import { GLOSSARY } from "@/lib/glossary";
 import { linkableGlossaryTerms } from "@/lib/seo/link-policy";
 
@@ -51,86 +60,90 @@ const POPULAR_PAGES = [
 
 export default function NotFound() {
   return (
-    <main id="main" className="min-h-screen bg-background flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
-      {/* Client-only tracker — captures the requested pathname to Sentry
-          so we can triage broken inbound links in operational dashboards
-          instead of discovering them weeks later via analytics. */}
-      <NotFoundTracker />
-      <div className="w-full max-w-2xl text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-blue-light)] text-primary">
-          <Compass className="size-6" />
-        </div>
-        <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
-          TrueCap
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-          404 — page not found
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-          The page you&apos;re looking for doesn&apos;t exist or has moved.
-          Search the site or jump to one of the most-visited sections below.
-        </p>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main id="main" className="flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
+        {/* Client-only tracker — captures the requested pathname to Sentry
+            so we can triage broken inbound links in operational dashboards
+            instead of discovering them weeks later via analytics. */}
+        <NotFoundTracker />
+        <div className="w-full max-w-2xl text-center">
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-blue-light)] text-primary">
+            <Compass className="size-6" />
+          </div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
+            TrueCap
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            404 — page not found
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+            The page you&apos;re looking for doesn&apos;t exist or has moved.
+            Search the site or jump to one of the most-visited sections below.
+          </p>
 
-        {/* Site search — the same /search route that powers Google's
-            sitelinks search box markup. Pure GET form, no JavaScript
-            needed for it to work (great for crawlers + accessibility). */}
-        <form
-          action="/search"
-          method="get"
-          role="search"
-          aria-label="Search TrueCap"
-          className="mt-6 relative max-w-lg mx-auto"
-        >
-          <SearchIcon
-            className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            name="q"
-            placeholder="Search blog, glossary, calculators…"
-            aria-label="Search the site"
-            // 16px: iOS Safari zooms the page when a focused field is smaller.
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-          />
-        </form>
-
-        {/* Primary CTA — the conversion action. */}
-        <div className="mt-5">
-          <Link
-            href="/analyze"
-            prefetch={false}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
+          {/* Site search — the same /search route that powers Google's
+              sitelinks search box markup. Pure GET form, no JavaScript
+              needed for it to work (great for crawlers + accessibility). */}
+          <form
+            action="/search"
+            method="get"
+            role="search"
+            aria-label="Search TrueCap"
+            className="mt-6 relative max-w-lg mx-auto"
           >
-            Run a free analysis
-            <ArrowUpRight className="size-4" />
-          </Link>
-        </div>
-      </div>
+            <SearchIcon
+              className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              name="q"
+              placeholder="Search blog, glossary, calculators…"
+              aria-label="Search the site"
+              // 16px: iOS Safari zooms the page when a focused field is smaller.
+              className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            />
+          </form>
 
-      {/* Popular pages — 6-card grid. Covers every major content area
-          so any user, regardless of intent, has a relevant next step. */}
-      <div className="mt-12 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {POPULAR_PAGES.map((page) => {
-          const Icon = page.icon;
-          return (
+          {/* Primary CTA — the conversion action. */}
+          <div className="mt-5">
             <Link
-              key={page.href}
-              href={page.href}
+              href="/analyze"
               prefetch={false}
-              className="group rounded-xl border border-border bg-card p-4 text-left transition hover:border-primary hover:shadow-sm"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
             >
-              <div className="flex items-center gap-2">
-                <Icon className="size-4 text-primary" aria-hidden="true" />
-                <div className="text-sm font-bold text-foreground">{page.label}</div>
-              </div>
-              <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">
-                {page.blurb}
-              </p>
+              Run a free analysis
+              <ArrowUpRight className="size-4" />
             </Link>
-          );
-        })}
-      </div>
-    </main>
+          </div>
+        </div>
+
+        {/* Popular pages — 6-card grid. Covers every major content area
+            so any user, regardless of intent, has a relevant next step. */}
+        <div className="mt-12 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {POPULAR_PAGES.map((page) => {
+            const Icon = page.icon;
+            return (
+              <Link
+                key={page.href}
+                href={page.href}
+                prefetch={false}
+                className="group rounded-xl border border-border bg-card p-4 text-left transition hover:border-primary hover:shadow-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="size-4 text-primary" aria-hidden="true" />
+                  <div className="text-sm font-bold text-foreground">{page.label}</div>
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">
+                  {page.blurb}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
