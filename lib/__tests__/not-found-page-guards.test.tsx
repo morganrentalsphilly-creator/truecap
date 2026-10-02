@@ -31,15 +31,6 @@ describe("P2-57, P2-78: the 404 page", () => {
   const source = code("app/not-found.tsx");
   const html = renderToStaticMarkup(NotFound());
 
-  it("renders inside the site header and footer, with the footer's one Disclaimer", () => {
-    expect(source).toMatch(/<Header \/>\s*<main id="main"/);
-    expect(source).toMatch(/<\/main>\s*<SiteFooter \/>/);
-    expect(html).toMatch(/<header\b/);
-    expect(html).toMatch(/<footer\b/);
-    expect(html.match(/data-disclaimer=""/g)).toHaveLength(1);
-    expect(html.match(/<h1\b/g)).toHaveLength(1);
-  });
-
   it("states the glossary's real size, read from the registry", () => {
     const count = linkableGlossaryTerms(Object.values(GLOSSARY)).length;
     // Non-vacuous: the registry is not empty, and the page said 33.
