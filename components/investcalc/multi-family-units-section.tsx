@@ -19,6 +19,7 @@ import {
 } from "@/lib/multi-family-rent-check";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
+import { withoutHudFilledRents } from "@/components/investcalc/typed-unit-rents";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   applyHouseHackOwnerUnitSelection,
@@ -108,7 +109,13 @@ export function MultiFamilyUnitsSection({
   // benchmarks; produces per-unit verdicts (inline hint only when a unit is
   // FAR off market) and a one-line rollup. Passive text, matching the
   // single-family precedent — never dismissible chrome, never a blocker.
-  const rentCheck = checkUnitRentsAgainstFmr(units, fmrByBedrooms);
+  // A unit whose rent is still the auto-filled HUD figure is left out: the
+  // check would compare HUD with itself and call the rent "in line"
+  // (typed-unit-rents.ts).
+  const rentCheck = checkUnitRentsAgainstFmr(
+    withoutHudFilledRents(units, fmrByBedrooms),
+    fmrByBedrooms,
+  );
 
   const handleAddUnit = () => {
     append({
