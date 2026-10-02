@@ -9,6 +9,13 @@ import { cn } from '@/lib/utils'
 
 const ToastProvider = ToastPrimitives.Provider
 
+/**
+ * Where toasts appear. On phones the viewport starts at top-14 (56px), so a
+ * toast (16px further down, the viewport's own padding) sits under the
+ * sticky header instead of on top of the logo, "Analyze" and the menu
+ * button. From sm it is the bottom-right corner; while the cookie banner is
+ * up, components/ui/toaster.tsx lifts it clear of the banner's buttons.
+ */
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
@@ -16,7 +23,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-5 sm:right-5 sm:top-auto sm:flex-col md:max-w-[390px]',
+      'fixed top-14 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-5 sm:right-5 sm:top-auto sm:flex-col md:max-w-[390px]',
       className,
     )}
     {...props}
