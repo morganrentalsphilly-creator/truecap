@@ -10,6 +10,7 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import {
   FieldError,
+  isMinimumErrorHeldWhileTyping,
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
 import {
@@ -83,9 +84,18 @@ export function PropertyDetailsSection({
   sampleSlot,
 }: PropertyDetailsSectionProps) {
   const {
-    formState: { errors },
+    formState: { errors, touchedFields, submitCount },
   } = form;
   const bare = chrome === "bare";
+  // The minimum-price message waits for blur or a run attempt; see
+  // isMinimumErrorHeldWhileTyping.
+  const purchasePriceError = isMinimumErrorHeldWhileTyping({
+    errorType: errors.purchasePrice?.type as string | undefined,
+    fieldTouched: Boolean(touchedFields.purchasePrice),
+    submitCount,
+  })
+    ? undefined
+    : errors.purchasePrice;
 
   /* Address - Google Places autocomplete attached when key is set */
   const addressBlock = (
@@ -207,10 +217,10 @@ export function PropertyDetailsSection({
                 step={100}
                 placeholder="385,000"
                 aria-required="true"
-                aria-invalid={!!errors.purchasePrice}
+                aria-invalid={!!purchasePriceError}
                 aria-describedby={
                   [
-                    errors.purchasePrice ? "purchasePrice-error" : null,
+                    purchasePriceError ? "purchasePrice-error" : null,
                     priceSourceLabel ? "purchase-price-source" : null,
                   ]
                     .filter(Boolean)
@@ -218,7 +228,7 @@ export function PropertyDetailsSection({
                 }
                 className={cn(
                   "min-h-11 border-input bg-background pl-8",
-                  errors.purchasePrice &&
+                  purchasePriceError &&
                     "border-destructive focus-visible:ring-destructive",
                 )}
               />
@@ -227,7 +237,7 @@ export function PropertyDetailsSection({
         </div>
         <FieldError
           id="purchasePrice-error"
-          message={errors.purchasePrice?.message}
+          message={purchasePriceError?.message}
         />
         {priceSourceLabel ? (
           <p
