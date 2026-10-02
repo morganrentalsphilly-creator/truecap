@@ -1951,8 +1951,18 @@ export function DashboardHome({
             </h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
               Run {savedTotalCount > 0 ? "a" : "your first"} rental property
-              through the analyzer and save it. You&apos;ll see portfolio
-              totals, top performers, and risk/return analysis here.
+              through the analyzer and save it.{" "}
+              {/* Says what this screen shows for the reader's plan. The
+                  focused dashboard is one deals table; its Offer Ceiling and
+                  Gap columns are solved for paid subscribers only
+                  (canShowMao in app/dashboard/page.tsx) and read "—" for a
+                  Free account. The old line is kept for the kill-switch
+                  layout, which still mounts the modules it names. */}
+              {!focusedDashboard
+                ? "You'll see portfolio totals, top performers, and risk/return analysis here."
+                : data.user.isPremium
+                  ? "Every saved deal appears here in one table with its Offer Ceiling and the gap to asking."
+                  : "Every saved deal appears here in one table with its asking price, screening result and Deal score. Pro adds the Offer Ceiling and the gap to asking."}
               {/* FFM-3: the one personalization feature worth naming up front —
                   a buy box makes every future deal get a personal pass/fail. */}{" "}
               Set{" "}
