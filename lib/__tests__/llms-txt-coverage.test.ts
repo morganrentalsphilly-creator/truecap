@@ -88,7 +88,7 @@ describe("llms.txt lists what the sitemap lists", () => {
       const name = link.label.replace(/^TrueCap vs\. /, "");
       expect(link.label, slug).toBe(`TrueCap vs. ${name}`);
       // The hub's name, or the hub's name without a trailing parenthetical
-      // ("Cozy.co (shut down)" is listed here as "Cozy.co").
+      // ("Cozy.co (moved to Apartments.com)" is listed here as "Cozy.co").
       expect(hubName === name || hubName!.startsWith(`${name} (`), `${slug}: "${name}" vs hub "${hubName}"`).toBe(true);
       // No one-line claim about a competitor: the page argues it, with sources.
       expect(link.rest, slug).toBe("");
