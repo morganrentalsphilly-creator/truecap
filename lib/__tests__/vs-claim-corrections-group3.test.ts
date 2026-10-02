@@ -109,7 +109,11 @@ describe("corrected comparison pages (group 3)", () => {
       ["mashvisor", /\$\$\$|expensive to license|Account-gated views/i],
       ["mashvisor-for-short-term-rentals", /\$70-300|\$20-40|gold standard|Investibility|Limited free dashboard/i],
       ["privy", /setup fees|optimistic rent|Trial only|~\$99/i],
-      ["propstream", /150M\+|Not the use case|no underwriting|similar volume to PropStream|heavyweight/i],
+      // PropStream's plan table marks direct mail an add-on on all three plans.
+      [
+        "propstream",
+        /150M\+|Not the use case|no underwriting|similar volume to PropStream|heavyweight|direct mail included/i,
+      ],
       ["quickbooks-rental", /Trial only|\$15-90|Self-Employed|connect any US bank/i],
       ["rentcast", /Limited free lookups|PDF reports available on paid|limits property lookups and excludes its API/i],
     ];
@@ -137,9 +141,14 @@ describe("corrected comparison pages (group 3)", () => {
     for (const slug of ["mashvisor", "mashvisor-for-short-term-rentals"] as const) {
       expect(flat(slug), slug).toContain("https://www.mashvisor.com/pricing");
     }
-    expect(flat("mashvisor-for-short-term-rentals")).toContain(
-      "$39.99 to $99.99 a month billed annually, or $49.99 to $119.99 billed quarterly",
-    );
+    // A rule, not a snapshot of Mashvisor's prices: the weekly SEO loop
+    // refreshes competitor figures on /vs pages and cannot edit this file. The
+    // false "$70-300" stays out through RETIRED above.
+    const strPrice =
+      matrixRows("mashvisor-for-short-term-rentals").find((row) => row.feature === "Pricing (paid tier)")
+        ?.competitor ?? "";
+    expect(strPrice).toMatch(/\$\d/);
+    expect(strPrice).toMatch(/as of [A-Z][a-z]+ 20\d\d/);
 
     const propstream = matrixRows("propstream");
     expect(propstream.find((row) => row.feature === "Cap rate / CoC / DSCR analysis")?.winner).toBe("tie");
