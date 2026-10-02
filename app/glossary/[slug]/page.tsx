@@ -104,9 +104,11 @@ export async function generateMetadata({
  * look for the number they just read about.
  */
 const IN_PRODUCT_BY_CATEGORY: Record<GlossaryCategory, string> = {
-  // Only what holds for every metric entry that renders this block: GRM, NOI
-  // and the Deal score are shown but are not Buy Box or Offer Ceiling
-  // targets, so the sentence makes no claim about targets, the memo or the PDF.
+  // Holds for the seven metric entries that render it: cap rate, cash-on-cash,
+  // monthly cash flow, DSCR, NOI, Deal score and GRM. GRM, NOI and the Deal
+  // score are shown but are not Buy Box or Offer Ceiling targets, so the
+  // sentence makes no claim about targets, the memo or the PDF. IRR and the
+  // Offer Ceiling have their own sentence in IN_PRODUCT_BY_SLUG below.
   metric:
     "The analyzer computes this metric on every run from the assumptions you see and can edit, and shows it in the results view.",
   financing:
@@ -141,6 +143,21 @@ const METRICS_NOT_IN_THE_RESULTS_VIEW: ReadonlySet<string> = new Set([
   "equity-multiple",
 ]);
 
+/**
+ * Metric entries the category sentence would be false on, each with its own:
+ *   - irr: computed on every run (calculateMaoIrr in analysis-dashboard.tsx)
+ *     but shown only as a Buy Box rule once a minimum IRR target is set
+ *     (lib/buy-box.ts); the "10-Yr Return" tile is a different figure;
+ *   - max-allowable-offer: the exact Offer Ceiling is part of the first
+ *     complete decision and paid after that (mao in
+ *     lib/entitlements-catalog.ts), so it is not shown on every run.
+ */
+const IN_PRODUCT_BY_SLUG: Readonly<Record<string, string>> = {
+  irr: "The analyzer computes a 10-year pre-tax IRR from the assumptions you see and can edit, and checks it against your Buy Box when you set a minimum IRR target.",
+  "max-allowable-offer":
+    "The Offer Ceiling is part of your first complete decision; after that the exact figure comes with Pro. The analyzer works backward from your targets and the assumptions you see and can edit.",
+};
+
 export default async function GlossaryTermPage({
   params,
 }: {
@@ -163,7 +180,7 @@ export default async function GlossaryTermPage({
   // Where the term shows up in the product: null when it does not.
   const inProduct = METRICS_NOT_IN_THE_RESULTS_VIEW.has(entry.slug)
     ? null
-    : IN_PRODUCT_BY_CATEGORY[entry.category];
+    : (IN_PRODUCT_BY_SLUG[entry.slug] ?? IN_PRODUCT_BY_CATEGORY[entry.category]);
 
   // ── Schema.org markup ──
   // DefinedTerm: tells Google this is a glossary entry → "what is X" SERPs

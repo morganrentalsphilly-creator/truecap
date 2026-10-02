@@ -21,7 +21,8 @@ import { GET as getLlmsTxt } from "@/app/llms.txt/route";
 import MethodologyPage from "@/app/methodology/page";
 import ToolsLandingPage from "@/app/tools/page";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
-import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { EMPTY_BUY_BOX } from "@/lib/buy-box";
+import { FEATURE_CATALOG, isFeatureReleased } from "@/lib/entitlements-catalog";
 import { GLOSSARY } from "@/lib/glossary";
 import { decodeEntities } from "../../seo/scripts/lib/html.ts";
 
@@ -233,6 +234,10 @@ describe("glossary: 'Where it shows up in TrueCap' says only what the analyzer d
     .filter((entry) => entry.category === "metric")
     .map((entry) => entry.slug);
   const termOf = (slug: string) => Object.values(GLOSSARY).find((entry) => entry.slug === slug)!.term;
+  // IRR is shown only as a Buy Box rule once a minimum IRR target is set, and
+  // the exact Offer Ceiling is paid after the first complete decision, so
+  // neither is "shown in the results view on every run".
+  const OWN_SENTENCE = ["irr", "max-allowable-offer"];
 
   it("reads all the metric entries", () => {
     expect(metricSlugs.length).toBeGreaterThanOrEqual(13);
@@ -275,10 +280,32 @@ describe("glossary: 'Where it shows up in TrueCap' says only what the analyzer d
       if (at === -1) continue;
       withBlock += 1;
       const block = page.slice(at, at + 400);
-      expect(block, slug).toContain("computes this metric on every run");
+      if (!OWN_SENTENCE.includes(slug)) expect(block, slug).toContain("computes this metric on every run");
       expect(block, slug).not.toMatch(/uses your targets for it|decision memo and the PDF/i);
     }
     expect(withBlock).toBe(metricSlugs.length - 4);
+  });
+
+  it("gives IRR and the Offer Ceiling their own sentence, not 'on every run ... in the results view'", async () => {
+    for (const slug of OWN_SENTENCE) {
+      const page = await mainText(slug);
+      expect(page, slug).toContain(`Where ${termOf(slug)} shows up in TrueCap`);
+      expect(page, slug).not.toMatch(/on every run/i);
+      expect(page, slug).not.toMatch(/shows it in the results view/i);
+    }
+    expect(await mainText("irr")).toContain(
+      "computes a 10-year pre-tax IRR from the assumptions you see and can edit, and checks it against your Buy Box when you set a minimum IRR target.",
+    );
+    expect(await mainText("max-allowable-offer")).toContain(
+      "The Offer Ceiling is part of your first complete decision; after that the exact figure comes with Pro.",
+    );
+  });
+
+  it("keeps the two sentences true to the code: IRR is a Buy Box rule only with a target, the Offer Ceiling is paid after the first decision", () => {
+    expect(EMPTY_BUY_BOX.minIrrPct).toBeNull();
+    expect(read("lib/buy-box.ts")).toMatch(/if \(criteria\.minIrrPct != null\) \{[\s\S]{0,400}label: "10-year pre-tax IRR"/);
+    expect(FEATURE_CATALOG.mao.tiers).not.toContain("free");
+    expect(FEATURE_CATALOG.mao.anonymousLimit).toBe("one exact deal");
   });
 });
 
