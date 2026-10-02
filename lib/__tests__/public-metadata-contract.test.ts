@@ -43,7 +43,7 @@ const SURFACES = [
     pageTitle: "Rental Property Calculator Comparisons",
     socialTitle: "Rental Property Calculator Comparisons | TrueCap",
     description:
-      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
+      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using side-by-side workflow reviews.",
   },
   {
     file: "app/blog/page.tsx",
