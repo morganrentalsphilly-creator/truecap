@@ -31,9 +31,47 @@ describe("llms.txt lists what the sitemap lists", () => {
 
   it("lists every comparison page in the sitemap, in the sitemap's order, and no other", async () => {
     const inSitemap = sitemapPaths().filter((path) => path.startsWith("/vs/"));
-    expect(inSitemap.length).toBeGreaterThanOrEqual(38);
+    // No fixed count: the SEO loop may take a comparison page out of the
+    // index (content/seo/noindex.json), and the sitemap is then one shorter.
+    // The rule is the equality below; this only keeps it from passing on
+    // two empty lists.
+    expect(inSitemap.length).toBeGreaterThan(0);
     const listed = sectionLinks(await llms(), "Comparison pages");
     expect(listed.map((link) => link.path)).toEqual(inSitemap);
+  });
+
+  it("still matches the sitemap when the SEO loop takes a comparison page out of the index", async () => {
+    // seo-prune may add a /vs path to content/seo/noindex.json. The sitemap
+    // and llms.txt both drop it, and nothing here may fail on that: a guard
+    // pinned to 38 pages would redden the loop's own pull request.
+    const before = sitemapPaths().filter((path) => path.startsWith("/vs/"));
+    const pruned = before[0];
+    expect(pruned).toBeDefined();
+    vi.resetModules();
+    vi.doMock("@/lib/seo/noindex", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/lib/seo/noindex")>();
+      return {
+        ...actual,
+        isNoindexPath: (path: string) => path === pruned || actual.isNoindexPath(path),
+      };
+    });
+    try {
+      const { default: prunedSitemap } = await import("@/app/sitemap");
+      const { GET } = await import("@/app/llms.txt/route");
+      const inSitemap = prunedSitemap()
+        .map((entry) => new URL(entry.url).pathname)
+        .filter((path) => path.startsWith("/vs/"));
+      expect(inSitemap).toEqual(before.slice(1));
+      const text = await (await GET()).text();
+      const listed = sectionLinks(text, "Comparison pages");
+      expect(listed.map((link) => link.path)).toEqual(inSitemap);
+      expect(text).not.toContain(`${pruned})`);
+      expect(text).toContain(`  - ${inSitemap.length} side-by-side comparison pages, including TrueCap vs. `);
+      expect(text).toContain(`/vs): All ${inSitemap.length} comparison pages.`);
+    } finally {
+      vi.doUnmock("@/lib/seo/noindex");
+      vi.resetModules();
+    }
   });
 
   it("names each competitor as the /vs hub does and says nothing else about it", async () => {
