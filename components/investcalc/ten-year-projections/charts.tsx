@@ -19,6 +19,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartCard } from "@/components/investcalc/analysis-panels/shared/chart-card";
+import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -38,6 +39,9 @@ export function TenYearProjectionCharts({
 }: {
   projectionYears: ProjectionYear[];
 }) {
+  // Recharts animates from JavaScript, which the reduced-motion CSS rule
+  // cannot stop, so every mark is told directly.
+  const animate = !usePrefersReducedMotion();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Annual Cash Flow">
@@ -47,7 +51,7 @@ export function TenYearProjectionCharts({
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-            <Bar dataKey="netCashFlowAnnual" fill="var(--color-netCashFlowAnnual)" radius={[8, 8, 0, 0]} />
+            <Bar isAnimationActive={animate} dataKey="netCashFlowAnnual" fill="var(--color-netCashFlowAnnual)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ChartContainer>
       </ChartCard>
@@ -61,6 +65,7 @@ export function TenYearProjectionCharts({
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Legend content={<ChartLegendContent />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="rentalIncomeAnnual"
               stroke="var(--color-rentalIncomeAnnual)"
@@ -68,6 +73,7 @@ export function TenYearProjectionCharts({
               dot={false}
             />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="operatingExpensesAnnual"
               stroke="var(--color-operatingExpensesAnnual)"
@@ -80,6 +86,7 @@ export function TenYearProjectionCharts({
                 visible - income vs operating expenses, P&I, and modeled
                 mortgage insurance. */}
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="debtServiceAnnual"
               stroke="var(--color-debtServiceAnnual)"
@@ -98,6 +105,7 @@ export function TenYearProjectionCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Area
+              isAnimationActive={animate}
               type="monotone"
               dataKey="cumulativeCashFlowAnnual"
               stroke="var(--color-cumulativeCashFlowAnnual)"

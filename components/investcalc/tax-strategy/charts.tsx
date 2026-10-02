@@ -17,6 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartCard } from "@/components/investcalc/analysis-panels/shared/chart-card";
+import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -37,6 +38,9 @@ export function TaxStrategyCharts({
 }: {
   years: TaxStrategyYear[];
 }) {
+  // Recharts animates from JavaScript, which the reduced-motion CSS rule
+  // cannot stop, so every mark is told directly.
+  const animate = !usePrefersReducedMotion();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Modeled Annual Tax Savings">
@@ -46,7 +50,7 @@ export function TaxStrategyCharts({
             <XAxis dataKey="year" tickLine={false} axisLine={false} />
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-            <Bar dataKey="taxSavingsAnnual" radius={[8, 8, 0, 0]} fill="var(--color-taxSavingsAnnual)" />
+            <Bar isAnimationActive={animate} dataKey="taxSavingsAnnual" radius={[8, 8, 0, 0]} fill="var(--color-taxSavingsAnnual)" />
           </BarChart>
         </ChartContainer>
       </ChartCard>
@@ -59,6 +63,7 @@ export function TaxStrategyCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="taxableRentalIncomeAnnual"
               stroke="var(--color-taxableRentalIncomeAnnual)"
@@ -78,6 +83,7 @@ export function TaxStrategyCharts({
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Legend content={<ChartLegendContent />} />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="mortgageInterestDeductionAnnual"
               stroke="var(--color-mortgageInterestDeductionAnnual)"
@@ -85,6 +91,7 @@ export function TaxStrategyCharts({
               dot={false}
             />
             <Line
+              isAnimationActive={animate}
               type="monotone"
               dataKey="depreciationDeductionAnnual"
               stroke="var(--color-depreciationDeductionAnnual)"
@@ -103,9 +110,9 @@ export function TaxStrategyCharts({
             <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
             <Legend content={<ChartLegendContent />} />
-            <Bar dataKey="operatingExpensesAnnual" stackId="deductions" fill="var(--color-operatingExpensesAnnual)" radius={[0, 0, 8, 8]} />
-            <Bar dataKey="mortgageInterestDeductionAnnual" stackId="deductions" fill="var(--color-mortgageInterestDeductionAnnual)" />
-            <Bar dataKey="depreciationDeductionAnnual" stackId="deductions" fill="var(--color-depreciationDeductionAnnual)" radius={[8, 8, 0, 0]} />
+            <Bar isAnimationActive={animate} dataKey="operatingExpensesAnnual" stackId="deductions" fill="var(--color-operatingExpensesAnnual)" radius={[0, 0, 8, 8]} />
+            <Bar isAnimationActive={animate} dataKey="mortgageInterestDeductionAnnual" stackId="deductions" fill="var(--color-mortgageInterestDeductionAnnual)" />
+            <Bar isAnimationActive={animate} dataKey="depreciationDeductionAnnual" stackId="deductions" fill="var(--color-depreciationDeductionAnnual)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ChartContainer>
       </ChartCard>
