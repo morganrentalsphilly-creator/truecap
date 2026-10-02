@@ -17,7 +17,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
-    "Free renovation cost estimator with editable square-foot and per-room defaults for cosmetic, kitchen, bath, and systems work.",
+    "Free renovation cost estimator with square-foot and per-room planning defaults for cosmetic, kitchen, bath, and systems work.",
   keywords: [
     "rehab cost estimator",
     "rehab calculator",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How accurate is a sq-ft-based rehab estimate?",
-    a: "Directional, not bid-quality. The defaults are TrueCap planning starting points, not current market pricing or a survey of contractors, and every line is editable. Real bids vary widely with local labor rates, material availability, scope clarity, and contractor markup. Use this estimator to triage deals; get local bids before committing.",
+    a: "Directional, not bid-quality. The defaults are TrueCap planning starting points, not current market pricing or a survey of contractors. You switch line items on or off and set the square footage, bath count and contingency; an item's default cost cannot be changed in the tool. Real bids vary widely with local labor rates, material availability, scope clarity, and contractor markup. Use this estimator to triage deals; get local bids before committing.",
   },
   {
     q: "What contingency should I budget?",
@@ -79,7 +79,7 @@ export default function RehabEstimatorPage() {
     slug: "rehab-cost-estimator",
     name: "Rehab Cost Estimator",
     description:
-      "Free renovation cost estimator with editable square-foot and per-room defaults for cosmetic, kitchen, bath, and systems work.",
+      "Free renovation cost estimator with square-foot and per-room planning defaults for cosmetic, kitchen, bath, and systems work.",
     featureList: [
       "Per-sqft + per-room rehab cost estimates",
       "Cosmetic, kitchen, bath, and systems work",
@@ -105,8 +105,10 @@ export default function RehabEstimatorPage() {
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               Sq-ft-based pricing for every common rehab work item — paint,
               flooring, kitchens, baths, roofs, HVAC, electrical, plumbing.
-              Mid-market defaults you can override. Use it for early scope and
-              budget triage before committing to detailed contractor bids.
+              Each item carries a planning default: switch items on or off and
+              set the square footage, bath count and contingency. Use it for
+              early scope and budget triage before committing to detailed
+              contractor bids.
             </p>
           </header>
 
@@ -127,7 +129,7 @@ export default function RehabEstimatorPage() {
               potential deals down to the 10% worth a real bid.
             </p>
             <p>
-              This tool ships with editable TrueCap planning defaults for every
+              This tool ships with TrueCap planning defaults for every
               common rehab work item. Pick the scope, the calculator does
               the math, you get a number in seconds. Then add a contingency
               percentage (10-20% is common) and you have a directional planning
@@ -140,7 +142,8 @@ export default function RehabEstimatorPage() {
             <ol>
               <li>
                 <strong>Set the sqft and bath count.</strong> Defaults to
-                the property values if available; you can override.
+                the property values if available; type your own numbers to
+                change them.
               </li>
               <li>
                 <strong>Click &ldquo;Pick work items&rdquo;</strong> to
