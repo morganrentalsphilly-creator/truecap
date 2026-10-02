@@ -177,7 +177,7 @@ export type LandingSection = (typeof LANDING_SECTIONS)[number];
 const SECTION_SET = new Set<string>(LANDING_SECTIONS);
 
 /**
- * The two persona landing pages ads point at. Their path segments carry a
+ * The agent and investor landing pages. Their path segments carry a
  * hyphen, which the cookie value pattern below does not allow (lower-case
  * letters and underscores only), so each maps to an underscore name. Stored
  * as it is, `paid_search.for-agents` would fail to parse and the record would
