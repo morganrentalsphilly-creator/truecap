@@ -144,9 +144,9 @@ export default async function ReviewsPage() {
             <div className="flex flex-col border-b border-rule-soft py-4">
               <h3 className="text-lg font-semibold">The math is public</h3>
               <p className="mt-1 max-w-[64ch] flex-1 text-pretty text-base leading-relaxed text-muted-foreground">
-                Every formula behind a verdict is written down with its
-                limits: cash flow, cap rate, DSCR, and the Offer Ceiling.
-                Nothing is hidden inside a model you cannot read.
+                The core formulas behind a verdict are written down with
+                their limits: cash flow, cap rate, DSCR, and the Offer
+                Ceiling.
               </p>
               <IntentPrefetchLink href="/methodology" className={COLUMN_LINK_CLASS}>
                 Read the methodology
@@ -218,7 +218,7 @@ export default async function ReviewsPage() {
                 term: "Public methodology",
                 detail: (
                   <>
-                    Every formula is published, with its limits. Read it at{" "}
+                    The core formulas are published, with their limits. Read them at{" "}
                     <IntentPrefetchLink href="/methodology" className="tc-link">
                       /methodology
                     </IntentPrefetchLink>

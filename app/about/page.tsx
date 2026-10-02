@@ -193,9 +193,11 @@ export default function AboutPage() {
                   likely to move the answer.
                 </p>
                 <p className="mt-4">
-                  The formulas behind all of it are published and versioned on the
-                  methodology page, so a partner or lender can check the math
-                  instead of taking the label on faith.
+                  The core formulas behind it (cash flow, cap rate, cash-on-cash
+                  return, DSCR, the mortgage payment, and the Offer Ceiling) are
+                  published and versioned on the methodology page, so a partner
+                  or lender can check the math instead of taking the label on
+                  faith.
                 </p>
               </div>
             </div>
@@ -220,7 +222,7 @@ export default function AboutPage() {
                   screen is much cheaper than finding out after closing.
                 </p>
                 <p className="mt-4">
-                  Every formula the analyzer uses is documented, down to the
+                  The analyzer&apos;s core formulas are documented, down to the
                   conventions, on the{" "}
                   <IntentPrefetchLink href="/methodology" className="tc-link">
                     methodology page
