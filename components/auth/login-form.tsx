@@ -199,6 +199,7 @@ export function LoginForm() {
                 <Input
                   type="email"
                   autoComplete="email"
+                  aria-required="true"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
                   className="h-12 px-4 text-base lg:text-base"
@@ -229,6 +230,7 @@ export function LoginForm() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
+                    aria-required="true"
                     placeholder="Enter your password"
                     disabled={isSubmitting}
                     className="h-12 pl-4 pr-12 text-base lg:text-base"

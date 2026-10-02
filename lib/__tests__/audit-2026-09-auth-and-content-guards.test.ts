@@ -28,7 +28,12 @@ describe("sign-up with email confirmation holds a sent state", () => {
   });
 
   it("states the password rule where the field is and pins policy errors to it", () => {
-    expect(form).toContain('id="password-policy"');
+    // The rule is a FormDescription under the field. It used to carry a
+    // hand-set id that the input named in a hand-set aria-describedby, which
+    // kept a rejected password out of the field's description (audit row
+    // P2-73). FormControl now lists both; form-control-described-by.test.tsx
+    // holds that.
+    expect(form).toMatch(/<FormDescription>\s*\{PASSWORD_POLICY_TEXT\}\s*<\/FormDescription>/);
     expect(form).toContain("{PASSWORD_POLICY_TEXT}");
     const schema = read("lib/auth-schema.ts");
     expect(schema).toContain('.min(12, "Password must be at least 12 characters")');
