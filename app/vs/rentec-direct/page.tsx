@@ -2,7 +2,9 @@
  * /vs/rentec-direct — competitor comparison landing page.
  *
  * Target queries: "rentec direct alternative", "rentec vs buildium", "rentec direct pricing", "rentec direct review".
- * Rentec Direct is small-landlord PM software — sweet spot is 5-100 units. Cheaper than Buildium, more feature-rich than TurboTenant. Investors compare it as the next step up from a basic ops tool.
+ * Rentec Direct is property management software in three editions (Starter, Pro, PM).
+ * Competitor cells were checked in October 2026 against rentecdirect.com/pricing, which
+ * carries the edition comparison; Rentec publishes no unit range, so the page states none.
  */
 
 import type { Metadata } from "next";
@@ -47,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
   description:
-    "Rentec Direct runs the rentals you own (5-100 units). TrueCap underwrites the ones you're considering. Honest side-by-side.",
+    "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. Honest side-by-side.",
   keywords: [
     "rentec direct alternative",
     "rentec vs buildium",
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
     description:
-      "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the deal before. Different stages.",
+      "Rentec Direct is property management software for landlords and property managers. TrueCap underwrites the deal before you buy. Different stages.",
     url: "/vs/rentec-direct",
     type: "website",
     images: [
@@ -91,13 +93,13 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    rentecdirect: "Not modeled",
+    rentecdirect: "Not on Rentec Direct's edition comparison",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    rentecdirect: "Not modeled",
+    rentecdirect: "Not on Rentec Direct's edition comparison",
     winner: "truecap",
   },
   {
@@ -115,13 +117,15 @@ const MATRIX: Row[] = [
   {
     feature: "Tenant + lease management",
     truecap: "No",
-    rentecdirect: "Yes — designed for 5-100 units",
+    rentecdirect:
+      "Yes, on every edition: tenant accounting, online applications and a tenant portal",
     winner: "rentecdirect",
   },
   {
     feature: "Online rent collection",
     truecap: "No",
-    rentecdirect: "Yes — ACH + card",
+    rentecdirect:
+      "Yes, ACH and card; tenant ACH payments cost $2 on Starter and are free on Pro and PM",
     winner: "rentecdirect",
   },
   {
@@ -133,31 +137,34 @@ const MATRIX: Row[] = [
   {
     feature: "Accounting + Schedule E",
     truecap: "Forward projection only",
-    rentecdirect: "Yes — full GL + 1099 + Schedule E",
+    rentecdirect:
+      "Property and tenant accounting and Schedule E reports on every edition; 1099 e-file on Pro and PM",
     winner: "rentecdirect",
   },
   {
     feature: "Owner portals (for partnerships)",
     truecap: "No",
-    rentecdirect: "Yes — multi-owner statements",
+    rentecdirect: "Owner portal on Rentec PM only",
     winner: "rentecdirect",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    rentecdirect: "No — paid only (trial available)",
+    rentecdirect: "No free plan; two-week free trial on every edition",
     winner: "truecap",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)",
-    winner: "truecap",
+    rentecdirect:
+      "Starter $25 a month (up to 10 properties); Pro and PM from $50 a month (as of October 2026)",
+    winner: "tie",
   },
   {
-    feature: "Sweet spot",
-    truecap: "1-30 doors, solo investor",
-    rentecdirect: "5-100 units, small PM or scaling landlord",
+    feature: "Who it is for",
+    truecap: "Agents with investor clients, and buy-and-hold investors",
+    rentecdirect:
+      "Starter for 10 or fewer properties; Pro for landlords and investors; PM for property managers",
     winner: "tie",
   },
 ];
@@ -170,7 +177,7 @@ export default function VsRentecDirectPage() {
     name: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
     url: `${siteUrl}/vs/rentec-direct`,
     description:
-      "Rentec Direct runs the rentals you own (5-100 units). TrueCap underwrites the ones you're considering. Honest side-by-side.",
+      "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. Honest side-by-side.",
     dateModified: lastmodFor("/vs/rentec-direct"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -193,11 +200,13 @@ export default function VsRentecDirectPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Rentec Direct is property management software targeted at small
-            landlords running 5-100 units — tenant management, rent collection,
-            accounting, owner portals. TrueCap models the pre-purchase economics
-            of properties you are considering. We don&apos;t compete; different
-            halves of the rental lifecycle.
+            Rentec Direct is property management software sold in three
+            editions: Starter for 10 or fewer properties, Pro for landlords and
+            investors, and PM for property managers. It covers tenant
+            management, rent collection and accounting, with an owner portal on
+            PM. TrueCap models the pre-purchase economics of properties you are
+            considering. We don&apos;t compete; different halves of the rental
+            lifecycle.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -242,7 +251,7 @@ export default function VsRentecDirectPage() {
                 <li>You&apos;re evaluating a property before buying.</li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>You want a free tier — no monthly commitment.</li>
-                <li>You&apos;re not managing 5+ rentals yet.</li>
+                <li>You&apos;re deciding what to pay, not yet managing tenants.</li>
               </ul>
             </div>
             <div className="min-w-0">
@@ -250,17 +259,21 @@ export default function VsRentecDirectPage() {
                 Use Rentec Direct when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>You own 5-100 units and need PM-grade ops + accounting.</li>
                 <li>
-                  You want rent collection, lease management, work orders, owner
-                  reports in one tool.
+                  You own rentals and want accounting, rent collection and
+                  tenant management in one tool.
                 </li>
                 <li>
-                  You&apos;re scaling past what TurboTenant or Avail can handle.
+                  You want tenant screening, work orders and Schedule E reports
+                  in the same place.
                 </li>
                 <li>
-                  You may want to manage for other owners (semi-pro PM
-                  workflow).
+                  You want 1099 e-file, bank sync or an open API (Rentec Pro
+                  and PM).
+                </li>
+                <li>
+                  You manage for other owners and need trust accounting and an
+                  owner portal (Rentec PM).
                 </li>
               </ul>
             </div>
@@ -288,17 +301,17 @@ export default function VsRentecDirectPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Rentec Direct details based on publicly available product info as of
-            2026. See{" "}
+            Rentec Direct details checked in October 2026 against{" "}
             <a
-              href="https://rentecdirect.com"
+              href="https://www.rentecdirect.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              rentecdirect.com
-            </a>{" "}
-            for their current state.
+              Rentec Direct&apos;s pricing page
+            </a>
+            , which carries its edition comparison. See Rentec Direct for
+            current plans.
           </p>
         </Section>
 
@@ -320,7 +333,7 @@ export default function VsRentecDirectPage() {
               </li>
               <li>
                 <strong>Operate in Rentec Direct.</strong> Rent comes in, expenses
-                get logged, Schedule E builds itself.
+                get logged, and the Schedule E report is there at tax time.
               </li>
               <li>
                 <strong>Annual review.</strong> Pull Rentec Direct&apos;s actuals;
@@ -366,6 +379,7 @@ export default function VsRentecDirectPage() {
         <ComparisonFaq
           competitorName="Rentec Direct"
           items={RENTEC_DIRECT_FAQ}
+          reviewedDate="October 2026"
         />
 
         {/* Pricing CTA */}
@@ -374,9 +388,9 @@ export default function VsRentecDirectPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -447,8 +461,8 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     answer: (
       <>
         No — different stages. Rentec Direct operates rentals you own. TrueCap
-        underwrites rentals you&apos;re considering buying. Landlords running
-        5-100 units typically use both.
+        underwrites rentals you&apos;re considering buying. The two fit one
+        after the other: TrueCap before you buy, Rentec Direct once you own.
       </>
     ),
   },
@@ -456,11 +470,11 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Rentec Direct vs Buildium — which one?",
     answer: (
       <>
-        Rentec Direct is generally cheaper and a better fit for landlords
-        managing their own units (5-100). Buildium leans toward property
-        management companies and scales further. For solo investors growing past
-        TurboTenant or Avail, Rentec Direct is often the next step up before
-        Buildium.
+        We don&apos;t rank property management software. Rentec Direct
+        publishes its prices: Starter at a flat $25 a month for up to 10
+        properties, Pro and PM from $50 a month (as of October 2026). Compare
+        that with Buildium&apos;s pricing page for your unit count. TrueCap is
+        the step before either one.
       </>
     ),
   },
@@ -468,10 +482,11 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Does Rentec Direct have a free tier?",
     answer: (
       <>
-        No — paid only, with a free trial. Pricing starts around $45/month for
-        landlords as of 2026, with per-unit fees scaling up. TrueCap is free for
-        the underwriting layer; if you&apos;re not yet at 5+ units, Rentec
-        Direct may be premature.
+        No. Rentec Direct says it is not free and offers a two-week free trial
+        on every edition. Starter is a flat $25 a month for up to 10
+        properties; Pro and PM start at $50 a month and rise with unit count
+        (as of October 2026). TrueCap&apos;s core analysis is free; see live
+        pricing for Pro.
       </>
     ),
   },
@@ -479,9 +494,10 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Can I use Rentec Direct for underwriting new deals?",
     answer: (
       <>
-        No — Rentec Direct is operational only. For pre-purchase underwriting
-        (cap rate, DSCR, cash flow, projection), use TrueCap, DealCheck, or your
-        spreadsheet.
+        Rentec Direct&apos;s edition comparison covers managing rentals you
+        own: accounting, rent collection, tenant screening and maintenance. It
+        lists no pre-purchase deal analysis. For that (cap rate, DSCR, cash
+        flow, projection), use TrueCap, DealCheck, or your spreadsheet.
       </>
     ),
   },
@@ -489,9 +505,12 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Should I use TurboTenant or Rentec Direct?",
     answer: (
       <>
-        TurboTenant is better for 1-5 units with a strong free tier. Rentec
-        Direct is better once you&apos;re at 5-100 units and need richer
-        accounting + owner reporting. Both pair with TrueCap upstream.
+        Compare what each plan includes. TurboTenant has a free plan, and its
+        paid plans start at $149 a year for up to 10 units. Rentec Direct has
+        no free plan and starts at $25 a month for up to 10 properties (both as
+        of October 2026). Rentec lists Schedule E reports on every edition and
+        an owner portal on PM; TurboTenant lists Schedule E on Pro. Either one
+        comes after the purchase decision TrueCap helps with.
       </>
     ),
   },
