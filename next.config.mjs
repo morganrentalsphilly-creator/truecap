@@ -11,17 +11,25 @@ const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 // Observation-only CSP rollout. This does not block traffic; violations are
 // reduced to non-sensitive directive/origin metadata by /api/csp-report so we
 // can tighten the policy safely before enforcing it with nonces.
+//
+// The Google Ads tag (consent-gated, components/analytics/google-measurement.tsx)
+// loads a script from googleads.g.doubleclick.net and sends beacons to
+// www.google.com, ad.doubleclick.net and www.googleadservices.com. Those four
+// origins were missing, so a consented page view posted 4 or 5 reports, and
+// enforcing the policy as it stood would have stopped conversion tracking.
+// Each is listed under the directive the 2026-10 audit captured it in
+// (script-src-elem falls back to script-src). The header stays report-only.
 const cspReportOnly = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
   "form-action 'self' https://checkout.stripe.com",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://*.googletagmanager.com https://*.googleapis.com https://js.stripe.com https://*.posthog.com https://challenges.cloudflare.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://*.googletagmanager.com https://*.googleapis.com https://googleads.g.doubleclick.net https://js.stripe.com https://*.posthog.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://*.sentry.io https://*.googleapis.com https://api.stripe.com https://challenges.cloudflare.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://*.sentry.io https://*.googleapis.com https://www.google.com https://ad.doubleclick.net https://www.googleadservices.com https://api.stripe.com https://challenges.cloudflare.com",
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://challenges.cloudflare.com https://www.google.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
