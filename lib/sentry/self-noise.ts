@@ -7,8 +7,9 @@
  * left every visitor's browser once per full page load: one error-quota event
  * per load. On 2026-10-01 the organisation's error quota ran out and Sentry
  * answered every error envelope with 429. Browser, server and edge share one
- * DSN, so a blocked checkout or an unbound paid event would have raised no
- * alert either.
+ * DSN, so server alerts (a blocked checkout, an unbound paid event) were
+ * almost certainly rejected as well; the audit inferred this and did not
+ * measure it.
  *
  * This one message is now dropped in two places. captureMessageLazy
  * (lib/sentry/lazy.ts), the helper lib/analytics.ts calls, returns before it
