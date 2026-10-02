@@ -386,7 +386,7 @@ export default function VsCozyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Cozy" items={COZY_FAQ} />
+        <ComparisonFaq competitorName="Cozy" items={COZY_FAQ} retired />
 
         {/* Pricing CTA */}
         <CloseSection

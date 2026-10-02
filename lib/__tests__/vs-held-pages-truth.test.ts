@@ -107,7 +107,10 @@ describe("/vs/cozy says when and where Cozy went", () => {
     // The dated note would also tell readers to verify details "on Cozy's own
     // site", which is gone. Pass a date only after Apartments.com's current
     // pages were read as rendered and the note fits a retired product.
-    expect(page).toMatch(/<ComparisonFaq competitorName="Cozy" items=\{COZY_FAQ\} \/>/);
+    // `retired` (2026-10 integration) makes the note say Cozy is no longer
+    // offered and drops the "check Cozy's live pricing" clause; it adds no date.
+    expect(page).toMatch(/<ComparisonFaq competitorName="Cozy" items=\{COZY_FAQ\} retired \/>/);
+    expect(page).not.toMatch(/reviewedDate=/);
   });
 });
 
