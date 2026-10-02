@@ -26,8 +26,11 @@ import { AppLogo } from "@/components/brand/app-logo";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 
-/** prefetch: false opts a link out of IntentPrefetchLink's hover/focus prefetch. */
-type FooterLink = { label: string; href: string; external?: boolean; prefetch?: false };
+/**
+ * prefetch: false opts a link out of IntentPrefetchLink's hover/focus prefetch.
+ * nofollow: true renders rel="nofollow", for a target robots.txt disallows.
+ */
+type FooterLink = { label: string; href: string; external?: boolean; prefetch?: false; nofollow?: true };
 
 const FOOTER_COLS: Array<{
   title: string;
@@ -125,10 +128,15 @@ const FOOTER_COLS: Array<{
   },
   {
     title: "Account",
+    // robots.txt disallows /auth/ (app/robots.ts), so a crawler never fetches
+    // these pages and never reads their noindex. Linked from every page
+    // without a hint, the bare URLs could be indexed with no snippet.
+    // rel="nofollow" tells crawlers not to count these links; the links
+    // themselves stay, so every page keeps its way to sign in.
     links: [
-      { label: "Sign in", href: "/auth/login" },
-      { label: "Create account", href: "/auth/sign-up" },
-      { label: "Forgot password", href: "/auth/forgot-password" },
+      { label: "Sign in", href: "/auth/login", nofollow: true },
+      { label: "Create account", href: "/auth/sign-up", nofollow: true },
+      { label: "Forgot password", href: "/auth/forgot-password", nofollow: true },
     ],
   },
 ];
@@ -220,6 +228,7 @@ export function SiteFooter({
                     <IntentPrefetchLink
                       href={link.href}
                       prefetch={link.prefetch}
+                      rel={link.nofollow ? "nofollow" : undefined}
                       className="inline-flex min-h-11 min-w-11 items-center text-base text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
