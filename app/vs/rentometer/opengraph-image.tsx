@@ -1,16 +1,15 @@
 /**
- * Dynamic OG image for /vs/rentometer. Auto-detected by Next.js App Router
- * convention; overrides any images: [...] declared in the route's
- * metadata.
+ * Social card for /vs/rentometer. The page sets no images of its own, so Next
+ * serves this file as its og:image and twitter:image. Drawn by the shared
+ * template, lib/og/vs-og-template.tsx.
  *
- * Implementation lives in the shared template at
- * lib/og/vs-og-template.tsx — this file is just the per-competitor
- * config wrapper so all 10 /vs OG images stay visually consistent.
+ * The tagline restates what /vs/rentometer and the /vs hub say today. When the
+ * page changes a fact, change this line with it.
  */
 
 import { renderVsOgImage, OG_SIZE } from "@/lib/og/vs-og-template";
 
-export const alt = "TrueCap vs Rentometer — honest comparison";
+export const alt = "TrueCap vs Rentometer";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -18,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Rentometer",
     tagline:
-      "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent, plus cap rate, DSCR, and cash flow.",
+      "Rentometer is rent estimates and rental comps, with a Deal Worksheet on its Pro plan. TrueCap underwrites the deal and checks it against your targets.",
     slug: "rentometer",
   });
 }
