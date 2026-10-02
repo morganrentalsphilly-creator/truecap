@@ -276,7 +276,7 @@ export default function VsStessaPage() {
             </div>
           </div>
           <p className={VS_FOOTNOTE}>
-            <strong className="font-semibold text-foreground">Honest take:</strong> the
+            <strong className="font-semibold text-foreground">Our take:</strong> the
             products overlap during acquisition. Stessa is no longer accurately
             described as post-purchase only. The meaningful comparison is
             focused decision workflow versus a broader search-to-operations
