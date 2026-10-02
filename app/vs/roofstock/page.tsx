@@ -128,20 +128,20 @@ const MATRIX: Row[] = [
     feature: "10-year projection",
     truecap: "Pro — rent, expense, appreciation, and equity scenarios",
     roofstock:
-      "The marketplace calculator shows projected cash flow, cap rate and ROI",
+      "The marketplace calculator is a year-1 pro-forma: cash flow, cap rate and cash on cash",
     winner: "tie",
   },
   {
     feature: "Sensitivity grid (stress test)",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
     roofstock:
-      "Stessa's Stress Test report models rent collection scenarios against your cash reserves",
+      "Stessa's Stress Test report models rent collection scenarios against cash reserves for properties you already own",
     winner: "tie",
   },
   {
     feature: "Deal score with breakdown",
     truecap: "Free — 0–100 score with subscore drill-down",
-    roofstock: "Neighborhood, school and crime scores on each listing",
+    roofstock: "A 1-to-5 neighborhood score on each listing, Roofstock's own rating",
     winner: "tie",
   },
   {
@@ -341,8 +341,9 @@ export default function VsRoofstockPage() {
           </SectionHeading>
           <p className={VS_INTRO}>
             TrueCap provides an underwriting model. The Roofstock column is
-            what roofstock.com and Stessa&apos;s marketplace pages said in
-            October 2026; confirm current details on those sites.
+            what roofstock.com, Stessa&apos;s marketplace pages and
+            Stessa&apos;s help center said in October 2026; confirm current
+            details on those sites.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
             <VsMatrixTable
@@ -382,8 +383,8 @@ export default function VsRoofstockPage() {
               className="tc-link"
             >
               marketplace overview
-            </a>{" "}
-            and{" "}
+            </a>
+            ,{" "}
             <a
               href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace"
               target="_blank"
@@ -391,6 +392,15 @@ export default function VsRoofstockPage() {
               className="tc-link"
             >
               Stessa&apos;s help center
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://support.stessa.com/en/articles/3904791-stress-test-sensitivity-analysis-report"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              Stessa&apos;s Stress Test article
             </a>
             , read in October 2026.
           </p>

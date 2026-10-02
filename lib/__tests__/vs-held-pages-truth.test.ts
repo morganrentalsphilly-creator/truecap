@@ -149,6 +149,20 @@ describe("/vs/roofstock describes what Roofstock offers an individual buyer toda
     expect(capRate?.[1]).toBe("tie");
   });
 
+  it("states what Stessa's listings show, where the help center says more", () => {
+    // Stessa's help center lists "Neighborhood, school, and crime scores" on
+    // each listing, but four listings rendered signed out on 2026-10-02 (Kansas,
+    // Texas, Indiana, Tennessee) each showed one 1-to-5 "Neighborhood score",
+    // "Roofstock's proprietary rating", and no school or crime score. Their
+    // calculator panel is headed "Edit assumptions: year 1 pro-forma".
+    expect(text).not.toMatch(/school and crime scores|crime scores?\b/i);
+    expect(page).toContain(`roofstock: "A 1-to-5 neighborhood score on each listing, Roofstock's own rating"`);
+    expect(page).toContain("The marketplace calculator is a year-1 pro-forma");
+    // The Stress Test report is an owner report, and its source is linked.
+    expect(page).toContain("for properties you already own");
+    expect(page).toContain('href="https://support.stessa.com/en/articles/3904791-stress-test-sensitivity-analysis-report"');
+  });
+
   it("does not restore the broken FAQ sentence", () => {
     expect(text).not.toContain("Roofstock is a current individual-investor services vary by offering");
     expect(text).toContain(
