@@ -3256,9 +3256,18 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
   })();
 
   return (
+    // @container: the three figures size off this card's own width. Three
+    // columns at 18px with 12px side padding need about 97px each for a
+    // four-digit figure; at 360px the card gave 75px and "+$1,032" ran 10px
+    // past its border. Under 21rem of content width (a phone up to about
+    // 450px) the figure is 14px with 6px padding and a 6px gap, which leaves
+    // a four-digit figure about 6px of room at 360px; under 14.5rem (a
+    // 344px phone and below) the three stack. Anything longer wraps inside
+    // its card instead of crossing the border. Written as max-width
+    // container rules so they can never apply next to the sm: sizes.
     <section
       aria-label="Cash flow over time"
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="@container rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -3268,7 +3277,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
           monthly · 10-yr horizon
         </p>
       </div>
-      <div className="grid grid-cols-1 items-stretch gap-2 min-[280px]:grid-cols-3 sm:gap-4">
+      <div className="grid grid-cols-3 items-stretch gap-2 @max-[21rem]:gap-1.5 @max-[14.5rem]:grid-cols-1 sm:gap-4">
         {points.map((point, index) => {
           const tone =
             point.monthly > 25
@@ -3286,7 +3295,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
             <div
               key={point.label}
               className={cn(
-                "relative rounded-xl border border-border bg-background px-3 py-3 sm:px-4 sm:py-4",
+                "relative min-w-0 rounded-xl border border-border bg-background px-3 py-3 @max-[21rem]:px-1.5 sm:px-4 sm:py-4",
                 index === 0 ? "border-primary/30 bg-primary/[0.03]" : null,
               )}
             >
@@ -3295,7 +3304,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
               </p>
               <p
                 className={cn(
-                  "mt-1 text-lg font-extrabold tabular-nums sm:text-2xl",
+                  "mt-1 text-lg font-extrabold tabular-nums [overflow-wrap:anywhere] @max-[21rem]:text-sm sm:text-2xl",
                   valueColor,
                 )}
               >
