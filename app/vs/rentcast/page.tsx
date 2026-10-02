@@ -92,49 +92,51 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    rentcast: "Not modeled",
+    rentcast: "Not among RentCast's listed features",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    rentcast: "Not modeled",
+    rentcast: "Not among RentCast's listed features",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    rentcast: "Not applicable",
+    rentcast: "Not among RentCast's listed features",
     winner: "truecap",
   },
   {
     feature: "Rent comp data",
     truecap: "HUD Fair Market Rent (county-level, gov-published)",
-    rentcast: "Yes — listings-based comps with addresses",
+    rentcast:
+      "Yes: up to 20 nearby rental listings as comps (5 on the Free plan)",
     winner: "rentcast",
   },
   {
     feature: "Property value estimate",
     truecap: "Purchase price as user input",
-    rentcast: "Yes — automated valuation model",
+    rentcast: "Yes: property value estimates (AVM) through its API",
     winner: "rentcast",
   },
   {
     feature: "API access for developers",
     truecap: "No",
-    rentcast: "Yes — REST API for rent + value",
+    rentcast:
+      "Yes: an API for property records, value estimates and rent estimates",
     winner: "rentcast",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    rentcast: "Property data only",
-    winner: "truecap",
+    rentcast: "Rent estimates and property data",
+    winner: "tie",
   },
   {
     feature: "Mortgage + financing math",
     truecap: "Yes — full PITI + DSCR + amortization",
-    rentcast: "Not included",
+    rentcast: "Not among RentCast's listed features",
     winner: "truecap",
   },
   {
@@ -146,26 +148,29 @@ const MATRIX: Row[] = [
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    rentcast: "Limited free lookups",
-    winner: "truecap",
+    rentcast:
+      "Free plan: rent estimates, 5 comps per report, 5 saved properties",
+    winner: "tie",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    rentcast: "Not the use case",
-    winner: "truecap",
+    rentcast:
+      "Shares online rent reports; they carry rent data, not a deal analysis",
+    winner: "tie",
   },
   {
     feature: "PDF deal report",
     truecap: "Included with Pro",
-    rentcast: "PDF reports available on paid",
+    rentcast:
+      "Property rent report PDF; custom branding and market reports on Pro",
     winner: "tie",
   },
   {
     feature: "Investor dashboard (saved deals)",
     truecap:
       "Free — dashboard + save up to 5 deals; Pro adds unlimited saves + portfolio rollup",
-    rentcast: "Property-list dashboard",
+    rentcast: "Rental portfolio dashboard: 5 properties on Free, 50+ on Pro",
     winner: "tie",
   },
 ];
@@ -255,7 +260,9 @@ export default function VsRentcastPage() {
                   ratios).
                 </li>
                 <li>You want a portfolio rollup across saved deals.</li>
-                <li>You want a free tier that doesn&apos;t cap analyses.</li>
+                <li>
+                  You want cap rate, DSCR, and cash flow free on every analysis.
+                </li>
               </ul>
             </div>
             <div className="min-w-0">
@@ -263,10 +270,7 @@ export default function VsRentcastPage() {
                 Use RentCast when
               </h3>
               <ul className={VS_TLDR_LIST}>
-                <li>
-                  You want listings-based rent comps with comparable property
-                  addresses.
-                </li>
+                <li>You want rent comps drawn from nearby rental listings.</li>
                 <li>
                   You need API access to integrate rent data into your own
                   software.
@@ -338,9 +342,9 @@ export default function VsRentcastPage() {
                 and equity projection.
               </li>
               <li>
-                <strong>Save the deal + revisit later.</strong> TrueCap&apos;s
-                saved-deal feature lets you re-run with updated assumptions when
-                market data shifts.
+                <strong>Save the deal + revisit later.</strong> A saved deal can
+                be re-run with updated assumptions when market data shifts;
+                updating a saved deal needs a paid plan.
               </li>
             </ol>
             <p>
@@ -379,10 +383,10 @@ export default function VsRentcastPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -475,7 +479,8 @@ const RENTCAST_FAQ: FaqItem[] = [
     question: "Does RentCast do cap rate or DSCR calculations?",
     answer: (
       <>
-        No — RentCast is a data and estimation tool, not a financial calculator.
+        RentCast lists rent estimates, rental comps, market data, and an API;
+        cap rate and DSCR calculators are not among its listed features.
         You&apos;d use the rent number and AVM property value from RentCast as
         inputs into a separate calculator (TrueCap, DealCheck, or your
         spreadsheet) to compute cap rate, DSCR, cash flow, etc.
@@ -487,10 +492,11 @@ const RENTCAST_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap provides no-account preliminary screens with cap rate, CoC,
-        DSCR, NOI, and monthly cash flow. RentCast&apos;s free tier limits
-        property lookups and excludes its API. They solve different jobs: use
-        rent evidence for the assumption, then use an underwriting workflow to
-        test the deal.
+        DSCR, NOI, and monthly cash flow. RentCast&apos;s Free plan is free
+        forever and includes rent estimates, 5 comps per report, and 5 saved
+        properties; its API is a separate product with its own free plan of 50
+        calls a month. They solve different jobs: use rent evidence for the
+        assumption, then use an underwriting workflow to test the deal.
       </>
     ),
   },
@@ -500,8 +506,7 @@ const RENTCAST_FAQ: FaqItem[] = [
       <>
         Yes — every input in TrueCap is editable. Pull rent from RentCast, type
         it into TrueCap&apos;s rent field, and the entire downstream analysis
-        (cap rate, CoC, DSCR, cash flow) updates instantly. This is the most
-        common combined workflow.
+        (cap rate, CoC, DSCR, cash flow) updates instantly.
       </>
     ),
   },
