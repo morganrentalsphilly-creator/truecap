@@ -287,7 +287,9 @@ textarea,
    on next/font naming its fallback family "Archivo Fallback";
    lib/__tests__/display-font-fallback.test.ts pins both ends. */
 @font-face {
-  font-family: "Archivo Fallback";
+  /* Not a second typeface: the size-adjusted fallback DESIGN.md's Loading
+     rule calls for, named as next/font names it. */
+  font-family: "Archivo Fallback"; /* impeccable-disable-line design-system-font */
   src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("LiberationSans-Bold");
   font-weight: 750;
   font-stretch: 82%;
