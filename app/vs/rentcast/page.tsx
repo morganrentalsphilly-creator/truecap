@@ -102,7 +102,7 @@ const MATRIX: Row[] = [
   {
     feature: "Rent comp data",
     truecap:
-      "HUD Fair Market Rent as an editable area benchmark; the comps lookup adds nearby rent comps and a rent estimate from third-party data",
+      "An editable HUD rent benchmark; the comps lookup adds nearby rent comps and a rent estimate from third-party data",
     rentcast:
       "Yes: up to 20 nearby rental listings as comps (5 on the Free plan)",
     winner: "rentcast",
@@ -467,7 +467,7 @@ const RENTCAST_FAQ: FaqItem[] = [
       <>
         Not directly — they overlap on rent estimates but TrueCap is full
         underwriting. RentCast provides listings-based rent comps and AVM-style
-        property value estimates. TrueCap pre-fills an editable HUD area
+        property value estimates. TrueCap pre-fills an editable HUD rent
         benchmark and then runs the full underwrite. You can use RentCast as one
         evidence source and TrueCap for the downstream model.
       </>

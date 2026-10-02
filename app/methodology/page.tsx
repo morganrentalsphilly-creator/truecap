@@ -351,7 +351,7 @@ export default function MethodologyPage() {
             available. HUD uses FMRs as operating parameters in housing
             assistance programs. TrueCap queries the HUD API using resolved
             geography and bedroom count and presents the returned value as an
-            editable area benchmark. It is not a property rent comp, lease, or
+            editable rent benchmark. It is not a property rent comp, lease, or
             forecast. Verify achievable rent with current comparable evidence.
           </p>
           <p>

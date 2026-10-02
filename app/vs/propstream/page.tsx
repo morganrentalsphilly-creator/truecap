@@ -330,8 +330,8 @@ export default function VsPropstreamPage() {
                 you have an address.
               </li>
               <li>
-                <strong>Underwrite in TrueCap.</strong> Paste the address. HUD
-                area rent and the FRED owner-occupied rate can pre-fill as
+                <strong>Underwrite in TrueCap.</strong> Paste the address. A HUD
+                rent benchmark and the FRED owner-occupied rate can pre-fill as
                 editable benchmarks; enter property tax from a local bill or
                 reviewed rate. Run the analysis and review the Offer Ceiling under
                 your targets.
@@ -474,7 +474,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Can TrueCap do skip tracing or pull property lists?",
     answer: (
       <>
-        No. TrueCap focuses on per-deal underwriting and uses HUD area rent and
+        No. TrueCap focuses on per-deal underwriting and uses a HUD rent benchmark and
         the FRED owner-occupied 30-year rate as editable benchmarks; property
         tax is a manual local input. For lead generation, list pulls, and owner
         contact info, PropStream or DealMachine are the right tools.

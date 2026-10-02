@@ -290,7 +290,7 @@ export default function VsBiggerPocketsCalculatorPage() {
               </li>
               <li>
                 <strong>Start from labeled assumptions.</strong> TrueCap can
-                pre-fill editable HUD area rent and the FRED owner-occupied
+                pre-fill an editable HUD rent benchmark and the FRED owner-occupied
                 mortgage-rate benchmark; property tax is a manual local input.
               </li>
               <li>

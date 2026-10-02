@@ -367,8 +367,8 @@ export default function VsDealmachinePage() {
                 might buy.
               </li>
               <li>
-                <strong>Underwrite in TrueCap.</strong> Paste the address. HUD
-                area rent and the FRED owner-occupied rate can pre-fill as
+                <strong>Underwrite in TrueCap.</strong> Paste the address. A HUD
+                rent benchmark and the FRED owner-occupied rate can pre-fill as
                 editable benchmarks; property tax remains a manual local input.
                 Review the Offer Ceiling under your targets.
               </li>

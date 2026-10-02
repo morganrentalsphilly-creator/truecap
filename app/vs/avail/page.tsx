@@ -341,8 +341,8 @@ export default function VsAvailPage() {
                 off-market).
               </li>
               <li>
-                <strong>Underwrite in TrueCap.</strong> Paste the address; HUD
-                area rent and the FRED owner-occupied rate can pre-fill; property
+                <strong>Underwrite in TrueCap.</strong> Paste the address; a HUD
+                rent benchmark and the FRED owner-occupied rate can pre-fill; property
                 tax remains a manual local input. Check cap rate, CoC, DSCR,
                 monthly cash flow against benchmarks. Sensitize the inputs. Save
                 the deal.

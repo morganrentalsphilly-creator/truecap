@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Zillow Rent",
     tagline:
-      "Compare Zillow's property-specific starting estimate with TrueCap's editable HUD area benchmark and underwriting workflow.",
+      "Compare Zillow's property-specific starting estimate with TrueCap's editable HUD rent benchmark and underwriting workflow.",
     slug: "zillow-rent-estimate",
   });
 }

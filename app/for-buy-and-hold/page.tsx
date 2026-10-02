@@ -80,7 +80,7 @@ const USE_CASES: readonly RuledListItem[] = [
 // A real sequence (paste, adjust, calculate, project, stress-test, save), so
 // it is numbered.
 const WORKFLOW_STEPS = [
-  "Paste the listing address. HUD area rent and the FRED owner-occupied mortgage-rate benchmark can pre-fill; enter a local property-tax bill or reviewed rate manually.",
+  "Paste the listing address. A HUD rent benchmark and the FRED owner-occupied mortgage-rate benchmark can pre-fill; enter a local property-tax bill or reviewed rate manually.",
   "Adjust the financing (down %, term, rate) to match the offer you're considering.",
   "Run the analysis: cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
   "Pro: open the 10-year planning projection to review cash flow and equity under the entered growth assumptions.",

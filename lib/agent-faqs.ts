@@ -70,7 +70,7 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "Where do the starting numbers come from?",
-    a: "Rent starts from HUD Fair Market Rent and the rate from a FRED 30-year benchmark, both labeled. Property tax is your local input: until you enter the bill or a reviewed rate, the model labels its 1.1% assumption as a default to replace. Replace every starting value with the client's financing and property facts before you send.",
+    a: "Rent starts from a HUD benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such) and the rate from a FRED 30-year benchmark, both labeled. Property tax is your local input: until you enter the bill or a reviewed rate, the model labels its 1.1% assumption as a default to replace. Replace every starting value with the client's financing and property facts before you send.",
   },
   {
     q: "I only get a few investor clients a year. Is it worth it?",

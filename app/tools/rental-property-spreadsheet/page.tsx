@@ -377,7 +377,7 @@ export default function RentalPropertySpreadsheetPage() {
                 TrueCap analyzer
               </Link>{" "}
               starts where the spreadsheet ends: type an address and it can
-              pre-fill editable HUD area rent and the FRED owner-occupied rate
+              pre-fill an editable HUD rent benchmark and the FRED owner-occupied rate
               benchmark. Enter a local property-tax bill or reviewed rate
               manually; then it runs the same math and adds the parts a
               spreadsheet makes painful — PMI drop-off modeling, 10-year

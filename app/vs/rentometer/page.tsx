@@ -4,7 +4,7 @@
  * Target queries: "rentometer alternative", "rentometer vs", "free
  * rentometer", "rent estimator tool". Rentometer sells rent estimates and
  * comps, plus a Deal Worksheet on its Pro plan. TrueCap underwrites the
- * purchase and starts rent from a HUD area benchmark the user replaces (a
+ * purchase and starts rent from a HUD rent benchmark the user replaces (a
  * rent estimate appears only through the optional comps lookup). Competitor
  * cells were checked against rentometer.com/pricing/individual and
  * /deal-worksheet-landing in October 2026.
@@ -73,7 +73,7 @@ type Verdict = "truecap" | "rentometer" | "tie";
 type Row = { feature: string; truecap: string; rentometer: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Rent estimate from address",      truecap: "Editable HUD area benchmark; optional rent-comp lookup",                 rentometer: "Comp-driven rent estimate (their core product)",                  winner: "rentometer" },
+  { feature: "Rent estimate from address",      truecap: "Editable HUD rent benchmark; optional rent-comp lookup",                 rentometer: "Comp-driven rent estimate (their core product)",                  winner: "rentometer" },
   { feature: "Comp data access",                 truecap: "One free sale/rent comp lookup; Pro includes 50 per month",               rentometer: "Rental-comp product with plan-specific limits",                    winner: "rentometer" },
   { feature: "Full deal underwrite",             truecap: "Free core metrics; Pro adds 10-year projections",                         rentometer: "Deal Worksheet on Rentometer Pro: cash flow, cash-on-cash and gross yield", winner: "tie" },
   { feature: "Operating expense modeling",       truecap: "Editable tax, insurance, maintenance, management, and reserve inputs",    rentometer: "Editable operating expenses, taxes and insurance in the Pro Deal Worksheet", winner: "tie" },
@@ -345,7 +345,7 @@ const RENTOMETER_FAQ: FaqItem[] = [
     answer: (
       <>
         It depends on the evidence available for the property. TrueCap
-        provides the underwriting model and an editable HUD area
+        provides the underwriting model and an editable HUD rent
         benchmark; Rentometer can add comp-based rent context. Use
         the sources that fit the property, verify them independently,
         and sensitivity-test a reasonable rent range.
