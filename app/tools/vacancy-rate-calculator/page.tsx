@@ -50,10 +50,25 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
+/**
+ * The one national figure this page quotes, typed once (docs/voice.md rule 5).
+ * Source: U.S. Census Bureau, Quarterly Residential Vacancies and
+ * Homeownership (Housing Vacancy Survey), release CB26-116, the national
+ * rental vacancy rate. The survey publishes quarterly; to quote a newer
+ * release, read the rate from the release and change rate and period
+ * together, here and nowhere else. The FAQ answer and the lede both read
+ * this constant (lib/__tests__/reference-content-truth-guards pins that).
+ */
+const HVS_RENTAL_VACANCY = {
+  rate: "7.3%",
+  period: "the second quarter of 2026",
+  href: "https://www.census.gov/housing/hvs/index.html",
+} as const;
+
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is a good vacancy rate for rental property?",
-    a: "The Census Bureau's Housing Vacancy Survey put the national rental vacancy rate at 7.3% in the second quarter of 2026. Anything under 5% is aggressive — that assumes 18 days or less of vacancy per year, which is unusual outside of high-demand urban cores. For underwriting, use 8% as a default unless you have hard local data showing lower.",
+    a: `The Census Bureau's Housing Vacancy Survey put the national rental vacancy rate at ${HVS_RENTAL_VACANCY.rate} in ${HVS_RENTAL_VACANCY.period}. Anything under 5% is aggressive — that assumes 18 days or less of vacancy per year, which is unusual outside of high-demand urban cores. For underwriting, use 8% as a default unless you have hard local data showing lower.`,
   },
   {
     q: "How do you calculate vacancy rate?",
@@ -145,16 +160,16 @@ export default function VacancyRateCalculatorPage() {
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           The Census Bureau&apos;s{" "}
           <a
-            href="https://www.census.gov/housing/hvs/index.html"
+            href={HVS_RENTAL_VACANCY.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-primary hover:underline"
+            className="tc-link"
           >
             Housing Vacancy Survey
           </a>{" "}
-          put the national rental vacancy rate at 7.3% in the second quarter
-          of 2026. Most listing brochures quote 5%. The gap is where deals
-          quietly fail.
+          put the national rental vacancy rate at {HVS_RENTAL_VACANCY.rate} in{" "}
+          {HVS_RENTAL_VACANCY.period}. Most listing brochures quote 5%. The gap
+          is where deals quietly fail.
           This calculator converts vacant days + turnover cost into the true
           effective vacancy rate to use in your underwrite.
         </p>
