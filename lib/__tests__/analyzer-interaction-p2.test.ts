@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -149,6 +149,9 @@ describe("HOA prompt for an address with a unit number (P2-148)", () => {
     expect(prompt).toContain('document.getElementById("hoaMonthly")?.focus()');
     // The HOA field itself is unchanged: optional, no required marker.
     const hoaField = expenses.slice(expenses.indexOf('id="hoaMonthly"'), expenses.indexOf('id="hoaMonthly-error"'));
+    // Both anchors were found, in order: an empty slice would pass the check below.
+    expect(hoaField).toContain('id="hoaMonthly"');
+    expect(expenses.indexOf('id="hoaMonthly-error"')).toBeGreaterThan(expenses.indexOf('id="hoaMonthly"'));
     expect(hoaField).not.toMatch(/\brequired\b|aria-required/);
   });
 
@@ -304,13 +307,20 @@ describe("reduced motion reaches the charts and the last two scripted scrolls (P
   });
 
   it("leaves no literal smooth scroll in the analyzer components", () => {
+    // Every file under components/investcalc, not only the two that had one.
+    const root = join(process.cwd(), "components/investcalc");
+    const files = (readdirSync(root, { recursive: true }) as string[]).filter((file) =>
+      /\.tsx?$/.test(file),
+    );
+    expect(files.length).toBeGreaterThan(50);
+    for (const file of files) {
+      expect(readFileSync(join(root, file), "utf8"), file).not.toMatch(/behavior:\s*["']smooth["']/);
+    }
     for (const file of [
       "components/investcalc/compare-deals-client.tsx",
       "components/investcalc/strategy-outcome-card.tsx",
     ]) {
-      const source = read(file);
-      expect(source, file).not.toMatch(/behavior:\s*["']smooth["']/);
-      expect(source, file).toContain("behavior: scrollBehavior()");
+      expect(read(file), file).toContain("behavior: scrollBehavior()");
     }
   });
 });
@@ -330,10 +340,13 @@ describe("accessible names on the result and the sample button (P2-73)", () => {
 
   it("names the sample button by its visible text", () => {
     const page = read("components/investcalc/investcalc-page.tsx");
-    const button = page.slice(
-      page.indexOf("onClick={handleTrySampleDeal}\n              //"),
-      page.indexOf("Preview a sample Pro report"),
-    );
+    // The whole opening tag and both visible lines, from "<button" on, so an
+    // aria-label placed anywhere on the button is inside the slice.
+    const nameAt = page.indexOf("Preview a sample Pro report");
+    expect(nameAt).toBeGreaterThan(-1);
+    expect(page.indexOf("Preview a sample Pro report", nameAt + 1)).toBe(-1);
+    const button = page.slice(page.lastIndexOf("<button", nameAt), nameAt);
+    expect(button).toContain("onClick={handleTrySampleDeal}");
     expect(button).toContain("Try a sample rental");
     expect(button).not.toContain("aria-label=");
   });
