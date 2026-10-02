@@ -37,6 +37,7 @@ import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancell
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import { ActionRow, PageHero } from "@/components/marketing/page-parts";
+import { OtherPeriodLine, paidPlanFigures } from "@/components/marketing/pricing-card-figures";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
 import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -62,7 +63,9 @@ import {
   formatPublicUsd,
   formatUsdWhole,
   PRICING_OUTCOME_EXAMPLE,
+  PUBLIC_AGENT_PRO_ANNUAL_USD,
   PUBLIC_AGENT_PRO_MONTHLY_USD,
+  PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
 import {
@@ -302,6 +305,13 @@ export default async function PricingPage() {
   // disagree; nothing here is typed by hand. Agent stage first (2026-09
   // agent-first pass); investor stages follow. The plan name jumps to its
   // card (Free has no fragment of its own, so it lands on the plans).
+  //
+  // The cards open on Annual, so on phones (where the toggle is out of sight
+  // by the time the card is on screen) each paid stage also carries the
+  // annual figure under its monthly price, in the card's own words: the
+  // effective monthly figure and the annual charge
+  // (components/marketing/pricing-card-figures.tsx). Same inputs as the
+  // cards: the Stripe display price, else the catalog amount.
   const stages = [
     ...(agentProConfigured
       ? [
@@ -311,6 +321,10 @@ export default async function PricingPage() {
             href: "#agent-pro",
             price: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
             period: agentMonthly ? `/${agentMonthly.period}` : "/month",
+            annual: paidPlanFigures(agentMonthly, agentAnnual, {
+              monthlyUsd: PUBLIC_AGENT_PRO_MONTHLY_USD,
+              annualUsd: PUBLIC_AGENT_PRO_ANNUAL_USD,
+            }).annual,
             answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
           },
         ]
@@ -321,6 +335,7 @@ export default async function PricingPage() {
       href: "#plans",
       price: "$0",
       period: "forever",
+      annual: null,
       answer: "Understand the economics before spending more time on the property.",
     },
     {
@@ -329,6 +344,10 @@ export default async function PricingPage() {
       href: "#pro",
       price: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
       period: `/${monthly?.period ?? "month"}`,
+      annual: paidPlanFigures(monthly, annual, {
+        monthlyUsd: PUBLIC_PRO_MONTHLY_USD,
+        annualUsd: PUBLIC_PRO_ANNUAL_USD,
+      }).annual,
       answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
     },
   ];
@@ -421,6 +440,11 @@ export default async function PricingPage() {
                       <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>
                       <span className="text-sm text-muted-foreground">{stage.period}</span>
                     </p>
+                    {stage.annual ? (
+                      <p className="col-span-2 text-right text-sm text-muted-foreground md:hidden">
+                        <OtherPeriodLine figures={stage.annual} />
+                      </p>
+                    ) : null}
                     <p className="col-span-2 mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
                       {stage.answer}
                     </p>
