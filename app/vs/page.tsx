@@ -237,7 +237,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "rentcast",
     competitor: "RentCast",
     tagline:
-      "RentCast estimates rent + property value with an API. TrueCap underwrites the full deal.",
+      "RentCast estimates rent and property value. TrueCap underwrites the full deal from a rent benchmark you replace.",
     group: "Specialized tool",
   },
   {
@@ -290,7 +290,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "arrived",
     competitor: "Arrived",
     tagline:
-      "Arrived sells fractional rental shares (passive). TrueCap underwrites whole properties you'd own directly.",
+      "Arrived sells shares of rental homes and of its funds (passive). TrueCap underwrites whole properties you'd own directly.",
     group: "Specialized tool",
   },
   {
