@@ -490,20 +490,38 @@ describe("Export PDF on the sample does not talk about a purchase shutdown (P2-3
       "The sample's full report is on this page. A PDF of it comes with a Pro plan.",
     );
     const shutdown = dialog.indexOf("Already purchased a one-time report?");
-    const payments = dialog.indexOf("Payments are processed by Stripe.");
-    for (const index of [shutdown, payments]) {
-      expect(index).toBeGreaterThan(-1);
-      expect(dialog.lastIndexOf("{sample ? null : (", index)).toBeGreaterThan(
-        dialog.indexOf("<DialogHeader>"),
-      );
-    }
+    expect(shutdown).toBeGreaterThan(-1);
+    expect(dialog.lastIndexOf("{sample ? null : (", shutdown)).toBeGreaterThan(
+      dialog.indexOf("<DialogHeader>"),
+    );
+    // Only one block is dropped whole for the sample: the recovery note.
+    expect(dialog.split("{sample ? null : (")).toHaveLength(2);
     // Buyers of a past one-time report still get the recovery note.
     expect(dialog).toContain("Existing paid claims and recovery remain supported");
   });
 
-  it("the analyzer tells the dialog when the result on screen is the sample", () => {
-    expect(read("components/investcalc/investcalc-page.tsx")).toContain(
-      "sample={isTrueCapSyntheticSampleAddress(analysisValues?.address)}",
+  it("keeps the estimates line on the sample and drops only the payment sentence", () => {
+    const footer = dialog.slice(
+      dialog.lastIndexOf(
+        '<p className="text-2xs leading-relaxed text-muted-foreground">',
+      ),
     );
+    expect(footer).toMatch(
+      /\{sample\s*\? "Calculations are estimates based on the sample's inputs; verify assumptions independently before acting\."\s*: "Payments are processed by Stripe\. Calculations are estimates based on your current inputs; verify assumptions independently before acting\."\}/,
+    );
+    expect(dialog.split("Payments are processed by Stripe.")).toHaveLength(2);
+  });
+
+  it("shows the sample variant only while the sample's full report is on the page", () => {
+    const calculator = read("components/investcalc/investcalc-page.tsx");
+    // The Pro preview flag, not the address: a re-run of the sample after
+    // "Edit assumptions" ends the preview and gates the Pro panels again, and
+    // "The sample's full report is on this page" would then be false.
+    expect(calculator).toContain("sample={isSampleProPreview}");
+    expect(calculator).not.toContain(
+      "sample={isTrueCapSyntheticSampleAddress(",
+    );
+    // Every ordinary run ends the preview.
+    expect(calculator).toContain("setIsSampleProPreview(sampleProPreview);");
   });
 });

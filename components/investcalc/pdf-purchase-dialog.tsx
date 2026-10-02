@@ -23,10 +23,13 @@ interface PdfPurchaseDialogProps {
   onOpenChange: (open: boolean) => void;
   returnFocusRef?: RefObject<HTMLElement | null>;
   /**
-   * The export was asked for on the sample deal. A first-time visitor on the
-   * sample has bought nothing, so the one-time-purchase notice, the recovery
-   * note for past buyers and the payment line do not apply to them; the
-   * dialog says where the sample's report is and that Pro includes its PDF.
+   * The export was asked for while the sample deal's full report is on the
+   * page (the analyzer passes its sample Pro preview flag, not the address:
+   * a re-run of the sample gates the panels again). A first-time visitor on
+   * the sample has bought nothing, so the one-time-purchase notice, the
+   * recovery note for past buyers and the payment sentence do not apply to
+   * them; the dialog says where the sample's report is and that Pro includes
+   * its PDF. The estimates line stays, worded for the sample.
    * It does not say a PDF "needs" Pro: a visitor's own first decision can be
    * exported without an account (lib/entitlements-catalog.ts, pdf_export).
    */
@@ -118,13 +121,11 @@ export function PdfPurchaseDialog({
           )}
         </div>
 
-        {sample ? null : (
-          <p className="text-2xs leading-relaxed text-muted-foreground">
-            Payments are processed by Stripe. Calculations are estimates based
-            on your current inputs; verify assumptions independently before
-            acting.
-          </p>
-        )}
+        <p className="text-2xs leading-relaxed text-muted-foreground">
+          {sample
+            ? "Calculations are estimates based on the sample's inputs; verify assumptions independently before acting."
+            : "Payments are processed by Stripe. Calculations are estimates based on your current inputs; verify assumptions independently before acting."}
+        </p>
       </DialogContent>
     </Dialog>
   );
