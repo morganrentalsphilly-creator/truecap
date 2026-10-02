@@ -62,6 +62,14 @@ export function looksLikeListingLink(value: string): boolean {
 }
 
 /**
+ * False until the first hero form on this page load has mounted. Only that
+ * first mount is a hydration over server-rendered inputs; a later mount is a
+ * client-side navigation, where the document can still hold the page being
+ * left, and its field must not be read as this one's.
+ */
+let firstHydrationDone = false;
+
+/**
  * What a visitor typed into the server-rendered field before React attached.
  *
  * The form is a plain GET until hydration, which on a slow phone takes over a
@@ -70,7 +78,7 @@ export function looksLikeListingLink(value: string): boolean {
  * window. Reading the field first makes the typed text the default.
  */
 export function readPreHydrationAddress(placement: "hero" | "close"): string {
-  if (typeof document === "undefined") return "";
+  if (typeof document === "undefined" || firstHydrationDone) return "";
   const form =
     placement === "hero"
       ? "form[data-hero-address-form]"
@@ -132,7 +140,10 @@ export function HeroAddressForm({
   // form is a plain GET to /analyze; after it, submit is handled in JS.
   // Tests wait on it so they exercise the intended path deterministically.
   const [ready, setReady] = useState(false);
-  useEffect(() => setReady(true), []);
+  useEffect(() => {
+    firstHydrationDone = true;
+    setReady(true);
+  }, []);
 
   const openAnalyzer = () => {
     setOpening(true);
