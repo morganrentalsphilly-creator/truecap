@@ -51,6 +51,7 @@ import {
 } from "@/lib/calculator-registry";
 import {
   DATA_SOURCE_FACTS,
+  FOUR_ACQUISITION_ANSWERS,
   getPlanFacts,
   getProductAvailabilityFacts,
   PRODUCT_POSITIONING,
@@ -65,6 +66,60 @@ export const revalidate = 3600;
 // Calculator list is driven by lib/calculator-registry.ts (the single source
 // of truth) so llms.txt can never disagree with /tools on which calculators
 // exist or how many there are.
+
+/**
+ * Every /vs comparison page in the sitemap (COMPARISON_PATHS in
+ * app/sitemap.ts), in its order, with the competitor named as the /vs hub
+ * names it (COMPARISONS in app/vs/page.tsx). This section was seven
+ * hand-typed lines while the sitemap listed 38 pages.
+ * lib/__tests__/llms-txt-coverage.test.ts holds the two lists together: a
+ * comparison page added to or removed from the sitemap fails there until
+ * this list matches, and a name that differs from the hub's fails too.
+ *
+ * The lines carry no description. What a competitor does or lacks is argued
+ * on the comparison page itself, with its sources, not in a one-line summary
+ * here.
+ */
+const COMPARISON_PAGES: ReadonlyArray<readonly [slug: string, competitor: string]> = [
+  ["dealcheck", "DealCheck"],
+  ["bricked", "Bricked AI"],
+  ["stessa", "Stessa"],
+  ["mashvisor", "Mashvisor"],
+  ["biggerpockets-calculator", "BiggerPockets Calculator"],
+  ["excel", "Excel / Google Sheets"],
+  ["rentometer", "Rentometer"],
+  ["zillow-rent-estimate", "Zillow Rent Estimate"],
+  ["roofstock", "Roofstock"],
+  ["rentredi", "RentRedi"],
+  ["avail", "Avail"],
+  ["propstream", "PropStream"],
+  ["rentcast", "RentCast"],
+  ["turbotenant", "TurboTenant"],
+  ["baselane", "Baselane"],
+  ["buildium", "Buildium"],
+  ["appfolio", "AppFolio"],
+  ["rentec-direct", "Rentec Direct"],
+  ["landlord-studio", "Landlord Studio"],
+  ["rentspree", "RentSpree"],
+  ["hostfully", "Hostfully"],
+  ["cozy", "Cozy.co"],
+  ["dealmachine", "DealMachine"],
+  ["batchleads", "BatchLeads"],
+  ["yardi-breeze", "Yardi Breeze"],
+  ["hostaway", "Hostaway"],
+  ["airdna", "AirDNA"],
+  ["arrived", "Arrived"],
+  ["fundrise", "Fundrise"],
+  ["lodgify", "Lodgify"],
+  ["guesty", "Guesty"],
+  ["crexi", "Crexi"],
+  ["reonomy", "Reonomy"],
+  ["privy", "Privy"],
+  ["quickbooks-rental", "QuickBooks (for rentals)"],
+  ["biggerpockets-for-house-hacking", "BiggerPockets for House Hacking"],
+  ["dealcheck-for-short-term-rentals", "DealCheck for STRs"],
+  ["mashvisor-for-short-term-rentals", "Mashvisor for STRs"],
+];
 
 /** A site path llms.txt may list: not on the SEO loop's noindex list. */
 const listed = (path: string): boolean => !isNoindexPath(path);
@@ -110,6 +165,8 @@ export async function GET() {
       listed(`/markets/${c.citySlug}/${c.strategy}`),
   );
 
+  const comparisons = COMPARISON_PAGES.filter(([slug]) => listed(`/vs/${slug}`));
+
   // Counts derived from the same lists the body renders, so the prose
   // figures can never drift from the actual content (this previously
   // said "20+ posts / 33 states / 26 combos" while those lists kept growing).
@@ -144,7 +201,16 @@ export async function GET() {
       .map((t) => t.shortTitle)
       .join(", ")}, etc)`,
     `  - ${stateCount} state rental data guides (Census and HUD figures) and ${marketCount} city rental market data guides with HUD Fair Market Rent${comboCount ? `, plus ${comboCount} city + strategy guides` : ""}`,
-    "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
+    // Count and names come from the listed comparison pages, so this line
+    // cannot name a page the section below leaves out.
+    ...(comparisons.length
+      ? [
+          `  - ${comparisons.length} side-by-side comparison pages, including TrueCap vs. ${comparisons
+            .slice(0, 7)
+            .map(([, competitor]) => competitor)
+            .join(", ")}`,
+        ]
+      : []),
     `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
     "  - Methodology page documenting the analyzer's core formulas",
     `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
@@ -187,17 +253,21 @@ export async function GET() {
       `- [${c.strategyLabel} in ${c.cityName}, ${c.state}](${siteUrl}/markets/${c.citySlug}/${c.strategy}): ${c.pitch}`,
   );
 
-  const compareSection = [
-    `- [TrueCap vs. DealCheck](${siteUrl}/vs/dealcheck): Fair workflow comparison with links to DealCheck's official product documentation.`,
-    `- [TrueCap vs. Stessa](${siteUrl}/vs/stessa): How the two compare for active-investor underwriting vs. landlord accounting.`,
-    `- [TrueCap vs. Mashvisor](${siteUrl}/vs/mashvisor): When each platform's data sources and strengths fit best.`,
-    `- [TrueCap vs. BiggerPockets calculator](${siteUrl}/vs/biggerpockets-calculator): Address-to-decision workflow vs. a detailed calculator inside a community ecosystem.`,
-    `- [TrueCap vs. Excel](${siteUrl}/vs/excel): Why spreadsheet underwriting is fragile.`,
-    `- [TrueCap vs. Rentometer](${siteUrl}/vs/rentometer): Rent estimation vs. full underwriting.`,
-    `- [TrueCap vs. Zillow rent estimate](${siteUrl}/vs/zillow-rent-estimate): When Zillow's number is misleading.`,
-  ].filter((line) => listed(pathOf(line, siteUrl)));
+  const compareSection = comparisons.map(
+    ([slug, competitor]) => `- [TrueCap vs. ${competitor}](${siteUrl}/vs/${slug})`,
+  );
 
+  // /for-agents exists only where Agent Pro is sold: without its Stripe
+  // Price the page permanently redirects to /pricing (and leaves the sitemap
+  // and the footer), so it is listed on the same condition. Both new lines
+  // are assembled from lib/product-facts.ts, not restated here.
   const personasSection = [
+    ...(availability.agentPro
+      ? [
+          `- [TrueCap for real estate agents](${siteUrl}/for-agents): For agents with investor clients. ${planFacts.agentPro}`,
+        ]
+      : []),
+    `- [TrueCap for rental investors](${siteUrl}/for-investors): Four answers before an offer: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
     `- [TrueCap for buy-and-hold investors](${siteUrl}/for-buy-and-hold): Cash flow modeling for long-term rentals.`,
     `- [BRRRR education](${siteUrl}/blog/brrrr-method-explained): An assumption-led walkthrough of the buy, rehab, rent, and refinance sequence.`,
     `- [TrueCap for house hackers](${siteUrl}/for-house-hackers): Owner-occupant FHA 3.5% strategy.`,
@@ -211,6 +281,7 @@ export async function GET() {
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state rental data guides.`,
+    `- [Comparisons index](${siteUrl}/vs): All ${comparisons.length} comparison pages.`,
     `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
   ].filter((line) => listed(pathOf(line, siteUrl)));
 
