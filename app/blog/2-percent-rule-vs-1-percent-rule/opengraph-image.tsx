@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Screening",
     tag: "2% vs 1% rule",
-    title: "One screen, two bars: which one applies in 2026?",
+    title: "2% rule vs 1% rule: which rental screen actually applies in 2026?",
     subline: "GRM and cap rate · worked $250,000 and $75,000 deals",
   });
 }

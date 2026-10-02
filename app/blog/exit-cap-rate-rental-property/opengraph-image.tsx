@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Metrics",
     tag: "Exit cap rate",
-    title: "The number that sets your sale price",
+    title: "Exit cap rate: how to pick the number that sets your sale price (2026)",
     subline: "A worked $300K duplex · sale-price and IRR sensitivity",
   });
 }

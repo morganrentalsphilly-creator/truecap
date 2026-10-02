@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Financing",
     tag: "DTI and rental income",
-    title: "How lenders count your rental income",
+    title: "Debt-to-income ratio for an investment property: how lenders count rental income (2026)",
     subline: "Illustrative 75% treatment · house-hack example · DSCR alternative",
   });
 }

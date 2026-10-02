@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "How-to",
     tag: "DSCR",
-    title: "How to calculate DSCR (and what counts as good)",
+    title: "How to calculate DSCR: the formula, a worked example, what counts as good, and DSCR loans",
     subline: "Formula · worked example · good ratio · DSCR loans",
   });
 }

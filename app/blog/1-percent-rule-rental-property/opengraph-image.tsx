@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Metrics",
     tag: "1% rule",
-    title: "The 1% rule for rental property in 2026",
+    title: "The 1% rule for rental property: does it still work in 2026?",
     subline: "Rent-to-price · GRM · break-even · cash-on-cash",
   });
 }

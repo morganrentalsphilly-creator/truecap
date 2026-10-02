@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Underwriting",
     tag: "Margin of safety",
-    title: "How much vacancy can your rental survive?",
-    subline: "Break-even occupancy · break-even rent · the DSCR 1.0 line",
+    title: "Break-even occupancy: how much vacancy a rental can survive (2026)",
+    subline: "The formula · break-even rent · the DSCR 1.0 line",
   });
 }
