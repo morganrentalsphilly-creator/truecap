@@ -126,15 +126,15 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
   const hero = read("components/marketing/hero-address-form.tsx");
   const help = read("components/investcalc/listing-link-input.tsx");
 
-  it("names the same five sites in the helper, the error and the analyzer help", () => {
+  it("names the same four sites in the helper, the error and the analyzer help", () => {
     expect(SUPPORTED_LISTING_SITES_TEXT).toBe(
-      "Zillow, Redfin, Realtor.com, Homes.com, or Trulia",
+      "Zillow, Redfin, Realtor.com, or Homes.com",
     );
     expect(HERO_EMPTY_HELPER).toBe(
-      "Paste an address or a Zillow, Redfin, Realtor.com, Homes.com, or Trulia link",
+      "Paste an address or a Zillow, Redfin, Realtor.com, or Homes.com link",
     );
     expect(HERO_LISTING_ERROR).toBe(
-      "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link",
+      "Paste a supported Zillow, Redfin, Realtor.com, or Homes.com property link",
     );
     expect(help).toContain("{SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts");
     // No site list typed by hand anywhere else in the two surfaces.
@@ -151,6 +151,9 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
   });
 
   it("the parser reads a link from every site the list names", () => {
+    // Each fixture must be the shape the site serves today, not the shape
+    // the parser happens to accept: a made-up Trulia /homedetails/ link once
+    // passed here while real Trulia links missed their branch.
     const links: Record<(typeof SUPPORTED_LISTING_SITES)[number], string> = {
       Zillow:
         "https://www.zillow.com/homedetails/100-Test-St-Springfield-IL-62701/12345_zpid/",
@@ -160,16 +163,42 @@ describe("one list of supported listing sites, and share-sheet text (P2-37)", ()
         "https://www.realtor.com/realestateandhomes-detail/100-Test-St_Springfield_IL_62701_M12345-67890",
       "Homes.com":
         "https://www.homes.com/property/100-Test-St-Springfield-IL-62701/id-987/",
-      Trulia:
-        "https://www.trulia.com/homedetails/100-Test-St-Springfield-IL-62701/12345",
+    };
+    const sources: Record<(typeof SUPPORTED_LISTING_SITES)[number], string> = {
+      Zillow: "zillow",
+      Redfin: "redfin",
+      "Realtor.com": "realtor",
+      "Homes.com": "homes",
     };
     expect(Object.keys(links)).toEqual([...SUPPORTED_LISTING_SITES]);
     for (const [site, link] of Object.entries(links)) {
       const parsed = parseListingUrl(link);
+      // The site's own branch read it, not the generic fallback.
+      expect(parsed?.source, site).toBe(
+        sources[site as (typeof SUPPORTED_LISTING_SITES)[number]],
+      );
       expect(parsed?.address, site).toMatch(/100 Test St/i);
       expect(parsed?.state, site).toBe("IL");
       expect(parsed?.zip, site).toBe("62701");
+      // No listing id (a run of six or more digits) lands in the address.
+      expect(parsed?.address, site).not.toMatch(/\d{6,}/);
     }
+  });
+
+  it("names Trulia only once the parser reads the links Trulia serves", () => {
+    // Trulia property links are trulia.com/home/<address>-<id> (seen on
+    // trulia.com results, 2026-10-02). Until the parser's Trulia branch
+    // reads that shape, the generic fallback returns the address with the
+    // listing id attached, and that string goes into Property Address as is.
+    const parsed = parseListingUrl(
+      "https://www.trulia.com/home/100-test-st-springfield-il-62701-33825793",
+    );
+    const readsTruliaLinks =
+      parsed?.source === "trulia" && !/\d{6,}/.test(parsed.address);
+    const namesTrulia = (SUPPORTED_LISTING_SITES as readonly string[]).includes(
+      "Trulia",
+    );
+    expect(namesTrulia && !readsTruliaLinks).toBe(false);
   });
 
   it("finds the link inside share-sheet text, so the sentence is not the address", () => {
