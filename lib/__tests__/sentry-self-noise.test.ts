@@ -2,16 +2,20 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-const initMock = vi.hoisted(() => vi.fn());
+const { initMock, captureMessageMock } = vi.hoisted(() => ({
+  initMock: vi.fn(),
+  captureMessageMock: vi.fn(),
+}));
 
 vi.mock("@sentry/nextjs", () => ({
   init: initMock,
   captureException: vi.fn(),
-  captureMessage: vi.fn(),
+  captureMessage: captureMessageMock,
   captureRouterTransitionStart: vi.fn(),
 }));
 
 import { initSentryClient } from "@/lib/sentry/client-init";
+import { captureMessageLazy } from "@/lib/sentry/lazy";
 import {
   POSTHOG_KEY_MISSING_NOTICE_PREFIX,
   isPerPageLoadConfigNotice,
@@ -66,6 +70,24 @@ describe("the per-page-load PostHog notice no longer spends the Sentry error quo
     }
     expect(isPerPageLoadConfigNotice({})).toBe(false);
     expect(isPerPageLoadConfigNotice({ message: 42, logentry: null })).toBe(false);
+  });
+
+  it("stops the notice at the lazy helper lib/analytics.ts calls, and lets other messages through", async () => {
+    captureMessageMock.mockClear();
+    await captureMessageLazy(noticeSentByTheSite(), {
+      level: "warning",
+      tags: { feature: "analytics" },
+    });
+    expect(captureMessageMock).not.toHaveBeenCalled();
+
+    const context = { level: "warning" as const, tags: { feature: "not-found" } };
+    await captureMessageLazy("404 on a linked page", context);
+    expect(captureMessageMock).toHaveBeenCalledTimes(1);
+    expect(captureMessageMock).toHaveBeenCalledWith("404 on a linked page", context);
+
+    // The call the helper intercepts is the one the site makes.
+    const analytics = readFileSync(join(ROOT, "lib/analytics.ts"), "utf8");
+    expect(analytics).toContain('import { captureMessageLazy } from "@/lib/sentry/lazy";');
   });
 
   it("drops that notice in the browser's beforeSend", () => {
