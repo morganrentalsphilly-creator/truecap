@@ -28,7 +28,8 @@ const SELF_GRADE = /\bhonest(?:ly)?\b|\bfair\b|\bunbiased\b/i;
  * /vs pages whose descriptions still carried the words when this guard was
  * written and whose files belong to other packages of the same fix wave
  * (x-vs-money, y2-vs-data, y3-vs-str). Each of those packages removes the
- * words from its own pages; take a slug off this list once its page is clean.
+ * words from its own pages; once a held page is clean, the test below turns
+ * red until its slug comes off this list.
  */
 const HELD_BY_ANOTHER_PACKAGE = new Set([
   "arrived",
@@ -83,9 +84,13 @@ describe("a page description does not grade its own comparison", () => {
     expect(graded).toEqual([]);
   });
 
-  it("holds only pages that exist", () => {
+  it("holds only pages that exist and still carry the words", () => {
     for (const slug of HELD_BY_ANOTHER_PACKAGE) {
       expect(VS_SLUGS, slug).toContain(slug);
+      expect(
+        vsDescriptions(slug).some((d) => SELF_GRADE.test(d)),
+        `${slug} is clean: take it off HELD_BY_ANOTHER_PACKAGE`,
+      ).toBe(true);
     }
   });
 
