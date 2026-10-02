@@ -267,9 +267,9 @@ export default function RentalPropertySpreadsheetPage() {
               management, 10% maintenance, and a 5% CapEx reserve — the same
               starting assumptions the TrueCap analyzer uses. Property tax
               starts at 1.1% of the price, a placeholder to replace with the
-              parcel&apos;s actual bill. Zero the reserves out if you must, but
-              know that&apos;s the underwrite you&apos;re changing, not the
-              formula.
+              rate from the parcel&apos;s actual bill (annual bill ÷ price, as a
+              percent). Zero the reserves out if you must, but know that&apos;s
+              the underwrite you&apos;re changing, not the formula.
             </p>
 
             <h3>Tab 2 — 10-Year Projection</h3>
