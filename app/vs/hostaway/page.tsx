@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
   description:
-    "Hostaway runs your STR portfolio after closing. TrueCap underwrites the STR deal before. Honest comparison for short-term rental investors.",
+    "Hostaway runs your STR portfolio after closing. TrueCap underwrites the deal before you buy. How the two fit together.",
   keywords: [
     "hostaway alternative",
     "hostaway vs hostfully",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
     description:
-      "Hostaway manages STRs after closing. TrueCap underwrites the STR deal before. Different stages.",
+      "Hostaway manages STRs after closing. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/hostaway",
     type: "website",
   },
@@ -159,7 +159,7 @@ export default function VsHostawayPage() {
     name: "Hostaway vs TrueCap (2026): STR PM vs Deal Math",
     url: `${siteUrl}/vs/hostaway`,
     description:
-      "Hostaway runs your STR portfolio after closing. TrueCap underwrites the STR deal before. Honest comparison for short-term rental investors.",
+      "Hostaway runs your STR portfolio after closing. TrueCap underwrites the deal before you buy. How the two fit together.",
     dateModified: lastmodFor("/vs/hostaway"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -186,7 +186,11 @@ export default function VsHostawayPage() {
             manager across Airbnb, Vrbo and Booking.com, automated guest
             messaging, dynamic pricing, and task automation.
             TrueCap models the property&apos;s pre-purchase economics from
-            user-reviewed assumptions. Different stages, complementary tools.
+            user-reviewed assumptions. TrueCap&apos;s Short-term Rental mode is
+            a beta revenue screen: it models revenue as nightly rate ×
+            occupancy and does not fully model platform fees, turnover, lodging
+            tax, seasonality, or local STR eligibility. Different stages,
+            complementary tools.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -304,10 +308,10 @@ export default function VsHostawayPage() {
                 STR being sold.
               </li>
               <li>
-                <strong>Model the STR underwrite in TrueCap.</strong> Use a
-                conservative monthly-equivalent gross income (e.g. 75% of expected
-                gross STR revenue / 12 to account for vacancy + cleaning). Run cap
-                rate, DSCR, cash flow.
+                <strong>Model the STR underwrite in TrueCap.</strong> Enter the
+                monthly revenue you expect in the rent field, or a nightly rate
+                and occupancy in the Short-term Rental mode. Use figures you
+                can support. Run cap rate, DSCR, cash flow.
               </li>
               <li>
                 <strong>If the deal pencils, close.</strong> Take ownership.

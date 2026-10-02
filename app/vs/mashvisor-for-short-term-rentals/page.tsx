@@ -45,7 +45,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Mashvisor vs TrueCap for STR Deals (2026)",
   description:
-    "Mashvisor scores STR markets with Airbnb data. TrueCap underwrites the specific deal. Honest comparison for STR investors plus how they fit together.",
+    "Mashvisor provides short-term rental market and property data. TrueCap underwrites a specific deal on your own numbers. How the two fit together.",
   keywords: [
     "mashvisor short term rental",
     "mashvisor airbnb",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mashvisor vs TrueCap for STR Deals (2026)",
     description:
-      "STR-specific TrueCap vs Mashvisor: market scoring vs per-deal underwriting. They do different jobs.",
+      "Short-term rentals: Mashvisor's market and property data, and TrueCap's beta revenue screen for a deal on your own numbers.",
     url: "/vs/mashvisor-for-short-term-rentals",
     type: "website",
   },
@@ -82,7 +82,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "STR revenue projection (ADR + occupancy)",
-    truecap: "Manual — plug monthly revenue into rent field",
+    truecap:
+      "Manual: a nightly rate and occupancy you set (Short-term Rental mode, beta), or a monthly figure in the rent field",
     mashvisor: "Yes — automated from Airbnb data",
     winner: "mashvisor",
   },
@@ -206,7 +207,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
     name: "Mashvisor vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,
     description:
-      "Mashvisor scores STR markets with Airbnb data. TrueCap underwrites the specific deal. Honest comparison for STR investors plus how they fit together.",
+      "Mashvisor provides short-term rental market and property data. TrueCap underwrites a specific deal on your own numbers. How the two fit together.",
     dateModified: lastmodFor("/vs/mashvisor-for-short-term-rentals"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -232,8 +233,12 @@ export default function VsMashvisorForShortTermRentalsPage() {
             Both serve STR investors. Mashvisor is the market-discovery +
             revenue-projection tool (Airbnb occupancy rates, ADR by
             neighborhood). TrueCap turns user-reviewed revenue assumptions into
-            a full modeled analysis (cap rate, DSCR, cash flow, projection). The
-            user verifies the inputs and makes the investment decision.
+            a full modeled analysis (cap rate, DSCR, cash flow, projection).
+            TrueCap&apos;s Short-term Rental mode is a beta revenue screen: it
+            models revenue as nightly rate × occupancy and does not fully model
+            platform fees, turnover, lodging tax, seasonality, or local STR
+            eligibility. The user verifies the inputs and makes the investment
+            decision.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>

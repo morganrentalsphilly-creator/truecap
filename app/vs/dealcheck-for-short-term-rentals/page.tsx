@@ -42,7 +42,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "DealCheck vs TrueCap for STR Deals (2026)",
   description:
-    "Compare TrueCap and DealCheck for STR screening: user-supplied revenue, occupancy assumptions, financing, and explicit tax-eligibility boundaries.",
+    "DealCheck and TrueCap's beta revenue screen for short-term rentals: user-supplied revenue, occupancy assumptions, financing, and tax-eligibility limits.",
   keywords: [
     "dealcheck short term rental",
     "dealcheck airbnb calculator",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealCheck vs TrueCap for STR Deals (2026)",
     description:
-      "STR-specific TrueCap vs DealCheck: ADR + occupancy modeling, AirDNA-input workflow, and tax-model limitations.",
+      "Short-term rentals: how DealCheck and TrueCap's beta revenue screen handle revenue you supply, occupancy, financing and tax-eligibility limits.",
     url: "/vs/dealcheck-for-short-term-rentals",
     type: "website",
   },
@@ -66,13 +66,13 @@ type Row = { feature: string; truecap: string; dealcheck: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "LTR + STR scenario comparison", truecap: "Save separate scenarios; side-by-side comparison is Pro", dealcheck: "Duplicate the deal and compare, subject to plan caps", winner: "tie" },
-  { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field; gross rent can be entered on a daily or weekly basis", winner: "tie" },
-  { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Not listed in its short-term rental help article", winner: "tie" },
+  { feature: "ADR + occupancy input model", truecap: "Short-term Rental mode (beta): a nightly rate and occupancy you set, or a monthly figure in the rent field", dealcheck: "Editable rent field; gross rent can be entered on a daily or weekly basis", winner: "tie" },
+  { feature: "Seasonal occupancy curve modeling", truecap: "Not modeled: the beta mode takes one blended nightly rate and occupancy; compare manual scenarios", dealcheck: "Not listed in its short-term rental help article", winner: "tie" },
   { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "No AirDNA or Mashvisor integration listed on its integrations page", winner: "tie" },
   { feature: "Bonus depreciation / STR tax eligibility", truecap: "No tax-specific module; review with a qualified professional", dealcheck: "Verify the current calculator scope and eligibility limits", winner: "tie" },
   { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Not listed on its pricing or short-term rental help pages", winner: "tie" },
   { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes, operating expenses are customizable", winner: "tie" },
-  { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes, custom operating expenses for cleaning and upkeep", winner: "tie" },
+  { feature: "Higher utilities + cleaning fees", truecap: "Partly: a utilities field, a maintenance %, a turnover reserve and an other-fixed-expense line; no cleaning or platform-fee line", dealcheck: "Yes, custom operating expenses for cleaning and upkeep", winner: "dealcheck" },
   { feature: "Mobile UX", truecap: "PWA installable", dealcheck: "Native iOS + Android", winner: "dealcheck" },
   { feature: "Free tier covers STR underwriting", truecap: "Yes — core cap rate / CoC / DSCR / cash flow", dealcheck: "Yes — Rental Cash Flow for Airbnbs is included on Starter", winner: "tie" },
 ];
@@ -82,7 +82,7 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Which is better for short-term rentals — TrueCap or DealCheck?",
     answer: (
       <>
-        Both work. TrueCap models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow for Airbnbs calculator and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
+        Both work. TrueCap&apos;s Short-term Rental mode is a beta revenue screen that models a blended ADR + occupancy input; model separate seasonal cases as saved scenarios, with side-by-side comparison on Pro. DealCheck Starter includes its Rental Cash Flow for Airbnbs calculator and professional reports, subject to published caps. Neither calculator determines STR-loophole eligibility; model cost segregation and bonus depreciation with a qualified tax professional.
       </>
     ),
   },
@@ -130,7 +130,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
     "@type": "WebPage",
     name: "DealCheck vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,
-    description: "Compare TrueCap and DealCheck for STR screening: user-supplied revenue, occupancy assumptions, financing, and explicit tax-eligibility boundaries.",
+    description: "DealCheck and TrueCap's beta revenue screen for short-term rentals: user-supplied revenue, occupancy assumptions, financing, and tax-eligibility limits.",
     dateModified: lastmodFor("/vs/dealcheck-for-short-term-rentals"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -150,7 +150,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            Both calculators let you model short-term rentals with projected revenue inputs. This comparison covers seasonal ADR + occupancy, AirDNA-input workflow, and where tax-specific work must move to a CPA model.
+            Both calculators let you model short-term rentals with projected revenue inputs. TrueCap&apos;s Short-term Rental mode is a beta revenue screen: it models revenue as nightly rate × occupancy and does not fully model platform fees, turnover, lodging tax, seasonality, or local STR eligibility. This comparison covers seasonal ADR + occupancy, entering AirDNA figures by hand, and where tax-specific work must move to a CPA model.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -256,7 +256,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="DealCheck" items={NICHE_FAQ} />
+        <ComparisonFaq competitorName="DealCheck" items={NICHE_FAQ} reviewedDate="October 2026" />
 
         <CloseSection
           headingId="vs-close-heading"

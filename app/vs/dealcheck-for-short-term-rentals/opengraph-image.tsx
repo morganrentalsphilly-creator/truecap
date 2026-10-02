@@ -17,7 +17,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "DealCheck (STR)",
     tagline:
-      "Short-term rentals: how TrueCap and DealCheck handle revenue you supply, occupancy assumptions, financing and tax-eligibility limits.",
+      "Short-term rentals: how DealCheck and TrueCap's beta revenue screen handle revenue you supply, occupancy, financing and tax-eligibility limits.",
     slug: "dealcheck-for-short-term-rentals",
   });
 }

@@ -204,11 +204,12 @@ describe("the /vs social cards", () => {
     }
   });
 
-  it("does not say TrueCap underwrites a short-term rental as such while that mode is a beta revenue screen", () => {
+  it("names TrueCap's short-term mode on a card only with the product's beta label", () => {
     // lib/investor-strategies.ts labels the short-term type "Beta revenue
-    // screen only". Whether the comparison pages market it is an open
-    // decision (report row P2-23), so the cards for the short-term rental
-    // tools say TrueCap underwrites "the deal", not "the STR deal".
+    // screen only". The six short-term comparison pages stay and each says so
+    // in one sentence (report row P2-23, decided 2026-10-02). A card has no
+    // room for that sentence, so the cards for the short-term rental tools
+    // say TrueCap underwrites "the deal", not "the STR deal".
     // Everything from the first "TrueCap" on is about TrueCap, including a
     // closing sentence of its own ("Different STR lifecycle stages." placed
     // TrueCap as a stage of the short-term rental lifecycle).
@@ -217,6 +218,11 @@ describe("the /vs social cards", () => {
       const fromTrueCap = tagline.slice(tagline.indexOf("TrueCap"));
       expect(tagline, slug).toContain("TrueCap");
       expect(fromTrueCap, slug).not.toMatch(/\b(?:STRs?|short-term)\b/i);
+    }
+    // The two short-term slices compare the mode itself, so their cards name
+    // it for what it is.
+    for (const slug of ["dealcheck-for-short-term-rentals", "mashvisor-for-short-term-rentals"]) {
+      expect(bySlug(slug).tagline, slug).toContain("TrueCap's beta revenue screen");
     }
   });
 });

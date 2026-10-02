@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how the two fit together.",
+    "Hostfully manages short-term rentals after you buy them. TrueCap underwrites the deal before you buy. How the two fit together.",
   keywords: [
     "hostfully alternative",
     "hostfully vs",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
     description:
-      "Hostfully runs your STR after closing. TrueCap underwrites the deal before. Different stages of the STR lifecycle.",
+      "Hostfully runs your STR after closing. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/hostfully",
     type: "website",
   },
@@ -133,7 +133,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "STR-specific underwriting (ADR, occupancy)",
-    truecap: "Inputs editable; not auto-pulled",
+    truecap:
+      "Short-term Rental mode (beta): a nightly rate and occupancy you set; no market data",
     hostfully: "Not among Hostfully's listed features",
     winner: "truecap",
   },
@@ -153,7 +154,7 @@ export default function VsHostfullyPage() {
     name: "Hostfully vs TrueCap (2026): Manage vs Underwrite",
     url: `${siteUrl}/vs/hostfully`,
     description:
-      "Hostfully manages short-term rentals after you buy them. TrueCap underwrites them before. Honest comparison and how the two fit together.",
+      "Hostfully manages short-term rentals after you buy them. TrueCap underwrites the deal before you buy. How the two fit together.",
     dateModified: lastmodFor("/vs/hostfully"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -180,8 +181,11 @@ export default function VsHostfullyPage() {
             manager (Airbnb, Vrbo, Booking.com), a unified guest inbox,
             automation, and dynamic pricing through integration partners.
             TrueCap models the property&apos;s pre-purchase
-            economics from user-reviewed assumptions. Different stages,
-            complementary tools.
+            economics from user-reviewed assumptions. TrueCap&apos;s Short-term
+            Rental mode is a beta revenue screen: it models revenue as nightly
+            rate × occupancy and does not fully model platform fees, turnover,
+            lodging tax, seasonality, or local STR eligibility. Different
+            stages, complementary tools.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -306,10 +310,10 @@ export default function VsHostfullyPage() {
                 an existing STR being sold.
               </li>
               <li>
-                <strong>Model the STR underwrite in TrueCap.</strong> Use a
-                conservative monthly-equivalent rent (e.g. 75% of expected gross
-                STR revenue / 12 to account for vacancy and cleaning). Run the cap
-                rate, DSCR, cash flow.
+                <strong>Model the STR underwrite in TrueCap.</strong> Enter the
+                monthly revenue you expect in the rent field, or a nightly rate
+                and occupancy in the Short-term Rental mode. Use figures you
+                can support. Run the cap rate, DSCR, cash flow.
               </li>
               <li>
                 <strong>If the deal pencils — buy.</strong> Close the property.
@@ -449,11 +453,12 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "Can TrueCap model short-term rental revenue?",
     answer: (
       <>
-        Yes, but indirectly — every input is editable, so you can plug in your
-        expected monthly STR revenue (gross income ÷ 12, conservatively
-        discounted for vacancy and cleaning) as the rent value, then run the
-        full underwrite. TrueCap doesn&apos;t auto-pull AirDNA or Mashvisor STR
-        data — for that you&apos;d use those tools alongside.
+        Yes, in two ways. Enter your expected monthly STR revenue (gross income
+        ÷ 12, conservatively discounted for vacancy and cleaning) as the rent
+        value and run the full underwrite, or use the Short-term Rental mode, a
+        beta revenue screen that takes a nightly rate and occupancy. TrueCap
+        doesn&apos;t auto-pull AirDNA or Mashvisor STR data; for that
+        you&apos;d use those tools alongside.
       </>
     ),
   },
