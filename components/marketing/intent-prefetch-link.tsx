@@ -79,6 +79,7 @@ function FragmentAnchor({
   legacyBehavior: _legacyBehavior,
   onNavigate: _onNavigate,
   transitionTypes: _transitionTypes,
+  unstable_dynamicOnHover: _dynamicOnHover,
   ...anchorProps
 }: Omit<Props, "href" | "prefetch"> & { href: string }) {
   return <a {...anchorProps} />;
