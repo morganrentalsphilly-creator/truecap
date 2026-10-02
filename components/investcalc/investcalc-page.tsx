@@ -10924,7 +10924,11 @@ export function InvestCalcPage({
           open
           onOpenChange={setIsPdfPurchaseDialogOpen}
           returnFocusRef={pdfPurchaseTriggerRef}
-          sample={isTrueCapSyntheticSampleAddress(analysisValues?.address)}
+          // The sample sentence says the full report is on this page, which
+          // holds only while the sample's Pro preview is on. A re-run of the
+          // sample after "Edit assumptions" ends the preview and gates the
+          // panels again, so the address alone must not switch it on.
+          sample={isSampleProPreview}
         />
       ) : null}
       {/* Duplicate-address chooser - opens when saving an address that's
