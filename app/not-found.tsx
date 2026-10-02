@@ -8,6 +8,10 @@
  *
  * Industry rule of thumb: ~30-40% of 404 visits can be recovered with
  * a well-designed page. Worth a few extra lines of JSX.
+ *
+ * The glossary count is read from the registry, the same list /glossary
+ * renders, and is never typed here: it said "33 metrics" while the glossary
+ * held 44 terms.
  */
 
 import type { Metadata } from "next";
@@ -23,17 +27,24 @@ import {
   MapPin,
 } from "lucide-react";
 import { NotFoundTracker } from "@/components/marketing/not-found-tracker";
+import { GLOSSARY } from "@/lib/glossary";
+import { linkableGlossaryTerms } from "@/lib/seo/link-policy";
 
 export const metadata: Metadata = {
   title: "Page not found",
   robots: { index: false, follow: false },
 };
 
+/** The terms /glossary lists (app/glossary/page.tsx filters the same way). */
+const GLOSSARY_TERM_COUNT = linkableGlossaryTerms(
+  Object.values(GLOSSARY),
+).length;
+
 const POPULAR_PAGES = [
   { href: "/tools", label: "Free calculators", icon: Calculator, blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens." },
   { href: "/blog", label: "Blog", icon: BookOpen, blurb: "Deep dives on rental analysis + underwriting." },
-  { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: "Plain-English definitions for 33 metrics." },
-  { href: "/markets/philadelphia", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },
+  { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.` },
+  { href: "/markets", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },
   { href: "/pricing", label: "Pricing", icon: TrendingUp, blurb: "Free + Pro plans." },
   { href: "/analyze", label: "Run a free analysis", icon: ArrowUpRight, blurb: "Paste any address — 60-second underwrite." },
 ];
@@ -79,7 +90,8 @@ export default function NotFound() {
             name="q"
             placeholder="Search blog, glossary, calculators…"
             aria-label="Search the site"
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            // 16px: iOS Safari zooms the page when a focused field is smaller.
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
           />
         </form>
 
