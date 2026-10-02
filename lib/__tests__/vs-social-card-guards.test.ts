@@ -64,6 +64,14 @@ describe("the /vs social cards", () => {
     }
   });
 
+  it("draws no self-grading footer on the shared template", () => {
+    // "Honest comparison" footed all 38 cards while more than a dozen of the
+    // pages carried false competitor cells. The frame's label already says "Comparison".
+    const template = readFileSync(join(ROOT, "lib/og/vs-og-template.tsx"), "utf8");
+    expect(template).not.toMatch(/honest comparison/i);
+    expect(template).not.toMatch(/footerLeft=/);
+  });
+
   it("states no number about a competitor that is not listed here with its source", () => {
     /**
      * A size, price or count on a card is a competitor fact with a shelf life.
