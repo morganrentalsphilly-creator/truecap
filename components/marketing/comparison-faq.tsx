@@ -200,7 +200,7 @@ export function ComparisonFaq({
           Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
           specifically to an editable HUD area-rent benchmark and the FRED
           owner-occupied 30-year mortgage-rate benchmark. Property tax is a manual
-          local input with a disclosed generic fallback, not a state-data
+          local input with a disclosed generic default, not a state-data
           auto-fill.
         </Note>
 

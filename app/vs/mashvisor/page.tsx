@@ -506,7 +506,7 @@ const MASHVISOR_FAQ: FaqItem[] = [
       <>
         Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED 30-year
         mortgage rate (national). Property tax remains a manual local input with
-        a disclosed generic fallback when blank. These are screening
+        a disclosed generic default when blank. These are screening
         assumptions—not a property rent quote, mortgage offer, or parcel tax
         verification—so users should replace them with deal-specific evidence.
         The per-deal underwriting math itself is market-agnostic.

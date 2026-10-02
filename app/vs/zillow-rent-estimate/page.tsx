@@ -124,7 +124,7 @@ const MATRIX: Row[] = [
   {
     feature: "Property tax input",
     truecap:
-      "Manual local bill or reviewed rate; blank inputs use a disclosed generic fallback",
+      "Manual local bill or reviewed rate; blank inputs use a disclosed generic default",
     zillow:
       "Not part of the Rent Zestimate; verify the post-sale tax basis with the county",
     winner: "tie",
