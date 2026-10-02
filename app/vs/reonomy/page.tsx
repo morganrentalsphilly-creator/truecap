@@ -81,7 +81,7 @@ const MATRIX: Row[] = [
   {
     feature: "Primary asset class",
     truecap: "Residential (SFR, small multifamily, owner-occupant)",
-    reonomy: "Commercial (office, retail, industrial, multifamily 5+)",
+    reonomy: "Commercial real estate: 53M+ US commercial properties",
     winner: "tie",
   },
   {
@@ -93,25 +93,26 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine for residential",
-    reonomy: "Not modeled (intelligence only)",
+    reonomy:
+      "Not on Reonomy's published feature list; it is a property and ownership data platform",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    reonomy: "Not modeled",
+    reonomy: "Not on Reonomy's published feature list",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    reonomy: "CRE property data only",
+    reonomy: "Commercial property, transaction and ownership records",
     winner: "truecap",
   },
   {
-    feature: "Commercial property data (50M+ properties)",
+    feature: "Commercial property data",
     truecap: "No — residential focus",
-    reonomy: "Yes — best-in-class CRE coverage",
+    reonomy: "Yes: 53M+ US commercial properties",
     winner: "reonomy",
   },
   {
@@ -129,20 +130,21 @@ const MATRIX: Row[] = [
   {
     feature: "Tenant rosters (CRE)",
     truecap: "No",
-    reonomy: "Yes — tenant lookup",
+    reonomy: "Yes: occupant data, including a tenant's US locations",
     winner: "reonomy",
   },
   {
     feature: "Free tier",
-    truecap: "Yes — full residential underwriting",
-    reonomy: "Paid only (enterprise pricing)",
+    truecap: "Yes — core residential underwriting",
+    reonomy: "No free tier (free trial on request)",
     winner: "truecap",
   },
   {
     feature: "Pricing",
     truecap: "Free core; paid Pro — see live pricing",
-    reonomy: "Custom (typically $300+/mo enterprise)",
-    winner: "truecap",
+    reonomy:
+      "Self-serve monthly and annual plans; reonomy.com lists a starting price of $400 a month on an annual subscription (as of October 2026). Data feeds and API by quote",
+    winner: "tie",
   },
 ];
 
@@ -175,9 +177,9 @@ export default function VsReonomyPage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Reonomy is commercial real estate intelligence — property data,
-            owner contact info, debt + transaction history, tenant rosters
-            across 50M+ CRE properties. Used by CRE brokers, lenders, and
-            institutional investors for prospecting + due diligence. TrueCap is
+            owner contact info, debt + transaction history and occupant data
+            across 53M+ commercial properties. Reonomy lists brokers, investors,
+            lenders, developers and appraisers among its users. TrueCap is
             a residential rental underwriting calculator — single-family, small
             multifamily, owner-occupant. Different asset classes, different
             jobs.
@@ -230,7 +232,7 @@ export default function VsReonomyPage() {
                   You want cap rate, CoC, DSCR, cash flow on specific addresses.
                 </li>
                 <li>You&apos;re not pursuing commercial deals.</li>
-                <li>You want a free tier — no enterprise contract.</li>
+                <li>You want a free tier for the core analysis.</li>
               </ul>
             </div>
             <div className="min-w-0">
@@ -244,8 +246,7 @@ export default function VsReonomyPage() {
                   You research CRE debt + transaction history for due diligence.
                 </li>
                 <li>
-                  You&apos;re an institutional investor, broker, or lender
-                  working in CRE.
+                  You&apos;re a broker, investor, or lender working in CRE.
                 </li>
               </ul>
             </div>
@@ -273,17 +274,16 @@ export default function VsReonomyPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Reonomy details based on publicly available product info as of 2026.
-            See{" "}
+            Reonomy details checked in October 2026 against reonomy.com and{" "}
             <a
-              href="https://reonomy.com"
+              href="https://www.reonomy.com/pricing/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              reonomy.com
-            </a>{" "}
-            for their current state.
+              Reonomy&apos;s pricing page
+            </a>
+            . See Reonomy for current plans.
           </p>
         </Section>
 
@@ -300,14 +300,14 @@ export default function VsReonomyPage() {
                 diligence.
               </li>
               <li>
-                <strong>Purely residential investors.</strong> Reonomy is overkill
-                — residential MLS, PropStream, or DealMachine fit better. TrueCap
-                handles the underwriting.
+                <strong>Purely residential investors.</strong> Reonomy&apos;s
+                data set is commercial property, so it is not where a house
+                search starts. TrueCap handles the underwriting.
               </li>
               <li>
-                <strong>Purely commercial investors.</strong> Reonomy + a
-                CRE-specific underwriting tool (Argus, RealNex). TrueCap
-                isn&apos;t built for CRE.
+                <strong>Purely commercial investors.</strong> Reonomy plus a
+                commercial underwriting model of your own. TrueCap isn&apos;t
+                built for CRE.
               </li>
             </ul>
             <p>
@@ -318,7 +318,7 @@ export default function VsReonomyPage() {
               >
                 How to calculate cap rate
               </IntentPrefetchLink>{" "}
-              covers the formula Reonomy assumes you already know, and{" "}
+              covers the formula, and{" "}
               <IntentPrefetchLink
                 href="/blog/what-is-a-good-cap-rate"
                 className="tc-link"
@@ -339,7 +339,11 @@ export default function VsReonomyPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Reonomy" items={REONOMY_FAQ} />
+        <ComparisonFaq
+          competitorName="Reonomy"
+          items={REONOMY_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -347,9 +351,9 @@ export default function VsReonomyPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -429,11 +433,10 @@ const REONOMY_FAQ: FaqItem[] = [
     question: "Reonomy vs PropStream — which one?",
     answer: (
       <>
-        Different asset classes. Reonomy is commercial real estate (office,
-        retail, industrial, large multifamily). PropStream is residential
-        (single-family, small multifamily, distressed sellers). If you&apos;re
-        sourcing CRE deals, Reonomy. If you&apos;re sourcing residential
-        off-market deals, PropStream.
+        Start from the property type. Reonomy describes itself as a commercial
+        property data platform covering 53M+ US commercial properties.
+        PropStream is a separate product; check PropStream&apos;s own site for
+        its coverage and plans before choosing.
       </>
     ),
   },
@@ -441,11 +444,11 @@ const REONOMY_FAQ: FaqItem[] = [
     question: "Is Reonomy enterprise-only?",
     answer: (
       <>
-        Effectively yes. Reonomy uses custom enterprise pricing (typically
-        $300+/month and up depending on data tier and team size). They primarily
-        serve CRE brokers, lenders, and institutional investors. For solo
-        residential investors, the data isn&apos;t relevant and the price
-        isn&apos;t justified.
+        No. Reonomy sells monthly and annual subscriptions online, describes
+        the monthly plan as best for individuals, and offers a free trial on
+        request. Its homepage lists a starting price of $400 a month on an
+        annual subscription (as of October 2026). Bulk data feeds and the API
+        are priced by quote. Its data set is commercial property.
       </>
     ),
   },
@@ -453,10 +456,10 @@ const REONOMY_FAQ: FaqItem[] = [
     question: "Does Reonomy do underwriting?",
     answer: (
       <>
-        No — it&apos;s a data intelligence platform. You pull property data,
-        owner contact info, debt + transaction history, then use that data as
-        input to your own underwriting model (an Argus model, an Excel CRE
-        underwrite, or a custom institutional process).
+        Reonomy describes itself as a commercial property data platform:
+        property details, ownership, contacts and transaction history. Its
+        published feature list names no underwriting model, so you use that
+        data as input to your own.
       </>
     ),
   },
@@ -464,11 +467,9 @@ const REONOMY_FAQ: FaqItem[] = [
     question: "Should solo investors care about Reonomy?",
     answer: (
       <>
-        Only if you&apos;re moving into commercial real estate. For residential
-        investing (the bulk of TrueCap&apos;s audience), Reonomy isn&apos;t
-        relevant — the data doesn&apos;t cover SFR ownership in the way
-        PropStream / BatchLeads do, and the price is built for enterprise
-        budgets.
+        Only if you&apos;re moving into commercial real estate. Reonomy&apos;s
+        data set is commercial property, and its published starting price is
+        $400 a month on an annual subscription (as of October 2026).
       </>
     ),
   },
