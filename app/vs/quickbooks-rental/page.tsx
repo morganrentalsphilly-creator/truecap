@@ -292,7 +292,7 @@ export default function VsQuickbooksRentalPage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            Honest take: compare a rental-specific tool first
+            Compare a rental-specific tool first
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
