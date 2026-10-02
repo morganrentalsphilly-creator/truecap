@@ -42,8 +42,8 @@ decided by the founder. The two positions:
 - **Keep `free` as a negative (how this file is written).** Leave the copy as it is.
 - **Remove `free` from the negatives.** Then these lines may be added, and each
   is true today: headlines `Analyze a deal free`, `First deal free, no account`
-  and `21-day free trial, no card`; callouts `First deal free` and
-  `Free trial, no card`. Expect clicks from people who want a free tool only.
+  and `21-day free trial, 3 Pro deals`; callouts `First deal free` and
+  `Free trial: 3 Pro deals`. Expect clicks from people who want a free tool only.
 
 ## Rules every line follows
 
@@ -52,8 +52,11 @@ decided by the founder. The two positions:
   paths 15 or fewer, sitelink text 25 or fewer, sitelink description lines 35
   or fewer, callouts 25 or fewer. Counted by `check-ad-copy.mjs` on 2026-10-02.
 - Google shows headlines in any order and any combination. Each line is true
-  on its own.
-- Final URLs carry no query string and no UTM parameters.
+  on its own, so a line that states the trial's length also states its
+  allowance (3 Pro deals).
+- Final URLs carry no query string. Each campaign sets a Final URL suffix with
+  `utm_medium=cpc` (`docs/analytics.md`, "Ad URLs"; the suffix is in
+  `README.md`).
 
 ---
 
@@ -62,8 +65,9 @@ decided by the founder. The two positions:
 Every ad group in this campaign lands on `https://usetruecap.com/for-agents`.
 
 Before enabling it, open that page and confirm it shows the Agent Pro prices.
-The page shows a waitlist instead when Agent Pro's Stripe prices are not
-configured, and then the price lines below must not run.
+When Agent Pro's Stripe prices are not configured, `/for-agents` permanently
+redirects to `/pricing` (`app/for-agents/page.tsx`); then the agents campaign
+must not run.
 
 ### Ad group A1: agents with investor clients
 
@@ -94,7 +98,7 @@ Descriptions
 
 ```text
 Paste the listing address. See if it clears your client's Buy Box, and the Offer Ceiling.
-With Agent Pro, send a co-branded share link or PDF. The client can rerun the numbers.
+With Agent Pro, send a co-branded share link or PDF. The link lets the client rerun it.
 Agent Pro is $59.99 a month or $590 a year. Cancel anytime from your profile.
 The first full decision needs no account or card. Every assumption is labeled.
 ```
@@ -159,7 +163,7 @@ Each input shows its source
 See what could break the deal
 What to verify before offering
 First deal needs no account
-21-day trial, no card
+Trial: 3 Pro deals in 21 days
 Pro is $29.99 a month
 Pro is $300 a year
 The math is published
@@ -170,8 +174,8 @@ Descriptions
 ```text
 Paste a listing address. See cash flow, cap rate, cash-on-cash, DSCR and a Deal score.
 The Offer Ceiling is the highest price that still meets your targets.
-Rent starts from HUD Fair Market Rent, the rate from FRED. Replace both with your own.
-Your first full decision needs no account. A new account adds a 21-day trial, no card.
+Rent starts from a HUD figure, the rate from FRED. Replace both with your own.
+First full decision needs no account. A new account adds 3 Pro deals in 21 days, no card.
 ```
 
 ### Ad group I2: what to offer on a rental
@@ -193,7 +197,7 @@ Every assumption is editable
 Each input shows its source
 A rental, in about 60 seconds
 First deal needs no account
-21-day trial, no card
+Trial: 3 Pro deals in 21 days
 Pro is $29.99 a month
 Pro is $300 a year
 The math is published
@@ -205,7 +209,7 @@ Descriptions
 The Offer Ceiling is the highest price that still meets your targets.
 Your first deal shows the exact Offer Ceiling with no account. Pro keeps it on every deal.
 On Pro, save a Buy Box with your cash flow, DSCR and price targets.
-Pro is $29.99 a month or $300 a year. A new account gets a 21-day trial, no card.
+Pro is $29.99 a month or $300 a year. The no-card trial covers 3 Pro deals in 21 days.
 ```
 
 ---
@@ -237,7 +241,7 @@ Cancel anytime
 Agents campaign only:
 
 ```text
-Co-branded on paid plans
+Co-branded on Pro plans
 Roster: up to 100 clients
 ```
 

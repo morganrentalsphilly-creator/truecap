@@ -18,7 +18,8 @@
  *   4. Numbers: every dollar amount in the ad text is one of the four catalog
  *      prices in lib/public-pricing.ts, and all four appear; the trial length,
  *      the trial allowance, the roster size and the Buy Box cap match
- *      lib/product-access.ts and the two server actions that enforce them.
+ *      lib/product-access.ts and the two server actions that enforce them, and
+ *      a line that states the trial length also states the allowance.
  *   5. Claims the kit must not make: a refund or guarantee, a tax or exit
  *      feature, the refinance and resale strategy models, a report described
  *      as ready for a lender, a superlative, a usage count, an exclamation
@@ -235,10 +236,13 @@ for (const text of adText) {
   for (const amount of text.match(/\$[0-9][0-9,.]*[0-9]|\$[0-9]/g) ?? []) {
     if (!priceLabels.includes(amount)) fail(`"${text}": ${amount} is not a catalog price (${priceLabels.join(", ")})`);
   }
-  const days = text.match(/(\d+)-day/);
+  const days = text.match(/(\d+)[- ]days?\b/);
   if (days && Number(days[1]) !== trial.days) fail(`"${text}": the trial is ${trial.days} days`);
   const deals = text.match(/(\d+) Pro deals?/);
   if (deals && Number(deals[1]) !== trial.deals) fail(`"${text}": the trial covers ${trial.deals} Pro deals`);
+  // Google shows a line on its own: a trial length without the allowance
+  // reads as that many days of Pro.
+  if (days && !deals) fail(`"${text}": states the trial length without its allowance (${trial.deals} Pro deals)`);
   const comparisons = text.match(/(\d+) comparisons?/);
   if (comparisons && Number(comparisons[1]) !== trial.comparisons) {
     fail(`"${text}": the trial covers ${trial.comparisons} comparison`);
