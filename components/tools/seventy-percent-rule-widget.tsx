@@ -18,8 +18,8 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,13 +174,13 @@ export function SeventyPercentRuleWidget() {
             <p className="text-xs text-muted-foreground mt-1.5">
               What the property sells for <em>after</em> the rehab. Don&apos;t
               have it? Build it from sold comps with the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/arv-calculator"
                 target="_top"
                 className="text-primary font-semibold hover:underline"
               >
                 ARV calculator
-              </Link>
+              </IntentPrefetchLink>
               .
             </p>
           </div>
