@@ -86,85 +86,89 @@ const MATRIX: Row[] = [
   {
     feature: "Primary purpose",
     truecap: "Per-deal underwriting calculator",
-    dealmachine: "Mobile lead generation + skip-tracing",
+    dealmachine:
+      "Property and owner data, lead lists, driving for dollars, skip tracing, direct mail",
     winner: "tie",
   },
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    dealmachine: "Not modeled",
-    winner: "truecap",
+    dealmachine:
+      "Public calculators for rental cash flow, cap rate and cash-on-cash, plus BRRRR and wholesale offer price; DSCR not listed",
+    winner: "tie",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    dealmachine: "Not modeled",
+    dealmachine: "Not listed in its public calculators",
     winner: "truecap",
   },
   {
     feature: "Deal score (0–100)",
     truecap: "Free — 0–100 score with factor breakdown",
-    dealmachine: "Not applicable",
+    dealmachine: "Not listed on its tools or pricing pages",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    dealmachine: "Property data only",
-    winner: "truecap",
+    dealmachine: "Its public rental calculator takes manual inputs",
+    winner: "tie",
   },
   {
     feature: "Driving for dollars / mobile lead capture",
     truecap: "No",
-    dealmachine: "Yes — photo + instant owner lookup",
+    dealmachine: "Yes, with routes, photos and instant owner lookups",
     winner: "dealmachine",
   },
   {
     feature: "Skip tracing (owner phone/email)",
     truecap: "No",
-    dealmachine: "Yes — built-in",
+    dealmachine: "Yes, owner phone numbers and emails on paid plans",
     winner: "dealmachine",
   },
   {
     feature: "Direct mail campaigns",
     truecap: "No",
-    dealmachine: "Yes — automated postcards",
+    dealmachine: "Yes, pay-as-you-go postcards with automated drip campaigns",
     winner: "dealmachine",
   },
   {
     feature: "Property data + lists",
     truecap: "Limited (HUD FMR + FRED)",
-    dealmachine: "Yes — 150M+ properties, motivated lists",
+    dealmachine: "Yes, 150M+ searchable properties with saved searches and lists",
     winner: "dealmachine",
   },
   {
     feature: "Mobile-first UX",
     truecap: "PWA installable",
-    dealmachine: "Native app (built for mobile)",
+    dealmachine: "Driving for Dollars phone app included with every plan",
     winner: "dealmachine",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    dealmachine: "Trial only ($59-99/mo paid)",
-    winner: "truecap",
+    dealmachine:
+      "Free account to explore; owner and contact data, lists, driving for dollars and mail need a paid plan",
+    winner: "tie",
   },
   {
     feature: "Pricing (entry tier)",
     truecap: "Free core; paid Pro — see live pricing",
-    dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)",
-    winner: "truecap",
+    dealmachine:
+      "Basic $99 and Pro $149 per seat a month; Scale $599 per package a month (as of October 2026)",
+    winner: "tie",
   },
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    dealmachine: "Internal-only data",
+    dealmachine: "Not listed on its pricing page",
     winner: "truecap",
   },
   {
     feature: "PDF deal report",
     truecap: "Included with Pro",
-    dealmachine: "Not the use case",
+    dealmachine: "Not listed on its pricing page",
     winner: "truecap",
   },
 ];
@@ -200,11 +204,11 @@ export default function VsDealmachinePage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            DealMachine is the heavyweight in mobile-first driving for dollars —
-            snap a photo of a distressed property, get owner contact info
-            instantly, send a postcard or skip-trace from your phone. TrueCap
-            models the economics of an address from user-reviewed assumptions.
-            Different jobs; many active off-market buyers use both.
+            DealMachine is a property and owner data platform with a
+            driving-for-dollars app, skip tracing and direct mail built in.
+            TrueCap models the economics of an address from user-reviewed
+            assumptions. Different jobs: one finds the lead, the other
+            underwrites it.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -250,7 +254,10 @@ export default function VsDealmachinePage() {
                   You&apos;ve found an address and want to know if it cash
                   flows.
                 </li>
-                <li>You want a defensible analysis for a lender or partner.</li>
+                <li>
+                  You want the numbers and their sources in a form you can send
+                  to a partner.
+                </li>
                 <li>
                   You don&apos;t drive for dollars — you source on-market or via
                   wholesalers.
@@ -304,17 +311,35 @@ export default function VsDealmachinePage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            DealMachine details based on publicly available product info as of
-            2026. See{" "}
+            DealMachine details were checked against its{" "}
             <a
-              href="https://dealmachine.com"
+              href="https://www.dealmachine.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              dealmachine.com
+              pricing
+            </a>
+            ,{" "}
+            <a
+              href="https://www.dealmachine.com/tools"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              tools
             </a>{" "}
-            for their current state.
+            and{" "}
+            <a
+              href="https://help.dealmachine.com/en/articles/13186423-is-dealmachine-free-to-use-or-is-there-cost"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              free account
+            </a>{" "}
+            pages in October 2026. Prices are for monthly billing. Features and
+            prices can change.
           </p>
         </Section>
 
@@ -330,8 +355,9 @@ export default function VsDealmachinePage() {
                 Snap the distressed property; pull owner contact info.
               </li>
               <li>
-                <strong>Send direct mail / skip-trace / cold call.</strong>{" "}
-                DealMachine automates the outreach campaign.
+                <strong>Skip-trace and send direct mail.</strong>{" "}
+                DealMachine&apos;s mail app sends postcards and automated drip
+                campaigns.
               </li>
               <li>
                 <strong>Seller calls back.</strong> Now you have an address you
@@ -376,7 +402,11 @@ export default function VsDealmachinePage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="DealMachine" items={DEALMACHINE_FAQ} />
+        <ComparisonFaq
+          competitorName="DealMachine"
+          items={DEALMACHINE_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -384,9 +414,9 @@ export default function VsDealmachinePage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -458,8 +488,8 @@ const DEALMACHINE_FAQ: FaqItem[] = [
       <>
         Not really — they solve different problems. DealMachine finds
         motivated-seller leads via mobile driving for dollars + skip-tracing.
-        TrueCap underwrites a specific property once you have an address. Most
-        active off-market buyers use both.
+        TrueCap underwrites a specific property once you have an address. They
+        do different jobs, so they can be used together.
       </>
     ),
   },
@@ -467,21 +497,21 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "DealMachine vs PropStream — which one?",
     answer: (
       <>
-        DealMachine is more mobile-first and best for driving-for-dollars
-        workflows. PropStream is more data-heavy with deeper public records
-        access and richer list-pull filters. Solo investors who hunt on the road
-        lean DealMachine; teams running large mail campaigns from a desk lean
-        PropStream. Some wholesalers run both.
+        DealMachine includes a driving-for-dollars app and a mail app with
+        every plan, alongside its property and owner data. For PropStream, see
+        its own site. Compare each vendor&apos;s current data coverage, filters
+        and pricing before choosing.
       </>
     ),
   },
   {
-    question: "Is DealMachine worth $59-99/month?",
+    question: "Is DealMachine worth the price?",
     answer: (
       <>
-        It depends on volume. DealMachine&apos;s all-in acquisition workflow may
-        fit frequent driving-for-dollars and direct-mail campaigns. If you buy
-        only a few properties through listed channels, evaluate whether you need
+        It depends on volume. DealMachine&apos;s paid plans start at $99 per
+        seat a month (as of October 2026), and its acquisition workflow may fit
+        frequent driving-for-dollars and direct-mail campaigns. If you buy only
+        a few properties through listed channels, evaluate whether you need
         that workflow. TrueCap&apos;s free and paid underwriting options are
         listed on its live pricing page.
       </>
@@ -491,10 +521,12 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "Does DealMachine do underwriting?",
     answer: (
       <>
-        No — it surfaces motivated-seller leads and contact info but
-        doesn&apos;t model cap rate, DSCR, or cash flow on those leads.
-        You&apos;d use TrueCap, DealCheck, or a spreadsheet to run the numbers
-        after DealMachine finds you a deal.
+        Partly. DealMachine publishes calculators for rental cash flow, cap
+        rate and cash-on-cash, plus BRRRR and wholesale offer-price
+        calculators, and says investment analysis is available on a lead inside
+        its product.
+        DSCR is not listed. TrueCap covers DSCR, a Deal score and an Offer
+        Ceiling: the highest price that still meets your targets.
       </>
     ),
   },
