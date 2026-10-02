@@ -65,6 +65,9 @@ describe("Phase 9 — pricing page", () => {
     expect(page).toContain("data-pricing-comparison");
     expect(page).toContain("DEALCHECK_COMPARISON.plusMonthlyUsd");
     expect(page).toContain("DEALCHECK_COMPARISON.proMonthlyUsd");
+    // The two figures are DealCheck's per-month prices under yearly billing,
+    // so the heading has to carry the unit and the billing term.
+    expect(page).toMatch(/DEALCHECK_COMPARISON\.proMonthlyUsd\)\} Pro a month, billed yearly\)/);
     expect(page).toContain("If you only need metrics");
     expect(DEALCHECK_COMPARISON.href).toBe("/vs/dealcheck");
     expect(DEALCHECK_COMPARISON.plusMonthlyUsd).toBe(10);
