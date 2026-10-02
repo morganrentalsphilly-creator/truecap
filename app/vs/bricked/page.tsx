@@ -124,7 +124,8 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Repair cost estimates",
-    truecap: "A free rehab cost estimator with editable default line items",
+    truecap:
+      "A free rehab cost estimator: default line items you switch on or off, with the square footage, bath count and contingency you set",
     bricked: "Itemized, ZIP-localized material + labor costs",
     winner: "bricked",
   },
@@ -511,7 +512,8 @@ const BRICKED_FAQ: FaqItem[] = [
       <>
         For precision, likely yes — Bricked aggregates local material and labor
         pricing by ZIP to produce itemized estimates, while TrueCap&apos;s free
-        rehab cost estimator uses default line items you adjust yourself.
+        rehab cost estimator uses default line items you switch on or off,
+        with the square footage, bath count and contingency you set.
         TrueCap&apos;s estimator is built for a quick planning budget, not
         contractor-grade scoping. If repair precision drives your
         deals (heavy rehabs, flips at volume), Bricked&apos;s approach is

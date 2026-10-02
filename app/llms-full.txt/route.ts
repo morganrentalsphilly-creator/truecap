@@ -82,7 +82,7 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> =
     "rehab-cost-estimator": {
       formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
       description:
-        "An educational square-foot calculation across editable work categories. Defaults are generic planning inputs, not current local contractor quotes or a recommended contingency; replace them with scoped bids.",
+        "An educational square-foot calculation across work items you switch on or off, with the square footage, bath count and contingency you enter. Defaults are generic planning inputs, not current local contractor quotes or a recommended contingency; replace the total with scoped bids.",
     },
     "mortgage-payment-calculator": {
       formula:

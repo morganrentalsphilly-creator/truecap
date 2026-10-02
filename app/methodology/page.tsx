@@ -615,9 +615,9 @@ export default function MethodologyPage() {
               >
                 rehab cost estimator
               </Link>{" "}
-              gives you editable illustrative planning amounts for common work
-              items. They are not condition-aware prices, market observations,
-              or contractor bids.
+              gives you illustrative planning amounts for common work items,
+              which you switch on or off. They are not condition-aware prices,
+              market observations, or contractor bids.
             </li>
             <li>
               <strong>

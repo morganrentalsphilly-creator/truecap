@@ -3,10 +3,16 @@
 /**
  * Rehab estimator card - UI for the rehab cost estimator library.
  *
- * Self-contained: holds its own state (selected work items, contingency,
- * overrides). Pre-fills sqft + bath count from the parent property data
- * if available, but the user can edit them. Outputs a per-line breakdown
- * and a total.
+ * Self-contained: holds its own state (selected work items, sqft, bath
+ * count, contingency). Pre-fills sqft + bath count from the parent property
+ * data if available, but the user can edit them. Outputs a total with its
+ * subtotal and contingency.
+ *
+ * It has NO per-item amount field: each work item's cost is a fixed default
+ * shown as text, and nothing here hands the pure calculator a per-item
+ * amount. Copy that describes this tool (this card's caption, the tool page,
+ * /vs/bricked, llms-full.txt) must not call the defaults or the lines
+ * editable while that is so; released-tool-surface-guards.test.ts holds it.
  *
  * Does not write to the form - exposes its total via an optional
  * onTotalChange callback so an enclosing panel can consume the total.
@@ -148,7 +154,8 @@ export function RehabEstimatorCard({
         </button>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Directional planning defaults you can edit — not bid-quality pricing and
+        Directional planning defaults: switch items on or off and set the
+        square footage, bath count and contingency. Not bid-quality pricing and
         not current market data. Get local contractor bids before committing to
         a number.
       </p>
