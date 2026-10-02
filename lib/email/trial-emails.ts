@@ -7,8 +7,8 @@ import "server-only";
  * `trial_granted=true` marker. Current checkout uses `trialDays: 0`; the
  * current no-card product evaluation is separate, does not auto-renew, and
  * never enters this scheduler. Historical sessions use Resend `scheduled_at`:
- *   - trial_day1  (+1 day): activation nudge — the 10-deal guarantee habit
- *   - trial_day10 (+10 days): plain pre-billing reminder + guarantee restated
+ *   - trial_day1  (+1 day): how to use Pro during the trial (one Buy Box on every listing)
+ *   - trial_day10 (+10 days): plain pre-billing reminder
  *
  * Same estate rules as every lifecycle send: gated on
  * LIFECYCLE_EMAILS_MODE=live (the founder's one flip for the whole lifecycle
