@@ -107,6 +107,18 @@ describe("parseFirstTouchCookieValue (zod)", () => {
       expect(parseFirstTouchCookieValue(raw), String(raw)).toBeNull();
     }
   });
+
+  it("accepts the agent and investor landing sections, and not their hyphenated paths (audit row P2-112)", () => {
+    // What a paid click to /for-agents now stores; before, it was paid_search.other.
+    expect(parseFirstTouchCookieValue("paid_search.for_agents")).toEqual({ source: "paid_search", section: "for_agents" });
+    expect(parseFirstTouchCookieValue("external_referral.for_investors")).toEqual({
+      source: "external_referral",
+      section: "for_investors",
+    });
+    // The path segment as it is written would be dropped here, at sign-up.
+    expect(parseFirstTouchCookieValue("paid_search.for-agents")).toBeNull();
+    expect(parseFirstTouchCookieValue("paid_search.for-investors")).toBeNull();
+  });
 });
 
 describe("signUpAction first-touch persistence", () => {

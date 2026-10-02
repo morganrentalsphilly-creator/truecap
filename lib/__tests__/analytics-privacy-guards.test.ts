@@ -139,6 +139,15 @@ describe("analytics privacy guards", () => {
           // Paid, not organic: the ads' Final URLs carry no UTM parameters.
           expected: "paid_search.tools",
         },
+        {
+          // Audit row P2-112: a paid click to the agent page has its own
+          // section token; the hyphenated path segment is never written.
+          referrer: "https://www.google.com/",
+          path: "/for-agents",
+          search: "gclid=TEST_AUDIT_ONLY_DO_NOT_COUNT",
+          secrets: ["TEST_AUDIT", "gclid", "for-agents"],
+          expected: "paid_search.for_agents",
+        },
       ];
       const tokens = new Set<string>([...FIRST_TOUCH_REFERRAL_SOURCES, ...LANDING_SECTIONS]);
       for (const input of hostile) {
