@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Metrics",
     tag: "Operating expense ratio",
-    title: "How much of the rent survives to NOI",
+    title: "Operating expense ratio (OER): what's a good one for a rental? (2026)",
     subline: "Operating expenses ÷ EGI · what counts · rough benchmark bands",
   });
 }
