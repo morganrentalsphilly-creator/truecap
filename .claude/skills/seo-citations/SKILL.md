@@ -69,6 +69,7 @@ Edit only when all of these hold. Otherwise hand the candidate back as `skipped`
    - **Supported, but with a different figure or year:** rewrite the claim to exactly what the source states, with its year ("for 2026, …"), then link it.
    - **Partly supported:** soften the claim to what the source supports, then link it.
    - **Unsupported after the fetch:** remove the claim, or reduce it to a general statement the source supports. Never leave a checked claim bare, and never swap it for a vaguer unsourced number.
+   - **The post's card:** when you remove or change a figure that the card prints (`tag`, `subline` or `alt` in `app/blog/<slug>/opengraph-image.tsx`), change the card in the same patch and add a `changes[]` row for that file. `lib/__tests__/blog-social-card-truth.test.ts` runs in verify-build and fails the whole run when a card prints a figure its post does not.
    - **Weekly-moving numbers (mortgage rates):** link the FRED series instead of quoting a value. If the page already quotes one, restate it with its observation date.
    - **Competitor claim on `/vs` or a comparisons-hub post (`config.paths.vendorLinkAllow`):** link the vendor's own page on `config.vendorDomains` and add "(as of <Month YYYY>)" beside it, taking the month from `run-flags.date`. Never do this on a blog post: verify-static allows vendor hosts only in `app/vs/*/page.tsx`. Leave blog competitor claims unchanged.
 7. **FAQ answers.** They are plain strings, rendered visibly and fed into FAQPage JSON-LD from the same array.
