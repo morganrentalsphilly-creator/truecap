@@ -57,7 +57,7 @@ both cases the reader can see where every number came from.
 
 ## Positioning
 
-Homepage promise (copy pass, pending #148): "Stop forwarding listings. Start
+Homepage promise (copy pass, live on the homepage): "Stop forwarding listings. Start
 sending deals that already pencil." Investor line: "Buying for your own
 portfolio? Same analyzer, your own Buy Box." Neighbouring tools (DealCheck,
 the BiggerPockets calculator, spreadsheets, brokerage stacks) return metrics

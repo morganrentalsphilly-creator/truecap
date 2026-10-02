@@ -7,12 +7,17 @@
 
 ## 1. Project at a glance
 
-**TrueCap** (https://usetruecap.com) is a rental-property investment
-analyzer for individual real-estate investors. A user enters a property
-(price, rent, financing, expenses) and gets a full underwrite in
-seconds: cash flow, cap rate, cash-on-cash, DSCR, 10-year projections,
-tax strategy, exit scenarios, plus a plain-English verdict and a
-shareable read-only link.
+**TrueCap** (https://usetruecap.com) is a rental-property analyzer for
+real estate agents who work with investor clients and for investors
+buying for their own portfolio. A user enters a property (price, rent,
+financing, expenses) and gets a full underwrite in seconds: whether the
+deal meets a Buy Box (the client's or the investor's targets), the Offer
+Ceiling (the highest price that still meets them), cash flow, cap rate,
+cash-on-cash, DSCR, a Deal score and 10-year projections, plus a
+shareable read-only link. An agent can keep a roster of clients, each
+with their own Buy Box, and send a co-branded report. The homepage
+speaks to the agent first; `PRODUCT.md` and `docs/voice.md` carry the
+approved hero.
 
 - **Audience**: real estate agents who work with investor clients (primary)
   and solo / small-portfolio buy-and-hold investors and house hackers
@@ -403,24 +408,47 @@ Bumping it requires reading the Stripe changelog.
 Webhook secret rotates independently of the publishable key. Don't
 co-rotate them in env-management scripts.
 
-### 3.6 OG images — edge runtime, fail-safe to a fallback
+### 3.6 OG images — shared templates, fail-safe to the plain frame
 
 OG images live next to the page they belong to (`opengraph-image.tsx`)
-and use Next.js's built-in convention.
+and use Next.js's built-in convention. There are 130 card files. All but
+one are a few lines of configuration (headline, tagline, slug) handed to
+a shared template in `lib/og/`: `blog-og-template.tsx` (73 posts),
+`vs-og-template.tsx` (38 comparison pages), `tool-og-template.tsx`
+(12 calculators) and `persona-og-template.tsx` (/analyze, /pricing and
+the four persona pages). Every template draws on one frame,
+`lib/og/newsprint.tsx` (Newsprint paper, Archivo, DM Mono).
 
-Constraints (see `app/d/[encoded]/opengraph-image.tsx`):
+The exception is `app/d/[encoded]/opengraph-image.tsx`: a static,
+privacy-safe card for legacy share links. It never decodes the URL, so
+no address, price, metric or verdict reaches a crawler's preview cache.
+The homepage and /for-agents cards are route handlers
+(`app/og/home/route.tsx`, `app/og/for-agents/route.tsx`), not file
+images: a root-level file image would be inherited by every child
+segment.
 
-- `export const runtime = "edge"`
-- Use **only** the `next/og` JSX subset (basic divs + inline styles + text). No Tailwind classes.
-- **No server-only imports.** Allowed: `decodeShareLink`, `calculateAnalysis`,
-  the Zod schema, pure helpers. Disallowed: anything that touches
-  Supabase, fs, env-with-secrets, etc.
-- Wrap the analysis in `safeParse` + `try/catch` and return the
-  `Fallback({ headline })` ImageResponse on any bad input. Never let a
-  malformed share link surface a 500.
+Constraints:
 
-Same pattern applies to the per-tool OG images under
-`app/tools/<tool>/opengraph-image.tsx` and blog OG images.
+- A card file exports `alt`, `size`, `contentType` and a default
+  `Image()`. None of them sets `runtime`.
+- Use **only** the `next/og` JSX subset (basic divs + inline styles + text).
+  No Tailwind classes. `next/og` cannot read CSS variables, so the palette
+  is the `DESIGN.md` tokens as hex (`NEWSPRINT` in `lib/og/newsprint.tsx`).
+- **No server-only imports.** Allowed: pure helpers (the sample-deal
+  ledger, formatters, the catalog constants). Disallowed: anything that
+  touches Supabase, fs, env-with-secrets, etc.
+- **A card always renders.** `loadNewsprintFonts` fetches each face once
+  per server process and returns `undefined`, never an empty list, when
+  no face loads (an empty list makes `next/og` throw "No fonts are
+  loaded", which fails a build that prerenders the card). Each template
+  wraps its render in `try/catch` and returns the plain frame on error.
+- **A page with a sibling card sets no `images`** in its `openGraph` or
+  `twitter` metadata. Next serves the file card only when the page names
+  no image of its own; `public-metadata-contract.test.ts` checks every
+  page.
+- **A card's text restates what its page says today.** When a page
+  changes a fact, change its card line with it
+  (`vs-social-card-guards.test.ts`, `blog-social-card-truth.test.ts`).
 
 ### 3.7 Share links — current `/s` links are owned; legacy `/d` is frozen
 
