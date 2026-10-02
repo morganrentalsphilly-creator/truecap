@@ -80,7 +80,7 @@ type Row = {
   feature: string;
   truecap: string;
   mashvisor: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -88,20 +88,23 @@ const MATRIX: Row[] = [
     feature: "Primary job",
     truecap:
       "Per-deal underwriting — does this property fit my Buy Box?",
-    mashvisor: "Market research — WHERE should I invest?",
+    mashvisor:
+      "Market and property research: where to invest, and which listing",
     winner: "tie",
   },
   {
     feature: "Free tier depth",
     truecap:
-      "Core cap rate, CoC, DSCR, cash flow, Deal score, and Buy Box fit",
-    mashvisor: "Limited free preview; most data requires paid plan",
+      "Core cap rate, CoC, DSCR, cash flow and the Deal score; Buy Box fit on the first decision, then with Pro",
+    mashvisor:
+      "No free plan on its pricing page; platform subscriptions have no free trial",
     winner: "truecap",
   },
   {
     feature: "Per-deal cap rate / CoC / DSCR",
     truecap: "Yes — live as you type, with inline benchmarks",
-    mashvisor: "Yes — alongside market data",
+    mashvisor:
+      "Cap rate, cash-on-cash and cash flow estimates per property; editable expenses on Standard and above; DSCR not listed",
     winner: "tie",
   },
   // NOT "with depreciation". Depreciation output is the tax_strategy feature,
@@ -112,74 +115,75 @@ const MATRIX: Row[] = [
   {
     feature: "10-year projection",
     truecap: "Pro — 10-year cash flow and equity projection",
-    mashvisor: "Available",
-    winner: "tie",
+    mashvisor: "Not listed on Mashvisor's plan comparison",
   },
   {
     feature: "Market-level heatmaps",
     truecap: "No — focused on the property in front of you",
-    mashvisor: "Yes — neighborhood-level cap rate + rent heatmaps",
+    mashvisor:
+      "Yes, on Standard and above: listing price, rental income, cash-on-cash return and Airbnb occupancy by neighborhood",
     winner: "mashvisor",
   },
   {
     feature: "Airbnb / STR market data",
     truecap: "Long-term focus; STR-specific fields coming",
-    mashvisor: "Strong — pulls Airbnb occupancy + ADR data by ZIP",
+    mashvisor:
+      "Yes: Airbnb occupancy, nightly rate and revenue estimates by address or market",
     winner: "mashvisor",
   },
   {
     feature: "Sale + rent comps",
     truecap: "One free lookup; Pro includes 50 per month; no AVM",
-    mashvisor: "Yes — included in their data layer",
+    mashvisor:
+      "Rental comps on Standard and above; comparable sales feed its investment scores",
     winner: "mashvisor",
   },
   {
     feature: "Property listings discovery",
     truecap: "Not the focus — start with an address you found elsewhere",
-    mashvisor: "Yes — investment-property marketplace",
+    mashvisor: "Yes: nationwide property search on every plan",
     winner: "mashvisor",
   },
   {
     feature: "Sensitivity / stress test",
     truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",
-    mashvisor: "Not the primary use case",
-    winner: "truecap",
+    mashvisor:
+      "Not listed on Mashvisor's plan comparison; expenses can be edited and recalculated on Standard and above",
   },
   {
     feature: "Offer Ceiling solver",
     truecap: "Pro — works backward from your targets",
-    mashvisor: "Not a primary feature",
-    winner: "truecap",
+    mashvisor: "Not listed on Mashvisor's plan comparison",
   },
   {
     feature: "Deal score + breakdown",
     truecap: "Free — 0–100 score with per-subscore explanation",
-    mashvisor: "Their own metric",
+    mashvisor: "Its own Investment Opportunity Score per property",
     winner: "tie",
   },
   {
     feature: "Free starting values",
     truecap: "HUD rent + FRED rate + manual property tax — free, no signup",
-    mashvisor: "Behind paywall",
+    mashvisor:
+      "Requires an account; platform plans are paid, with no free trial",
     winner: "truecap",
   },
   {
     feature: "Sharable read-only deal links",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    mashvisor: "Account-gated views",
-    winner: "truecap",
+    mashvisor: "Not listed on Mashvisor's plan comparison",
   },
   {
     feature: "PDF deal report",
     truecap: "Included with Pro",
-    mashvisor: "Available",
+    mashvisor: "Professional plan only",
     winner: "tie",
   },
   {
     feature: "Pricing",
     truecap: "Free + monthly Pro on /pricing, no card to start",
-    mashvisor: "Tiered paid plans, generally $$$ at scale",
-    winner: "truecap",
+    mashvisor:
+      "Three priced plans (Lite, Standard, Professional), about $40 to $120 a month depending on plan and billing period, plus a custom-priced Enterprise plan (as of October 2026)",
   },
 ];
 
@@ -275,8 +279,8 @@ export default function VsMashvisorPage() {
                   explicit manual local tax input.
                 </li>
                 <li>
-                  You don&apos;t want to pay $$$/mo for market data you may not
-                  need.
+                  You don&apos;t need market-level data and want the per-deal
+                  math free.
                 </li>
               </ul>
             </div>
@@ -293,7 +297,9 @@ export default function VsMashvisorPage() {
                   You&apos;re running an STR strategy and need Airbnb occupancy
                   data.
                 </li>
-                <li>You want comparable sales (comps) data built in.</li>
+                <li>
+                  You want rental comps built in (Standard and above).
+                </li>
                 <li>You want to browse investment-property listings.</li>
               </ul>
             </div>
@@ -319,17 +325,17 @@ export default function VsMashvisorPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Mashvisor details based on publicly available product info as of
-            2026. See{" "}
+            Mashvisor plans, prices and features were checked against its
+            pricing page in October 2026. See{" "}
             <a
-              href="https://mashvisor.com"
+              href="https://www.mashvisor.com/pricing"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              mashvisor.com
+              mashvisor.com/pricing
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
@@ -339,12 +345,13 @@ export default function VsMashvisorPage() {
           </SectionHeading>
           <div className={VS_PROSE}>
             <p>
-              Mashvisor is a great tool for market research and STR-focused
-              strategies. The trade-off is price (their data is expensive to
-              license, so the subscription has to cover that) and depth on the
-              per-deal math (heatmaps tell you which neighborhood; they don&apos;t
-              tell you whether THIS specific 3-bed off Market St clears your DSCR
-              target with the lender you&apos;re actually talking to).
+              Mashvisor is built for market research and STR-focused strategies,
+              and it estimates cap rate, cash-on-cash return and cash flow for a
+              property. Its plan comparison does not list DSCR, a stress test, or
+              a price solved from your own targets: heatmaps tell you which
+              neighborhood; they don&apos;t tell you whether THIS specific 3-bed
+              off Market St clears your DSCR target with the lender you&apos;re
+              actually talking to.
             </p>
             <p>
               TrueCap is built for the moment you have an address and need to
@@ -375,14 +382,18 @@ export default function VsMashvisorPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Mashvisor" items={MASHVISOR_FAQ} />
+        <ComparisonFaq
+          competitorName="Mashvisor"
+          items={MASHVISOR_FAQ}
+          reviewedDate="October 2026"
+        />
 
         <CloseSection
           headingId="vs-close-heading"
           heading={<>Underwriting the next deal? Start free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and
+              TrueCap free covers cap rate, CoC, DSCR, monthly cash flow, and
               plain read-only share links. Pro adds co-branding, 10-year cash-flow
               and equity projections, sensitivity, Offer Ceiling, saved-deal
               comparison, and included PDFs. No card to start.
@@ -449,7 +460,7 @@ const MASHVISOR_FAQ: FaqItem[] = [
         Yes, but they solve different problems. Mashvisor is built for market
         discovery — heatmaps, neighborhood scoring, Airbnb comps. TrueCap is
         built for per-property underwriting — once you have an address, decide
-        if the deal works. Many investors use both: Mashvisor to find a
+        if the deal works. The two can be used in turn: Mashvisor to find a
         neighborhood, TrueCap to underwrite the specific listing.
       </>
     ),
@@ -458,11 +469,12 @@ const MASHVISOR_FAQ: FaqItem[] = [
     question: "How does TrueCap compare to Mashvisor for short-term rentals?",
     answer: (
       <>
-        Mashvisor is stronger for short-term rental comparable research — they
-        have Airbnb occupancy and ADR data baked in. TrueCap is stronger for the
-        long-term rental underwrite. If STR is your primary strategy, Mashvisor
-        + TrueCap together cover both halves of the job. If you&apos;re
-        long-term buy and hold, TrueCap alone is enough.
+        Mashvisor has Airbnb occupancy and nightly-rate data built in; TrueCap
+        does not. TrueCap is built around the long-term rental underwrite: DSCR,
+        sensitivity, and an Offer Ceiling for your targets. If STR is your
+        primary strategy, Mashvisor + TrueCap together cover both halves of the
+        job. If you&apos;re long-term buy and hold, TrueCap covers the per-deal
+        underwrite.
       </>
     ),
   },
