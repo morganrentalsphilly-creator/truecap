@@ -276,6 +276,57 @@ describe("copy about the rehab estimator matches its controls", () => {
     expect(sentencesRead).toBeGreaterThan(50);
     expect(offenders).toEqual([]);
   });
+
+  // The same surfaces also said every item is priced by the square foot
+  // ("Sq-ft-based pricing for every common rehab work item", "sq-ft-based
+  // defaults for every common work item", "square-foot calculation",
+  // "Σ (Sq ft × Rate per sq ft) per work category") and that the defaults
+  // include soft costs ("The defaults in this tool roll those in"). Most
+  // items are a flat amount or a per-bath amount, and no item is a permit,
+  // dumpster or management line. Each rule lifts itself when the item list
+  // makes the sentence true.
+  const ALL_BY_THE_SQUARE_FOOT = [
+    /\bsq(?:uare)?[- ]?f(?:oo)?t[- ]based (?:pricing|defaults?)\b[^.]{0,40}\bevery\b/i,
+    /\bsquare-foot calculation\b/i,
+    /Sq ft × Rate per sq ft/i,
+  ];
+  const SOFT_COSTS_INCLUDED = /\bdefaults\b[^.]{0,40}\broll (?:those|them|soft costs) in\b/i;
+  const flat = (text: string) => text.replace(/\s+/g, " ");
+
+  it("does not say every item is priced by the square foot, or that soft costs are in the defaults", async () => {
+    const { REHAB_WORK_ITEMS } = await import("@/lib/rehab-estimator");
+    const everyItemIsPerSqft = REHAB_WORK_ITEMS.every(
+      (item) => typeof item.defaultCostPerSqft === "number",
+    );
+    const hasSoftCostLine = REHAB_WORK_ITEMS.some((item) =>
+      /permit|dumpster|management|soft cost/i.test(item.label),
+    );
+
+    // The retired sentences are read as claims, the current ones as none.
+    for (const retired of [
+      "Sq-ft-based pricing for every common rehab work item — paint, flooring, kitchens",
+      "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item.",
+      "An educational square-foot calculation across work items you switch on or off",
+      "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
+    ]) {
+      expect(ALL_BY_THE_SQUARE_FOOT.some((rule) => rule.test(retired)), retired).toBe(true);
+    }
+    expect(SOFT_COSTS_INCLUDED.test("The defaults in this tool roll those in.")).toBe(true);
+
+    const page = flat(code("app/tools/rehab-cost-estimator/page.tsx"));
+    const llms = code("app/llms-full.txt/route.ts");
+    const entryAt = llms.indexOf('"rehab-cost-estimator": {');
+    expect(entryAt).toBeGreaterThan(-1);
+    const entry = flat(llms.slice(entryAt, llms.indexOf("},", entryAt)));
+
+    if (!everyItemIsPerSqft) {
+      for (const rule of ALL_BY_THE_SQUARE_FOOT) {
+        expect(page, String(rule)).not.toMatch(rule);
+        expect(entry, String(rule)).not.toMatch(rule);
+      }
+    }
+    if (!hasSoftCostLine) expect(page).not.toMatch(SOFT_COSTS_INCLUDED);
+  });
 });
 
 describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name", () => {
