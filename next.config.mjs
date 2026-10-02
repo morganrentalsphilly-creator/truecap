@@ -19,6 +19,9 @@ const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 // enforcing the policy as it stood would have stopped conversion tracking.
 // Each is listed under the directive the 2026-10 audit captured it in
 // (script-src-elem falls back to script-src). The header stays report-only.
+// Google's CSP guide (developers.google.com/tag-platform/security/guides/csp)
+// lists more sources for a conversion tag than the audit captured, and the
+// purchase conversion request was never captured; check them before enforcing.
 const cspReportOnly = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -40,9 +43,9 @@ const cspReportOnly = [
 // page still calls permanentRedirect(), but those pages are prerendered, so
 // the 308 carried a fixed Location and the query string was gone before any
 // script ran: an ad click to /tools/cap-rate-calculator?gclid=... arrived at
-// the article with no click id and was stored as direct traffic. A redirect
-// declared here runs before the page and passes the request's query through
-// (same 308, same destination).
+// the article with no click id and was stored as direct or organic traffic,
+// never as paid. A redirect declared here runs before the page and passes
+// the request's query through (same 308, same destination).
 //
 // Keep this map equal to HISTORICAL_TOOL_REDIRECTS. A redirect here shadows
 // the page, so a calculator must leave this list in the same change that
