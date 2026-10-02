@@ -272,14 +272,21 @@ export default async function StatePage({
           <p className="mt-2 text-base leading-relaxed text-muted-foreground">
             {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
           </p>
+          {/* No minimum width: at 24rem the 3-bedroom figures were cut
+              mid-number at 390px with no cue, and without it the table fits
+              a 320px phone (the column heads wrap to two lines). If it ever
+              overflows, the first column stays pinned and ScrollX shows its
+              "Scroll for more" caption. The pinned cells take the card's
+              background (components/ui/scroll-x.tsx), so the table sits on
+              the card and its header row is the solid band. */}
           {hudCities.length > 0 ? (
-            <ScrollX label="Table" className="mt-4 overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[24rem] text-sm">
+            <ScrollX cue stickyFirstColumn label="Table" className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
+              <table className="w-full text-sm">
                 <caption className="sr-only">
                   {fmrLabel(year)} by {state.name} market city
                 </caption>
                 <thead>
-                  <tr className="border-b border-border bg-muted/50 text-left">
+                  <tr className="border-b border-border bg-muted text-left">
                     <th scope="col" className={cell}>
                       City
                     </th>

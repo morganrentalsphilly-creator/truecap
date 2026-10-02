@@ -233,7 +233,19 @@ export function MarketHero({
   );
 }
 
-/** HUD Fair Market Rent by bedroom count (with the prior fiscal year), plus ZIP-level SAFMR rows when HUD publishes them. */
+/**
+ * HUD Fair Market Rent by bedroom count (with the prior fiscal year), plus
+ * ZIP-level SAFMR rows when HUD publishes them.
+ *
+ * Neither table sets a minimum width. The ZIP table's 24rem minimum, inside
+ * the card's padding, hid its whole 3-bedroom column at 390px (78px cut,
+ * nothing to say so), and the bedroom table's 18rem overflowed at 360px.
+ * Without them both fit a 360px phone, the column heads wrapping to two
+ * lines. Where a table still overflows (the bedroom table at 320px) its
+ * first column stays pinned and ScrollX shows its "Scroll for more" caption.
+ * The pinned cells take the card's background and the solid header band
+ * (components/ui/scroll-x.tsx), so the header row is the solid band too.
+ */
 export function MarketFmrSection({
   city,
   data,
@@ -277,13 +289,13 @@ export function MarketFmrSection({
           </>
         ) : null}
       </p>
-      <ScrollX label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[18rem] text-sm">
+      <ScrollX cue stickyFirstColumn label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
+        <table className="w-full text-sm">
           <caption className="sr-only">
             {fmrLabel(hud.year)} by bedroom count, {area ? area.areaName : city}
           </caption>
           <thead>
-            <tr className="border-b border-border bg-muted/50 text-left">
+            <tr className="border-b border-border bg-muted text-left">
               <th scope="col" className={cell}>
                 Bedrooms
               </th>
@@ -337,13 +349,13 @@ export function MarketFmrSection({
               </>
             ) : null}
           </p>
-          <ScrollX label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[24rem] text-sm">
+          <ScrollX cue stickyFirstColumn label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-sm">
               <caption className="sr-only">
                 HUD Small Area Fair Market Rent (FY{safmr.year}) by ZIP code, {safmr.areaName}
               </caption>
               <thead>
-                <tr className="border-b border-border bg-muted/50 text-left">
+                <tr className="border-b border-border bg-muted text-left">
                   <th scope="col" className={cell}>
                     ZIP code
                   </th>
