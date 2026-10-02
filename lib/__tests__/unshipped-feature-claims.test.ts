@@ -99,6 +99,20 @@ describe("no marketing surface sells an unshipped feature", () => {
     expect(source.replace(/\s+/g, " ")).not.toMatch(/tax[- ]impact/i);
   });
 
+  it("no /vs page, hub included, mentions a tax-impact model while the tax view is unavailable", () => {
+    // Report row P0-11 asked for a whole-page assertion over every /vs page.
+    // It could not pass until all four page groups had landed: the bullet sat
+    // on /vs/crexi and on /vs/mashvisor-for-short-term-rentals. "depreciation"
+    // stays a cell-only check (see above): prose uses the word honestly.
+    if (isFeatureReleased("tax_strategy")) return;
+    // The glob does not match the hub itself, so it is named.
+    const pages = tracked(["app/vs/**/page.tsx", "app/vs/page.tsx"]);
+    expect(pages.length).toBeGreaterThan(35);
+    expect(pages).toContain("app/vs/page.tsx");
+    const offenders = pages.filter((path) => /tax[- ]impact/i.test(read(path).replace(/\s+/g, " ")));
+    expect(offenders).toEqual([]);
+  });
+
   it("the mashvisor 10-year row claims only what is released", () => {
     const source = read("app/vs/mashvisor/page.tsx");
     const row = source
