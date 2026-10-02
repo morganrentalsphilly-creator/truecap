@@ -182,7 +182,7 @@ describe("public funnel and trust guards", () => {
     expect(comparison).toContain(
       "support.stessa.com/en/articles/3904791-stress-test-sensitivity-analysis-report",
     );
-    expect(comparison).toContain('reviewedDate="August 27, 2026"');
+    expect(comparison).toContain('reviewedDate="October 2026"');
     expect(comparison).toContain("Owned-portfolio Stress Test");
     expect(comparisonHub).toMatch(
       /slug: "stessa"[\s\S]{0,260}group: "Direct alternative"/,
