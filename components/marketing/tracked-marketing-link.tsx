@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { isFragmentHref } from "@/components/marketing/fragment-href";
 import { trackEvent, type FunnelEvent } from "@/lib/analytics";
 
 /**
@@ -30,7 +31,10 @@ export function TrackedMarketingLink({
   children: ReactNode;
 }) {
   const onClick = () => trackEvent(event, properties);
-  if (isFullDocumentHref(href)) {
+  // A same-page fragment ("#pricing") is a plain <a> too: next/link does not
+  // scroll when the URL already carries that fragment, so the button did
+  // nothing the second time it was used (fragment-href.ts).
+  if (isFullDocumentHref(href) || isFragmentHref(href)) {
     return (
       <a href={href} className={className} onClick={onClick}>
         {children}
