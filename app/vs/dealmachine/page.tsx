@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
   description:
-    "DealMachine finds the leads with mobile-first driving for dollars. TrueCap underwrites them. Honest comparison and how investors use both.",
+    "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. Honest comparison and how the two fit together.",
   keywords: [
     "dealmachine alternative",
     "dealmachine vs propstream",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     description:
-      "DealMachine is mobile-first lead generation. TrueCap underwrites the deals it surfaces. Different jobs.",
+      "DealMachine finds leads with property data and driving for dollars. TrueCap underwrites them. Different jobs.",
     url: "/vs/dealmachine",
     type: "website",
     images: [
@@ -112,7 +112,8 @@ const MATRIX: Row[] = [
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    dealmachine: "Its public rental calculator takes manual inputs",
+    dealmachine:
+      "Rent estimate and nearby rentals in Comps & Analysis; its public rental calculator takes manual inputs",
     winner: "tie",
   },
   {
@@ -181,7 +182,7 @@ export default function VsDealmachinePage() {
     name: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/dealmachine`,
     description:
-      "DealMachine finds the leads with mobile-first driving for dollars. TrueCap underwrites them. Honest comparison and how investors use both.",
+      "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. Honest comparison and how the two fit together.",
     dateModified: lastmodFor("/vs/dealmachine"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -255,8 +256,8 @@ export default function VsDealmachinePage() {
                   flows.
                 </li>
                 <li>
-                  You want the numbers and their sources in a form you can send
-                  to a partner.
+                  You want the numbers in a form you can send to a partner: a
+                  read-only link, or a PDF report with Pro.
                 </li>
                 <li>
                   You don&apos;t drive for dollars — you source on-market or via
@@ -328,6 +329,15 @@ export default function VsDealmachinePage() {
               className="tc-link"
             >
               tools
+            </a>
+            ,{" "}
+            <a
+              href="https://www.dealmachine.com/features/comps-analysis"
+              target="_blank"
+              rel="noopener"
+              className="tc-link"
+            >
+              Comps &amp; Analysis
             </a>{" "}
             and{" "}
             <a
@@ -346,7 +356,7 @@ export default function VsDealmachinePage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How active investors use both
+            How the two fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
