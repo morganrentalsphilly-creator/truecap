@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Metrics",
     tag: "Lazy equity",
-    title: "What is your rental's equity actually earning?",
-    subline: "Return on equity · ROE vs cash-on-cash · the refi test",
+    title: "Return on equity (ROE) on a rental property: the lazy-equity test (2026)",
+    subline: "The formula · ROE vs cash-on-cash · the refi test",
   });
 }

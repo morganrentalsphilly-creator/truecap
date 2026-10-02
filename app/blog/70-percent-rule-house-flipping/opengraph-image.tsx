@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Strategy",
     tag: "The 70% rule",
-    title: "How to calculate a 70%-rule price screen",
+    title: "The 70% rule for house flipping (and BRRRR): calculate a 70%-rule price screen (2026)",
     subline: "70% of ARV minus repairs · the BRRRR tie-in · when 70% is wrong",
   });
 }

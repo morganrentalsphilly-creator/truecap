@@ -19,7 +19,7 @@ export default function Image() {
   return renderBlogOgImage({
     section: "Underwriting",
     tag: "Negative leverage",
-    title: "When borrowing lowers your return",
+    title: "Negative leverage in real estate: when borrowing lowers your return (2026)",
     subline: "Loan constant vs cap rate · one property, five cap rates",
   });
 }

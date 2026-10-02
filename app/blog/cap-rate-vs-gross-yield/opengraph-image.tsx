@@ -17,9 +17,9 @@ export const contentType = "image/png";
 
 export default function Image() {
   return renderBlogOgImage({
-    section: "Metrics",
-    tag: "Cap rate vs gross yield vs GRM",
-    title: "Three quotes for the same building: which one to trust?",
-    subline: "Conversion table · worked $250K duplex · the $54,000 twin trap",
+    section: "Comparisons",
+    tag: "Metrics",
+    title: "Cap rate vs gross yield vs GRM: three quotes for the same building",
+    subline: "Conversion table · worked $250,000 duplex · the $54,000 twin trap",
   });
 }

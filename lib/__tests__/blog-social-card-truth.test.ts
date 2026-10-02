@@ -10,13 +10,15 @@ import { describe, expect, it } from "vitest";
  * had already dropped (cap-rate and yield ranges, "25% contingency", "7 lies",
  * a bonus-depreciation "phase-down schedule"). The fact passes edit page.tsx
  * and nothing made them touch the card. These checks tie the two files
- * together: a card on the shared template, a headline the post carries, and
- * no figure the post does not print.
+ * together: a card on the shared template, headlined with one of the post's
+ * own titles, printing no figure the post does not print.
  *
  * The weekly SEO loop runs the whole suite on its patched tree (verify-build
  * in .github/workflows/seo-weekly.yml), so a patch that retitles a post or
  * drops a figure has to change the card in the same patch. Card files are
- * inside the loop's fence (seo/config.json paths.agentAllow).
+ * inside the loop's fence (seo/config.json paths.agentAllow) and this file is
+ * not, so every check here is a rule the loop can satisfy by editing the
+ * card: nothing below pins a sentence of a post or of a card.
  */
 
 const ROOT = process.cwd();
@@ -29,7 +31,7 @@ const SLUGS = readdirSync(BLOG)
 
 const STRING = String.raw`"((?:[^"\\]|\\.)*)"`;
 
-type Card = { section: string; tag: string; title: string; subline: string };
+type Card = { section: string; tag: string; title: string; subline: string; alt: string };
 
 function cardOf(slug: string): Card {
   const source = read(`app/blog/${slug}/opengraph-image.tsx`);
@@ -40,12 +42,28 @@ function cardOf(slug: string): Card {
     expect(value, `${slug}: ${name} must be a plain string literal`).toBeTruthy();
     return (value ?? "").replace(/\\(.)/g, "$1");
   };
-  return { section: field("section"), tag: field("tag"), title: field("title"), subline: field("subline") };
+  // The card's alt export is the post's og:image:alt and twitter:image:alt.
+  const alt = new RegExp(String.raw`export const alt =\s*${STRING}`).exec(source)?.[1];
+  expect(alt, `${slug}: alt must be a plain string literal`).toBeTruthy();
+  return {
+    section: field("section"),
+    tag: field("tag"),
+    title: field("title"),
+    subline: field("subline"),
+    alt: (alt ?? "").replace(/\\(.)/g, "$1"),
+  };
 }
 
-/** The post's source without block comments: what the page can render. */
+/**
+ * The post's source, less what a reader never sees and what would let a
+ * stray number match: block comments, import lines, class names and ISO dates.
+ */
 function pageOf(slug: string): string {
-  return read(`app/blog/${slug}/page.tsx`).replace(/\/\*[\s\S]*?\*\//g, "");
+  return read(`app/blog/${slug}/page.tsx`)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^import .*$/gm, "")
+    .replace(/className=(?:"[^"]*"|\{[^}]*\})/g, "")
+    .replace(/\d{4}-\d{2}-\d{2}/g, "");
 }
 
 /** Every title the post gives itself: the H1, the SERP title, the article data. */
@@ -70,52 +88,11 @@ const plain = (title: string) =>
     .toLowerCase();
 
 /**
- * Cards whose headline is not one of the post's titles. Each pins the
- * headline and names the phrase in the post that carries it; when a rewrite
- * drops the phrase, or the headline changes, the card has to be re-read
- * against the post. The phrase comes from the H1 or the body, never from the
- * meta description alone, which the loop's title pass rewrites on its own.
+ * Dollar amounts, percentages and multiples are matched exactly. A bare count
+ * under 100 is matched loosely (the post prints that number somewhere), and a
+ * count spelled as a word ("five mistakes") is not matched at all: the title
+ * rule and review carry counts.
  */
-const OWN_HEADLINES: Record<string, { headline: string; carriedBy: string }> = {
-  "2-percent-rule-vs-1-percent-rule": {
-    headline: "One screen, two bars: which one applies in 2026?",
-    carriedBy: "the same rent-to-price screen at two different bars",
-  },
-  "70-percent-rule-house-flipping": {
-    headline: "How to calculate a 70%-rule price screen",
-    carriedBy: "calculate a 70%-rule price screen",
-  },
-  "break-even-occupancy-rental-property": {
-    headline: "How much vacancy can your rental survive?",
-    carriedBy: "how much vacancy a rental can survive",
-  },
-  "cap-rate-vs-gross-yield": {
-    headline: "Three quotes for the same building: which one to trust?",
-    carriedBy: "three quotes for the same building",
-  },
-  "debt-to-income-ratio-investment-property": {
-    headline: "How lenders count your rental income",
-    carriedBy: "how lenders count rental income",
-  },
-  "exit-cap-rate-rental-property": {
-    headline: "The number that sets your sale price",
-    carriedBy: "the number that sets your sale price",
-  },
-  "negative-leverage-real-estate": {
-    headline: "When borrowing lowers your return",
-    carriedBy: "when borrowing lowers your return",
-  },
-  "operating-expense-ratio-rental-property": {
-    headline: "How much of the rent survives to NOI",
-    carriedBy: "cents survives as",
-  },
-  "return-on-equity-rental-property": {
-    headline: "What is your rental's equity actually earning?",
-    carriedBy: "actually earning right now",
-  },
-};
-
-/** Dollar amounts, percentages, multiples, counts and years, as printed. */
 const FIGURE = /\$?\d[\d,]*(?:\.\d+)?(?:%|K|x)?/g;
 
 function figuresIn(text: string): string[] {
@@ -144,30 +121,21 @@ describe("blog social cards say only what their posts say", () => {
     }
   });
 
-  it("headlines a card with one of the post's own titles, or a phrase the post carries", () => {
+  // The post's H1 (TITLE, TITLE_PLAIN or ARTICLE.title) is the title to use:
+  // the loop's title pass rewrites the SERP title on its own, and a card that
+  // mirrors only that one fails here after such a pass.
+  it("headlines a card with one of the post's own titles", () => {
+    const strays: string[] = [];
     for (const slug of SLUGS) {
       const card = cardOf(slug);
-      const page = pageOf(slug);
       const headline = plain(card.title);
-      const mirrors = pageTitles(page).some((title) => {
+      const mirrors = pageTitles(pageOf(slug)).some((title) => {
         const candidate = plain(title);
         return candidate === headline || candidate.startsWith(`${headline} `) || candidate.startsWith(`${headline}:`);
       });
-      const own = OWN_HEADLINES[slug];
-      if (own === undefined) {
-        expect(mirrors, `${slug}: "${card.title}" is none of the post's titles`).toBe(true);
-        continue;
-      }
-      expect(mirrors, `${slug} mirrors a post title now: drop it from OWN_HEADLINES`).toBe(false);
-      expect(card.title, `${slug}: re-read the new headline against the post`).toBe(own.headline);
-      expect(page.toLowerCase(), `${slug}: the post no longer says "${own.carriedBy}"`).toContain(
-        own.carriedBy.toLowerCase(),
-      );
+      if (!mirrors) strays.push(`${slug}: "${card.title}" is none of the post's titles`);
     }
-  });
-
-  it("keeps OWN_HEADLINES to cards that exist", () => {
-    for (const slug of Object.keys(OWN_HEADLINES)) expect(SLUGS, slug).toContain(slug);
+    expect(strays).toEqual([]);
   });
 
   it("prints no figure the post does not print", () => {
@@ -175,7 +143,7 @@ describe("blog social cards say only what their posts say", () => {
     for (const slug of SLUGS) {
       const card = cardOf(slug);
       const page = pageOf(slug);
-      for (const figure of figuresIn(`${card.tag} ${card.title} ${card.subline}`)) {
+      for (const figure of figuresIn(`${card.tag} ${card.title} ${card.subline} ${card.alt}`)) {
         if (!printsFigure(page, figure)) missing.push(`${slug}: ${figure}`);
       }
     }
@@ -185,7 +153,7 @@ describe("blog social cards say only what their posts say", () => {
   it("makes no claim about the post, its readers or a competitor that a card cannot carry", () => {
     for (const slug of SLUGS) {
       const card = cardOf(slug);
-      const text = `${card.section} ${card.tag} ${card.title} ${card.subline}`;
+      const text = `${card.section} ${card.tag} ${card.title} ${card.subline} ${card.alt}`;
       expect(text, slug).not.toMatch(/\bhonest/i);
       expect(text, slug).not.toMatch(/\bverified\b/i);
       expect(text, slug).not.toMatch(/often used together/i);
