@@ -1,6 +1,6 @@
 /**
  * Truth guards for the parts every /vs comparison page shares: the sources
- * note in ComparisonFaq and its one line for agents.
+ * note in ComparisonFaq, its one line for agents, and the hub (app/vs/page.tsx).
  *
  * Each block pins a defect the 2026-10 go-to-market audit found live:
  *
@@ -10,8 +10,17 @@
  *     review.
  *   - 34 of 38 pages never mentioned agents. The shared block now carries one
  *     line for them, linked to /for-agents only where that page renders.
+ *   - The hub said "most landlords use TrueCap + one of these together", and
+ *     comparison pages repeated softer forms ("Most serious investors use
+ *     both", "typically use both", "a common combination"). No data supports
+ *     how many people use anything here: the proof registries are empty. The
+ *     guard is pinned to the quantified forms, so "may use both" and a "How X
+ *     and Y fit together" heading still pass.
+ *   - The hub carried unit ranges no vendor publishes, an AirDNA line that read
+ *     as an integration, and a metric the analyzer does not show.
  */
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -35,6 +44,10 @@ import { ComparisonFaq } from "@/components/marketing/comparison-faq";
 
 const ROOT = process.cwd();
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
+const tracked = (globs: string[]) =>
+  execFileSync("git", ["ls-files", ...globs], { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })
+    .split("\n")
+    .filter((file) => Boolean(file) && existsSync(join(ROOT, file)));
 
 /** Source as a reader meets it: comments out, entities decoded, JSX line wraps joined. */
 const visibleSource = (source: string) =>
@@ -45,6 +58,7 @@ const visibleSource = (source: string) =>
     .replace(/\s+/g, " ");
 
 const FAQ = "components/marketing/comparison-faq.tsx";
+const HUB = "app/vs/page.tsx";
 const ITEMS = [{ question: "Q?", answer: "A." }];
 
 /** The sources note as rendered: the <aside> that follows the FAQ rows. */
@@ -112,5 +126,131 @@ describe("the /vs agent line links /for-agents only where that page renders", ()
       "Screening listings for investor clients? <a href=\"/for-agents\" data-intent-prefetch=\"\">TrueCap for agents</a> keeps a client roster and screens a deal against that client&#x27;s Buy Box.",
     );
     agentPro.configured = false;
+  });
+});
+
+/**
+ * A statement of how many people use the tools, alone or together. Two shapes:
+ * a quantifier in the same sentence as "use both" / "used together" / "a
+ * combination", and "most|many <people> use|default to|run ...".
+ */
+const QUANTIFIED_PAIRING =
+  /\b(?:most|many|typically|often|commonly|usually|common)\b[^.?!]{0,80}\b(?:use both|uses both|using both|used together|combination|combined workflow)\b/i;
+const QUANTIFIED_USERS =
+  /\b(?:most|many)\s+(?:[a-z-]+\s+){0,3}(?:landlords|investors|agents|realtors|hosts|buyers|operators|owners|wholesalers|users)\b[^.?!]{0,60}\b(?:use|uses|using|default to|defaults to|rely on|run)\b/i;
+
+const usageClaim = (source: string): string | null => {
+  const text = visibleSource(source);
+  return QUANTIFIED_PAIRING.exec(text)?.[0] ?? QUANTIFIED_USERS.exec(text)?.[0] ?? null;
+};
+
+/**
+ * Files that still carried a quantified usage line when this guard was
+ * written (origin/main ed1890d). Each is rewritten in the same fix train by
+ * the change that owns that page or social card; delete a path here as its
+ * sweep lands, and delete the list when the last one has. Every other /vs
+ * file, the hub and the shared frame are held to the rule today.
+ */
+const USAGE_SWEEP_PENDING: ReadonlySet<string> = new Set([
+  "app/vs/airdna/opengraph-image.tsx",
+  "app/vs/airdna/page.tsx",
+  "app/vs/arrived/page.tsx",
+  "app/vs/avail/page.tsx",
+  "app/vs/baselane/page.tsx",
+  "app/vs/batchleads/page.tsx",
+  "app/vs/dealmachine/page.tsx",
+  "app/vs/hostfully/page.tsx",
+  "app/vs/landlord-studio/page.tsx",
+  "app/vs/mashvisor-for-short-term-rentals/page.tsx",
+  "app/vs/mashvisor/page.tsx",
+  "app/vs/privy/page.tsx",
+  "app/vs/propstream/page.tsx",
+  "app/vs/quickbooks-rental/opengraph-image.tsx",
+  "app/vs/quickbooks-rental/page.tsx",
+  "app/vs/rentcast/opengraph-image.tsx",
+  "app/vs/rentcast/page.tsx",
+  "app/vs/rentec-direct/page.tsx",
+  "app/vs/rentometer/page.tsx",
+  "app/vs/rentredi/page.tsx",
+  "app/vs/rentspree/page.tsx",
+  "app/vs/turbotenant/page.tsx",
+  "app/vs/yardi-breeze/page.tsx",
+]);
+
+describe("no /vs surface states how many people use the tools", () => {
+  const surfaces = [...new Set([...tracked(["app/vs/**/*.tsx"]), HUB, FAQ, "components/marketing/vs-page.tsx"])];
+
+  it("reads the hub, the shared frame and every comparison page and card", () => {
+    expect(surfaces).toContain(HUB);
+    expect(surfaces).toContain(FAQ);
+    expect(surfaces.length).toBeGreaterThan(75);
+    for (const file of USAGE_SWEEP_PENDING) expect(surfaces, `${file} is on the pending list but is not a /vs file`).toContain(file);
+    // The files this change owns are never exempt.
+    for (const file of [HUB, FAQ, "components/marketing/vs-page.tsx"]) expect(USAGE_SWEEP_PENDING.has(file), file).toBe(false);
+  });
+
+  it("matches the audited forms and lets the plain ones pass", () => {
+    for (const claim of [
+      "We don't compete — most landlords use TrueCap + one of these together.",
+      "Most serious investors use both: PropStream to source, TrueCap to underwrite.",
+      "Landlords managing 5-100 units typically use both.",
+      "Yes — that's a common combination.",
+      "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Often used together.",
+      "QuickBooks is general accounting many landlords default to.",
+      "Many investors use Rentometer for rent comp and TrueCap for the full deal underwrite.",
+    ]) {
+      expect(usageClaim(claim), claim).not.toBeNull();
+    }
+    for (const plain of [
+      "STR investors may use both.",
+      "Can a realtor use both TrueCap + RentSpree?",
+      "Using both is optional, not the default answer.",
+      "How TrueCap and Landlord Studio fit together",
+      "TrueCap covers the purchase decision, so you can use it alongside any of them.",
+      "Honest take: most landlords should consider a rental-specific tool instead.",
+    ]) {
+      expect(usageClaim(plain), plain).toBeNull();
+    }
+  });
+
+  it("finds no quantified usage claim outside the files still waiting on their sweep", () => {
+    const violations = surfaces
+      .filter((file) => !USAGE_SWEEP_PENDING.has(file))
+      .map((file) => [file, usageClaim(read(file))] as const)
+      .filter(([, claim]) => claim !== null)
+      .map(([file, claim]) => `${file}: ${claim}`);
+    expect(violations).toEqual([]);
+  });
+});
+
+describe("the /vs hub's one-liners", () => {
+  const hub = visibleSource(read(HUB));
+
+  it("says nothing about who uses the tools together", () => {
+    expect(hub).not.toMatch(/\buse both\b|\bused together\b/i);
+    expect(hub).not.toMatch(/most landlords|many landlords/i);
+  });
+
+  it("does not restore the corrected competitor lines", () => {
+    // BatchLeads has been a PropStream product since PropStream's 2025-07-07 acquisition.
+    expect(hub).not.toMatch(/PropStream alternative/i);
+    expect(hub).toContain("a PropStream product since 2025");
+    // No vendor publishes these unit ranges (Rentec Direct, Yardi Breeze, Hostaway, Lodgify).
+    expect(hub).not.toMatch(/\b\d+-\d+ (?:unit|units|properties|STRs)\b/i);
+    // Rentometer's Pro plan includes a Deal Worksheet, and TrueCap's starting rent is a HUD benchmark, not an estimate.
+    expect(hub).not.toMatch(/including the rent/i);
+    expect(hub).not.toMatch(/gold-standard|enterprise commercial|LoopNet/i);
+  });
+
+  it("does not describe TrueCap features that do not exist", () => {
+    // There is no AirDNA integration: the reader enters AirDNA's numbers.
+    expect(hub).not.toMatch(/using AirDNA's projections/i);
+    // The analyzer has no "effective rent saved" output; House Hack mode counts the owner's unit at $0 rent.
+    expect(hub).not.toMatch(/rent[- ]saved/i);
+  });
+
+  it("does not call the library sourced or honest while most pages carry no review date", () => {
+    expect(hub).not.toMatch(/\bsourced\b/i);
+    expect(hub).not.toMatch(/Honest feature matrices/i);
   });
 });

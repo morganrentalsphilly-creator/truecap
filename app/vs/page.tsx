@@ -52,7 +52,7 @@ import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link"
 export const metadata: Metadata = {
   title: "Rental Property Calculator Comparisons",
   description:
-    "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
+    "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using side-by-side workflow reviews.",
   keywords: [
     "rental property tool comparison",
     "truecap alternatives",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rental Property Calculator Comparisons | TrueCap",
     description:
-      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
+      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using side-by-side workflow reviews.",
     url: "/vs",
     type: "website",
     images: [
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Rental Property Calculator Comparisons | TrueCap",
     description:
-      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
+      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using side-by-side workflow reviews.",
     images: ["/home.jpg"],
   },
 };
@@ -132,7 +132,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "bricked",
     competitor: "Bricked AI",
     tagline:
-      "Bricked focuses on flip-oriented comps, ARV, and repairs. TrueCap models rental economics under the assumptions shown.",
+      "Bricked works from comps, repair estimates and ARV to an offer price. TrueCap models rental economics under the assumptions shown.",
     group: "Complementary tool",
   },
   {
@@ -174,14 +174,14 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "rentec-direct",
     competitor: "Rentec Direct",
     tagline:
-      "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the next deal before you scale.",
+      "Rentec Direct is property management software for landlords and property managers. TrueCap underwrites the next deal before you scale.",
     group: "Complementary tool",
   },
   {
     slug: "rentspree",
     competitor: "RentSpree",
     tagline:
-      "RentSpree screens tenants. TrueCap underwrites the property. Agents use both.",
+      "RentSpree screens tenants. TrueCap underwrites the property.",
     group: "Complementary tool",
   },
   {
@@ -211,21 +211,21 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "mashvisor",
     competitor: "Mashvisor",
     tagline:
-      "Mashvisor is market discovery (heatmaps, neighborhood scores). TrueCap is per-deal underwriting once you've picked an address.",
+      "Mashvisor is rental data for finding markets and properties, with its own property analysis. TrueCap is the deal decision once you've picked an address.",
     group: "Specialized tool",
   },
   {
     slug: "propstream",
     competitor: "PropStream",
     tagline:
-      "PropStream finds motivated-seller leads. TrueCap underwrites them. The full off-market workflow.",
+      "PropStream is property data and lead lists, on and off market. TrueCap underwrites the leads you choose.",
     group: "Specialized tool",
   },
   {
     slug: "rentometer",
     competitor: "Rentometer",
     tagline:
-      "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent.",
+      "Rentometer is rent estimates and rental comps, with a Deal Worksheet on its Pro plan. TrueCap underwrites the deal and shows the highest price that still meets your targets.",
     group: "Specialized tool",
   },
   {
@@ -257,28 +257,28 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "hostaway",
     competitor: "Hostaway",
     tagline:
-      "Hostaway manages STRs at scale (3-100 properties). TrueCap underwrites the STR deal before.",
+      "Hostaway is vacation rental management software. TrueCap underwrites the STR deal before.",
     group: "Complementary tool",
   },
   {
     slug: "airdna",
     competitor: "AirDNA",
     tagline:
-      "AirDNA is the gold-standard STR revenue data. TrueCap underwrites the full deal using AirDNA's projections.",
+      "AirDNA is short-term rental data and revenue projections. TrueCap underwrites the deal from the numbers you enter.",
     group: "Specialized tool",
   },
   {
     slug: "dealmachine",
     competitor: "DealMachine",
     tagline:
-      "DealMachine is mobile-first driving-for-dollars lead generation. TrueCap underwrites what it surfaces.",
+      "DealMachine is property and owner data for building lead lists, with skip tracing, direct mail and driving for dollars. TrueCap underwrites what it surfaces.",
     group: "Specialized tool",
   },
   {
     slug: "batchleads",
     competitor: "BatchLeads",
     tagline:
-      "BatchLeads is lead generation + skip-tracing (PropStream alternative). TrueCap underwrites the deals.",
+      "BatchLeads is lead lists and skip tracing, a PropStream product since 2025. TrueCap underwrites the deals.",
     group: "Specialized tool",
   },
   {
@@ -292,7 +292,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "yardi-breeze",
     competitor: "Yardi Breeze",
     tagline:
-      "Yardi Breeze is small-business property management (1-100 units). TrueCap underwrites the next acquisition.",
+      "Yardi Breeze is cloud-based property management software. TrueCap underwrites the next acquisition.",
     group: "Complementary tool",
   },
   // Round 4 additions
@@ -307,7 +307,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "lodgify",
     competitor: "Lodgify",
     tagline:
-      "Lodgify is small-operator STR software (1-10 STRs). TrueCap underwrites the STR deal before.",
+      "Lodgify is vacation rental software: calendar sync, direct bookings and guest messaging. TrueCap underwrites the STR deal before.",
     group: "Complementary tool",
   },
   {
@@ -321,14 +321,14 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "crexi",
     competitor: "Crexi",
     tagline:
-      "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting.",
+      "Crexi is a commercial real estate marketplace. TrueCap is residential underwriting.",
     group: "Specialized tool",
   },
   {
     slug: "reonomy",
     competitor: "Reonomy",
     tagline:
-      "Reonomy is enterprise commercial RE intelligence + owner data. TrueCap is residential underwriting.",
+      "Reonomy is commercial real estate data and owner records. TrueCap is residential underwriting.",
     group: "Specialized tool",
   },
   {
@@ -342,7 +342,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "quickbooks-rental",
     competitor: "QuickBooks (for rentals)",
     tagline:
-      "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting.",
+      "QuickBooks is general accounting software. TrueCap is pre-purchase underwriting.",
     group: "Complementary tool",
   },
   // Niche use-case slices
@@ -350,7 +350,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "biggerpockets-for-house-hacking",
     competitor: "BiggerPockets for House Hacking",
     tagline:
-      "House-hack cut of TrueCap vs BiggerPockets — owner-occupant unit modeling, FHA financing, effective rent saved.",
+      "House-hack cut of TrueCap vs BiggerPockets: your unit counts at $0 rent, so the cash-flow line is your net monthly cost after reserves.",
     group: "Direct alternative",
   },
   {
@@ -364,7 +364,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "mashvisor-for-short-term-rentals",
     competitor: "Mashvisor for STRs",
     tagline:
-      "STR investor's cut of TrueCap vs Mashvisor — market scoring vs per-deal underwriting.",
+      "STR investor's cut of TrueCap vs Mashvisor: market and property data compared with a deal decision on your own numbers.",
     group: "Specialized tool",
   },
   {
@@ -421,7 +421,7 @@ const GROUPS = [
     id: "vs-complementary-tools",
     label: "Complementary tools",
     description:
-      "Tools that solve a different stage of the rental lifecycle. We don't compete — most landlords use TrueCap + one of these together.",
+      "Tools that solve a different stage of the rental lifecycle. TrueCap covers the purchase decision, so you can use it alongside any of them.",
     items: inGroup("Complementary tool"),
   },
   {
@@ -438,9 +438,9 @@ const NBSP = String.fromCharCode(0xa0);
 /**
  * Sets a line of directory copy so it breaks between ideas. The characters
  * render as written; only where a line may break changes:
- * - a hyphenated compound or range ("pre-purchase", "(1-10") never splits
+ * - a hyphenated compound or range ("pre-purchase", "50-unit") never splits
  *   at its hyphen;
- * - a number stays with the word after it ("60 seconds", "5-100 unit");
+ * - a number stays with the word after it ("60 seconds", "$0 rent");
  * - a "+" or "—" stays on the line of the word before it instead of
  *   opening the next line.
  */
@@ -492,7 +492,7 @@ export default function VsHubPage() {
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <PageHero
           title="TrueCap vs every rental tool that matters."
-          lede={`${COMPARISONS.length} side-by-side comparisons. Honest feature matrices. Where each tool does the job better. When TrueCap fits, when something else does, and how to combine them.`}
+          lede={`${COMPARISONS.length} side-by-side comparisons, each with a feature table. Where each tool does the job better. When TrueCap fits, when something else does, and how to combine them.`}
           actions={
             <ActionRow>
               <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
