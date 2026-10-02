@@ -9,7 +9,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
@@ -152,18 +152,18 @@ export default async function CityStrategyPage({
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li>
-              <Link href="/" className="hover:text-foreground">
+              <IntentPrefetchLink href="/" className="hover:text-foreground">
                 Home
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li>
-              <Link
+              <IntentPrefetchLink
                 href={`/markets/${combo.citySlug}`}
                 className="hover:text-foreground"
               >
                 {combo.cityName}
-              </Link>
+              </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">
@@ -189,12 +189,12 @@ export default async function CityStrategyPage({
             {fmrLabel(hud.year)} for the area that contains{" "}
             {combo.cityName}: {usd(hud.rent2br)}/mo for 2 bedrooms,{" "}
             {usd(hud.rent3br)}/mo for 3 bedrooms. The{" "}
-            <Link
+            <IntentPrefetchLink
               href={`/markets/${combo.citySlug}`}
               className="font-semibold text-primary hover:underline"
             >
               {combo.cityName} market page
-            </Link>{" "}
+            </IntentPrefetchLink>{" "}
             shows what that rent pencils to on a sample deal.
           </p>
         ) : null}
@@ -259,24 +259,24 @@ export default async function CityStrategyPage({
             Other {combo.cityName} verification guides
           </p>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link
+            <IntentPrefetchLink
               href={`/markets/${combo.citySlug}`}
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               {combo.cityName} market overview
-            </Link>
+            </IntentPrefetchLink>
             {CITY_STRATEGY_COMBOS.filter(
               (candidate) =>
                 candidate.citySlug === combo.citySlug &&
                 candidate.strategy !== combo.strategy,
             ).map((candidate) => (
-              <Link
+              <IntentPrefetchLink
                 key={candidate.strategy}
                 href={`/markets/${candidate.citySlug}/${candidate.strategy}`}
                 className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
               >
                 {candidate.strategyLabel} in {candidate.cityName}
-              </Link>
+              </IntentPrefetchLink>
             ))}
           </div>
         </section>

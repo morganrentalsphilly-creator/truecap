@@ -20,7 +20,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { notFound } from "next/navigation";
 import { Calculator } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
@@ -246,13 +246,13 @@ export default async function MarketCityPage({
             </p>
             <div className="flex flex-wrap gap-2 text-sm">
               {RELATED_TOOLS.map((t) => (
-                <Link
+                <IntentPrefetchLink
                   key={t.slug}
                   href={`/tools/${t.slug}`}
                   className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
                 >
                   {t.label}
-                </Link>
+                </IntentPrefetchLink>
               ))}
             </div>
           </section>

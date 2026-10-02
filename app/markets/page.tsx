@@ -12,6 +12,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { MapPin } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -176,13 +177,13 @@ export default function MarketsIndexPage() {
                           className="mb-2 text-lg font-extrabold text-foreground"
                         >
                           {stateSlug ? (
-                            <Link
+                            <IntentPrefetchLink
                               href={`/states/${stateSlug}`}
                               className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             >
                               {stateName}
                               <span className="sr-only"> investing guide</span>
-                            </Link>
+                            </IntentPrefetchLink>
                           ) : (
                             stateName
                           )}
@@ -190,13 +191,13 @@ export default function MarketsIndexPage() {
                         <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                           {entries.map((city) => (
                             <li key={city.slug}>
-                              <Link
+                              <IntentPrefetchLink
                                 href={`/markets/${city.slug}`}
                                 data-market-city-link=""
                                 className="inline-flex min-h-11 min-w-11 w-full items-center rounded-lg px-3 text-sm font-semibold text-foreground/80 transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                               >
                                 {city.name} →
-                              </Link>
+                              </IntentPrefetchLink>
                             </li>
                           ))}
                         </ul>

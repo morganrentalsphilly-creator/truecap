@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
@@ -95,9 +96,9 @@ export default function RehabEstimatorPage() {
       <div className="min-h-screen bg-background">
         <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">
+            <IntentPrefetchLink href="/tools" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Rehab Cost Estimator
             </h1>
@@ -132,7 +133,7 @@ export default function RehabEstimatorPage() {
               percentage (10-20% is common) and you have a directional planning
               figure to screen with — replace it with local contractor bids
               before you commit. For how these defaults are built, read{" "}
-              <Link href="/blog/how-to-estimate-rehab-costs" className="font-semibold text-primary hover:underline">how to estimate rehab costs</Link>.
+              <IntentPrefetchLink href="/blog/how-to-estimate-rehab-costs" className="font-semibold text-primary hover:underline">how to estimate rehab costs</IntentPrefetchLink>.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">How to use the estimator</h2>
@@ -155,7 +156,7 @@ export default function RehabEstimatorPage() {
                 Carry the total into your own project ledger; TrueCap does
                 not currently offer integrated BRRRR or fix-and-flip models.
                 New to the strategy? Start with{" "}
-                <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>.
+                <IntentPrefetchLink href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</IntentPrefetchLink>.
               </li>
             </ol>
 

@@ -5,7 +5,7 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { getSiteUrl } from "@/lib/site-url";
 import { MortgagePaymentWidget } from "@/components/tools/mortgage-payment-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -73,12 +73,12 @@ export default function MortgagePaymentPage() {
           className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
         >
           <header className="mb-6 sm:mb-8">
-            <Link
+            <IntentPrefetchLink
               href="/tools"
               className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
             >
               ← Free tools
-            </Link>
+            </IntentPrefetchLink>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               Mortgage Payment Calculator
             </h1>
@@ -108,12 +108,12 @@ export default function MortgagePaymentPage() {
               a deal on P&amp;I-only math is the fastest way to make a deal look
               more profitable than it is. (For a full breakdown of each piece,
               read{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/piti-explained-rental-property"
                 className="font-semibold text-primary hover:underline"
               >
                 PITI explained for rental property
-              </Link>
+              </IntentPrefetchLink>
               .)
             </p>
 
@@ -166,22 +166,22 @@ export default function MortgagePaymentPage() {
               A mortgage payment is just one input in a real underwrite. You
               also need to know your DSCR (does the property cover the payment?
               —{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/blog/how-to-calculate-dscr"
                 className="font-semibold text-primary hover:underline"
               >
                 how to calculate DSCR
-              </Link>{" "}
+              </IntentPrefetchLink>{" "}
               explains TrueCap&apos;s preliminary ratio; lenders may use a
               different NOI and debt-service convention), cash-on-cash return
               (what does your money actually earn?), the upfront cash to close
               (estimate it with the{" "}
-              <Link
+              <IntentPrefetchLink
                 href="/tools/closing-cost-calculator"
                 className="font-semibold text-primary hover:underline"
               >
                 closing cost calculator
-              </Link>
+              </IntentPrefetchLink>
               ), and, when your access includes it, a 10-year cash-flow and
               equity projection (how might the stabilized hold evolve?).
               TrueCap&apos;s free core analyzer combines the preliminary
