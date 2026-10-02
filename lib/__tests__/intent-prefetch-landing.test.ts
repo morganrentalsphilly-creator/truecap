@@ -128,9 +128,9 @@ type Allow = [href: string | RegExp, count: number];
  */
 const SOURCE_RULES: Record<string, { allow: Allow[]; intent: boolean; hero?: true }> = {
   // The hero's jump to #pricing and the close's Agent Pro sign-up are tracked
-  // islands (the source cannot tell; TrackedMarketingLink renders the /auth/
-  // one as a plain <a>, held by the rendered layer); everything else is on
-  // intent.
+  // islands (the source cannot tell; TrackedMarketingLink renders both the
+  // same-page fragment and the /auth/ one as a plain <a>, held by the
+  // rendered layer); everything else is on intent.
   "app/for-agents/page.tsx": {
     allow: [
       ['"#pricing"', 1],
@@ -138,15 +138,12 @@ const SOURCE_RULES: Record<string, { allow: Allow[]; intent: boolean; hero?: tru
     ],
     intent: true,
   },
-  // The hero's links: "See Pro plans" and the stage chooser's plan jumps
-  // (same-page fragments), and the agent line under the actions (a plain
-  // Link on main too, like the homepage hero's investor cue).
+  // The hero's one next/link: the agent line under the actions (a plain
+  // Link on main too, like the homepage hero's investor cue). "See Pro
+  // plans" and the stage chooser's plan jumps are same-page fragments,
+  // written as plain <a> elements: see "same-page fragment links" below.
   "app/pricing/page.tsx": {
-    allow: [
-      ['"#pro"', 1],
-      ["{stage.href}", 1],
-      ['"/for-agents"', 1],
-    ],
+    allow: [['"/for-agents"', 1]],
     intent: true,
     hero: true,
   },
@@ -324,6 +321,30 @@ describe("paid landing pages: intent-only prefetch (source)", () => {
     const tracked = read("components/marketing/tracked-marketing-link.tsx");
     expect(tracked).toMatch(/href\.startsWith\("\/auth\/"\)/);
   });
+
+  it("same-page fragment links on /pricing are plain anchors, not next/link", () => {
+    // next/link scrolls on a hash-only navigation only when the hash changes,
+    // so with the fragment already in the URL "See Pro plans" and the stage
+    // chooser's plan names scrolled 0px on a second click (and after Back
+    // from sign-up). A native <a> scrolls every time.
+    const page = read("app/pricing/page.tsx");
+    const isFragment = (href: string | null) =>
+      href !== null && (/^"#[\w-]+"$/.test(href) || href === "{stage.href}");
+    const fragmentAnchors = openingTags(page, ["a"])
+      .map(({ tag }) => hrefSource(tag))
+      .filter(isFragment);
+    expect(fragmentAnchors.sort()).toEqual(['"#pro"', "{stage.href}"]);
+    expect(
+      openingTags(page, ["Link", "IntentPrefetchLink", "TrackedMarketingLink"])
+        .map(({ tag }) => hrefSource(tag))
+        .filter(isFragment),
+      "no next/link (or link island) to a same-page fragment on /pricing",
+    ).toEqual([]);
+    // Every stage the chooser lists jumps to a fragment, so the mapped
+    // {stage.href} anchor is never a route.
+    const stageHrefs = [...stripComments(page).matchAll(/^\s+href: ("[^"]*"),$/gm)].map((m) => m[1]);
+    expect(stageHrefs).toEqual(['"#agent-pro"', '"#plans"', '"#pro"']);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -380,14 +401,20 @@ const RENDERED: Record<
     intent: string[];
     /** Rendered as a plain <a> (a full-document navigation), not next/link. */
     document?: string[];
+    /** Rendered in the hero as a plain <a>: a same-page fragment jump. */
+    heroDocument?: string[];
   }
 > = {
-  // Nothing below the hero prefetches on scroll. The hero's #pricing jump is
-  // a same-page fragment (repeated on intent under the roster); the close's
-  // Agent Pro sign-up is a plain <a>, so Back from sign-up returns to the
-  // close.
+  // Nothing prefetches on scroll. The hero's #pricing jump is a same-page
+  // fragment, which TrackedMarketingLink renders as a plain <a> (next/link
+  // would not scroll on a second click); it repeats under the roster through
+  // IntentPrefetchLink, which is replaced here by the recording mock and
+  // whose own fragment handling is held by "same-page fragment links render
+  // as plain anchors" below. The close's Agent Pro sign-up is a plain <a>
+  // too, so Back from sign-up returns to the close.
   "app/for-agents/page.tsx": {
-    eager: { "#pricing": 1 },
+    eager: {},
+    heroDocument: ["#pricing"],
     document: [AGENT_PRO_SIGNUP],
     intent: [
       "#pricing",
@@ -446,7 +473,7 @@ function eagerTally(html: string): Record<string, number> {
 describe("paid landing pages: intent-only prefetch (rendered)", () => {
   it.each(Object.entries(RENDERED))(
     "%s prefetches on scroll only its first-screen routes",
-    async (path, { eager, conversion = {}, intent, document = [] }) => {
+    async (path, { eager, conversion = {}, intent, document = [], heroDocument = [] }) => {
       const html = await renderPage(path);
       const main = mainOf(html);
       const inMain = anchors(main);
@@ -480,12 +507,61 @@ describe("paid landing pages: intent-only prefetch (rendered)", () => {
         }
       }
 
+      // The hero's same-page jumps: plain <a> elements, never next/link.
+      const inHero = anchors(main.slice(heroStart, heroEnd));
+      for (const href of heroDocument) {
+        const matches = inHero.filter((a) => a.href === href);
+        expect(matches.length, `${path}: ${href} rendered in the hero`).toBeGreaterThan(0);
+        for (const a of matches) {
+          expect(a.prefetch, `${path}: the hero's ${href} is a plain <a>`).toBe("(external)");
+        }
+      }
+
       // /analyze never prefetches anywhere on the page, header and footer included.
       for (const a of anchors(html).filter((a) => /^\/analyze(?:[?#]|$)/.test(a.href))) {
         expect(a.prefetch, `${path}: ${a.href}`).toBe("off");
       }
     },
   );
+
+  it("same-page fragment links render as plain anchors through both link components", async () => {
+    // The real components, not the recording mock above. The next/link mock
+    // stamps data-prefetch on everything it renders, so an <a> without it
+    // did not go through next/link.
+    const { IntentPrefetchLink: RealIntentPrefetchLink } = await vi.importActual<
+      typeof import("@/components/marketing/intent-prefetch-link")
+    >("@/components/marketing/intent-prefetch-link");
+    const { TrackedMarketingLink } = await import("@/components/marketing/tracked-marketing-link");
+
+    const intentFragment = renderToStaticMarkup(
+      createElement(RealIntentPrefetchLink, { href: "#pricing", className: "x", scroll: false }, "Jump"),
+    );
+    expect(intentFragment).toBe('<a href="#pricing" class="x">Jump</a>');
+    const trackedFragment = renderToStaticMarkup(
+      createElement(
+        TrackedMarketingLink,
+        { href: "#pricing", event: "agent_pro_cta_clicked", className: "x" },
+        "Jump",
+      ),
+    );
+    expect(trackedFragment).toBe('<a href="#pricing" class="x">Jump</a>');
+
+    // A route still goes through next/link: off until intent for the intent
+    // link, the default for the tracked one. A path that carries a fragment
+    // ("/pricing#plans") is a route, not a same-page jump.
+    for (const href of ["/methodology", "/pricing#plans"]) {
+      expect(
+        anchors(renderToStaticMarkup(createElement(RealIntentPrefetchLink, { href }, "Go"))),
+      ).toEqual([{ href, prefetch: "off" }]);
+      expect(
+        anchors(
+          renderToStaticMarkup(
+            createElement(TrackedMarketingLink, { href, event: "agent_pro_cta_clicked" }, "Go"),
+          ),
+        ),
+      ).toEqual([{ href, prefetch: "default" }]);
+    }
+  });
 
   it("/pricing's value stack links /for-agents on intent", () => {
     const html = renderToStaticMarkup(createElement(PricingValueStack, { agentProConfigured: true }));

@@ -29,9 +29,10 @@ import { Header } from "@/components/investcalc/header";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 // Links below the first screen prefetch on hover or keyboard focus, not on
-// scroll. The hero's links (its actions, the stage chooser's plan jumps and
-// the agent line) and the plan cards' checkout actions keep next/link's
-// default; /analyze never prefetches. Guarded by
+// scroll. The hero's agent line and the plan cards' checkout actions keep
+// next/link's default; /analyze never prefetches. The hero's same-page jumps
+// ("See Pro plans" and the stage chooser's plan names) are plain <a>
+// elements, so they scroll every time they are used. Guarded by
 // lib/__tests__/intent-prefetch-landing.test.ts.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
@@ -372,12 +373,16 @@ export default async function PricingPage() {
               >
                 Analyze a property free
               </Link>
-              <Link
+              {/* A plain <a>, like the stage chooser's plan jumps below:
+                  next/link does not scroll when the URL already carries the
+                  fragment, so a second click did nothing
+                  (components/marketing/fragment-href.ts). */}
+              <a
                 href="#pro"
                 className={buttonVariants({ size: "cta", variant: "outline" })}
               >
                 See Pro plans
-              </Link>
+              </a>
             </ActionRow>
           }
           aside={
@@ -405,12 +410,12 @@ export default async function PricingPage() {
                     <p className="mt-0.5 min-w-0 text-base">
                       {/* A 44px tap target from padding that the negative
                           margin takes back out of the line box. */}
-                      <Link
+                      <a
                         href={stage.href}
                         className="tc-link -my-3 inline-block min-w-11 py-3 font-semibold"
                       >
                         {stage.product}
-                      </Link>
+                      </a>
                     </p>
                     <p className="mt-0.5 flex items-baseline justify-end gap-x-1 whitespace-nowrap">
                       <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>

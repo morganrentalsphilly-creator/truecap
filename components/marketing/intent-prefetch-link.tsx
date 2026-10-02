@@ -33,10 +33,16 @@
  * Pass prefetch={false} to never prefetch, even on intent. The footer does
  * this for /analyze, whose bundle stays off marketing pages
  * (docs/site-overhaul.md, Phase 7).
+ *
+ * A same-page fragment href ("#pricing") has no route to prefetch and is
+ * rendered as a plain <a>: next/link does not scroll when the URL already
+ * carries that fragment, so the link did nothing on a second click
+ * (fragment-href.ts).
  */
 
 import Link from "next/link";
 import { useState, type ComponentProps } from "react";
+import { isFragmentHref } from "@/components/marketing/fragment-href";
 
 type Props = Omit<ComponentProps<typeof Link>, "prefetch"> & {
   prefetch?: false;
@@ -59,6 +65,25 @@ function isKeyboardFocus(element: Element) {
   }
 }
 
+/**
+ * The plain <a> for a same-page fragment: the anchor's own attributes and
+ * handlers, without the props only next/link understands.
+ */
+function FragmentAnchor({
+  as: _as,
+  replace: _replace,
+  scroll: _scroll,
+  shallow: _shallow,
+  passHref: _passHref,
+  locale: _locale,
+  legacyBehavior: _legacyBehavior,
+  onNavigate: _onNavigate,
+  transitionTypes: _transitionTypes,
+  ...anchorProps
+}: Omit<Props, "href" | "prefetch"> & { href: string }) {
+  return <a {...anchorProps} />;
+}
+
 export function IntentPrefetchLink({
   prefetch,
   onPointerEnter,
@@ -66,6 +91,16 @@ export function IntentPrefetchLink({
   ...props
 }: Props) {
   const [intent, setIntent] = useState(false);
+  if (isFragmentHref(props.href)) {
+    return (
+      <FragmentAnchor
+        {...props}
+        href={props.href}
+        onPointerEnter={onPointerEnter}
+        onFocus={onFocus}
+      />
+    );
+  }
   return (
     <Link
       {...props}
