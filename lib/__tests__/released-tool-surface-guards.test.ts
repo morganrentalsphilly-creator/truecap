@@ -109,8 +109,16 @@ describe("the 70%-rule heuristic never borrows the canonical Offer Ceiling name"
     }
   });
 
+  // The GRM and 1% rule posts turn their ratio into a rule-of-thumb price too
+  // (target GRM x annual rent; 100 x monthly rent). Same rule: that price is a
+  // price screen, never an Offer Ceiling.
+  const RULE_OF_THUMB_POSTS = [
+    "app/blog/gross-rent-multiplier-explained/page.tsx",
+    "app/blog/1-percent-rule-rental-property/page.tsx",
+  ];
+
   it("only mentions Offer Ceiling to contrast it with the canonical solver", () => {
-    for (const path of HEURISTIC_SURFACES) {
+    for (const path of [...HEURISTIC_SURFACES, ...RULE_OF_THUMB_POSTS]) {
       for (const line of read(path).split("\n")) {
         if (!/Offer Ceiling/.test(line)) continue;
         // Permitted: naming TrueCap's own solver as a DIFFERENT thing.

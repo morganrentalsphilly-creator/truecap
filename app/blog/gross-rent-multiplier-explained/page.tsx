@@ -285,11 +285,11 @@ export default function GrossRentMultiplierPost() {
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Turning GRM into an Offer Ceiling
+            Turning GRM into a price screen
           </h2>
           <p>
-            Because GRM is just price over rent, you can rearrange it into an
-            Offer Ceiling once you select a target multiple:
+            Because GRM is just price over rent, you can rearrange it into a
+            price screen once you select a target multiple:
           </p>
           <p>
             <strong>Max price = target GRM × annual gross rent.</strong>
@@ -297,7 +297,7 @@ export default function GrossRentMultiplierPost() {
           <p>
             Say your market trades at a GRM of 9 and you want to buy a half-point
             better, at 8.5. A duplex grossing $2,600/month ($31,200/year) gives a
-            modeled Offer Ceiling of 8.5 × 31,200 = <strong>$265,200</strong>. Want a GRM of
+            GRM price screen of 8.5 × 31,200 = <strong>$265,200</strong>. Want a GRM of
             8 flat? 8 × 31,200 = $249,600 — which is why $250,000 felt right for
             Listing A. Far faster than working backward from a target cash flow:
             set your opening number, then let the full{" "}
@@ -532,7 +532,7 @@ export default function GrossRentMultiplierPost() {
               comp GRM.
             </li>
             <li>
-              <strong>Shortlist.</strong> For survivors, calculate an Offer Ceiling with
+              <strong>Shortlist.</strong> For survivors, calculate a GRM price screen with
               max price = target GRM × annual rent.
             </li>
             <li>

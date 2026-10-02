@@ -257,7 +257,7 @@ export default function OnePercentRulePost() {
               <strong>Monthly rent ÷ purchase price ≥ 1%.</strong>
             </p>
             <p>
-              Flip it around and it becomes a rule-of-thumb Offer Ceiling:{" "}
+              Flip it around and it becomes a rule-of-thumb price screen:{" "}
               <strong>100 × the monthly rent</strong>. A house that rents for
               $1,800/month &quot;passes&quot; at any price up to $180,000; one
               that rents for $2,500 passes up to $250,000. That is the whole
