@@ -98,7 +98,7 @@ export function ForgotPasswordForm() {
                   autoComplete="email"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="h-12 px-4 text-base md:text-base"
+                  className="h-12 px-4 text-base lg:text-base"
                   {...field}
                 />
               </FormControl>

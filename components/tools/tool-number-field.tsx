@@ -80,7 +80,7 @@ export function ToolNumberField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           className={cn(
-            "h-12 text-base md:text-base",
+            "h-12 text-base lg:text-base",
             prefix && "pl-7",
             suffix && "pr-8",
             error && "border-destructive"

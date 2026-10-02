@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { cn } from "@/lib/utils";
 
 /**
  * Source-level regression guards for the mobile layout/reachability fixes
@@ -10,8 +11,10 @@ import { fileURLToPath } from "node:url";
  *
  *   1. Native <select>s must be 16px on phones. Under 16px, iOS Safari zooms
  *      the page in on focus and never zooms back out. `components/ui/input.tsx`
- *      already encodes `text-base … md:text-sm`; the raw <select>s bypass that
- *      primitive, so the rule has to be re-stated (and can drift) per site.
+ *      encodes `text-base … lg:text-sm` (the step moved from md to lg so a
+ *      phone held in landscape, 768px and wider, keeps 16px fields: audit row
+ *      P2-78); the raw <select>s bypass that primitive, so the rule has to be
+ *      re-stated (and can drift) per site. They still step down at md.
  *   2. The BRRRR / fix-and-flip collapse toggles must keep a ≥44px tap band on
  *      phones — they render publicly on every /d/<share> page.
  *   3. app/globals.css reserves footer space while a sticky bottom bar is
@@ -64,6 +67,42 @@ describe("mobile layout guards", () => {
         expect(match[1]).toBe("md:");
       }
     }
+  });
+
+  // P2-78: at 844x390 (a phone in landscape) every field built on the Input
+  // primitive computed to 14px, because the primitive stepped down at md
+  // (768px). The step is at lg now. A call site that wants 16px at every
+  // width has to override the SAME variant: tailwind-merge only drops the
+  // primitive's lg:text-sm for an lg: class, so a leftover md:text-base would
+  // leave the hero, tool and auth fields at 14px from 1024px.
+  it("the Input primitive stays 16px until 1024px and its 16px call sites override at lg", () => {
+    const primitive = read("../../components/ui/input.tsx");
+    expect(primitive).toMatch(/\btext-base\b[^']*\blg:text-sm'/);
+    expect(primitive).not.toMatch(/\b(?:sm|md):text-sm\b/);
+
+    const merged = cn(
+      "h-9 min-h-11 text-base lg:text-sm",
+      "h-12 px-4 text-base lg:text-base",
+    );
+    expect(merged.split(" ")).toContain("lg:text-base");
+    expect(merged.split(" ")).not.toContain("lg:text-sm");
+
+    for (const file of [
+      "../../components/marketing/hero-address-form.tsx",
+      "../../components/tools/tool-number-field.tsx",
+      "../../components/auth/sign-up-form.tsx",
+      "../../components/auth/login-form.tsx",
+      "../../components/auth/forgot-password-form.tsx",
+      "../../components/auth/update-password-form.tsx",
+    ]) {
+      const source = read(file);
+      expect(source, file).toContain("text-base lg:text-base");
+      expect(source, file).not.toContain("md:text-base");
+    }
+    // The analyzer's unit fields restate the primitive's step: keep them on it.
+    const units = read("../../components/investcalc/multi-family-units-section.tsx");
+    expect(units).not.toContain("md:text-sm");
+    expect(units.match(/\blg:text-sm\b/g) ?? []).toHaveLength(5);
   });
 
   it.each([

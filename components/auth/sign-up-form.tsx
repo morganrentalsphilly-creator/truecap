@@ -376,7 +376,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                     aria-required="true"
                     placeholder="you@example.com"
                     disabled={isSubmitting}
-                    className="h-12 px-4 text-base md:text-base"
+                    className="h-12 px-4 text-base lg:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -401,7 +401,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       placeholder="Create a password"
                       disabled={isSubmitting}
                       aria-describedby="password-policy"
-                      className="h-12 pl-4 pr-12 text-base md:text-base"
+                      className="h-12 pl-4 pr-12 text-base lg:text-base"
                       {...field}
                     />
                   </FormControl>
@@ -443,7 +443,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                       aria-required="true"
                       placeholder="Confirm your password"
                       disabled={isSubmitting}
-                      className="h-12 pl-4 pr-12 text-base md:text-base"
+                      className="h-12 pl-4 pr-12 text-base lg:text-base"
                       {...field}
                     />
                   </FormControl>
