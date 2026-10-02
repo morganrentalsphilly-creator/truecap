@@ -349,7 +349,7 @@ export default function VsTurbotenantPage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How DIY landlords use both
+            How TrueCap and TurboTenant fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>

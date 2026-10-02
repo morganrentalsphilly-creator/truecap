@@ -49,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "RentSpree vs TrueCap (2026): Screening vs Analysis",
   description:
-    "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow — and how realtors use both.",
+    "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow, and how the two fit for realtors.",
   keywords: [
     "rentspree alternative",
     "rentspree vs",
@@ -173,7 +173,7 @@ export default function VsRentspreePage() {
     name: "RentSpree vs TrueCap (2026): Screening vs Analysis",
     url: `${siteUrl}/vs/rentspree`,
     description:
-      "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow — and how realtors use both.",
+      "RentSpree screens your tenants. TrueCap underwrites your deals. Different jobs in the rental workflow, and how the two fit for realtors.",
     dateModified: lastmodFor("/vs/rentspree"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -314,7 +314,7 @@ export default function VsRentspreePage() {
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            How agents + landlords use both
+            How TrueCap and RentSpree fit together
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
