@@ -465,6 +465,41 @@ describe("address request and enrichment sequencing", () => {
     expect(propertySwap).not.toContain("Previous values kept for review");
   });
 
+  it("never asks to replace a property with the address that was just typed", () => {
+    const propertySwap = section(
+      calculator,
+      "const preparePropertySwap = useCallback",
+      "/** Address-selected entry point",
+    );
+
+    // A typed address commits on blur with the field already holding it, so
+    // the "previous address" is that same text. Without a ZIP the provenance
+    // identity never equals itself, and the dialog opened on a first visit
+    // with a primary button that erased the price and rent.
+    const sameText = propertySwap.indexOf(
+      "normalizeAutofillPropertyAddress(previousAddress) === committedIdentity",
+    );
+    expect(sameText).toBeGreaterThan(-1);
+    expect(sameText).toBeLessThan(propertySwap.indexOf("await confirmDialog("));
+    expect(sameText).toBeLessThan(
+      propertySwap.indexOf("isSameAutofillProperty("),
+    );
+
+    // An untouched valueAsNumber input holds NaN, and `NaN != null` is true:
+    // an empty form counted as carrying property-specific values.
+    expect(propertySwap).not.toMatch(/\b(bedrooms|bathrooms|sqft|monthlyRent|stabilizedMonthlyRent) != null/);
+    for (const field of ["bedrooms", "bathrooms", "sqft"]) {
+      expect(propertySwap).toContain(`hasEnteredNumber(currentValues.${field})`);
+      expect(propertySwap).toContain(`hasEnteredNumber(unit.${field})`);
+    }
+    const helper = section(
+      calculator,
+      "const hasEnteredNumber = (v: unknown): boolean => {",
+      "};",
+    );
+    expect(helper).toContain("Number.isFinite(v)");
+  });
+
   it("seeds prior-property identity before the first swap after every restore path", () => {
     const identityHelper = section(
       calculator,
