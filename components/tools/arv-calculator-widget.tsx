@@ -18,12 +18,16 @@
 
 import { useId, useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { Sparkles } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { computeRuleMaxOffer } from "@/components/tools/max-offer-math";
+import {
+  validateToolNumber,
+  type ToolNumberBounds,
+} from "@/lib/public-tool-validation";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -32,6 +36,89 @@ const num = (s: string) => {
 
 const fmt = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+
+// What the fields accept. A negative or out-of-range value gets a visible,
+// announced error under its field and the result is withheld; the arithmetic
+// is unchanged for every value inside these bounds.
+const PRICE_MAX = 100_000_000;
+const SQFT_MAX = 100_000;
+
+/**
+ * A field that may be left blank (an unused comp, repairs of $0, the subject
+ * square footage the empty state already asks for): blank is not an error.
+ */
+const optionalFieldError = (
+  raw: string,
+  bounds: ToolNumberBounds,
+): string | null =>
+  raw.trim() === "" ? null : validateToolNumber(raw, bounds).error;
+
+export type ArvRawInputs = {
+  comp1Price: string;
+  comp1Sqft: string;
+  comp2Price: string;
+  comp2Sqft: string;
+  comp3Price: string;
+  comp3Sqft: string;
+  subjectSqft: string;
+  repairs: string;
+  multiplier: string;
+};
+
+/** The message for each field as typed, or null while it is in range. */
+export function arvFieldErrors(
+  raw: ArvRawInputs,
+): Record<keyof ArvRawInputs, string | null> {
+  return {
+    comp1Price: optionalFieldError(raw.comp1Price, {
+      label: "Comp 1 sale price",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    comp1Sqft: optionalFieldError(raw.comp1Sqft, {
+      label: "Comp 1 square footage",
+      min: 0,
+      max: SQFT_MAX,
+    }),
+    comp2Price: optionalFieldError(raw.comp2Price, {
+      label: "Comp 2 sale price",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    comp2Sqft: optionalFieldError(raw.comp2Sqft, {
+      label: "Comp 2 square footage",
+      min: 0,
+      max: SQFT_MAX,
+    }),
+    comp3Price: optionalFieldError(raw.comp3Price, {
+      label: "Comp 3 sale price",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    comp3Sqft: optionalFieldError(raw.comp3Sqft, {
+      label: "Comp 3 square footage",
+      min: 0,
+      max: SQFT_MAX,
+    }),
+    subjectSqft: optionalFieldError(raw.subjectSqft, {
+      label: "Subject finished square footage",
+      min: 0,
+      max: SQFT_MAX,
+    }),
+    repairs: optionalFieldError(raw.repairs, {
+      label: "Repair costs",
+      min: 0,
+      max: PRICE_MAX,
+    }),
+    // The rule needs a multiplier: blank is an error here, and so is 0.
+    multiplier: validateToolNumber(raw.multiplier, {
+      label: "Rule multiplier",
+      min: 0,
+      minExclusive: true,
+      max: 100,
+    }).error,
+  };
+}
 
 export function ArvCalculatorWidget() {
   // Defaults = the first three comps from the how-to-calculate-arv guide's
@@ -47,7 +134,35 @@ export function ArvCalculatorWidget() {
   const [comp3Price, setComp3Price] = useState("270000");
   const [comp3Sqft, setComp3Sqft] = useState("1500");
 
+  const errors = useMemo(
+    () =>
+      arvFieldErrors({
+        comp1Price,
+        comp1Sqft,
+        comp2Price,
+        comp2Sqft,
+        comp3Price,
+        comp3Sqft,
+        subjectSqft,
+        repairs,
+        multiplier,
+      }),
+    [
+      subjectSqft,
+      repairs,
+      multiplier,
+      comp1Price,
+      comp1Sqft,
+      comp2Price,
+      comp2Sqft,
+      comp3Price,
+      comp3Sqft,
+    ],
+  );
+  const hasErrors = Object.values(errors).some((error) => error !== null);
+
   const result = useMemo(() => {
+    if (hasErrors) return null;
     const comps = [
       { price: num(comp1Price), sqft: num(comp1Sqft) },
       { price: num(comp2Price), sqft: num(comp2Sqft) },
@@ -74,6 +189,7 @@ export function ArvCalculatorWidget() {
       maxCompPrice: Math.max(...compPrices),
     };
   }, [
+    hasErrors,
     subjectSqft,
     repairs,
     multiplier,
@@ -84,6 +200,14 @@ export function ArvCalculatorWidget() {
     comp3Price,
     comp3Sqft,
   ]);
+
+  // The rule gives no price when repairs use up the whole allowance. The
+  // sentence under the figures says so; the figure itself is a placeholder,
+  // never a negative price.
+  const priceScreen =
+    result === null ? null : result.mao > 0 ? fmt(result.mao) : "—";
+
+  const handoffNoteId = useId();
 
   // Do not carry a rule-of-thumb screen into underwriting as though it were a
   // verified purchase price. The analyzer starts separately and asks for the
@@ -107,20 +231,44 @@ export function ArvCalculatorWidget() {
           label="Comp 1 sale price"
           value={comp1Price}
           setValue={setComp1Price}
+          max={PRICE_MAX}
+          error={errors.comp1Price}
         />
-        <Plain label="Comp 1 sq ft" value={comp1Sqft} setValue={setComp1Sqft} />
+        <Plain
+          label="Comp 1 sq ft"
+          value={comp1Sqft}
+          setValue={setComp1Sqft}
+          max={SQFT_MAX}
+          error={errors.comp1Sqft}
+        />
         <Money
           label="Comp 2 sale price"
           value={comp2Price}
           setValue={setComp2Price}
+          max={PRICE_MAX}
+          error={errors.comp2Price}
         />
-        <Plain label="Comp 2 sq ft" value={comp2Sqft} setValue={setComp2Sqft} />
+        <Plain
+          label="Comp 2 sq ft"
+          value={comp2Sqft}
+          setValue={setComp2Sqft}
+          max={SQFT_MAX}
+          error={errors.comp2Sqft}
+        />
         <Money
           label="Comp 3 sale price"
           value={comp3Price}
           setValue={setComp3Price}
+          max={PRICE_MAX}
+          error={errors.comp3Price}
         />
-        <Plain label="Comp 3 sq ft" value={comp3Sqft} setValue={setComp3Sqft} />
+        <Plain
+          label="Comp 3 sq ft"
+          value={comp3Sqft}
+          setValue={setComp3Sqft}
+          max={SQFT_MAX}
+          error={errors.comp3Sqft}
+        />
       </div>
 
       <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
@@ -131,18 +279,48 @@ export function ArvCalculatorWidget() {
           label="Subject finished sq ft"
           value={subjectSqft}
           setValue={setSubjectSqft}
+          max={SQFT_MAX}
+          error={errors.subjectSqft}
         />
-        <Money label="Repair costs" value={repairs} setValue={setRepairs} />
+        <Money
+          label="Repair costs"
+          value={repairs}
+          setValue={setRepairs}
+          max={PRICE_MAX}
+          error={errors.repairs}
+        />
         <Pct
           label="Rule multiplier"
           value={multiplier}
           setValue={setMultiplier}
           step="1"
+          max={100}
+          error={errors.multiplier}
         />
       </div>
 
       <div className="rounded-xl border border-border bg-[var(--background)] p-5 sm:p-6 space-y-4">
-        {result === null ? (
+        {/* One polite status line when the result changes, for screen
+            readers; the visible figures below stay as they were. */}
+        <span
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {hasErrors
+            ? "Fix the highlighted inputs to estimate ARV."
+            : result === null
+              ? "Enter a sold comp and your property's finished square footage to estimate ARV."
+              : result.mao > 0
+                ? `Estimated ARV ${fmt(result.arv)}. 70%-rule price screen ${fmt(result.mao)}.`
+                : `Estimated ARV ${fmt(result.arv)}. No feasible price screen at this multiplier.`}
+        </span>
+        {hasErrors ? (
+          <p className="text-sm text-muted-foreground">
+            Fix the highlighted inputs to estimate ARV.
+          </p>
+        ) : result === null || priceScreen === null ? (
           <p className="text-sm text-muted-foreground">
             Enter at least one sold comp (sale price + square footage) and your
             property&apos;s finished square footage to estimate ARV.
@@ -157,7 +335,7 @@ export function ArvCalculatorWidget() {
               />
               <Metric
                 label={`70%-rule price screen (${num(multiplier)}%)`}
-                value={fmt(result.mao)}
+                value={priceScreen}
                 positive={result.mao > 0}
                 negative={result.mao <= 0}
               />
@@ -227,7 +405,7 @@ export function ArvCalculatorWidget() {
               />
               <Row
                 label={`70%-rule price screen — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
-                value={fmt(result.mao)}
+                value={priceScreen}
                 bold
               />
             </div>
@@ -235,16 +413,41 @@ export function ArvCalculatorWidget() {
         )}
       </div>
 
+      {/* One plain action, then one line saying what does not carry over
+          (the 1% rule widget's pattern). */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        aria-describedby={handoffNoteId}
+        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
       >
-        <Sparkles className="w-4 h-4" />
-        Open the rental analyzer with a separately verified purchase
-        price
+        Open the rental analyzer
       </AnalyzerHandoffLink>
+      <p
+        id={handoffNoteId}
+        className="mt-2 text-pretty text-sm text-muted-foreground"
+      >
+        The price screen above is a rule of thumb and does not carry over.
+        Enter the price you are evaluating.
+      </p>
     </div>
+  );
+}
+
+/** What every field takes so an out-of-range value is marked and announced. */
+type FieldBounds = {
+  max: number;
+  /** The validation message, or null while the value is in range. */
+  error: string | null;
+};
+
+/** The error line under a field; role="alert" so it is read when it appears. */
+function FieldError({ id, error }: { id: string; error: string | null }) {
+  if (!error) return null;
+  return (
+    <p id={id} role="alert" className="mt-1.5 text-sm text-destructive-text">
+      {error}
+    </p>
   );
 }
 
@@ -252,12 +455,15 @@ function Money({
   label,
   value,
   setValue,
+  max,
+  error,
 }: {
   label: string;
   value: string;
   setValue: (v: string) => void;
-}) {
+} & FieldBounds) {
   const id = useId();
+  const errorId = `${id}-error`;
   return (
     <div>
       <Label
@@ -274,11 +480,19 @@ function Money({
           id={id}
           type="number"
           inputMode="numeric"
+          min={0}
+          max={max}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="pl-7 border-input bg-background"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          className={cn(
+            "pl-7 border-input bg-background",
+            error && "border-destructive",
+          )}
         />
       </div>
+      <FieldError id={errorId} error={error} />
     </div>
   );
 }
@@ -287,13 +501,16 @@ function Pct({
   value,
   setValue,
   step = "0.5",
+  max,
+  error,
 }: {
   label: string;
   value: string;
   setValue: (v: string) => void;
   step?: string;
-}) {
+} & FieldBounds) {
   const id = useId();
+  const errorId = `${id}-error`;
   return (
     <div>
       <Label
@@ -308,14 +525,22 @@ function Pct({
           type="number"
           inputMode="decimal"
           step={step}
+          min={0}
+          max={max}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="pr-8 border-input bg-background"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          className={cn(
+            "pr-8 border-input bg-background",
+            error && "border-destructive",
+          )}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
           %
         </span>
       </div>
+      <FieldError id={errorId} error={error} />
     </div>
   );
 }
@@ -323,12 +548,15 @@ function Plain({
   label,
   value,
   setValue,
+  max,
+  error,
 }: {
   label: string;
   value: string;
   setValue: (v: string) => void;
-}) {
+} & FieldBounds) {
   const id = useId();
+  const errorId = `${id}-error`;
   return (
     <div>
       <Label
@@ -341,10 +569,18 @@ function Plain({
         id={id}
         type="number"
         inputMode="numeric"
+        min={0}
+        max={max}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="border-input bg-background"
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
+        className={cn(
+          "border-input bg-background",
+          error && "border-destructive",
+        )}
       />
+      <FieldError id={errorId} error={error} />
     </div>
   );
 }
