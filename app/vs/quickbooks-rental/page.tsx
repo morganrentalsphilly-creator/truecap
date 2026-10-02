@@ -2,7 +2,7 @@
  * /vs/quickbooks-rental — competitor comparison landing page.
  *
  * Target queries: "quickbooks for rentals", "quickbooks alternative landlord", "quickbooks vs stessa", "quickbooks rental property", "best accounting for rentals".
- * QuickBooks (Self-Employed and Online) is general-purpose small-business accounting. Many landlords default to it for rental bookkeeping. Stessa / Baselane / Landlord Studio are rental-specific competitors; TrueCap is upstream of all of them.
+ * QuickBooks Online is general-purpose small-business accounting that can be set up for rental bookkeeping (per-property books need class and location tracking, on Plus and above). Stessa / Baselane / Landlord Studio are rental-specific competitors; TrueCap is upstream of all of them.
  */
 
 import type { Metadata } from "next";
@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "QuickBooks vs TrueCap for Rentals (2026)",
   description:
-    "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. See what to use for accounting instead.",
+    "QuickBooks is general-purpose accounting. TrueCap is pre-purchase rental underwriting. See where each fits and how rental-specific accounting tools compare.",
   keywords: [
     "quickbooks for rentals",
     "quickbooks alternative landlord",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "QuickBooks vs TrueCap for Rentals (2026)",
     description:
-      "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting. Different stages.",
+      "QuickBooks is general-purpose accounting. TrueCap is pre-purchase underwriting. Different stages.",
     url: "/vs/quickbooks-rental",
     type: "website",
     images: [
@@ -79,7 +79,7 @@ type Row = {
   feature: string;
   truecap: string;
   quickbooksrental: string;
-  winner: Verdict;
+  winner?: Verdict;
 };
 
 const MATRIX: Row[] = [
@@ -92,61 +92,64 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    quickbooksrental: "Not modeled",
+    quickbooksrental: "Not among QuickBooks' listed plan features",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    quickbooksrental: "Not modeled",
+    quickbooksrental: "Not among QuickBooks' listed plan features",
     winner: "truecap",
   },
   {
     feature: "Starting values (rent/rate/tax)",
     truecap: "HUD rent + FRED rate + manual local property tax",
-    quickbooksrental: "Not applicable",
+    quickbooksrental: "Not among QuickBooks' listed plan features",
     winner: "truecap",
   },
   {
     feature: "Rental-specific categorization",
     truecap: "Forward-looking expense modeling",
-    quickbooksrental: "Manual setup — generic categories",
-    winner: "truecap",
+    quickbooksrental:
+      "General business accounting; its pricing page lists nothing rental-specific",
   },
   {
     feature: "Bank-feed sync",
     truecap: "No",
-    quickbooksrental: "Yes — connect any US bank",
+    quickbooksrental:
+      "Yes: bank connections that sync transactions; the Free plan connects one bank",
     winner: "quickbooksrental",
   },
   {
     feature: "Per-property P&L",
     truecap: "Forward projection per deal",
-    quickbooksrental: "Class / Location tracking (manual)",
+    quickbooksrental: "Class and location tracking, on the Plus plan and above",
     winner: "tie",
   },
   {
     feature: "Schedule E export",
     truecap: "No",
-    quickbooksrental: "Yes — but requires Schedule E mapping",
-    winner: "quickbooksrental",
+    quickbooksrental:
+      "Profit and loss reports; Schedule E is not named on its pricing page",
   },
   {
     feature: "Rental rent collection",
     truecap: "No",
-    quickbooksrental: "Yes — invoicing + ACH (Online only)",
+    quickbooksrental:
+      "Invoices paid by card or bank transfer through QuickBooks Payments",
     winner: "quickbooksrental",
   },
   {
     feature: "Free tier",
     truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
-    quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)",
-    winner: "truecap",
+    quickbooksrental:
+      "Yes: a Free plan (1 user, 2 invoices a month, 1 bank connection); paid plans from $38 to $340 a month (as of October 2026)",
+    winner: "tie",
   },
   {
-    feature: "Built specifically for landlords",
-    truecap: "Yes",
-    quickbooksrental: "No — general business accounting",
+    feature: "Built for rental property",
+    truecap: "Yes: rental underwriting for agents and investors",
+    quickbooksrental: "No: general business accounting",
     winner: "truecap",
   },
 ];
@@ -159,7 +162,7 @@ export default function VsQuickbooksRentalPage() {
     name: "QuickBooks vs TrueCap for Rentals (2026)",
     url: `${siteUrl}/vs/quickbooks-rental`,
     description:
-      "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
+      "QuickBooks is general-purpose accounting. TrueCap is pre-purchase rental underwriting. See where each fits and how rental-specific accounting tools compare.",
     dateModified: lastmodFor("/vs/quickbooks-rental"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -182,13 +185,13 @@ export default function VsQuickbooksRentalPage() {
           </h1>
           <BlogByline />
           <p className={VS_LEDE}>
-            QuickBooks (Self-Employed and Online versions) is general-purpose
-            small-business accounting that many landlords default to for rental
-            bookkeeping — and then quietly outgrow because it isn&apos;t built
-            for the rental-specific workflow. TrueCap is pre-purchase rental
-            underwriting (cap rate, cash flow, DSCR, projection). Different
-            stages. For rental-specific accounting, Stessa / Baselane / Landlord
-            Studio are typically better than QuickBooks.
+            QuickBooks Online is general-purpose small-business accounting that
+            can be set up for rental bookkeeping. It is not built around
+            rentals: per-property books run through class and location
+            tracking, which is on the Plus plan and above. TrueCap is
+            pre-purchase rental underwriting (cap rate, cash flow, DSCR,
+            projection). Different stages. For rental-specific accounting,
+            compare Stessa, Baselane, and Landlord Studio.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
@@ -235,9 +238,7 @@ export default function VsQuickbooksRentalPage() {
                 <li>
                   You&apos;re not yet tracking actual rental income / expenses.
                 </li>
-                <li>
-                  You want a free tier — no monthly QuickBooks subscription.
-                </li>
+                <li>You want the core underwriting metrics free.</li>
               </ul>
             </div>
             <div className="min-w-0">
@@ -253,7 +254,7 @@ export default function VsQuickbooksRentalPage() {
                 <li>You need general accounting beyond just rentals.</li>
                 <li>
                   You&apos;ve set up rental-specific classes / locations in
-                  QuickBooks and it works.
+                  QuickBooks (Plus and above) and it works.
                 </li>
               </ul>
             </div>
@@ -281,25 +282,24 @@ export default function VsQuickbooksRentalPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            QuickBooks for rentals details based on publicly available product
-            info as of 2026. See{" "}
+            QuickBooks plans and prices were read from Intuit&apos;s pricing
+            page in October 2026. See{" "}
             <a
-              href="https://quickbooks.intuit.com"
+              href="https://quickbooks.intuit.com/pricing/"
               target="_blank"
               rel="noopener"
               className="tc-link"
             >
-              quickbooks.intuit.com
+              quickbooks.intuit.com/pricing
             </a>{" "}
-            for their current state.
+            for current terms.
           </p>
         </Section>
 
         {/* Complementary workflow */}
         <Section aria-labelledby="vs-fit-heading">
           <SectionHeading id="vs-fit-heading">
-            Honest take: most landlords should consider a rental-specific tool
-            instead
+            Honest take: compare a rental-specific tool first
           </SectionHeading>
           <div className={VS_PROSE}>
             <ol>
@@ -308,10 +308,10 @@ export default function VsQuickbooksRentalPage() {
                 DSCR, cash flow, projection.
               </li>
               <li>
-                <strong>Decide on accounting tool.</strong> QuickBooks works but
-                requires manual setup (class tracking per property, custom
-                Schedule E mapping). Stessa, Baselane, or Landlord Studio are
-                built for rentals and typically less work to set up and maintain.
+                <strong>Decide on accounting tool.</strong> QuickBooks can do it
+                with class tracking per property (Plus and above) and your own
+                Schedule E mapping. Stessa, Baselane, and Landlord Studio are
+                built for rentals; compare their plans before you choose.
               </li>
               <li>
                 <strong>Operate.</strong> Whichever accounting tool you pick, log
@@ -362,10 +362,10 @@ export default function VsQuickbooksRentalPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-              Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
-              live pricing for current terms. No card to start.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Pro adds 10-year cash-flow and equity projections, sensitivity, the
+              Offer Ceiling, co-branded share links, and PDF reports; see live
+              pricing for current terms. No card to start.
             </>
           }
           actions={
@@ -444,23 +444,25 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
     question: "Should I use QuickBooks for my rentals?",
     answer: (
       <>
-        Probably not, unless you already use QuickBooks for other businesses or
-        your CPA insists. Rental-specific tools (Stessa, Baselane, Landlord
-        Studio) are usually less work to set up, have rental-categorized expense
-        buckets out of the box, and generate Schedule E reports automatically.
-        QuickBooks works but needs significant manual setup (class tracking per
-        property, custom Schedule E mapping).
+        It can work, especially if you already use QuickBooks for other
+        businesses or your CPA asks for it. Per-property books use class and
+        location tracking, which is on the Plus plan and above, and Schedule E
+        is not named on QuickBooks&apos; pricing page, so plan on mapping
+        categories to it yourself. Rental-specific tools are built around those
+        reports: Stessa lists a Schedule E report on its paid Manage and Pro
+        plans, and Landlord Studio lists Schedule E reports on Pro and Pro Plus.
+        Compare them before you choose.
       </>
     ),
   },
   {
-    question: "QuickBooks Self-Employed vs Online for rentals?",
+    question: "Which QuickBooks plan fits rentals?",
     answer: (
       <>
-        Self-Employed is too thin — designed for freelancers, lacks the
-        multi-property class tracking landlords need. Online is workable if you
-        set up classes per property and customize the Schedule E mapping, but
-        again, rental-specific tools usually require less ongoing maintenance.
+        For per-property books you need class and location tracking, which
+        Intuit lists on QuickBooks Online Plus ($140 a month as of October 2026)
+        and above. If you only need that for rentals, compare a rental-specific
+        tool before you choose.
       </>
     ),
   },
