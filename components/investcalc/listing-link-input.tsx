@@ -24,6 +24,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import type { ListingImportMissingField } from "@/lib/hero-handoff";
+import { SUPPORTED_LISTING_SITES_TEXT } from "./supported-listing-sites";
 
 type ListingLinkInputProps = {
   /** URL-row visibility. Controlled by the parent, which mirrors it to
@@ -153,7 +154,7 @@ export function ListingLinkInput({
         id="listing-url-help"
         className="mt-0.5 text-2xs text-muted-foreground"
       >
-        Zillow, Redfin, or Realtor.com — TrueCap extracts the address. When
+        {SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts the address. When
         available, a signed-in lookup can also fill the active asking price and
         property facts; other values remain labeled estimates. It never imports
         listing photos, seller claims, or the actual tax bill. Review every
