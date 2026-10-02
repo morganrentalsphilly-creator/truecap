@@ -131,7 +131,7 @@ const MATRIX: Row[] = [
   {
     feature: "Sweet spot",
     truecap:
-      "Real estate agents with investor clients, and rental investors deciding what to offer",
+      "Real estate agents with investor clients, and rental investors weighing an offer on a specific listing",
     lodgify: "Hosts and property managers",
     winner: "tie",
   },

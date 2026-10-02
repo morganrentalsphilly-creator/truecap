@@ -79,7 +79,7 @@ const MATRIX: Row[] = [
   {
     feature: "Primary audience",
     truecap:
-      "Real estate agents with investor clients, and rental investors deciding what to offer",
+      "Real estate agents with investor clients, and rental investors weighing an offer on a specific listing",
     guesty: "Lite: 1-3 listings; Pro: 4-199; Enterprise: 200+",
     winner: "tie",
   },
@@ -239,8 +239,8 @@ export default function VsGuestyPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You are deciding whether to buy the next property and what
-                  to offer.
+                  You are deciding whether to buy the next property and how
+                  much to pay.
                 </li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
                 <li>You want a free core underwriting tier.</li>
