@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: `Should I use Stessa, Avail, or Baselane?`,
-    a: `Pick based on what you need most. Stessa for accounting (especially if you have existing business banking); its free plan also lists tenant screening, online rent collection, and maintenance tracking. Avail for leasing + online rent collection (especially if you're placing new tenants often). Baselane if you want banking + bookkeeping + rent collection in one platform and don't mind moving your rental banking. Some landlords pair two of the three.`,
+    a: `Pick based on what you need most. Stessa for accounting (especially if you have existing business banking); its free plan also lists tenant screening, online rent collection, and maintenance tracking. Avail for leasing + online rent collection (especially if you're placing new tenants often). Baselane if you want banking + bookkeeping + rent collection in one platform and don't mind moving your rental banking. You can also pair two of the three.`,
   },
   {
     q: `Is Baselane really FDIC-insured?`,
@@ -83,7 +83,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `Avail vs Stessa — which one if I can only pick one?`,
-    a: `If you're filling units and managing tenants actively, Avail is more useful (listings, screening, leases, rent collection). If you already have tenants in place and just need accounting + Schedule E for tax time, Stessa is more useful (Schedule E is on its paid Manage and Pro plans). Some landlords with several units end up using both.`,
+    a: `If you're filling units and managing tenants actively, Avail is more useful (listings, screening, leases, rent collection). If you already have tenants in place and just need accounting + Schedule E for tax time, Stessa is more useful (Schedule E is on its paid Manage and Pro plans). With several units you can use both.`,
   },
 ];
 

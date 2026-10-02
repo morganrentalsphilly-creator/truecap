@@ -85,7 +85,8 @@ const TOOLS = [
     name: "DealCheck",
     bestFor: "Dedicated BRRRR calculator + native mobile apps",
     url: "/vs/dealcheck",
-    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
+    pricing:
+      "Free Starter; Plus $10/mo and Pro $20/mo billed annually ($14 / $29 billed monthly), as of October 2026",
     freeCovers: [
       "Solid BRRRR-friendly underwriting",
       "Address search that imports public-record and listing data",
@@ -109,7 +110,7 @@ const TOOLS = [
       "Community forums and content on BRRRR strategy",
     ],
     freeGates: [
-      "Calculator UX is dated",
+      "Unlimited calculator reports require BiggerPockets Pro",
     ],
     pickIf:
       "You're already paying for BiggerPockets for the BRRRR community access.",
@@ -179,7 +180,7 @@ const DECISION_LINES: Array<{ q: string; a: string }> = [
  * the string renders. Each phrase appears once on the page.
  */
 const CITATIONS = [
-  { phrase: "Plus $10/mo, Pro $20/mo", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Plus $10/mo and Pro $20/mo billed annually", url: "https://dealcheck.io/pricing/" },
   { phrase: "Solid BRRRR-friendly underwriting", url: "https://dealcheck.io/features/brrrr-calculator/" },
   {
     phrase: "Address search that imports public-record and listing data",
@@ -194,6 +195,7 @@ const CITATIONS = [
   { phrase: "Standard BRRRR-friendly underwriting", url: "https://www.biggerpockets.com/brrrr-calculator" },
   { phrase: "Printable PDF reports", url: "https://www.biggerpockets.com/brrrr-calculator" },
   { phrase: "Community forums and content", url: "https://www.biggerpockets.com/pro-membership" },
+  { phrase: "Unlimited calculator reports", url: "https://www.biggerpockets.com/pro-membership" },
   {
     phrase: "Free (with your existing Office / Workspace)",
     url: "https://workspace.google.com/products/sheets/",

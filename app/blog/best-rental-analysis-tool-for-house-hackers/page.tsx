@@ -80,7 +80,8 @@ const TOOLS = [
     name: "DealCheck",
     bestFor: "Mobile + property-data import (multifamily calculator)",
     url: "/vs/dealcheck",
-    pricing: "Free Starter, Plus $10/mo, Pro $20/mo (as of June 2026)",
+    pricing:
+      "Free Starter; Plus $10/mo and Pro $20/mo billed annually ($14 / $29 billed monthly), as of October 2026",
     freeCovers: [
       "Standard multifamily underwriting",
       "Address search that imports public-record and listing data",
@@ -102,10 +103,10 @@ const TOOLS = [
     freeCovers: [
       "BiggerPockets' Pro rental property calculator, which you adapt for a house hack",
       "House-hacking articles and forum discussion in the BP community",
+      "A free Rent vs. Buy vs. House Hack calculator download from its house-hacking guide (BiggerPockets sign-up required)",
     ],
     freeGates: [
       "Calculator alone doesn't justify $390/yr unless you use the community",
-      "Limited mobile UX",
     ],
     pickIf:
       "You're already paying for BiggerPockets and want to adapt its bundled rental calculator for a house hack.",
@@ -165,7 +166,7 @@ const DECISION_LINES: Array<{ q: string; a: string }> = [
  * the string renders. Each phrase appears once on the page.
  */
 const CITATIONS = [
-  { phrase: "Plus $10/mo, Pro $20/mo", url: "https://dealcheck.io/pricing/" },
+  { phrase: "Plus $10/mo and Pro $20/mo billed annually", url: "https://dealcheck.io/pricing/" },
   { phrase: "Standard multifamily underwriting", url: "https://dealcheck.io/pricing/" },
   {
     phrase: "Address search that imports public-record and listing data",
@@ -179,6 +180,10 @@ const CITATIONS = [
   { phrase: "BP Pro ~$390/yr", url: "https://www.biggerpockets.com/pro-membership" },
   { phrase: "Pro rental property calculator", url: "https://www.biggerpockets.com/rental-property-calculator" },
   { phrase: "House-hacking articles and forum discussion", url: "https://www.biggerpockets.com/blog/house-hacking" },
+  {
+    phrase: "Rent vs. Buy vs. House Hack calculator download",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+  },
   {
     phrase: "Free (with your existing Office / Workspace)",
     url: "https://workspace.google.com/products/sheets/",
@@ -260,6 +265,10 @@ const SOURCES = [
   { title: "DealCheck, home page (iOS and Android apps)", url: "https://dealcheck.io/" },
   { title: "BiggerPockets, Pro membership", url: "https://www.biggerpockets.com/pro-membership" },
   { title: "BiggerPockets, House Hacking articles", url: "https://www.biggerpockets.com/blog/house-hacking" },
+  {
+    title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+    url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+  },
   { title: "Google Workspace, Google Sheets", url: "https://workspace.google.com/products/sheets/" },
   {
     title: "HUD Mortgagee Letter 2010-29 (FHA minimum credit scores and loan-to-value limits)",
@@ -391,7 +400,15 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               >
                 official calculator pages
               </a>{" "}
-              list no dedicated house-hack calculator.
+              list no dedicated house-hack calculator; its{" "}
+              <a
+                href="https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy"
+                className="font-semibold text-primary hover:underline"
+              >
+                house-hacking guide
+              </a>{" "}
+              offers a free download of its Rent vs. Buy vs. House Hack
+              calculator (BiggerPockets sign-up required).
             </p>
           </section>
 

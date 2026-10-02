@@ -366,8 +366,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 <a href="https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings">
                   property-data import from public records and active listings
                 </a>
-                , longer track record in the BRRRR community, broader brand
-                recognition.
+                .
               </li>
             </ul>
 

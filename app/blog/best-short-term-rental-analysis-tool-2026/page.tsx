@@ -106,7 +106,7 @@ const TOOLS: Tool[] = [
     ],
     freeGates: [
       "The customizable Rentalizer is on paid plans (Market Research includes 5 Rentalizer Agent Reports)",
-      "API access (by quote) plus historical market data, comp sets and future-demand data on paid tiers",
+      "Historical market data, comparable sets and future-demand data start on the paid Market Research plan",
     ],
     pickIf: (
       <>
@@ -144,10 +144,10 @@ const TOOLS: Tool[] = [
     pricing: (
       <>
         <a href="https://www.mashvisor.com/pricing" className={SOURCE_LINK}>
-          $49.99–$99.99/mo billed annually ($49.99–$119.99/mo billed
+          $39.99–$99.99/mo billed annually ($49.99–$119.99/mo billed
           quarterly)
         </a>
-        ; Enterprise custom (as of September 2026)
+        ; Enterprise custom (as of October 2026)
       </>
     ),
     coversLabel: "Paid plans cover",
@@ -244,7 +244,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "AirDNA vs Mashvisor for STR — which one?",
-    a: "AirDNA is more STR-specific and considered the gold standard for ADR / occupancy / RevPAR data. Mashvisor covers both STR and LTR plus broader market analysis. STR-primary investors lean AirDNA. Investors toggling between LTR and STR on the same property lean Mashvisor's broader scope.",
+    a: "AirDNA is more STR-specific: it publishes ADR, occupancy and RevPAR by market. Mashvisor covers both STR and LTR plus broader market analysis. If you only buy short-term rentals, AirDNA's narrower focus fits. If you compare LTR and STR on the same property, Mashvisor's broader scope fits.",
   },
   {
     q: "Can TrueCap model short-term rental revenue?",
