@@ -176,6 +176,17 @@ describe("performance contract", () => {
     for (const source of shots) expect(source).not.toMatch(/\bpriority\b/);
   });
 
+  // Both links sit in the first screen at desktop width. As default links
+  // they prefetched the two auth routes and supabase-js (about 100 KB of
+  // script) on every anonymous desktop load (go-to-market audit, P2-87).
+  // They are nofollow like the footer's: robots.txt disallows /auth/ (P2-94).
+  it("prefetches the header's auth links on intent, not on every desktop load", () => {
+    const header = read("components/investcalc/header.tsx");
+    expect(header).not.toMatch(/<Link\s[^>]*href="\/auth\//);
+    expect(header).toContain('<IntentPrefetchLink href="/auth/login" rel="nofollow">');
+    expect(header).toContain('<IntentPrefetchLink href="/auth/sign-up" rel="nofollow">');
+  });
+
   // Where a product shot IS the largest paint it must not wait for layout:
   // lazy, it was the desktop LCP on every /vs page and painted about 1.4 s
   // after the text on /for-buy-and-hold on a slow phone connection.
