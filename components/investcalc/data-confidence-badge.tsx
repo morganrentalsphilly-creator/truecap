@@ -67,6 +67,7 @@ export function DataConfidenceBadge({
                       ? "Confirmed by you"
                       : dataConfidenceSourceLabel(p.source, {
                           stateAverage: p.stateAverage,
+                          detail: p.detail,
                         })}
                     {p.detail || p.fetchedAt ? (
                       <span className="block text-3xs font-normal text-muted-foreground">

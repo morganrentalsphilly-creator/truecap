@@ -56,6 +56,30 @@ function rentProvenanceFor(out: EnrichPropertyResult): EnrichmentProvenanceInput
   };
 }
 
+/** A complete single-family form for Input Confidence. */
+function formValues(monthlyRent: number | undefined): InvestmentFormValues {
+  return {
+    propertyType: "single-family",
+    address: "1 Test St, Columbus, OH 43215, USA",
+    purchasePrice: 250_000,
+    monthlyRent,
+    yearBuilt: 1990,
+    units: [],
+    downPaymentPct: 20,
+    interestRate: 6.42,
+    loanTermYears: 30,
+    maintenancePct: 10,
+    vacancyPct: 5,
+    mgmtPct: 8,
+    capexPct: 5,
+    buildingValuePct: 85,
+    depreciationYears: 27.5,
+    expenseGrowthPct: 2.5,
+    rentGrowthPct: 2.5,
+    insuranceInputMode: "percent",
+  } as Partial<InvestmentFormValues> as InvestmentFormValues;
+}
+
 /** The four places the analyzer names the rent source (audit row P0-02). */
 function rentSourceLabels(out: EnrichPropertyResult) {
   const provenance = rentProvenanceFor(out);
@@ -64,32 +88,13 @@ function rentSourceLabels(out: EnrichPropertyResult) {
     JSON.parse(JSON.stringify(buildDataConfidence(provenance, { hasRent: true, hasPrice: true }))),
   )!.fields.monthlyRent!;
   const inputConfidence = buildInputConfidence({
-    values: {
-      propertyType: "single-family",
-      address: "1 Test St, Columbus, OH 43215, USA",
-      purchasePrice: 250_000,
-      monthlyRent: out.monthlyRent,
-      yearBuilt: 1990,
-      units: [],
-      downPaymentPct: 20,
-      interestRate: 6.42,
-      loanTermYears: 30,
-      maintenancePct: 10,
-      vacancyPct: 5,
-      mgmtPct: 8,
-      capexPct: 5,
-      buildingValuePct: 85,
-      depreciationYears: 27.5,
-      expenseGrowthPct: 2.5,
-      rentGrowthPct: 2.5,
-      insuranceInputMode: "percent",
-    } as Partial<InvestmentFormValues> as InvestmentFormValues,
+    values: formValues(out.monthlyRent),
     provenance,
   }).fields.find((field) => field.key === "rent")!;
   return {
     strip: strip.source,
     stripShort: strip.short,
-    confidenceBadge: dataConfidenceSourceLabel(stored.source, { stateAverage: stored.stateAverage }),
+    confidenceBadge: dataConfidenceSourceLabel(stored.source, { stateAverage: stored.stateAverage, detail: stored.detail }),
     inputConfidence: inputConfidence.sourceLabel,
     receipt: enrichmentRentSourceLabel(out.meta.rent!.source, out.meta.rent!.stateAverage),
   };
@@ -202,6 +207,24 @@ describe("audit: enrichPropertyAction", () => {
     for (const label of Object.values(labels)) {
       expect(label).not.toMatch(/county|ZIP|FMR/);
     }
+
+    // The same result saved before the flag existed: no stateAverage, but the
+    // stored detail is the fallback's "OH avg". The two labels a reopened
+    // deal shows read the detail, so they say statewide too.
+    const legacyRent = { source: "hud-fmr" as const, detail: "OH avg", fetchedAt: "2026", overridden: false };
+    const legacyStored = normalizeDataConfidence(
+      JSON.parse(JSON.stringify(buildDataConfidence({ monthlyRent: legacyRent }, { hasRent: true, hasPrice: true }))),
+    )!.fields.monthlyRent!;
+    expect(legacyStored).not.toHaveProperty("stateAverage");
+    expect(
+      dataConfidenceSourceLabel(legacyStored.source, { stateAverage: legacyStored.stateAverage, detail: legacyStored.detail }),
+    ).toBe("HUD rent benchmark (statewide average)");
+    expect(
+      buildInputConfidence({
+        values: formValues(1750),
+        provenance: { monthlyRent: legacyRent },
+      }).fields.find((field) => field.key === "rent")!.sourceLabel,
+    ).toBe("HUD Rent Benchmark (statewide average)");
   });
 
   it("uses the same statewide figure and label when the matched county has no value for the bedroom count", async () => {
@@ -243,7 +266,7 @@ describe("audit: enrichPropertyAction", () => {
     expect(analyzer).toContain("...(capture.monthlyRent.stateAverage ? { stateAverage: true } : {}),");
     // The badge passes the stored flag to the label.
     const badge = read("components/investcalc/data-confidence-badge.tsx");
-    expect(badge).toContain("dataConfidenceSourceLabel(p.source, { stateAverage: p.stateAverage, })");
+    expect(badge).toContain("dataConfidenceSourceLabel(p.source, { stateAverage: p.stateAverage, detail: p.detail, })");
   });
 
   it("the save action keeps the statewide flag in the stored provenance", () => {
