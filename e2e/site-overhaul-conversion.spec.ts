@@ -119,7 +119,7 @@ test("a /tools calculator hands its inputs to the analyzer on /analyze", async (
     await page.locator("#twopct-rent").fill("2475");
     await expect(page.getByText("0.86%", { exact: true })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 20_000 });
-  const handoff = page.locator('a[href="/analyze?utm_source=2-percent-rule-calculator"]');
+  const handoff = page.locator('a[href="/analyze?from=2-percent-rule-calculator"]');
   await expect(handoff).toBeAttached();
   await expect(handoff).not.toHaveAttribute("href", /price=|rent=|address=/);
   await handoff.click();

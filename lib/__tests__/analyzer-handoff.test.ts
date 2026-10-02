@@ -136,14 +136,18 @@ describe("buildAnalyzerHandoffUrl", () => {
     });
   });
 
-  it("rounds money + always sets a utm_source", () => {
+  it("rounds money + always names the linking page, without a utm_ parameter", () => {
     const url = buildAnalyzerHandoffUrl({
       purchasePrice: 299999.6,
       monthlyRent: 2000.4,
     });
     expect(url).toContain("price=300000");
     expect(url).toContain("rent=2000");
-    expect(url).toContain("utm_source=tool-handoff");
+    expect(url).toContain("from=tool-handoff");
+    expect(url).not.toContain("utm_");
+    expect(
+      buildAnalyzerHandoffUrl({ purchasePrice: 300000 }, { utmSource: "cap-rate-calculator" }),
+    ).toBe("/analyze?price=300000&from=cap-rate-calculator");
   });
 
   it("omits empty / invalid fields", () => {

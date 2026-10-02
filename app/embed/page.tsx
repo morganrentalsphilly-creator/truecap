@@ -373,7 +373,7 @@ export default function EmbedHubPage() {
           actions={
             <ActionRow>
               <Link
-                href="/analyze?utm_source=embed-hub-cta"
+                href="/analyze?from=embed-hub-cta"
                 prefetch={false}
                 className={buttonVariants({ size: "cta" })}
               >
