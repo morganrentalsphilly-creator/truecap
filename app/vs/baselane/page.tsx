@@ -205,10 +205,10 @@ export default function VsBaselanePage() {
           <BlogByline />
           <p className={VS_LEDE}>
             Baselane is a banking, bookkeeping and rent collection platform
-            for rental property owners: checking and savings accounts with
-            banking services provided by Thread Bank, Member FDIC, income and
-            expense tracking by property, Schedule E reports and online rent
-            collection. TrueCap is a pre-purchase underwriting calculator that
+            for rental property owners. It offers checking and savings
+            accounts (banking services provided by Thread Bank, Member FDIC),
+            income and expense tracking by property, Schedule E reports and
+            online rent collection. TrueCap is a pre-purchase underwriting calculator that
             helps screen an acquisition. Baselane also publishes a free ROI
             calculator, but its core product is for rentals you already own;
             TrueCap is for the one you are deciding whether to buy.
