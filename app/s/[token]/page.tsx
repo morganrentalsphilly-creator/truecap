@@ -56,7 +56,10 @@ export async function generateMetadata(): Promise<Metadata> {
   // Never resolve the private snapshot for metadata. Link unfurlers cache OG
   // fields outside TrueCap's access boundary, so the address/title belongs
   // only in the authorized page body.
-  const title = "Shared rental analysis — TrueCap";
+  // The root layout's title template appends " | TrueCap" to `title`; the
+  // social titles take no template, so they carry the brand themselves.
+  const title = "Shared rental analysis";
+  const socialTitle = `${title} | TrueCap`;
   return {
     title,
     description:
@@ -69,12 +72,12 @@ export async function generateMetadata(): Promise<Metadata> {
       nosnippet: true,
     },
     openGraph: {
-      title,
+      title: socialTitle,
       description: "Shared via TrueCap.",
     },
     twitter: {
       card: "summary",
-      title,
+      title: socialTitle,
       description: "Shared via TrueCap.",
     },
   };

@@ -32,7 +32,10 @@ type Props = { params: Promise<{ encoded: string }> };
 export async function generateMetadata(): Promise<Metadata> {
   // Legacy URLs contain the full snapshot. Never decode it for metadata:
   // unfurlers cache titles and images outside TrueCap's privacy boundary.
-  const title = "Legacy shared rental analysis — TrueCap";
+  // The root layout's title template appends " | TrueCap" to `title`; the
+  // social titles take no template, so they carry the brand themselves.
+  const title = "Legacy shared rental analysis";
+  const socialTitle = `${title} | TrueCap`;
   return {
     title: title,
     description:
@@ -42,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // another copy for crawlers, browser extensions, or downstream tooling.
     robots: { index: false, follow: false }, // share links shouldn't be indexed
     openGraph: {
-      title,
+      title: socialTitle,
       description: "Shared via TrueCap.",
       // No images: [] here — the sibling opengraph-image.tsx file is
       // auto-detected by Next.js and generates a per-deal preview card
@@ -51,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary",
-      title,
+      title: socialTitle,
       description: "Shared via TrueCap.",
     },
   };
