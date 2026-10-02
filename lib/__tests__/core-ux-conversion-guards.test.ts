@@ -159,7 +159,21 @@ describe("share links are revocable from the share dialog", () => {
     );
     expect(shareButton).toContain("setShareUrl(opaque.url)");
     expect(shareButton).toContain("navigator.clipboard.writeText(shareUrl)");
-    expect(shareButton).toContain("Links also expire automatically.");
+    // The dialog states the period and the second way a link dies. It said
+    // only "Links also expire automatically." The period is the table
+    // default, and lib/public-share.ts refuses a link whose stored standard
+    // version is not the current one; a change to either must reach this copy.
+    expect(shareButton).not.toContain("Links also expire automatically.");
+    expect(shareButton).toMatch(/A link expires 180 days after it is created\./);
+    expect(shareButton).toMatch(
+      /When TrueCap\s+updates its underwriting standard, earlier links stop opening:\s+rerun the deal and share a new link\./,
+    );
+    expect(read("supabase/migrations/20260817150658_public_shares.sql")).toContain(
+      "expires_at timestamptz default (now() + interval '180 days')",
+    );
+    expect(shareStore).toMatch(
+      /if \(storedMethodologyVersion !== currentResult\.methodologyVersion\) \{\s+return null;/,
+    );
   });
 });
 
