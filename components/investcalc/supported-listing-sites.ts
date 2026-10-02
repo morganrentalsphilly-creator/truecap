@@ -1,22 +1,27 @@
 /**
  * The listing sites named to visitors, in one place.
  *
- * The address parser (lib/listing-url.ts) has a branch for each of these
- * five. The homepage helper used to name two of them, the analyzer's
- * listing-link help three and the unsupported-link error all five, so the
- * same product described itself three ways. Every surface reads this list.
- * `lib/__tests__/analyzer-first-visit-guards.test.ts` checks that a link from
- * each named site parses.
+ * The homepage helper used to name two sites, the analyzer's listing-link
+ * help three and the unsupported-link error five, so the same product
+ * described itself three ways. Every surface reads this list.
+ *
+ * A site is named here only when the link shape it serves today reaches its
+ * own branch of the address parser (lib/listing-url.ts) and comes back as an
+ * address. Trulia is not named: its property links are
+ * trulia.com/home/<address>-<id>, the parser's Trulia branch reads only
+ * /homedetails/ paths, and the generic fallback that catches the real link
+ * leaves the listing id in the address. It can return to the list once the
+ * parser reads that shape; `lib/__tests__/analyzer-first-visit-guards.test.ts`
+ * holds the condition and checks that a link from each named site parses.
  */
 export const SUPPORTED_LISTING_SITES = [
   "Zillow",
   "Redfin",
   "Realtor.com",
   "Homes.com",
-  "Trulia",
 ] as const;
 
-/** "Zillow, Redfin, Realtor.com, Homes.com, or Trulia" */
+/** "Zillow, Redfin, Realtor.com, or Homes.com" */
 export const SUPPORTED_LISTING_SITES_TEXT = `${SUPPORTED_LISTING_SITES.slice(0, -1).join(", ")}, or ${SUPPORTED_LISTING_SITES.at(-1)}`;
 
 /**
