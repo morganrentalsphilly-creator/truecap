@@ -251,7 +251,7 @@ export default function BestStatesPost() {
               over the last decade (nominal).
             </p>
             <p>
-              <strong>Read the full Indianapolis breakdown:</strong>{" "}
+              <strong>Indianapolis rental market data:</strong>{" "}
               <Link
                 href="/markets/indianapolis"
                 className="text-primary font-semibold hover:underline"
@@ -263,7 +263,7 @@ export default function BestStatesPost() {
                 href="/states/indiana"
                 className="text-primary font-semibold hover:underline"
               >
-                Indiana investing guide →
+                Indiana rental market data
               </Link>
             </p>
 
@@ -290,7 +290,7 @@ export default function BestStatesPost() {
               1.80%); a rental&apos;s bill can be higher.
             </p>
             <p>
-              <strong>Read the full Cleveland breakdown:</strong>{" "}
+              <strong>Cleveland rental market data:</strong>{" "}
               <Link
                 href="/markets/cleveland"
                 className="text-primary font-semibold hover:underline"
@@ -302,7 +302,7 @@ export default function BestStatesPost() {
                 href="/states/ohio"
                 className="text-primary font-semibold hover:underline"
               >
-                Ohio investing guide →
+                Ohio rental market data
               </Link>
             </p>
 
@@ -325,7 +325,7 @@ export default function BestStatesPost() {
               — always pull current tax records, not seller&apos;s prior bill.
             </p>
             <p>
-              <strong>Read the full Kansas City breakdown:</strong>{" "}
+              <strong>Kansas City rental market data:</strong>{" "}
               <Link
                 href="/markets/kansas-city"
                 className="text-primary font-semibold hover:underline"
@@ -337,7 +337,7 @@ export default function BestStatesPost() {
                 href="/states/missouri"
                 className="text-primary font-semibold hover:underline"
               >
-                Missouri investing guide →
+                Missouri rental market data
               </Link>
             </p>
 
@@ -353,7 +353,7 @@ export default function BestStatesPost() {
               harder to run without local relationships.
             </p>
             <p>
-              <strong>Read the full Detroit breakdown:</strong>{" "}
+              <strong>Detroit rental market data:</strong>{" "}
               <Link
                 href="/markets/detroit"
                 className="text-primary font-semibold hover:underline"
@@ -365,7 +365,7 @@ export default function BestStatesPost() {
                 href="/states/michigan"
                 className="text-primary font-semibold hover:underline"
               >
-                Michigan investing guide →
+                Michigan rental market data
               </Link>
             </p>
 
@@ -381,7 +381,7 @@ export default function BestStatesPost() {
               different property-level income, expense, and price dynamics.
             </p>
             <p>
-              <strong>Read the full Memphis breakdown:</strong>{" "}
+              <strong>Memphis rental market data:</strong>{" "}
               <Link
                 href="/markets/memphis"
                 className="text-primary font-semibold hover:underline"
@@ -393,7 +393,7 @@ export default function BestStatesPost() {
                 href="/states/tennessee"
                 className="text-primary font-semibold hover:underline"
               >
-                Tennessee investing guide →
+                Tennessee rental market data
               </Link>
             </p>
 
@@ -435,7 +435,7 @@ export default function BestStatesPost() {
               expect step-changes rather than annual creep.
             </p>
             <p>
-              <strong>Read the full Charlotte breakdown:</strong>{" "}
+              <strong>Charlotte rental market data:</strong>{" "}
               <Link
                 href="/markets/charlotte"
                 className="text-primary font-semibold hover:underline"
@@ -447,7 +447,7 @@ export default function BestStatesPost() {
                 href="/states/north-carolina"
                 className="text-primary font-semibold hover:underline"
               >
-                North Carolina investing guide →
+                North Carolina rental market data
               </Link>
             </p>
 
@@ -469,7 +469,7 @@ export default function BestStatesPost() {
               can pay more, so pull the parcel&apos;s bill.
             </p>
             <p>
-              <strong>Read the full Atlanta breakdown:</strong>{" "}
+              <strong>Atlanta rental market data:</strong>{" "}
               <Link
                 href="/markets/atlanta"
                 className="text-primary font-semibold hover:underline"
@@ -481,7 +481,7 @@ export default function BestStatesPost() {
                 href="/states/georgia"
                 className="text-primary font-semibold hover:underline"
               >
-                Georgia investing guide →
+                Georgia rental market data
               </Link>
             </p>
 
@@ -533,7 +533,7 @@ export default function BestStatesPost() {
               not prohibit short-term rentals.
             </p>
             <p>
-              <strong>Read the full Phoenix breakdown:</strong>{" "}
+              <strong>Phoenix rental market data:</strong>{" "}
               <Link
                 href="/markets/phoenix"
                 className="text-primary font-semibold hover:underline"
@@ -545,7 +545,7 @@ export default function BestStatesPost() {
                 href="/states/arizona"
                 className="text-primary font-semibold hover:underline"
               >
-                Arizona investing guide →
+                Arizona rental market data
               </Link>
             </p>
 
@@ -561,7 +561,7 @@ export default function BestStatesPost() {
               seller&apos;s prior policy is not what you&apos;ll pay.
             </p>
             <p>
-              <strong>Read the full Tampa breakdown:</strong>{" "}
+              <strong>Tampa rental market data:</strong>{" "}
               <Link
                 href="/markets/tampa"
                 className="text-primary font-semibold hover:underline"
@@ -573,7 +573,7 @@ export default function BestStatesPost() {
                 href="/states/florida"
                 className="text-primary font-semibold hover:underline"
               >
-                Florida investing guide →
+                Florida rental market data
               </Link>
             </p>
 
@@ -606,7 +606,7 @@ export default function BestStatesPost() {
               (Dallas CAD, Tarrant CAD, Collin CAD, Harris CAD).
             </p>
             <p>
-              <strong>Read the full Dallas + Houston breakdowns:</strong>{" "}
+              <strong>Dallas and Houston rental market data:</strong>{" "}
               <Link
                 href="/markets/dallas"
                 className="text-primary font-semibold hover:underline"
@@ -625,7 +625,7 @@ export default function BestStatesPost() {
                 href="/states/texas"
                 className="text-primary font-semibold hover:underline"
               >
-                Texas investing guide →
+                Texas rental market data
               </Link>
             </p>
 
@@ -649,7 +649,7 @@ export default function BestStatesPost() {
                 href="/markets/philadelphia"
                 className="text-primary font-semibold hover:underline"
               >
-                Philadelphia breakdown
+                Philadelphia rental market data
               </Link>
               .
             </p>

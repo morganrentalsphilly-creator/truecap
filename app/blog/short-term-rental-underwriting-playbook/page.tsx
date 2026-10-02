@@ -589,9 +589,11 @@ export default function BlogPost() {
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Modeling an STR deal? TrueCap lets you toggle between long-term and
-            short-term assumptions, run sensitivity grids on ADR and occupancy,
-            and stress-test for a bad off-season — all in one place.{" "}
+            Modeling an STR deal? TrueCap&apos;s Short-term Rental mode (beta)
+            models revenue as nightly rate × occupancy. Its sensitivity grid
+            (free on your first decision, then Pro) reruns the deal with the
+            nightly rate 10% lower and higher. There is no seasonal model, so
+            run a bad off-season as a separate scenario with lower occupancy.{" "}
           </p>
         </footer>
       </main>
