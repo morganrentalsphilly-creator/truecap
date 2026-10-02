@@ -86,7 +86,7 @@ type Row = {
 const MATRIX: Row[] = [
   {
     feature: "Primary audience",
-    truecap: "Solo / small-portfolio investors (1-30 doors)",
+    truecap: "Agents with investor clients, and buy-and-hold investors",
     buildium: "Landlords and professional property managers",
     winner: "tie",
   },
@@ -99,13 +99,13 @@ const MATRIX: Row[] = [
   {
     feature: "Cap rate / CoC / DSCR analysis",
     truecap: "Yes — full engine, free tier",
-    buildium: "Not modeled",
+    buildium: "No acquisition calculator listed in its plans",
     winner: "truecap",
   },
   {
     feature: "10-year projection",
     truecap: "Pro — rent + expense + appreciation",
-    buildium: "Not modeled",
+    buildium: "No pre-purchase projection listed in its plans",
     winner: "truecap",
   },
   {
@@ -127,21 +127,22 @@ const MATRIX: Row[] = [
     winner: "buildium",
   },
   {
-    feature: "Accounting (GL, P&L, balance sheet)",
+    feature: "Property accounting + financial reports",
     truecap: "No",
-    buildium: "Yes — full PM-grade accounting",
+    buildium:
+      "Yes, property accounting, bank reconciliation and financial reports",
     winner: "buildium",
   },
   {
     feature: "Owner reports + portals",
     truecap: "No",
-    buildium: "Yes — multi-owner statement generation",
+    buildium: "Yes, Owners Portal and standard reports on every plan",
     winner: "buildium",
   },
   {
     feature: "Maintenance vendor management",
     truecap: "No",
-    buildium: "Yes — full work-order workflow",
+    buildium: "Yes, task and work order management on every plan",
     winner: "buildium",
   },
   {
@@ -165,7 +166,7 @@ const MATRIX: Row[] = [
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    buildium: "Internal portal only",
+    buildium: "Owner and resident portals; no public deal link listed",
     winner: "truecap",
   },
 ];
@@ -247,7 +248,7 @@ export default function VsBuildiumPage() {
               </h3>
               <ul className={VS_TLDR_LIST}>
                 <li>
-                  You own 1-30 rental units and underwrite deals yourself.
+                  You underwrite deals yourself, or for investor clients.
                 </li>
                 <li>
                   You want cap rate, DSCR, cash flow, projection before buying.
@@ -271,8 +272,8 @@ export default function VsBuildiumPage() {
                   You run a property management company and need owner portals.
                 </li>
                 <li>
-                  You need PM-grade accounting (GL, balance sheet, owner
-                  statements).
+                  You need property accounting, bank reconciliation, and
+                  financial reports.
                 </li>
                 <li>
                   You&apos;re scaling from a few rentals into a PM business.
@@ -303,8 +304,8 @@ export default function VsBuildiumPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            Buildium details based on publicly available product info as of
-            2026. See{" "}
+            Buildium details checked against its pricing page in October 2026.
+            See{" "}
             <a
               href="https://www.buildium.com/pricing/"
               target="_blank"
@@ -313,7 +314,7 @@ export default function VsBuildiumPage() {
             >
               Buildium&apos;s official pricing page
             </a>{" "}
-            for their current state.
+            for current plans.
           </p>
         </Section>
 
@@ -339,9 +340,10 @@ export default function VsBuildiumPage() {
                 portfolio fit before choosing Buildium or an alternative.
               </li>
               <li>
-                <strong>Keep TrueCap for new acquisitions.</strong> Buildium
-                doesn&apos;t underwrite. You&apos;ll still want TrueCap (or
-                DealCheck) for the next property — they&apos;re complementary.
+                <strong>Keep TrueCap for new acquisitions.</strong>{" "}
+                Buildium&apos;s plans list no acquisition calculator, so
+                you&apos;ll still want TrueCap (or DealCheck) for the next
+                property.
               </li>
             </ol>
             <p>
@@ -373,7 +375,11 @@ export default function VsBuildiumPage() {
           </div>
         </Section>
 
-        <ComparisonFaq competitorName="Buildium" items={BUILDIUM_FAQ} />
+        <ComparisonFaq
+          competitorName="Buildium"
+          items={BUILDIUM_FAQ}
+          reviewedDate="October 2026"
+        />
 
         {/* Pricing CTA */}
         <CloseSection
@@ -381,9 +387,9 @@ export default function VsBuildiumPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+              the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
             </>
           }
@@ -474,10 +480,10 @@ const BUILDIUM_FAQ: FaqItem[] = [
     question: "Does Buildium underwrite deals?",
     answer: (
       <>
-        No. Buildium is purely operational — it manages units, tenants, leases,
-        accounting, vendors. It doesn&apos;t model cap rate, DSCR, or cash flow
-        on a potential acquisition. For that you&apos;d use TrueCap, DealCheck,
-        or a spreadsheet.
+        Buildium&apos;s plans cover operations: units, tenants, leases,
+        accounting, vendors. They list no calculator for cap rate, DSCR, or
+        cash flow on a potential acquisition. For that you&apos;d use TrueCap,
+        DealCheck, or a spreadsheet.
       </>
     ),
   },
@@ -499,7 +505,8 @@ const BUILDIUM_FAQ: FaqItem[] = [
         Compare the vendors&apos; current pricing, minimums, accounting,
         resident, owner, maintenance, support, and implementation features.
         AppFolio&apos;s Core plan currently states a 50-unit minimum; Buildium
-        publishes tiered entry pricing without that comparison-page assumption.
+        publishes starting prices for its three plans and states no unit
+        minimum.
       </>
     ),
   },
