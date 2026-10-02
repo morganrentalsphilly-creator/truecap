@@ -214,7 +214,7 @@ export default function VsArrivedPage() {
                 <strong>If you want passive exposure with minimal effort → Arrived.</strong> Pick properties from Arrived&apos;s marketplace; collect quarterly distributions; let them handle everything.
               </li>
               <li>
-                <strong>If you want both → split the portfolio.</strong> Many investors run 1-3 direct properties (cash flow + tax benefits) AND keep some money in Arrived (diversification + passive). TrueCap helps with the direct side; Arrived handles the passive side.
+                <strong>If you want both → split the portfolio.</strong> You can hold direct properties and Arrived shares side by side. TrueCap helps with the direct side; Arrived handles the passive side.
               </li>
             </ul>
             <p>
@@ -248,10 +248,10 @@ export default function VsArrivedPage() {
           heading={<>Underwrite the next deal — free.</>}
           lede={
             <>
-              TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
+              TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-              No card to start.
+              the Offer Ceiling, co-branded share links and PDF reports; see
+              live pricing for current terms. No card to start.
             </>
           }
           actions={
