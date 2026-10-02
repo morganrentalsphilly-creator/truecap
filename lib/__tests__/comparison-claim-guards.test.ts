@@ -119,11 +119,22 @@ describe("comparison claim truth", () => {
     expect(read("app/vs/roofstock/page.tsx")).toMatch(
       /heuristic summary of the modeled numbers/i,
     );
+    // The comps lookup returns a value estimate and a rent estimate with the
+    // comps (lib/property-enrichment/rentcast.ts), so the cell these two pages
+    // carried, "…; no AVM", was untrue. The allowances are the catalog's.
+    const comps = read("lib/entitlements-catalog.ts");
+    expect(comps).toMatch(/comps: \{[^}]*freeLimit: "1 lifetime lookup"[^}]*proLimit: "50\/mo"/);
     for (const file of ["app/vs/mashvisor/page.tsx", "app/vs/privy/page.tsx"]) {
       expect(read(file), file).toContain(
-        "One free lookup; Pro includes 50 per month; no AVM",
+        "One free lookup with an account; Pro and Agent Pro include 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
       );
     }
+    expect(comparisonCopy).not.toMatch(/\bno AVM\b/i);
+    // /vs/rentcast: TrueCap's lookup has a value estimate, and no RentCast
+    // plan costs $15 ($74 is the API's Foundation plan, not the app's price).
+    const rentcast = read("app/vs/rentcast/page.tsx");
+    expect(rentcast).not.toContain("Purchase price as user input");
+    expect(rentcast).not.toMatch(/\$15-\$74/);
   });
 
   it("keeps comparison articles live-priced and appropriately qualified", () => {
