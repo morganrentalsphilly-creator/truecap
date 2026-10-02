@@ -114,8 +114,9 @@ const CURATED: Term[] = [
     also: ["CoC", "Cash on cash"],
     definition:
       "Annual cash flow divided by total cash invested (down payment + closing costs + initial repairs). Cash-on-cash measures the return on the cash YOU specifically put in, after the lender takes their cut. Unlike cap rate, it does include financing.",
-    benchmark:
-      "8-10%+ is strong in 2026. 5-7% is acceptable. Below 5% needs an appreciation or tax-savings story.",
+    // Read from lib/glossary.ts, like cap rate above: the hub said "8-10%+ is
+    // strong in 2026" while the term page says there is no universal target.
+    benchmark: GLOSSARY.coc.benchmark,
     postPath: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
   {

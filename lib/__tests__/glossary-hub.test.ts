@@ -93,4 +93,12 @@ describe("glossary hub ↔ lib/glossary.ts", () => {
     expect(HUB_SRC).not.toMatch(/coastal Tier-1 where appreciation/);
     expect(GLOSSARY.capRate.benchmark).toMatch(/^No universal range/);
   });
+
+  it("the hub's cash-on-cash benchmark is the term page's own too", () => {
+    // The hub said "8-10%+ is strong in 2026. 5-7% is acceptable." while
+    // /glossary/cash-on-cash-return said there is no universal target.
+    expect(HUB_SRC).toContain("benchmark: GLOSSARY.coc.benchmark,");
+    expect(HUB_SRC).not.toMatch(/8-10%\+ is strong/);
+    expect(GLOSSARY.coc.benchmark).toMatch(/^There is no universal target/);
+  });
 });
