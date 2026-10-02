@@ -224,7 +224,7 @@ describe("Input Confidence v1.1", () => {
     });
 
     expect(byKey(result, "rent").sourceClass).toBe("market-benchmark");
-    expect(byKey(result, "rent").sourceLabel).toContain("HUD Rent Benchmark");
+    expect(byKey(result, "rent").sourceLabel).toContain("HUD rent benchmark");
     expect(byKey(result, "interestRate").sourceClass).toBe("market-benchmark");
     // The rate is FRED's own figure, unchanged: the label names FRED and the
     // reason does not call it a TrueCap estimate (audit row P2-151).
@@ -245,7 +245,7 @@ describe("Input Confidence v1.1", () => {
 
   // Audit row P0-02: an address with no county match gets the statewide HUD
   // fallback. "Verify next" and the PDF's "Current source" column used to
-  // call it "HUD Rent Benchmark (county)".
+  // call it "HUD rent benchmark (county)".
   it("labels the statewide HUD fallback as statewide without changing its class or score", () => {
     const area = buildInputConfidence({
       values: values(),
@@ -266,9 +266,9 @@ describe("Input Confidence v1.1", () => {
       },
     });
 
-    expect(byKey(area, "rent").sourceLabel).toBe("HUD Rent Benchmark (county)");
+    expect(byKey(area, "rent").sourceLabel).toBe("HUD rent benchmark (county)");
     expect(byKey(statewide, "rent").sourceLabel).toBe(
-      "HUD Rent Benchmark (statewide average)",
+      "HUD rent benchmark (statewide average)",
     );
     expect(byKey(statewide, "rent").sourceLabel).not.toMatch(/county|ZIP/);
     expect(byKey(statewide, "rent").reason).toMatch(/statewide average/i);
@@ -320,7 +320,7 @@ describe("Input Confidence v1.1", () => {
       provenance: restored.provenance,
     });
     expect(byKey(reopened, "rent").sourceLabel).toBe(
-      "HUD Rent Benchmark (statewide average)",
+      "HUD rent benchmark (statewide average)",
     );
 
     const overridden = buildInputConfidence({
@@ -365,7 +365,7 @@ describe("Input Confidence v1.1", () => {
     // restored unchanged (above), and its "VA avg" detail, the area name the
     // statewide fallback is given, now picks the statewide label.
     expect(byKey(reopened, "rent").sourceLabel).toBe(
-      "HUD Rent Benchmark (statewide average)",
+      "HUD rent benchmark (statewide average)",
     );
     expect(byKey(reopened, "rent").reason).toMatch(/statewide average/i);
     // Label and reason only: the score is the one a flagged record gets.
@@ -407,7 +407,7 @@ describe("Input Confidence v1.1", () => {
       ).provenance,
     });
     expect(byKey(countyReopened, "rent").sourceLabel).toBe(
-      "HUD Rent Benchmark (county)",
+      "HUD rent benchmark (county)",
     );
   });
 

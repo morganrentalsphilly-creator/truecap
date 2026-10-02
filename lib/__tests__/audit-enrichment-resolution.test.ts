@@ -147,7 +147,7 @@ describe("audit: enrichPropertyAction", () => {
       strip: "HUD rent benchmark (ZIP)",
       stripShort: "HUD SAFMR",
       confidenceBadge: "HUD rent benchmark (ZIP)",
-      inputConfidence: "HUD Rent Benchmark (ZIP)",
+      inputConfidence: "HUD rent benchmark (ZIP)",
       receipt: "HUD SAFMR",
     });
   });
@@ -172,7 +172,7 @@ describe("audit: enrichPropertyAction", () => {
       strip: "HUD rent benchmark (county)",
       stripShort: "HUD FMR",
       confidenceBadge: "HUD rent benchmark (county)",
-      inputConfidence: "HUD Rent Benchmark (county)",
+      inputConfidence: "HUD rent benchmark (county)",
       receipt: "HUD FMR",
     });
   });
@@ -201,7 +201,7 @@ describe("audit: enrichPropertyAction", () => {
       strip: "HUD rent benchmark (statewide average)",
       stripShort: "HUD statewide",
       confidenceBadge: "HUD rent benchmark (statewide average)",
-      inputConfidence: "HUD Rent Benchmark (statewide average)",
+      inputConfidence: "HUD rent benchmark (statewide average)",
       receipt: "HUD statewide average",
     });
     for (const label of Object.values(labels)) {
@@ -224,7 +224,7 @@ describe("audit: enrichPropertyAction", () => {
         values: formValues(1750),
         provenance: { monthlyRent: legacyRent },
       }).fields.find((field) => field.key === "rent")!.sourceLabel,
-    ).toBe("HUD Rent Benchmark (statewide average)");
+    ).toBe("HUD rent benchmark (statewide average)");
   });
 
   it("uses the same statewide figure and label when the matched county has no value for the bedroom count", async () => {

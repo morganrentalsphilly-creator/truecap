@@ -149,7 +149,7 @@ describe("multi-family HUD rent provenance", () => {
 
     expect(confidenceField(hud, "rent")).toMatchObject({
       sourceClass: "market-benchmark",
-      sourceLabel: "HUD Rent Benchmark (ZIP)",
+      sourceLabel: "HUD rent benchmark (ZIP)",
     });
     expect(confidenceField(edited, "rent")).toMatchObject({
       sourceClass: "user-estimate",
