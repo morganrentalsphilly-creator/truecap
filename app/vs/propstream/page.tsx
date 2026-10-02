@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "PropStream vs TrueCap (2026): Find vs Underwrite",
   description:
-    "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. An honest side-by-side of where each fits.",
+    "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. See where each fits.",
   keywords: [
     "propstream alternative",
     "propstream vs",
@@ -174,7 +174,7 @@ export default function VsPropstreamPage() {
     name: "PropStream vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/propstream`,
     description:
-      "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. An honest side-by-side of where each fits.",
+      "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. See where each fits.",
     dateModified: lastmodFor("/vs/propstream"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
