@@ -44,20 +44,27 @@ describe("the verdict-engine post does not call the engine open (P2-18)", () => 
 });
 
 describe("the trial's numbers are read from lib/product-access (P2-14)", () => {
-  it("the two server-action messages and the sign-up description type no trial number", () => {
+  it("the trial-ended message and the sign-up description type no trial number", () => {
     const evaluation = read("app/actions/product-evaluation.ts");
     expect(evaluation).toContain("`Your ${PRODUCT_EVALUATION_DAYS}-day free trial has ended.`");
     expect(evaluation).not.toMatch(/\b\d+-day free trial\b/);
 
-    const anonymous = read("app/actions/anonymous-decision.ts");
-    expect(anonymous).toContain(
-      "Create a free account for ${PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card.",
-    );
-    expect(anonymous).not.toMatch(/\b(?:two|three|four|five)\b complete Pro deals|\bone comparison\b/i);
-
     const signUp = read("app/auth/sign-up/page.tsx");
     expect(signUp).toContain("${PRODUCT_EVALUATION_DAYS}-day free Pro evaluation");
     expect(signUp).not.toMatch(/\b\d+-day free\b/);
+  });
+
+  // The message a visitor gets once this browser's no-signup decision is
+  // used keeps its wording: what a locked visitor reads is not changed by a
+  // sweep. Its two number words are tied to the limits here instead, so a
+  // limit change reddens this case until the sentence is rewritten.
+  it("the used-decision message still spells the limits, and the words match them", () => {
+    const WORDS = ["zero", "one", "two", "three", "four", "five", "six"];
+    const anonymous = read("app/actions/anonymous-decision.ts");
+    expect(anonymous).toContain(
+      `Create a free account for ${WORDS[PRODUCT_EVALUATION_DEAL_LIMIT]} complete Pro deals and ${WORDS[PRODUCT_EVALUATION_COMPARISON_LIMIT]} comparison — no card.`,
+    );
+    expect(anonymous).not.toMatch(/\b\d+ complete Pro deals?\b|\b\d+ comparisons?\b/);
   });
 
   it("the constants are the numbers those sentences printed before", () => {
