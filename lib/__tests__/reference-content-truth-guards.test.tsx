@@ -255,9 +255,10 @@ describe("voice: 'released' is not customer copy on the calculator pages", () =>
   it.each(CALCULATOR_REGISTRY.map((tool) => `app/tools/${tool.slug}/page.tsx`))("%s", (path) => {
     const source = withoutComments(read(path));
     expect(source).not.toMatch(/\b(?:un)?released\b/i);
-    // The shared CTA's default supporting text still carries the word, so a
-    // calculator page passes its own.
-    expect(source).toMatch(/<ToolsConversionCta\b[^>]*\bhook=/);
+    // Every calculator page mounts the shared CTA; its default supporting
+    // text is held to the same rule in the next block, so a page may pass
+    // its own text or take the default.
+    expect(source).toMatch(/<ToolsConversionCta\b/);
   });
 });
 

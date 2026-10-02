@@ -288,12 +288,7 @@ export default function VacancyRateCalculatorPage() {
         <ToolEmbedInvite slug="vacancy-rate-calculator" />
 
 
-        {/* Own hook: the shared default still says "released", a build word
-            the voice guide keeps out of customer copy (docs/voice.md rule 6). */}
-        <ToolsConversionCta
-          calculatorName="Vacancy rate calculator"
-          hook="Run the rental analyzer with labeled, editable assumptions. No signup is required for the first analysis."
-        />
+        <ToolsConversionCta calculatorName="Vacancy rate calculator" />
         <RelatedContent kind="tool" slug="vacancy-rate-calculator" title="Vacancy Rate Calculator" className="mt-10" />
       </main>
       <SiteFooter />
