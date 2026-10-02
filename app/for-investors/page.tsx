@@ -47,7 +47,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const PAGE_TITLE = "For Rental Investors — Buy Box & Offer Ceiling";
 const PAGE_DESCRIPTION =
-  "Paste a listing and see whether it meets your Buy Box, the highest price that still does, and what could break it. Cash flow, cap rate, DSCR. Free first decision.";
+  "Paste a listing and see whether it meets your Buy Box, the highest price that still does, and what could break it. Free first decision.";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
