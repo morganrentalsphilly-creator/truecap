@@ -89,6 +89,16 @@ describe("unsourced opinions about competitors stay out of the comparison posts"
       /all great tools/i,
       // A claim about who uses a plan, with no data behind it.
       /often professional STR managers/i,
+      // A heading that turned each vendor's own list into a claim that it
+      // beats the other two, which their pages contradict.
+      /What each does better/i,
+      // A denial with no page to prove it, and unsourced grades.
+      /None of the three platforms underwrites/i,
+      /take ownership for granted/i,
+      /low-cost starts/i,
+      /smaller-operator friendly/i,
+      /cover most workflows/i,
+      /are built for that/i,
     ]) {
       expect(post).not.toMatch(retired);
     }

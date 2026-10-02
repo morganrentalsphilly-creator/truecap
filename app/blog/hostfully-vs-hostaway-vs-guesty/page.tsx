@@ -69,15 +69,15 @@ const FAQ_ITEMS = [
   },
   {
     q: "Hostfully vs Hostaway — which one?",
-    a: "Hostfully pitches its plans from 1 listing up, and Hostaway quotes by listing count. Hostfully offers digital guidebooks, the first one free, and a direct-booking site. Hostaway advertises 300+ integrations against Hostfully's 150+. Look at both before you choose.",
+    a: "Hostfully pitches its plans from 1 listing up, and Hostaway quotes by listing count. Hostfully offers digital guidebooks, the first one free, and both list a direct-booking website builder. Hostaway advertises 300+ integrations against Hostfully's 150+. Look at both before you choose.",
   },
   {
     q: "Hostaway vs Guesty — which is more enterprise?",
-    a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway quotes by listing count and advertises 300+ integrations. If you already manage STRs for other owners, Guesty's owners portal and custom permissions are built for that.",
+    a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway quotes by listing count, advertises 300+ integrations and lists an owner portal and owner statements. Guesty's owners portal lets you set custom permissions per owner. If you manage STRs for other owners, compare the two portals.",
   },
   {
     q: "Do any of these underwrite STR deals?",
-    a: "No. All three are operational — they manage STRs you already own (channels, pricing, guest messaging, cleaning). For pre-purchase underwriting (cap rate, DSCR, cash flow on a property you're considering buying as an STR), use TrueCap, DealCheck, or a spreadsheet. AirDNA's Rentalizer provides an STR revenue projection you can enter in TrueCap's rent field.",
+    a: "All three sell property management software for STRs you operate (channels, pricing, guest messaging, cleaning). For pre-purchase underwriting (cap rate, DSCR, cash flow on a property you're considering buying as an STR), use TrueCap, DealCheck, or a spreadsheet. AirDNA's Rentalizer provides an STR revenue projection you can enter in TrueCap's rent field.",
   },
   {
     q: "Where does TrueCap fit in the STR workflow?",
@@ -187,8 +187,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 Lite (1–3 listings) through Pro and Enterprise (200+ listings)
               </a>
               . For solo STR investors with 1-3 properties, Guesty
-              Lite is aimed squarely at that size, and Lodgify or Smoobu are
-              other low-cost starts.
+              Lite is aimed squarely at that size, and Lodgify and Smoobu
+              publish plans for a single property.
               <strong> TrueCap</strong> is upstream of all three: the
               underwriting calculator you&apos;d use BEFORE buying an STR.
             </p>
@@ -237,7 +237,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               </li>
             </ul>
 
-            <h2>What each does better</h2>
+            <h2>What each one offers</h2>
             <h3>Hostfully</h3>
             <ul>
               <li>
@@ -392,7 +392,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 , builds direct-booking website, channel manager.
               </li>
               <li>
-                <strong>Smoobu</strong> — even smaller-operator friendly,{" "}
+                <strong>Smoobu</strong> —{" "}
                 <a href="https://www.smoobu.com/en/pricing/">
                   single-property pricing
                 </a>
@@ -401,7 +401,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               <li>
                 <strong>Direct Airbnb tools</strong> — if you only list on
                 Airbnb, the platform&apos;s native tools (messaging, calendar,
-                scheduled messages) cover most workflows.{" "}
+                scheduled messages) may be enough.{" "}
                 <a href="https://www.airbnb.com/help/article/1857">
                   No monthly subscription, though Airbnb deducts its service
                   fee from each payout
@@ -412,9 +412,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
 
             <h2>Where TrueCap fits — the underwriting layer</h2>
             <p>
-              None of the three platforms underwrites whether the property is a
-              good STR investment in the first place. They take ownership for
-              granted. Before you buy an STR, the workflow is:
+              Hostfully, Hostaway and Guesty sell property management software
+              for rentals you operate. Before you buy an STR, the workflow is:
             </p>
             <ol>
               <li>
@@ -465,16 +464,14 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                 listings.
               </li>
               <li>
-                <strong>
-                  &quot;I have 3-15 STRs and want digital guidebooks and a
-                  branded direct-booking site.&quot;
-                </strong>{" "}
-                Hostfully.
+                <strong>&quot;I have 3-15 STRs.&quot;</strong>{" "}
+                Hostfully (Growth plan pitched at 1–50 listings, first
+                guidebook free) or Hostaway (quoted by listing count).
               </li>
               <li>
                 <strong>
-                  &quot;I have 5-50 STRs and want direct channel connections
-                  plus 300+ integrations.&quot;
+                  &quot;I have 5-50 STRs and want the 300+ integrations
+                  Hostaway advertises.&quot;
                 </strong>{" "}
                 Hostaway.
               </li>
@@ -483,7 +480,8 @@ export default function HostfullyVsHostawayVsGuestyPost() {
                   &quot;I manage 50+ STRs as a business, possibly for other
                   owners.&quot;
                 </strong>{" "}
-                Guesty Pro or Enterprise.
+                Guesty Pro or Enterprise (owners portal from Pro up), or
+                Hostaway, which also lists an owner portal.
               </li>
               <li>
                 <strong>&quot;I&apos;m about to BUY an STR.&quot;</strong>{" "}
