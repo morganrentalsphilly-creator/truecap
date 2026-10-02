@@ -1,200 +1,158 @@
-# TrueCap — Google Ads launch playbook
+# TrueCap Google Ads kit
 
-Everything you need to launch profitable Google Ads on day 1. Read this
-top-to-bottom once, then work through the **Setup checklist** at the
-bottom step by step.
+What is in this folder:
 
 ```
 google-ads/
-├── README.md                  ← this file
-├── ad-copy.md                 ← paste-ready headlines + descriptions
-└── creatives/                 ← display ad PNGs (1200×628 + 1200×1200)
+├── README.md            this file: structure, landing pages, negatives, tracking
+├── ad-copy.md           the ad text to paste: two campaigns, four ad groups
+├── check-ad-copy.mjs    checks ad-copy.md against the code (lengths, prices, URLs)
+├── generate_ads.py      draws the display images in creatives/
+└── creatives/           one display image and two logo files
 ```
 
-## What "profitable" means here
+## Read this first
 
-For ads to keep running, the math has to be:
+- This kit was rewritten on 2026-10-02 from the code at commit `176d52d`. The
+  kit it replaces was written in May 2026 for a different price and for
+  features TrueCap does not offer. Do not paste anything from the earlier
+  version in git history, and do not re-enable a campaign that was built
+  from it.
+- Nothing in this repository starts, pauses or removes an ad. Whether a
+  campaign is running, and which assets it still holds, can only be seen in
+  the Google Ads account.
+- An ad cannot read a price from the catalog. `ad-copy.md` lists every value
+  it was written from. Re-read it whenever `lib/public-pricing.ts` changes,
+  then run `node google-ads/check-ad-copy.mjs`.
 
-> **(Conversion rate × LTV) > Cost-per-click**
+## What the ads say, and what they do not
 
-Concrete: if your Pro Monthly is $19/mo with average 6-month retention
-(LTV ≈ $114), and your visit-to-paid conversion rate ends up at 3%, you
-can pay up to **$3.42 per click** and break even at month 6.
+The copy says only what the code does today:
 
-The four levers we control:
+- The first complete decision needs no account and no card. A new account
+  adds a 21-day trial with 3 Pro deals and 1 comparison, still no card
+  (`lib/product-access.ts`, `lib/product-facts.ts`).
+- Pro is $29.99 a month or $300 a year. Agent Pro is $59.99 a month or $590 a
+  year (`lib/public-pricing.ts`).
+- The Offer Ceiling is the highest price that still meets your targets. The
+  Buy Box is the set of targets. Cash flow, cap rate, cash-on-cash, DSCR and a
+  0 to 100 Deal score come with every analysis (`lib/entitlements-catalog.ts`).
+- Agent Pro keeps a roster of up to 100 clients and up to 12 Buy Boxes per
+  account. Pro and Agent Pro put the agent's logo and brand color on the share
+  page and a "Prepared by" block in the PDF (`lib/agent-faqs.ts`).
 
-1. **Conversion rate** ← the landing page work we just shipped
-2. **LTV** ← push annual plan in the upsell flow (better cash + retention)
-3. **CPC** ← keyword choice + Quality Score + bid strategy
-4. **Click-through rate** ← ad copy + creative + match to search intent
+The copy leaves these out, each for a reason in the code:
 
-We've shipped (1). Setting up (3) and (4) properly is what this guide is
-about.
+| Not in the ads | Why |
+| --- | --- |
+| A refund or a guarantee | `app/terms/page.tsx` says subscription charges are non-refundable except where the law requires. |
+| Tax or exit scenarios | `tax_strategy` and `exit_scenarios` are `shipped: false` in `lib/entitlements-catalog.ts`. |
+| The refinance and resale strategy models | `strategies` is `shipped: false`, and both model flags default to off in `lib/feature-flags.ts`. |
+| A report described as ready for a lender | TrueCap is "not an appraisal, a lender decision, or investment advice" (`docs/voice.md`, the disclaimer). |
+| Property tax filled in for you | `PROPERTY_TAX_FACTS.notAutoFilled` in `lib/product-facts.ts`: property tax is the user's own input. |
+| A client portal or white-label output | `agent_portal` and `embed_whitelabel` are `shipped: false`; the output is co-branded, and TrueCap's name stays on it. |
+| A trial of the roster or of co-branding | The trial is Pro deal analyses and a comparison only (`evaluationFeatures` in `lib/entitlements.ts`). |
+| A count of users or deals, a rating, a quote | There is no verified testimonial or rating, and the deals-analyzed counter was removed (`PRODUCT.md`, "Evidence on Hand"). |
+| A buy or avoid recommendation | The result is a screening result, not advice (`lib/verdict-display.ts`). |
+| Superlatives | `docs/voice.md`. |
+| The word "free" | The one open switch, below. |
 
----
+## Structure
 
-## STEP 1 · Google Ads account setup (10 min)
-
-If you already have an account, skip ahead.
-
-1. Sign up at https://ads.google.com with the same Google identity you
-   want to manage from
-2. Skip the "Smart Mode" / express setup — choose **Expert mode**
-   (small link at the bottom). Smart mode hides the levers we need
-3. Set your **time zone** (irreversible later — use your business zone)
-   and **currency** (USD)
-4. Add your **billing info** (no charges yet — campaigns are paused
-   until you launch)
-
-## STEP 2 · Conversion tracking (15 min — DO THIS BEFORE ANY CAMPAIGN)
-
-Without conversion tracking, Google can't optimize and you'll burn
-money. This is non-negotiable.
-
-### 2a — Verify the global site tag is firing
-
-The TrueCap site already loads `gtag.js` with `AW-18159235338` in
-production (see `app/layout.tsx`). To confirm it's working:
-
-1. Install **Tag Assistant Companion** (Chrome extension)
-2. Visit `https://usetruecap.com` and open Tag Assistant
-3. You should see `AW-18159235338` firing on page load
-
-If you don't see it, deploy is broken — fix before continuing.
-
-### 2b — Create the three conversion actions
-
-In Google Ads → **Goals → Conversions → New conversion action → Website**:
-
-| Action name        | Category   | Value          | Count       | Click-through window | Primary? |
-|--------------------|------------|----------------|-------------|----------------------|----------|
-| Paid subscription  | Purchase   | Use entered    | Every       | 30 days              | ★ YES    |
-| Sign-up            | Sign-up    | Don't use      | One         | 30 days              | ★ YES    |
-| Calc completed     | Lead       | Don't use      | One         | 7 days               | Secondary |
-| PDF exported       | Lead       | Don't use      | One         | 7 days               | Secondary |
-| Deal saved         | Lead       | Don't use      | One         | 7 days               | Secondary |
-
-For each action, when Google asks "How do you want to track conversions?"
-choose **Use Google tag** (not "scan website"). Google will give you a
-**conversion label** — a 12-ish-character string like
-`AbC_DeFgHi-jKlM_NoP`. **Copy each one.**
-
-### 2c — Paste the labels into the code
-
-Open `lib/analytics/track-conversion.ts`:
-
-```ts
-const LABELS: Record<ConversionKey, string | null> = {
-  calc_completed:  null,    // ← paste label here
-  signup:          null,    // ← paste label here
-  paid_subscribed: null,    // ← paste label here
-  pdf_exported:    null,    // ← paste label here
-  deal_saved:      null,    // ← paste label here
-};
-```
-
-Replace each `null` with the matching label (in quotes). Commit and
-deploy. Until you do this, events go nowhere — campaigns will run blind.
-
-### 2d — Test fire each conversion
-
-Use Tag Assistant in Chrome:
-
-1. Open Tag Assistant → "Enable" → visit `https://usetruecap.com`
-2. Run a calculation → confirm `calc_completed` fires
-3. Sign up with a throwaway email → confirm `signup` fires
-4. (Optional) Complete a Stripe checkout in test mode → confirm
-   `paid_subscribed` fires with the dollar value attached
-
-In Google Ads, conversions take **up to 3 hours** to show up in the
-dashboard for the first time. Don't panic if they don't appear instantly.
-
-## STEP 3 · Campaign structure (30 min)
-
-The single biggest mistake new advertisers make: one giant catch-all
-campaign. The fix: **one campaign per intent type**, each with
-ad-groups grouped by tight keyword themes.
-
-### Recommended structure
+Two search campaigns, so that each audience gets its own landing page, its own
+copy and its own landing section in the first-touch record.
 
 ```
-TrueCap — Search                              ← campaign
-├── Generic rental property analysis          ← ad group
-├── BRRRR calculator                          ← ad group
-├── Cap rate calculator                       ← ad group
-├── Cash-on-cash calculator                   ← ad group
-├── 1% rule calculator                        ← ad group
-└── Rehab cost estimator                      ← ad group
+TrueCap: agents (search)            lands on /for-agents
+├── A1  agents with investor clients
+└── A2  client roster and Buy Box screening
 
-TrueCap — Performance Max (turn on later)     ← campaign
-└── (uses creatives + headlines as 'assets')
+TrueCap: investors (search)         lands on /for-investors
+├── I1  rental property analysis
+└── I2  what to offer on a rental
 ```
 
-Start with **Search only**. Add Performance Max in week 3 once Search
-has 30+ conversions for the algorithm to learn from.
+### Keywords
 
-### Keywords per ad group
+Phrase match to start. These are suggestions to test, not a record of what
+converts: no search-term data is in this repository.
 
-Use **Phrase match** for everything to start (broad match burns money on
-new accounts; exact match is too narrow until you have data). Add the
-generic negatives at the bottom right away.
+**A1, agents with investor clients**
+```
+"real estate agent investor clients"
+"working with investor clients"
+"investment property analysis for agents"
+"rental property analysis for agents"
+"deal analysis for real estate agents"
+```
 
-**Generic rental property analysis**
+**A2, client roster and Buy Box screening**
+```
+"investor client buy box"
+"buy box real estate"
+"send deals to investor clients"
+"rental property report for clients"
+"co-branded real estate report"
+```
+
+**I1, rental property analysis**
 ```
 "rental property analyzer"
 "rental property analysis"
 "rental property analysis tool"
+"rental property calculator"
 "investment property analyzer"
-"real estate underwriting tool"
 "real estate deal analyzer"
 "investment property deal analyzer"
 ```
 
-**BRRRR calculator** → landing URL `/tools/brrrr-calculator`
+**I2, what to offer on a rental**
 ```
-"brrrr calculator"
-"brrrr analysis calculator"
-"brrrr method calculator"
-"buy rehab rent refinance calculator"
-"brrrr deal calculator"
-```
-
-**Cap rate calculator** → landing URL `/tools/cap-rate-calculator`
-```
-"cap rate calculator"
-"capitalization rate calculator"
-"rental cap rate calculator"
-"real estate cap rate calculator"
-"property cap rate calculator"
+"how much to offer on a rental property"
+"rental property offer price"
+"max offer rental property"
+"rental property purchase price calculator"
+"what to pay for a rental property"
 ```
 
-**Cash-on-cash calculator** → landing URL `/tools/cash-on-cash-calculator`
-```
-"cash on cash calculator"
-"cash on cash return calculator"
-"coc return calculator"
-"rental property cash on cash"
-```
+### Ad groups the earlier kit had and this one does not
 
-**1% rule calculator** → landing URL `/tools/1-percent-rule-calculator`
-```
-"1 percent rule calculator"
-"one percent rule calculator"
-"1% rule real estate calculator"
-```
+- Single-metric calculator groups (cap rate, cash-on-cash and the refinance
+  strategy calculator). Those `/tools` pages are retired and answer with a
+  permanent redirect to an article, so an ad for a calculator would land on a
+  page with no calculator.
+- The 1% rule and rehab estimator groups. Their pages are still live at
+  `/tools/1-percent-rule-calculator` and `/tools/rehab-cost-estimator`, but the
+  old copy for them leaned on the word "free", on a refund promise and on
+  strategy models that are not offered. They can come back as their own ad
+  groups with new copy.
 
-**Rehab cost estimator** → landing URL `/tools/rehab-cost-estimator`
-```
-"rehab cost calculator"
-"flip rehab estimator"
-"rental rehab budget calculator"
-"renovation cost calculator"
-```
+## Landing pages and URLs
 
-### Negative keywords (campaign-wide)
+- Agent ad groups use `https://usetruecap.com/for-agents`. Investor ad groups
+  use `https://usetruecap.com/for-investors`. No investor ad lands on the
+  homepage, whose headline speaks to agents.
+- Never use one of the ten retired `/tools` paths as a Final URL or a
+  sitelink. They are the keys of `HISTORICAL_TOOL_REDIRECTS` in
+  `lib/historical-tool-redirects.ts`, mirrored by `RETIRED_TOOL_REDIRECTS` in
+  `next.config.mjs`. `check-ad-copy.mjs` reads that list and fails on a match.
+- Final URLs carry no query string and no UTM parameters. With auto-tagging
+  on, Google adds its click id, and `lib/first-touch.ts` counts a landing that
+  carries a click id (`gclid`, `gbraid`, `wbraid`, `dclid`, `msclkid`) as paid
+  search. It also counts `utm_medium=cpc` as paid search. If you add UTM
+  parameters, put them in the campaign's Final URL suffix and leave the Final
+  URLs as they are:
+  `utm_source=google&utm_medium=cpc&utm_campaign=agents_search` for the agents
+  campaign, `...&utm_campaign=investors_search` for the investors campaign.
+- The same module records the landing section, `for_agents` or
+  `for_investors`, in the first-touch cookie once the visitor has accepted
+  cookies, and the server copies it to the account at sign-up. That is how a
+  sign-up from an agent ad can be told from one from an investor ad.
 
-Paste this list into the **Negative keywords** section at the campaign
-level on day 1 — it will save you serious money:
+## Negative keywords
+
+Add this list at the campaign level in both campaigns. It is the earlier
+kit's list, unchanged.
 
 ```
 free
@@ -229,153 +187,66 @@ school
 university
 ```
 
-## STEP 4 · Bidding + budget (10 min)
+### The one open switch: `free`
 
-### Bid strategy
+`free` is on the list, so the ads never show for a search that contains the
+word. The copy in `ad-copy.md` is written to match: no headline, description,
+sitelink or callout uses it. The founder has not decided this. To flip it,
+remove `free` from the list and add the lines that `ad-copy.md` holds ready
+under "The one open switch". Run the check with
+`node google-ads/check-ad-copy.mjs --allow-free` after that.
 
-- **Week 1-2**: `Maximize Conversions` with a **Max CPC cap of $3.50**.
-  This caps your downside while Google learns. Without the cap, Google
-  will bid $15+ on real-estate keywords and burn through your budget
-  before you have data.
-- **Week 3-4** (after 15+ conversions): switch to `Maximize Conversions`
-  **without** a CPC cap — Google now has data
-- **Week 5+** (after 30+ paid conversions): switch to **Target CPA**
-  with target = your acceptable cost-per-paid-subscription (likely
-  $30-80 depending on which plan converts)
-- **Month 3+** (50+ paid conversions): test **Target ROAS** if revenue
-  per click stabilizes
+### A note on `realtor`
 
-### Daily budget
+Google says negative keywords do not match close variants (Google Ads Help,
+"About negative keywords"), so `realtor` blocks a search that contains that
+exact word and not the plural. It stays on the list as it was. For that
+reason no keyword in this kit contains it, and the ad text says "agents".
+Narrowing it to `realtor.com` would let agent searches through; that is not
+decided.
 
-Start at **$20/day** ($600/mo total). That's enough to get ~150
-clicks per week if your CPC averages ~$1, and 150 clicks × 2-3%
-conversion = 3-5 conversions/week — the floor for the algorithm to
-optimize. Less than that and you're starving the data.
+## Tracking, as the code does it today
 
-## STEP 5 · Ads (use ad-copy.md)
+- The site loads the Google Ads tag `AW-8236119484` and its Tag Manager
+  container only in production, only after the visitor accepts cookies, and
+  never on a route whose path holds an encoded analysis or a bearer token
+  (`components/analytics/google-measurement.tsx`). The earlier version of this
+  file named another ID; the code does not load it.
+- One conversion reaches Google Ads: a paid subscription, `paid_subscribed` in
+  `lib/analytics/track-conversion.ts`. `signup`, `calc_completed`,
+  `pdf_exported` and `deal_saved` have no conversion label, so Google Ads
+  receives nothing for them; they are pushed to the data layer as
+  `tc_<name>` events.
+- To report another conversion, create the conversion action in Google Ads
+  and put its label in the `LABELS` map in that file.
 
-For each ad group, create **one Responsive Search Ad** with:
+## Before a campaign is enabled
 
-- **15 headlines** (30 char max each) — Google rotates and picks the
-  best ones. The more variants, the better Google can optimize.
-- **4 descriptions** (90 char max each)
-- **Final URL** = the matching `/tools/*` page (or `/` for generic)
-- **Display path** = leave as `usetruecap.com/[tools]`
+These are the founder's steps in the Google Ads account.
 
-Open `ad-copy.md` in this folder — every ad group has a ready-to-paste
-set.
+- [ ] The headlines, descriptions, images and video from the earlier kit are
+      removed from the account's assets. Pausing leaves them reusable.
+- [ ] Each ad group holds only the text in `ad-copy.md`.
+- [ ] `node google-ads/check-ad-copy.mjs` passes on the day of launch.
+- [ ] `/for-agents` shows the Agent Pro prices, not a waitlist, before the
+      agents campaign runs.
+- [ ] The negative keyword list is added to both campaigns, and the copy
+      matches the position of the `free` switch.
+- [ ] Auto-tagging is on.
+- [ ] Budget, bids and bid strategy are set. This kit sets none of them: the
+      repository holds no conversion-rate, retention or cost-per-click data to
+      set them from. The break-even rule is the usual one: a click is worth
+      paying for while conversion rate times revenue per customer is higher
+      than the cost per click.
 
-### Ad assets to add (campaign-level)
+## Display images
 
-These are **free** and 2-3x your CTR. Add all of them on day 1:
+`creatives/` holds one display image, `02_60_second_speed_landscape_1200x628.png`,
+and two logo files. Nine other images were removed on 2026-10-02 because each
+stated something that is not true today, and `generate_ads.py` no longer draws
+them.
 
-- **Sitelinks** (4 minimum, 6 max): Free Calculator · Pricing · Cap Rate Tool · BRRRR Tool · Cash-on-Cash Tool · How It Works
-- **Callouts** (6 min): `Free to start` · `No card required` · `60-second setup` · `Auto-fill from address` · `14-day money-back` · `Lender-ready PDFs`
-- **Structured snippets** (Featured: types of investment): SFR · Multi-family · BRRRR · Fix-and-flip · House-hacking
-- **Call extension**: skip unless you actually answer calls
-- **Lead form**: skip for now — direct-to-website converts better at our price point
-
-## STEP 6 · Audiences + targeting
-
-### Locations
-- Start with **United States only** (HUD data is US-only)
-- Exclude any country you don't want to spend on
-- Use the **Presence: People IN your targeted locations** option
-  (not "interest in") — saves money on lookers
-
-### Devices
-- Don't exclude any device, but in the **Devices** column of the
-  campaign view, **reduce mobile bid by -10% for week 1**. Mobile
-  converts but the form is denser. You can lift it back to 0% in
-  week 3 once you have data.
-
-### Audiences (signals)
-Add these as **observation** (not targeting) so you can see how
-they perform without restricting reach:
-
-- In-market audiences → Real Estate → **Residential Properties for Sale**
-- In-market audiences → Real Estate → **Mortgages**
-- Affinity → **Real Estate Enthusiasts**
-- Custom segment based on these URLs: `biggerpockets.com`, `dealcheck.io`, `mashvisor.com`, `stessa.com`
-
-After 2 weeks check the **Audiences** report — if one audience is
-converting 2× the baseline, add a +25% bid adjustment.
-
-## STEP 7 · Launch checklist (final 5 min)
-
-Before clicking "Launch":
-
-- [ ] Conversion actions created in Google Ads (Step 2b)
-- [ ] Conversion labels pasted into `track-conversion.ts` AND deployed
-- [ ] Verified tracking fires via Tag Assistant (Step 2d)
-- [ ] Negative keywords added at campaign level (Step 3)
-- [ ] Daily budget set to $20 (Step 4)
-- [ ] Max CPC cap set to $3.50 (Step 4)
-- [ ] Min 5 headlines + 2 descriptions per ad group (Step 5)
-- [ ] 6 callouts + 4 sitelinks added (Step 5)
-- [ ] Targeting: USA only, presence-based (Step 6)
-- [ ] Email yourself the campaign URL so you can check it Monday morning
-
-Now click Enable. Don't touch anything for 72 hours.
-
-## STEP 8 · Week-1 optimization rules
-
-Do these once per day for the first 7 days:
-
-1. **Check the Search Terms report** (Keywords → Search terms). Anything
-   that's burning >$5 with zero conversions → add as a **negative
-   keyword**. Anything converting → add as an **exact match** keyword.
-2. **Quality Score** (Keywords → Quality Score column — enable in
-   columns). If any keyword is <5, your ad copy or landing page doesn't
-   match the intent. Pause and rework.
-3. **Don't pause low-CTR keywords yet.** Need at least 100 impressions
-   before any decision.
-
-After 14 days, the algorithm has enough data. At that point:
-
-- Pause anything with >$20 spent and 0 conversions
-- Increase bid adjustment on anything converting at >3× baseline
-- Add 5 more negatives based on the search terms report
-- Consider switching bid strategy (see Step 4)
-
-## STEP 9 · The break-even spreadsheet (track this weekly)
-
-Open Google Sheets, name it "TrueCap Ads — week N". Track:
-
-| Metric                          | Source                       |
-|---------------------------------|------------------------------|
-| Spend                           | Google Ads                   |
-| Clicks                          | Google Ads                   |
-| Sign-ups                        | Conversions / Stripe         |
-| Paid subscriptions              | Stripe                       |
-| Revenue (this month)            | Stripe                       |
-| Cost per sign-up                | Spend ÷ Sign-ups             |
-| Cost per paid                   | Spend ÷ Paid subscriptions   |
-| LTV estimate (Pro monthly × 6)  | $19 × 6 = $114               |
-| ROAS                            | Revenue ÷ Spend              |
-| Payback months                  | Cost per paid ÷ Monthly ARPU |
-
-If **Cost per paid > LTV** after week 4, the unit economics don't
-work — either the conversion rate has to improve (LP work) or the LTV
-has to (push annual harder, retention work) or the CPC has to come
-down (better Quality Score, narrower keywords).
-
-If **Cost per paid is < LTV by month 2**, scale: double the daily
-budget every 2 weeks while CPA holds.
-
-## Common mistakes to avoid
-
-- ❌ **Broad match keywords on day 1** — burns budget on irrelevant queries
-- ❌ **Sending all traffic to `/`** — Quality Score punishes generic LPs.
-  Send tool-specific ads to the matching `/tools/*` page
-- ❌ **Skipping conversion tracking** — Google can't optimize without it
-- ❌ **Pausing too early** — give every keyword 100 impressions before judging
-- ❌ **Daily budget too low** — under $15/day starves the algorithm
-- ❌ **Using only 1-2 ad headlines** — fewer variants = Google can't optimize
-- ❌ **Not adding negatives** — week 1 search term reports always have surprises
-
-## When to come back to me
-
-- After 7 days of data: I'll help interpret the search terms report and decide what to pause/keep
-- After 30 days: I'll help diagnose whether the unit economics work and what to invest in next (LP changes, new ad copy, expanded keywords)
-- Anytime CPC spikes >2× baseline: usually a Quality Score issue I can help diagnose
+The image that is left was drawn in May 2026. Its metric tiles are sample
+figures, it uses the earlier brand colors, and its button reads "Try the free
+calculator", so it does not match the `free` switch as it stands. Check it
+against the current product before using it.
