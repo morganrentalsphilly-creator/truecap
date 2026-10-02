@@ -141,10 +141,9 @@ const MATRIX: Row[] = [
     winner: "appfolio",
   },
   {
-    feature: "AI assistant for renters",
+    feature: "AI for leasing",
     truecap: "No",
-    appfolio:
-      "Yes: Realm-X Assistant is included; the AI Leasing Performer is a paid add-on",
+    appfolio: "Paid add-on: the Realm-X Leasing Performer",
     winner: "appfolio",
   },
   {
@@ -169,8 +168,9 @@ const MATRIX: Row[] = [
   {
     feature: "Shareable read-only deal link",
     truecap: "Free — read-only public link; Pro adds co-branding",
-    appfolio: "Owner, vendor and resident portals; no public deal link listed",
-    winner: "truecap",
+    appfolio:
+      "Owner, vendor and resident portals; AppFolio Investment Manager adds an investor portal and deal sharing",
+    winner: "tie",
   },
 ];
 
@@ -305,8 +305,8 @@ export default function VsAppfolioPage() {
             />
           </ScrollX>
           <p className={VS_SOURCES}>
-            AppFolio details checked against its pricing page and AppFolio
-            Stack marketplace in October 2026. See{" "}
+            AppFolio details checked against its pricing page, its Investment
+            Manager page and AppFolio Stack marketplace in October 2026. See{" "}
             <a
               href="https://www.appfolio.com/pricing"
               target="_blank"
