@@ -31,7 +31,11 @@ export type ToolOgConfig = {
   tagline: string;
   /** Section label shown in the top-right corner (e.g. "Free tool"). */
   sectionLabel?: string;
-  /** 3-4 short facts shown as chips above the headline. */
+  /**
+   * Short facts shown as chips above the headline. There is no default: a
+   * chip is a claim about the tool, so each card passes the ones its own page
+   * supports, and a card that passes none draws none.
+   */
   pills?: string[];
   /** Bottom footer text — typically the route or a category list. */
   footerLeft?: string;
@@ -44,7 +48,7 @@ export async function renderToolOgImage(config: ToolOgConfig): Promise<ImageResp
     name,
     tagline,
     sectionLabel = "Free tool",
-    pills = ["Live data", "No signup", "60 seconds"],
+    pills = [],
     footerLeft = "Free real estate calculators",
   } = config;
   const label = `Tools · ${sectionLabel}`;
