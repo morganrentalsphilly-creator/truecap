@@ -157,6 +157,7 @@ import {
 } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
+import type { MarketRentSource } from "./deal-driver-insight";
 import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import {
@@ -1101,6 +1102,11 @@ export function InvestCalcPage({
   const [marketRentEstimate, setMarketRentEstimate] = useState<number | null>(
     null,
   );
+  // What marketRentEstimate is, so the deal-driver card names it truthfully:
+  // the HUD area figure, the HUD statewide average (no county match), or an
+  // adopted RentCast estimate. Set and cleared beside marketRentEstimate.
+  const [marketRentSource, setMarketRentSource] =
+    useState<MarketRentSource | null>(null);
   // Multi-family sibling of marketRentEstimate: HUD FMR keyed by bedroom
   // count, for the per-unit rent reality-check in the units section. Same
   // rules: captured on enrichment, never blocks analysis, cleared on a new
@@ -1109,6 +1115,10 @@ export function InvestCalcPage({
     number,
     number
   > | null>(null);
+  // True once any merged benchmark set came back as the HUD statewide
+  // average (enrich-property's meta.unitRents.stateAverage), so the units
+  // section never names it an area Fair Market Rent. Cleared with the map.
+  const [unitFmrIsStatewide, setUnitFmrIsStatewide] = useState(false);
   // Typed by the panel's exported snapshot shape so the two can't drift
   // (the inline duplicate did exactly that when breakEvenPrice was added).
   const [livePreview, setLivePreview] = useState<LivePreviewSnapshot | null>(
@@ -1991,9 +2001,11 @@ export function InvestCalcPage({
       });
       enrichmentCaptureRef.current = {};
       setMarketRentEstimate(null);
+      setMarketRentSource(null);
       // Same rules as marketRentEstimate: a fresh session must never judge
       // its units against the PREVIOUS deal's market benchmark.
       setUnitFmrByBedrooms(null);
+      setUnitFmrIsStatewide(false);
       unitFmrKeyRef.current = null;
       enrichedUnitsRef.current.clear();
       // …and the enrichment TRIGGERS, not just the captures — the same
@@ -2379,7 +2391,9 @@ export function InvestCalcPage({
         if (!sameProperty) {
           enrichmentCaptureRef.current = {};
           setMarketRentEstimate(null);
+          setMarketRentSource(null);
           setUnitFmrByBedrooms(null);
+          setUnitFmrIsStatewide(false);
           unitFmrKeyRef.current = null;
         }
         lastEnrichedAddressRef.current = placeKey;
@@ -2578,6 +2592,9 @@ export function InvestCalcPage({
         // Always record the HUD benchmark for the rent reality-check, even if
         // the user already typed their own rent (so we can compare the two).
         setMarketRentEstimate(enrichment.monthlyRent);
+        setMarketRentSource(
+          enrichment.meta.rent?.stateAverage ? "hud-statewide" : "hud-area",
+        );
         const current = form.getValues("monthlyRent") as
           | number
           | undefined
@@ -2619,7 +2636,7 @@ export function InvestCalcPage({
           description: rentFilledFromHud
             ? `${filled.join("  ·  ")} - ${
                 rentIsStateAverage
-                  ? "No local HUD match — this is a statewide average; local rents vary widely, so adjust to comps."
+                  ? "No local HUD figure matched this address, so this is a statewide HUD average; local rents vary widely, so adjust to comps."
                   : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
               }`
             : filled.join("  ·  "),
@@ -2858,7 +2875,9 @@ export function InvestCalcPage({
       purchasePriceProvenanceAddressRef.current = null;
       purchasePriceProvenanceValueRef.current = null;
       setMarketRentEstimate(null);
+      setMarketRentSource(null);
       setUnitFmrByBedrooms(null);
+      setUnitFmrIsStatewide(false);
       unitFmrKeyRef.current = null;
       persistedInputConfidenceSourceContextRef.current = null;
       persistedInputConfidenceAddressRef.current = null;
@@ -3363,7 +3382,7 @@ export function InvestCalcPage({
             title: "Auto-filled per-unit rent",
             description: `${filledLines.join("  ·  ")} - ${
               anyStateAverage
-                ? "No local HUD match — these are statewide averages; local rents vary widely, so adjust to comps."
+                ? "No local HUD figure matched this address, so these are statewide HUD averages; local rents vary widely, so adjust to comps."
                 : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
             }`,
           });
@@ -3428,6 +3447,9 @@ export function InvestCalcPage({
             ...(prev ?? {}),
             ...result.fmrByBedrooms,
           }));
+          if (result.meta.unitRents?.stateAverage === true) {
+            setUnitFmrIsStatewide(true);
+          }
         }
       })
       .catch((err) => {
@@ -3570,6 +3592,7 @@ export function InvestCalcPage({
       ) {
         form.setValue("monthlyRent", adopted.monthlyRent, opts);
         setMarketRentEstimate(adopted.monthlyRent);
+        setMarketRentSource("rentcast");
         enrichmentCaptureRef.current.monthlyRent = {
           source: "rentcast-estimate",
           detail: "RentCast market-rent estimate",
@@ -4887,7 +4910,9 @@ export function InvestCalcPage({
           enrichmentCaptureRef.current = {};
           setSavedTemplateFallback(null);
           setMarketRentEstimate(null);
+          setMarketRentSource(null);
           setUnitFmrByBedrooms(null);
+          setUnitFmrIsStatewide(false);
           unitFmrKeyRef.current = null;
           lastSelectedAddressRef.current = null;
           lastEnrichedAddressRef.current = null;
@@ -7435,6 +7460,7 @@ export function InvestCalcPage({
         shouldValidate: true,
       });
       setMarketRentEstimate(adopted.monthlyRent);
+      setMarketRentSource("rentcast");
       enrichmentCaptureRef.current.monthlyRent = {
         source: "rentcast-estimate",
         detail: "RentCast market-rent estimate",
@@ -8201,7 +8227,9 @@ export function InvestCalcPage({
     setInputVerification({});
     inputVerificationAddressRef.current = null;
     setMarketRentEstimate(null);
+    setMarketRentSource(null);
     setUnitFmrByBedrooms(null);
+    setUnitFmrIsStatewide(false);
     unitFmrKeyRef.current = null;
     enrichedUnitsRef.current.clear();
     // …and the enrichment TRIGGERS, not just the captures (verifier
@@ -10209,6 +10237,7 @@ export function InvestCalcPage({
                         form={form}
                         isHouseHack={propertyType === "owner-occupant"}
                         fmrByBedrooms={unitFmrByBedrooms}
+                        fmrIsStatewide={unitFmrIsStatewide}
                         chrome="bare"
                       />
                     )}
@@ -10798,6 +10827,7 @@ export function InvestCalcPage({
                   isLoadingDealScore={isLoadingDealScore}
                   propertyType={propertyType}
                   marketRentEstimate={marketRentEstimate}
+                  marketRentSource={marketRentSource}
                   projectionSource={projectionSource}
                   taxStrategySource={taxStrategySource}
                   exitScenarioSource={exitScenarioSource}

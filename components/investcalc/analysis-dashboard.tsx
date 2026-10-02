@@ -98,7 +98,10 @@ import { ProInlineGate } from "@/components/investcalc/pro-inline-gate";
 import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card";
 import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
-import { DealDriverInsight } from "@/components/investcalc/deal-driver-insight";
+import {
+  DealDriverInsight,
+  type MarketRentSource,
+} from "@/components/investcalc/deal-driver-insight";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
 import {
   RecordedSpecialistAnalysisCard,
@@ -213,8 +216,11 @@ interface AnalysisDashboardProps {
   dealScoreResult: DealScoreActionResult | null;
   isLoadingDealScore: boolean;
   propertyType: "single-family" | "multi-family" | "owner-occupant";
-  /** HUD area rent benchmark for the entered address (single-family). */
+  /** Rent benchmark for the entered address (single-family). */
   marketRentEstimate?: number | null;
+  /** What marketRentEstimate is: the HUD area figure, the HUD statewide
+   *  average, or an adopted RentCast estimate. */
+  marketRentSource?: MarketRentSource | null;
   projectionSource: {
     analysisId: string | null;
     recorded?: boolean;
@@ -485,6 +491,7 @@ export function AnalysisDashboard({
   isLoadingDealScore,
   propertyType,
   marketRentEstimate,
+  marketRentSource,
   projectionSource,
   taxStrategySource,
   exitScenarioSource,
@@ -2247,6 +2254,7 @@ export function AnalysisDashboard({
           values={values}
           result={result}
           marketRentEstimate={marketRentEstimate}
+          marketRentSource={marketRentSource}
         />
       ) : null}
 
@@ -2580,6 +2588,7 @@ export function AnalysisDashboard({
                     values={values}
                     result={result}
                     marketRentEstimate={marketRentEstimate}
+                    marketRentSource={marketRentSource}
                   />
                 ) : null}
                 <AssumptionImpactCard values={values} />

@@ -54,15 +54,33 @@ const DRIVER_ADVICE: Record<string, { noun: string; risk: string }> = {
   },
 };
 
+/**
+ * Where marketRentEstimate came from. A HUD fill is the Fair Market Rent area
+ * figure, or, when the address has no county match, the statewide average of
+ * HUD's area figures (enrich-property's meta.rent.stateAverage); an adopted
+ * RentCast estimate also feeds marketRentEstimate. Each is named for what it
+ * is, the same way Input Confidence names it on the same screen.
+ */
+export type MarketRentSource = "hud-area" | "hud-statewide" | "rentcast";
+
+const BENCHMARK_NAME: Record<MarketRentSource, string> = {
+  "hud-area": "HUD area benchmark",
+  "hud-statewide": "HUD statewide average",
+  rentcast: "RentCast market-rent estimate",
+};
+
 export function DealDriverInsight({
   values,
   result,
   marketRentEstimate,
+  marketRentSource,
 }: {
   values: InvestmentFormValues | null;
   result: AnalysisResult | null;
-  /** HUD area rent benchmark — turns the rent advice into a concrete check. */
+  /** Rent benchmark for the address — turns the rent advice into a concrete check. */
   marketRentEstimate?: number | null;
+  /** What marketRentEstimate is; a missing value reads as the HUD area figure. */
+  marketRentSource?: MarketRentSource | null;
 }) {
   const drivers = useMemo(
     () => (values ? computeAssumptionImpact(values) : []),
@@ -79,10 +97,12 @@ export function DealDriverInsight({
   const advice = DRIVER_ADVICE[top.key];
   const noun = advice?.noun ?? top.label.toLowerCase();
 
-  // Concrete context vs the HUD area benchmark — only for the rent driver,
+  // Concrete context vs the rent benchmark — only for the rent driver,
   // single-family, and only when we actually fetched a benchmark for this
   // address. HUD FMR is an area-level screening reference, never a substitute
   // for current comparable leases or other property-specific evidence.
+  const source: MarketRentSource = marketRentSource ?? "hud-area";
+  const benchmarkName = BENCHMARK_NAME[source];
   const enteredRent =
     values.propertyType === "single-family" && typeof values.monthlyRent === "number"
       ? Math.round(values.monthlyRent)
@@ -116,22 +136,24 @@ export function DealDriverInsight({
             {Math.abs(rentDiffPct) < 4 ? (
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is in
-                line with the <strong className="text-foreground">${market.toLocaleString()}</strong> HUD area
-                benchmark. That is a screening reference, not property-specific evidence; verify it with current
-                comparable leases before relying on the result.
+                line with the <strong className="text-foreground">${market.toLocaleString()}</strong>{" "}
+                {benchmarkName}. That is a screening reference, not property-specific evidence; verify it with
+                current comparable leases before relying on the result.
               </>
             ) : rentDiffPct > 0 ? (
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
                 <strong className="text-foreground">{rentDiffPct}% above</strong> the ${market.toLocaleString()}{" "}
-                HUD area benchmark. Verify the entered rent with current comparable leases; HUD is not a
-                property-specific rent estimate.
+                {benchmarkName}. Verify the entered rent with current comparable leases;{" "}
+                {source === "rentcast"
+                  ? "an automated estimate is not verified in-place rent or a signed lease."
+                  : "HUD is not a property-specific rent estimate."}
               </>
             ) : (
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
                 <strong className="text-foreground">{Math.abs(rentDiffPct)}% below</strong> the $
-                {market.toLocaleString()} HUD area benchmark. Review the gap, but do not change the underwrite
+                {market.toLocaleString()} {benchmarkName}. Review the gap, but do not change the underwrite
                 without current comparable leases or other property-specific evidence.
               </>
             )}
