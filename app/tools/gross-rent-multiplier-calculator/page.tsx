@@ -19,6 +19,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free GRM Calculator — Gross Rent Multiplier Screen",
@@ -35,24 +36,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/gross-rent-multiplier-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free GRM Calculator — Gross Rent Multiplier Screen",
     description:
       "Compare rental deals in seconds with Gross Rent Multiplier — the fastest screening ratio in real estate.",
     url: "/tools/gross-rent-multiplier-calculator",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap GRM calculator",
-      },
-    ],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/home.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function GrmCalculatorPage() {

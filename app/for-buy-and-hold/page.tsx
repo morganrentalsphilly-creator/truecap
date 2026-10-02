@@ -34,6 +34,7 @@ import { Header } from "@/components/investcalc/header";
 // scroll. The hero's actions keep next/link's default; /analyze never
 // prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "For Buy-and-Hold Investors",
@@ -47,21 +48,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/for-buy-and-hold" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "For Buy-and-Hold Investors — TrueCap",
     description:
       "A source-labeled screen for cap rate, CoC, DSCR, sensitivity, Offer Ceiling, and 10-year cash-flow and equity projections.",
     url: "/for-buy-and-hold",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap for buy-and-hold investors",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 const USE_CASES: readonly RuledListItem[] = [

@@ -16,6 +16,7 @@ import { RelatedContent } from "@/components/marketing/related-content";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Mortgage Payment Calculator — Full PITI",
@@ -32,21 +33,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/mortgage-payment-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Mortgage Payment Calculator — Full PITI",
     description:
       "Compute principal, interest, tax, homeowner insurance, estimated PMI, and total interest paid over the loan.",
     url: "/tools/mortgage-payment-calculator",
     type: "website",
-    images: [
-      {
-        url: "/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TrueCap mortgage payment calculator",
-      },
-    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function MortgagePaymentPage() {

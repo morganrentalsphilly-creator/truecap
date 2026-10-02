@@ -28,6 +28,7 @@ import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "70% Rule Calculator | 70%-rule price screen",
   description:
@@ -41,17 +42,14 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/70-percent-rule-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "70% Rule Calculator — Early Price Screen",
     description:
       "70%-rule price screen = 70% of ARV minus repairs. Compute the boundary at 60/65/70/75% and learn when 70% is the wrong screen.",
     url: "/tools/70-percent-rule-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap 70% rule calculator" }],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/home.jpg"],
-  },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS: { q: string; a: string }[] = [

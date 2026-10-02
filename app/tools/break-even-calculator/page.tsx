@@ -18,6 +18,7 @@ import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd, toolAppId } from "@/lib/seo/tool-app-ld";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const metadata: Metadata = {
   title: "Free Break-Even Calculator — Months to Recoup Cash",
@@ -33,13 +34,13 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/break-even-calculator" },
   openGraph: {
+    ...OPEN_GRAPH_BASE,
     title: "Free Break-Even Calculator — Months to Recoup Cash",
     description: "How many months until your rental property has returned your initial investment from cash flow alone.",
     url: "/tools/break-even-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap break-even calculator" }],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: { card: "summary_large_image" },
 };
 
 const FAQS: { q: string; a: string }[] = [
