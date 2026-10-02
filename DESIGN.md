@@ -541,7 +541,11 @@ a screenshot:
   and 390×844 the cue sits above the fold and the ledger's head starts at it.
   As built, the display size eases from 1024px (see Typography) so the
   investor cue clears the one-line cookie banner in a 1095×760 window, and the
-  ledger's figure columns step down to 9rem between 1024 and 1279px.
+  ledger's figure columns step down to 9rem between 1024 and 1279px. In that
+  band the hero's address field and button each give up 4px of inline padding
+  a side (12px and 16px), so the placeholder fits a field that is 187px wide
+  at 1024px. The form is not stacked there: 58px more height puts the cue
+  under the banner at 1095×760.
 - **Copy:** the copy pass's H1, subhead, CTA, sample link, risk line and
   investor cue, unchanged. The arrow suffixes go ("See the sample deal", "For
   investors"). The ledger's caption calls it the sample deal, never
