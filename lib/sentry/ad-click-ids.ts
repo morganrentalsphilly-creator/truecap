@@ -24,11 +24,17 @@ import {
 const BARE_QUERY_KEY = /(?:^|[._])query(?:$|[._])/i;
 const MAX_DEPTH = 8;
 
+/**
+ * A stripped copy of plain event data. `done` remembers each object's copy,
+ * so one object referenced from two places is stripped in both. While an
+ * object is still being walked it maps to a marker, which ends a cycle
+ * without handing back the unstripped original.
+ */
 function stripDeep(
   value: unknown,
   key = "",
   depth = 0,
-  seen = new WeakSet<object>(),
+  done = new WeakMap<object, unknown>(),
 ): unknown {
   if (typeof value === "string") {
     return BARE_QUERY_KEY.test(key)
@@ -36,19 +42,21 @@ function stripDeep(
       : stripAdClickIds(value);
   }
   if (!value || typeof value !== "object") return value;
-  if (depth >= MAX_DEPTH || seen.has(value)) return value;
-  seen.add(value);
-  if (Array.isArray(value)) {
-    return value.map((entry) => stripDeep(entry, key, depth + 1, seen));
-  }
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>).map(
-      ([childKey, child]) => [
-        childKey,
-        stripDeep(child, childKey, depth + 1, seen),
-      ],
-    ),
-  );
+  if (done.has(value)) return done.get(value);
+  if (depth >= MAX_DEPTH) return value;
+  done.set(value, "[circular]");
+  const copy = Array.isArray(value)
+    ? value.map((entry) => stripDeep(entry, key, depth + 1, done))
+    : Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(
+          ([childKey, child]) => [
+            childKey,
+            stripDeep(child, childKey, depth + 1, done),
+          ],
+        ),
+      );
+  done.set(value, copy);
+  return copy;
 }
 
 type QueryString = NonNullable<Event["request"]>["query_string"];
