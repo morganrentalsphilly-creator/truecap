@@ -182,7 +182,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
     slug: "comparisons",
     title: "Tool Comparisons",
     description:
-      "Honest side-by-side comparisons of rental analysis calculators, deal-discovery platforms, and landlord software.",
+      "Side-by-side comparisons of rental analysis calculators, deal-discovery platforms, and landlord software.",
     intro:
       "Picking software shouldn't take longer than picking the deal. These side-by-side comparisons cover rental calculators, deal-discovery platforms, and landlord ops tools — what each does well, where each falls short, and which investor each one actually fits.",
     postSlugs: [
