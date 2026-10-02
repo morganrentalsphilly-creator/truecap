@@ -249,7 +249,9 @@ export const PUBLIC_CATALOG_FACTS = {
 } as const;
 
 export const DATA_SOURCE_FACTS = {
-  rent: "HUD Fair Market Rent by county or ZIP when available",
+  // Shared rent-source wording (audit row P0-02): the lookup has three
+  // outcomes, and the statewide one is not a Fair Market Rent for any area.
+  rent: "HUD rent benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such)",
   mortgageRate: "FRED 30-year fixed mortgage series",
   propertyTax: `${PROPERTY_TAX_FACTS.acceptedInputs.join(" or ")}; ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
   editable:

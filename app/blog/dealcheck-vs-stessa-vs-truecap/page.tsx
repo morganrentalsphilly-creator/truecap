@@ -275,7 +275,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <strong>TrueCap free</strong> gives you the full underwriting
               engine — cap rate, CoC, DSCR, NCF, monthly cash flow — on every
               analysis, with no monthly limit and no signup wall. Address
-              auto-fill starts with a HUD area rent benchmark and a FRED
+              auto-fill starts with a HUD rent benchmark and a FRED
               owner-occupied 30-year rate benchmark. Property tax remains a
               manual local input; if left blank, the screen discloses a generic
               1.1% purchase-price fallback rather than a state or parcel

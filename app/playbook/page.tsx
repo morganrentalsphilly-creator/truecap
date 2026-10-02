@@ -86,7 +86,7 @@ const STEPS = [
     short: "Read the analysis",
     title: "Read the analysis like an underwriter, not a fan",
     paragraphs: [
-      "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD area benchmark and rate from a labeled FRED national series; property tax is a manual local input with a disclosed generic fallback when blank. These are editable screening starting points, not verified facts or quotes for the property.",
+      "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD rent benchmark and rate from a labeled FRED national series; property tax is a manual local input with a disclosed generic fallback when blank. These are editable screening starting points, not verified facts or quotes for the property.",
       "Replace four numbers with local evidence before you believe any verdict: the rent (pull 3 comparable actual rentals, not asking rents), the tax bill (the county has the real number), insurance (one phone call), and the rate (a written quote for an investor loan, which is not the owner-occupant headline rate). Everything else — vacancy, maintenance, CapEx, management — keep conservative defaults until the property tells you otherwise.",
       "Then read three outputs in order: modeled cash flow with reserves, DSCR against your Buy Box threshold, and the downside scenario. A lender may calculate DSCR differently and will apply its own eligibility, valuation, and reserve rules.",
     ],

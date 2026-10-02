@@ -153,7 +153,7 @@ const ROSTER: [title: string, body: string][] = [
 
 const WORKFLOW_STEPS = [
   "Open TrueCap on your phone or laptop at the showing.",
-  "Paste the listing address. HUD area rent and the FRED 30-year benchmark fill in as editable starting values; enter the local property-tax bill or a reviewed rate yourself.",
+  "Paste the listing address. A HUD rent benchmark and the FRED 30-year benchmark fill in as editable starting values; enter the local property-tax bill or a reviewed rate yourself.",
   "Switch to the client's financing: their down payment, their lender's rate, a DSCR loan if that is what they use.",
   "Assign the deal to the client. It is screened against that client's Buy Box, and the Offer Ceiling shows the highest price that still meets their targets.",
   "Send the co-branded share link or PDF. If it misses, the memo names the criterion it missed and by how much.",

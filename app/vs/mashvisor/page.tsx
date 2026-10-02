@@ -499,7 +499,9 @@ const MASHVISOR_FAQ: FaqItem[] = [
     question: "Can I use TrueCap to analyze deals in any US market?",
     answer: (
       <>
-        Yes. TrueCap pulls HUD Fair Market Rent (county-level), FRED 30-year
+        Yes. TrueCap pulls a HUD rent benchmark (ZIP-level when available,
+        otherwise the HUD Fair Market Rent area; when an address has no county
+        match, a statewide HUD figure, labeled as such) and the FRED 30-year
         mortgage rate (national). Property tax remains a manual local input with
         a disclosed generic default when blank. These are screening
         assumptions—not a property rent quote, mortgage offer, or parcel tax

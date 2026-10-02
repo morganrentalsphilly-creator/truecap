@@ -39,6 +39,12 @@ const PAGES: Array<{ file: string; page: string; fullLadder: boolean }> = [
   { file: "app/vs/bricked/page.tsx", page: "/vs/bricked", fullLadder: true },
   { file: "app/methodology/page.tsx", page: "/methodology", fullLadder: true },
   { file: "app/blog/how-to-estimate-rent-rental-property/page.tsx", page: "/blog/how-to-estimate-rent-rental-property", fullLadder: false },
+  // DATA_SOURCE_FACTS.rent: the homepage source table, /for-investors, /llms.txt and /llms-full.txt.
+  { file: "lib/product-facts.ts", page: "/, /for-investors, /llms.txt and /llms-full.txt", fullLadder: true },
+  // The agent FAQ: /for-agents, /why-truecap and the homepage FAQ.
+  { file: "lib/agent-faqs.ts", page: "/for-agents, /why-truecap and the homepage FAQ", fullLadder: true },
+  { file: "app/vs/zillow-rent-estimate/page.tsx", page: "/vs/zillow-rent-estimate", fullLadder: true },
+  { file: "app/vs/mashvisor/page.tsx", page: "/vs/mashvisor", fullLadder: true },
 ];
 
 /** The two-outcome sentences this row removed. */
@@ -48,6 +54,47 @@ const RETIRED = [
   /geographic matching can fail/i,
   /labeled statewide average where HUD has no local match/i,
   /whether the value came from an FMR area or a ZIP-level SAFMR/i,
+  /HUD Fair Market Rent by county or ZIP/i,
+  /Rent starts from HUD Fair Market Rent\b/i,
+  /Small Area FMR where available and a broader-area fallback/i,
+  /HUD Fair Market Rent \(county-level\)/i,
+];
+
+/**
+ * TrueCap's rent fill named as an area figure. The statewide fallback is not
+ * one, so copy that describes what TrueCap fills says "HUD rent benchmark"
+ * (or the full ladder), never "HUD area rent" or "HUD area benchmark".
+ * Files whose only "area" mention is about HUD's FMR itself are not listed.
+ */
+const AREA_FILL_FILES = [
+  "app/vs/page.tsx",
+  "app/vs/zillow-rent-estimate/page.tsx",
+  "app/vs/zillow-rent-estimate/opengraph-image.tsx",
+  "app/vs/rentometer/page.tsx",
+  "app/vs/rentcast/page.tsx",
+  "app/vs/mashvisor/page.tsx",
+  "app/vs/biggerpockets-calculator/page.tsx",
+  "app/vs/dealcheck/page.tsx",
+  "app/vs/propstream/page.tsx",
+  "app/vs/avail/page.tsx",
+  "app/vs/dealmachine/page.tsx",
+  "app/for-agents/page.tsx",
+  "app/for-buy-and-hold/page.tsx",
+  "app/playbook/page.tsx",
+  "app/methodology/page.tsx",
+  "app/tools/rental-property-spreadsheet/page.tsx",
+  "app/blog/best-states-for-rental-investors-2026/page.tsx",
+  "app/blog/dealcheck-vs-stessa-vs-truecap/page.tsx",
+  "components/marketing/landing-sections.tsx",
+  "lib/product-facts.ts",
+  "lib/agent-faqs.ts",
+];
+const AREA_FILL = [
+  /\bHUD area (?:rent )?benchmark\b/i,
+  /\bHUD area rent\b/i,
+  /\beditable area benchmark\b/i,
+  /\bArea rent and a national\b/,
+  /HUD Fair Market Rent as an editable area benchmark/i,
 ];
 
 /** docs/voice.md rule 10, applied to the sentence that carries the ladder. */
@@ -72,6 +119,11 @@ describe("rent source copy names the statewide fallback (audit row P0-02)", () =
     // whole FAQ answer line or table cell on every one of these pages.
     const around = source.slice(Math.max(0, at - 200), at + THIRD_OUTCOME.length + 200);
     for (const pattern of FMR_MISNAMES) expect(around).not.toMatch(pattern);
+  });
+
+  it.each(AREA_FILL_FILES)("%s does not call TrueCap's rent fill an area figure", (file) => {
+    const source = visible(file);
+    for (const pattern of AREA_FILL) expect(source).not.toMatch(pattern);
   });
 
   it("/methodology describes the statewide figure the way the lookup computes it", () => {

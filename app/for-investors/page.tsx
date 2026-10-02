@@ -138,7 +138,7 @@ const WHAT_YOU_GET = [
 const SOURCES: { label: string; source: string; flag?: string }[] = [
   {
     label: "Rent",
-    source: `${DATA_SOURCE_FACTS.rent}, labeled as a benchmark to check against local comps.`,
+    source: `${DATA_SOURCE_FACTS.rent}. Check it against local comps.`,
   },
   {
     label: "Mortgage rate",

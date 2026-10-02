@@ -244,7 +244,7 @@ const COMPARISONS: ComparisonCard[] = [
     slug: "zillow-rent-estimate",
     competitor: "Zillow Rent Estimate",
     tagline:
-      "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full underwriting workflow.",
+      "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD rent benchmark and full underwriting workflow.",
     group: "Specialized tool",
   },
   // Short-term-rental operations software (Hostfully, Hostaway, Lodgify,

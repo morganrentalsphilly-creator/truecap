@@ -56,7 +56,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
   description:
-    "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full rental underwriting workflow.",
+    "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD rent benchmark and full rental underwriting workflow.",
   keywords: [
     "zillow rent estimate accuracy",
     "zillow rent vs market",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
     description:
-      "How an editable HUD area benchmark and full underwriting differ from Zillow's property-specific Rent Zestimate.",
+      "How an editable HUD rent benchmark and full underwriting differ from Zillow's property-specific Rent Zestimate.",
     url: "/vs/zillow-rent-estimate",
     type: "website",
   },
@@ -88,7 +88,7 @@ type Row = {
 const MATRIX: Row[] = [
   {
     feature: "Rent estimate source",
-    truecap: "Editable HUD area benchmark; add property-specific rent evidence",
+    truecap: "Editable HUD rent benchmark; add property-specific rent evidence",
     zillow:
       "Property-specific estimate using public data and similar local listings",
     winner: "tie",
@@ -252,7 +252,7 @@ export default function VsZillowRentPage() {
             </ul>
             <p>
               <strong>HUD Fair Market Rent</strong>, which TrueCap uses as an
-              editable area benchmark, estimates gross rent for standard-quality
+              editable rent benchmark, estimates gross rent for standard-quality
               units at the 40th percentile within HUD-defined areas. It is not a
               property-specific rent opinion, appraisal, or lender approval input;
               replace it when you have stronger local evidence.
@@ -275,7 +275,7 @@ export default function VsZillowRentPage() {
                   estimate is going into a real money decision.
                 </li>
                 <li>
-                  You want an editable HUD area benchmark inside a full
+                  You want an editable HUD rent benchmark inside a full
                   underwriting workflow.
                 </li>
                 <li>
@@ -378,7 +378,7 @@ export default function VsZillowRentPage() {
           heading={<>Start with a rent benchmark, then underwrite the deal.</>}
           lede={
             <>
-              Paste an address. TrueCap starts with an editable HUD area rent
+              Paste an address. TrueCap starts with an editable HUD rent
               benchmark and a mortgage-rate benchmark; enter a local property-tax
               bill or reviewed rate manually. Replace those starting assumptions
               with property-specific evidence before relying on the result.
@@ -462,9 +462,10 @@ const ZILLOW_FAQ: FaqItem[] = [
     question: "What rent data does TrueCap use instead of Zillow?",
     answer: (
       <>
-        TrueCap starts from an editable HUD Fair Market Rent area benchmark for
-        the relevant bedroom count, using ZIP-level Small Area FMR where
-        available and a broader-area fallback. HUD publishes FMRs for
+        TrueCap starts from an editable HUD rent benchmark for the relevant
+        bedroom count: ZIP-level when available, otherwise the HUD Fair Market
+        Rent area; when an address has no county match, a statewide HUD
+        figure, labeled as such. HUD publishes FMRs for
         housing-program administration; they are not property-specific rent
         opinions or lender approvals. Replace the value when you have stronger
         local evidence.
@@ -475,8 +476,8 @@ const ZILLOW_FAQ: FaqItem[] = [
     question: "Can I check rent on a specific Zillow listing in TrueCap?",
     answer: (
       <>
-        Yes — paste the property address into TrueCap and you get the editable
-        HUD area benchmark for that location and bedroom count. The rent field
+        Yes — paste the property address into TrueCap and you get an editable
+        HUD rent benchmark for that bedroom count. The rent field
         is editable, so if you see a Rent Zestimate you trust more for that
         specific listing, type it in and the full underwrite updates in real
         time.
@@ -489,7 +490,7 @@ const ZILLOW_FAQ: FaqItem[] = [
       <>
         Neither source is guaranteed to be more accurate for every property.
         Zillow offers a property-specific starting estimate; TrueCap places an
-        editable HUD area benchmark inside a full expense and financing model.
+        editable HUD rent benchmark inside a full expense and financing model.
         Compare both with current local evidence and use a sensitivity range
         before deciding.
       </>

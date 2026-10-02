@@ -86,7 +86,7 @@ const SPINE_STEPS = [
     key: "analyze",
     label: "Analyze",
     title: "Paste the listing at the showing",
-    body: "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.",
+    body: "A rent benchmark and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.",
   },
   {
     key: "decide",
