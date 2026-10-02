@@ -75,7 +75,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is good monthly cash flow for a rental property?",
-    a: "It depends on deal size and how conservative the expense assumptions are. TrueCap's Buy Box classifier uses explicit cash-flow, DSCR, and cash-on-cash thresholds as screening references. The result only means something when the expense reserves and other inputs are verified.",
+    a: "It depends on deal size and how conservative the expense assumptions are. TrueCap's screening bands use explicit cash-flow, DSCR, and cash-on-cash thresholds as references. The result only means something when the expense reserves and other inputs are verified.",
   },
   {
     q: "Does cash flow include the mortgage payment?",
@@ -326,8 +326,8 @@ export default function RentalCashFlowCalculatorPage() {
             <p>
               There&apos;s no universal magic number — $300/mo means something
               different on a $120k door in Cleveland than on a $600k door in
-              Phoenix. But the bands TrueCap&apos;s own Buy Box classifier
-              uses are a screening reference:
+              Phoenix. But TrueCap&apos;s own screening bands are a
+              reference:
             </p>
             <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
