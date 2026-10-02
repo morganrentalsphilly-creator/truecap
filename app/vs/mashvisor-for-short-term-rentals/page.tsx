@@ -65,7 +65,7 @@ export const metadata: Metadata = {
         url: "/home.jpg",
         width: 1200,
         height: 630,
-        alt: "TrueCap vs Mashvisor for Short-Term Rentals — honest comparison",
+        alt: "TrueCap vs Mashvisor for short-term rentals",
       },
     ],
   },
@@ -227,12 +227,12 @@ export default function VsMashvisorForShortTermRentalsPage() {
       <JsonLd data={structuredData} />
       <VsBreadcrumbSchema
         vsPath="/vs/mashvisor-for-short-term-rentals"
-        pageName="TrueCap vs Mashvisor for Short-Term Rentals"
+        pageName="TrueCap vs Mashvisor for short-term rentals"
       />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         <VsHero>
           <h1 className={VS_H1}>
-            TrueCap vs Mashvisor for Short-term rentals:{" "}
+            TrueCap vs Mashvisor for short-term rentals:{" "}
             market scoring vs per-deal STR underwriting
           </h1>
           <BlogByline />
@@ -271,7 +271,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
 
         <Section rhythm="tight" aria-labelledby="vs-tldr-heading">
           <SectionHeading id="vs-tldr-heading">
-            TL;DR for Short-term rentals investors
+            TL;DR for short-term rental investors
           </SectionHeading>
           <div className={VS_TLDR_GRID}>
             <div className="min-w-0">
@@ -321,10 +321,10 @@ export default function VsMashvisorForShortTermRentalsPage() {
 
         <Section aria-labelledby="vs-matrix-heading">
           <SectionHeading id="vs-matrix-heading">
-            Short-term rentals feature-by-feature
+            Short-term rental feature-by-feature
           </SectionHeading>
           <p className={VS_INTRO}>
-            Where each tool wins on the Short-term rentals workflow
+            Where each tool wins on the short-term rental workflow
             specifically.
           </p>
           <ScrollX label="Comparison table" className="mt-8 max-w-5xl">
