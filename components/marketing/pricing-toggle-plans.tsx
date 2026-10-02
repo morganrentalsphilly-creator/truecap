@@ -47,6 +47,10 @@ import {
   storeBillingPeriod,
   type BillingPeriod,
 } from "@/components/marketing/pricing-period-storage";
+import {
+  OtherPeriodLine,
+  paidPlanFigures,
+} from "@/components/marketing/pricing-card-figures";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -319,6 +323,20 @@ export function PricingTogglePlans({
     period === "monthly"
       ? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)
       : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD);
+  // On phones the cards stack and the toggle is out of sight above them (the
+  // Agent Pro card is the third one down), while the hero's stage chooser
+  // quotes the monthly price. So under its price each paid card also carries
+  // the period the toggle is NOT on (pricing-card-figures.tsx), from the same
+  // inputs as the card: the Stripe display price, else the catalog amount.
+  const otherPeriod: BillingPeriod = period === "monthly" ? "annual" : "monthly";
+  const proOtherPeriod = paidPlanFigures(monthly, annual, {
+    monthlyUsd: PUBLIC_PRO_MONTHLY_USD,
+    annualUsd: PUBLIC_PRO_ANNUAL_USD,
+  })[otherPeriod];
+  const agentOtherPeriod = paidPlanFigures(agentMonthly, agentAnnual, {
+    monthlyUsd: PUBLIC_AGENT_PRO_MONTHLY_USD,
+    annualUsd: PUBLIC_AGENT_PRO_ANNUAL_USD,
+  })[otherPeriod];
 
   return (
     <>
@@ -420,9 +438,12 @@ export function PricingTogglePlans({
           price={proCard.priceTop}
           period={proCard.priceSub}
           priceNote={
-            annualSavingsLabel
-              ? `${proCard.subline} · ${annualSavingsLabel}`
-              : proCard.subline
+            <>
+              {annualSavingsLabel
+                ? `${proCard.subline} · ${annualSavingsLabel}`
+                : proCard.subline}{" "}
+              <OtherPeriodLine figures={proOtherPeriod} />
+            </>
           }
           // A block span, so the caption's wrap is balanced ("Everything in
           // Free, plus / answers to four questions —") rather than leaving
@@ -481,7 +502,12 @@ export function PricingTogglePlans({
             }
             price={agentCard.priceTop}
             period={agentCard.priceSub}
-            priceNote={agentCard.subline}
+            priceNote={
+              <>
+                {agentCard.subline}{" "}
+                <OtherPeriodLine figures={agentOtherPeriod} />
+              </>
+            }
             answersCaption="What changes for your workflow"
             answers={[...AGENT_PRO_FEATURES, ...AGENT_PRO_WORKFLOW].map((f) => ({ term: f }))}
             note={
