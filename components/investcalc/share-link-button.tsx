@@ -570,7 +570,7 @@ export function ShareLinkButton({
                           "show",
                           true,
                           "Show the exact address",
-                          "Your client sees the address at the top of the page and can save a private copy. If this deal has saved comps, the page shows them.",
+                          "Your client sees the address at the top of the page and, with a TrueCap account, can save a private copy. If this deal has saved comps, the page shows them.",
                         ],
                         [
                           "hide",
