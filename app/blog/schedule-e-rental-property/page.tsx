@@ -9,13 +9,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -165,28 +177,24 @@ export default function ScheduleEPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -194,7 +202,8 @@ export default function ScheduleEPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Schedule E and a property cash-flow statement use different
               conventions. This walkthrough uses one simplified hypothetical to
               show the reconciliation, then identifies the records and
@@ -202,14 +211,12 @@ export default function ScheduleEPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What Schedule E measures (and what it doesn&apos;t)
-            </h2>
+          <ArticleBody>
+            <h2>What Schedule E measures (and what it doesn&apos;t)</h2>
             <p>
               <a
                 href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E (Form 1040)
               </a>
@@ -227,7 +234,7 @@ export default function ScheduleEPost() {
               nor your NOI. Depreciation may create a non-cash deduction;{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 loan principal is generally not a current expense
               </a>
@@ -237,7 +244,7 @@ export default function ScheduleEPost() {
               the documents and calculations depend on the loan program;{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR loans
               </Link>{" "}
@@ -245,9 +252,7 @@ export default function ScheduleEPost() {
               and borrower review still vary.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The top of the form: property type and fair rental days
-            </h2>
+            <h2>The top of the form: property type and fair rental days</h2>
             <p>
               Before the money lines, the 2025 form asks for the property
               address, a property-type code, and two day
@@ -259,16 +264,14 @@ export default function ScheduleEPost() {
               the{" "}
               <a
                 href="https://www.irs.gov/instructions/i1040se"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 current personal-use thresholds and allocation method
               </a>{" "}
               before filing.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Line 3: rents received
-            </h2>
+            <h2>Line 3: rents received</h2>
             <p>
               This line generally starts with rental income under the
               taxpayer&apos;s accounting method. Prepaid rent, retained
@@ -278,9 +281,7 @@ export default function ScheduleEPost() {
               current instructions rather than copying scheduled rent.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Lines 5–19: the expense lines that do the work
-            </h2>
+            <h2>Lines 5–19: the expense lines that do the work</h2>
             <p>
               The 2025 form separates expenses into multiple categories.
               Common entries to reconcile include:
@@ -310,14 +311,14 @@ export default function ScheduleEPost() {
                 in an{" "}
                 <a
                   href="https://www.irs.gov/instructions/i1040se"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   ordinarily efficient operating condition
                 </a>
                 , subject to the{" "}
                 <a
                   href="https://www.irs.gov/publications/p527"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   capitalization rules
                 </a>{" "}
@@ -330,7 +331,7 @@ export default function ScheduleEPost() {
                 can apply; do not treat the{" "}
                 <a
                   href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section164&num=0&edition=prelim"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   personal-itemized SALT cap
                 </a>{" "}
@@ -350,21 +351,19 @@ export default function ScheduleEPost() {
               checklist is in{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rental property tax deductions
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Line 18: depreciation, the non-cash line that drives the result
-            </h2>
+            <h2>Line 18: depreciation, the non-cash line that drives the result</h2>
             <p>
               Residential rental buildings are generally recovered under{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 MACRS, while land is not depreciable
               </a>
@@ -374,7 +373,7 @@ export default function ScheduleEPost() {
               see the general closing-cost discussion in{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 the closing-cost breakdown
               </Link>{" "}
@@ -387,7 +386,7 @@ export default function ScheduleEPost() {
               building basis and the{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 27.5-year recovery period IRS Publication 946 gives residential rental property
               </a>
@@ -399,13 +398,13 @@ export default function ScheduleEPost() {
               gain on a later disposition. A qualifying{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1031 exchange
               </Link>{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 may postpone recognition in some circumstances
               </a>
@@ -413,9 +412,7 @@ export default function ScheduleEPost() {
               the exit.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A complete worked example: the $250K rental
-            </h2>
+            <h2>A complete worked example: the $250K rental</h2>
             <p>
               This hypothetical assumes a $250,000 purchase, $2,100 monthly
               rent, a $187,500 loan at an entered 7% over 30 years, $200,000 of
@@ -467,7 +464,7 @@ export default function ScheduleEPost() {
               ($1,665) plus{" "}
               <Link
                 href="/glossary/principal-paydown"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 principal paydown
               </Link>{" "}
@@ -477,14 +474,14 @@ export default function ScheduleEPost() {
               side in the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
               and review the reporting distinctions in the{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rental-property tax-deduction guide
               </Link>
@@ -492,15 +489,13 @@ export default function ScheduleEPost() {
               limitations, and other return items.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Line 22: can you actually use the loss?
-            </h2>
+            <h2>Line 22: can you actually use the loss?</h2>
             <p>
               A loss on line 21 doesn&apos;t automatically reduce your taxes.
               Rental activities are commonly{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 subject to passive-activity rules
               </a>
@@ -516,7 +511,7 @@ export default function ScheduleEPost() {
               forward. Real-estate-professional status{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 does not by itself make every rental loss non-passive
               </a>
@@ -526,16 +521,14 @@ export default function ScheduleEPost() {
               full release is not automatic for every transfer or sale.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where the number goes from here
-            </h2>
+            <h2>Where the number goes from here</h2>
             <p>
               The allowed amount flows through the current return under the
               applicable instructions. Services, entity structure, activity
               classification, and other facts can also{" "}
               <a
                 href="https://www.irs.gov/instructions/i1040se"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 change employment-tax and reporting treatment
               </a>
@@ -545,9 +538,7 @@ export default function ScheduleEPost() {
               needed to review later-year deductions and disposition treatment.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Four reconciliation risks
-            </h2>
+            <h2>Four reconciliation risks</h2>
             <p>
               <strong>Treating a project label as its tax result.</strong> A
               whole-building-system replacement can differ from a localized
@@ -555,7 +546,7 @@ export default function ScheduleEPost() {
               surrounding work control. Review the general distinction in the{" "}
               <Link
                 href="/blog/capex-maintenance-reserves-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 capex and reserves guide
               </Link>
@@ -576,7 +567,7 @@ export default function ScheduleEPost() {
               <strong>Ignoring missed depreciation.</strong>{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Allowed-or-allowable amounts
               </a>{" "}
@@ -588,7 +579,7 @@ export default function ScheduleEPost() {
               <strong>Losing track of carryforwards.</strong> A qualifying{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 fully taxable disposition of an entire interest to an unrelated party
               </a>{" "}
@@ -597,22 +588,20 @@ export default function ScheduleEPost() {
               and have the specific disposition reviewed before treating a
               carryforward as released.
             </p>
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Read the form before you buy the property
-            </h2>
+          <ArticleBody className="mt-16">
+            <h2>Read the form before you buy the property</h2>
             <p>
               Professional review is particularly important around the
               repair-vs-improvement boundary, passive losses, and dispositions.
@@ -621,7 +610,7 @@ export default function ScheduleEPost() {
               tax brackets can correctly disagree about the same deal. The{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -630,38 +619,37 @@ export default function ScheduleEPost() {
               scenario with a qualified professional. Related reading:{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 the 14 rental tax deductions
               </Link>
               ,{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1031 exchange basics
               </Link>
               , and{" "}
               <Link
                 href="/blog/cash-on-cash-vs-irr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash vs IRR
               </Link>
               .
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
