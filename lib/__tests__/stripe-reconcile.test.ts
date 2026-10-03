@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   classifyStripeSubscriptions,
+  dropForeignMissingLocal,
   isPaidStatus,
   orphanNeedsHeal,
   partitionLocalPaidRows,
@@ -216,5 +219,53 @@ describe("orphanNeedsHeal", () => {
 
   it("does nothing when the candidate was a listing-cap false positive", () => {
     expect(orphanNeedsHeal(localRow({ status: "active" }), "active")).toBe(false);
+  });
+});
+
+describe("dropForeignMissingLocal: the shared account's other product is not drift", () => {
+  it("drops foreign subscriptions from category (a) and counts them", async () => {
+    const foreign = new Set(["sub_other_1", "sub_other_2"]);
+    const result = await dropForeignMissingLocal(
+      ["sub_other_1", "sub_truecap_lost", "sub_other_2"],
+      async (id) => foreign.has(id),
+    );
+    expect(result).toEqual({ kept: ["sub_truecap_lost"], skippedForeignApp: 2, foreignCheckErrors: 0 });
+  });
+
+  it("keeps every TrueCap subscription: nothing is skipped unless the rule says foreign", async () => {
+    const result = await dropForeignMissingLocal(["sub_a", "sub_b"], async () => false);
+    expect(result).toEqual({ kept: ["sub_a", "sub_b"], skippedForeignApp: 0, foreignCheckErrors: 0 });
+  });
+
+  it("keeps and counts an id whose foreign check throws, so a failure hides nothing", async () => {
+    const result = await dropForeignMissingLocal(["sub_a", "sub_b"], async (id) => {
+      if (id === "sub_a") throw new Error("database unavailable");
+      return true;
+    });
+    expect(result).toEqual({ kept: ["sub_a"], skippedForeignApp: 1, foreignCheckErrors: 1 });
+  });
+
+  it("the weekly cron filters only category (a), with the webhook's foreign rule, before reporting or healing", () => {
+    const route = readFileSync(
+      join(__dirname, "..", "..", "app/api/cron/reconcile-stripe/route.ts"),
+      "utf8",
+    );
+    expect(route).toContain(
+      'import { isForeignSubscription } from "@/lib/stripe/billing-user-resolution";',
+    );
+    const classify = route.indexOf("const mismatches = classifyStripeSubscriptions(");
+    const filter = route.indexOf("await dropForeignMissingLocal(mismatches.missingLocal,", classify);
+    const assign = route.indexOf("mismatches.missingLocal = foreignFilter.kept;", filter);
+    const heal = route.indexOf("for (const id of mismatches.missingLocal) {", assign);
+    const drift = route.indexOf("const anyDrift =", heal);
+    expect(classify).toBeGreaterThan(-1);
+    expect(filter).toBeGreaterThan(classify);
+    expect(assign).toBeGreaterThan(filter);
+    expect(heal).toBeGreaterThan(assign);
+    expect(drift).toBeGreaterThan(heal);
+    expect(route.slice(filter, assign)).toContain("isForeignSubscription(admin, sub)");
+    // Rows with a local subscription are never filtered.
+    expect(route).not.toMatch(/dropForeignMissingLocal\(mismatches\.(nullPlan|statusMismatch)/);
+    expect(route).toContain("skipped_foreign_app: foreignFilter.skippedForeignApp");
   });
 });
