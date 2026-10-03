@@ -12,7 +12,7 @@ Properties are minimal and never personal: no addresses, emails, prices, or unde
 | `analysis_completed` | Same handler, once the result is committed to visible state | `verdict` (the tier label), `has_ceiling` |
 | `sample_viewed` | The `/analyze?sample=1` entry, which the hero's "See the sample deal" link opens, and the analyzer's own sample button. The hero link itself sends nothing, so one click counts once | `source` (link / analyzer) |
 | `signup_started` | Sign-up form submit; Google button click | `method` (email / google) |
-| `signup_completed` | Sign-up form success (email); OAuth callback (google, server) | `method` |
+| `signup_completed` | Sign-up form accepted (email; before the confirmation link is clicked, so unconfirmed accounts are included); OAuth callback (google, server) | `method` |
 | `trial_started` | Right after `signup_completed` — every new account starts the no-card free trial | `method` |
 | `checkout_started` | Pricing plan buttons before the Stripe redirect | `plan` (plan slug), `interval` (monthly / annual) |
 | `checkout_completed` | Stripe webhook, server-side, once per successfully synced checkout | `plan`, `interval` |

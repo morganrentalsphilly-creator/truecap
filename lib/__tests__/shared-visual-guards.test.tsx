@@ -67,6 +67,29 @@ describe("page parts", () => {
     for (const mount of mounts) expect(mount).toContain(' titleAs="h2"');
   });
 
+  it("keeps a heading-titled opening Note outside ArticleBody", () => {
+    // Inside .prose, app/globals.css sets every h2 at section size with a
+    // 64px top margin ("&.prose :where(h2)"), so a Note whose title is an h2
+    // must sit outside the article body: every <ArticleBody opened before
+    // the Note is closed before it.
+    const posts = readdirSync(join(process.cwd(), "app/blog"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `app/blog/${entry.name}/page.tsx`)
+      .filter((path) => existsSync(join(process.cwd(), path)));
+    let checked = 0;
+    for (const path of posts) {
+      const source = read(path);
+      for (const mount of source.matchAll(/<Note title="(?:Quick answer|TL;DR)"[^>]*>/g)) {
+        const before = source.slice(0, mount.index);
+        const opened = before.match(/<ArticleBody\b/g)?.length ?? 0;
+        const closed = before.match(/<\/ArticleBody>/g)?.length ?? 0;
+        expect(opened, `${path}: the opening Note sits inside ArticleBody`).toBe(closed);
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThanOrEqual(13);
+  });
+
   it("drops the Note's rule straight after FAQ rows, which already close on the same rule (every /vs page)", () => {
     const html = renderToStaticMarkup(
       <ComparisonFaq competitorName="X" reviewedDate="2026-09-30" items={[{ question: "Q?", answer: "A." }]} />,
