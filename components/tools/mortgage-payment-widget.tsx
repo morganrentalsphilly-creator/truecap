@@ -4,14 +4,26 @@
  * Mortgage Payment calculator widget. Computes monthly P&I plus a
  * full PITI estimate (P&I + tax + insurance) using standard fixed-rate
  * amortization. Also breaks down total interest paid over the loan life.
+ *
+ * Set on the calculator parts (components/tools/tool-parts.tsx), like the
+ * 1% rule widget: the frame opens on the 2px ink rule with no card, the six
+ * fields are the shared ToolNumberField, and the payment is the key figure
+ * in DM Mono over the double rule (LedgerTotal), in ink. The result is
+ * announced by its own one-line status, so the visible block is not a
+ * second live region (ToolResult is one, and has no switch for that). The
+ * seven lines behind the payment sit under the result on soft rules (after
+ * the action on one column). The grid reads the frame's own width
+ * (@container), so the widget lays out the same in the tool page's hero
+ * column and in the /embed iframe.
  */
 
 import { useId, useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { LedgerFigure, LedgerTotal } from "@/components/ledger/ledger-parts";
+import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { ToolFrame } from "@/components/tools/tool-parts";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import {
   allToolNumbersValid,
@@ -186,7 +198,16 @@ export function MortgagePaymentWidget() {
     insurancePctInput,
   ]);
 
+  const headingId = useId();
   const handoffNoteId = useId();
+  // The fields' ids stay React's own, as before; ToolNumberField derives the
+  // error line's id from each.
+  const priceId = useId();
+  const downPctId = useId();
+  const rateId = useId();
+  const termId = useId();
+  const taxPctId = useId();
+  const insurancePctId = useId();
 
   // Carry the user's home price into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
@@ -195,71 +216,89 @@ export function MortgagePaymentWidget() {
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        {/* Inputs */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            Mortgage Payment Calculator
-          </h2>
-
-          <FieldMoney
-            label="Home Price"
-            value={priceInput}
-            setValue={setPriceInput}
+    // The page and the /embed iframe both show an H1 naming the calculator,
+    // so the widget's own heading is for the outline only.
+    <ToolFrame aria-labelledby={headingId}>
+      <h2 id={headingId} className="sr-only">
+        Mortgage payment calculator
+      </h2>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-6 @lg:grid-cols-2">
+        {/* Inputs. The percent fields pair up on one column (a phone, a
+            narrow iframe) and again once the frame is 672px wide; between
+            the two the field column is too narrow for a pair and they
+            stack. */}
+        <div className="min-w-0 space-y-5 @lg:row-span-2">
+          <ToolNumberField
+            id={priceId}
+            label="Home price"
+            prefix="$"
             min={0}
             max={100_000_000}
+            value={priceInput}
+            onChange={(e) => setPriceInput(e.target.value)}
             error={validated.price.error}
           />
-          <div className="grid grid-cols-2 gap-3">
-            <FieldPct
-              label="Down Payment %"
-              value={downPctInput}
-              setValue={setDownPctInput}
+          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1 @2xl:grid-cols-2">
+            <ToolNumberField
+              id={downPctId}
+              label="Down payment %"
+              suffix="%"
+              step={0.5}
               min={0}
               max={100}
+              value={downPctInput}
+              onChange={(e) => setDownPctInput(e.target.value)}
               error={validated.downPct.error}
             />
-            <FieldPct
-              label="Interest Rate"
-              value={rateInput}
-              setValue={setRateInput}
-              step="0.125"
+            <ToolNumberField
+              id={rateId}
+              label="Interest rate"
+              suffix="%"
+              step={0.125}
               min={0}
               max={30}
+              value={rateInput}
+              onChange={(e) => setRateInput(e.target.value)}
               error={validated.rate.error}
             />
           </div>
-          <FieldNum
-            label="Loan Term (years)"
-            value={termInput}
-            setValue={setTermInput}
+          <ToolNumberField
+            id={termId}
+            label="Loan term (years)"
             min={1}
             max={50}
+            value={termInput}
+            onChange={(e) => setTermInput(e.target.value)}
             error={validated.term.error}
           />
-          <div className="grid grid-cols-2 gap-3">
-            <FieldPct
-              label="Property Tax (annual)"
-              value={taxPctInput}
-              setValue={setTaxPctInput}
+          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1 @2xl:grid-cols-2">
+            <ToolNumberField
+              id={taxPctId}
+              label="Property tax (annual)"
+              suffix="%"
+              step={0.5}
               min={0}
               max={20}
+              value={taxPctInput}
+              onChange={(e) => setTaxPctInput(e.target.value)}
               error={validated.taxPct.error}
             />
-            <FieldPct
+            <ToolNumberField
+              id={insurancePctId}
               label="Insurance (annual)"
-              value={insurancePctInput}
-              setValue={setInsurancePctInput}
+              suffix="%"
+              step={0.5}
               min={0}
               max={20}
+              value={insurancePctInput}
+              onChange={(e) => setInsurancePctInput(e.target.value)}
               error={validated.insurancePct.error}
             />
           </div>
         </div>
 
-        {/* Output */}
-        <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-between">
+        {/* Output. On one column it opens on the rule under the fields. */}
+        <div className="min-w-0 border-t border-border pt-5 @lg:border-t-0 @lg:pt-0">
           {/* The result is announced when it changes: one polite status line
               for screen readers, in place of eight rows re-read per keystroke. */}
           <span
@@ -272,38 +311,48 @@ export function MortgagePaymentWidget() {
               ? `Estimated monthly payment ${fmtMoney(result.monthlyTotal)}. Monthly principal and interest ${fmtMoney(result.monthlyPI)}.`
               : "Fix the highlighted inputs to calculate the payment."}
           </span>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Estimated Monthly Payment
-            </div>
-            <div
-              className={cn(
-                "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
-                inputsValid ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {inputsValid ? fmtMoney(result.monthlyTotal) : "—"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {inputsValid ? (
-                <>
-                  Principal, interest, property tax, homeowner&apos;s insurance
-                  {result.monthlyPmi > 0
-                    ? ", and estimated mortgage insurance."
-                    : "."}
-                </>
-              ) : (
-                "Fix the highlighted inputs to calculate."
-              )}
-            </p>
-          </div>
-
-          <div
+          <p className="text-sm leading-snug font-semibold text-foreground">
+            Estimated monthly payment
+          </p>
+          {/* The color sits on the line, as in ToolResult; wrap-anywhere
+              keeps an eight-figure payment inside the frame. */}
+          <p
             className={cn(
-              "mt-5 pt-5 border-t border-border space-y-1.5 text-xs",
-              !inputsValid && "hidden",
+              "mt-3 wrap-anywhere",
+              inputsValid ? "text-foreground" : "text-muted-foreground",
             )}
           >
+            <LedgerTotal className="text-key-sm sm:text-key">
+              {inputsValid ? fmtMoney(result.monthlyTotal) : "—"}
+            </LedgerTotal>
+          </p>
+          <p className="mt-4 max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
+            {inputsValid ? (
+              <>
+                Principal, interest, property tax, homeowner&apos;s insurance
+                {result.monthlyPmi > 0
+                  ? ", and estimated mortgage insurance."
+                  : "."}
+              </>
+            ) : (
+              "Fix the highlighted inputs to calculate."
+            )}
+          </p>
+        </div>
+
+        {/* What the payment is made of. On one column it follows the action
+            (order-4 after the action's order-3), so the fields lead straight
+            to the result and the action on a phone; in the two-column layout
+            it sits under the result, beside the fields. Withheld while a
+            field is in error, so a rejected value is never printed as a
+            figure. */}
+        <div
+          className={cn(
+            "order-4 min-w-0 text-sm @lg:order-none",
+            !inputsValid && "hidden",
+          )}
+        >
+          <dl className="border-t border-border">
             <Row label="Loan amount" value={fmtMoney(result.loan)} />
             <Row label="Down payment" value={fmtMoney(result.downPayment)} />
             <Row label="Monthly P&I" value={fmtMoney(result.monthlyPI)} bold />
@@ -320,196 +369,43 @@ export function MortgagePaymentWidget() {
               label="Total interest over loan"
               value={fmtMoney(result.totalInterest)}
             />
-            {result.monthlyPmi > 0 ? (
-              <p className="pt-2 text-2xs leading-relaxed text-muted-foreground">
-                PMI uses TrueCap&apos;s {DEFAULT_PMI_ANNUAL_RATE_PCT}% annual
-                screening estimate on the starting loan. Verify the actual
-                premium and cancellation rules with the lender.
-              </p>
-            ) : null}
-          </div>
+          </dl>
+          {result.monthlyPmi > 0 ? (
+            <p className="mt-3 max-w-[68ch] text-pretty text-muted-foreground">
+              PMI uses TrueCap&apos;s {DEFAULT_PMI_ANNUAL_RATE_PCT}% annual
+              screening estimate on the starting loan. Verify the actual
+              premium and cancellation rules with the lender.
+            </p>
+          ) : null}
+        </div>
+
+        {/* One plain action, then one line saying what is free and what is
+            not (the 1% rule widget's pattern). The label claims no
+            carry-over: only the home price is handed on, and not at all from
+            a partner's iframe. */}
+        <div className="order-3 min-w-0 @lg:order-none @lg:col-span-2">
+          <AnalyzerHandoffLink
+            handoffHref={handoffHref}
+            target="_top"
+            aria-describedby={handoffNoteId}
+            className={cn(buttonVariants({ size: "cta" }), "w-full sm:w-auto")}
+          >
+            Run the full analysis
+          </AnalyzerHandoffLink>
+          <p
+            id={handoffNoteId}
+            className="mt-2 text-pretty text-sm text-muted-foreground"
+          >
+            Cap rate, CoC, DSCR and cash flow are free in TrueCap. The 10-year
+            projection is a Pro feature.
+          </p>
         </div>
       </div>
-
-      {/* One plain action, then one line saying what is free and what is not
-          (the 1% rule widget's pattern). The label claims no carry-over: only
-          the home price is handed on, and not at all from a partner's iframe. */}
-      <AnalyzerHandoffLink
-        handoffHref={handoffHref}
-        target="_top"
-        aria-describedby={handoffNoteId}
-        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
-      >
-        Run the full analysis
-      </AnalyzerHandoffLink>
-      <p
-        id={handoffNoteId}
-        className="mt-2 text-pretty text-sm text-muted-foreground"
-      >
-        Cap rate, CoC, DSCR and cash flow are free in TrueCap. The 10-year
-        projection is a Pro feature.
-      </p>
-    </div>
+    </ToolFrame>
   );
 }
 
-/** What every field takes so an out-of-range value is marked and announced. */
-type FieldBounds = {
-  min: number;
-  max: number;
-  /** The validation message, or null while the value is in range. */
-  error: string | null;
-};
-
-/** The error line under a field; role="alert" so it is read when it appears. */
-function FieldError({ id, error }: { id: string; error: string | null }) {
-  if (!error) return null;
-  return (
-    <p id={id} role="alert" className="mt-1.5 text-sm text-destructive-text">
-      {error}
-    </p>
-  );
-}
-
-function FieldMoney({
-  label,
-  value,
-  setValue,
-  min,
-  max,
-  error,
-}: {
-  label: string;
-  value: string;
-  setValue: (v: string) => void;
-} & FieldBounds) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  return (
-    <div>
-      <Label
-        htmlFor={id}
-        className="text-sm font-medium text-foreground mb-1.5 block"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-          $
-        </span>
-        <Input
-          id={id}
-          type="number"
-          inputMode="numeric"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={cn(
-            "pl-7 border-input bg-background text-base",
-            error && "border-destructive",
-          )}
-        />
-      </div>
-      <FieldError id={errorId} error={error} />
-    </div>
-  );
-}
-
-function FieldPct({
-  label,
-  value,
-  setValue,
-  step = "0.5",
-  min,
-  max,
-  error,
-}: {
-  label: string;
-  value: string;
-  setValue: (v: string) => void;
-  step?: string;
-} & FieldBounds) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  return (
-    <div>
-      <Label
-        htmlFor={id}
-        className="text-sm font-medium text-foreground mb-1.5 block"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        <Input
-          id={id}
-          type="number"
-          inputMode="decimal"
-          step={step}
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={cn(
-            "pr-8 border-input bg-background text-base",
-            error && "border-destructive",
-          )}
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-          %
-        </span>
-      </div>
-      <FieldError id={errorId} error={error} />
-    </div>
-  );
-}
-
-function FieldNum({
-  label,
-  value,
-  setValue,
-  min,
-  max,
-  error,
-}: {
-  label: string;
-  value: string;
-  setValue: (v: string) => void;
-} & FieldBounds) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  return (
-    <div>
-      <Label
-        htmlFor={id}
-        className="text-sm font-medium text-foreground mb-1.5 block"
-      >
-        {label}
-      </Label>
-      <Input
-        id={id}
-        type="number"
-        inputMode="numeric"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        className={cn(
-          "border-input bg-background text-base",
-          error && "border-destructive",
-        )}
-      />
-      <FieldError id={errorId} error={error} />
-    </div>
-  );
-}
-
+/** One line of the payment on a soft rule: the name in Ink 2, the figure in DM Mono. */
 function Row({
   label,
   value,
@@ -520,16 +416,13 @@ function Row({
   bold?: boolean;
 }) {
   return (
-    <div className="flex justify-between gap-2">
-      <span className="text-muted-foreground">{label}</span>
-      <span
-        className={cn(
-          "tabular-nums",
-          bold ? "font-bold text-foreground" : "text-foreground",
-        )}
-      >
-        {value}
-      </span>
+    <div className="flex items-baseline justify-between gap-4 border-b border-rule-soft py-2">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd>
+        <LedgerFigure className={cn("text-foreground", bold && "font-medium")}>
+          {value}
+        </LedgerFigure>
+      </dd>
     </div>
   );
 }

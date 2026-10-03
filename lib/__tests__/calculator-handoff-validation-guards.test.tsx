@@ -256,9 +256,16 @@ describe("P2-48: the mortgage calculator rejects negative and absurd inputs", ()
 
   it("marks and announces: aria-invalid, a described error with role=alert, a polite status", () => {
     const source = code("components/tools/mortgage-payment-widget.tsx");
-    expect(source.match(/aria-invalid=\{error \? true : undefined\}/g)).toHaveLength(3);
-    expect(source.match(/aria-describedby=\{error \? errorId : undefined\}/g)).toHaveLength(3);
-    expect(source).toMatch(/<p id=\{id\} role="alert"/);
+    // The widget had three local field components, each with its own
+    // aria-invalid, described error and role="alert" line. On the calculator
+    // template all six fields are the shared ToolNumberField, which carries
+    // the same three things once.
+    expect(source.match(/<ToolNumberField\b/g)).toHaveLength(6);
+    expect(source).not.toMatch(/<Input\b/);
+    const field = code("components/tools/tool-number-field.tsx");
+    expect(field).toContain("aria-invalid={error ? true : undefined}");
+    expect(field).toContain("aria-describedby={describedBy}");
+    expect(field).toMatch(/<p id=\{errorId\} role="alert"/);
     const html = renderToStaticMarkup(createElement(MortgagePaymentWidget));
     // P2-72: the result is a live region. At the defaults it reads the payment.
     const status = /<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">([^<]*)<\/span>/.exec(html)?.[1];
