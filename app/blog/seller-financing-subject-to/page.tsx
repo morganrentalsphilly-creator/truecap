@@ -11,12 +11,23 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileSignature } from "lucide-react";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -137,270 +148,267 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
+              {TITLE}
+            </h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <p>
-            With 30-year mortgage rates running roughly 6% to 7% in 2026 (
-            <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
-              Freddie Mac&apos;s weekly average ranged from 5.98% to 7.03%
-              through Sept. 24, 2026
-            </a>
-            ), a lot of deals that don&apos;t work with a new bank loan still work with{" "}
-            <strong>creative financing</strong> — structures where the seller,
-            not a bank, provides some or all of the financing. The two
-            you&apos;ll hear most are
-            <strong> seller financing</strong> and <strong>subject-to</strong>.
-            Either can be available in a properly structured transaction. Both
-            carry legal and financial risks that the YouTube version
-            conveniently skips, so here&apos;s the honest walkthrough.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            Seller financing (owner financing)
-          </h2>
-          <p>
-            The seller becomes the bank. Instead of you getting a mortgage, the
-            seller holds a <strong>promissory note</strong> secured by a
-            mortgage or deed of trust, and you make payments directly to them on
-            terms you negotiate — rate, length, down payment, and whether
-            there&apos;s a balloon. It works most cleanly when the seller owns
-            the property <strong>free and clear</strong>, so there&apos;s no
-            underlying loan in the picture.
-          </p>
-          <p>
-            Why a seller agrees: monthly income on an asset they wanted to sell,
-            spreading the capital-gains tax over years via{" "}
-            <a href="https://www.irs.gov/taxtopics/tc705" className="text-primary font-semibold hover:underline">
-              installment-sale treatment
-            </a>{" "}
-            (though any part of the gain that is ordinary income under the
-            depreciation-recapture rules must still be reported in the year of
-            sale), a higher sale price in exchange for flexible terms, or a
-            faster close on a property that&apos;s hard to finance
-            conventionally. The whole game is a motivated seller trading{" "}
-            <em>terms</em> for <em>price</em>.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            Subject-to (taking over payments)
-          </h2>
-          <p>
-            In a subject-to deal, you take <strong>title</strong> to the
-            property, but the seller&apos;s existing mortgage{" "}
-            <strong>stays in the seller&apos;s name</strong> and you make the
-            payments on it. A lower existing note rate can create a payment
-            difference versus a current quote, but use the actual statement,
-            payoff, arrears, escrow, insurance, servicing, maturity, balloon,
-            and default terms. A rate gap alone does not establish savings or
-            cash flow.
-          </p>
-          <p>
-            The catch is the <strong>due-on-sale clause</strong>. If the loan
-            documents contain one,{" "}
-            <a href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim" className="text-primary font-semibold hover:underline">
-              federal law generally permits the lender to enforce it
-            </a>{" "}
-            when title transfers, subject to listed exceptions and the
-            contract. The Garn-St. Germain Act bars enforcement for certain
-            transfers of a home with fewer than five units (for example, into a
-            living trust in which the borrower remains a beneficiary, to a
-            relative after the borrower&apos;s death, or to a spouse or
-            children) but <strong>not</strong> an arm&apos;s-length sale to an
-            investor. So the lender <em>can</em> call the loan. Whether and
-            when the lender exercises that option is lender- and fact-specific;{" "}
-            <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
-              timely payments do not waive it
-            </a>
-            .
-          </p>
-          <p>
-            Due-on-sale exposure is only one issue; it does not determine
-            whether the overall transaction complies with applicable law, loan
-            terms, disclosures, licensing, servicing, title, and insurance
-            requirements. Buyers commonly plan to keep payments current, hold
-            reserves, keep insurance properly arranged, and plan an exit (a
-            refinance or sale) so a call wouldn&apos;t be catastrophic. Treat
-            anyone who tells you the due-on-sale clause &quot;never gets
-            enforced, don&apos;t worry about it&quot; as a warning sign.
-          </p>
-
-          <h3>The wraparound (a hybrid)</h3>
-          <p>
-            A wraparound mortgage (AITD) is a blend: the seller keeps their
-            underlying loan and finances you for a larger amount that
-            &quot;wraps&quot; around it, pocketing the spread. It carries the{" "}
-            <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
-              same due-on-sale exposure
-            </a>{" "}
-            as subject-to, because the underlying loan stays in place.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            Where Dodd-Frank fits (and where it doesn&apos;t)
-          </h2>
-          <p>
-            Federal mortgage rules include definitions and exemptions that can
-            turn on occupancy, property type, the seller&apos;s activity, and
-            the transaction structure.{" "}
-            <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/" className="text-primary font-semibold hover:underline">
-              An investment purpose can change which rules apply
-            </a>
-            , but it is not a blanket exemption from federal or state lending,
-            licensing, disclosure, servicing, usury, or consumer laws.
-          </p>
-          <p>
-            <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/36/" className="text-primary font-semibold hover:underline">
-              Seller-financer exclusions and exemptions
-            </a>{" "}
-            are technical and conditional; a property count alone does not
-            establish compliance.
-            Have a real-estate attorney and, where appropriate, a licensed
-            mortgage professional and servicer review the actual documents
-            before offering or accepting terms.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            The 2026 rate arbitrage, with eyes open
-          </h2>
-          <p>
-            Why consider it now? Rate arbitrage. Picture a $300,000 property
-            with an existing 3.5% loan taken subject-to versus a new loan at
-            7%:
-          </p>
-          <ul>
-            <li>
-              <strong>New 7% loan</strong> on ~$300k → principal &amp; interest
-              near $2,000/month.
-            </li>
-            <li>
-              <strong>Subject-to at 3.5%</strong> on the same balance → P&amp;I
-              near $1,350/month.
-            </li>
-          </ul>
-          <p>
-            That ~$650/month swing can be the entire difference between negative
-            and positive cash flow on the deal — which is why the structure
-            draws interest when new-loan rates are high. But the honest underwrite prices the due-on-sale risk and a
-            refinance exit alongside the savings; the rate gap is the reward,
-            the call risk is the cost.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Risks on each side</h2>
-          <ul>
-            <li>
-              <strong>Buyer, seller financing:</strong> a balloon you can&apos;t
-              refinance into when it comes due. Negotiate enough runway.
-            </li>
-            <li>
-              <strong>Seller, seller financing:</strong> buyer default means
-              foreclosing to get the property back. Vet the buyer and keep a
-              real down payment.
-            </li>
-            <li>
-              <strong>Buyer, subject-to:</strong> the due-on-sale call, plus
-              you&apos;re relying on the seller&apos;s loan staying in good
-              standing.
-            </li>
-            <li>
-              <strong>Seller, subject-to:</strong> the loan stays on{" "}
-              <em>your</em> credit and your name —{" "}
-              <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="text-primary font-semibold hover:underline">
-                if the buyer stops paying, it&apos;s your default
+          <ArticleBody>
+            <p>
+              With 30-year mortgage rates running roughly 6% to 7% in 2026 (
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="tc-link">
+                Freddie Mac&apos;s weekly average ranged from 5.98% to 7.03%
+                through Sept. 24, 2026
               </a>
-              . This is why subject-to demands deep trust
-              and airtight paperwork.
-            </li>
-          </ul>
+              ), a lot of deals that don&apos;t work with a new bank loan still work with{" "}
+              <strong>creative financing</strong> — structures where the seller,
+              not a bank, provides some or all of the financing. The two
+              you&apos;ll hear most are
+              <strong> seller financing</strong> and <strong>subject-to</strong>.
+              Either can be available in a properly structured transaction. Both
+              carry legal and financial risks that the YouTube version
+              conveniently skips, so here&apos;s the honest walkthrough.
+            </p>
 
-          <div className="not-prose"></div>
+            <h2>
+              Seller financing (owner financing)
+            </h2>
+            <p>
+              The seller becomes the bank. Instead of you getting a mortgage, the
+              seller holds a <strong>promissory note</strong> secured by a
+              mortgage or deed of trust, and you make payments directly to them on
+              terms you negotiate — rate, length, down payment, and whether
+              there&apos;s a balloon. It works most cleanly when the seller owns
+              the property <strong>free and clear</strong>, so there&apos;s no
+              underlying loan in the picture.
+            </p>
+            <p>
+              Why a seller agrees: monthly income on an asset they wanted to sell,
+              spreading the capital-gains tax over years via{" "}
+              <a href="https://www.irs.gov/taxtopics/tc705" className="tc-link">
+                installment-sale treatment
+              </a>{" "}
+              (though any part of the gain that is ordinary income under the
+              depreciation-recapture rules must still be reported in the year of
+              sale), a higher sale price in exchange for flexible terms, or a
+              faster close on a property that&apos;s hard to finance
+              conventionally. The whole game is a motivated seller trading{" "}
+              <em>terms</em> for <em>price</em>.
+            </p>
 
-          <p>
-            Creative financing changes the <em>financing inputs</em>, not the
-            underlying property math. Drop the actual terms — the inherited
-            rate, the balloon, the seller-carried second — into{" "}
-            <Link
-              href="/"
-              className="text-primary font-semibold hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            and you&apos;ll see what they do to cash flow and{" "}
-            <Link
-              href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
-            >
-              DSCR
-            </Link>
-            , so the rate arbitrage is something you&apos;ve measured rather
-            than something a seller pitched you. If a refinance is your exit,
-            model it against a standard{" "}
-            <Link
-              href="/blog/how-to-refinance-a-rental-property"
-              className="text-primary font-semibold hover:underline"
-            >
-              refinance
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/blog/cash-out-refinance-vs-heloc-rental"
-              className="text-primary font-semibold hover:underline"
-            >
-              cash-out vs HELOC
-            </Link>{" "}
-            first.
-          </p>
+            <h2>
+              Subject-to (taking over payments)
+            </h2>
+            <p>
+              In a subject-to deal, you take <strong>title</strong> to the
+              property, but the seller&apos;s existing mortgage{" "}
+              <strong>stays in the seller&apos;s name</strong> and you make the
+              payments on it. A lower existing note rate can create a payment
+              difference versus a current quote, but use the actual statement,
+              payoff, arrears, escrow, insurance, servicing, maturity, balloon,
+              and default terms. A rate gap alone does not establish savings or
+              cash flow.
+            </p>
+            <p>
+              The catch is the <strong>due-on-sale clause</strong>. If the loan
+              documents contain one,{" "}
+              <a href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim" className="tc-link">
+                federal law generally permits the lender to enforce it
+              </a>{" "}
+              when title transfers, subject to listed exceptions and the
+              contract. The Garn-St. Germain Act bars enforcement for certain
+              transfers of a home with fewer than five units (for example, into a
+              living trust in which the borrower remains a beneficiary, to a
+              relative after the borrower&apos;s death, or to a spouse or
+              children) but <strong>not</strong> an arm&apos;s-length sale to an
+              investor. So the lender <em>can</em> call the loan. Whether and
+              when the lender exercises that option is lender- and fact-specific;{" "}
+              <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="tc-link">
+                timely payments do not waive it
+              </a>
+              .
+            </p>
+            <p>
+              Due-on-sale exposure is only one issue; it does not determine
+              whether the overall transaction complies with applicable law, loan
+              terms, disclosures, licensing, servicing, title, and insurance
+              requirements. Buyers commonly plan to keep payments current, hold
+              reserves, keep insurance properly arranged, and plan an exit (a
+              refinance or sale) so a call wouldn&apos;t be catastrophic. Treat
+              anyone who tells you the due-on-sale clause &quot;never gets
+              enforced, don&apos;t worry about it&quot; as a warning sign.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+            <h3>The wraparound (a hybrid)</h3>
+            <p>
+              A wraparound mortgage (AITD) is a blend: the seller keeps their
+              underlying loan and finances you for a larger amount that
+              &quot;wraps&quot; around it, pocketing the spread. It carries the{" "}
+              <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="tc-link">
+                same due-on-sale exposure
+              </a>{" "}
+              as subject-to, because the underlying loan stays in place.
+            </p>
 
-          <p className="text-sm text-muted-foreground">
-            <FileSignature className="inline w-4 h-4 mr-1 align-text-bottom" />
-            Creative-financing structures carry real legal and financial risk,
-            and the rules vary by state. Work with a real-estate attorney and a
-            title company before entering one.
-          </p>
+            <h2>
+              Where Dodd-Frank fits (and where it doesn&apos;t)
+            </h2>
+            <p>
+              Federal mortgage rules include definitions and exemptions that can
+              turn on occupancy, property type, the seller&apos;s activity, and
+              the transaction structure.{" "}
+              <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/" className="tc-link">
+                An investment purpose can change which rules apply
+              </a>
+              , but it is not a blanket exemption from federal or state lending,
+              licensing, disclosure, servicing, usury, or consumer laws.
+            </p>
+            <p>
+              <a href="https://www.consumerfinance.gov/rules-policy/regulations/1026/36/" className="tc-link">
+                Seller-financer exclusions and exemptions
+              </a>{" "}
+              are technical and conditional; a property count alone does not
+              establish compliance.
+              Have a real-estate attorney and, where appropriate, a licensed
+              mortgage professional and servicer review the actual documents
+              before offering or accepting terms.
+            </p>
+
+            <h2>
+              The 2026 rate arbitrage, with eyes open
+            </h2>
+            <p>
+              Why consider it now? Rate arbitrage. Picture a $300,000 property
+              with an existing 3.5% loan taken subject-to versus a new loan at
+              7%:
+            </p>
+            <ul>
+              <li>
+                <strong>New 7% loan</strong> on ~$300k → principal &amp; interest
+                near $2,000/month.
+              </li>
+              <li>
+                <strong>Subject-to at 3.5%</strong> on the same balance → P&amp;I
+                near $1,350/month.
+              </li>
+            </ul>
+            <p>
+              That ~$650/month swing can be the entire difference between negative
+              and positive cash flow on the deal — which is why the structure
+              draws interest when new-loan rates are high. But the honest underwrite prices the due-on-sale risk and a
+              refinance exit alongside the savings; the rate gap is the reward,
+              the call risk is the cost.
+            </p>
+
+            <h2>Risks on each side</h2>
+            <ul>
+              <li>
+                <strong>Buyer, seller financing:</strong> a balloon you can&apos;t
+                refinance into when it comes due. Negotiate enough runway.
+              </li>
+              <li>
+                <strong>Seller, seller financing:</strong> buyer default means
+                foreclosing to get the property back. Vet the buyer and keep a
+                real down payment.
+              </li>
+              <li>
+                <strong>Buyer, subject-to:</strong> the due-on-sale call, plus
+                you&apos;re relying on the seller&apos;s loan staying in good
+                standing.
+              </li>
+              <li>
+                <strong>Seller, subject-to:</strong> the loan stays on{" "}
+                <em>your</em> credit and your name —{" "}
+                <a href="https://sf.freddiemac.com/docs/doc/uniform-instruments/3043-tennesseedeedoftrust.doc" className="tc-link">
+                  if the buyer stops paying, it&apos;s your default
+                </a>
+                . This is why subject-to demands deep trust
+                and airtight paperwork.
+              </li>
+            </ul>
+
+            <p>
+              Creative financing changes the <em>financing inputs</em>, not the
+              underlying property math. Drop the actual terms — the inherited
+              rate, the balloon, the seller-carried second — into{" "}
+              <Link
+                href="/"
+                className="tc-link"
+              >
+                TrueCap
+              </Link>{" "}
+              and you&apos;ll see what they do to cash flow and{" "}
+              <Link
+                href="/glossary/dscr"
+                className="tc-link"
+              >
+                DSCR
+              </Link>
+              , so the rate arbitrage is something you&apos;ve measured rather
+              than something a seller pitched you. If a refinance is your exit,
+              model it against a standard{" "}
+              <Link
+                href="/blog/how-to-refinance-a-rental-property"
+                className="tc-link"
+              >
+                refinance
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/blog/cash-out-refinance-vs-heloc-rental"
+                className="tc-link"
+              >
+                cash-out vs HELOC
+              </Link>{" "}
+              first.
+            </p>
+
+          </ArticleBody>
+
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+          <ArticleBody className="mt-8">
+            <p className="text-sm text-muted-foreground">
+              Creative-financing structures carry real legal and financial risk,
+              and the rules vary by state. Work with a real-estate attorney and a
+              title company before entering one.
+            </p>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -438,39 +446,38 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/cash-out-refinance-vs-heloc-rental"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Cash-out refi vs HELOC →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-refinance-a-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               How to refinance a rental →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               DSCR loans explained →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
