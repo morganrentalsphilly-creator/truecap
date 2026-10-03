@@ -14,11 +14,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -143,55 +156,55 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Cap rate = NOI ÷ purchase price. Sounds simple, but it&apos;s easy
-            to mix lender-style NOI with investor cash reserves or to skip
-            vacancy. Here&apos;s the formula, three worked examples (a full NOI
-            build-up / a broker&apos;s inflated cap / a cash purchase), and when
-            cap rate is the wrong metric.
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              Cap rate = NOI ÷ purchase price. Sounds simple, but it&apos;s easy
+              to mix lender-style NOI with investor cash reserves or to skip
+              vacancy. Here&apos;s the formula, three worked examples (a full NOI
+              build-up / a broker&apos;s inflated cap / a cash purchase), and when
+              cap rate is the wrong metric.
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <h2 className="text-2xl sm:text-3xl">The cap rate formula</h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-base sm:text-lg font-mono">
-              <span className="font-bold">Cap rate</span> = Annual NOI ÷
-              Purchase price
-            </div>
-          </div>
+          <ArticleBody>
+          <h2>The cap rate formula</h2>
+          <ToolFormula
+            formula={
+              <>
+                <span>Cap rate</span> = Annual NOI ÷
+                Purchase price
+              </>
+            }
+          />
           <p>
             Two inputs. Get either one wrong and the cap rate lies to you. The
             formula is fine; the discipline is in how you compute NOI.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             How to compute NOI correctly (5 steps)
           </h2>
           <p>
@@ -212,7 +225,7 @@ export default function BlogPost() {
             Budget an allowance for your local market — for context, the{" "}
             <a
               href="https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Census Bureau&apos;s national rental vacancy rate was 7.3% in the
               second quarter of 2026
@@ -273,7 +286,7 @@ export default function BlogPost() {
             percentage.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Worked example #1: the full NOI build-up
           </h2>
           <p>
@@ -312,7 +325,7 @@ export default function BlogPost() {
             return instead of raising it.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Worked example #2: the &ldquo;8% cap&rdquo; that isn&apos;t
           </h2>
           <p>
@@ -335,7 +348,7 @@ export default function BlogPost() {
             $12,906. This is a common gap in broker{" "}
             <Link
               href="/glossary/pro-forma"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               pro formas
             </Link>{" "}
@@ -343,7 +356,7 @@ export default function BlogPost() {
             number.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Worked example #3: cash purchase same property
           </h2>
           <p>
@@ -361,7 +374,7 @@ export default function BlogPost() {
             yield).
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             When cap rate is the wrong metric
           </h2>
           <p>Cap rate breaks down in three cases:</p>
@@ -377,7 +390,7 @@ export default function BlogPost() {
               revenue. Underwrite STRs on
               <Link
                 href="/blog/short-term-rental-underwriting-playbook"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 {" "}
                 cash flow with full OpEx buildup
@@ -390,7 +403,7 @@ export default function BlogPost() {
               housing cost vs. renting instead.
               <Link
                 href="/blog/house-hack-underwriting-guide"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 {" "}
                 Full guide here
@@ -399,47 +412,41 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <div className="not-prose"></div>
-
           <p className="text-sm text-muted-foreground mt-6">
             Related reading:{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               What is a good cap rate
             </Link>
             ,{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Cap rate vs cash-on-cash vs DSCR
             </Link>
             ,{" "}
             <Link
               href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Cap rate (glossary)
             </Link>
             .
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -453,9 +460,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -465,10 +469,12 @@ export default function BlogPost() {
             the CapEx reserve) so none are skipped.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
