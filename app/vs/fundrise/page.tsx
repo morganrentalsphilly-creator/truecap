@@ -125,7 +125,7 @@ export default function VsFundrisePage() {
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
-              Run a deal — 60 seconds
+              Run a deal
             </AnalyzeCtaLink>
             <Link
               href="/pricing"

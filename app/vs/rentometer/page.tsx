@@ -221,7 +221,7 @@ export default function VsRentometerPage() {
           heading={<>Get the core underwrite free.</>}
           lede={
             <>
-              Bring a rent number from Rentometer, a lease or your own comps. TrueCap runs the rest of the underwrite: expenses, financing, cap rate, cash-on-cash and DSCR. Try a deal in 60 seconds.
+              Bring a rent number from Rentometer, a lease or your own comps. TrueCap runs the rest of the underwrite: expenses, financing, cap rate, cash-on-cash and DSCR. Try a deal.
             </>
           }
           actions={

@@ -252,8 +252,8 @@ export default async function BlogTopicHubPage({
           lede={
             <>
               Reading is step one. Enter an address, the asking price and a bedroom count in
-              TrueCap and get cap rate, cash-on-cash, DSCR, cash flow, and a Buy Box fit in
-              60 seconds — free.
+              TrueCap and get cap rate, cash-on-cash, DSCR, cash flow, and a Buy Box fit —
+              free.
             </>
           }
           actions={

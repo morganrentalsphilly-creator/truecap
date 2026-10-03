@@ -78,7 +78,7 @@ describe("the address promise names what the analyzer asks for (P1-14)", () => {
     }
     // Sentence-initial on the 404 page and in llms-full.txt.
     expect(flat("app/not-found.tsx")).toContain(
-      "An address, the asking price and a bedroom count: 60-second underwrite.",
+      "An address, the asking price and a bedroom count: a first-pass underwrite.",
     );
     expect(flat("app/llms-full.txt/route.ts")).toContain(
       "An address, the asking price and a bedroom count. Four answers",

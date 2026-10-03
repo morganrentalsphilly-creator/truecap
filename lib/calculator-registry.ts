@@ -43,7 +43,7 @@ export type CalculatorEntry = {
 
 const ALL_CALCULATORS: CalculatorEntry[] = [
   // Screen
-  { slug: "1-percent-rule-calculator", title: "1% Rule Calculator", shortTitle: "1% Rule", description: "Pass/fail rental screening filter in 5 seconds.", category: "screen", embeddable: true, footerFeatured: true },
+  { slug: "1-percent-rule-calculator", title: "1% Rule Calculator", shortTitle: "1% Rule", description: "Pass/fail rental screening filter.", category: "screen", embeddable: true, footerFeatured: true },
   { slug: "2-percent-rule-calculator", title: "2% Rule Calculator", shortTitle: "2% Rule", description: "The strict cash-flow screen — rent-to-price against the 2% and 1% bars.", category: "screen", embeddable: true },
   { slug: "gross-rent-multiplier-calculator", title: "Gross Rent Multiplier (GRM) Calculator", shortTitle: "GRM", description: "The 10-second screening ratio for triaging rental deals.", category: "screen", embeddable: true },
   { slug: "break-even-calculator", title: "Break-Even Calculator", shortTitle: "Break-Even", description: "Months until rental cash flow returns your initial investment.", category: "screen", embeddable: true },

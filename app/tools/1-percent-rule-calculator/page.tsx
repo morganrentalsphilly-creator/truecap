@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     ...OPEN_GRAPH_BASE,
     title: "Free 1% Rule Calculator — Instant Pass/Fail Screen",
     description:
-      "Pass / fail the 1% rule in 5 seconds. Plus plain-English guidance on when the rule applies and when it doesn't.",
+      "Pass / fail the 1% rule. Plus plain-English guidance on when the rule applies and when it doesn't.",
     url: "/tools/1-percent-rule-calculator",
     type: "website",
   },
@@ -270,7 +270,7 @@ export default function OnePercentRulePage() {
                 ]}
               />
               <p>
-                TrueCap handles steps 4 and 5 in about four minutes once you have
+                TrueCap handles steps 4 and 5 once you have
                 the inputs. Two sibling screens are worth knowing too: our{" "}
                 <IntentPrefetchLink href="/blog/50-percent-rule-rentals" className="tc-link">
                   50% rule walkthrough
@@ -306,7 +306,7 @@ export default function OnePercentRulePage() {
         <CloseSection
           heading="Take the deal past the 1% rule"
           headingId="onepct-close-heading"
-          lede="Passing the 1% rule earns a deal a closer look. TrueCap runs the full underwrite — cap rate, CoC, DSCR, cash flow, 10-year cash-flow and equity projections, sensitivity, and Offer Ceiling — in about four minutes, free to start."
+          lede="Passing the 1% rule earns a deal a closer look. TrueCap runs the full underwrite — cap rate, CoC, DSCR, cash flow, 10-year cash-flow and equity projections, sensitivity, and Offer Ceiling — free to start."
           actions={
             <>
               <ul className="border-t-2 border-foreground">

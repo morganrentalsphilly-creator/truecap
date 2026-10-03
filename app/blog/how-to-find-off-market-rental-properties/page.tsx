@@ -160,7 +160,7 @@ export default function OffMarketPost() {
             What doesn&apos;t work: spray-and-pray to every property in a zip code. Targeting is the entire game.
           </p>
           <p>
-            Budget: price the postcard, postage and list per piece with your vendors before you start, and track cost per deal from your own campaigns. Answer calls quickly and run the math fast (use <Link href="/" className="tc-link">TrueCap</Link> to underwrite leads in 60 seconds instead of 30 minutes).
+            Budget: price the postcard, postage and list per piece with your vendors before you start, and track cost per deal from your own campaigns. Answer calls quickly and run the math fast (use <Link href="/" className="tc-link">TrueCap</Link> to underwrite leads).
           </p>
 
           <h2>3. Driving for dollars</h2>
@@ -179,7 +179,7 @@ export default function OffMarketPost() {
             Wholesalers source distressed properties and assign the contract to investors for a fee added to the price. Done right, they&apos;re a real source of pre-MLS deals. Done wrong, they&apos;re a way to overpay on a property dressed up as a deal.
           </p>
           <p>
-            The play: build relationships with 5-10 active wholesalers in your market. Get on their cash-buyer email lists. Respond to every deal they email — fast (run it through <Link href="/" className="tc-link">TrueCap</Link> in 60 seconds), then either commit or pass clearly. Wholesalers prioritize investors who respond fast and close reliably; ghost their emails and you fall off their list.
+            The play: build relationships with 5-10 active wholesalers in your market. Get on their cash-buyer email lists. Respond to every deal they email — fast (run it through <Link href="/" className="tc-link">TrueCap</Link>), then either commit or pass clearly. Wholesalers prioritize investors who respond fast and close reliably; ghost their emails and you fall off their list.
           </p>
           <p>
             Verification matters. Run your OWN underwriting on every wholesale deal. Verify ARV from comps (not the wholesaler&apos;s number). Pull tax bills yourself. Read the full inspection report. <Link href="/blog/spot-bad-rental-in-60-seconds" className="tc-link">The red flags</Link> matter even more on wholesale deals because the wholesaler is incentivized to hide them.
@@ -190,7 +190,7 @@ export default function OffMarketPost() {
             Most agents work the MLS. A subset specializes in investor clients and hears about pocket listings (deals an owner wants to sell but hasn&apos;t listed yet). These investor-focused agents are gold.
           </p>
           <p>
-            How to find them: ask wholesalers + property managers + other investors which agents have brought them deals. The same few names tend to come up. Build relationships with those agents. Make it easy for them to bring you deals — fast underwriting (60 seconds via TrueCap), clear buying criteria, reliable closes, no haggling on commission.
+            How to find them: ask wholesalers + property managers + other investors which agents have brought them deals. The same few names tend to come up. Build relationships with those agents. Make it easy for them to bring you deals — fast underwriting (via TrueCap), clear buying criteria, reliable closes, no haggling on commission.
           </p>
           <p>
             A single well-positioned investor agent can be a steady source of deals. Worth the time investment.
@@ -238,7 +238,7 @@ export default function OffMarketPost() {
           </p>
           <ul>
             <li><strong>Speed of response</strong> — answer calls and emails within 4 hours, ideally faster. Sellers who reach out to multiple investors often go with whoever responds first.</li>
-            <li><strong>Speed of underwriting</strong> — being able to run a deal in about a minute instead of half an hour lets you respond to far more leads each month. <Link href="/" className="tc-link">TrueCap</Link> exists specifically for this moment.</li>
+            <li><strong>Speed of underwriting</strong> — being able to run a deal quickly lets you respond to far more leads each month. <Link href="/" className="tc-link">TrueCap</Link> exists specifically for this moment.</li>
             <li><strong>Clear buying criteria</strong> — wholesalers + agents send deals to investors who say &quot;yes&quot; or &quot;no&quot; cleanly. Investors who waffle get fewer deals.</li>
             <li><strong>Reliability of close</strong> — fall through on one deal and the source stops sending you deals. Close fast, close clean, close on terms agreed.</li>
           </ul>

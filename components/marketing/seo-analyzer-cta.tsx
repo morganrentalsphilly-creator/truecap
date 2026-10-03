@@ -84,7 +84,7 @@ export function SeoAnalyzerCta({
         </p>
         <p className="mt-2 max-w-[56ch] text-pretty text-base leading-relaxed text-muted-foreground">
           {supportingText ??
-            "Free 60-second analysis with labeled starting assumptions and no signup. Your first complete decision includes the Offer Ceiling: the highest price that still meets your targets under the assumptions shown. After that, the exact figure comes with Pro."}
+            "Free analysis with labeled starting assumptions and no signup. Your first complete decision includes the Offer Ceiling: the highest price that still meets your targets under the assumptions shown. After that, the exact figure comes with Pro."}
         </p>
       </div>
       <TrackedContentCtaLink

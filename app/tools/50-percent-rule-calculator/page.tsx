@@ -32,7 +32,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 export const metadata: Metadata = {
   title: "50% Rule Calculator | Free Rental Expense Triage",
   description:
-    "Free 50% rule calculator. Estimate rental operating expenses, NOI, and cash flow in 3 seconds — plus where the rule is accurate and the five markets where it lies.",
+    "Free 50% rule calculator. Estimate rental operating expenses, NOI, and cash flow — plus where the rule is accurate and the five markets where it lies.",
   keywords: [
     "50 percent rule calculator",
     "50% rule real estate",
@@ -113,7 +113,7 @@ export default function FiftyPercentRuleCalculatorPage() {
     slug: "50-percent-rule-calculator",
     name: "50% Rule Calculator",
     description:
-      "Free 50% rule calculator. Estimate rental operating expenses, NOI, and cash flow in 3 seconds — with an adjustable expense ratio for the markets where 50% is wrong.",
+      "Free 50% rule calculator. Estimate rental operating expenses, NOI, and cash flow — with an adjustable expense ratio for the markets where 50% is wrong.",
     featureList: [
       "Estimated expenses + NOI + cash flow from gross rent",
       "Adjustable expense ratio (50-65%) for hard markets",
@@ -300,8 +300,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               the address through TrueCap — the analyzer can start from editable
               HUD rent and FRED rate benchmarks while property tax stays manual,
               then computes cash flow, cap rate, CoC, and DSCR from real expense
-              lines. Five seconds for the rule, about two minutes for the real
-              number.
+              lines. The rule first, then the real number.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>

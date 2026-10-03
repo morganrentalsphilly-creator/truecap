@@ -273,7 +273,7 @@ export default function SfrVsMfrPost() {
             <Link href="/" className="tc-link">
               TrueCap
             </Link>{" "}
-            to compare apples-to-apples cash flow + cap rate + DSCR on SFR vs multi-family in your specific market. The 60-second analyzer treats both property types correctly. Related reading:{" "}
+            to compare apples-to-apples cash flow + cap rate + DSCR on SFR vs multi-family in your specific market. The analyzer treats both property types correctly. Related reading:{" "}
             <Link
               href="/blog/house-hacking-explained"
               className="tc-link"

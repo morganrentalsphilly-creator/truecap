@@ -988,7 +988,7 @@ export default function BlogPost() {
             >
               TrueCap analyzer
             </Link>{" "}
-            takes about a minute per property and will hold both, so you can
+            will hold both, so you can
             compare standardized economics rather than eyeball spreadsheets. For
             the wider property-type question, including where five-plus units
             change the rules,{" "}

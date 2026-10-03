@@ -532,7 +532,7 @@ export default function BlogPost() {
             All three numbers live next to each other in TrueCap&apos;s main
             analyzer. Pro adds the 10-year cash-flow and equity projection, the
             sensitivity grid, and the Offer Ceiling: the highest price that
-            still meets your targets. Run a real deal in 60 seconds.
+            still meets your targets. Run a real deal.
           </p>
           </ArticleBody>
 

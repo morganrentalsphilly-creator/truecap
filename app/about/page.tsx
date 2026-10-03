@@ -142,7 +142,7 @@ export default function AboutPage() {
               <SectionHeading id="what-truecap-does">What TrueCap does</SectionHeading>
               <div className={READING_CLASS}>
                 <p>
-                  Paste a listing and, in about 60 seconds, see whether it works at
+                  Paste a listing and see whether it works at
                   the asking price, what price makes it work, and what could break
                   the deal: monthly cash flow, cap rate, cash-on-cash return, DSCR, a
                   Deal score, and the Offer Ceiling &mdash; your walk-away price

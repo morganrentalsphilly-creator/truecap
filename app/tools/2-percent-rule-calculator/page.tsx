@@ -298,8 +298,8 @@ export default function TwoPercentRuleCalculatorPage() {
                 >
                   cap rate
                 </IntentPrefetchLink>
-                , cash-on-cash, DSCR. TrueCap does that from a typed address in
-                about two minutes, starting from an editable HUD rent benchmark
+                , cash-on-cash, DSCR. TrueCap does that from a typed address,
+                starting from an editable HUD rent benchmark
                 while keeping property tax as a manual local input, so the
                 screen&apos;s guesses get replaced, not repeated.
               </p>
