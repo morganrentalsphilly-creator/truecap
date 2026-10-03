@@ -143,6 +143,43 @@ describe("offer trust language", () => {
     }
     expect(privacy).not.toContain("Collected via Vercel Analytics and Google Analytics.");
     expect(privacy).not.toContain("we send only the property address / county");
+
+    // Audit row P2-120: the policy names what the code loads and nothing it
+    // does not. Cloudflare Turnstile runs on the three auth forms, Google Tag
+    // Manager and the Ads tag load after Accept, and the cookies are named.
+    const flat = privacy.replace(/\s+/g, " ");
+    for (const disclosure of [
+      "<strong>Cloudflare</strong> — Turnstile",
+      "Google Tag Manager",
+      "<code>_gcl_au</code>",
+      "<code>{FIRST_TOUCH_COOKIE}</code>",
+      "<code>{ANONYMOUS_DECISION_GRANT_COOKIE}</code>",
+      "<code>{CHECKOUT_RETURN_COOKIE}</code>",
+      "<code>truecap_compare_ids</code>",
+      "<strong>Deal documents</strong>",
+    ]) {
+      expect(flat).toContain(disclosure);
+    }
+    for (const form of ["login-form", "sign-up-form", "forgot-password-form"]) {
+      expect(read(`components/auth/${form}.tsx`), form).toContain("CaptchaWidget");
+    }
+    const google = read("components/analytics/google-measurement.tsx");
+    expect(google).toContain("https://www.googletagmanager.com/gtm.js");
+    expect(read("app/actions/compare.ts")).toContain(
+      'const COMPARE_COOKIE = "truecap_compare_ids";',
+    );
+    expect(read("components/investcalc/deal-documents-card.tsx")).toContain(
+      'const BUCKET = "deal-documents";',
+    );
+    // Not in use, so not listed as if they were: Google Analytics (the GTM
+    // container carries no Analytics tag and no gtag config names a G- id),
+    // the newsletter (cancelled), and PostHog, which stays named but is
+    // marked as not connected.
+    expect(flat).not.toMatch(/Places address suggestions, Analytics/);
+    expect(flat).not.toMatch(/newsletter/i);
+    expect(flat).not.toMatch(/through Google and PostHog/);
+    expect(flat).toContain("<strong>PostHog</strong> — product analytics. Not in use today");
+    expect(google).not.toMatch(/gtag\('config', 'G-/);
   });
 
   it("describes only new signed-in deal links as revocable", () => {

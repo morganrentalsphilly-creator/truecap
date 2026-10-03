@@ -19,6 +19,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
+import { FIRST_TOUCH_COOKIE } from "@/lib/first-touch";
+import { ANONYMOUS_DECISION_GRANT_COOKIE } from "@/lib/anonymous-decision-grant";
+import { CHECKOUT_RETURN_COOKIE } from "@/lib/stripe/checkout-return-cookie";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -39,7 +42,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "September 27, 2026";
+const LAST_UPDATED = "October 3, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -67,7 +70,7 @@ export default function PrivacyPage() {
           <h2 className="text-2xl">The short version</h2>
           <ul>
             <li>We do <strong>not</strong> sell, rent, or trade your personal information.</li>
-            <li>We collect what you give us (account info, deals, forms, and optional client-roster data) plus the limited analytics described below.</li>
+            <li>We collect what you give us (account info, deals and the documents you attach to them, forms, and optional client-roster data) plus the limited analytics described below.</li>
             <li>Payments are processed by Stripe — we never see your card number.</li>
             <li>You can delete your account anytime by emailing us.</li>
           </ul>
@@ -85,13 +88,17 @@ export default function PrivacyPage() {
               expenses, and any notes you save against a deal.
             </li>
             <li>
+              <strong>Deal documents</strong> — files you upload to a saved deal, such as an
+              inspection report, a lease, or photos. They are kept in private file storage
+              tied to your account until you delete them.
+            </li>
+            <li>
               <strong>Agent workspace data</strong> — client names and any optional email,
               phone, Buy Box criteria, or deal assignments an Agent Pro user chooses to save.
             </li>
             <li>
               <strong>Forms and branding</strong> — contact details, messages, logos, and
-              business information you submit through lead, support, newsletter, or branding
-              forms.
+              business information you submit through lead, support, or branding forms.
             </li>
             <li>
               <strong>Communications</strong> — anything you email us at hello@usetruecap.com.
@@ -108,18 +115,27 @@ export default function PrivacyPage() {
             <li>
               <strong>Usage data</strong> — pages visited, calculator actions, broad referrer
               (e.g. &ldquo;came from Google Ads&rdquo;), browser type, approximate location based
-              on IP. Nonessential browser analytics through Google and PostHog follows your
-              cookie choice; Vercel also provides limited operational analytics. When you are
+              on IP. Nonessential browser measurement through Google follows your cookie
+              choice; Vercel also provides limited operational analytics. When you are
               signed in, necessary product, account, and billing lifecycle events may be
               associated with your account ID and email so we can deliver the Service,
               understand activation, and troubleshoot account-specific issues.
             </li>
             <li>
               <strong>Cookies</strong> — session cookie for keeping you signed in (set by
-              Supabase Auth), plus analytics and advertising storage only according to the
-              choice you make in our cookie banner. You can reject nonessential analytics.
-              If you accept analytics cookies, a first-party cookie (kept up to 90 days)
-              records a broad traffic-source category and the site section you first landed
+              Supabase Auth; its name begins with <code>sb-</code>), plus analytics and
+              advertising storage only according to the choice you make in our cookie
+              banner. You can reject nonessential analytics. If you accept, the Google Ads
+              tag sets <code>_gcl_au</code> (kept up to 90 days) and we set{" "}
+              <code>{FIRST_TOUCH_COOKIE}</code>, described below. A few short-lived
+              first-party cookies are set only when you use the feature they belong to:{" "}
+              <code>{ANONYMOUS_DECISION_GRANT_COOKIE}</code> (your free first decision),{" "}
+              <code>truecap_compare_ids</code> (the deals you picked to compare), and{" "}
+              <code>{CHECKOUT_RETURN_COOKIE}</code> (returning from checkout). Your cookie
+              choice itself is stored in your browser&apos;s local storage, not in a cookie.
+              If you accept analytics cookies, the first-party cookie{" "}
+              <code>{FIRST_TOUCH_COOKIE}</code> (kept up to 90 days) records a broad
+              traffic-source category and the site section you first landed
               on, and these are stored with your account if you sign up.
             </li>
             <li>
@@ -181,15 +197,23 @@ export default function PrivacyPage() {
               <a href="https://stripe.com/privacy" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
-              <strong>Google</strong> — Places address suggestions, Analytics, Ads, and
-              optional sign-in. Text entered into the address autocomplete and the selected
-              place are processed by Google Places.{" "}
+              <strong>Google</strong> — Places address suggestions, Google Tag Manager,
+              Google Ads conversion measurement, and optional sign-in. Text entered into the
+              address autocomplete and the selected place are processed by Google Places.
+              Google Tag Manager and the Google Ads tag load only after you accept cookies.{" "}
               <a href="https://policies.google.com/privacy" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
-              <strong>PostHog</strong> — product analytics and account-lifecycle measurement;
-              nonessential browser tracking follows your cookie choice.{" "}
+              <strong>PostHog</strong> — product analytics. Not in use today: no PostHog
+              project is connected, so nothing is sent to PostHog. If we turn it on,
+              nonessential browser tracking will follow your cookie choice.{" "}
               <a href="https://posthog.com/privacy" className="text-primary hover:underline">Privacy</a>
+            </li>
+            <li>
+              <strong>Cloudflare</strong> — Turnstile, the automated-abuse check on the
+              sign-in, sign-up, and password-reset forms. It is a security check, so it loads
+              on those pages whatever your cookie choice.{" "}
+              <a href="https://www.cloudflare.com/privacypolicy/" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
               <strong>Sentry</strong> — error reporting, performance monitoring, and security
