@@ -17,11 +17,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_META_NEXT,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { Note } from "@/components/marketing/page-parts";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -136,55 +150,42 @@ export default function DealCheckVsStessaVsTrueCapPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleSchema} />
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={faqSchema} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-
+      <ArticleMain>
         <article>
-          <header className="mb-8 sm:mb-10">
-            <div className="text-2xs uppercase tracking-widest text-primary font-bold mb-3">
-              Comparison · {READING_TIME_MIN} min read
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              {DESCRIPTION}
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              · Comparison · {READING_TIME_MIN} min read
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">
+            <p className={ARTICLE_META_NEXT}>
               Published {PUBLISHED_AT}
               {MODIFIED_AT !== PUBLISHED_AT && ` · Updated ${MODIFIED_AT}`}
             </p>
             <BlogByline />
-            <p className="mt-2 text-xs font-semibold text-foreground/75">
+            <p className={ARTICLE_META_NEXT}>
               Competitor facts reviewed August 27, 2026 against the official
               sources linked below.
             </p>
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          {/* TL;DR */}
-          <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
-              TL;DR
-            </h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground">
+          <Note title="TL;DR">
+            <p>
               All three now overlap during acquisition.{" "}
               <strong>DealCheck</strong> and <strong>TrueCap</strong> are
               focused per-deal analyzers.
               <strong> Stessa</strong> adds a{" "}
-              <a href="https://www.stessa.com/investment-property-marketplace/">
+              <a href="https://www.stessa.com/investment-property-marketplace/" className="tc-link">
                 marketplace with investor filters, buy-box alerts
               </a>
               , comps, and editable underwriting, then continues
@@ -192,9 +193,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               how much discovery, decision depth, and post-close workflow you
               want in one product—not a simple before-versus-after split.
             </p>
-          </section>
+          </Note>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
+          <ArticleBody className="mt-10 sm:mt-12">
             <h2>The three tools, in one sentence each</h2>
             <p>
               Before getting into pricing or feature matrices, get the
@@ -559,29 +560,19 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
             </ul>
 
-            <h2>FAQ</h2>
-            <div className="not-prose space-y-3">
-              {FAQ_ITEMS.map((item) => (
-                <details
-                  key={item.q}
-                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
-                >
-                  <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
-                    <span>{item.q}</span>
-                    <span
-                      aria-hidden
-                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
-                  </div>
-                </details>
-              ))}
-            </div>
+          </ArticleBody>
 
+          {/* faqSchema above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQ_ITEMS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
             <h2>Run a deal in TrueCap free</h2>
             <p>
               The easiest way to figure out which calculator you like is to run
@@ -590,74 +581,66 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               property values that are still missing, and you&apos;ll see the
               modeled underwrite.
             </p>
-            <p className="not-prose"></p>
-          </div>
-
-          <PostSources
-            sources={[
-              {
-                title: "Stessa, Investment Property Marketplace",
-                url: "https://www.stessa.com/investment-property-marketplace/",
-              },
-              {
-                title: "DealCheck, Plans & Pricing",
-                url: "https://dealcheck.io/pricing/",
-              },
-              {
-                title:
-                  "DealCheck, Rental Property Calculator & Cash Flow Analysis",
-                url: "https://dealcheck.io/features/rental-property-calculator/",
-              },
-              {
-                title:
-                  "Stessa Help Center, Stessa Investment Properties Marketplace",
-                url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
-              },
-              {
-                title: "Stessa, Pricing",
-                url: "https://www.stessa.com/pricing/",
-              },
-              {
-                title:
-                  "DealCheck Help Center, How to Search Properties Listed for Sale",
-                url: "https://help.dealcheck.io/en/articles/11471921-how-to-search-properties-listed-for-sale",
-              },
-              {
-                title:
-                  "DealCheck Help Center, How much does DealCheck cost? Can I try it for free?",
-                url: "https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free",
-              },
-              {
-                title: "DealCheck, homepage (iOS and Android app links)",
-                url: "https://dealcheck.io/",
-              },
-              {
-                title:
-                  "DealCheck Help Center, How to Import Property Data from Public Records & Listings",
-                url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
-              },
-              {
-                title: "Stessa, Rental Returns and Income Tax Calculator",
-                url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
-              },
-            ]}
-          />
-
-          <div className="mt-10">
-            <NewsletterSignup />
-          </div>
-
-          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
-
-          <div className="mt-10">
-            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
-          </div>
+          </ArticleBody>
         </article>
-      </main>
 
-      <BlogStickyCta />
+        <PostSources
+          sources={[
+            {
+              title: "Stessa, Investment Property Marketplace",
+              url: "https://www.stessa.com/investment-property-marketplace/",
+            },
+            {
+              title: "DealCheck, Plans & Pricing",
+              url: "https://dealcheck.io/pricing/",
+            },
+            {
+              title:
+                "DealCheck, Rental Property Calculator & Cash Flow Analysis",
+              url: "https://dealcheck.io/features/rental-property-calculator/",
+            },
+            {
+              title:
+                "Stessa Help Center, Stessa Investment Properties Marketplace",
+              url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace",
+            },
+            {
+              title: "Stessa, Pricing",
+              url: "https://www.stessa.com/pricing/",
+            },
+            {
+              title:
+                "DealCheck Help Center, How to Search Properties Listed for Sale",
+              url: "https://help.dealcheck.io/en/articles/11471921-how-to-search-properties-listed-for-sale",
+            },
+            {
+              title:
+                "DealCheck Help Center, How much does DealCheck cost? Can I try it for free?",
+              url: "https://help.dealcheck.io/en/articles/4471054-how-much-does-dealcheck-cost-can-i-try-it-for-free",
+            },
+            {
+              title: "DealCheck, homepage (iOS and Android app links)",
+              url: "https://dealcheck.io/",
+            },
+            {
+              title:
+                "DealCheck Help Center, How to Import Property Data from Public Records & Listings",
+              url: "https://help.dealcheck.io/en/articles/2046991-how-to-import-property-data-from-public-records-listings",
+            },
+            {
+              title: "Stessa, Rental Returns and Income Tax Calculator",
+              url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+            },
+          ]}
+        />
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
