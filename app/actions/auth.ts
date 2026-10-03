@@ -41,8 +41,10 @@ function mapAuthError(message: string): string {
     // Supabase checks the captcha before the credentials, so this says
     // nothing about the account. Its own strings ("captcha protection: request
     // disallowed (timeout-or-duplicate)", "captcha verification process
-    // failed") are not for a customer. The form has already asked the widget
-    // for a new token by the time this is on screen.
+    // failed") are not for a customer. The auth forms (login, sign-up,
+    // forgot-password) have already asked the widget for a new token by the
+    // time this is on screen; the profile page's reset card has not, and
+    // relies on the reload hint.
     return "Couldn't verify you're human. Wait for the check to finish, then try again. If it keeps failing, reload the page.";
   }
   if (m.startsWith("password should")) {
