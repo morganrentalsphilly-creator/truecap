@@ -5,12 +5,22 @@
  * analyzer. Static — driven by lib/blog-topics.ts. Every link it lists passes
  * lib/seo/link-policy.ts (no unpublished or noindexed post, no unreleased
  * calculator); each post links back here through its "Part of" line.
+ *
+ * Layout (DESIGN.md): the page hero with the breadcrumb as its meta line,
+ * one section per block on the /blog hub's 5/7 split (the heading on the
+ * left, ruled rows on the right), and the close on the heavy rule with the
+ * analyzer button and the other hubs under it.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, BookOpen, Calculator } from "lucide-react";
+// Internal links prefetch on hover or keyboard focus, not as they scroll into
+// view; the /analyze link stays next/link with prefetch={false}.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -24,6 +34,25 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 export const dynamicParams = false;
+
+/**
+ * The meta line under the H1 and its links: the article frame's meta line
+ * and meta link (a tc-link with a 44px-tall target), the link padded to 44px
+ * wide for a short word. Written out here, not imported: a file under
+ * app/blog that imports components/marketing/article is read as a post on
+ * the frame (lib/__tests__/blog-post-frame.test.tsx, seo/ARCHITECTURE.md).
+ */
+const BREADCRUMB_CLASS = "mt-4 text-sm text-muted-foreground";
+const BREADCRUMB_LINK_CLASS = "tc-link -mx-2 -my-3 inline-block px-2 py-3";
+
+/**
+ * A section's two columns from 1024px (the /blog hub's 5/7 split): the
+ * heading on the left, its rows on the right. One zero-minimum track below
+ * that and min-w-0 columns, so an unbreakable token in a registry title or
+ * excerpt wraps instead of widening the page.
+ */
+const SPLIT_CLASS =
+  "grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-6 break-words lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]";
 
 export function generateStaticParams() {
   return BLOG_TOPICS.map((t) => ({ topic: t.slug }));
@@ -103,128 +132,154 @@ export default async function BlogTopicHubPage({
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={collectionLd} />
-      <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
-            <li aria-hidden="true">›</li>
-            <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">{topic.title}</li>
-          </ol>
-        </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero title={topic.title} lede={topic.intro}>
+          {/* The breadcrumb sits under the H1 as the hero's meta line, never
+              above it (the blog's hub link does the same on a post). */}
+          <nav aria-label="Breadcrumb" className={BREADCRUMB_CLASS}>
+            <ol className="flex flex-wrap items-center gap-x-2">
+              <li>
+                <IntentPrefetchLink href="/" className={BREADCRUMB_LINK_CLASS}>
+                  Home
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <IntentPrefetchLink href="/blog" className={BREADCRUMB_LINK_CLASS}>
+                  Blog
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li aria-current="page" className="text-foreground">
+                {topic.title}
+              </li>
+            </ol>
+          </nav>
+        </PageHero>
 
-        <header className="mb-8">
-          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
-            {topic.title}
-          </h1>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground">{topic.intro}</p>
-        </header>
-
-        {/* Guides */}
-        <section className="mb-10">
-          <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold text-foreground">
-            <BookOpen className="size-4 text-primary" /> Guides
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {posts.map((post) => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="group flex flex-col gap-2 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary"
-              >
-                <h3 className="font-bold text-foreground group-hover:text-primary">{post.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
-                <span className="mt-auto text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  {post.readingTimeMinutes} min read
-                </span>
-              </Link>
-            ))}
+        {/* Guides: the /blog hub's section, the heading on the left and the
+            posts as ruled rows on the right. The title is the row's one link;
+            its padding, pulled back by the negative margin, makes a 44px
+            target. The hero's bottom rule opens this section. */}
+        <Section rhythm="tight" aria-labelledby="topic-guides-heading">
+          <div className={SPLIT_CLASS}>
+            <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+              <SectionHeading id="topic-guides-heading">Guides</SectionHeading>
+            </div>
+            <ul className="min-w-0 border-t-2 border-foreground">
+              {posts.map((post) => (
+                <li key={post.slug} className="border-b border-rule-soft py-4">
+                  <h3 className="text-pretty text-lg font-semibold">
+                    <IntentPrefetchLink
+                      href={`/blog/${post.slug}`}
+                      className="tc-link -my-2 inline-block max-w-full py-2"
+                    >
+                      {post.title}
+                    </IntentPrefetchLink>
+                  </h3>
+                  <p className="mt-1 line-clamp-3 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {post.readingTimeMinutes} min read
+                  </p>
+                </li>
+              ))}
+            </ul>
           </div>
-        </section>
+        </Section>
 
         {/* Terms the hub's guides turn on (lib/blog-topics.ts glossarySlugs). */}
         {terms.length > 0 ? (
-          <section className="mb-10" data-topic-glossary-terms="">
-            <h2 className="mb-3 text-base font-extrabold text-foreground">Terms these guides use</h2>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {terms.map((entry, index) => (
-                <span key={entry.slug}>
-                  {index > 0 ? ", " : ""}
-                  <Link
-                    href={`/glossary/${entry.slug}`}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    {entry.term}
-                  </Link>
-                </span>
-              ))}
-              . Every other term is defined in the{" "}
-              <Link href="/glossary" className="font-semibold text-primary hover:underline">
-                glossary
-              </Link>
-              .
-            </p>
-          </section>
+          <Section rhythm="tight" aria-labelledby="topic-terms-heading" data-topic-glossary-terms="">
+            <div className={SPLIT_CLASS}>
+              <div className="min-w-0">
+                <SectionHeading id="topic-terms-heading">Terms these guides use</SectionHeading>
+              </div>
+              <p className="min-w-0 max-w-[64ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+                {terms.map((entry, index) => (
+                  <span key={entry.slug}>
+                    {index > 0 ? ", " : ""}
+                    <IntentPrefetchLink href={`/glossary/${entry.slug}`} className="tc-link">
+                      {entry.term}
+                    </IntentPrefetchLink>
+                  </span>
+                ))}
+                . Every other term is defined in the{" "}
+                <IntentPrefetchLink href="/glossary" className="tc-link">
+                  glossary
+                </IntentPrefetchLink>
+                .
+              </p>
+            </div>
+          </Section>
         ) : null}
 
-        {/* Calculators */}
+        {/* Calculators: the same ruled rows, no icon and no card. */}
         {calculators.length > 0 ? (
-          <section className="mb-10">
-            <h2 className="mb-4 flex items-center gap-2 text-base font-extrabold text-foreground">
-              <Calculator className="size-4 text-primary" /> Calculators for this
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {calculators.map((calc) => (
-                <Link
-                  key={calc.slug}
-                  href={`/tools/${calc.slug}`}
-                  className="group flex flex-col gap-1.5 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary"
+          <Section rhythm="tight" aria-labelledby="topic-calculators-heading">
+            <div className={SPLIT_CLASS}>
+              <div className="min-w-0">
+                <SectionHeading id="topic-calculators-heading">Calculators for this</SectionHeading>
+              </div>
+              <ul className="min-w-0 border-t-2 border-foreground">
+                {calculators.map((calc) => (
+                  <li key={calc.slug} className="border-b border-rule-soft py-4">
+                    <h3 className="text-pretty text-lg font-semibold">
+                      <IntentPrefetchLink
+                        href={`/tools/${calc.slug}`}
+                        className="tc-link -my-2 inline-block max-w-full py-2"
+                      >
+                        {calc.title}
+                      </IntentPrefetchLink>
+                    </h3>
+                    <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                      {calc.description}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Section>
+        ) : null}
+
+        {/* The close on the heavy rule: the analyzer button, then the other
+            hubs under it on a soft rule (two-column ruled links on phones,
+            2px tags from 640px: the /blog hero's topic links). */}
+        <CloseSection
+          heading="Run a real deal"
+          headingId="topic-cta-heading"
+          lede={
+            <>
+              Reading is step one. Paste an address into TrueCap and get cap rate, cash-on-cash,
+              DSCR, cash flow, and a Buy Box fit in 60 seconds — free.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                Open TrueCap
+              </Link>
+            </ActionRow>
+          }
+        >
+          <nav aria-labelledby="more-topics-label" className="mt-10 border-t border-rule-soft pt-6">
+            <p id="more-topics-label" className="mb-2 text-sm font-semibold text-muted-foreground">
+              More topics
+            </p>
+            <div className="grid grid-cols-2 gap-x-6 break-words sm:flex sm:flex-wrap sm:gap-2">
+              {otherTopics.map((t) => (
+                <IntentPrefetchLink
+                  key={t.slug}
+                  href={`/blog/topics/${t.slug}`}
+                  className="block min-h-11 min-w-11 border-b border-rule-soft py-3 text-sm text-foreground transition-colors hover:bg-band sm:inline-flex sm:items-center sm:rounded-sm sm:border sm:border-border sm:px-3 sm:py-2"
                 >
-                  <div className="flex items-center justify-between">
-                    <Calculator className="size-5 text-primary" />
-                    <ArrowUpRight className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                  </div>
-                  <h3 className="font-bold text-foreground">{calc.title}</h3>
-                  <p className="text-sm text-muted-foreground">{calc.description}</p>
-                </Link>
+                  {t.title}
+                </IntentPrefetchLink>
               ))}
             </div>
-          </section>
-        ) : null}
-
-        {/* CTA */}
-        <section className="mb-10 rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
-          <h2 className="mb-2 text-xl font-extrabold sm:text-2xl">Run a real deal</h2>
-          <p className="mb-4 text-sm opacity-90 sm:text-base">
-            Reading is step one. Paste an address into TrueCap and get cap rate, cash-on-cash,
-            DSCR, cash flow, and a Buy Box fit in 60 seconds — free.
-          </p>
-          <Link
-            href="/analyze" prefetch={false}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-4 py-2.5 font-bold text-primary transition-opacity hover:opacity-90"
-          >
-            Open TrueCap <ArrowUpRight className="size-4" />
-          </Link>
-        </section>
-
-        {/* Other topics */}
-        <section className="border-t border-border pt-6">
-          <p className="mb-3 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-            More topics
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {otherTopics.map((t) => (
-              <Link
-                key={t.slug}
-                href={`/blog/topics/${t.slug}`}
-                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-              >
-                {t.title}
-              </Link>
-            ))}
-          </div>
-        </section>
+          </nav>
+        </CloseSection>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
