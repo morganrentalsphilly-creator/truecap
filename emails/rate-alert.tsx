@@ -230,7 +230,7 @@ export default function RateAlertEmail({
               margin: "16px 0 0",
             }}
           >
-            TrueCap · Underwrite rentals in 60 seconds ·{" "}
+            TrueCap · Rental property underwriting ·{" "}
             <Link href={siteUrl} style={{ color: "#51504c" }}>
               usetruecap.com
             </Link>

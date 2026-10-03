@@ -151,7 +151,7 @@ export default function LifecycleEmail({
               margin: "16px 0 0",
             }}
           >
-            TrueCap · Underwrite rentals in 60 seconds
+            TrueCap · Rental property underwriting
             <br />
             {LIFECYCLE_FOOTER_REASON}
             <br />

@@ -93,7 +93,7 @@ const SEQUENCE: Array<{
       <p>The playbook covers Buy Box criteria, input review, sensitivity, due
       diligence, and adviser questions. It's a model, not an appraisal, a
       lender decision, or investment advice.</p>
-      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds your Offer Ceiling →</a></p>
+      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze a rental free from an address, the asking price and a bedroom count</a></p>
     `,
   },
   {

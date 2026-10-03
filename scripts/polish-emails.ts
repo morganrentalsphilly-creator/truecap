@@ -36,9 +36,9 @@ const CONTENT_DIR = path.join(process.cwd(), "emails", "content");
 const POLISH: Record<string, Polish> = {
   // ───── 2026-05-25 ──── Launch (past-dated; included for completeness)
   "2026-05-25": {
-    subject: "Underwrite any rental in 60 seconds — without the spreadsheet",
+    subject: "Underwrite any rental without the spreadsheet",
     preheader:
-      "Paste an address. Get cap rate, cash flow, DSCR, 10-year projection. Free, no signup.",
+      "Enter an address, the asking price and a bedroom count. Get cap rate, cash flow and DSCR. Free, no signup.",
     shipNote: {
       title: "Start with the free TrueCap analyzer",
       items: [
@@ -51,13 +51,13 @@ const POLISH: Record<string, Polish> = {
 
   // ───── 2026-06-02 ──── 5-number triage
   "2026-06-02": {
-    subject: "The 5 numbers that decide every rental deal (in 60 seconds)",
+    subject: "The 5 numbers that decide every rental deal",
     preheader:
       "Cap rate, cash-on-cash, DSCR, monthly NCF, 10-yr IRR — and which to weight when",
     shipNote: {
       title: "All 5 numbers, every analysis — free",
       items: [
-        "Paste an address — cap rate, cash-on-cash, DSCR, monthly net cash flow auto-calculated in 60 seconds",
+        "Enter an address, the asking price and a bedroom count: cap rate, cash-on-cash, DSCR and monthly net cash flow are calculated for you",
         "Pro: 10-year IRR projection, sensitivity grid, max-allowable-offer calculator",
         "Run your next deal through TrueCap →",
       ],
@@ -117,7 +117,7 @@ const POLISH: Record<string, Polish> = {
     shipNote: {
       title: "Compare both strategies on the same deal",
       items: [
-        "Free: cap rate + cash flow + DSCR for any property in 60 seconds",
+        "Free: cap rate + cash flow + DSCR for any property",
         "Pro: 10-year IRR projection — see whether cash flow or appreciation actually drives this deal's return",
         "Run both scenarios in TrueCap →",
       ],
@@ -162,7 +162,7 @@ const POLISH: Record<string, Polish> = {
     shipNote: {
       title: "Use TrueCap to answer your next 'should I' question",
       items: [
-        "Free: paste an address, get every key metric in 60 seconds — no spreadsheet wrangling",
+        "Free: enter an address, the asking price and a bedroom count and get the key metrics, no spreadsheet wrangling",
         "Pro: refi A/B compare, sensitivity grid, MAO calculator for offer math",
         "Stop building Excel models for one-off questions →",
       ],
@@ -209,7 +209,7 @@ const POLISH: Record<string, Polish> = {
       items: [
         "Free: rehab cost estimator built in — model how a $15k roof or $8k electrical changes the deal",
         "Pro: sensitivity grid — see exact cap rate impact of accepting vs walking",
-        "Re-underwrite after inspection in 60 seconds →",
+        "Re-underwrite after inspection →",
       ],
     },
   },
@@ -297,7 +297,7 @@ const POLISH: Record<string, Polish> = {
     shipNote: {
       title: "Underwrite STR + LTR side-by-side",
       items: [
-        "Free: cap rate + cash flow with long-term rental assumptions in 60 seconds",
+        "Free: cap rate + cash flow with long-term rental assumptions",
         "Pro: customize rent + vacancy + management to model STR scenarios — see if the upside is real after operational cost",
         "Compare both strategies on the same property →",
       ],

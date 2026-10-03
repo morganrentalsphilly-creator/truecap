@@ -123,7 +123,7 @@ export default function RentAlertEmail({ deals, siteUrl }: RentAlertEmailProps) 
             </Section>
           </Section>
           <Text style={{ color: "#51504c", fontSize: 11, textAlign: "center" as const, margin: "16px 0 0" }}>
-            TrueCap · Underwrite rentals in 60 seconds · <Link href={siteUrl} style={{ color: "#51504c" }}>usetruecap.com</Link>
+            TrueCap · Rental property underwriting · <Link href={siteUrl} style={{ color: "#51504c" }}>usetruecap.com</Link>
           </Text>
         </Container>
       </Body>
