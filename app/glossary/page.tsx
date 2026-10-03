@@ -9,11 +9,21 @@
  * Internal-link hub: every term that has a calculator deep-links to
  * /tools/<slug>, and every blog post that covers the topic deep-links
  * here. This strengthens the topical cluster around rental analysis.
+ *
+ * Layout (DESIGN.md): the page hero, the jump links as a ruled grid, the
+ * definitions as ruled rows in the reading column (a benchmark is a ruled
+ * Note, not a tinted box), and the close on the heavy rule with the
+ * analyzer button.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, BookOpen } from "lucide-react";
+// Internal links prefetch on hover or keyboard focus, not as they scroll into
+// view; the /analyze link stays next/link with prefetch={false}.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { ActionRow, CloseSection, Note, PageHero } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import {
@@ -381,126 +391,128 @@ export default function GlossaryPage() {
       <JsonLd data={definedTermSetLd} />
       <BreadcrumbSchema items={[{ name: "Glossary", path: "/glossary" }]} />
 
-      <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
-            Real Estate Glossary
-          </h1>
-          <p className="text-base text-muted-foreground mt-2 leading-relaxed">
-            Plain-English definitions of every rental-property analysis term.
-            Cross-linked to the calculators and the long-form posts so you can
-            dig as deep as you want on any concept.
-          </p>
-        </header>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="Real Estate Glossary"
+          lede="Plain-English definitions of every rental-property analysis term. Cross-linked to the calculators and the long-form posts so you can dig as deep as you want on any concept."
+        />
 
-        {/* Jump-to nav — alphabetical chips for fast scanning */}
-        <nav
-          aria-label="Jump to term"
-          className="mb-8 flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3 sm:p-4"
-        >
-          {TERMS.map((t) => (
-            <a
-              key={t.slug}
-              href={`#${t.slug}`}
-              className="inline-flex min-h-11 min-w-11 items-center rounded-full bg-muted px-3 text-2xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:text-xs"
-            >
-              {t.term}
-            </a>
-          ))}
-        </nav>
+        {/* Jump-to nav: every term as a ruled link at least 44px tall, in
+            two to four columns, sentence case (it was a box of uppercase
+            pills). rule="none": the hero's bottom rule opens it. */}
+        <Section rhythm="tight" rule="none">
+          <nav
+            aria-label="Jump to term"
+            className="grid grid-cols-2 gap-x-6 break-words border-t-2 border-foreground sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12"
+          >
+            {TERMS.map((t) => (
+              <a
+                key={t.slug}
+                href={`#${t.slug}`}
+                className="flex min-h-11 min-w-11 items-center border-b border-rule-soft py-3 text-sm text-foreground transition-colors hover:bg-band"
+              >
+                {t.term}
+              </a>
+            ))}
+          </nav>
+        </Section>
 
-        {/* Definitions */}
-        <div className="space-y-6">
-          {TERMS.map((t) => (
-            <article
-              key={t.slug}
-              id={t.slug}
-              className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 sm:p-6"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="text-xl font-extrabold text-foreground sm:text-2xl">
-                    {t.term}
-                  </h2>
-                  {t.also && t.also.length > 0 ? (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Also called: {t.also.join(", ")}
-                    </p>
+        {/* Definitions: one ruled row per term in the reading column, not a
+            card each. A row keeps its <article id> (the jump links and the
+            DefinedTerm @ids point at it) and its H2. */}
+        <Section rhythm="tight">
+          <div className="max-w-[68ch] break-words border-t-2 border-foreground">
+            {TERMS.map((t) => (
+              <article
+                key={t.slug}
+                id={t.slug}
+                className="scroll-mt-24 border-b border-rule-soft py-6"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <h2 className="font-display text-balance text-h3-sm sm:text-2xl">
+                      {t.term}
+                    </h2>
+                    {t.also && t.also.length > 0 ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Also called: {t.also.join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
+                  {/* A plain underlined link in Signal Blue (5.9:1 on paper),
+                      sentence case and no arrow; it was an 11px uppercase
+                      label whose /60 opacity measured 2.52:1. */}
+                  <IntentPrefetchLink
+                    href={`/glossary/${t.slug}`}
+                    aria-label={`Full definition for ${t.term}`}
+                    className="tc-link -my-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-end text-sm"
+                  >
+                    Permalink
+                  </IntentPrefetchLink>
+                </div>
+
+                <p className="mt-3 text-pretty text-base leading-relaxed text-foreground">
+                  {t.definition}
+                </p>
+
+                {t.benchmark ? (
+                  <Note className="mt-4">
+                    <strong className="font-semibold text-foreground">Benchmark:</strong>{" "}
+                    {t.benchmark}
+                  </Note>
+                ) : null}
+
+                {/* Cross-links — full definition page + calculator + deeper read */}
+                <div className="mt-2 flex flex-wrap items-center gap-x-6 text-base">
+                  <IntentPrefetchLink
+                    href={`/glossary/${t.slug}`}
+                    className="tc-link inline-flex min-h-11 min-w-11 items-center"
+                  >
+                    Full definition, formula, example
+                  </IntentPrefetchLink>
+                  {t.toolPath && isLinkablePath(t.toolPath) ? (
+                    <IntentPrefetchLink
+                      href={t.toolPath}
+                      className="tc-link inline-flex min-h-11 min-w-11 items-center"
+                    >
+                      Calculator
+                    </IntentPrefetchLink>
+                  ) : null}
+                  {t.postPath && isLinkablePath(t.postPath) ? (
+                    <IntentPrefetchLink
+                      href={t.postPath}
+                      className="tc-link inline-flex min-h-11 min-w-11 items-center"
+                    >
+                      Deep dive
+                    </IntentPrefetchLink>
                   ) : null}
                 </div>
-                <Link
-                  href={`/glossary/${t.slug}`}
-                  aria-label={`Full definition for ${t.term}`}
-                  // Full token, not /60. At 11px bold the /60 opacity
-                  // composited to #9CA4AD = 2.52:1 on white, against a 4.5:1
-                  // minimum — 44 nodes, and the only axe-detectable WCAG AA
-                  // failure on the page. The full token is #596877 = 5.72:1,
-                  // which clears AA with margin and still reads as secondary.
-                  className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                >
-                  PERMALINK →
-                </Link>
-              </div>
+              </article>
+            ))}
+          </div>
+        </Section>
 
-              <p className="mt-3 text-sm leading-relaxed text-foreground sm:text-base">
-                {t.definition}
-              </p>
-
-              {t.benchmark ? (
-                <div className="mt-3 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs leading-relaxed text-foreground sm:text-sm">
-                  <strong className="text-foreground">Benchmark:</strong>{" "}
-                  {t.benchmark}
-                </div>
-              ) : null}
-
-              {/* Cross-links — full definition page + calculator + deeper read */}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold">
-                <Link
-                  href={`/glossary/${t.slug}`}
-                  className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                >
-                  Full definition, formula, example
-                  <ArrowUpRight className="size-3.5" />
-                </Link>
-                {t.toolPath && isLinkablePath(t.toolPath) ? (
-                  <Link
-                    href={t.toolPath}
-                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  >
-                    Calculator
-                  </Link>
-                ) : null}
-                {t.postPath && isLinkablePath(t.postPath) ? (
-                  <Link
-                    href={t.postPath}
-                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  >
-                    <BookOpen className="size-3.5" />
-                    Deep dive
-                  </Link>
-                ) : null}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <section className="mt-10 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-            Stop looking these up. Use the analyzer.
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4">
-            TrueCap computes every metric on this page live as you type, with
-            inline tooltips that explain each one in context. Free to start — no
-            signup needed.
-          </p>
-          <Link
-            href="/analyze" prefetch={false}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90"
-          >
-            Open TrueCap
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </section>
+        <CloseSection
+          heading="Stop looking these up. Use the analyzer."
+          headingId="glossary-cta-heading"
+          lede={
+            <>
+              TrueCap computes every metric on this page live as you type, with
+              inline tooltips that explain each one in context. Free to start — no
+              signup needed.
+            </>
+          }
+          actions={
+            <ActionRow>
+              <Link
+                href="/analyze" prefetch={false}
+                className={buttonVariants({ size: "cta" })}
+              >
+                Open TrueCap
+              </Link>
+            </ActionRow>
+          }
+        />
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
