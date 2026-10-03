@@ -47,7 +47,7 @@ const ALL_CALCULATORS: CalculatorEntry[] = [
   { slug: "2-percent-rule-calculator", title: "2% Rule Calculator", shortTitle: "2% Rule", description: "The strict cash-flow screen — rent-to-price against the 2% and 1% bars.", category: "screen", embeddable: true },
   { slug: "gross-rent-multiplier-calculator", title: "Gross Rent Multiplier (GRM) Calculator", shortTitle: "GRM", description: "A first-pass screening ratio for triaging rental deals.", category: "screen", embeddable: true },
   { slug: "break-even-calculator", title: "Break-Even Calculator", shortTitle: "Break-Even", description: "Months until rental cash flow returns your initial investment.", category: "screen", embeddable: true },
-  { slug: "50-percent-rule-calculator", title: "50% Rule Calculator", shortTitle: "50% Rule", description: "First-pass expense triage — estimated expenses, NOI, and cash flow from gross rent.", category: "screen", embeddable: true },
+  { slug: "50-percent-rule-calculator", title: "50% Rule Calculator", shortTitle: "50% Rule", description: "First-pass expense triage: estimated expenses, NOI, and cash flow from gross rent.", category: "screen", embeddable: true },
   // Finance
   { slug: "dscr-calculator", title: "DSCR Calculator", shortTitle: "DSCR", description: "Debt Service Coverage Ratio — the metric every investment-property lender uses.", category: "finance", embeddable: true, footerFeatured: true },
   { slug: "mortgage-payment-calculator", title: "Mortgage Payment Calculator", shortTitle: "Mortgage Payment", description: "PITI breakdown — principal, interest, taxes, insurance — for investment loans.", category: "finance", embeddable: true },

@@ -28,7 +28,7 @@ function sourceFiles(directory: string): string[] {
 
 describe("rule-of-thumb calculators state no second count", () => {
   const files = [...sourceFiles("app/tools"), "lib/calculator-registry.ts"];
-  const SECOND_COUNT = /\b(?:\d+|three|five|ten|thirty|ninety)[- ]seconds?\b/i;
+  const SECOND_COUNT = /\b(?:\d+|three|five|ten|thirty|ninety)[- ]seconds?\b|\bunder a minute\b/i;
 
   it("reads the calculator pages and the registry", () => {
     expect(files.length).toBeGreaterThan(20);
@@ -65,6 +65,9 @@ describe("rule-of-thumb calculators state no second count", () => {
     );
     const registry = read("lib/calculator-registry.ts");
     expect(registry).toContain("A first-pass screening ratio for triaging rental deals.");
-    expect(registry).toContain("First-pass expense triage");
+    expect(registry).toContain("First-pass expense triage:");
+    expect(read("app/tools/50-percent-rule-calculator/page.tsx")).toContain(
+      "has earned the full underwrite",
+    );
   });
 });
