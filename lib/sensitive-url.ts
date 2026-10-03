@@ -107,12 +107,15 @@ export function shouldKeepThirdPartyTelemetryDisabled(
 /**
  * The only auth pages, and the only `next` values, on which cookieless page
  * analytics may stay mounted although `next` is a sensitive parameter
- * (founder decision 2026-10-03, audit row P1-49). Every in-product sign-up
- * prompt links to /auth/sign-up?next=/dashboard/new and every /pricing plan
- * button to /auth/sign-up?next=/pricing?checkout=<plan>#plans, so with the
- * gate above those sign-ups had no transport at all. These values are fixed
- * strings that name a public route and a catalog plan slug; they cannot hold
- * an address, a deal id, a share token or another site.
+ * (founder decision 2026-10-03, audit row P1-49). The analyzer and result-page
+ * sign-up prompts, the sign-up card, and the /pricing and /for-agents plan
+ * buttons link to /auth/sign-up with next=/dashboard/new (the plan buttons
+ * add plan= and billing=), and the pricing checkout return
+ * (/pricing?checkout=<plan>#plans) is the other fixed return path, so with
+ * the gate above those sign-ups had no transport at all. Prompts that pass
+ * any other next (the share dialog, a saved-deal return) stay off. These
+ * values are fixed strings that name a public route and a catalog plan slug;
+ * they cannot hold an address, a deal id, a share token or another site.
  */
 const COUNTED_NEXT_AUTH_PATHS: ReadonlySet<string> = new Set([
   "/auth/sign-up",
