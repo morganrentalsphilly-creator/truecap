@@ -10,13 +10,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -120,28 +132,24 @@ export default function DownPaymentPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -149,7 +157,8 @@ export default function DownPaymentPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               &quot;How much do I need to put down?&quot; is the first real question
               every new rental investor hits, and the internet&apos;s favorite answer —
               &quot;20%&quot; — is often the wrong one. The honest answer
@@ -161,24 +170,22 @@ export default function DownPaymentPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The short answer
-            </h2>
+          <ArticleBody>
+            <h2>The short answer</h2>
             <p>
               If you are buying a property you will <strong>not</strong> live in, a
               conventional loan requires <strong>15% down on a single-family rental</strong>{" "}
               and <strong>25% down on a 2–4 unit building</strong>. Those are{" "}
               <a
                 href="https://singlefamily.fanniemae.com/media/20786/display"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae
               </a>{" "}
               and{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac
               </a>{" "}
@@ -191,14 +198,14 @@ export default function DownPaymentPost() {
               financing opens up:{" "}
               <a
                 href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>FHA at 3.5% down</strong>
               </a>{" "}
               on a 1–4 unit, a{" "}
               <a
                 href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>VA loan at 0% down</strong>
               </a>{" "}
@@ -208,16 +215,14 @@ export default function DownPaymentPost() {
               difference on the same building.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The full down-payment menu (2026)
-            </h2>
+            <h2>The full down-payment menu (2026)</h2>
             <p>
               Here&apos;s the practical range by loan type. &quot;Owner-occupied&quot; means you
               live in the property as your primary residence; lenders typically require you
               to{" "}
               <a
                 href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4000.1hsgh.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 move in within 60 days and stay at least 12 months
               </a>
@@ -229,7 +234,7 @@ export default function DownPaymentPost() {
               <li><strong>Conventional, owner-occupied 1-unit:</strong> 3–5% down. Under 20% down you pay PMI until you{" "}
                 <a
                   href="https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   ask to cancel it at 20% equity
                 </a>{" "}
@@ -237,7 +242,7 @@ export default function DownPaymentPost() {
               <li><strong>Conventional, owner-occupied 2–4 units:</strong>{" "}
                 <a
                   href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   as little as 5% down
                 </a>{" "}
@@ -247,12 +252,12 @@ export default function DownPaymentPost() {
               <li><strong>Second home (not a rental):</strong> 10% down — but you{" "}
                 <a
                   href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   can&apos;t rent it full-time and call it a second home
                 </a>
                 .</li>
-              <li><strong><Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loan</Link> (investment):</strong> down payment and qualification rules vary by lender and program; get the written term sheet. Many programs qualify primarily on the property&apos;s rent.</li>
+              <li><strong><Link href="/blog/how-to-calculate-dscr#dscr-loans" className="tc-link">DSCR loan</Link> (investment):</strong> down payment and qualification rules vary by lender and program; get the written term sheet. Many programs qualify primarily on the property&apos;s rent.</li>
             </ul>
             <p>
               Notice what&apos;s missing from the investment rows: there&apos;s no 3%- or
@@ -260,9 +265,7 @@ export default function DownPaymentPost() {
               topic.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Rentals can carry mortgage insurance, but 15% down is the floor
-            </h2>
+            <h2>Rentals can carry mortgage insurance, but 15% down is the floor</h2>
             <p>
               On an owner-occupied loan, private mortgage insurance lets you put down less
               than 20% — the insurer covers the lender&apos;s risk in exchange for a monthly
@@ -271,7 +274,7 @@ export default function DownPaymentPost() {
               investment loans at 85% LTV (75% on 2–4 units), and{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 any conventional loan above 80% LTV requires mortgage insurance
               </a>
@@ -283,7 +286,7 @@ export default function DownPaymentPost() {
               mortgage insurance. FHA charges an{" "}
               <a
                 href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 annual MIP around 0.55% of the loan
               </a>{" "}
@@ -296,27 +299,25 @@ export default function DownPaymentPost() {
               not a footnote.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Worked example: a $250k single-family at 15% vs. 20% vs. 25% down
-            </h2>
+            <h2>Worked example: a $250k single-family at 15% vs. 20% vs. 25% down</h2>
             <p>
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
               a hypothetical 7.25%{" "}
-              <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">investment rate</Link>{" "}
+              <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="tc-link">investment rate</Link>{" "}
               (for reference,{" "}
               <a
                 href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac&apos;s survey of primary-residence 30-year rates averaged about
                 6.5% in June 2026
               </a>
               ), renting for $2,500/month — right at the{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 1% rule
               </Link>{" "}
               line. After honest operating expenses (5% vacancy, 8% management, 5%
-              maintenance, 5% <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">capex reserves</Link>, $3,000 taxes, $1,450 insurance), the property
+              maintenance, 5% <Link href="/blog/capex-maintenance-reserves-rental-property" className="tc-link">capex reserves</Link>, $3,000 taxes, $1,450 insurance), the property
               throws off about <strong>$18,650 of net operating income</strong> — a 7.46% cap
               rate. Now watch what the down payment does:
             </p>
@@ -327,20 +328,18 @@ export default function DownPaymentPost() {
             </ul>
             <p>
               Reproduce any row in seconds with the{" "}
-              <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/tools/mortgage-payment-calculator" className="tc-link">
                 mortgage payment calculator
               </Link>{" "}
               for the P&amp;I, then let the free{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               turn it into cash-on-cash and DSCR. The pattern is the surprising
               part.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The counterintuitive part: more down, higher return
-            </h2>
+            <h2>The counterintuitive part: more down, higher return</h2>
             <p>
               For a decade of cheap money, the gospel was &quot;put as little down as possible
               and let leverage juice your return.&quot; Look at the table again: cash-on-cash
@@ -365,15 +364,13 @@ export default function DownPaymentPost() {
               question, not a rule of thumb, and the answer changes with rates. Compare your
               deal&apos;s cap rate to its loan constant before you assume minimum-down is optimal —
               the{" "}
-              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="text-primary font-semibold hover:underline">
+              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="tc-link">
                 cash-on-cash guide
               </Link>{" "}
               walks the full formula.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The house-hack shortcut
-            </h2>
+            <h2>The house-hack shortcut</h2>
             <p>
               If the 25%-down wall on a multifamily feels impossible, owner-occupancy is the
               door around it. Take the <em>same</em> $250,000 duplex three ways:
@@ -389,7 +386,7 @@ export default function DownPaymentPost() {
               because owner-occupied loans price better than investor loans:{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae applies a loan-level price adjustment to every investment-property loan
               </a>
@@ -397,15 +394,13 @@ export default function DownPaymentPost() {
               you live there for at least a year, carry a bigger loan balance, and pay mortgage
               insurance. For most first-timers it&apos;s the single fastest way into rental real
               estate. The full playbook is in{" "}
-              <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">
+              <Link href="/blog/house-hacking-explained" className="tc-link">
                 house hacking explained
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The cash the down payment hides: closing costs and reserves
-            </h2>
+            <h2>The cash the down payment hides: closing costs and reserves</h2>
             <p>
               Your down payment is not your cash-to-close. Two more piles sit on top of it,
               and skipping them is how new investors end up short at the table:
@@ -414,7 +409,7 @@ export default function DownPaymentPost() {
               <strong>Closing costs.</strong> Budget{" "}
               <a
                 href="https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2–5% of the price
               </a>{" "}
@@ -422,11 +417,11 @@ export default function DownPaymentPost() {
               roughly $5,000–$12,500 on our $250k rental — covering lender fees, title,
               transfer taxes, and prepaids. They&apos;re sunk the day you sign, so they belong in
               your return math up front. The full line-by-line breakdown is in{" "}
-              <Link href="/blog/closing-costs-investment-property" className="text-primary font-semibold hover:underline">
+              <Link href="/blog/closing-costs-investment-property" className="tc-link">
                 closing costs on an investment property
               </Link>
               , and you can estimate yours with the{" "}
-              <Link href="/tools/closing-cost-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/tools/closing-cost-calculator" className="tc-link">
                 closing cost calculator
               </Link>
               .
@@ -436,7 +431,7 @@ export default function DownPaymentPost() {
               about{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 six months of PITI
               </a>{" "}
@@ -447,7 +442,7 @@ export default function DownPaymentPost() {
               <strong>$81,400 of liquidity</strong>, not the $62,500 the down-payment line implies.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               So how much should <em>you</em> put down?
             </h2>
             <p>
@@ -458,7 +453,7 @@ export default function DownPaymentPost() {
             <ul>
               <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t, more down does. Check it deal by deal.</li>
               <li><strong>DSCR headroom.</strong> Lenders and your own safety both want{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 DSCR
               </Link>{" "}
               comfortably above 1.0 — 1.20+ is a healthy buffer. More down raises DSCR; if a deal only clears 1.0 at 25% down, that&apos;s the market telling you it&apos;s thin.</li>
@@ -466,37 +461,33 @@ export default function DownPaymentPost() {
               <li><strong>Reserves after closing.</strong> Never put down so much that you close with an empty bank account. A vacancy and a furnace in the same quarter is a normal year, not a black swan.</li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Run your actual deal
-            </h2>
+            <h2>Run your actual deal</h2>
             <p>
               The cleanest habit is to stop guessing at &quot;20%&quot; and model the specific
               property at two or three down-payment levels before you write an offer. Drop the
               price, rent, expenses, and each financing scenario into{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link href="/" className="tc-link">
                 TrueCap
               </Link>{" "}
               and you&apos;ll see cash flow, cap rate, cash-on-cash, and DSCR side by side in about
               60 seconds — including the all-in cash the deal really needs. For the rest of the
               underwrite, see{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
                 how to underwrite a rental in 60 seconds
               </Link>
               .
             </p>
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQs
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
-          </div>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQs"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -552,13 +543,12 @@ export default function DownPaymentPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
