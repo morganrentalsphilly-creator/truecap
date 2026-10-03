@@ -463,7 +463,7 @@ export default function BestDealCheckAlternativesPost() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               For a no-account preliminary rental screen,{" "}
               <strong>TrueCap</strong> (that&apos;s us) exposes core rental

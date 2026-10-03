@@ -394,7 +394,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               <strong>TrueCap</strong> (that&apos;s us) is the closest free
               replacement — unlimited preliminary rental screens, no signup,

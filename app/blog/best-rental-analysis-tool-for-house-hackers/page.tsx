@@ -385,7 +385,7 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               For house hackers specifically: <strong>TrueCap</strong> stands out for the explicit owner-occupant property type (auto-excludes your unit from rent income) and a down-payment field you can set to{" "}
               <a

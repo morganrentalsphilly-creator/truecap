@@ -195,16 +195,23 @@ const AFTER_FAQ_ROWS = "[:has(>details:last-child)+&]:border-t-0";
 
 export function Note({
   title,
+  titleAs: Title = "p",
   children,
   className,
 }: {
   title?: ReactNode;
+  /**
+   * The title's element. "h2" where the title names a part of the page a
+   * reader jumps to by heading (a post's "Quick answer" or "TL;DR"); it is
+   * set exactly like the default <p>, so the note looks the same either way.
+   */
+  titleAs?: "p" | "h2" | "h3";
   children: ReactNode;
   className?: string;
 }) {
   return (
     <aside className={cn("max-w-[68ch] border-t border-border pt-3", AFTER_FAQ_ROWS, className)}>
-      {title ? <p className="text-base font-semibold">{title}</p> : null}
+      {title ? <Title className="text-base font-semibold">{title}</Title> : null}
       <div className={cn("text-pretty text-base leading-relaxed text-muted-foreground", title && "mt-1")}>
         {children}
       </div>

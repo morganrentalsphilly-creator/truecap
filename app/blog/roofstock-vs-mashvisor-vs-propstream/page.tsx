@@ -167,7 +167,7 @@ export default function ThreeWayComparisonPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               All three help you <em>find</em> rental property deals; each includes{" "}
               <a href="https://www.mashvisor.com/pricing" className="tc-link">some built-in analysis</a>{" "}

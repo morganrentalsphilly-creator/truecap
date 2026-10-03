@@ -167,7 +167,7 @@ export default function ThreeWayComparisonPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               <strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports;{" "}
               <a

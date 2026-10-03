@@ -166,7 +166,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               All three are short-term rental property management systems —
               channel managers, automation, dynamic pricing, cleaning workflows.

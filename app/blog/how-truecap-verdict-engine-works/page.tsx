@@ -171,7 +171,7 @@ export default function HowVerdictEngineWorksPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               TrueCap&apos;s screening classifier is a small set of explicit
               thresholds that groups modeled results into five bands:{" "}
