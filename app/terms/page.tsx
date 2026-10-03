@@ -4,6 +4,11 @@
  * Required by Google OAuth verification, Stripe seller agreement,
  * and basic SaaS hygiene. Product-specific Agent Pro, trial, one-time
  * Decision Pack, refund, and guarantee language approved 2026-08-23.
+ *
+ * The Agent Pro wording in sections 1, 4 and 5 is the 2026-08-23 text
+ * (commit 0d7b90f), restored as a DRAFT on 2026-10-03 because Agent Pro
+ * is sold again. It is not live until its owner and counsel approve it.
+ * lib/__tests__/retired-capability-copy-guards.test.ts pins it.
  */
 
 import type { Metadata } from "next";
@@ -43,7 +48,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "September 6, 2026";
+const LAST_UPDATED = "October 3, 2026";
 
 export default function TermsPage() {
   return (
@@ -76,9 +81,9 @@ export default function TermsPage() {
             investments — cap rate, cash-on-cash return, debt service coverage,
             multi-year operating projections, Buy Box fit, and related
             calculators. The Service includes free access and paid TrueCap Pro
-            subscriptions. New one-time Deal Decision Pack purchases are
-            currently unavailable; the Pack terms below continue to govern prior
-            purchases.
+            and Agent Pro subscriptions. New one-time Deal Decision Pack
+            purchases are currently unavailable; the Pack terms below continue
+            to govern prior purchases.
           </p>
           <p>
             The Service can use public market data (HUD Fair Market Rent and
@@ -140,7 +145,7 @@ export default function TermsPage() {
           <h2 className="text-2xl">4. Paid subscriptions</h2>
           <h3>Plans &amp; billing</h3>
           <p>
-            Available TrueCap Pro plans are billed in advance on the cadence
+            TrueCap Pro and Agent Pro plans are billed in advance on the cadence
             shown at checkout by Stripe. By subscribing, you authorize us (via
             Stripe) to charge the recurring fee to your payment method until you
             cancel. Prices are listed at{" "}
@@ -200,17 +205,17 @@ export default function TermsPage() {
             added by Stripe at checkout.
           </p>
 
-          <h2 className="text-2xl">5. Professional and client information</h2>
+          <h2 className="text-2xl">5. Agent Pro and client information</h2>
           <p>
-            If TrueCap makes a professional or client-information workflow
-            available and you choose to use it, you represent that you have a
-            lawful basis and any required permission to provide and use
-            information about a client, lead, or other person. You remain
-            responsible for your communications, fair-housing and advertising
-            compliance, professional licensing obligations, and every
-            recommendation you make to a client. No current public page or
-            dormant product reference promises that such a workflow is
-            available.
+            Agent Pro provides client-workspace and co-branded reporting tools.
+            If you enter information about a client, lead, or other person, you
+            represent that you have a lawful basis and any required permission
+            to provide and use that information. You remain responsible for
+            your communications, fair-housing and advertising compliance,
+            professional licensing obligations, and every recommendation you
+            make to a client. Co-branding does not transfer ownership of
+            TrueCap or authorize a white-label, resale, or sublicensing
+            arrangement.
           </p>
 
           <h2 className="text-2xl">6. Your content</h2>

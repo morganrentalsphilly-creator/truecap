@@ -143,6 +143,71 @@ describe("offer trust language", () => {
     }
     expect(privacy).not.toContain("Collected via Vercel Analytics and Google Analytics.");
     expect(privacy).not.toContain("we send only the property address / county");
+
+    // Audit row P2-120: the policy names what the code loads and nothing it
+    // does not. Cloudflare Turnstile runs on the three auth forms and /profile, Google Tag
+    // Manager and the Ads tag load after Accept, and the cookies are named.
+    const flat = privacy.replace(/\s+/g, " ");
+    for (const disclosure of [
+      "<strong>Cloudflare</strong> — Turnstile",
+      "Google Tag Manager",
+      "<code>_gcl_au</code>",
+      "<code>{FIRST_TOUCH_COOKIE}</code>",
+      "<code>{ANONYMOUS_DECISION_GRANT_COOKIE}</code>",
+      "<code>{CHECKOUT_RETURN_COOKIE}</code>",
+      "<code>truecap_compare_ids</code>",
+      "<strong>Deal documents</strong>",
+    ]) {
+      expect(flat).toContain(disclosure);
+    }
+    for (const form of ["login-form", "sign-up-form", "forgot-password-form"]) {
+      expect(read(`components/auth/${form}.tsx`), form).toContain("CaptchaWidget");
+    }
+    // Turnstile also mounts in the profile's Password card, so the policy
+    // names that place too.
+    expect(read("components/profile/profile-form.tsx")).toContain("<CaptchaWidget");
+    expect(flat).toContain("and on the password section of your profile");
+
+    // The Ads tag writes more than one cookie: _gcl_aw appears when the
+    // visitor arrives with an ad click id. The policy names the prefix, and
+    // the footer control deletes by the same prefix.
+    expect(flat).toContain("cookies whose names begin with <code>_gcl_</code>");
+    expect(flat).toContain("<code>_gcl_aw</code>");
+    expect(read("components/marketing/cookie-choices-button.tsx")).toContain(
+      'const GOOGLE_ADS_COOKIE_PREFIX = "_gcl_";',
+    );
+
+    // Each feature cookie's lifetime is stated and tied to the code that sets
+    // it. The first-decision grant lasts 21 days, so the group is not called
+    // "short-lived".
+    expect(flat).not.toMatch(/short-lived/);
+    expect(flat).toContain("kept up to {ANONYMOUS_DECISION_GRANT_DAYS} days");
+    expect(read("app/actions/anonymous-decision.ts")).toContain(
+      "maxAge: ANONYMOUS_DECISION_GRANT_DAYS * 24 * 60 * 60,",
+    );
+    expect(flat).toContain("the deals you picked to compare, kept up to 1 hour");
+    expect(read("app/actions/compare.ts")).toContain("maxAge: 60 * 60,");
+    expect(flat).toContain("kept up to {CHECKOUT_RETURN_COOKIE_MAX_AGE_SECONDS / 60} minutes");
+    const checkoutReturn = read("lib/stripe/checkout-return-cookie.ts");
+    expect(checkoutReturn).toContain("export const CHECKOUT_RETURN_COOKIE_MAX_AGE_SECONDS = 10 * 60;");
+    expect(checkoutReturn).toContain("maxAge: CHECKOUT_RETURN_COOKIE_MAX_AGE_SECONDS,");
+    const google = read("components/analytics/google-measurement.tsx");
+    expect(google).toContain("https://www.googletagmanager.com/gtm.js");
+    expect(read("app/actions/compare.ts")).toContain(
+      'const COMPARE_COOKIE = "truecap_compare_ids";',
+    );
+    expect(read("components/investcalc/deal-documents-card.tsx")).toContain(
+      'const BUCKET = "deal-documents";',
+    );
+    // Not in use, so not listed as if they were: Google Analytics (the GTM
+    // container carries no Analytics tag and no gtag config names a G- id),
+    // the newsletter (cancelled), and PostHog, which stays named but is
+    // marked as not connected.
+    expect(flat).not.toMatch(/Places address suggestions, Analytics/);
+    expect(flat).not.toMatch(/newsletter/i);
+    expect(flat).not.toMatch(/through Google and PostHog/);
+    expect(flat).toContain("<strong>PostHog</strong> — product analytics. Not in use today");
+    expect(google).not.toMatch(/gtag\('config', 'G-/);
   });
 
   it("describes only new signed-in deal links as revocable", () => {

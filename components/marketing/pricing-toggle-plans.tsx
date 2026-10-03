@@ -513,6 +513,20 @@ export function PricingTogglePlans({
             evaluation={evaluation}
             tier={showAgentPro ? "agent_pro" : "pro"}
           />
+          {/* The renewal terms beside the signed-in Subscribe buttons, which
+              say only "today". Signed out, the buttons lead to a no-card
+              account and the sentence above already says nothing renews.
+              Every amount is the catalog's (proChargeToday and
+              agentChargeToday, lib/public-pricing.ts) for the period the
+              toggle shows; pricing-copy-guards.test.ts pins the sentence. */}
+          {isAuthenticated ? (
+            <p data-pricing-renewal-terms="" className="mt-2">
+              A subscription renews automatically each {period === "monthly" ? "month" : "year"} at
+              the price shown ({proOfferName} {proChargeToday}
+              {showAgentPro ? `, Agent Pro ${agentChargeToday}` : ""}) until you cancel from your
+              profile.
+            </p>
+          ) : null}
         </div>
       ) : null}
     </>
