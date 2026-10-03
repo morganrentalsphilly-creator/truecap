@@ -17,10 +17,17 @@
  * promises returns.
  */
 
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import {
+  ARTICLE_META,
+  ARTICLE_META_NEXT,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { ActionRow, Note, PageHero } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
@@ -30,6 +37,8 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/json-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "The First Offer Playbook",
@@ -145,95 +154,85 @@ export default function PlaybookPage() {
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <ScrollDepthTracker />
-      <main id="main" className="bg-background">
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
-          <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-            <p className="text-2xs font-bold uppercase tracking-widest text-primary">
-              The First Offer Playbook
-            </p>
-            <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              From screening deals to a submitted offer.
-            </h1>
-            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              You&apos;ve analyzed twenty deals and offered on none. The math
-              was never the blocker — the process was. Here is the whole path,
-              written down: five steps, one action each, scripts included.
-            </p>
-            <nav
-              aria-label="Playbook steps"
-              className="mt-6 flex flex-wrap gap-2"
-            >
-              {STEPS.map((s, i) => (
-                <a
-                  key={s.id}
-                  href={`#${s.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-card px-3 py-1.5 text-xs font-semibold text-primary hover:border-primary/60"
-                >
-                  {i + 1}. {s.short}
-                </a>
-              ))}
-            </nav>
-          </div>
-        </section>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* Nothing sits above the H1: the playbook's name (the former
+            eyebrow) is the meta line under the lede, and the step links
+            follow it as plain text links with 44px targets. */}
+        <PageHero
+          title="From screening deals to a submitted offer."
+          lede="You&apos;ve analyzed twenty deals and offered on none. The math was never the blocker — the process was. Here is the whole path, written down: five steps, one action each, scripts included."
+        >
+          <p className={ARTICLE_META}>The First Offer Playbook</p>
+          <nav
+            aria-label="Playbook steps"
+            className="mt-2 flex flex-wrap gap-x-6"
+          >
+            {STEPS.map((s, i) => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className="tc-link inline-flex min-h-11 items-center text-base"
+              >
+                {i + 1}. {s.short}
+              </a>
+            ))}
+          </nav>
+        </PageHero>
 
-        <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-          {STEPS.map((step) => (
-            <section
-              key={step.id}
-              id={step.id}
-              className="mb-12 scroll-mt-24 sm:mb-16"
-            >
-              <p className="text-2xs font-bold uppercase tracking-widest text-primary">
-                {step.kicker}
-              </p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                {step.title}
-              </h2>
-              {step.paragraphs.map((p) => (
-                <p
-                  key={p.slice(0, 40)}
-                  className="mt-4 text-[15px] leading-relaxed text-foreground/90"
-                >
-                  {p}
-                </p>
+        {/* The hero's bottom rule is the one rule here: Section drops its own
+            when it follows a PageHero. */}
+        <Section>
+          <article className="max-w-[68ch]">
+            <ArticleBody>
+              {/* Each step's H2 carries the step's anchor id (the hero links
+                  and the HowTo JSON-LD point at it). "Step N" is the meta
+                  line under its heading, not a kicker above it. */}
+              {STEPS.map((step) => (
+                <Fragment key={step.id}>
+                  <h2 id={step.id}>{step.title}</h2>
+                  <p className={cn("not-prose", ARTICLE_META_NEXT)}>
+                    {step.kicker}
+                  </p>
+                  {step.paragraphs.map((p) => (
+                    <p key={p.slice(0, 40)}>{p}</p>
+                  ))}
+                  <p>
+                    <strong>Do this now: {step.action}</strong>
+                  </p>
+                </Fragment>
               ))}
-              <p className="mt-4 inline-flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-4 py-3 text-sm font-semibold text-foreground">
-                <CheckCircle2
-                  aria-hidden
-                  className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]"
-                />
-                <span>Do this now: {step.action}</span>
-              </p>
-            </section>
-          ))}
+            </ArticleBody>
 
-          <div className="space-y-6 border-t border-border pt-10">
-            <SeoAnalyzerCta
-              context="your first candidate through the playbook"
-              utmSource="playbook"
-            />
-            <LeadMagnetInline source="playbook" />
-            <div className="rounded-2xl border border-border bg-card p-5 text-center sm:p-6">
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Want the reps to be easier? Pro runs the whole playbook on every
-                address — Buy Box verdict, downside test, Offer Ceiling,
-                lender-facing report
-                {getMarketingOfferConfig().guaranteeEnabled
-                  ? " — and the risk is ours, not yours."
-                  : "."}
-              </p>
-              <div className="mt-3 flex flex-col items-center gap-2">
-                <Link
-                  href="/pricing#plans"
-                  className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/95"
-                >
-                  See Pro plans
-                </Link>
+            {/* The analyzer CTA and the playbook capture stay exactly as
+                shipped; each opens on its own rule, so the group needs none. */}
+            <div className="mt-16 space-y-10">
+              <SeoAnalyzerCta
+                context="your first candidate through the playbook"
+                utmSource="playbook"
+              />
+              <LeadMagnetInline source="playbook" />
+              <div>
+                <Note>
+                  Want the reps to be easier? Pro runs the whole playbook on every
+                  address — Buy Box verdict, downside test, Offer Ceiling,
+                  lender-facing report
+                  {getMarketingOfferConfig().guaranteeEnabled
+                    ? " — and the risk is ours, not yours."
+                    : "."}
+                </Note>
+                <ActionRow className="mt-4">
+                  <Link
+                    href="/pricing#plans"
+                    className={buttonVariants({ variant: "outline", size: "cta" })}
+                  >
+                    See Pro plans
+                  </Link>
+                </ActionRow>
                 <GuaranteeBadge />
               </div>
             </div>
-          </div>
-        </article>
+          </article>
+        </Section>
       </main>
       <SiteFooter />
       <JsonLd data={playbookLd} />

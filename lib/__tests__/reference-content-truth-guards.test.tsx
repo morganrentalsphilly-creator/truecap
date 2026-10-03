@@ -507,3 +507,23 @@ describe("P2-56: /methodology is set from the rollout parts", () => {
     for (const link of close.match(/<a\b[^>]*>/g)!) expect(link).toContain("min-h-12");
   });
 });
+
+describe("P2-56: /playbook is set from the rollout parts and keeps its capture as shipped", () => {
+  const source = withoutComments(read("app/playbook/page.tsx"));
+
+  it("has no gradient hero, eyebrow, pill or icon, and nothing above the H1", () => {
+    expect(source).toContain("<PageHero");
+    expect(source).toContain("<ArticleBody>");
+    expect(source).not.toMatch(/lucide-react/);
+    expect(source).not.toMatch(/\buppercase\b|\bbg-gradient|\brounded-(?:xl|2xl|full)\b|brand-(?:blue|green)-light|tracking-widest/);
+    // The playbook's name is the meta line inside the hero, after the title and lede.
+    expect(source).toMatch(/<PageHero\s+title="[^"]+"\s+lede="[^"]+"\s*>\s*<p className=\{ARTICLE_META\}>The First Offer Playbook<\/p>/);
+  });
+
+  it("the step links are 44px text links and the analyzer CTA and capture mount once, unchanged", () => {
+    expect(source).toMatch(/href=\{`#\$\{s\.id\}`\}\s+className="tc-link inline-flex min-h-11 items-center text-base"/);
+    expect(source).toContain('<h2 id={step.id}>{step.title}</h2>');
+    expect(source.match(/<LeadMagnetInline source="playbook" \/>/g)).toHaveLength(1);
+    expect(source.match(/<SeoAnalyzerCta\s+context="your first candidate through the playbook"\s+utmSource="playbook"\s+\/>/g)).toHaveLength(1);
+  });
+});
