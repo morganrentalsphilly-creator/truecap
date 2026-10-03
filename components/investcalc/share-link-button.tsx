@@ -97,10 +97,25 @@ export function ShareLinkButton({
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
-  const [includeAddress, setIncludeAddress] = useState(false);
-  const [audience, setAudience] = useState<
+  // The address disclosure the sharer has chosen for this link. `null` means
+  // nothing chosen yet. For a Partner or Lender review link that reads as
+  // hidden (the checkbox's unchecked state, as before). For a Client link
+  // there is no default: the two-option choice below must be answered before
+  // the link can be made, so a client report is never sent with an address
+  // setting the agent did not pick.
+  const [addressChoice, setAddressChoice] = useState<boolean | null>(null);
+  const [audience, setAudienceState] = useState<
     "investment-partner" | "client" | "lender-review"
   >("investment-partner");
+  const includeAddress = addressChoice === true;
+  const clientAddressChoiceMissing =
+    audience === "client" && addressChoice === null;
+  const setAudience = (next: typeof audience) => {
+    // Moving to Client asks the question fresh: a box ticked (or left
+    // unticked) for another audience is not an answer for the client.
+    if (next === "client" && audience !== "client") setAddressChoice(null);
+    setAudienceState(next);
+  };
   // Creating the opaque row happens after the user confirms disclosure
   // choices. Keep its in-flight state visible like the neighboring actions.
   const [isPreparing, setIsPreparing] = useState(false);
@@ -270,8 +285,8 @@ export function ShareLinkButton({
       setCreatedShare(null);
       setShowAllShares(false);
       setSessionAuthRequired(false);
-      setIncludeAddress(false);
-      setAudience(
+      setAddressChoice(null);
+      setAudienceState(
         context === "client-report" ? "client" : "investment-partner",
       );
       setOpen(true);
@@ -289,13 +304,17 @@ export function ShareLinkButton({
     setSessionAuthRequired(false);
     // Privacy choices are per-link intent. Never carry an earlier explicit
     // disclosure into the next share dialog.
-    setIncludeAddress(false);
-    setAudience(context === "client-report" ? "client" : "investment-partner");
+    setAddressChoice(null);
+    setAudienceState(
+      context === "client-report" ? "client" : "investment-partner",
+    );
     setOpen(true);
   };
 
   const prepareShare = async () => {
     if (!values) return;
+    // A Client link is never minted on an address setting nobody picked.
+    if (clientAddressChoiceMissing) return;
     setIsPreparing(true);
     try {
       // Mint a server-backed share whose URL is
@@ -459,9 +478,13 @@ export function ShareLinkButton({
             <DialogDescription>
               {needsSignIn
                 ? "Sign in or create a free account to make a new share link. Anyone who receives the link can view it without signing in."
-                : context === "client-report"
-                  ? "Create a read-only link for the assigned client. The exact address stays hidden unless you explicitly include it."
-                  : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
+                : audience === "client"
+                  ? context === "client-report"
+                    ? "Create a read-only link for the assigned client. You choose whether the exact address is shown."
+                    : "Choose what to disclose, then create an opaque, expiring link. For a client link you choose whether the exact address is shown."
+                  : context === "client-report"
+                    ? "Create a read-only link for the assigned client. The exact address stays hidden unless you explicitly include it."
+                    : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
             </DialogDescription>
           </DialogHeader>
 
@@ -533,29 +556,89 @@ export function ShareLinkButton({
                 </div>
               </fieldset>
 
-              <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
-                <input
-                  type="checkbox"
-                  className="mt-0.5"
-                  checked={includeAddress}
-                  onChange={(event) => setIncludeAddress(event.target.checked)}
-                />
-                <span>
-                  <span className="font-semibold text-foreground">
-                    Include the exact property address
+              {audience === "client" ? (
+                // A client report has no address default: the agent picks
+                // one of the two before the link can be made.
+                <fieldset aria-describedby="share-client-address-hint">
+                  <legend className="text-sm font-semibold text-foreground">
+                    Exact property address
+                  </legend>
+                  <div className="mt-2 grid gap-2">
+                    {(
+                      [
+                        [
+                          "show",
+                          true,
+                          "Show the exact address",
+                          "Your client sees the address at the top of the page and can save a private copy. If this deal has saved comps, the page shows them.",
+                        ],
+                        [
+                          "hide",
+                          false,
+                          "Hide the exact address",
+                          "The page is headed “Rental analysis” and says the sender kept the address private. Saved comps and the private copy are left out.",
+                        ],
+                      ] as const
+                    ).map(([value, include, label, detail]) => (
+                      <label
+                        key={value}
+                        className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring"
+                      >
+                        <input
+                          type="radio"
+                          name="share-client-address"
+                          value={value}
+                          className="mt-0.5"
+                          checked={addressChoice === include}
+                          onChange={() => setAddressChoice(include)}
+                        />
+                        <span>
+                          <span className="font-semibold text-foreground">
+                            {label}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                            {detail}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <p
+                    id="share-client-address-hint"
+                    className="mt-2 text-xs leading-relaxed text-muted-foreground"
+                  >
+                    {addressChoice === null
+                      ? "Choose one to create the link. Neither is selected for you."
+                      : "The shared page still includes underwriting outputs and the financial assumptions needed to explain them."}
+                  </p>
+                </fieldset>
+              ) : (
+                <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={includeAddress}
+                    onChange={(event) =>
+                      setAddressChoice(event.target.checked)
+                    }
+                  />
+                  <span>
+                    <span className="font-semibold text-foreground">
+                      Include the exact property address
+                    </span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                      Off by default. The shared page still includes
+                      underwriting outputs and the financial assumptions needed
+                      to explain them.
+                    </span>
                   </span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
-                    Off by default. The shared page still includes underwriting
-                    outputs and the financial assumptions needed to explain
-                    them.
-                  </span>
-                </span>
-              </label>
+                </label>
+              )}
 
               <Button
                 type="button"
                 onClick={prepareShare}
-                disabled={isPreparing}
+                disabled={isPreparing || clientAddressChoiceMissing}
                 className="min-h-11 w-full rounded-xl font-semibold"
               >
                 {isPreparing ? (

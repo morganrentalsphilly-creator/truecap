@@ -62,8 +62,9 @@ describe("what the agent pitch says the client receives", () => {
     expect(numbers?.body).toContain("The PDF lists the inputs");
     const rerun = CLIENT_RECEIVES.find((item) => item.key === "rerun");
     expect(rerun?.body).toContain("without source labels");
-    // With the address hidden (the Share dialog's default) the rerun drops
-    // the address and the analyzer asks for one.
+    // With the address hidden (the unticked default for a Partner or Lender
+    // review link; for a Client link the agent picks) the rerun drops the
+    // address and the analyzer asks for one.
     expect(rerun?.body).toContain("when the address is hidden, they enter the property address");
   });
 
