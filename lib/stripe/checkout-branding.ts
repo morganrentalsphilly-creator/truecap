@@ -10,14 +10,28 @@ import type Stripe from "stripe";
  */
 export const TRUECAP_STRIPE_ASSET_BASE_URL = "https://usetruecap.com";
 
+/**
+ * The site palette (DESIGN.md), as the hex values Stripe requires. Stripe's
+ * `branding_settings` takes two colours only: the page background and the
+ * button. It chooses the text colours itself (dark text on a light
+ * background, white on a dark button), so Ink is not a value this file can
+ * send. White on Signal Blue is 5.8:1.
+ *
+ * These are sent on every Checkout Session this repository creates, so they
+ * apply whatever the Stripe account's Dashboard branding says. Archivo is not
+ * one of Stripe's supported Checkout fonts, so the font stays Inter.
+ */
+export const TRUECAP_CHECKOUT_PAPER = "#EFECE8";
+export const TRUECAP_CHECKOUT_SIGNAL_BLUE = "#0066BA";
+
 export function buildTrueCapCheckoutBranding(
   assetBaseUrl: string = TRUECAP_STRIPE_ASSET_BASE_URL
 ): NonNullable<Stripe.Checkout.SessionCreateParams["branding_settings"]> {
   const baseUrl = assetBaseUrl.replace(/\/$/, "");
   return {
     display_name: "TrueCap",
-    background_color: "#F7FAFC",
-    button_color: "#0B3B60",
+    background_color: TRUECAP_CHECKOUT_PAPER,
+    button_color: TRUECAP_CHECKOUT_SIGNAL_BLUE,
     font_family: "inter",
     border_style: "rounded",
     logo: {
