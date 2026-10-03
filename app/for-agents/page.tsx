@@ -37,6 +37,7 @@ import { LedgerFigure } from "@/components/ledger/ledger-parts";
 // /auth/ hrefs that way, so the jump scrolls every time it is used and Back
 // from sign-up returns to the close); /analyze never prefetches.
 // Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
 import {
@@ -73,7 +74,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 
 const PAGE_TITLE = "For Real Estate Agents — Investor Deal Analysis";
 const PAGE_DESCRIPTION =
-  "Screen a listing against each investor client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo in about 60 seconds.";
+  "Screen a listing against each investor client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo.";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -120,7 +121,7 @@ const HERO_TERMS = ["Cash flow", "Cap rate", "Cash-on-cash", "DSCR", "Buy Box fi
 const PROMISES: { title: string; body: string }[] = [
   {
     title: "Save time",
-    body: "First-pass numbers from the address, the asking price and a bedroom count in about 60 seconds, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
+    body: "First-pass numbers from the address, the asking price and a bedroom count, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
   },
   {
     title: "Improve the client experience",
@@ -209,8 +210,8 @@ export default async function ForAgentsPage() {
       <AgentProPageTracker />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
         {/* Hero: the agent's outcome in the headline, the product in the
-            lede, the free analyzer as the primary action, Agent Pro as the
-            secondary. The aside is a capture of the /sample-decision-memo
+            lede, the free analyzer's address form as the primary action,
+            Agent Pro as the secondary. The aside is a capture of the /sample-decision-memo
             page (public/product/manifest.json), shown as a printed document
             and captioned as the sample page it is: it is NOT the share page
             or the PDF an agent's client receives, and the caption must not
@@ -220,10 +221,10 @@ export default async function ForAgentsPage() {
           lede={
             <>
               <p>
-                Paste the listing. In about 60 seconds, see whether it clears
-                your client&apos;s Buy Box, the highest price that still does
-                (the Offer Ceiling), and what could break it. Send it
-                co-branded; your client can rerun it with their own numbers.
+                Paste the listing. See whether it clears your client&apos;s
+                Buy Box, the highest price that still does (the Offer
+                Ceiling), and what could break it. Send it co-branded with Pro
+                or Agent Pro; your client can rerun it with their own numbers.
               </p>
               {/* Each term keeps its separator and never splits ("Buy Box" /
                   "fit"), so the line only breaks after a "·". */}
@@ -240,19 +241,23 @@ export default async function ForAgentsPage() {
             </>
           }
           actions={
-            <ActionRow>
-              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
-                Analyze a deal free
-              </Link>
-              <TrackedMarketingLink
-                href="#pricing"
-                event="agent_pro_cta_clicked"
-                properties={{ placement: "agent_hero" }}
-                className={buttonVariants({ size: "cta", variant: "outline" })}
-              >
-                See Agent Pro pricing
-              </TrackedMarketingLink>
-            </ActionRow>
+            <>
+              {/* The page's first action is the homepage hero's own one-field
+                  form (audit row P1-64): same component, same placeholder,
+                  same handoff to /analyze, no other field. Its top margin is
+                  the actions slot's. */}
+              <HeroAddressForm className="mt-0 sm:mt-0" />
+              <ActionRow className="mt-3">
+                <TrackedMarketingLink
+                  href="#pricing"
+                  event="agent_pro_cta_clicked"
+                  properties={{ placement: "agent_hero" }}
+                  className={buttonVariants({ size: "cta", variant: "outline" })}
+                >
+                  See Agent Pro pricing
+                </TrackedMarketingLink>
+              </ActionRow>
+            </>
           }
           note={
             agentProConfigured

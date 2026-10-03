@@ -95,6 +95,13 @@ vi.mock("@/components/marketing/intent-prefetch-link", async (importActual) => {
   };
 });
 
+// /for-agents and /for-investors open with the homepage's address form (a
+// client island that calls useRouter); a static render has no app router.
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push() {}, replace() {}, prefetch() {}, back() {}, forward() {}, refresh() {} }),
+}));
+
 // /for-agents redirects to /pricing unless Agent Pro is sold, and every
 // persona page shows its /for-agents cue only then: render the sold state.
 vi.mock("@/lib/stripe/plan-prices", async (importOriginal) => ({

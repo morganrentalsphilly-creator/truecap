@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 import { BLOG_POSTS } from "@/lib/blog-posts";
@@ -58,6 +58,15 @@ import { STATES } from "@/lib/states";
  * links are checked like any page's, and its source and imports are still
  * scanned for rule 2 (SOURCE_SCANNED), so the cards' links stay covered.
  */
+
+// /for-investors opens with the homepage's address form (audit row P1-64), a
+// client island that calls useRouter. Only useRouter is replaced, so the page
+// renders and its links stay in the rendered graph; "/" and /analyze still
+// need what NOT_UNIT_RENDERABLE says they need.
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push() {}, replace() {}, prefetch() {}, back() {}, forward() {}, refresh() {} }),
+}));
 
 const ROOT = process.cwd();
 const APP = join(ROOT, "app");
