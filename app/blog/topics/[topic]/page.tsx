@@ -18,7 +18,7 @@ import { notFound } from "next/navigation";
 // Internal links prefetch on hover or keyboard focus, not as they scroll into
 // view; the /analyze link stays next/link with prefetch={false}.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -133,7 +133,7 @@ export default async function BlogTopicHubPage({
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={collectionLd} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-        <PageHero title={topic.title} lede={topic.intro}>
+        <PageHero title={topic.title} lede={topic.intro} actions={<UnderTitleAnalyzeLink />}>
           {/* The breadcrumb sits under the H1 as the hero's meta line, never
               above it (the blog's hub link does the same on a post). */}
           <nav aria-label="Breadcrumb" className={BREADCRUMB_CLASS}>

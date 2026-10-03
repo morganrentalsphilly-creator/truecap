@@ -8,7 +8,7 @@
 
 import type { Metadata } from "next";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { PageHero } from "@/components/marketing/page-parts";
+import { PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { Section } from "@/components/marketing/section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -81,6 +81,7 @@ export default function BlogTopicsIndexPage() {
         <PageHero
           title="Browse by topic"
           lede={`Every TrueCap guide, grouped into the ${HUB_COUNT_WORD} things investors actually work through. Most hubs pair the reading with the calculators that run the numbers.`}
+          actions={<UnderTitleAnalyzeLink />}
         >
           {/* The breadcrumb is the visible half of the BreadcrumbList above;
               like the blog's hub link it sits under the H1, never above it. */}
