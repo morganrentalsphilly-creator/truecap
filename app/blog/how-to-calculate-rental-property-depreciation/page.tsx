@@ -18,13 +18,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -140,29 +152,27 @@ export default function RentalPropertyDepreciationPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               How to calculate depreciation on a rental property: the 27.5-year
               math, step by step (2026)
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -170,7 +180,8 @@ export default function RentalPropertyDepreciationPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Depreciation is often one of the largest deductions a rental
               investor gets, and it requires no cash outlay in the year you
               claim it. It&apos;s also a deduction investors often compute
@@ -187,10 +198,8 @@ export default function RentalPropertyDepreciationPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What depreciation actually is (and why 27.5 years)
-            </h2>
+          <ArticleBody>
+            <h2>What depreciation actually is (and why 27.5 years)</h2>
             <p>
               The tax code treats a rental building as a machine that wears out:
               you bought an income-producing asset with a finite life, so you
@@ -198,7 +207,7 @@ export default function RentalPropertyDepreciationPost() {
               For residential rental property, Congress set that life at{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>27.5 years</strong>, recovered on a straight line
               </a>{" "}
@@ -207,7 +216,7 @@ export default function RentalPropertyDepreciationPost() {
               Two things in the purchase{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 never depreciate
               </a>
@@ -220,14 +229,12 @@ export default function RentalPropertyDepreciationPost() {
               every year of the schedule inherits the error.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Step 1 — build the depreciable basis
-            </h2>
+            <h2>Step 1 — build the depreciable basis</h2>
             <p>
               Basis starts with the purchase price and{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 adds the costs of <em>acquiring</em> the property
               </a>
@@ -239,7 +246,7 @@ export default function RentalPropertyDepreciationPost() {
               (The{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 closing costs breakdown
               </Link>{" "}
@@ -252,9 +259,7 @@ export default function RentalPropertyDepreciationPost() {
               $6,000 — about $218 a year, every year, for 27.5 years.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Step 2 — carve out the land
-            </h2>
+            <h2>Step 2 — carve out the land</h2>
             <p>
               Only the building depreciates, so you need a defensible split
               between land and improvements. The IRS starts from the fair
@@ -262,7 +267,7 @@ export default function RentalPropertyDepreciationPost() {
               those,{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Publication 527
               </a>{" "}
@@ -291,7 +296,7 @@ export default function RentalPropertyDepreciationPost() {
               value;{" "}
               <a
                 href="https://www.fhfa.gov/sites/default/files/documents/wp1901-1028.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 an FHFA staff working paper
               </a>{" "}
@@ -300,9 +305,7 @@ export default function RentalPropertyDepreciationPost() {
               parcel&apos;s actual ratio, not a rule of thumb.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Step 3 — divide by 27.5 (and the mid-month convention)
-            </h2>
+            <h2>Step 3 — divide by 27.5 (and the mid-month convention)</h2>
             <p>
               From year two onward the math is one line:{" "}
               <strong>$192,000 ÷ 27.5 = $6,982 a year</strong> — $582 a month of
@@ -310,7 +313,7 @@ export default function RentalPropertyDepreciationPost() {
               because residential rental uses the{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>mid-month convention</strong>
               </a>
@@ -323,7 +326,7 @@ export default function RentalPropertyDepreciationPost() {
               about <strong>$291</strong>. Note the trigger is{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <em>ready and available</em>
               </a>{" "}
@@ -333,9 +336,7 @@ export default function RentalPropertyDepreciationPost() {
               tenant moves in come January.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What it does to your taxes: the paper-loss bridge
-            </h2>
+            <h2>What it does to your taxes: the paper-loss bridge</h2>
             <p>
               Now follow the number through the return. Suppose the duplex,
               financed with 25% down at 7%, clears about{" "}
@@ -344,7 +345,7 @@ export default function RentalPropertyDepreciationPost() {
               your own deal&apos;s number in the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>
@@ -363,7 +364,7 @@ export default function RentalPropertyDepreciationPost() {
               personal-use, and other rules. The{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E walkthrough
               </Link>{" "}
@@ -371,16 +372,14 @@ export default function RentalPropertyDepreciationPost() {
               to your return and holding structure.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Improvements, repairs, and the shorter schedules
-            </h2>
+            <h2>Improvements, repairs, and the shorter schedules</h2>
             <p>
               The 27.5-year clock covers what you bought. What you spend
               afterward splits three ways. <strong>Repairs</strong> — fixing
               what broke, at comparable quality —{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 deduct in full the year you pay them
               </a>
@@ -388,7 +387,7 @@ export default function RentalPropertyDepreciationPost() {
               kitchen renovation —{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 are capitalized
               </a>{" "}
@@ -399,7 +398,7 @@ export default function RentalPropertyDepreciationPost() {
               27.5-year property at all:{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>
                   appliances, carpet, and furniture recover over 5 years; fences,
@@ -412,7 +411,7 @@ export default function RentalPropertyDepreciationPost() {
               <strong>de minimis safe harbor</strong>, if you elect it,{" "}
               <a
                 href="https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 lets you expense items up to $2,500 per invoice or item
               </a>{" "}
@@ -422,7 +421,7 @@ export default function RentalPropertyDepreciationPost() {
               restored{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 100% bonus deduction for qualifying property acquired and placed
                 in service after January 19, 2025
@@ -430,23 +429,21 @@ export default function RentalPropertyDepreciationPost() {
               , is covered in the{" "}
               <Link
                 href="/blog/bonus-depreciation-rental-property-2026"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 bonus depreciation guide
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The allowed-or-allowable trap
-            </h2>
+            <h2>The allowed-or-allowable trap</h2>
             <p>
               Here&apos;s the part that makes depreciation mandatory in
               everything but name: when you sell, the IRS reduces your basis by
               the depreciation that was{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>allowed or allowable</strong>
               </a>{" "}
@@ -456,14 +453,14 @@ export default function RentalPropertyDepreciationPost() {
               you still owe{" "}
               <Link
                 href="/blog/depreciation-recapture-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 depreciation recapture
               </Link>{" "}
               — at{" "}
               <a
                 href="https://www.irs.gov/taxtopics/tc409"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 up to 25%
               </a>{" "}
@@ -472,7 +469,7 @@ export default function RentalPropertyDepreciationPost() {
               you&apos;ve been under-claiming, the repair is{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>Form 3115</strong>
               </a>{" "}
@@ -488,24 +485,22 @@ export default function RentalPropertyDepreciationPost() {
               (Depreciation is also just one of the{" "}
               <a
                 href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 fourteen deductions on the schedule
               </a>{" "}
               — the{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 full deduction list
               </Link>{" "}
               covers the rest.)
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Five mistakes investors make with depreciation
-            </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <h2>Five mistakes investors make with depreciation</h2>
+            <ul>
               <li>
                 <strong>
                   Depreciating the purchase price instead of the basis.
@@ -544,7 +539,7 @@ export default function RentalPropertyDepreciationPost() {
                 Recapture is{" "}
                 <a
                   href="https://www.irs.gov/publications/p544"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   computed on allowed <em>or allowable</em> depreciation
                 </a>{" "}
@@ -553,21 +548,20 @@ export default function RentalPropertyDepreciationPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Depreciation is three steps of arithmetic sitting on one carefully
               built number: purchase price plus acquisition costs, minus the
@@ -579,7 +573,7 @@ export default function RentalPropertyDepreciationPost() {
               financing, and operating expenses through the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -587,7 +581,7 @@ export default function RentalPropertyDepreciationPost() {
               confirmed basis, eligibility, timing, and limitations. None of
               this is tax advice.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -631,13 +625,12 @@ export default function RentalPropertyDepreciationPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
