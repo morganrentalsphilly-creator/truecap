@@ -30,6 +30,12 @@ const textOf = (html: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
+// The tool rendering's handoff: the label the calculators that carry nothing
+// use (calculator-handoff-validation-guards.test.tsx), and its one line.
+const HANDOFF_LABEL = "Open the rental analyzer";
+const HANDOFF_NOTE =
+  "The rehab estimate is a planning figure and does not carry over. Enter the price you are evaluating.";
+
 describe("the rehab estimator has two renderings of one estimate", () => {
   // The signed-in analyzer's strategies panel mounts the card with no
   // variant. The public tool page got its own rendering; the analyzer's must
@@ -90,10 +96,40 @@ describe("the rehab estimator has two renderings of one estimate", () => {
     expect(tool).toMatch(/<input\b[^>]*\smin="0" max="50" step="1"[^>]*placeholder="10"/);
     // The total is the calculator result: one polite live region.
     expect(tool.match(/aria-live="polite"/g)).toHaveLength(1);
-    // Same words. The card prints its title and its switch first; the tool
-    // rendering puts the switch after the fields.
-    const words = (html: string) => textOf(html).split(" ").sort().join(" ");
-    expect(words(tool)).toBe(words(card));
+    // Same words, plus the analyzer handoff's label and line, which only the
+    // tool rendering has (below). The card prints its title and its switch
+    // first; the tool rendering puts the switch after the fields. Before the
+    // handoff existed this pinned words(tool) === words(card).
+    const words = (text: string) => text.split(" ").sort().join(" ");
+    expect(textOf(tool).endsWith(` ${HANDOFF_LABEL} ${HANDOFF_NOTE}`)).toBe(true);
+    expect(words(textOf(tool).slice(0, -` ${HANDOFF_LABEL} ${HANDOFF_NOTE}`.length))).toBe(words(textOf(card)));
+  });
+
+  it("the tool rendering hands off to the analyzer like the ARV and 70% rule calculators; the card does not", () => {
+    const tool = renderToStaticMarkup(createElement(RehabEstimatorCard, { variant: "tool" }));
+    const anchors = [...tool.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)];
+    // One link, to the analyzer, carrying nothing: the handoff has no rehab
+    // field, so the line under it says the estimate does not carry over.
+    expect(anchors).toHaveLength(1);
+    const [, attrs, inner] = anchors[0];
+    expect(/\shref="([^"]*)"/.exec(attrs)?.[1]).toBe("/analyze?from=rehab-cost-estimator");
+    expect(textOf(inner)).toBe(HANDOFF_LABEL);
+    // A 48px button (the cta size), full width on phones, no icon.
+    expect(attrs).toMatch(/class="[^"]*\bmin-h-12\b[^"]*\bw-full\b[^"]*\bsm:w-auto\b/);
+    expect(attrs).toContain('target="_top"');
+    const noteId = /\saria-describedby="([^"]+)"/.exec(attrs)?.[1];
+    expect(noteId).toBeDefined();
+    const note = tool.slice(tool.indexOf(`<p id="${noteId}"`));
+    expect(textOf(note.slice(0, note.indexOf("</p>")))).toBe(HANDOFF_NOTE);
+    // It follows the total, and it is the frame's last block.
+    expect(tool.indexOf("<a ")).toBeGreaterThan(tool.indexOf('aria-live="polite"'));
+    expect(tool).toMatch(/<\/p><\/section>$/);
+    // The note must stay true: nothing in the handoff type takes a rehab amount.
+    expect(read("lib/analyzer-handoff.ts")).not.toMatch(/rehab/i);
+    const source = read("components/investcalc/rehab-estimator-card.tsx");
+    expect(source).toMatch(/buildAnalyzerHandoffUrl\(\s*\{\},\s*\{ utmSource: "rehab-cost-estimator" \},?\s*\)/);
+    // The analyzer's card has no link at all (and its hash above is unchanged).
+    expect(renderToStaticMarkup(createElement(RehabEstimatorCard))).not.toContain("<a ");
   });
 });
 
