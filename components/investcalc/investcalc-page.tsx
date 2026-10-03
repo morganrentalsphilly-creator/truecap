@@ -213,12 +213,12 @@ import {
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { claimAnonymousDecisionAction } from "@/app/actions/anonymous-decision";
 import {
+  ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   ANONYMOUS_DECISION_INPUT_BOUND_NOTE,
   anonymousDecisionUsedDescription,
 } from "@/lib/anonymous-decision-copy";
 import { announceTrialUsage } from "@/lib/pricing-evaluation";
 import {
-  ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   anonymousDecisionPresentationGrantMatches,
   bindAnonymousDecisionPresentationGrant,
 } from "@/lib/anonymous-decision-presentation";
@@ -6341,7 +6341,7 @@ export function InvestCalcPage({
                   ? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE
                   : anonymousGrant.code === "LIMIT_REACHED"
                     ? anonymousDecisionUsedDescription()
-                  : anonymousGrant.message,
+                    : anonymousGrant.message,
               variant: "warning",
               ...(anonymousGrant.code === "RATE_LIMITED"
                 ? {

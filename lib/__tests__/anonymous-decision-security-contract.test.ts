@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE } from "@/lib/anonymous-decision-presentation";
+import { ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE } from "@/lib/anonymous-decision-copy";
 
 function read(relativePath: string): string {
   return readFileSync(
@@ -97,9 +97,12 @@ describe("anonymous first-decision security contract", () => {
     // The cap itself is unchanged: 5 new claims an hour per network address.
     expect(action).toMatch(/windowMs: 60 \* 60 \* 1000,\s+maxPerWindow: 5,/);
     // The page writes the words for that result code; the action's bare
-    // "Try again later." is no longer what the visitor reads.
+    // "Try again later." is no longer what the visitor reads. LIMIT_REACHED
+    // has page text of its own too (row P1-38, pinned in
+    // trial-limit-copy-guards.test.ts); every other code keeps the action's
+    // message.
     expect(analyzer).toMatch(
-      /anonymousGrant\.code === "RATE_LIMITED"\s+\? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE\s+: anonymousGrant\.message/,
+      /anonymousGrant\.code === "RATE_LIMITED"\s+\? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE\s+: anonymousGrant\.code === "LIMIT_REACHED"\s+\? anonymousDecisionUsedDescription\(\)\s+: anonymousGrant\.message,/,
     );
     expect(ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE).toBe(
       "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again in an hour.",
