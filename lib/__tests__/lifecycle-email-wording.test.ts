@@ -38,6 +38,12 @@ describe("lifecycle content wording", () => {
     // Live /pricing (2026-10-02) has no immediate-charge or campaign-offer
     // wording; it says checkout shows the exact charge before you confirm.
     ["points at immediate-charge terms or a campaign offer on /pricing", /immediate-charge|campaign offer/i],
+    // Founder answer 17 (2026-10-03): no email times an analysis (no timing
+    // has been measured), the trial is counted in Pro analyses, and an
+    // address alone is not what produces the numbers.
+    ["times an analysis", /\b\d+[- ]?(?:s|secs?|seconds?|minutes?)\b|\bin (?:about )?(?:seconds|a minute)\b/i],
+    ["counts the trial in Pro deals", /\bPro deals?\b/i],
+    ["promises numbers from a pasted address alone", /\bpaste (?:an?|the|a U\.S\.) address\b/i],
   ])("no email %s", (_label, pattern) => {
     const hits = contentFiles.filter((file) => pattern.test(read(file)));
     expect(hits).toEqual([]);
@@ -52,7 +58,7 @@ describe("lifecycle content wording", () => {
       const text = read(file);
       for (const match of text.matchAll(/(\d+)-day,? no-card free trial/g)) days.push(Number(match[1]));
       for (const match of text.matchAll(
-        /free trial for (?:up to )?(\w+) (?:complete Pro deals|Pro deal analyses) and (\w+) (?:full )?comparison/g,
+        /free trial for (?:up to )?(\w+) (?:complete )?Pro analyses and (\w+) (?:full )?comparison/g,
       )) {
         limits.push([asNumber(match[1]!), asNumber(match[2]!)]);
       }
@@ -71,6 +77,27 @@ describe("lifecycle content wording", () => {
       [...read(file).matchAll(/(\d+)[- ]day[^.]{0,40}\btrial\b/g)].map((match) => Number(match[1])),
     );
     expect(new Set(otherTrialLengths)).toEqual(new Set([PRODUCT_EVALUATION_DAYS]));
+  });
+
+  it("prints no time figure in the email templates' footers, the two operator scripts or the playbook email", () => {
+    // Founder answer 17 (2026-10-03). The footers said "Underwrite rentals in
+    // 60 seconds"; they now carry the line the Supabase templates use.
+    // emails/weekly-digest.tsx belongs to the retired newsletter and is left.
+    const templates = ["lifecycle-email", "rate-alert", "rent-alert", "weekly-summary"].map(
+      (name) => `emails/${name}.tsx`,
+    );
+    for (const file of templates) {
+      expect(read(file), file).toContain("TrueCap · Rental property underwriting");
+    }
+    for (const file of [
+      ...templates,
+      "scripts/polish-emails.ts",
+      "scripts/schedule-daily-campaign.ts",
+      "app/actions/lead-magnet-capture.ts",
+    ]) {
+      expect(read(file), file).not.toMatch(/\b60[- ]seconds?\b|\bin (?:about )?seconds\b/i);
+      expect(read(file), file).not.toMatch(/Analyze any address free|\bpaste an address\b/i);
+    }
   });
 
   it("keeps the retired tagline and 'institutional-grade' out of the Supabase template copies", () => {

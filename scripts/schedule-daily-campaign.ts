@@ -292,7 +292,7 @@ export function renderHtml(content: DailyContent): string {
           <tr>
             <td style="padding:24px 32px 32px 32px;border-top:1px solid ${COLORS.border};">
               <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:${COLORS.muted};">
-                TrueCap &middot; Underwrite any rental in 60 seconds
+                TrueCap &middot; Rental property underwriting
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:${COLORS.muted};">
                 <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:${COLORS.muted};text-decoration:underline;">Unsubscribe</a>
@@ -325,7 +325,7 @@ export function renderText(content: DailyContent): string {
   const footer = [
     "",
     "—",
-    "TrueCap · Underwrite any rental in 60 seconds",
+    "TrueCap · Rental property underwriting",
     "Unsubscribe: {{{RESEND_UNSUBSCRIBE_URL}}}",
     "https://usetruecap.com",
   ].join("\n");

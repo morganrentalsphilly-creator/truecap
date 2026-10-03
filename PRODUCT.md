@@ -104,7 +104,7 @@ recommended option, accepted by the founder 2026-10-03].
   - Anonymous: one full first decision including the exact Offer Ceiling and a
     downside check; later deals show a coarse range until sign-up.
   - Free account: Deal score, metrics, up to 5 saved deals, dashboard.
-  - 21-day no-card trial on every new account: 3 Pro deal analyses and 1
+  - 21-day no-card trial on every new account: 3 Pro analyses and 1
     comparison. It never includes the client roster or client Buy Boxes.
   - Pro: $29.99/mo or $300/yr. Agent Pro: $59.99/mo or $590/yr. Prices render
     from the catalog and Stripe; copy never hard-codes them.
