@@ -14,6 +14,7 @@
  * it sends nothing, writes nothing and needs no environment values.
  */
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -36,5 +37,13 @@ describe("the Google Ads kit matches the live catalog", () => {
     }
     expect(exitCode, output).toBe(0);
     expect(output).toContain("all checks passed");
+  });
+
+  it("states no time to a result and no address-only result", () => {
+    // Report rows P2-19 (one speed statement everywhere) and P1-14 (an address
+    // alone produces no numbers without an account) wait on the founder.
+    const copy = readFileSync(join(ROOT, "google-ads/ad-copy.md"), "utf8");
+    expect(copy).not.toMatch(/\b\d+\s*(?:s|secs?|seconds?|mins?|minutes?)\b/i);
+    expect(copy).not.toMatch(/Paste (?:a|the) listing address\. See\b/i);
   });
 });
