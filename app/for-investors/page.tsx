@@ -25,8 +25,9 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
 // Links below the first screen prefetch on hover or keyboard focus, not on
-// scroll. The hero's actions keep next/link's default; /analyze never
+// scroll. The hero's pricing link keeps next/link's default; /analyze never
 // prefetches. Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
 import { ActionRow, CloseSection, PageHero, RuledList } from "@/components/marketing/page-parts";
@@ -170,8 +171,7 @@ export default function ForInvestorsPage() {
           lede={
             <>
               <p>
-                Paste a listing. In about 60 seconds, see whether the rental
-                works at asking, whether it meets your Buy Box, the Offer
+                Paste a listing. See whether the rental works at asking, whether it meets your Buy Box, the Offer
                 Ceiling for your targets, and what could break the deal.
                 Every assumption is labeled and yours to change.
               </p>
@@ -191,14 +191,18 @@ export default function ForInvestorsPage() {
             </>
           }
           actions={
-            <ActionRow>
-              <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
-                Analyze a property free
-              </Link>
-              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
-                See Pro pricing
-              </Link>
-            </ActionRow>
+            <>
+              {/* The page's first action is the homepage hero's own one-field
+                  form (audit row P1-64): same component, same placeholder,
+                  same handoff to /analyze, no other field. Its top margin is
+                  the actions slot's. */}
+              <HeroAddressForm className="mt-0 sm:mt-0" />
+              <ActionRow className="mt-3">
+                <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+                  See Pro pricing
+                </Link>
+              </ActionRow>
+            </>
           }
           note={
             <>

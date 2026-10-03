@@ -16,7 +16,7 @@ export default function Image() {
   return renderPersonaOgImage({
     label: "For rental investors",
     headline: "Know the highest price that still meets your targets before you write the offer.",
-    subhead: "Paste a listing. In about 60 seconds, see whether the rental works at asking, whether it meets your Buy Box, the Offer Ceiling for your targets, and what could break the deal. Every assumption is labeled and yours to change.",
+    subhead: "Paste a listing. See whether the rental works at asking, whether it meets your Buy Box, the Offer Ceiling for your targets, and what could break the deal. Every assumption is labeled and yours to change.",
     path: "/for-investors",
   });
 }
