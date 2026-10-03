@@ -17,7 +17,7 @@ describe("listing-paste expectation line under the hero form", () => {
 
   it("says a link gives the address, and who gets the price and bedrooms filled", () => {
     expect(HERO_LISTING_EXPECTATION).toBe(
-      "A listing link fills in the address. You enter the asking price and bedrooms; Pro and Agent Pro can fill them from an active listing.",
+      "A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.",
     );
     // The same plans the analyzer's listing-link help and refusal name.
     const help = read("components/investcalc/listing-link-input.tsx").replace(/\s+/g, " ");

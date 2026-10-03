@@ -61,7 +61,7 @@ export const HERO_LISTING_ERROR = `Paste a supported ${SUPPORTED_LISTING_SITES_T
  * own listing-link help says (components/investcalc/listing-link-input.tsx).
  */
 export const HERO_LISTING_EXPECTATION =
-  "A listing link fills in the address. You enter the asking price and bedrooms; Pro and Agent Pro can fill them from an active listing.";
+  "A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.";
 
 /**
  * Carries a listing link rather than a street address. The link may sit

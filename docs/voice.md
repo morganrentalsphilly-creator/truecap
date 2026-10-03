@@ -45,7 +45,7 @@ The agent-first hero from the 2026-09-29 copy pass. These lines are quoted from 
 
 - Headline (`HOMEPAGE_HEADLINES.decision_system` in `lib/marketing-offer-config.ts`): "Stop forwarding listings. Start sending deals that already pencil."
 - Subhead (`components/marketing/marketing-hero.tsx`): "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
-- Under the form, after the button (`HERO_LISTING_EXPECTATION` in `components/marketing/hero-address-form.tsx`, shown with the hero form on the homepage, `/for-agents` and `/for-investors`): "A listing link fills in the address. You enter the asking price and bedrooms; Pro and Agent Pro can fill them from an active listing."
+- Under the form, after the button (`HERO_LISTING_EXPECTATION` in `components/marketing/hero-address-form.tsx`, shown with the hero form on the homepage, `/for-agents` and `/for-investors`): "A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them."
 - Under the CTA: "Free. No account. Your first full decision is included."
 - Investor cue, above the address form at every width so it is in the first screen at desktop and at 390px: "Buying for your own portfolio? Same analyzer, your own Buy Box." followed by the link "For investors".
 - The earlier investor headline, "Know your walk-away price before you make the offer.", is retired on the homepage. Do not bring it back there.
