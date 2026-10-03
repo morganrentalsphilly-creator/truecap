@@ -53,7 +53,7 @@ describe("UnderTitleAnalyzeLink", () => {
     const hero = html.slice(html.indexOf("<section data-page-hero"), html.indexOf("</section>", html.indexOf("<section data-page-hero")));
     expect(count(hero, LINK_HTML)).toBe(1);
     expect(hero.indexOf(LINK_HTML)).toBeGreaterThan(hero.indexOf("</h1>"));
-    expect(hero.indexOf(LINK_HTML)).toBeGreaterThan(hero.indexOf("The 5-second filter"));
+    expect(hero.indexOf(LINK_HTML)).toBeGreaterThan(hero.indexOf("A first-pass filter"));
     expect(hero.indexOf(LINK_HTML)).toBeLessThan(hero.indexOf(">Free tools</a>"));
     expect(hero.indexOf(LINK_HTML)).toBeLessThan(hero.indexOf('id="onepct-price"'));
   });

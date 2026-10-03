@@ -74,7 +74,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What is the 1% rule in real estate?",
-    a: "The 1% rule says monthly rent should equal at least 1% of the purchase price. A $200,000 property should rent for at least $2,000/month. It's a 5-second screening filter, not a complete analysis.",
+    a: "The 1% rule says monthly rent should equal at least 1% of the purchase price. A $200,000 property should rent for at least $2,000/month. It's a first-pass screening filter, not a complete analysis.",
   },
   {
     q: "Is the 1% rule still relevant in 2026?",
@@ -131,7 +131,7 @@ export default function OnePercentRulePage() {
             action is the one short analyzer link under the H1 (P2-80). */}
         <PageHero
           title="1% rule calculator"
-          lede="The 5-second filter for whether a rental property is worth a deeper underwrite. Pass means run the full analysis; fail means either an appreciation market or an overpriced deal."
+          lede="A first-pass filter for whether a rental property is worth a deeper underwrite. Pass means run the full analysis; fail means either an appreciation market or an overpriced deal."
           actions={<UnderTitleAnalyzeLink />}
           aside={<OnePercentRuleWidget />}
         >
@@ -158,7 +158,7 @@ export default function OnePercentRulePage() {
               />
               <p>
                 That&apos;s it. No expenses, no financing, no projection — just a
-                5-second sanity check. For the full deal screen, the{" "}
+                quick sanity check. For the full deal screen, the{" "}
                 <IntentPrefetchLink
                   href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                   className="tc-link"

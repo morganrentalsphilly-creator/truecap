@@ -19,7 +19,7 @@ export default function Image() {
   return renderToolOgImage({
     name: "GRM calculator",
     tagline:
-      "Property price ÷ annual gross rent. The 10-second screening ratio for triaging deals before underwriting.",
+      "Property price ÷ annual gross rent. A first-pass screening ratio for triaging deals before underwriting.",
     pills: ["Free", "No signup"],
   });
 }
