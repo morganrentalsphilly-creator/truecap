@@ -6,6 +6,18 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -13,7 +25,6 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -72,31 +83,42 @@ export default function PropertyManagementPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}{" "}
+            · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             Property managers usually charge a percentage of collected rent, and their fee schedules can add a lease-up fee and a maintenance markup. That sounds like it eats your cash flow alive. The honest math: it usually doesn&apos;t — and self-managing has real hidden costs that are easy to leave out of the math.
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The PM cost structure (honest version)</h2>
+        <ArticleBody>
+          <h2>The PM cost structure (honest version)</h2>
           <p>
             A residential PM&apos;s fee schedule usually includes:
           </p>
           <ul>
-            <li><strong>A percentage of collected rent</strong> (get the actual rate from local management agreements) — this is the line you&apos;ll see as the <Link href="/glossary/management-fee" className="text-primary font-semibold hover:underline">management fee</Link> on your operating statement</li>
+            <li><strong>A percentage of collected rent</strong> (get the actual rate from local management agreements) — this is the line you&apos;ll see as the <Link href="/glossary/management-fee" className="tc-link">management fee</Link> on your operating statement</li>
             <li><strong>A lease-up (placement) fee</strong>, often quoted as a share of one month&apos;s rent, whenever they place a new tenant</li>
             <li><strong>A maintenance markup</strong> on coordinated repairs (they manage the contractor; you pay PM&apos;s rate, not direct contractor rate)</li>
             <li><strong>Occasional fees:</strong> renewal fee, eviction processing fee, sometimes a setup fee at onboarding</li>
@@ -105,23 +127,23 @@ export default function PropertyManagementPost() {
             An illustrative example (assumed fees, not market data) on a $1,500/mo rental: a 9% fee ($135/mo) + amortized lease-up of $50-100/mo + ~$30/mo of repair markup = <strong>~$215-265/mo all-in</strong>. That&apos;s about 14-18% of gross rent, well above the 9% headline fee alone.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What you actually get for that</h2>
+          <h2>What you actually get for that</h2>
           <p>
             The PM&apos;s job is much more than &quot;collect rent.&quot; What they actually do:
           </p>
           <ul>
             <li><strong>Tenant screening</strong> — credit, criminal, eviction, employment, prior-landlord references. A bad tenant can cost you months of lost rent plus damages. PM screening at scale catches issues a single landlord wouldn&apos;t spot.</li>
             <li><strong>Marketing the unit</strong> — listing photos, Zillow/Apartments.com syndication, showings, application processing</li>
-            <li><strong>Lease compliance</strong> — state-specific lease forms, security deposit handling per state law (tenant rights are usually spelled out in the lease and <a href="https://www.consumerfinance.gov/housing/housing-insecurity/help-for-renters/your-tenant-debt-collection-rights/" className="text-primary font-semibold hover:underline">state or local laws</a>), <a href="https://www.hud.gov/helping-americans/fair-housing-act-overview" className="text-primary font-semibold hover:underline">fair-housing</a> compliance, eviction process knowledge</li>
+            <li><strong>Lease compliance</strong> — state-specific lease forms, security deposit handling per state law (tenant rights are usually spelled out in the lease and <a href="https://www.consumerfinance.gov/housing/housing-insecurity/help-for-renters/your-tenant-debt-collection-rights/" className="tc-link">state or local laws</a>), <a href="https://www.hud.gov/helping-americans/fair-housing-act-overview" className="tc-link">fair-housing</a> compliance, eviction process knowledge</li>
             <li><strong>24/7 maintenance dispatch</strong> — tenant calls them at 11pm about a broken heater, not you</li>
             <li><strong>Rent collection + late-fee enforcement</strong> — including the awkward phone call you don&apos;t want to make</li>
-            <li><strong>Year-end accounting</strong> — <a href="https://www.irs.gov/taxtopics/tc414" className="text-primary font-semibold hover:underline">Schedule E</a> ready financials</li>
+            <li><strong>Year-end accounting</strong> — <a href="https://www.irs.gov/taxtopics/tc414" className="tc-link">Schedule E</a> ready financials</li>
           </ul>
           <p>
             The value isn&apos;t the rent collection (anyone can do that). It&apos;s the systemic risk reduction — the bad-tenant problem and the legal-compliance problem are where unmanaged landlords lose real money.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The actual self-management math</h2>
+          <h2>The actual self-management math</h2>
           <p>
             Self-management isn&apos;t free. The hidden costs:
           </p>
@@ -138,7 +160,7 @@ export default function PropertyManagementPost() {
             PM management makes sense at: 4+ properties (the time math flips), or out-of-state properties (you can&apos;t physically show or maintain remotely), or a primary career that doesn&apos;t leave evenings free, or properties in high-turnover student/transient markets.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The break-even calculation</h2>
+          <h2>The break-even calculation</h2>
           <p>
             Quick framework (the 9%, 75%, 15% and $300 below are example assumptions; swap in the terms from the management agreement you&apos;d actually sign):
           </p>
@@ -159,7 +181,7 @@ export default function PropertyManagementPost() {
             Self-management wins by ~$900/year here. BUT the standard deviation on self-management is much higher: one really bad tenant can add thousands to that &quot;worse screening loss&quot; number and self flips to a clear loss. PM is the lower-variance choice.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The cases where PM is hard to skip</h2>
+          <h2>The cases where PM is hard to skip</h2>
           <ul>
             <li><strong>Out-of-state properties.</strong> Flying out for every showing is hard to keep up past the first property. Bad PMs lose you money; the answer is to vet harder, not skip PM entirely.</li>
             <li><strong>You have a full-time career you don&apos;t want to interrupt.</strong> If your time is worth well over $50/hr, spending weekends on $50/hr tasks rarely pencils out.</li>
@@ -167,7 +189,7 @@ export default function PropertyManagementPost() {
             <li><strong>Multi-family 5+ units.</strong> The compliance + turnover math at scale strongly favors PM, even for local landlords.</li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">When to fire your PM</h2>
+          <h2>When to fire your PM</h2>
           <p>
             Switch back to self-management or change PMs when:
           </p>
@@ -182,14 +204,14 @@ export default function PropertyManagementPost() {
             The right PM is invisible — rent shows up monthly, statements arrive on time, problems get solved before you hear about them. If you&apos;re hearing about problems, switch.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Modeling PM in your underwriting</h2>
+          <h2>Modeling PM in your underwriting</h2>
           <p>
-            Set the <strong>Management %</strong> field in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> to <strong>the fee in the management agreement you&apos;d actually sign</strong> (TrueCap pre-fills 8%) for any property you don&apos;t plan to self-manage, and raise the <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link> % to cover the markup. If you&apos;re going to self-manage initially but expect to switch later (after the property is in your book and you stop having time), still underwrite at your quoted management fee — it&apos;s the more conservative truth and you don&apos;t want a deal that only works when you&apos;re donating your evenings. For the full operating-expense framework, see our <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">rental property pro forma walkthrough</Link>.
+            Set the <strong>Management %</strong> field in <Link href="/" className="tc-link">TrueCap</Link> to <strong>the fee in the management agreement you&apos;d actually sign</strong> (TrueCap pre-fills 8%) for any property you don&apos;t plan to self-manage, and raise the <Link href="/glossary/maintenance-reserve" className="tc-link">maintenance</Link> % to cover the markup. If you&apos;re going to self-manage initially but expect to switch later (after the property is in your book and you stop having time), still underwrite at your quoted management fee — it&apos;s the more conservative truth and you don&apos;t want a deal that only works when you&apos;re donating your evenings. For the full operating-expense framework, see our <Link href="/blog/rental-property-pro-forma-explained" className="tc-link">rental property pro forma walkthrough</Link>.
           </p>
           <p>
             A deal that pencils at your quoted management fee can absorb a switch to PM if your life situation changes. A deal that only pencils at 0% management is fragile — you&apos;re effectively forced to never get sick, never travel, never have a baby, never have a demanding job.
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -209,11 +231,12 @@ export default function PropertyManagementPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
