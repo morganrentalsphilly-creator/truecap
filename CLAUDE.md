@@ -742,6 +742,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 ### Optional
 
 - `STRIPE_ANNUAL_DISCOUNT_COUPON_ID` — coupon applied to annual checkout if the annual Price isn't already discounted.
+- `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` — a TrueCap-only Stripe Customer Portal configuration (`bpc_...`) passed to the three billing-portal sessions in `app/actions/billing.ts`. Unset uses the shared account's default portal configuration.
 - `NEXT_PUBLIC_GOOGLE_PLACES_API_KEY` — address autocomplete (restrict by HTTP referrer in GCP console).
 - `FRED_API_KEY` — current 30-yr mortgage rate to pre-fill financing (free key).
 - `HUD_API_KEY` — Fair Market Rent by county for single-family rent pre-fill (free key).

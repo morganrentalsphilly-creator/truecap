@@ -109,6 +109,29 @@ function getSiteUrl(): string {
   );
 }
 
+/**
+ * Optional TrueCap-only Customer Portal configuration (`bpc_...`).
+ *
+ * The Stripe account is shared with another product, and a portal session
+ * created without `configuration` uses the account's DEFAULT portal
+ * configuration, whatever it lists. When STRIPE_BILLING_PORTAL_CONFIGURATION_ID
+ * is set, the three portal sessions below name that configuration. Unset (or
+ * not shaped like a configuration id) adds nothing, so the request is exactly
+ * what it was before this variable existed.
+ */
+function billingPortalConfiguration(): { configuration?: string } {
+  const raw = process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID?.trim();
+  if (!raw) return {};
+  if (!/^bpc_[A-Za-z0-9]+$/.test(raw)) {
+    Sentry.captureMessage(
+      "billing: STRIPE_BILLING_PORTAL_CONFIGURATION_ID is not a bpc_ id; using the account default portal",
+      { level: "error", tags: { feature: "billing-portal" } },
+    );
+    return {};
+  }
+  return { configuration: raw };
+}
+
 function buildSubscriptionCheckoutSessionParams(args: {
   intent: SubscriptionCheckoutIntent;
   customerId: string;
@@ -1431,6 +1454,7 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
     const portal = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
       return_url: `${getSiteUrl()}/profile`,
+      ...billingPortalConfiguration(),
     });
     return { ok: true, url: portal.url };
   } catch (error) {
@@ -1502,6 +1526,7 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
     const portal = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
       return_url: `${siteUrl}/profile`,
+      ...billingPortalConfiguration(),
       flow_data: {
         type: "subscription_cancel",
         subscription_cancel: {
@@ -1728,6 +1753,7 @@ export async function createSwitchPlanPortalSessionAction(
     const portal = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
       return_url: `${siteUrl}/profile?billing=plan_switched#billing`,
+      ...billingPortalConfiguration(),
       flow_data: {
         type: "subscription_update_confirm",
         subscription_update_confirm: {
