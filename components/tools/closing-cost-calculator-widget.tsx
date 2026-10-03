@@ -6,19 +6,39 @@
  * The widget lets users adjust each line item (origination,
  * title, recording, taxes, escrow, prepaid items) to see how the
  * total moves.
+ *
+ * Set on the calculator parts (components/tools/tool-parts.tsx), like the 1%
+ * rule widget: the frame opens on the 2px ink rule with no card, the fields
+ * are the shared ToolNumberField, the total is the key figure in DM Mono
+ * over the double rule, in ink, the breakdown is rows on rules, and the
+ * analyzer handoff is one plain button with a line under it.
  */
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import {
+  DisclosureMark,
+  LedgerFigure,
+  LedgerTotal,
+} from "@/components/ledger/ledger-parts";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { ToolFrame } from "@/components/tools/tool-parts";
 import { validateToolNumber } from "@/lib/public-tool-validation";
 
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 const fmtPct = (n: number) => `${n.toFixed(2)}%`;
+
+// One column on a phone, two once the frame itself is 24rem wide (@container:
+// the hero column on the tool page, a partner's iframe on /embed).
+const FIELD_GRID_CLASS =
+  "mt-3 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-2";
+// A breakdown line: the item, then its amount in DM Mono, on a soft rule.
+const BREAKDOWN_ROW_CLASS =
+  "flex justify-between gap-3 border-b border-rule-soft py-2";
 
 export function ClosingCostCalculatorWidget() {
   const [purchasePrice, setPurchasePrice] = useState("300000");
@@ -185,7 +205,7 @@ export function ClosingCostCalculatorWidget() {
   );
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <ToolFrame>
       <ToolNumberField
         id="cc-price"
         label="Purchase price"
@@ -197,10 +217,10 @@ export function ClosingCostCalculatorWidget() {
         error={validated.purchasePrice.error}
       />
 
-      <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mt-8 text-base font-semibold text-foreground">
         Loan + title fees
       </p>
-      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className={FIELD_GRID_CLASS}>
         <ToolNumberField
           id="cc-down"
           label="Down payment"
@@ -211,7 +231,6 @@ export function ClosingCostCalculatorWidget() {
           value={downPaymentPct}
           onChange={(e) => setDownPaymentPct(e.target.value)}
           error={validated.downPaymentPct.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-orig"
@@ -223,7 +242,6 @@ export function ClosingCostCalculatorWidget() {
           value={originationPct}
           onChange={(e) => setOriginationPct(e.target.value)}
           error={validated.originationPct.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-title"
@@ -235,7 +253,6 @@ export function ClosingCostCalculatorWidget() {
           value={titlePct}
           onChange={(e) => setTitlePct(e.target.value)}
           error={validated.titlePct.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-record"
@@ -246,7 +263,6 @@ export function ClosingCostCalculatorWidget() {
           value={recordingFees}
           onChange={(e) => setRecordingFees(e.target.value)}
           error={validated.recordingFees.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-transfer"
@@ -258,14 +274,13 @@ export function ClosingCostCalculatorWidget() {
           value={transferTaxPct}
           onChange={(e) => setTransferTaxPct(e.target.value)}
           error={validated.transferTaxPct.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
       </div>
 
-      <p className="mt-6 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mt-8 text-base font-semibold text-foreground">
         Prepaid items + due diligence
       </p>
-      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className={FIELD_GRID_CLASS}>
         <ToolNumberField
           id="cc-ins"
           label="Insurance prepay"
@@ -275,7 +290,6 @@ export function ClosingCostCalculatorWidget() {
           value={insurancePrepay}
           onChange={(e) => setInsurancePrepay(e.target.value)}
           error={validated.insurancePrepay.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-tax"
@@ -286,7 +300,6 @@ export function ClosingCostCalculatorWidget() {
           value={taxEscrow}
           onChange={(e) => setTaxEscrow(e.target.value)}
           error={validated.taxEscrow.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-appr"
@@ -297,7 +310,6 @@ export function ClosingCostCalculatorWidget() {
           value={appraisal}
           onChange={(e) => setAppraisal(e.target.value)}
           error={validated.appraisal.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
         <ToolNumberField
           id="cc-inspect"
@@ -308,11 +320,14 @@ export function ClosingCostCalculatorWidget() {
           value={inspection}
           onChange={(e) => setInspection(e.target.value)}
           error={validated.inspection.error}
-          labelClassName="normal-case tracking-normal font-medium"
         />
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
+      {/* The result opens on the rule under the fields. */}
+      <div className="mt-8 border-t border-border pt-5">
+        {/* One polite status line when the result changes, for screen
+            readers. The figure block is therefore not ToolResult, whose own
+            live region would read the result a second time. */}
         <span
           className="sr-only"
           role="status"
@@ -323,21 +338,27 @@ export function ClosingCostCalculatorWidget() {
             ? `${verdict}. Total modeled closing costs ${fmtMoney(result.total)}, or ${fmtPct(result.pctOfPrice)} of purchase price.`
             : "Fix the highlighted inputs to calculate modeled closing costs."}
         </span>
-        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm leading-snug font-semibold text-foreground">
           Total closing costs
         </p>
+        {/* The key figure in DM Mono over the double rule, in ink (Ink 2 for
+            the placeholder); the caution color stays on the line under it.
+            The color sits on the line, not on LedgerTotal (see ToolResult). */}
         <p
           className={cn(
-            "mt-1 font-mono text-4xl sm:text-5xl font-extrabold tabular-nums",
-            verdictColor,
+            "mt-3 wrap-anywhere",
+            result ? "text-foreground" : "text-muted-foreground",
           )}
         >
-          {result ? fmtMoney(result.total) : "—"}
+          <LedgerTotal className="text-key-sm sm:text-key">
+            {result ? fmtMoney(result.total) : "—"}
+          </LedgerTotal>
         </p>
-        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+        <p className="mt-4 max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
           {result && verdict ? (
             <>
-              {fmtPct(result.pctOfPrice)} of purchase price ·{" "}
+              <LedgerFigure>{fmtPct(result.pctOfPrice)}</LedgerFigure> of
+              purchase price ·{" "}
               <span className={cn("font-semibold", verdictColor)}>
                 {verdict}
               </span>
@@ -347,65 +368,74 @@ export function ClosingCostCalculatorWidget() {
           )}
         </p>
         {result ? (
-          <details className="mt-3 group">
-            <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground">
+          <details className="group mt-3">
+            <summary className="flex min-h-12 max-w-md cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-foreground [&::-webkit-details-marker]:hidden">
               Breakdown
+              <DisclosureMark />
             </summary>
-            <ul className="mt-2 space-y-1 text-xs text-muted-foreground tabular-nums">
+            <ul className="max-w-md border-t border-border text-sm text-muted-foreground">
               {/* State the loan the origination is charged against. Without it
                   the reader cannot tell which basis the fee used, which is how
                   the price-based version went unnoticed. */}
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Loan amount</span>
-                <span>{fmtMoney(result.loanAmount)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.loanAmount)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Origination (on loan)</span>
-                <span>{fmtMoney(result.origination)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.origination)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Title insurance</span>
-                <span>{fmtMoney(result.title)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.title)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Recording fees</span>
-                <span>{fmtMoney(result.recording)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.recording)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Transfer tax</span>
-                <span>{fmtMoney(result.transfer)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.transfer)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Insurance prepay</span>
-                <span>{fmtMoney(result.insurance)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.insurance)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Tax escrow</span>
-                <span>{fmtMoney(result.taxes)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.taxes)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Appraisal</span>
-                <span>{fmtMoney(result.appr)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.appr)}</LedgerFigure>
               </li>
-              <li className="flex justify-between">
+              <li className={BREAKDOWN_ROW_CLASS}>
                 <span>Inspection</span>
-                <span>{fmtMoney(result.inspect)}</span>
+                <LedgerFigure className="text-foreground">{fmtMoney(result.inspect)}</LedgerFigure>
               </li>
             </ul>
           </details>
         ) : null}
       </div>
 
+      {/* The action is one plain button (the 1% rule widget's pattern), 48px
+          and full width on phones; what the analysis adds is the line under
+          it, which aria-describedby reads with the link. The words are the
+          old text link's, split where its first dash was. */}
       <AnalyzerHandoffLink
         handoffHref={handoffHref}
         target="_top"
-        className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
+        aria-describedby="cc-handoff-note"
+        className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
       >
-        <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, cash-to-close,
-        returns — free
-        <ArrowUpRight className="w-4 h-4" />
+        Run the full analysis with these numbers
       </AnalyzerHandoffLink>
-    </div>
+      <p
+        id="cc-handoff-note"
+        className="mt-2 text-pretty text-sm text-muted-foreground"
+      >
+        cash flow, cash-to-close, returns — free
+      </p>
+    </ToolFrame>
   );
 }

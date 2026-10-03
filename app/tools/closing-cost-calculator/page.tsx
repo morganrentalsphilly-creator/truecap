@@ -3,6 +3,14 @@
  *
  * Targets: "closing cost calculator", "rental property closing costs",
  * "investment property closing costs", "how much closing costs rental".
+ *
+ * Layout: the calculator page template (DESIGN.md "Components"; the 1% rule
+ * calculator is the reference). The widget sits beside the H1 in PageHero,
+ * with the breadcrumb as the meta line under the H1 (nothing sits above an
+ * H1), the guide runs in a 68ch reading column (ArticleBody), the FAQ is
+ * ruled rows (FaqSection; the page keeps its own FAQPage node), and the
+ * related links, the embed invite and RelatedContent follow in that column.
+ * The page has no closing ask of its own, so it has no CloseSection.
  */
 
 import type { Metadata } from "next";
@@ -11,6 +19,14 @@ import { getSiteUrl } from "@/lib/site-url";
 import { ClosingCostCalculatorWidget } from "@/components/tools/closing-cost-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -101,83 +117,92 @@ export default function ClosingCostCalculatorPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
       <JsonLd data={appLd} />
       <ToolBreadcrumbSchema toolName="Closing Cost Calculator" toolPath="/tools/closing-cost-calculator" />
 
-      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><IntentPrefetchLink href="/" className="hover:text-foreground">Home</IntentPrefetchLink></li>
-            <li aria-hidden="true">›</li>
-            <li><IntentPrefetchLink href="/tools" className="hover:text-foreground">Tools</IntentPrefetchLink></li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">Closing Cost Calculator</li>
-          </ol>
-        </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The calculator in the first screen: from 1024px the widget sits
+            beside the H1. The breadcrumb keeps its words and both links and
+            sits under the H1 as the meta line, never above it. The hero's
+            action is the one short analyzer link under the H1 (P2-80). */}
+        <PageHero
+          title="Rental property closing cost calculator"
+          lede="Enter the major line items from lender, title, settlement, insurance, tax, and inspection estimates. The result is only as complete as the inputs and should be replaced with written transaction-specific figures before closing."
+          actions={<UnderTitleAnalyzeLink />}
+          aside={<ClosingCostCalculatorWidget />}
+        >
+          <nav aria-label="Breadcrumb" className={ARTICLE_META}>
+            <ol className="flex flex-wrap items-center gap-2">
+              <li><IntentPrefetchLink href="/" className={ARTICLE_META_LINK}>Home</IntentPrefetchLink></li>
+              <li aria-hidden="true">›</li>
+              <li><IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>Tools</IntentPrefetchLink></li>
+              <li aria-hidden="true">›</li>
+              <li className="font-semibold text-foreground">Closing cost calculator</li>
+            </ol>
+          </nav>
+        </PageHero>
 
-        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-          Rental Property Closing Cost Calculator
-        </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Enter the major line items from lender, title, settlement, insurance, tax, and inspection estimates. The result is only as complete as the inputs and should be replaced with written transaction-specific figures before closing.
-        </p>
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <div className="max-w-[68ch]">
+            <article>
+              <ArticleBody>
+                <h2>What closing costs include</h2>
+                <p>
+                  Closing costs fall into five buckets:
+                </p>
+                <ul>
+                  <li><strong>Lender charges:</strong> origination, discount points, processing, underwriting, and other charges shown on the written estimate.</li>
+                  <li><strong>Title + escrow fees:</strong> owner&apos;s title insurance, escrow / settlement fee, title search.</li>
+                  <li><strong>Government charges:</strong> recording fees, transfer tax, and mortgage tax where applicable.</li>
+                  <li><strong>Prepaid items:</strong> insurance, tax or insurance escrows, and mortgage interest from closing to the first payment period.</li>
+                  <li><strong>Due diligence:</strong> appraisal, inspection, optional radon/sewer/pest inspections.</li>
+                </ul>
+                <p>
+                  Include transaction costs in <IntentPrefetchLink href="/glossary/closing-costs" className="tc-link">total cash invested</IntentPrefetchLink> when computing <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="tc-link">cash-on-cash return</IntentPrefetchLink>. Omitting them understates modeled cash invested and overstates the resulting return percentage.
+                </p>
+              </ArticleBody>
 
-        <div className="mt-8">
-          <ClosingCostCalculatorWidget />
-        </div>
+              {/* The analyzer CTA where the guide ends, inside the article. */}
+              <ToolsConversionCta calculatorName="Closing cost calculator" />
 
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">What closing costs include</h2>
-          <p className="text-base leading-relaxed text-foreground">
-            Closing costs fall into five buckets:
-          </p>
-          <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
-            <li><strong>Lender charges:</strong> origination, discount points, processing, underwriting, and other charges shown on the written estimate.</li>
-            <li><strong>Title + escrow fees:</strong> owner&apos;s title insurance, escrow / settlement fee, title search.</li>
-            <li><strong>Government charges:</strong> recording fees, transfer tax, and mortgage tax where applicable.</li>
-            <li><strong>Prepaid items:</strong> insurance, tax or insurance escrows, and mortgage interest from closing to the first payment period.</li>
-            <li><strong>Due diligence:</strong> appraisal, inspection, optional radon/sewer/pest inspections.</li>
-          </ul>
-          <p className="mt-3 text-base leading-relaxed text-foreground">
-            Include transaction costs in <IntentPrefetchLink href="/glossary/closing-costs" className="text-primary font-semibold hover:underline">total cash invested</IntentPrefetchLink> when computing <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash return</IntentPrefetchLink>. Omitting them understates modeled cash invested and overstates the resulting return percentage.
-          </p>
-        </section>
+              {/* The page's FAQPage node is faqLd above, built from the same
+                  FAQS, so the section emits none of its own. */}
+              <FaqSection
+                id="cc-faq"
+                variant="inline"
+                heading="Frequently asked questions"
+                items={FAQS}
+                structuredData={false}
+              />
+            </article>
 
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">Frequently asked questions</h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-            {FAQS.map((f) => (
-              <details key={f.q} className="group p-5">
-                <summary className="cursor-pointer text-base font-bold text-foreground group-open:text-primary">{f.q}</summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-              </details>
-            ))}
+            {/* The page's own related links, set like RelatedContent below
+                them: a rule, the heading at the H3 step, underlined links in
+                44px rows. */}
+            <section aria-labelledby="cc-related-heading" className="mt-12 border-t border-border pt-6">
+              <h2 id="cc-related-heading" className="font-display text-balance text-h3-sm sm:text-2xl">Related calculators and terms</h2>
+              <ul className="mt-3 grid gap-x-8 sm:grid-cols-2">
+                <li className="min-w-0"><IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="tc-link inline-flex min-h-11 items-center py-1 text-base">Mortgage payment calculator</IntentPrefetchLink></li>
+                <li className="min-w-0"><IntentPrefetchLink href="/tools/break-even-calculator" className="tc-link inline-flex min-h-11 items-center py-1 text-base">Break-even calculator</IntentPrefetchLink></li>
+                <li className="min-w-0"><IntentPrefetchLink href="/glossary/cash-on-cash-return" className="tc-link inline-flex min-h-11 items-center py-1 text-base">Cash-on-cash return</IntentPrefetchLink></li>
+                <li className="min-w-0"><IntentPrefetchLink href="/glossary/down-payment" className="tc-link inline-flex min-h-11 items-center py-1 text-base">Down payment</IntentPrefetchLink></li>
+              </ul>
+            </section>
+
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget. See the component header. */}
+            <ToolEmbedInvite slug="closing-cost-calculator" />
+
+            <RelatedContent kind="tool" slug="closing-cost-calculator" title="Closing Cost Calculator" className="mt-12" />
           </div>
-        </section>
-
-        <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related calculators and terms</h2>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment calculator</IntentPrefetchLink>
-            <IntentPrefetchLink href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</IntentPrefetchLink>
-            <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</IntentPrefetchLink>
-            <IntentPrefetchLink href="/glossary/down-payment" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Down payment</IntentPrefetchLink>
-          </div>
-        </section>
-
-        {/* Backlink engine — quiet, collapsed, renders nothing if this
-
-            tool has no embeddable widget. See the component header. */}
-
-        <ToolEmbedInvite slug="closing-cost-calculator" />
-
-
-        <ToolsConversionCta calculatorName="Closing cost calculator" />
-        <RelatedContent kind="tool" slug="closing-cost-calculator" title="Closing Cost Calculator" className="mt-10" />
+        </Section>
       </main>
       <SiteFooter />
     </div>
