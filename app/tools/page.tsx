@@ -21,7 +21,7 @@ import Link from "next/link";
 // or keyboard focus, not as they scroll into view; /analyze links stay
 // next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -103,6 +103,7 @@ export default function ToolsLandingPage() {
         <PageHero
           title={<>Free real&nbsp;estate calculators</>}
           lede="No signup. These are narrow educational screens and input utilities, not substitutes for the full TrueCap underwrite. Use the analyzer when a decision depends on cash flow, NOI, DSCR, or returns."
+          actions={<UnderTitleAnalyzeLink />}
         />
 
         {/* Grouped by job (registry categories) so investors can find the

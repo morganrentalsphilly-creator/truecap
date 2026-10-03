@@ -26,7 +26,7 @@ import Link from "next/link";
 // or keyboard focus, not as they scroll into view; /analyze links stay
 // next/link with prefetch={false} (lib/__tests__/intent-prefetch-shared.test.ts).
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -155,6 +155,7 @@ export default function BlogIndexPage() {
         <PageHero
           title="Blog"
           lede="Deep dives on rental property analysis, real estate math, and underwriting best practices from TrueCap."
+          actions={<UnderTitleAnalyzeLink />}
         >
           {/* Browse by topic — hubs that group the posts by investor journey
               (P2-4) and pair each with the relevant calculators. From 640px

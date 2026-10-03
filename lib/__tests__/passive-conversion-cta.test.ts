@@ -114,8 +114,15 @@ describe("sitewide passive-conversion CTA", () => {
 
     // Every mount is the propless tag, at most one per page file. In a post
     // it sits in the post's own <header> (under the H1, never in the body);
-    // on the topic hubs, which share app/blog/ but are PageHero pages with
-    // no <header>, it is the hero's `actions`.
+    // on the hubs (the topic hubs and /blog itself share app/blog/ but are
+    // PageHero pages with no <header>; /tools, /methodology and /playbook
+    // are PageHero pages too) it is the hero's `actions`.
+    const HUBS_ON_PAGE_HERO = [
+      "app/blog/page.tsx",
+      "app/tools/page.tsx",
+      "app/methodology/page.tsx",
+      "app/playbook/page.tsx",
+    ];
     const walk = (dir: string): string[] =>
       readdirSync(join(process.cwd(), dir), { withFileTypes: true }).flatMap((entry) =>
         entry.isDirectory()
@@ -135,7 +142,7 @@ describe("sitewide passive-conversion CTA", () => {
       mounting.push(path);
       expect(mounts, path).toHaveLength(1);
       expect(mounts[0][0], path).toBe("<UnderTitleAnalyzeLink />");
-      if (path.startsWith("app/blog/topics/")) {
+      if (path.startsWith("app/blog/topics/") || HUBS_ON_PAGE_HERO.includes(path)) {
         expect(source, `${path}: in the hero's actions slot`).toContain("actions={<UnderTitleAnalyzeLink />}");
         expect(source.slice(0, mounts[0].index).lastIndexOf("<PageHero"), `${path}: on the PageHero`).toBeGreaterThan(-1);
       } else if (path.startsWith("app/blog/")) {
@@ -151,7 +158,16 @@ describe("sitewide passive-conversion CTA", () => {
         "app/glossary/page.tsx",
         "app/blog/topics/page.tsx",
         "app/blog/topics/[topic]/page.tsx",
+        // Four more hubs (wave 6, founder answer 15).
+        ...HUBS_ON_PAGE_HERO,
       ]),
+    );
+    // /markets takes no under-title link: its hero already holds the one
+    // imperative analyzer button ("Run a deal free"), and a page gets one.
+    const markets = read("app/markets/page.tsx");
+    expect(markets).not.toContain("UnderTitleAnalyzeLink");
+    expect(markets.slice(markets.indexOf("<PageHero"), markets.indexOf("</PageHero>"))).toMatch(
+      /href="\/analyze\?from=markets-hub" prefetch=\{false\}[\s\S]*?Run a deal free/,
     );
   });
 
