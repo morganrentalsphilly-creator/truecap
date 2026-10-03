@@ -141,6 +141,7 @@ describe("sitewide passive-conversion CTA", () => {
     expect(mounting).toEqual(
       expect.arrayContaining([
         "app/blog/1-percent-rule-rental-property/page.tsx",
+        "app/tools/1-percent-rule-calculator/page.tsx",
       ]),
     );
   });

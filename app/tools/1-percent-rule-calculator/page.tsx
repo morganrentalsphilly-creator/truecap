@@ -36,6 +36,7 @@ import {
   PageHero,
   RuledList,
   StepList,
+  UnderTitleAnalyzeLink,
 } from "@/components/marketing/page-parts";
 import { Section } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
@@ -126,10 +127,12 @@ export default function OnePercentRulePage() {
         {/* The calculator in the first screen: at 1095px the widget sits
             beside the H1 with its result and handoff above the fold. The
             hub link is the visible half of the breadcrumb schema; like the
-            blog's hub link it sits under the H1, never above it. */}
+            blog's hub link it sits under the H1, never above it. The hero's
+            action is the one short analyzer link under the H1 (P2-80). */}
         <PageHero
           title="1% rule calculator"
           lede="The 5-second filter for whether a rental property is worth a deeper underwrite. Pass means run the full analysis; fail means either an appreciation market or an overpriced deal."
+          actions={<UnderTitleAnalyzeLink />}
           aside={<OnePercentRuleWidget />}
         >
           <p className={ARTICLE_META}>
