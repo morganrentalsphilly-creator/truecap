@@ -102,9 +102,11 @@ describe("content hub touch targets", () => {
       "inline-flex min-h-11 min-w-11 w-full items-center",
     );
 
+    // The glossary's jump links are ruled rows, not pills; the 44px floor is
+    // what this guards.
     const glossary = read("app/glossary/page.tsx");
     expect(glossary).toContain(
-      "inline-flex min-h-11 min-w-11 items-center rounded-full",
+      "flex min-h-11 min-w-11 items-center border-b border-rule-soft",
     );
 
     const strategyGuides = read(
