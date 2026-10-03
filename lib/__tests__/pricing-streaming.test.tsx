@@ -32,6 +32,14 @@ vi.mock("@/lib/supabase/server", () => ({
     auth: { getUser: async () => ({ data: { user: state.user } }) },
   }),
 }));
+// The page also mounts <Testimonials />, which reads published rows through
+// the service-role client. With Supabase variables set (CI sets placeholders)
+// that became a real request, retried until it gave up. No row is published,
+// so the section renders nothing, which is what the live page does today.
+vi.mock("@/lib/testimonials/store", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/testimonials/store")>()),
+  listPublishedTestimonials: async () => [],
+}));
 vi.mock("@/lib/stripe/display-prices", async () => {
   const pricing = await import("@/lib/public-pricing");
   const amounts: Record<string, [number, string]> = {
