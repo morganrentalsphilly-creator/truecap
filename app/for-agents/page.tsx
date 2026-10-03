@@ -46,6 +46,7 @@ import {
   RuledList,
   StepList,
 } from "@/components/marketing/page-parts";
+import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -325,21 +326,24 @@ export default async function ForAgentsPage() {
         <AgentProofSection />
 
         {/* What your client receives: the list is shared with the homepage
-            (lib/client-receives.ts); the hero's aside is the sample memo
-            page, not the client's share page. */}
+            (lib/client-receives.ts), and so is the picture beside it, page 1
+            of the real PDF report (ClientPdfCover). The hero's aside is the
+            sample memo page, not the client's share page. */}
         <Section id="what-your-client-receives" aria-labelledby="client-receives">
-          <div className="max-w-3xl">
-            <SectionHeading id="client-receives">What your client receives</SectionHeading>
-            <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
-              No account on their side, nothing hidden on yours. Branding is set
-              up once in Settings and applies to every link and report.
-            </p>
+          <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            <div className="min-w-0">
+              <SectionHeading id="client-receives">What your client receives</SectionHeading>
+              <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
+                No account on their side, nothing hidden on yours. Branding is set
+                up once in Settings and applies to every link and report.
+              </p>
+              <RuledList
+                className="mt-8"
+                items={CLIENT_RECEIVES.map(({ key, title, body }) => ({ key, term: title, detail: body }))}
+              />
+            </div>
+            <ClientPdfCover className="lg:pt-2" />
           </div>
-          <RuledList
-            className="mt-8"
-            columns={2}
-            items={CLIENT_RECEIVES.map(({ key, title, body }) => ({ key, term: title, detail: body }))}
-          />
         </Section>
 
         {/* How the client roster works. The roster is what Agent Pro sells,

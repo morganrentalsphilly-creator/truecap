@@ -114,11 +114,46 @@ describe("what the agent pitch says the client receives", () => {
       expect(text, file).not.toContain("What your client receives: the decision memo");
       expect(text, file).not.toContain("The memo you hand a client");
       expect(text, file).not.toContain("The decision memo, generated from the free sample deal");
-      expect(text, file).toContain("sample decision memo page");
+      // The homepage block no longer mounts the memo capture (next test);
+      // wherever the capture is mounted it is captioned as the sample page.
+      if (text.includes("MEMO_SHOT")) {
+        expect(text, file).toContain("sample decision memo page");
+      }
+    }
+    for (const file of ["app/for-agents/page.tsx", "app/pricing/page.tsx"]) {
+      expect(copy(file), file).toContain("MEMO_SHOT");
     }
     expect(copy("app/sample-decision-memo/page.tsx")).not.toMatch(
       /exactly what a real deal\s+produces/,
     );
+  });
+
+  it("pictures the real, unbranded PDF cover of the sample deal under 'What your client receives'", () => {
+    // Row P1-47, founder answer 5 (2026-10-03): the picture is page 1 of the
+    // real PDF. Both pages mount the one component inside the block.
+    const home = copy("components/marketing/landing-sections.tsx");
+    const homeBlock = home.slice(home.indexOf("export function ClientReceivesSection"));
+    expect(homeBlock.slice(0, homeBlock.indexOf("</Section>"))).toContain("<ClientPdfCover");
+    expect(home).not.toContain("MEMO_SHOT");
+    const agents = copy("app/for-agents/page.tsx");
+    const agentsBlock = agents.slice(agents.indexOf('<Section id="what-your-client-receives"'));
+    expect(agentsBlock.slice(0, agentsBlock.indexOf("</Section>"))).toContain("<ClientPdfCover");
+
+    // The image is produced from the sample deal by the PDF generator, with
+    // no branding, and the file the component points at exists.
+    const script = read("scripts/render-pdf-cover-shot.ts");
+    expect(script).toContain("values: SAMPLE_DEAL_VALUES");
+    expect(script).toContain("buildCanonicalReportData");
+    expect(script).toContain('generateInvestmentPDFBlob(report, null, "personal")');
+    expect(script).toContain("public/product/pdf-cover.webp");
+    const cover = copy("components/marketing/client-pdf-cover.tsx");
+    expect(cover).toContain('src: "/product/pdf-cover.webp"');
+    expect(readFileSync(join(process.cwd(), "public/product/pdf-cover.webp")).length).toBeGreaterThan(10_000);
+
+    // The caption says what the picture is, and does not pass an unbranded
+    // sample cover off as an agent's co-branded report.
+    expect(cover).toContain("rendered from the sample deal with no branding set");
+    expect(cover).not.toMatch(/co-branded (?:report|cover|PDF)|your client's report|a real deal/i);
   });
 });
 
