@@ -6,13 +6,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -72,34 +83,45 @@ export default function HouseHackingPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}{" "}
+            · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            House hacking is the most under-rated path into rental investing. Done right, your tenants pay your mortgage and you build equity in property you live in — with as little as <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">3.5% down on an FHA loan</a> (for credit scores of 580 or higher). Here&apos;s the actual math, the rules, and how to tell whether a specific 2-4 unit pencils.
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
+            House hacking is the most under-rated path into rental investing. Done right, your tenants pay your mortgage and you build equity in property you live in — with as little as <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">3.5% down on an FHA loan</a> (for credit scores of 580 or higher). Here&apos;s the actual math, the rules, and how to tell whether a specific 2-4 unit pencils.
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What house hacking actually is</h2>
+        <ArticleBody>
+          <h2>What house hacking actually is</h2>
           <p>
-            House hacking = you buy a 2-4 unit property using owner-occupant financing (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">FHA</a>, <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">conventional 5% down</a>, or <a href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/" className="text-primary font-semibold hover:underline">VA if you qualify</a>), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (FHA requires the intent to occupy for at least one year; a conventional 2-4 unit loan carries a one-year occupancy covenant only if the lender <a href="https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions" className="text-primary font-semibold hover:underline">keeps it in the loan documents</a>, so check yours), you may be able to move out and convert the property to a full investment rental.
+            House hacking = you buy a 2-4 unit property using owner-occupant financing (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">FHA</a>, <a href="https://singlefamily.fanniemae.com/media/20786/display" className="tc-link">conventional 5% down</a>, or <a href="https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/" className="tc-link">VA if you qualify</a>), live in one unit yourself, and rent the others to cover most or all of your housing cost. After a year (FHA requires the intent to occupy for at least one year; a conventional 2-4 unit loan carries a one-year occupancy covenant only if the lender <a href="https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions" className="tc-link">keeps it in the loan documents</a>, so check yours), you may be able to move out and convert the property to a full investment rental.
           </p>
           <p>
             The leverage advantage is enormous. Compare:
           </p>
           <ul>
-            <li><strong>Investment property:</strong> use a current written quote and include <Link href="/glossary/down-payment" className="text-primary font-semibold hover:underline">down payment</Link>, reserves, rate, points, insurance, and closing costs</li>
+            <li><strong>Investment property:</strong> use a current written quote and include <Link href="/glossary/down-payment" className="tc-link">down payment</Link>, reserves, rate, points, insurance, and closing costs</li>
             <li><strong>Owner-occupant scenario:</strong> eligible borrowers may have lower-down-payment options, but rent is unverified and does not guarantee a housing-cost offset</li>
           </ul>
           <p>
@@ -108,16 +130,16 @@ export default function HouseHackingPost() {
             efficiency for a borrower.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The rules — what counts as a &quot;house hack&quot;</h2>
+          <h2>The rules — what counts as a &quot;house hack&quot;</h2>
           <p>
             Owner-occupant requirements vary by program and loan documents. For
             example, current FHA policy generally includes:
           </p>
           <ul>
-            <li><strong>You must occupy the property as your primary residence</strong> <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">within 60 days of closing</a></li>
+            <li><strong>You must occupy the property as your primary residence</strong> <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">within 60 days of closing</a></li>
             <li><strong>Intent to continue principal-residence occupancy for at least one year</strong>, subject to Handbook exceptions and the facts</li>
             <li><strong>Eligible property and unit-count rules</strong> that the lender must verify</li>
-            <li><strong>FHA Net Self-Sufficiency Rental Income Eligibility</strong> on 3-4 unit properties, calculated by the lender under the <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">current Handbook</a></li>
+            <li><strong>FHA Net Self-Sufficiency Rental Income Eligibility</strong> on 3-4 unit properties, calculated by the lender under the <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">current Handbook</a></li>
           </ul>
           <p>
             Conventional programs use different eligibility and underwriting.
@@ -125,12 +147,12 @@ export default function HouseHackingPost() {
             calculation does not imply approval.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The actual math — does it pencil?</h2>
+          <h2>The actual math — does it pencil?</h2>
           <p>
             The trap most first-timers fall into: they look at &quot;total rent collected vs. total mortgage&quot; and think they&apos;re living free. The honest math:
           </p>
           <p>
-            <strong>True monthly out-of-pocket =</strong> Mortgage + property tax + insurance + utilities (for your unit) + reserves for vacancy + reserves for maintenance + <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">reserves for CapEx</Link> — <strong>rent from other units</strong>.
+            <strong>True monthly out-of-pocket =</strong> Mortgage + property tax + insurance + utilities (for your unit) + reserves for vacancy + reserves for maintenance + <Link href="/blog/capex-maintenance-reserves-rental-property" className="tc-link">reserves for CapEx</Link> — <strong>rent from other units</strong>.
           </p>
           <p>
             If you skip reserves, you&apos;ll get crushed the first year someone moves out or the roof needs work. Build them in: 5% vacancy on rented units, 10% maintenance, 5% CapEx (newer building) to 10% CapEx (older building).
@@ -148,19 +170,19 @@ export default function HouseHackingPost() {
             On TrueCap, set <strong>Property type = Owner-occupant</strong>, then enter per-unit rents (zero for your unit). The score uses owner-occupant break-even bands ($300/mo near-zero), not investor cash-flow bands ($1,000/mo).
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">FHA MIP — the catch in the 3.5%</h2>
+          <h2>FHA MIP — the catch in the 3.5%</h2>
           <p>
             On a 3.5%-down, 30-year FHA loan with a base amount of $726,200 or
             less, HUD charges an{" "}
-            <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" className="text-primary font-semibold hover:underline">upfront premium of 1.75% of the base loan</a>,
+            <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" className="tc-link">upfront premium of 1.75% of the base loan</a>,
             which{" "}
-            <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">can be financed into the loan</a>,
+            <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">can be financed into the loan</a>,
             plus an annual premium of 0.55% of the balance, paid monthly for
             the life of the loan. Put 10% or more down and the annual premium
             ends after 11 years.
             Conventional PMI on a Fannie Mae-backed two- to four-unit home, by
             contrast,{" "}
-            <a href="https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance" className="text-primary font-semibold hover:underline">can be cancelled at your request</a>{" "}
+            <a href="https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance" className="tc-link">can be cancelled at your request</a>{" "}
             once the balance reaches 70% of the original value, and otherwise
             ends at the midpoint of the loan term.
           </p>
@@ -176,7 +198,7 @@ export default function HouseHackingPost() {
             universally cheaper or more available.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The year-2 transition — when you move out</h2>
+          <h2>The year-2 transition — when you move out</h2>
           <p>
             A year-2 move-out is a scenario, not an entitlement or a cash-flow
             promise. Before changing use, review the occupancy representations
@@ -187,7 +209,7 @@ export default function HouseHackingPost() {
             Example scenario: a Philadelphia triplex at $400,000 with 5% down,
             two modeled rents of $1,400 in year 1, and a third modeled rent of
             $1,500 after a permitted move-out. If verified income and all modeled
-            costs produced $900 per month, the simple <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash calculation</Link>{" "}
+            costs produced $900 per month, the simple <Link href="/glossary/cash-on-cash-return" className="tc-link">cash-on-cash calculation</Link>{" "}
             against only the $20,000 down payment would be 54%. That is not a
             forecast: include closing costs, reserves, vacancy, maintenance,
             capital work, taxes, insurance, utilities, management, loan terms,
@@ -200,7 +222,7 @@ export default function HouseHackingPost() {
             flow.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">What to look for in a house-hack property</h2>
+          <h2>What to look for in a house-hack property</h2>
           <p>
             Best house-hack targets share traits:
           </p>
@@ -213,27 +235,27 @@ export default function HouseHackingPost() {
             <li><strong>Reasonable school district</strong> for the next owner-occupant who buys it from you in 5-10 years</li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The honest downsides</h2>
+          <h2>The honest downsides</h2>
           <p>
             House hacking isn&apos;t magic:
           </p>
           <ul>
             <li><strong>You live next to your tenants.</strong> Loud party at 2am? You&apos;re the one on the wall. Maintenance call at 7am? You&apos;re probably the one walking over.</li>
-            <li><strong>You can only do this with FHA once at a time</strong> (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="text-primary font-semibold hover:underline">FHA won&apos;t insure more than one principal residence per borrower</a> at a time, with a few listed exceptions). You can chain conventional 5%-down owner-occupant loans, since <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="text-primary font-semibold hover:underline">Fannie Mae sets no limit on financed properties for principal-residence loans</a>, but each purchase must genuinely be your principal residence, and your loan documents may require a year of occupancy.</li>
+            <li><strong>You can only do this with FHA once at a time</strong> (<a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf" className="tc-link">FHA won&apos;t insure more than one principal residence per borrower</a> at a time, with a few listed exceptions). You can chain conventional 5%-down owner-occupant loans, since <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="tc-link">Fannie Mae sets no limit on financed properties for principal-residence loans</a>, but each purchase must genuinely be your principal residence, and your loan documents may require a year of occupancy.</li>
             <li><strong>Year 1 cash flow is usually break-even or negative.</strong> Your personal balance sheet needs to carry that for 12 months until you can move out.</li>
             <li><strong>Tenant turnover during your residency hurts more</strong> — you can&apos;t easily move other units while you&apos;re living there to do rehab during turnover.</li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The bottom line</h2>
+          <h2>The bottom line</h2>
           <p>
-            House hacking is the highest-leverage strategy in real estate that&apos;s actually accessible to a normal-income buyer. <a href="https://singlefamily.fanniemae.com/media/20786/display" className="text-primary font-semibold hover:underline">$10-20k down</a> for a $300-400k 2-4 unit, a year of living at or near break-even, then, if verified rents and costs support it, a year-2 move-out that can turn what was your housing into a rental.
+            House hacking is the highest-leverage strategy in real estate that&apos;s actually accessible to a normal-income buyer. <a href="https://singlefamily.fanniemae.com/media/20786/display" className="tc-link">$10-20k down</a> for a $300-400k 2-4 unit, a year of living at or near break-even, then, if verified rents and costs support it, a year-2 move-out that can turn what was your housing into a rental.
           </p>
           <p>
             Deals that pencil exist in many US markets, but whether a specific 2-4 unit works depends on its local price, rents, taxes and insurance, so test each property rather than relying on a city list. Run any specific property through{" "}
-            <Link href="/analyze?type=owner-occupant" prefetch={false} className="text-primary font-semibold hover:underline">TrueCap with property type = owner-occupant</Link> to see whether the math works before you commit. The starter template &quot;Starter — House hack&quot; on{" "}
-            <Link href="/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%23plans" className="text-primary font-semibold hover:underline">Pro templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="text-primary font-semibold hover:underline">how to find off-market rental properties</Link>.
+            <Link href="/analyze?type=owner-occupant" prefetch={false} className="tc-link">TrueCap with property type = owner-occupant</Link> to see whether the math works before you commit. The starter template &quot;Starter — House hack&quot; on{" "}
+            <Link href="/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%23plans" className="tc-link">Pro templates</Link> pre-seeds the right defaults. To find the kinds of motivated-seller 2-4 unit deals that make house hacking work, read <Link href="/blog/how-to-find-off-market-rental-properties" className="tc-link">how to find off-market rental properties</Link>.
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -269,11 +291,12 @@ export default function HouseHackingPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
