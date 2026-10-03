@@ -18,15 +18,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -130,28 +143,26 @@ export default function NegativeLeveragePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               {TITLE}
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -159,10 +170,11 @@ export default function NegativeLeveragePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               &quot;Use leverage and the returns go up&quot; is the first thing
               most investors learn, and for{" "}
-              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="tc-link">
                 a decade of cheap money
               </a>{" "}
               it was true by default. It is not a law. Leverage is a multiplier with a sign,
@@ -178,8 +190,8 @@ export default function NegativeLeveragePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               Leverage is conditional, not automatic
             </h2>
             <p>
@@ -196,7 +208,7 @@ export default function NegativeLeveragePost() {
             <p>
               The reason it surprises people is that for years the question
               never came up. With{" "}
-              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2010-01-01&coed=2023-12-31&fq=Annual&fam=avg" className="tc-link">
                 30-year loans at 3.5% to 4%
               </a>
               , a year of payments on the loan came to only about 5.4% to 5.7%
@@ -205,13 +217,13 @@ export default function NegativeLeveragePost() {
               hardened into a rule. That
               rule was really just a description of a low-rate world — move the
               cost of debt up two or three points,{" "}
-              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="tc-link">
                 which is exactly what happened
               </a>
               , and it starts handing out the wrong answer.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The number that decides it: the loan constant
             </h2>
             <p>
@@ -219,18 +231,20 @@ export default function NegativeLeveragePost() {
               <strong>loan constant</strong> — your annual debt service as a
               percentage of the loan balance:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Loan constant = Annual debt service ÷ Loan amount
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Loan constant = Annual debt service ÷ Loan amount
+                </>
+              }
+            />
             <p>
               Take a $225,000 loan at 7% over 30 years. The principal-and-interest
               payment is about $1,497 a month, or $17,963 a year (you can confirm
               it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -253,14 +267,14 @@ export default function NegativeLeveragePost() {
               sheet.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The rule: cap rate vs loan constant
             </h2>
             <p>
               The property&apos;s unlevered yield is its{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cap rate
               </Link>{" "}
@@ -268,33 +282,35 @@ export default function NegativeLeveragePost() {
               if you bought it for all cash. Set that against the loan constant
               and the whole question resolves to a single comparison:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Cap rate &gt; Loan constant → positive leverage
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Cap rate &lt; Loan constant → negative leverage
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Cap rate = Loan constant → neutral
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Cap rate &gt; Loan constant → positive leverage
+                  <br />
+                  Cap rate &lt; Loan constant → negative leverage
+                  <br />
+                  Cap rate = Loan constant → neutral
+                </>
+              }
+            />
             <p>
               You can make this exact rather than directional. Your levered{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash return
               </Link>{" "}
               decomposes cleanly into the cap rate plus a leverage term:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Levered CoC = Cap rate + (Loan ÷ Equity) × (Cap rate − Loan
-                constant)
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Levered CoC = Cap rate + (Loan ÷ Equity) × (Cap rate − Loan
+                  constant)
+                </>
+              }
+            />
             <p>
               Read that second term carefully, because it is the entire story.
               The factor in parentheses — cap rate minus loan constant — is the{" "}
@@ -308,7 +324,7 @@ export default function NegativeLeveragePost() {
               payment alone; closing costs and reserves are left out.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               One property, five cap rates
             </h2>
             <p>
@@ -318,11 +334,11 @@ export default function NegativeLeveragePost() {
               up to 9% and watch what leverage does to the same $75,000 of cash:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Cap rate (NOI)</th>
+                  <tr>
+                    <th>Cap rate (NOI)</th>
                     <th className="text-right">All-cash return</th>
                     <th className="text-right">Levered CoC</th>
                     <th className="text-right">DSCR</th>
@@ -369,7 +385,7 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               The crossover sits exactly at the 7.98% loan constant. Below it,
@@ -383,7 +399,7 @@ export default function NegativeLeveragePost() {
               the asset&apos;s yield meet.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The trap: it still cash-flows, it still passes the lender
             </h2>
             <p>
@@ -394,7 +410,7 @@ export default function NegativeLeveragePost() {
               distance of the minimum{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 debt-service-coverage ratio
               </Link>{" "}
@@ -416,7 +432,7 @@ export default function NegativeLeveragePost() {
               wide grey band where a property pays its bills, satisfies a{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR lender
               </Link>
@@ -427,7 +443,7 @@ export default function NegativeLeveragePost() {
               is yours to answer.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               More leverage makes it worse, not better
             </h2>
             <p>
@@ -437,11 +453,11 @@ export default function NegativeLeveragePost() {
               property ($18,000 of NOI) and change only the down payment:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Financing</th>
+                  <tr>
+                    <th>Financing</th>
                     <th className="text-right">Loan</th>
                     <th className="text-right">Cash-on-cash</th>
                   </tr>
@@ -464,7 +480,7 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               The return moves the <em>opposite</em> way to the textbook. Every
@@ -476,7 +492,7 @@ export default function NegativeLeveragePost() {
               the{" "}
               <Link
                 href="/blog/how-much-down-payment-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 down-payment breakdown
               </Link>
@@ -485,7 +501,7 @@ export default function NegativeLeveragePost() {
               spread. Get the spread positive first.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Why 2026 rates make negative leverage a live risk
             </h2>
             <p>
@@ -494,13 +510,13 @@ export default function NegativeLeveragePost() {
               amortization:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">30-yr rate</th>
+                  <tr>
+                    <th>30-yr rate</th>
                     <th className="text-right">Loan constant</th>
-                    <th className="text-left">Example cap rate (illustrative)</th>
+                    <th>Example cap rate (illustrative)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -526,19 +542,19 @@ export default function NegativeLeveragePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               In the cheap-money era, 3.5% to 4% rates meant a 30-year loan
               constant of about 5.4% to 5.7%, so leverage added to returns on any
               property whose cap rate sat above that. In 2026 the constant on a
               30-year loan has run about 7.2% to 8% at{" "}
-              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2025-06-01" className="tc-link">
                 Freddie Mac&apos;s weekly average rates (5.98% to 7.03% through
                 Sept. 24, 2026)
               </a>
               , and investment-property loans carry{" "}
-              <a href="https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf" className="text-primary font-semibold hover:underline">
+              <a href="https://guide.freddiemac.com/euf/assets/pdfs/Exhibit_19.pdf" className="tc-link">
                 extra agency credit fees
               </a>{" "}
               that can push investor quotes higher. Where cap rates have not
@@ -549,14 +565,14 @@ export default function NegativeLeveragePost() {
               cap-rate intuition is{" "}
               <Link
                 href="/blog/what-is-a-good-cap-rate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 quietly buying investors into negative leverage
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               What to do when a deal is negatively leveraged
             </h2>
             <p>
@@ -582,7 +598,7 @@ export default function NegativeLeveragePost() {
               yield — a perfectly sound bet, and exactly the{" "}
               <Link
                 href="/blog/cash-flow-vs-appreciation"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash flow versus appreciation
               </Link>{" "}
@@ -596,7 +612,7 @@ export default function NegativeLeveragePost() {
               It is also why cap rate and cash-on-cash have to be read{" "}
               <Link
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 together rather than in isolation
               </Link>
@@ -607,19 +623,20 @@ export default function NegativeLeveragePost() {
               trap.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+            </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            {/* faqLd above is the one FAQPage node for these rows. */}
+            <FaqSection
+              id="faq"
+              variant="inline"
+              heading="FAQ"
+              items={FAQS}
+              structuredData={false}
+              contact={null}
+            />
+
+            <ArticleBody className="mt-16">
+            <h2>
               The bottom line
             </h2>
             <p>
@@ -634,7 +651,7 @@ export default function NegativeLeveragePost() {
               DSCR lender. The fix is never &quot;more leverage&quot;; it is a
               wider spread, or a clear-eyed decision to accept the gap for
               paydown and appreciation. The full{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               runs cap rate, cash-on-cash, and DSCR off the same inputs, so when
@@ -643,7 +660,7 @@ export default function NegativeLeveragePost() {
               not after. Run your own numbers against your own terms before you
               buy.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -666,13 +683,12 @@ export default function NegativeLeveragePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
