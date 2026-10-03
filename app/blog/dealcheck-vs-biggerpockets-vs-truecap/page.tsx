@@ -11,11 +11,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_META_NEXT,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { Note } from "@/components/marketing/page-parts";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -129,194 +143,156 @@ export default function ThreeWayComparisonPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleSchema} />
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={faqSchema} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-
+      <ArticleMain>
         <article>
-          <header className="mb-8 sm:mb-10">
-            <div className="text-2xs uppercase tracking-widest text-primary font-bold mb-3">
-              Comparison · {READING_TIME_MIN} min read
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              {DESCRIPTION}
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              · Comparison · {READING_TIME_MIN} min read
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">
+            <p className={ARTICLE_META_NEXT}>
               Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
             <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          {/* TL;DR */}
-          <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
-              TL;DR
-            </h2>
-            <p
-              className="text-sm sm:text-base leading-relaxed text-foreground"
-            >
+          <Note title="TL;DR">
+            <p>
               <strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports;{" "}
               <a
                 href="https://dealcheck.io/pricing/"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 Starter includes professional interactive and PDF reports with published usage limits
               </a>
               . <strong>BiggerPockets Calculator</strong> comes with the BiggerPockets Pro membership: its{" "}
               <a
                 href="https://www.biggerpockets.com/analysis/rentals/new"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 calculator form
               </a>{" "}
               says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its{" "}
               <a
                 href="https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 house hacking guide
               </a>{" "}
               mentions 5 free calculator reports. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
             </p>
-          </section>
+            <p className="mt-3">
+              Access and pricing change. Check the official{" "}
+              <a
+                href="https://dealcheck.io/pricing/"
+                target="_blank"
+                rel="noreferrer"
+                className="tc-link"
+              >
+                DealCheck pricing
+              </a>
+              ,{" "}
+              <a
+                href="https://www.biggerpockets.com/rental-property-calculator"
+                target="_blank"
+                rel="noreferrer"
+                className="tc-link"
+              >
+                BiggerPockets calculator
+              </a>
+              ,{" "}
+              <a
+                href="https://www.biggerpockets.com/pro-membership"
+                target="_blank"
+                rel="noreferrer"
+                className="tc-link"
+              >
+                BiggerPockets Pro
+              </a>
+              , and{" "}
+              <a
+                href="https://usetruecap.com/pricing"
+                target="_blank"
+                rel="noreferrer"
+                className="tc-link"
+              >
+                TrueCap pricing
+              </a>{" "}
+              pages for current terms.
+            </p>
+          </Note>
 
-          <p className="mb-10 text-sm text-muted-foreground">
-            Access and pricing change. Check the official{" "}
-            <a
-              href="https://dealcheck.io/pricing/"
-              target="_blank"
-              rel="noreferrer"
-              className="tc-link"
-            >
-              DealCheck pricing
-            </a>
-            ,{" "}
-            <a
-              href="https://www.biggerpockets.com/rental-property-calculator"
-              target="_blank"
-              rel="noreferrer"
-              className="tc-link"
-            >
-              BiggerPockets calculator
-            </a>
-            ,{" "}
-            <a
-              href="https://www.biggerpockets.com/pro-membership"
-              target="_blank"
-              rel="noreferrer"
-              className="tc-link"
-            >
-              BiggerPockets Pro
-            </a>
-            , and{" "}
-            <a
-              href="https://usetruecap.com/pricing"
-              target="_blank"
-              rel="noreferrer"
-              className="tc-link"
-            >
-              TrueCap pricing
-            </a>{" "}
-            pages for current terms.
-          </p>
-
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
+          <ArticleBody className="mt-10 sm:mt-12">
             <h2>The three calculators in one sentence each</h2>
-            <div>
-              <ul>
-                <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
-                <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator included in BiggerPockets Pro (its form offers a 7-day free trial, and a sign-up prompt mentions 5 free calculator reports), alongside broader community and educational resources.</li>
-                <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
-              </ul>
-            </div>
+            <ul>
+              <li><strong>DealCheck</strong> — per-deal underwriting across rental, BRRRR, Airbnb, and flip strategies, with free Starter and paid Plus and Pro plans. It offers native iOS and Android apps and listing-import tools.</li>
+              <li><strong>BiggerPockets Calculator</strong> — a rental-property calculator included in BiggerPockets Pro (its form offers a 7-day free trial, and a sign-up prompt mentions 5 free calculator reports), alongside broader community and educational resources.</li>
+              <li><strong>TrueCap</strong> — an installable PWA with no-account preliminary core screens, labeled screening benchmarks, Buy Box fit, and a Deal score. Pro adds a 10-year cash-flow and equity projection, sensitivity, Offer Ceiling, comparison, and reports.</li>
+            </ul>
 
             <h2>Free tier comparison</h2>
-            <div>
-              <p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
-              <ul>
-                <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
-                <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
-                <li><strong>BiggerPockets calculator</strong> — its calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Check the official calculator and Pro pages because access terms can change.</li>
-              </ul>
-              <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>
-            </div>
+            <p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
+            <ul>
+              <li><strong>TrueCap free</strong> — preliminary screens with cap rate, CoC, DSCR, NOI, monthly cash flow, Buy Box fit, and labeled address starting assumptions without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
+              <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
+              <li><strong>BiggerPockets calculator</strong> — its calculator form says results unlock with Pro or a 7-day free trial, and a sign-up prompt on its house hacking guide mentions 5 free calculator reports with a BiggerPockets account. Check the official calculator and Pro pages because access terms can change.</li>
+            </ul>
+            <p>If you want to underwrite a deal immediately without paying or creating an account, TrueCap supports that workflow.</p>
 
             <h2>Pricing (paid tier comparison)</h2>
-            <div>
-              <ul>
-                <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
-                <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
-                <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
-              </ul>
-              <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans raise published limits and unlock features such as its Purchase Offer Calculator, investment-potential insights, owner lookup and branded reports; TrueCap Pro adds advanced analysis workflows; and BiggerPockets Pro combines calculator access with a broader membership.</p>
-            </div>
+            <ul>
+              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
+              <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
+              <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
+            </ul>
+            <p>Compare the current total price against the features you will use. DealCheck&apos;s paid plans raise published limits and unlock features such as its Purchase Offer Calculator, investment-potential insights, owner lookup and branded reports; TrueCap Pro adds advanced analysis workflows; and BiggerPockets Pro combines calculator access with a broader membership.</p>
 
             <h2>Mobile + at the showing</h2>
-            <div>
-              <p>TrueCap is a Progressive Web App that can be installed from the browser to a home screen. DealCheck offers native iOS and Android apps. BiggerPockets provides its calculator through the web.</p>
-              <p>Choose DealCheck if app-store distribution is important. Choose TrueCap if an installable browser app fits your workflow. Test the interface you plan to use at showings before committing to a paid plan.</p>
-            </div>
+            <p>TrueCap is a Progressive Web App that can be installed from the browser to a home screen. DealCheck offers native iOS and Android apps. BiggerPockets provides its calculator through the web.</p>
+            <p>Choose DealCheck if app-store distribution is important. Choose TrueCap if an installable browser app fits your workflow. Test the interface you plan to use at showings before committing to a paid plan.</p>
 
             <h2>What each does better</h2>
-            <div>
-              <ul>
-                <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
-                <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, a Purchase Offer Calculator on its paid plans, and a longer product history.</li>
-                <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
-              </ul>
-            </div>
+            <ul>
+              <li><strong>TrueCap stands out for</strong>: unlimited no-signup core analyses, labeled screening assumptions, Buy Box fit, portfolio rollup, a Deal score, Offer Ceiling, and sensitivity.</li>
+              <li><strong>DealCheck stands out for</strong>: native iOS and Android apps, listing imports, calculators for several investment strategies on Starter, a Purchase Offer Calculator on its paid plans, and a longer product history.</li>
+              <li><strong>BiggerPockets stands out for</strong>: combining calculator access with its broader investor community and educational membership resources.</li>
+            </ul>
 
             <h2>Quick decision matrix</h2>
-            <div>
-              <ul>
-                <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap supports that flow.</li>
-                <li><strong>&quot;I want projections, sensitivity, Offer Ceiling, and saved-deal comparison.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
-                <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
-                <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
-                <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
-                <li><strong>&quot;I want full property detail (list price, taxes, photos) imported automatically.&quot;</strong> DealCheck, which{" "}<a href="https://dealcheck.io/features/">imports property details from public records and online listings</a>. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
-                <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
-              </ul>
-            </div>
+            <ul>
+              <li><strong>&quot;I want to underwrite a deal right now, no signup.&quot;</strong> TrueCap supports that flow.</li>
+              <li><strong>&quot;I want projections, sensitivity, Offer Ceiling, and saved-deal comparison.&quot;</strong> Compare TrueCap&apos;s current Pro plans.</li>
+              <li><strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — native apps.</li>
+              <li><strong>&quot;I already pay for BiggerPockets for the community.&quot;</strong> Stay with BiggerPockets&apos; calculator; you&apos;re already paying.</li>
+              <li><strong>&quot;I want to know if it fits my targets, not just the metrics.&quot;</strong> TrueCap — Buy Box fit with a Deal score breakdown.</li>
+              <li><strong>&quot;I want full property detail (list price, taxes, photos) imported automatically.&quot;</strong> DealCheck, which{" "}<a href="https://dealcheck.io/features/">imports property details from public records and online listings</a>. (TrueCap takes a pasted listing link too, but pulls only the address — not the listing&apos;s price, taxes and photos.)</li>
+              <li><strong>&quot;I want a portfolio rollup across saved deals.&quot;</strong> TrueCap.</li>
+            </ul>
 
-            <h2>FAQ</h2>
-            <div className="not-prose space-y-3">
-              {FAQ_ITEMS.map((item) => (
-                <details
-                  key={item.q}
-                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
-                >
-                  <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
-                    <span>{item.q}</span>
-                    <span
-                      aria-hidden
-                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
-                  </div>
-                </details>
-              ))}
-            </div>
+          </ArticleBody>
 
+          {/* faqSchema above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQ_ITEMS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
             <h2>Try TrueCap free</h2>
             <p>
               Run the same verified inputs through the tools you are
@@ -324,53 +300,45 @@ export default function ThreeWayComparisonPost() {
               definitions, and projections can produce different results;
               compare both the outputs and the workflow before choosing.
             </p>
-            <p className="not-prose"></p>
-          </div>
-
-          <PostSources
-            sources={[
-              {
-                title: "DealCheck, Plans & Pricing",
-                url: "https://dealcheck.io/pricing/",
-              },
-              {
-                title: "BiggerPockets, Rental Property Report (calculator form)",
-                url: "https://www.biggerpockets.com/analysis/rentals/new",
-              },
-              {
-                title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
-                url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
-              },
-              {
-                title: "BiggerPockets, Rental Property Calculator",
-                url: "https://www.biggerpockets.com/rental-property-calculator",
-              },
-              {
-                title: "BiggerPockets, Pro membership",
-                url: "https://www.biggerpockets.com/pro-membership",
-              },
-              {
-                title: "DealCheck, Property analysis software features",
-                url: "https://dealcheck.io/features/",
-              },
-            ]}
-          />
-
-          <div className="mt-10">
-            <NewsletterSignup />
-          </div>
-
-          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
-
-          <div className="mt-10">
-            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
-          </div>
+          </ArticleBody>
         </article>
-      </main>
 
-      <BlogStickyCta />
+        <PostSources
+          sources={[
+            {
+              title: "DealCheck, Plans & Pricing",
+              url: "https://dealcheck.io/pricing/",
+            },
+            {
+              title: "BiggerPockets, Rental Property Report (calculator form)",
+              url: "https://www.biggerpockets.com/analysis/rentals/new",
+            },
+            {
+              title: "BiggerPockets, House Hacking: What Is It, How to Start, and Strategies for Success",
+              url: "https://www.biggerpockets.com/real-estate-investing/house-hacking-strategy",
+            },
+            {
+              title: "BiggerPockets, Rental Property Calculator",
+              url: "https://www.biggerpockets.com/rental-property-calculator",
+            },
+            {
+              title: "BiggerPockets, Pro membership",
+              url: "https://www.biggerpockets.com/pro-membership",
+            },
+            {
+              title: "DealCheck, Property analysis software features",
+              url: "https://dealcheck.io/features/",
+            },
+          ]}
+        />
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
