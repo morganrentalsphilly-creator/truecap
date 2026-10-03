@@ -46,7 +46,8 @@ export type ConversionKey =
   | "deal_saved";
 
 export interface ConversionOptions {
-  /** Dollar value of the conversion (e.g. monthly Pro price). */
+  /** Dollar value of the conversion. For paid_subscribed it is what the
+   *  Checkout Session charged (amount_total), not the plan's list price. */
   value?: number;
   /** ISO currency, default USD. */
   currency?: string;

@@ -11,9 +11,10 @@
  * /profile?billing=success, and a subscription-id keyed mount could fire a
  * second purchase event for the same Checkout Session.
  *
- * Renders nothing; mounting is the side effect. The `value` should be
- * the dollar amount of the plan they just bought so Google can use
- * value-based bidding strategies (tROAS, value rules) effectively.
+ * Renders nothing; mounting is the side effect. The `value` is what the
+ * buyer was charged at checkout, so Google's value-based bidding (tROAS,
+ * value rules) sees revenue and not the list price. No Stripe id is sent
+ * with it: `transactionId` is a local dedup key only.
  */
 
 import { useEffect } from "react";
@@ -22,7 +23,9 @@ import { trackConversion } from "@/lib/analytics/track-conversion";
 interface Props {
   /** The billing query param value — only fires for "success". */
   billingStatus: string | undefined;
-  /** Dollar amount of the plan to send as the conversion value (defaults 0). */
+  /** Dollars this Checkout Session charged (Stripe's amount_total, after any
+   *  coupon), from verifyCheckoutReturnAction; the Price's list amount only
+   *  when Stripe returned no total. Defaults 0. */
   value?: number;
   /** Stripe checkout SESSION id — the dedup key so a refresh doesn't
    *  double-fire (identical across every compatibility landing path). */
