@@ -63,7 +63,9 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
           ? AGENT_LEDE
           : "Create your account to unlock your Offer Ceiling, downside analysis, saved deals, and Pro evaluation. $0 today. No card required. Nothing automatically renews."
       }
-      panelTitle="Know your walk-away price before you make the offer."
+      // One side panel for every visitor, so it names no audience: "the Buy
+      // Box" is the client's for an agent and their own for an investor.
+      panelTitle="Know the highest price that still meets the Buy Box."
       panelDescription="Offer Ceiling. Downside analysis. Saved deals. Your work stays private."
     >
       {/* Suspense boundary is required because SignUpForm (via the
