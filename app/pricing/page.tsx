@@ -148,7 +148,7 @@ const FEATURE_COMPARISON: Array<
   ["Cap rate · CoC · DSCR · cash flow", true, true],
   ["Labeled HUD rent · FRED rate benchmarks", true, true],
   ["Deal score (0–100) with factor breakdown", true, true],
-  ["Sale + rent comps from the address", "1 free", "50 / mo"],
+  ["Sale + rent comps from the address", "1 free", "Up to 50 / mo"],
   ["Offer Ceiling · downside sensitivity", "First complete decision", true],
   ["Shareable read-only deal links", true, true],
   ["10-year cash flow projection", false, true],
