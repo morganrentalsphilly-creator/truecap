@@ -584,12 +584,12 @@ export default function VsHubPage() {
           heading="Stop comparison-shopping. Run your next deal."
           headingId="vs-close-heading"
           lede={keepTogether(
-            "The fastest way to know whether TrueCap fits your workflow is to enter an address, the asking price and a bedroom count and see the analysis. 60 seconds, no signup, no card.",
+            "The fastest way to know whether TrueCap fits your workflow is to enter an address, the asking price and a bedroom count and see the analysis. No signup, no card.",
           )}
           actions={
             <ActionRow>
               <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
-                Run a deal — 60 seconds
+                Run a deal
               </Link>
               <IntentPrefetchLink href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
                 See Pro pricing

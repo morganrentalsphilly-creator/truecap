@@ -384,7 +384,7 @@ export default function CapRateCalculatorPage() {
               well will run cap rate on every property they consider — often
               within 60 seconds of seeing the listing — and only proceed to a
               full analysis on the ones that clear their hurdle. This calculator
-              gives you that 60-second answer.
+              gives you that first answer.
             </p>
             <p>
               When you&apos;re ready to go deeper — cash-on-cash, DSCR, monthly

@@ -397,7 +397,7 @@ export default function BlogPost() {
                   </Link>
                 </strong>{" "}
                 — net monthly income after all expenses + mortgage. Run any
-                deal&apos;s number in 30 seconds in the{" "}
+                deal&apos;s number in the{" "}
                 <Link
                   href="/analyze" prefetch={false}
                   className="tc-link"

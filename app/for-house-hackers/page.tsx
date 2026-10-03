@@ -255,7 +255,7 @@ export default function ForHouseHackersPage() {
               <Link href="/analyze?strategy=house-hack" prefetch={false} className="tc-link">
                 analyzer in House Hack mode
               </Link>{" "}
-              — your effective housing cost after tenant rent, in seconds.
+              — your effective housing cost after tenant rent.
               Once you&apos;ve picked a property, ground the
               numbers in the{" "}
               <Link href="/analyze" prefetch={false} className="tc-link">

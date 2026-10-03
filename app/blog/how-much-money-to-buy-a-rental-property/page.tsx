@@ -1139,14 +1139,14 @@ export default function BlogPost() {
             </p>
             <p>
               The cheap defence against both is arithmetic before offers.
-              Underwriting a listing takes about a minute in the{" "}
+              Put the listing through the{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"
               >
                 TrueCap analyzer
-              </Link>
-              , and the whole point is to spend $0 discovering that a deal misses
+              </Link>{" "}
+              first: the whole point is to spend $0 discovering that a deal misses
               by $300 a month rather than $1,300 discovering it at the inspection.
             </p>
 

@@ -232,7 +232,7 @@ export default function RentalPropertySpreadsheetPage() {
                 className="tc-link"
               >
                 enter an address, the asking price and a bedroom count, and
-                get the same analysis in 60 seconds
+                get the same analysis
               </Link>
               ), and the rest of you got a good spreadsheet for free.
               That&apos;s the whole model.

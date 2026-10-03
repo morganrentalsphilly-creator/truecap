@@ -522,7 +522,7 @@ export default function ReturnOnEquityPost() {
                 TrueCap analyzer
               </Link>{" "}
               runs cash flow, cap rate, DSCR, and multi-year projections on any
-              property in seconds — so whether you are underwriting a new deal or
+              property — so whether you are underwriting a new deal or
               deciding what to do with the equity in an old one, you can see the
               return on the dollars that are actually at work.
             </p>

@@ -469,8 +469,8 @@ export default function DownPaymentPost() {
               <Link href="/" className="tc-link">
                 TrueCap
               </Link>{" "}
-              and you&apos;ll see cash flow, cap rate, cash-on-cash, and DSCR side by side in about
-              60 seconds — including the all-in cash the deal really needs. For the rest of the
+              and you&apos;ll see cash flow, cap rate, cash-on-cash, and DSCR side by
+              side — including the all-in cash the deal really needs. For the rest of the
               underwrite, see{" "}
               <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="tc-link">
                 how to underwrite a rental in 60 seconds

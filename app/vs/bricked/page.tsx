@@ -210,12 +210,11 @@ export default function VsBrickedPage() {
             Bricked is an AI valuation tool — it finds comps, estimates repairs,
             and prices offers for flippers and wholesalers working at volume.
             TrueCap is a rental-screening calculator — it estimates cash flow,
-            cap rate, CoC, and DSCR from reviewed assumptions. Both promise
-            underwriting in seconds. They mean different things by it.
+            cap rate, CoC, and DSCR from reviewed assumptions.
           </p>
           <ActionRow className={VS_ACTIONS}>
             <AnalyzeCtaLink analyticsSource="vs_hero" className={buttonVariants({ size: "cta" })}>
-              Run a deal — 60 seconds
+              Run a deal
             </AnalyzeCtaLink>
             <Link
               href="/pricing"

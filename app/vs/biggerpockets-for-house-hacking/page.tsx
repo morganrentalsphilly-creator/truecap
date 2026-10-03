@@ -410,7 +410,7 @@ export default function VsBiggerPocketsForHouseHackingPage() {
                 href="/analyze" prefetch={false}
                 className={buttonVariants({ size: "cta" })}
               >
-                Run a deal — 60 seconds
+                Run a deal
               </Link>
               <IntentPrefetchLink
                 href="/for-house-hackers"

@@ -210,7 +210,7 @@ export function SiteFooter({
               <AppLogo href="" subtitle="" />
             </IntentPrefetchLink>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Underwrite rentals in 60 seconds.
+              Underwrite a rental before you make an offer.
             </p>
           </div>
 
