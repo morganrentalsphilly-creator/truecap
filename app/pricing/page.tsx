@@ -573,8 +573,9 @@ async function PricingPlans({
  * that need a read follow in the same response: the header's signed-in state,
  * the lede, the agent line, the stage prices, the Offers JSON-LD, the plan
  * cards, the quotes and the footer's account column. The fallbacks in and
- * under the hero hold the space their content takes, so nothing in the first
- * screen moves when the content arrives.
+ * under the hero hold the space the signed-out content takes, so nothing in a
+ * visitor's first screen moves when the content arrives; a signed-in account
+ * gets a different lede and no agent line, so its hero can change height once.
  * The route stays dynamic (the session read uses cookies) and adds no
  * `dynamic` export: "force-dynamic" would switch off the ten-minute cache on
  * the Stripe price reads.

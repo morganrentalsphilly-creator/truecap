@@ -523,6 +523,10 @@ export function PricingTogglePlans({
  * The trial terms, set once as fine print under the plan cards.
  * Every string here is pinned (pricing-copy-guards.test.ts and the
  * authenticated e2e specs): restyle, never reword.
+ * The signed-out sentence was reworded for row P1-07 ("Pro analyses" plus
+ * the rerun sentence) with its pin; the signed-in allowance keeps the older
+ * noun, which formatPricingEvaluationAllowance (lib/pricing-evaluation.ts)
+ * writes and an e2e spec pins. Changing it there is an open item.
  */
 function PricingTrialTerms({
   isAuthenticated,

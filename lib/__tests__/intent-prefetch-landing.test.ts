@@ -32,9 +32,10 @@ import { describe, expect, it, vi } from "vitest";
  *   (<section data-page-hero>) unless named as the page's conversion route.
  *   Every /analyze link is "off". This also catches a plain Link inside a
  *   shared part the page renders, and mapped hrefs the source scan cannot
- *   read. /pricing reads the session cookie and cannot render here, so it
- *   is held by the source layer, which also checks that its allowlisted
- *   links sit inside <PageHero> (its value stack is rendered on its own).
+ *   read. /pricing renders here only as far as its Suspense fallbacks (the
+ *   plan cards and the agent line stream later), so it is held by the source
+ *   layer, which also checks that its allowlisted links sit inside
+ *   <PageHero> (its value stack is rendered on its own).
  */
 
 vi.mock("next/link", async () => {
