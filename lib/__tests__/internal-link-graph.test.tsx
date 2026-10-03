@@ -67,6 +67,15 @@ vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
   useRouter: () => ({ push() {}, replace() {}, prefetch() {}, back() {}, forward() {}, refresh() {} }),
 }));
+// Pages in the sitemap (/pricing among them) mount <Testimonials />, which reads published rows
+// through the service-role client. With Supabase variables set (CI sets
+// placeholders) that was a real request to the placeholder host, retried
+// until it gave up. The component turns any failed read into no rows, and no
+// row is published, so an empty list renders what the live page renders.
+vi.mock("@/lib/testimonials/store", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/testimonials/store")>()),
+  listPublishedTestimonials: async () => [],
+}));
 
 const ROOT = process.cwd();
 const APP = join(ROOT, "app");
