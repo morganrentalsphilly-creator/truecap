@@ -52,7 +52,7 @@ export function formatPricingEvaluationAllowance(
   const allowances: string[] = [];
   if (evaluation.dealsRemaining > 0) {
     allowances.push(
-      `${evaluation.dealsRemaining} Pro deal${evaluation.dealsRemaining === 1 ? "" : "s"}`,
+      `${evaluation.dealsRemaining} Pro ${evaluation.dealsRemaining === 1 ? "analysis" : "analyses"}`,
     );
   }
   if (evaluation.comparisonsRemaining > 0) {

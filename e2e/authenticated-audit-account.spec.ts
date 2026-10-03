@@ -34,9 +34,9 @@ test("sign-up creates an account, lands in the app, and opens the 21-day no-card
   await expect(page).toHaveURL(/^https?:\/\/[^/]+\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
   await expect(page.locator('form[data-calc-form="true"]')).toBeVisible({ timeout: 30_000 });
 
-  // Trial start: the DB trigger opens 3 Pro deals + 1 comparison for 21 days.
+  // Trial start: the DB trigger opens 3 Pro analyses + 1 comparison for 21 days.
   await page.goto("/pricing", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText(/3 Pro deals \+ 1 comparison remaining/).first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(/3 Pro analyses \+ 1 comparison remaining/).first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Your no-card free trial has ended.")).toHaveCount(0);
 });
 

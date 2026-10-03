@@ -36,11 +36,20 @@ describe("pricing evaluation truth", () => {
       comparisonsRemaining: 1,
     });
     expect(formatPricingEvaluationAllowance(summary)).toBe(
-      "2 Pro deals + 1 comparison remaining",
+      "2 Pro analyses + 1 comparison remaining",
     );
   });
 
-  it("does not keep promising Pro deals after that allowance is exhausted", () => {
+  it("uses the singular for one remaining analysis", () => {
+    const summary = summarizePricingEvaluation(
+      evaluationAccess({ dealsUsed: 2, comparisonsUsed: 1 }),
+    );
+    expect(formatPricingEvaluationAllowance(summary)).toBe(
+      "1 Pro analysis remaining",
+    );
+  });
+
+  it("does not keep promising Pro analyses after that allowance is exhausted", () => {
     const summary = summarizePricingEvaluation(
       evaluationAccess({ dealsUsed: 3, comparisonsUsed: 0 }),
     );
@@ -85,11 +94,11 @@ describe("trial strip follows a metered run", () => {
 
   it("counts down from the usage the metering call returned", () => {
     expect(formatPricingEvaluationAllowance(fresh)).toBe(
-      "3 Pro deals + 1 comparison remaining",
+      "3 Pro analyses + 1 comparison remaining",
     );
     const afterOne = applyTrialUsage(fresh, { dealsUsed: 1, comparisonsUsed: 0 });
     expect(formatPricingEvaluationAllowance(afterOne)).toBe(
-      "2 Pro deals + 1 comparison remaining",
+      "2 Pro analyses + 1 comparison remaining",
     );
     const afterThree = applyTrialUsage(afterOne, {
       dealsUsed: 3,
