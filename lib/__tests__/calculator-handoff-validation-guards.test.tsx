@@ -10,7 +10,10 @@ import {
   type ArvRawInputs,
 } from "@/components/tools/arv-calculator-widget";
 import { BreakEvenCalculatorWidget } from "@/components/tools/break-even-calculator-widget";
-import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
+import {
+  GrmCalculatorWidget,
+  grmFieldErrors,
+} from "@/components/tools/grm-calculator-widget";
 import {
   calculateMortgagePaymentEstimate,
   fmtMoney,
@@ -462,6 +465,48 @@ describe("P2-47, P2-48 and P2-72: the 2% rule calculator", () => {
     expect(html.match(/aria-live="polite"/g)).toHaveLength(1);
     expect(html).toContain('id="twopct-price"');
     expect(html).toContain('id="twopct-rent"');
+    expect(html).toContain('min="0" max="100000000"');
+    expect(html).toContain('min="0" max="1000000"');
+    expect(html).not.toMatch(INVALID_ATTR);
+    expect(html).not.toContain('role="alert"');
+  });
+});
+
+describe("P2-48 and P2-72: the GRM calculator", () => {
+  // Before the template fan-out a negative price printed "Property price -$5"
+  // beside the "Invalid" label with no message on the field, and the result
+  // was not a live region.
+  it("a cleared field is not an error; zero, a negative and an absurd value are", () => {
+    expect(grmFieldErrors({ price: "295000", rent: "2950" })).toEqual({ price: null, rent: null });
+    expect(grmFieldErrors({ price: "", rent: "" })).toEqual({ price: null, rent: null });
+    expect(grmFieldErrors({ price: "-5", rent: "-2950" })).toEqual({
+      price: "Property price must be greater than 0.",
+      rent: "Monthly gross rent must be greater than 0.",
+    });
+    expect(grmFieldErrors({ price: "0", rent: "2950" }).price).toBe("Property price must be greater than 0.");
+    expect(grmFieldErrors({ price: "999999999999999", rent: "99999999999999" })).toEqual({
+      price: "Property price must be 100,000,000 or less.",
+      rent: "Monthly gross rent must be 1,000,000 or less.",
+    });
+  });
+
+  it("withholds the multiple and its input rows while a field is in error, and keeps the formula", () => {
+    const source = code("components/tools/grm-calculator-widget.tsx");
+    expect(source).toContain("const hasResult = !hasFieldError && result.grm > 0;");
+    expect(source).toContain('figure={hasResult ? result.grm.toFixed(1) : "—"}');
+    expect(source).toContain('hasFieldError && "hidden"');
+    expect(source).toContain("error={priceError}");
+    expect(source).toContain("error={rentError}");
+    // The multiple itself is unchanged.
+    expect(source).toContain("const annualRent = monthlyRent * 12;");
+    expect(source).toContain("const grm = annualRent > 0 ? price / annualRent : 0;");
+  });
+
+  it("renders its defaults with bounds, no error and one announced result", () => {
+    const html = renderToStaticMarkup(createElement(GrmCalculatorWidget));
+    expect(html.match(/aria-live="polite"/g)).toHaveLength(1);
+    expect(html).toContain('id="grm-price"');
+    expect(html).toContain('id="grm-rent"');
     expect(html).toContain('min="0" max="100000000"');
     expect(html).toContain('min="0" max="1000000"');
     expect(html).not.toMatch(INVALID_ATTR);
