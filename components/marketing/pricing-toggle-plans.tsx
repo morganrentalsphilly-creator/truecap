@@ -526,7 +526,7 @@ function PricingTrialTerms({
 }: {
   isAuthenticated: boolean;
   evaluation: PricingEvaluationSummary;
-  /** The no-card trial grants Pro deal analyses only — never co-branding
+  /** The no-card trial grants Pro analyses only — never co-branding
    *  (custom_branding) or the client roster (lib/entitlements.ts
    *  evaluationFeatures) — so the terms say so after the Pro allowance, and
    *  name the roster when Agent Pro is on the page. */
@@ -536,8 +536,9 @@ function PricingTrialTerms({
     return (
       <p>
         <strong className="font-semibold text-foreground">New account: $0 today, no card.</strong>{" "}
-        The {PRODUCT_EVALUATION_DAYS}-day free trial includes {PRODUCT_EVALUATION_DEAL_LIMIT} complete
-        Pro deals and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison.
+        The {PRODUCT_EVALUATION_DAYS}-day free trial includes {PRODUCT_EVALUATION_DEAL_LIMIT} Pro
+        analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs
+        counts as a new analysis.
         {tier === "agent_pro"
           ? " Co-branded share pages and PDFs start with a Pro or Agent Pro subscription, and the client roster and client Buy Boxes with Agent Pro, not the trial."
           : " Co-branded share pages and PDFs start with a Pro subscription, not the trial."}{" "}

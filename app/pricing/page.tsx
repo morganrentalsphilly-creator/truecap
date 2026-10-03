@@ -78,7 +78,7 @@ import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Know Your Offer with Pro",
-  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
+  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day free trial with ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     ...OPEN_GRAPH_BASE,
@@ -120,7 +120,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the free trial work?",
-    a: `A new account gets ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+    a: `A new account gets ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. A rerun with changed inputs counts as a new analysis. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
   },
   {
     q: "What does Pro add?",
@@ -353,7 +353,7 @@ export default async function PricingPage() {
           }
           lede={
             !user
-              ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} deals, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
+              ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} analyses, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
               : activePaidPlanSlug || billingRecoveryRequired
                 ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
                 : pricingEvaluation.status === "active" && evaluationAllowance
