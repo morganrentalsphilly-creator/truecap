@@ -483,7 +483,6 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
                 </li>
               ))}
             </ul>
-
           </ArticleBody>
 
           {/* faqSchema above is the one FAQPage node for these rows. */}
