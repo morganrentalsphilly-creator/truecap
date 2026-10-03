@@ -14,11 +14,23 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -148,55 +160,53 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            House hacking sounds great in a podcast and confusing in a
-            spreadsheet. The honest math: your housing cost vs. renting the
-            equivalent, factoring in down payment, mortgage paydown,
-            appreciation, and the very real cost of being your tenants&apos;
-            landlord.
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              House hacking sounds great in a podcast and confusing in a
+              spreadsheet. The honest math: your housing cost vs. renting the
+              equivalent, factoring in down payment, mortgage paydown,
+              appreciation, and the very real cost of being your tenants&apos;
+              landlord.
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             House hacking is one of the highest-leverage moves in residential
             real estate: owner-occupant financing from{" "}
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               3.5% down on FHA
             </a>{" "}
             to{" "}
             <a
               href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               5% down on a conventional 2-4 unit primary residence
             </a>
@@ -214,7 +224,7 @@ export default function BlogPost() {
             renting the equivalent.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The right benchmark: housing cost vs. renting
           </h2>
           <p>
@@ -269,7 +279,7 @@ export default function BlogPost() {
             separately, including buying and selling costs and downside cases.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The five-bucket model</h2>
+          <h2>The five-bucket model</h2>
           <p>
             For a proper house hack underwrite, model five separate buckets and
             don&apos;t conflate them:
@@ -304,7 +314,7 @@ export default function BlogPost() {
             nominal terms, depending on the start date, per{" "}
             <a
               href="https://fred.stlouisfed.org/series/USSTHPI"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               FHFA&apos;s House Price Index
             </a>
@@ -313,7 +323,7 @@ export default function BlogPost() {
             your specific MSA from FHFA&apos;s metro-area index —{" "}
             <a
               href="https://fred.stlouisfed.org/series/ATNHPIUS26900Q"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Indianapolis&apos;s, for example
             </a>
@@ -322,11 +332,11 @@ export default function BlogPost() {
 
           <h3>5. Tax shield</h3>
           <p>
-            The rental portion of the property gets <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E treatment</Link>{" "}
+            The rental portion of the property gets <Link href="/blog/schedule-e-rental-property" className="tc-link">Schedule E treatment</Link>{" "}
             (see{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               IRS Publication 527 on renting part of a property
             </a>
@@ -337,7 +347,7 @@ export default function BlogPost() {
             model does not promise a tax shield.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The FHA self-sufficiency test (3-4 unit only)
           </h2>
           <p>
@@ -345,7 +355,7 @@ export default function BlogPost() {
             credit-score tiers down to 500 (
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               580 or higher for maximum financing
             </a>
@@ -355,7 +365,7 @@ export default function BlogPost() {
             performs it using the{" "}
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               current HUD Handbook 4000.1
             </a>{" "}
@@ -384,7 +394,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             FHA vs conventional owner-occupant — compare actual quotes
           </h2>
           <p>
@@ -395,7 +405,7 @@ export default function BlogPost() {
             label is automatically cheaper or easier for a specific borrower.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What to actually model</h2>
+          <h2>What to actually model</h2>
           <p>Build a model that&apos;s honest about:</p>
 
           <h3>1. Rental income on occupied units only (year 1)</h3>
@@ -438,7 +448,7 @@ export default function BlogPost() {
             reasonable method;{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               the IRS names square footage and number of rooms as the most
               common
@@ -446,7 +456,7 @@ export default function BlogPost() {
             . Talk to a CPA on the specifics.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The non-financial costs</h2>
+          <h2>The non-financial costs</h2>
           <p>
             The honest part most house-hack content skips: you&apos;re living
             next door to your tenants. Specifically:
@@ -478,54 +488,48 @@ export default function BlogPost() {
             after confirming the loan&apos;s occupancy terms (
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               FHA requires intent to occupy for at least one year
             </a>
             ). House hacking is a tactic, not a long-term lifestyle.
           </p>
 
-          <div className="not-prose"></div>
-
           <p className="text-sm text-muted-foreground mt-6">
             Related reading:{" "}
             <Link
               href="/blog/house-hacking-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               House hacking explained
             </Link>
             ,{" "}
             <Link
               href="/blog/best-rental-analysis-tool-for-house-hackers"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Best rental analysis tool for house hackers
             </Link>
             ,{" "}
             <Link
               href="/blog/single-family-vs-multi-family-rental"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Single-family vs multi-family
             </Link>
             .
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -554,9 +558,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -564,10 +565,12 @@ export default function BlogPost() {
             owner-occupant deals with one unit vacant to you.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
