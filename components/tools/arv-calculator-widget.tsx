@@ -14,13 +14,27 @@
  * engine subtracts costs from). Like lib/max-allowable-offer.ts, the
  * displayed offer is rounded DOWN to a $500 step — never up, so the
  * widget never quotes a price above the rule's own ceiling.
+ *
+ * Set on the calculator parts (components/tools/tool-parts.tsx), like the 1%
+ * rule widget: the frame opens on the 2px ink rule with no card, the fields
+ * are the shared ToolNumberField, the ARV is the key figure in DM Mono over
+ * the double rule, in ink, and the other figures are rows on rules. Green
+ * and orange belong to the comps-range check, a pass or a miss, and to the
+ * warnings. The grids read the frame's own width (@container), so the
+ * widget lays out the same in the tool page's hero column and in the /embed
+ * iframe.
  */
 
 import { useId, useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
+import {
+  LedgerFigure,
+  LedgerTotal,
+  LedgerVerdict,
+} from "@/components/ledger/ledger-parts";
+import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { ToolFrame } from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { computeRuleMaxOffer } from "@/components/tools/max-offer-math";
@@ -207,6 +221,7 @@ export function ArvCalculatorWidget() {
   const priceScreen =
     result === null ? null : result.mao > 0 ? fmt(result.mao) : "—";
 
+  const headingId = useId();
   const handoffNoteId = useId();
 
   // Do not carry a rule-of-thumb screen into underwriting as though it were a
@@ -218,15 +233,19 @@ export function ArvCalculatorWidget() {
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
-      <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">
-        ARV + 70% Rule Calculator
+    // The page and the /embed iframe both show an H1 naming the calculator,
+    // so the widget's own heading is for the outline only.
+    <ToolFrame aria-labelledby={headingId}>
+      <h2 id={headingId} className="sr-only">
+        ARV + 70% rule calculator
       </h2>
 
-      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="text-base font-semibold text-foreground">
         Sold comps — renovated, recent, nearby
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+      {/* A comp is a row: its sale price beside its square footage, at every
+          width. */}
+      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-5">
         <Money
           label="Comp 1 sale price"
           value={comp1Price}
@@ -271,10 +290,10 @@ export function ArvCalculatorWidget() {
         />
       </div>
 
-      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="mt-8 text-base font-semibold text-foreground">
         Your property + the rule
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-2 @2xl:grid-cols-3">
         <Plain
           label="Subject finished sq ft"
           value={subjectSqft}
@@ -293,15 +312,18 @@ export function ArvCalculatorWidget() {
           label="Rule multiplier"
           value={multiplier}
           setValue={setMultiplier}
-          step="1"
+          step={1}
           max={100}
           error={errors.multiplier}
         />
       </div>
 
-      <div className="rounded-xl border border-border bg-[var(--background)] p-5 sm:p-6 space-y-4">
+      {/* The result opens on the rule under the fields. */}
+      <div className="mt-8 border-t border-border pt-5">
         {/* One polite status line when the result changes, for screen
-            readers; the visible figures below stay as they were. */}
+            readers; the visible figures below stay as they were. The figure
+            block is therefore not ToolResult, whose own live region would
+            read the result a second time. */}
         <span
           className="sr-only"
           role="status"
@@ -317,80 +339,89 @@ export function ArvCalculatorWidget() {
                 : `Estimated ARV ${fmt(result.arv)}. No feasible price screen at this multiplier.`}
         </span>
         {hasErrors ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-pretty text-base leading-relaxed text-muted-foreground">
             Fix the highlighted inputs to estimate ARV.
           </p>
         ) : result === null || priceScreen === null ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
             Enter at least one sold comp (sale price + square footage) and your
             property&apos;s finished square footage to estimate ARV.
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              <Metric label="Estimated ARV" value={fmt(result.arv)} />
-              <Metric
+            {/* The ARV is the key figure, in DM Mono over the double rule, in
+                ink; the two figures it leads to follow as ruled rows. */}
+            <Metric label="Estimated ARV" value={fmt(result.arv)} />
+            <div className="mt-5 border-t border-border">
+              <Row
                 label="Avg comp $/sq ft"
                 value={`$${result.avgPpsf.toFixed(2)}`}
+                bold
               />
-              <Metric
+              <Row
                 label={`70%-rule price screen (${num(multiplier)}%)`}
                 value={priceScreen}
-                positive={result.mao > 0}
-                negative={result.mao <= 0}
+                bold
               />
             </div>
 
             {/* Sanity check straight from the comps method: a credible ARV
-                sits inside the range the comps actually sold in. */}
-            {result.arv > result.maxCompPrice ? (
-              <p className="text-xs font-semibold text-caution-text">
-                Sanity check: this ARV is ABOVE every comp&apos;s actual sale
-                price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
-                Be suspicious — check the subject square footage and whether the
-                comps are truly comparable before trusting it.
-              </p>
-            ) : result.arv < result.minCompPrice ? (
-              <p className="text-xs font-semibold text-caution-text">
-                Sanity check: this ARV is below every comp&apos;s actual sale
-                price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
-                That can happen when the subject is much smaller than the comps
-                — stay within about ±20% of your square footage when picking
-                them.
-              </p>
-            ) : (
-              <p className="text-xs font-semibold text-[var(--metric-positive)]">
-                Sanity check passed: the ARV sits inside your comps&apos; actual
-                sale range ({fmt(result.minCompPrice)}–
-                {fmt(result.maxCompPrice)}).
-              </p>
-            )}
+                sits inside the range the comps actually sold in. A pass or a
+                miss against that range, so it takes the verdict colors. */}
+            <p className="mt-4 max-w-[68ch] text-pretty text-sm">
+              {result.arv > result.maxCompPrice ? (
+                <LedgerVerdict pass={false}>
+                  Sanity check: this ARV is ABOVE every comp&apos;s actual sale
+                  price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                  Be suspicious — check the subject square footage and whether the
+                  comps are truly comparable before trusting it.
+                </LedgerVerdict>
+              ) : result.arv < result.minCompPrice ? (
+                <LedgerVerdict pass={false}>
+                  Sanity check: this ARV is below every comp&apos;s actual sale
+                  price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                  That can happen when the subject is much smaller than the comps
+                  — stay within about ±20% of your square footage when picking
+                  them.
+                </LedgerVerdict>
+              ) : (
+                <LedgerVerdict pass>
+                  Sanity check passed: the ARV sits inside your comps&apos; actual
+                  sale range ({fmt(result.minCompPrice)}–
+                  {fmt(result.maxCompPrice)}).
+                </LedgerVerdict>
+              )}
+            </p>
 
             {result.mao <= 0 && (
-              <p className="text-xs font-semibold text-[var(--metric-negative)]">
-                At this multiplier the repairs consume the entire allowable
-                price — the rule produces no feasible price screen for this deal
-                as entered.
+              <p className="mt-3 max-w-[68ch] text-pretty text-sm">
+                <LedgerVerdict pass={false}>
+                  At this multiplier the repairs consume the entire allowable
+                  price — the rule produces no feasible price screen for this deal
+                  as entered.
+                </LedgerVerdict>
               </p>
             )}
             {result.mao > 0 && result.arv < 150_000 && (
-              <p className="text-xs font-semibold text-caution-text">
-                Sub-$150k ARV: fixed costs (title, permits, utilities,
-                insurance) eat a big share of a small spread — many flippers
-                drop the multiplier to 60–65% here.
+              <p className="mt-3 max-w-[68ch] text-pretty text-sm">
+                <LedgerVerdict pass={false}>
+                  Sub-$150k ARV: fixed costs (title, permits, utilities,
+                  insurance) eat a big share of a small spread — many flippers
+                  drop the multiplier to 60–65% here.
+                </LedgerVerdict>
               </p>
             )}
             {result.mao > 0 && result.arv > 600_000 && (
-              <p className="text-xs font-semibold text-muted-foreground">
+              <p className="mt-3 max-w-[68ch] text-pretty text-sm font-semibold text-muted-foreground">
                 $600k+ ARV with a light rehab can justify 72–75% — but a thinner
                 margin needs a tighter rehab number and a faster exit.
               </p>
             )}
 
-            <div className="text-xs">
-              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+            <div className="mt-6">
+              <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">
                 Comp breakdown
-              </div>
+              </p>
               {result.comps.map((c, i) => (
                 <Row
                   key={i}
@@ -432,7 +463,7 @@ export function ArvCalculatorWidget() {
         The 70%-rule price screen is a rule of thumb and does not carry over.
         Enter the price you are evaluating.
       </p>
-    </div>
+    </ToolFrame>
   );
 }
 
@@ -443,178 +474,84 @@ type FieldBounds = {
   error: string | null;
 };
 
-/** The error line under a field; role="alert" so it is read when it appears. */
-function FieldError({ id, error }: { id: string; error: string | null }) {
-  if (!error) return null;
-  return (
-    <p id={id} role="alert" className="mt-1.5 text-sm text-destructive-text">
-      {error}
-    </p>
-  );
-}
-
-function Money({
-  label,
-  value,
-  setValue,
-  max,
-  error,
-}: {
+type FieldProps = {
   label: string;
   value: string;
   setValue: (v: string) => void;
-} & FieldBounds) {
+} & FieldBounds;
+
+/**
+ * The three kinds of field, each the shared ToolNumberField (the label tied
+ * to the input, the 48px field, aria-invalid and the message with
+ * role="alert") under an id of its own.
+ */
+function Money({ label, value, setValue, max, error }: FieldProps) {
   const id = useId();
-  const errorId = `${id}-error`;
   return (
-    <div>
-      <Label
-        htmlFor={id}
-        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-          $
-        </span>
-        <Input
-          id={id}
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={max}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={cn(
-            "pl-7 border-input bg-background",
-            error && "border-destructive",
-          )}
-        />
-      </div>
-      <FieldError id={errorId} error={error} />
-    </div>
+    <ToolNumberField
+      id={id}
+      label={label}
+      prefix="$"
+      min={0}
+      max={max}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      error={error}
+    />
   );
 }
 function Pct({
   label,
   value,
   setValue,
-  step = "0.5",
+  step = 0.5,
   max,
   error,
-}: {
-  label: string;
-  value: string;
-  setValue: (v: string) => void;
-  step?: string;
-} & FieldBounds) {
+}: FieldProps & { step?: number }) {
   const id = useId();
-  const errorId = `${id}-error`;
   return (
-    <div>
-      <Label
-        htmlFor={id}
-        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        <Input
-          id={id}
-          type="number"
-          inputMode="decimal"
-          step={step}
-          min={0}
-          max={max}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={cn(
-            "pr-8 border-input bg-background",
-            error && "border-destructive",
-          )}
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-          %
-        </span>
-      </div>
-      <FieldError id={errorId} error={error} />
-    </div>
+    <ToolNumberField
+      id={id}
+      label={label}
+      suffix="%"
+      min={0}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      error={error}
+    />
   );
 }
-function Plain({
-  label,
-  value,
-  setValue,
-  max,
-  error,
-}: {
-  label: string;
-  value: string;
-  setValue: (v: string) => void;
-} & FieldBounds) {
+function Plain({ label, value, setValue, max, error }: FieldProps) {
   const id = useId();
-  const errorId = `${id}-error`;
+  return (
+    <ToolNumberField
+      id={id}
+      label={label}
+      min={0}
+      max={max}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      error={error}
+    />
+  );
+}
+/** The key figure: its sentence-case label, then DM Mono over the double rule. */
+function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <Label
-        htmlFor={id}
-        className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-      >
+      <p className="text-sm leading-snug font-semibold text-foreground">
         {label}
-      </Label>
-      <Input
-        id={id}
-        type="number"
-        inputMode="numeric"
-        min={0}
-        max={max}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        className={cn(
-          "border-input bg-background",
-          error && "border-destructive",
-        )}
-      />
-      <FieldError id={errorId} error={error} />
+      </p>
+      {/* The color sits on the line, not on LedgerTotal (see ToolResult). */}
+      <p className="mt-3 wrap-anywhere text-foreground">
+        <LedgerTotal className="text-key-sm sm:text-key">{value}</LedgerTotal>
+      </p>
     </div>
   );
 }
-function Metric({
-  label,
-  value,
-  positive,
-  negative,
-}: {
-  label: string;
-  value: string;
-  positive?: boolean;
-  negative?: boolean;
-}) {
-  return (
-    <div>
-      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
-        {label}
-      </div>
-      <div
-        className={cn(
-          "text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
-          positive && "text-[var(--metric-positive)]",
-          negative && "text-[var(--metric-negative)]",
-          !positive && !negative && "text-foreground",
-        )}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
+/** A ruled row: what was measured, then its figure in DM Mono. */
 function Row({
   label,
   value,
@@ -625,16 +562,15 @@ function Row({
   bold?: boolean;
 }) {
   return (
-    <div className="flex justify-between py-0.5 gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span
-        className={cn(
-          "tabular-nums shrink-0",
-          bold ? "font-bold text-foreground" : "text-foreground",
-        )}
+    <div className="flex justify-between gap-3 border-b border-rule-soft py-2 text-sm">
+      <span className={bold ? "text-foreground" : "text-muted-foreground"}>
+        {label}
+      </span>
+      <LedgerFigure
+        className={cn("shrink-0 text-foreground", bold && "font-semibold")}
       >
         {value}
-      </span>
+      </LedgerFigure>
     </div>
   );
 }

@@ -15,21 +15,43 @@
  * ($255k ARV / $45k rehab / $133,500 70%-rule price screen / $191,250 refi loan) —
  * internal consistency beats novelty, and the widget's default comps are
  * the first three comps from that example.
+ *
+ * Layout: the calculator page template (DESIGN.md "Components"; the 1% rule
+ * calculator is the reference). The widget sits beside the H1 in PageHero,
+ * the guide runs in a 68ch reading column (ArticleBody) with the formulas on
+ * rules (ToolFormula) and the two tables as ruled tables (ArticleTable), the
+ * FAQ is ruled rows (FaqSection; the page keeps its own FAQPage node), and
+ * the page closes once on the heavy rule (CloseSection).
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { ArvCalculatorWidget } from "@/components/tools/arv-calculator-widget";
+import { ToolFormula } from "@/components/tools/tool-parts";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+  ArticleTable,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
+import { LedgerFigure } from "@/components/ledger/ledger-parts";
+import { buttonVariants } from "@/components/ui/button";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildToolAppLd } from "@/lib/seo/tool-app-ld";
@@ -118,45 +140,43 @@ export default function ArvCalculatorPage() {
   });
 
   return (
-    <>
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/arv-calculator" toolName="ARV calculator" />
       <JsonLd data={faqLd} />
       <JsonLd data={appLd} />
 
-      <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          {/* H1 */}
-          <header className="mb-6 sm:mb-8">
-            <IntentPrefetchLink
-              href="/tools"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Free tools
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The calculator in the first screen: from 1024px the widget sits
+            beside the H1. The hub link is the visible half of the breadcrumb
+            schema and sits under the H1, never above it. The hero's action
+            is the one short analyzer link under the H1 (P2-80). */}
+        <PageHero
+          title="ARV calculator (after-repair value + 70% rule)"
+          lede="Estimate what a property may sell for or appraise at after a renovation. Enter up to three renovated sold comps and the subject's finished square footage to calculate an ARV and an early 70%-rule price screen."
+          actions={<UnderTitleAnalyzeLink />}
+          aside={<ArvCalculatorWidget />}
+        >
+          <p className={ARTICLE_META}>
+            <IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>
+              Free tools
             </IntentPrefetchLink>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
-              ARV Calculator (After-Repair Value + 70% Rule)
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Estimate what a property may sell for or appraise at after a
-              renovation. Enter up to three renovated sold comps and the
-              subject&apos;s finished square footage to calculate an ARV and an
-              early 70%-rule price screen.
-            </p>
-          </header>
+          </p>
+        </PageHero>
 
-          {/* Calculator — above the fold */}
-          <ArvCalculatorWidget />
-
-          {/* Long-form content */}
-          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <article className="max-w-[68ch]">
+            <ArticleBody>
             <p>
               <strong>Educational guide:</strong> The material below explains
               how practitioners use ARV and the 70% rule. TrueCap does not
               currently expose an integrated renovation, flip, or BRRRR
               lifecycle model.
             </p>
-            <h2 className="text-2xl sm:text-3xl">What is ARV?</h2>
+            <h2>What is ARV?</h2>
             <p>
               ARV — <em>after-repair value</em> — is what the property would
               sell for once the rehab is complete: the price a fully renovated
@@ -173,15 +193,10 @@ export default function ArvCalculatorPage() {
             </p>
 
             <h3>The formula</h3>
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-              <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">ARV</span> ≈ average renovated-comp
-                $/sq ft × subject finished sq ft
-              </div>
-              <div className="text-sm text-muted-foreground mt-2">
-                e.g. $182.44/sq ft × 1,400 sq ft ≈ $255,000 ARV
-              </div>
-            </div>
+            <ToolFormula
+              formula="ARV ≈ average renovated-comp $/sq ft × subject finished sq ft"
+              example="e.g. $182.44/sq ft × 1,400 sq ft ≈ $255,000 ARV"
+            />
             <p>
               That one-liner is the last step of the process, not the process
               itself. The accuracy lives in which comps you select and how you
@@ -189,7 +204,7 @@ export default function ArvCalculatorPage() {
               not for a guess.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">The comps method, step by step</h2>
+            <h2>The comps method, step by step</h2>
             <p>
               The method is the same one the appraiser will use after your
               rehab, run in advance:
@@ -230,54 +245,54 @@ export default function ArvCalculatorPage() {
             <p>
               The full walk-through — including the adjustment discipline and
               what to do when comps are thin — is in our guide on{" "}
-              <IntentPrefetchLink href="/blog/how-to-calculate-arv" className="text-primary font-semibold hover:underline">how to calculate ARV</IntentPrefetchLink>.
+              <IntentPrefetchLink href="/blog/how-to-calculate-arv" className="tc-link">how to calculate ARV</IntentPrefetchLink>.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">A worked example</h2>
+            <h2>A worked example</h2>
             <p>
               Take the deal from that guide: a dated 3-bed, 2-bath
               single-family, 1,400 finished square feet, needing roughly
               $45,000 of work to reach the neighborhood&apos;s renovated
               standard. The four best renovated comps:
             </p>
-            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full text-sm border-collapse my-4">
+            <ArticleTable label="Results table" stickyFirstColumn={false}>
+              <table>
                 <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-2 px-3 font-bold">Comp</th>
-                    <th className="text-right py-2 px-3 font-bold">Sq ft</th>
-                    <th className="text-right py-2 px-3 font-bold">Sale price</th>
-                    <th className="text-right py-2 px-3 font-bold">$/sq ft</th>
+                  <tr>
+                    <th>Comp</th>
+                    <th className="text-right">Sq ft</th>
+                    <th className="text-right">Sale price</th>
+                    <th className="text-right">$/sq ft</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">A — 0.3 mi, sold 6 wks ago</td>
-                    <td className="py-2 px-3 text-right font-mono">1,450</td>
-                    <td className="py-2 px-3 text-right font-mono">$262,000</td>
-                    <td className="py-2 px-3 text-right font-mono">$180.69</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">B — 0.4 mi, sold 2 mo ago</td>
-                    <td className="py-2 px-3 text-right font-mono">1,350</td>
-                    <td className="py-2 px-3 text-right font-mono">$248,500</td>
-                    <td className="py-2 px-3 text-right font-mono">$184.07</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">C — 0.2 mi, sold 3 mo ago</td>
-                    <td className="py-2 px-3 text-right font-mono">1,500</td>
-                    <td className="py-2 px-3 text-right font-mono">$270,000</td>
-                    <td className="py-2 px-3 text-right font-mono">$180.00</td>
+                  <tr>
+                    <td>A — 0.3 mi, sold 6 wks ago</td>
+                    <td className="text-right"><LedgerFigure>1,450</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$262,000</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$180.69</LedgerFigure></td>
                   </tr>
                   <tr>
-                    <td className="py-2 px-3">D — 0.5 mi, sold 5 wks ago</td>
-                    <td className="py-2 px-3 text-right font-mono">1,380</td>
-                    <td className="py-2 px-3 text-right font-mono">$255,300</td>
-                    <td className="py-2 px-3 text-right font-mono">$185.00</td>
+                    <td>B — 0.4 mi, sold 2 mo ago</td>
+                    <td className="text-right"><LedgerFigure>1,350</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$248,500</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$184.07</LedgerFigure></td>
+                  </tr>
+                  <tr>
+                    <td>C — 0.2 mi, sold 3 mo ago</td>
+                    <td className="text-right"><LedgerFigure>1,500</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$270,000</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$180.00</LedgerFigure></td>
+                  </tr>
+                  <tr>
+                    <td>D — 0.5 mi, sold 5 wks ago</td>
+                    <td className="text-right"><LedgerFigure>1,380</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$255,300</LedgerFigure></td>
+                    <td className="text-right"><LedgerFigure>$185.00</LedgerFigure></td>
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>.
               Applied to 1,400 finished square feet: 1,400 × $182.44 ≈
@@ -292,22 +307,17 @@ export default function ArvCalculatorPage() {
               better comps, not bigger adjustments.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">
+            <h2>
               The 70% rule: turning ARV into a 70%-rule price screen
             </h2>
             <p>
               ARV&apos;s first job is setting the most you can pay and still
               leave room to profit — the 70%-rule price screen:
             </p>
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-              <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">70%-rule price screen</span> = (ARV × 0.70) −
-                Repair costs
-              </div>
-              <div className="text-sm text-muted-foreground mt-2">
-                e.g. (0.70 × $255,000) − $45,000 = $133,500
-              </div>
-            </div>
+            <ToolFormula
+              formula="70%-rule price screen = (ARV × 0.70) − Repair costs"
+              example="e.g. (0.70 × $255,000) − $45,000 = $133,500"
+            />
             <p>
               The 30% you hold back isn&apos;t profit — it&apos;s profit{" "}
               <em>plus</em>{" "}every cost the formula doesn&apos;t name: buying
@@ -317,9 +327,9 @@ export default function ArvCalculatorPage() {
               roughly 12–14% of ARV and your profit is the remaining 16–17%.
               The full ledger — where every dollar of the spread goes on a
               real flip — is worked through in our{" "}
-              <IntentPrefetchLink href="/blog/70-percent-rule-house-flipping" className="text-primary font-semibold hover:underline">70% rule deep-dive</IntentPrefetchLink>.
+              <IntentPrefetchLink href="/blog/70-percent-rule-house-flipping" className="tc-link">70% rule deep-dive</IntentPrefetchLink>.
               Already have an ARV and just want the rule? The dedicated{" "}
-              <IntentPrefetchLink href="/tools/70-percent-rule-calculator" className="text-primary font-semibold hover:underline">70% rule calculator</IntentPrefetchLink>{" "}
+              <IntentPrefetchLink href="/tools/70-percent-rule-calculator" className="tc-link">70% rule calculator</IntentPrefetchLink>{" "}
               runs the same max-offer math with the offer at 60, 65, 70,
               and 75% side by side.
             </p>
@@ -331,39 +341,39 @@ export default function ArvCalculatorPage() {
               assumptions, and when those don&apos;t hold, the multiplier
               should move:
             </p>
-            <ScrollX label="Results table" className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full text-sm border-collapse my-4">
+            <ArticleTable label="Results table" stickyFirstColumn={false}>
+              <table>
                 <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-2 px-3 font-bold">Situation</th>
-                    <th className="text-left py-2 px-3 font-bold">Why it breaks</th>
-                    <th className="text-right py-2 px-3 font-bold">Multiplier</th>
+                  <tr>
+                    <th>Situation</th>
+                    <th>Why it breaks</th>
+                    <th className="text-right">Multiplier</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">Cheap houses (ARV &lt; ~$150k)</td>
-                    <td className="py-2 px-3">Fixed costs are a big share of a small spread</td>
-                    <td className="py-2 px-3 text-right font-mono">60–65%</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">Typical deal ($200k–$400k)</td>
-                    <td className="py-2 px-3">The rule&apos;s home turf</td>
-                    <td className="py-2 px-3 text-right font-mono">70%</td>
-                  </tr>
-                  <tr className="border-b border-border">
-                    <td className="py-2 px-3">Long or heavy rehab (9+ months)</td>
-                    <td className="py-2 px-3">Holding costs balloon</td>
-                    <td className="py-2 px-3 text-right font-mono">drop 3–5 pts</td>
+                  <tr>
+                    <td>Cheap houses (ARV &lt; ~$150k)</td>
+                    <td>Fixed costs are a big share of a small spread</td>
+                    <td className="text-right"><LedgerFigure>60–65%</LedgerFigure></td>
                   </tr>
                   <tr>
-                    <td className="py-2 px-3">Expensive house, light rehab</td>
-                    <td className="py-2 px-3">Fat spread; costs are a small share</td>
-                    <td className="py-2 px-3 text-right font-mono">72–75%</td>
+                    <td>Typical deal ($200k–$400k)</td>
+                    <td>The rule&apos;s home turf</td>
+                    <td className="text-right"><LedgerFigure>70%</LedgerFigure></td>
+                  </tr>
+                  <tr>
+                    <td>Long or heavy rehab (9+ months)</td>
+                    <td>Holding costs balloon</td>
+                    <td className="text-right"><LedgerFigure>drop 3–5 pts</LedgerFigure></td>
+                  </tr>
+                  <tr>
+                    <td>Expensive house, light rehab</td>
+                    <td>Fat spread; costs are a small share</td>
+                    <td className="text-right"><LedgerFigure>72–75%</LedgerFigure></td>
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               That&apos;s why the multiplier in this calculator is an input,
               not a constant. And it&apos;s why the rule is a screen, not
@@ -371,18 +381,18 @@ export default function ArvCalculatorPage() {
               then solve the offer backward from your real costs and required
               profit before you sign. The other input matters just as much —
               build the repair number line by line with the{" "}
-              <IntentPrefetchLink href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">rehab cost estimator</IntentPrefetchLink>{" "}
+              <IntentPrefetchLink href="/tools/rehab-cost-estimator" className="tc-link">rehab cost estimator</IntentPrefetchLink>{" "}
               rather than guessing a round number, and add a 10–25%
               contingency for what demolition reveals.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Educational context: ARV and a future refinance</h2>
+            <h2>Educational context: ARV and a future refinance</h2>
             <p>
               TrueCap&apos;s ARV calculator stops at the comp-based ARV
               and 70%-rule screen; it does not model a renovation-to-refinance
               lifecycle. As educational context, buy-and-hold investors may use
               the same ARV with a different destination. On a{" "}
-              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR</IntentPrefetchLink>,
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="tc-link">BRRRR</IntentPrefetchLink>,
               you refinance the finished rental instead of selling it, and a
               cash-out refinance limit on a single-family investment property
               depends on the lender, program, borrower, property, seasoning,
@@ -396,7 +406,7 @@ export default function ArvCalculatorPage() {
               stabilized rental. The roughly five-point gap between the 70%
               you paid and the 75% you can refinance is the room the
               transaction costs may need — review the full list of inputs in the{" "}
-              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</IntentPrefetchLink>.
+              <IntentPrefetchLink href="/blog/brrrr-method-explained" className="tc-link">BRRRR workflow guide</IntentPrefetchLink>.
             </p>
             <p>
               One caution before you count on that refinance: the appraisal is
@@ -408,7 +418,7 @@ export default function ArvCalculatorPage() {
               still works 5–10% below it.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Mistakes that sink ARV estimates</h2>
+            <h2>Mistakes that sink ARV estimates</h2>
             <h3>1. Comping against unrenovated sales</h3>
             <p>
               Mixing dated sales into the set drags the $/sq ft down — or
@@ -434,7 +444,7 @@ export default function ArvCalculatorPage() {
               discipline the offer, not the other way around.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">When to use this calculator</h2>
+            <h2>When to use this calculator</h2>
             <p>
               Use it the moment a distressed listing catches your eye: three
               comps and a square footage produce the two numbers that decide
@@ -448,74 +458,81 @@ export default function ArvCalculatorPage() {
               scope, and lender terms on any specific deal.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
-            <div className="not-prose space-y-4">
-              {FAQS.map((f) => (
-                <details
-                  key={f.q}
-                  className="bg-card border border-border rounded-lg p-4 group"
-                >
-                  <summary className="font-semibold text-foreground cursor-pointer list-none flex items-start justify-between gap-3">
-                    <span>{f.q}</span>
-                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">
-                      +
-                    </span>
-                  </summary>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">
-                    {f.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </article>
+            </ArticleBody>
 
-          {/* CTA */}
-          <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-              Continue with the rental screen — free
-            </h2>
-            <p className="text-sm sm:text-base opacity-90 mb-4">
+            {/* The analyzer CTA where the guide hands off to TrueCap, inside
+                the article, so the page closes once, on the CloseSection
+                below. */}
+            <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use the rental analyzer for stabilized cash flow and TrueCap's Offer Ceiling." />
+
+            {/* The page's FAQPage node is faqLd above, built from the same
+                FAQS, so the section emits none of its own. */}
+            <FaqSection
+              id="arv-faq"
+              variant="inline"
+              heading="Frequently asked questions"
+              items={FAQS}
+              structuredData={false}
+            />
+          </article>
+        </Section>
+
+        <CloseSection
+          heading="Continue with the rental screen — free"
+          headingId="arv-close-heading"
+          lede={
+            <>
               ARV and the 70% rule are early screens, not a defensible offer by
               themselves. Use separate reviewed rehab and project ledgers for a
               flip or BRRRR; TrueCap&apos;s core analyzer can screen the
               stabilized rental cash flow, cap rate, CoC, and DSCR.
-            </p>
-            <ul className="text-sm space-y-1.5 mb-5 opacity-90">
-              {[
-                "TrueCap's Offer Ceiling — the highest price that still meets your targets",
-                "Separate rehab and stabilized-rental tools",
-                "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "10-year projection with rent + expense growth (Pro)",
-                "Downside sensitivity and TrueCap's Offer Ceiling (included in your first decision, Pro after)",
-                "Free to start — no credit card",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              Open the rental analyzer
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </section>
+            </>
+          }
+          actions={
+            <>
+              <ul className="border-t-2 border-foreground">
+                {[
+                  "TrueCap's Offer Ceiling — the highest price that still meets your targets",
+                  "Separate rehab and stabilized-rental tools",
+                  "Cash flow, cap rate, CoC, DSCR — auto-calculated",
+                  "10-year projection with rent + expense growth (Pro)",
+                  "Downside sensitivity and TrueCap's Offer Ceiling (included in your first decision, Pro after)",
+                  "Free to start — no credit card",
+                ].map((line) => (
+                  <li
+                    key={line}
+                    className="border-b border-rule-soft py-3 text-pretty text-base"
+                  >
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <ActionRow className="mt-6">
+                <Link
+                  href="/analyze" prefetch={false}
+                  className={buttonVariants({ size: "cta" })}
+                >
+                  Open the rental analyzer
+                </Link>
+              </ActionRow>
+            </>
+          }
+        />
 
-          {/* Footer */}
-          {/* Backlink engine — quiet, collapsed, renders nothing if this
-              tool has no embeddable widget. See the component header. */}
-          <ToolEmbedInvite slug="arv-calculator" />
+        {/* The tail shares the reading column. Each block spaces itself from
+            the one above (mt-12); the first one, directly under the close,
+            takes the close's own bottom space instead. */}
+        <Section rule="none" rhythm="tight" containerClassName="pt-0 sm:pt-0">
+          <div className="max-w-[68ch] [&>*:first-child]:mt-0">
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget. See the component header. */}
+            <ToolEmbedInvite slug="arv-calculator" />
 
-          <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use the rental analyzer for stabilized cash flow and TrueCap's Offer Ceiling." />
-
-          <RelatedContent kind="tool" slug="arv-calculator" title="ARV Calculator (After-Repair Value + 70% Rule)" className="mt-10" />
-
-        </main>
-        <SiteFooter />
-      </div>
-    </>
+            <RelatedContent kind="tool" slug="arv-calculator" title="ARV Calculator (After-Repair Value + 70% Rule)" className="mt-12" />
+          </div>
+        </Section>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
