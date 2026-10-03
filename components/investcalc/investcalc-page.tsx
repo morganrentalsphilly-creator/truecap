@@ -213,6 +213,7 @@ import {
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { claimAnonymousDecisionAction } from "@/app/actions/anonymous-decision";
 import {
+  ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   anonymousDecisionPresentationGrantMatches,
   bindAnonymousDecisionPresentationGrant,
 } from "@/lib/anonymous-decision-presentation";
@@ -6314,8 +6315,28 @@ export function InvestCalcPage({
                     : anonymousGrant.code === "UNAVAILABLE"
                       ? "Complete decision unavailable"
                       : "Review required",
-              description: anonymousGrant.message,
+              // The hourly cap's own words are written here, on the page:
+              // the action's message gave no limit and no way to continue.
+              // The cap and the action are unchanged.
+              description:
+                anonymousGrant.code === "RATE_LIMITED"
+                  ? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE
+                  : anonymousGrant.message,
               variant: "warning",
+              ...(anonymousGrant.code === "RATE_LIMITED"
+                ? {
+                    action: (
+                      <ToastAction
+                        altText="Create a free account and come back to this analysis"
+                        onClick={() => {
+                          router.push("/auth/sign-up?next=/dashboard/new");
+                        }}
+                      >
+                        Create free account
+                      </ToastAction>
+                    ),
+                  }
+                : {}),
             });
           }
         }

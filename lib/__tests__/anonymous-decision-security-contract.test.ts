@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE } from "@/lib/anonymous-decision-presentation";
+
 function read(relativePath: string): string {
   return readFileSync(
     fileURLToPath(new URL(`../../${relativePath}`, import.meta.url)),
@@ -87,6 +89,25 @@ describe("anonymous first-decision security contract", () => {
     expect(analyzer).toContain('anonymousGrant.code === "RATE_LIMITED"');
     expect(analyzer).toContain('anonymousGrant.code === "UNAVAILABLE"');
     expect(analyzer).toContain("No-signup decision paused");
+  });
+
+  it("tells a rate-limited visitor the hourly limit and offers the free account (P2-38)", () => {
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    const action = read("app/actions/anonymous-decision.ts");
+    // The cap itself is unchanged: 5 new claims an hour per network address.
+    expect(action).toMatch(/windowMs: 60 \* 60 \* 1000,\s+maxPerWindow: 5,/);
+    // The page writes the words for that result code; the action's bare
+    // "Try again later." is no longer what the visitor reads.
+    expect(analyzer).toMatch(
+      /anonymousGrant\.code === "RATE_LIMITED"\s+\? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE\s+: anonymousGrant\.message/,
+    );
+    expect(ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE).toBe(
+      "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again within the hour.",
+    );
+    const toastAt = analyzer.indexOf("? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE");
+    const toast = analyzer.slice(toastAt, toastAt + 900);
+    expect(toast).toContain('router.push("/auth/sign-up?next=/dashboard/new")');
+    expect(toast).toContain("Create free account");
   });
 
   it("keeps the public promise aligned with one portable first report", () => {
