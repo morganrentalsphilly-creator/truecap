@@ -7,8 +7,8 @@
  * unauthenticated visitors the CTA routes to
  * /auth/sign-up?next=/pricing?checkout=<plan>#plans, so they come back
  * here and PricingPlanButtons auto-resumes the exact checkout they
- * started (the param is read client-side via window.location — no
- * useSearchParams, so no extra Suspense boundary is needed here); for
+ * started (the param is read client-side via window.location, not through
+ * useSearchParams); for
  * authenticated free users the CTA triggers Stripe checkout directly
  * via the existing billing action. A Stripe cancel returns with
  * ?billing=checkout_cancelled (CheckoutCancelledBanner below), which
@@ -19,7 +19,7 @@
  * boxes everywhere else, and no motion.
  */
 
-import { Suspense } from "react";
+import { cache, Suspense, type ReactNode } from "react";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { DECISION_SHOT, MEMO_SHOT, ProductShot, RENT_BREAKDOWN_SHOT } from "@/components/marketing/product-shot";
 import type { Metadata } from "next";
@@ -50,7 +50,10 @@ import {
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
-import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
+import {
+  loadStripeDisplayPrice,
+  type StripeDisplayPrice,
+} from "@/lib/stripe/display-prices";
 
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -193,9 +196,18 @@ const agentProCell = (label: string, pro: boolean | string) =>
 const SHOT_FRAME =
   "md:[&>div]:aspect-[4/3] md:[&_img]:h-full md:[&_img]:object-contain md:[&_img]:object-top";
 
-export default async function PricingPage() {
-  const { proOfferName } = getMarketingOfferConfig();
-  const alertsLive = rateAlertEmailsLive();
+/** The signed-out lede; its counts come from the trial's limit constants. */
+const signedOutLede = (proOfferName: string) =>
+  `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} analyses, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`;
+
+/**
+ * The session half of the page's data, read once per request (React's
+ * cache()) and awaited only inside the Suspense boundaries below, so the
+ * headline, the actions and every section that needs neither the session nor
+ * Stripe are sent before these reads finish (audit rows P2-85 and P2-161).
+ * A visitor with no session resolves without a network call.
+ */
+const loadPricingSession = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -204,32 +216,13 @@ export default async function PricingPage() {
   // Signed-in evaluation copy comes from the actual evaluation row plus its
   // immutable usage ledger. Subscription history is still needed for checkout
   // recovery messaging, but it is never treated as proof of live allowances.
-  // Agent Pro renders ONLY when its Stripe price env is configured — until
-  // then the tier is fully plumbed but invisible (nothing to sell yet).
-  // Whether Agent Pro EXISTS is a configuration fact (env + plan rows), not a
-  // function of whether Stripe answered this request. Deriving visibility from
-  // the fetched price meant one transient Stripe error deleted a live tier from
-  // the pricing page for that visitor.
-  const agentProConfigured = isAgentProConfigured();
-  const faqs = FAQS;
   const [
-    monthly,
-    annual,
-    agentMonthly,
-    agentAnnual,
     activePaidPlanSlug,
     hadPriorSubscription,
     billingRecoveryRequired,
     productEvaluationAccess,
+    entitlements,
   ] = await Promise.all([
-    loadStripeDisplayPrice("pro_monthly"),
-    loadStripeDisplayPrice("pro_annual"),
-    agentProConfigured
-      ? loadStripeDisplayPrice("agent_pro_monthly")
-      : Promise.resolve(null),
-    agentProConfigured
-      ? loadStripeDisplayPrice("agent_pro_annual")
-      : Promise.resolve(null),
     user ? getActivePaidPlanSlug(supabase, user.id) : Promise.resolve(null),
     user
       ? hasAnySubscriptionHistory(supabase, user.id)
@@ -240,67 +233,146 @@ export default async function PricingPage() {
     user
       ? getProductEvaluationAccessForUser(supabase, user.id)
       : Promise.resolve(null),
+    user ? getEntitlementsForUser(supabase, user.id) : Promise.resolve(null),
   ]);
   const pricingEvaluation = summarizePricingEvaluation(productEvaluationAccess);
   const evaluationAllowance =
     formatPricingEvaluationAllowance(pricingEvaluation);
-  const entitlements = user
-    ? await getEntitlementsForUser(supabase, user.id)
-    : null;
-  const siteUrl = getSiteUrl();
-  const recurringOffers = [
-    [`${proOfferName} Monthly`, monthly],
-    [`${proOfferName} Annual`, annual],
-    ["Agent Pro Monthly", agentMonthly],
-    ["Agent Pro Annual", agentAnnual],
-  ] as const;
-  // The product the homepage declares (app/page.tsx, @id /#software), again,
-  // to carry the paid Offers: same @id, name and url, so a crawler reads one
-  // entity with every offer rather than two "TrueCap" apps (F4 review).
-  const pricingSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "@id": `${siteUrl}/#software`,
-    name: "TrueCap",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    url: siteUrl,
-    offers: [
-      {
-        "@type": "Offer",
-        name: "TrueCap Free",
-        price: 0,
-        priceCurrency: "USD",
-        url: `${siteUrl}/`,
-      },
-      ...recurringOffers.flatMap(([name, price]) =>
-        price
-          ? [
-              {
-                "@type": "Offer",
-                name,
-                price: price.unitAmount,
-                priceCurrency: price.currency,
-                url: `${siteUrl}/pricing`,
-              },
-            ]
-          : [],
-      ),
-    ],
+  return {
+    user,
+    entitlements,
+    activePaidPlanSlug,
+    hadPriorSubscription,
+    billingRecoveryRequired,
+    pricingEvaluation,
+    evaluationAllowance,
   };
-  // The Monthly ↔ Annual savings math is now done inside
-  // <PricingTogglePlans> so it can react to the user's toggle state.
-  // We just hand it both Stripe prices.
+});
 
-  // The exit-intent "50% off" offer was removed entirely (founder decision,
-  // 2026-07): no discount offers anywhere — full price only.
+/**
+ * The Stripe half: the four display prices, read once per request and
+ * awaited only inside Suspense. loadStripeDisplayPrice stays the one source
+ * (cached for ten minutes in lib/stripe/display-prices.ts).
+ */
+const loadPricingPrices = cache(async () => {
+  // Agent Pro renders ONLY when its Stripe price env is configured — until
+  // then the tier is fully plumbed but invisible (nothing to sell yet).
+  // Whether Agent Pro EXISTS is a configuration fact (env + plan rows), not a
+  // function of whether Stripe answered this request. Deriving visibility from
+  // the fetched price meant one transient Stripe error deleted a live tier from
+  // the pricing page for that visitor.
+  const agentProConfigured = isAgentProConfigured();
+  const [monthly, annual, agentMonthly, agentAnnual] = await Promise.all([
+    loadStripeDisplayPrice("pro_monthly"),
+    loadStripeDisplayPrice("pro_annual"),
+    agentProConfigured
+      ? loadStripeDisplayPrice("agent_pro_monthly")
+      : Promise.resolve(null),
+    agentProConfigured
+      ? loadStripeDisplayPrice("agent_pro_annual")
+      : Promise.resolve(null),
+  ]);
+  return { monthly, annual, agentMonthly, agentAnnual };
+});
 
-  // Which plan answers which job, with its monthly price: the hero's aside.
-  // Each paid price is the same expression its card shows on Monthly (the
-  // Stripe display price, else the catalog fallback), so the two never
-  // disagree; nothing here is typed by hand. Agent stage first (2026-09
-  // agent-first pass); investor stages follow. The plan name jumps to its
-  // card (Free has no fragment of its own, so it lands on the plans).
+/** The header with the server-read session; its fallback is the bare header. */
+async function PricingHeader() {
+  const { user, entitlements } = await loadPricingSession();
+  return <Header initialUser={user} initialEntitlements={entitlements} />;
+}
+
+async function PricingFooter() {
+  const { user } = await loadPricingSession();
+  return <SiteFooter hideAccountLinks={Boolean(user)} />;
+}
+
+/** The hero's lede, which depends on the session and the trial's state. */
+async function PricingLede({ proOfferName }: { proOfferName: string }) {
+  const {
+    user,
+    activePaidPlanSlug,
+    billingRecoveryRequired,
+    pricingEvaluation,
+    evaluationAllowance,
+  } = await loadPricingSession();
+  return (
+    <p>
+      {!user
+        ? signedOutLede(proOfferName)
+        : activePaidPlanSlug || billingRecoveryRequired
+          ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+          : pricingEvaluation.status === "active" && evaluationAllowance
+            ? `Your free trial has ${evaluationAllowance}.`
+            : pricingEvaluation.status === "exhausted"
+              ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+              : pricingEvaluation.status === "expired"
+                ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
+    </p>
+  );
+}
+
+const AGENT_LINE_LINK_LABEL = "TrueCap for agents";
+
+/**
+ * Keep-and-add (2026-09 agent-first pass): the overpay arithmetic stays the
+ * headline; one line speaks to the agent, set like the homepage's investor
+ * cue on its soft rule. The link is passed in from the hero's own JSX
+ * (intent-prefetch-landing.test.ts holds default-prefetch links to the hero).
+ * With no link it is the Suspense fallback: the same line, invisible and out
+ * of the accessibility tree, so the hero keeps its height while the session
+ * is read.
+ */
+function PricingAgentLine({ children }: { children?: ReactNode }) {
+  const placeholder = !children;
+  return (
+    <p
+      data-pricing-agent-line={placeholder ? undefined : ""}
+      aria-hidden={placeholder ? true : undefined}
+      className={cn(
+        "mt-6 border-t border-rule-soft pt-2.5 text-base",
+        placeholder && "invisible",
+      )}
+    >
+      Working with investor clients? The client remembers who caught
+      it.{" "}
+      {children ?? (
+        <span className="-my-3 inline-block py-3">{AGENT_LINE_LINK_LABEL}</span>
+      )}
+    </p>
+  );
+}
+
+/** The agent line, for a signed-out visitor only. */
+async function PricingSignedOutAgentLine({ children }: { children: ReactNode }) {
+  const { user } = await loadPricingSession();
+  return user ? null : <PricingAgentLine>{children}</PricingAgentLine>;
+}
+
+/**
+ * Which plan answers which job, with its monthly price: the hero's aside.
+ * Each paid price is the same expression its card shows on Monthly (the
+ * Stripe display price, else the catalog fallback), so the two never
+ * disagree; nothing here is typed by hand. Agent stage first (2026-09
+ * agent-first pass); investor stages follow. The plan name jumps to its
+ * card (Free has no fragment of its own, so it lands on the plans).
+ *
+ * Rendered twice: as the Suspense fallback with no Stripe price (the catalog
+ * amounts), then with the display prices. A display price is shown only when
+ * it equals the catalog amount (lib/stripe/display-prices.ts), so the figures
+ * do not change when the second render arrives.
+ */
+function PricingStages({
+  monthly,
+  agentMonthly,
+  agentProConfigured,
+  proOfferName,
+}: {
+  monthly: StripeDisplayPrice;
+  agentMonthly: StripeDisplayPrice;
+  agentProConfigured: boolean;
+  proOfferName: string;
+}) {
   const stages = [
     ...(agentProConfigured
       ? [
@@ -333,11 +405,199 @@ export default async function PricingPage() {
   ];
 
   return (
+    /* The stage chooser, set as a ledger in the hero's wider column
+       (the homepage's 5/7 grid from 1024px; it follows the text on
+       phones): a caption on the heavy rule, then one ruled row per
+       plan with the job, the plan and its price in DM Mono, and what
+       it answers. It puts every price in the first screen. */
+    <div data-pricing-stages="">
+      <h2
+        id="pricing-stage-title"
+        className="text-balance border-b-2 border-foreground pb-2.5 text-base font-semibold"
+      >
+        Which stage are you at?
+      </h2>
+      <ul>
+        {stages.map((stage) => (
+          <li
+            key={stage.job}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule-soft py-3.5"
+          >
+            <h3 className="col-span-2 text-balance text-lg font-semibold">
+              {stage.job}
+            </h3>
+            <p className="mt-0.5 min-w-0 text-base">
+              {/* A 44px tap target from padding that the negative
+                  margin takes back out of the line box. */}
+              <a
+                href={stage.href}
+                className="tc-link -my-3 inline-block min-w-11 py-3 font-semibold"
+              >
+                {stage.product}
+              </a>
+            </p>
+            <p className="mt-0.5 flex items-baseline justify-end gap-x-1 whitespace-nowrap">
+              <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>
+              <span className="text-sm text-muted-foreground">{stage.period}</span>
+            </p>
+            <p className="col-span-2 mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+              {stage.answer}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+async function PricingStagesWithPrices({
+  agentProConfigured,
+  proOfferName,
+}: {
+  agentProConfigured: boolean;
+  proOfferName: string;
+}) {
+  const { monthly, agentMonthly } = await loadPricingPrices();
+  return (
+    <PricingStages
+      monthly={monthly}
+      agentMonthly={agentMonthly}
+      agentProConfigured={agentProConfigured}
+      proOfferName={proOfferName}
+    />
+  );
+}
+
+/**
+ * The product the homepage declares (app/page.tsx, @id /#software), again,
+ * to carry the paid Offers: same @id, name and url, so a crawler reads one
+ * entity with every offer rather than two "TrueCap" apps (F4 review).
+ */
+async function PricingOffersJsonLd({ proOfferName }: { proOfferName: string }) {
+  const { monthly, annual, agentMonthly, agentAnnual } = await loadPricingPrices();
+  const siteUrl = getSiteUrl();
+  const recurringOffers = [
+    [`${proOfferName} Monthly`, monthly],
+    [`${proOfferName} Annual`, annual],
+    ["Agent Pro Monthly", agentMonthly],
+    ["Agent Pro Annual", agentAnnual],
+  ] as const;
+  const pricingSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": `${siteUrl}/#software`,
+    name: "TrueCap",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    url: siteUrl,
+    offers: [
+      {
+        "@type": "Offer",
+        name: "TrueCap Free",
+        price: 0,
+        priceCurrency: "USD",
+        url: `${siteUrl}/`,
+      },
+      ...recurringOffers.flatMap(([name, price]) =>
+        price
+          ? [
+              {
+                "@type": "Offer",
+                name,
+                price: price.unitAmount,
+                priceCurrency: price.currency,
+                url: `${siteUrl}/pricing`,
+              },
+            ]
+          : [],
+      ),
+    ],
+  };
+  return <JsonLd data={pricingSchema} />;
+}
+
+/**
+ * The plan cards with everything they need from the session and from Stripe:
+ * the one part of the page that waits for both. The Monthly ↔ Annual math is
+ * done inside <PricingTogglePlans> so it can react to the toggle; this hands
+ * it the Stripe prices and the session's plan state, as the page did before.
+ */
+async function PricingPlans({
+  agentProConfigured,
+  proOfferName,
+}: {
+  agentProConfigured: boolean;
+  proOfferName: string;
+}) {
+  const [
+    { monthly, annual, agentMonthly, agentAnnual },
+    {
+      user,
+      activePaidPlanSlug,
+      hadPriorSubscription,
+      billingRecoveryRequired,
+      pricingEvaluation,
+    },
+  ] = await Promise.all([loadPricingPrices(), loadPricingSession()]);
+  return (
     <>
-      <Header initialUser={user} initialEntitlements={entitlements} />
+      {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
+          points back here with ?billing=checkout_cancelled. Suspense keeps
+          the page's rendering unaffected by the banner's useSearchParams. */}
+      <Suspense fallback={null}>
+        <CheckoutCancelledBanner
+          hadPriorSubscription={hadPriorSubscription}
+          evaluation={pricingEvaluation}
+        />
+      </Suspense>
+      <PricingTogglePlans
+        monthly={monthly}
+        annual={annual}
+        agentMonthly={agentMonthly}
+        agentAnnual={agentAnnual}
+        isAuthenticated={Boolean(user)}
+        activePaidPlanSlug={activePaidPlanSlug}
+        evaluation={pricingEvaluation}
+        billingRecoveryRequired={billingRecoveryRequired}
+        agentProConfigured={agentProConfigured}
+        proOfferName={proOfferName}
+      />
+    </>
+  );
+}
+
+/**
+ * The page itself awaits nothing. The session and the Stripe display prices
+ * are read inside the Suspense boundaries, so the response opens with the
+ * headline, the actions, the table, the tier shots and the FAQ, and the parts
+ * that need a read follow in the same response: the header's signed-in state,
+ * the lede, the agent line, the stage prices, the Offers JSON-LD, the plan
+ * cards, the quotes and the footer's account column. The fallbacks in and
+ * under the hero hold the space their content takes, so nothing in the first
+ * screen moves when the content arrives.
+ * The route stays dynamic (the session read uses cookies) and adds no
+ * `dynamic` export: "force-dynamic" would switch off the ten-minute cache on
+ * the Stripe price reads.
+ */
+export default function PricingPage() {
+  const { proOfferName } = getMarketingOfferConfig();
+  const alertsLive = rateAlertEmailsLive();
+  const agentProConfigured = isAgentProConfigured();
+  const faqs = FAQS;
+
+  // The exit-intent "50% off" offer was removed entirely (founder decision,
+  // 2026-07): no discount offers anywhere — full price only.
+
+  return (
+    <>
+      <Suspense fallback={<Header />}>
+        <PricingHeader />
+      </Suspense>
 
       <main id="main" className="min-h-screen bg-background">
-        <JsonLd data={pricingSchema} />
+        <Suspense fallback={null}>
+          <PricingOffersJsonLd proOfferName={proOfferName} />
+        </Suspense>
         {/* Hero. Lead with the outcome (docs/site-overhaul.md Phase 9). The
             arithmetic is deliberately simple and checkable and every figure
             comes from PRICING_OUTCOME_EXAMPLE, not this file. */}
@@ -352,17 +612,17 @@ export default async function PricingPage() {
             </>
           }
           lede={
-            !user
-              ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} analyses, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
-              : activePaidPlanSlug || billingRecoveryRequired
-                ? `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
-                : pricingEvaluation.status === "active" && evaluationAllowance
-                  ? `Your free trial has ${evaluationAllowance}.`
-                  : pricingEvaluation.status === "exhausted"
-                    ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                    : pricingEvaluation.status === "expired"
-                      ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                      : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+            /* The fallback is the signed-out lede, invisible and out of the
+               accessibility tree: it holds the lines the lede will take. */
+            <Suspense
+              fallback={
+                <p aria-hidden className="invisible">
+                  {signedOutLede(proOfferName)}
+                </p>
+              }
+            >
+              <PricingLede proOfferName={proOfferName} />
+            </Suspense>
           }
           actions={
             <ActionRow>
@@ -385,66 +645,33 @@ export default async function PricingPage() {
             </ActionRow>
           }
           aside={
-            /* The stage chooser, set as a ledger in the hero's wider column
-               (the homepage's 5/7 grid from 1024px; it follows the text on
-               phones): a caption on the heavy rule, then one ruled row per
-               plan with the job, the plan and its price in DM Mono, and what
-               it answers. It puts every price in the first screen. */
-            <div data-pricing-stages="">
-              <h2
-                id="pricing-stage-title"
-                className="text-balance border-b-2 border-foreground pb-2.5 text-base font-semibold"
-              >
-                Which stage are you at?
-              </h2>
-              <ul>
-                {stages.map((stage) => (
-                  <li
-                    key={stage.job}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule-soft py-3.5"
-                  >
-                    <h3 className="col-span-2 text-balance text-lg font-semibold">
-                      {stage.job}
-                    </h3>
-                    <p className="mt-0.5 min-w-0 text-base">
-                      {/* A 44px tap target from padding that the negative
-                          margin takes back out of the line box. */}
-                      <a
-                        href={stage.href}
-                        className="tc-link -my-3 inline-block min-w-11 py-3 font-semibold"
-                      >
-                        {stage.product}
-                      </a>
-                    </p>
-                    <p className="mt-0.5 flex items-baseline justify-end gap-x-1 whitespace-nowrap">
-                      <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>
-                      <span className="text-sm text-muted-foreground">{stage.period}</span>
-                    </p>
-                    <p className="col-span-2 mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
-                      {stage.answer}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Suspense
+              fallback={
+                <PricingStages
+                  monthly={null}
+                  agentMonthly={null}
+                  agentProConfigured={agentProConfigured}
+                  proOfferName={proOfferName}
+                />
+              }
+            >
+              <PricingStagesWithPrices
+                agentProConfigured={agentProConfigured}
+                proOfferName={proOfferName}
+              />
+            </Suspense>
           }
         >
-          {/* Keep-and-add (2026-09 agent-first pass): the overpay arithmetic
-              stays the headline; one line speaks to the agent, set like the
-              homepage's investor cue on its soft rule. */}
-          {!user && agentProConfigured ? (
-            <p
-              data-pricing-agent-line=""
-              className="mt-6 border-t border-rule-soft pt-2.5 text-base"
-            >
-              Working with investor clients? The client remembers who caught
-              it.{" "}
-              {/* A 44px tap target from padding that the negative margin
-                  takes back out of the line box. */}
-              <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
-                TrueCap for agents
-              </Link>
-            </p>
+          {agentProConfigured ? (
+            <Suspense fallback={<PricingAgentLine />}>
+              <PricingSignedOutAgentLine>
+                {/* A 44px tap target from padding that the negative margin
+                    takes back out of the line box. */}
+                <Link href="/for-agents" className="tc-link -my-3 inline-block py-3">
+                  {AGENT_LINE_LINK_LABEL}
+                </Link>
+              </PricingSignedOutAgentLine>
+            </Suspense>
           ) : null}
         </PageHero>
 
@@ -463,27 +690,17 @@ export default async function PricingPage() {
           aria-labelledby="pricing-plans-title"
         >
           <h2 id="pricing-plans-title" className="sr-only">Plans</h2>
-          {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
-              points back here with ?billing=checkout_cancelled. Suspense keeps
-              the page's rendering unaffected by the banner's useSearchParams. */}
-          <Suspense fallback={null}>
-            <CheckoutCancelledBanner
-              hadPriorSubscription={hadPriorSubscription}
-              evaluation={pricingEvaluation}
+          {/* The cards wait for the session and the Stripe prices. Their
+              fallback is an empty block one screen tall: the card row is
+              taller than a screen at every width (measured on the live page
+              at 375, 640, 768, 1095 and 1440), so the trust row and the
+              table below stay out of view until the cards are in place. */}
+          <Suspense fallback={<div aria-hidden className="min-h-svh" />}>
+            <PricingPlans
+              agentProConfigured={agentProConfigured}
+              proOfferName={proOfferName}
             />
           </Suspense>
-          <PricingTogglePlans
-            monthly={monthly}
-            annual={annual}
-            agentMonthly={agentMonthly}
-            agentAnnual={agentAnnual}
-            isAuthenticated={Boolean(user)}
-            activePaidPlanSlug={activePaidPlanSlug}
-            evaluation={pricingEvaluation}
-            billingRecoveryRequired={billingRecoveryRequired}
-            agentProConfigured={agentProConfigured}
-            proOfferName={proOfferName}
-          />
           {/* Trust row (Phase 9): the four facts a buyer checks before the
               card form, set under the card row and its trial terms, on one
               rule. Each is true today: no card to start (evaluation flow),
@@ -702,7 +919,9 @@ export default async function PricingPage() {
             (lib/testimonials/rules.ts), not on plan, so a free account's
             quote can publish here — the component default is the truthful
             label. The component is its own Section. */}
-        <Testimonials limit={3} />
+        <Suspense fallback={null}>
+          <Testimonials limit={3} />
+        </Suspense>
 
         {/* FAQ: the shared ruled list. The page emits its own FAQPage below
             (the same FAQS records), so the section adds none — one FAQPage
@@ -752,7 +971,9 @@ export default async function PricingPage() {
           }}
         />
       </main>
-      <SiteFooter hideAccountLinks={Boolean(user)} />
+      <Suspense fallback={<SiteFooter />}>
+        <PricingFooter />
+      </Suspense>
       <ScrollDepthTracker />
     </>
   );
