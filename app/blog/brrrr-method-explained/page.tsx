@@ -8,13 +8,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -118,28 +130,26 @@ export default function BrrrrMethodPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>
             {TITLE}
           </h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "short",
               day: "numeric",
@@ -147,7 +157,8 @@ export default function BrrrrMethodPost() {
             · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             BRRRR — buy, rehab, rent, refinance, repeat — is the strategy of
             recycling one pile of capital through multiple rentals instead of
             saving a fresh down payment for each. The concept gets explained
@@ -157,8 +168,8 @@ export default function BrrrrMethodPost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+        <ArticleBody>
+          <h2>
             The five steps in one paragraph
           </h2>
           <p>
@@ -174,7 +185,7 @@ export default function BrrrrMethodPost() {
             difference is arithmetic, so let&apos;s do the arithmetic.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The worked example: a $145k single-family
           </h2>
           <p>
@@ -191,14 +202,14 @@ export default function BrrrrMethodPost() {
               flooring, one HVAC replacement. Estimate yours with the{" "}
               <Link
                 href="/tools/rehab-cost-estimator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rehab cost estimator
               </Link>{" "}
               and read{" "}
               <Link
                 href="/blog/how-to-estimate-rehab-costs"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how to estimate rehab costs
               </Link>{" "}
@@ -228,7 +239,7 @@ export default function BrrrrMethodPost() {
             the stated assumptions would imply.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             Financing the buy and the rehab
           </h2>
           <p>
@@ -246,7 +257,7 @@ export default function BrrrrMethodPost() {
             it $9,000-9,500 over a 7-month hold. Your{" "}
             <Link
               href="/blog/how-much-money-to-buy-a-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               actual cash into the deal
             </Link>{" "}
@@ -264,7 +275,7 @@ export default function BrrrrMethodPost() {
             version, it doesn&apos;t work.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The refinance is the whole game
           </h2>
           <p>
@@ -279,7 +290,7 @@ export default function BrrrrMethodPost() {
             lender. Conventional, delayed-financing, portfolio, and{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR
             </Link>{" "}
@@ -299,7 +310,7 @@ export default function BrrrrMethodPost() {
             the one that surprises people.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The second modeled constraint: property coverage
           </h2>
           <p>
@@ -314,7 +325,7 @@ export default function BrrrrMethodPost() {
               <strong>P&amp;I:</strong> ~$1,253/month (check any loan with the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -340,7 +351,7 @@ export default function BrrrrMethodPost() {
             ceiling, would decide your cash-out. Run your own deal through the{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
@@ -348,7 +359,7 @@ export default function BrrrrMethodPost() {
             actual formula and full program matrix.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             How the deal lands: max cash-out vs one notch down
           </h2>
           <p>
@@ -369,7 +380,7 @@ export default function BrrrrMethodPost() {
             roughly an 11%{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cash-on-cash return
             </Link>{" "}
@@ -384,7 +395,7 @@ export default function BrrrrMethodPost() {
             point. The margin of safety is.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The example&apos;s 75% assumption as a purchase ceiling
           </h2>
           <p>
@@ -406,7 +417,7 @@ export default function BrrrrMethodPost() {
             stays trapped.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The five ways BRRRR breaks
           </h2>
           <p>
@@ -414,7 +425,7 @@ export default function BrrrrMethodPost() {
             $10,000 the appraisal comes in below your{" "}
             <Link
               href="/blog/how-to-calculate-arv"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               ARV estimate
             </Link>{" "}
@@ -452,7 +463,7 @@ export default function BrrrrMethodPost() {
             forever, it doesn&apos;t work.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The repeat: what capital recycling actually looks like
           </h2>
           <p>
@@ -482,7 +493,7 @@ export default function BrrrrMethodPost() {
             portfolio outcome may differ.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             Two tax notes worth knowing
           </h2>
           <p>
@@ -490,7 +501,7 @@ export default function BrrrrMethodPost() {
             you pull out at the refinance is{" "}
             <a
               href="https://www.irs.gov/publications/p334"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               loan principal, not taxable gain
             </a>{" "}
@@ -499,7 +510,7 @@ export default function BrrrrMethodPost() {
             $50,000 spread on a flip held a year or less would be{" "}
             <a
               href="https://www.irs.gov/taxtopics/tc409"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               taxed at ordinary-income rates
             </a>{" "}
@@ -511,7 +522,7 @@ export default function BrrrrMethodPost() {
             it&apos;s{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               added to your depreciable basis and recovered over 27.5 years
             </a>{" "}
@@ -520,7 +531,7 @@ export default function BrrrrMethodPost() {
             and placed in service after January 19, 2025 can qualify for{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               100% bonus depreciation
             </a>
@@ -528,21 +539,21 @@ export default function BrrrrMethodPost() {
             made <em>after</em> the property is in service follow the{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               normal deduction rules
             </a>{" "}
             — see the{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               rental property tax deductions guide
             </Link>{" "}
-            for the full <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E</Link> breakdown.
+            for the full <Link href="/blog/schedule-e-rental-property" className="tc-link">Schedule E</Link> breakdown.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             BRRRR vs just buying a turnkey rental
           </h2>
           <p>
@@ -567,19 +578,20 @@ export default function BrrrrMethodPost() {
             both the acquisition and refinance lenders.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            FAQ
-          </h2>
-          {FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                {f.q}
-              </h3>
-              <p>{f.a}</p>
-            </div>
-          ))}
+          </ArticleBody>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+          <h2>
             Run your own BRRRR before you offer
           </h2>
           <p>
@@ -587,39 +599,39 @@ export default function BrrrrMethodPost() {
             how they interact. The{" "}
             <Link
               href="/tools/rehab-cost-estimator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               rehab cost estimator
             </Link>{" "}
             helps anchor one early-stage input. TrueCap doesn&apos;t offer an
             integrated BRRRR lifecycle model right now; the core{" "}
-            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>{" "}
             stress-tests the stabilized rental afterward. Related reading:{" "}
             <Link
               href="/blog/how-to-refinance-a-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to refinance a rental property
             </Link>
             ,{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR loans explained
             </Link>
             , and{" "}
             <Link
               href="/blog/how-to-estimate-rehab-costs"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to estimate rehab costs
             </Link>
             .
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -639,13 +651,12 @@ export default function BrrrrMethodPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
