@@ -1354,7 +1354,26 @@ export async function verifyCheckoutReturnAction(
       }
     }
 
-    return { ok: true, checkoutSessionId: sessionId, ...verified };
+    // The Purchase conversion value is what this Session actually charged
+    // (Stripe's amount_total, in cents, after any coupon), not the Price's
+    // list amount: a discounted purchase reported the full price to Google
+    // Ads. The list amount stays as the fallback when Stripe returns no
+    // total. Only this number goes to the browser's conversion call; the
+    // Session id stays a local dedup key (lib/analytics/track-conversion.ts).
+    const amountTotal = session.amount_total;
+    const conversionValue =
+      typeof amountTotal === "number" &&
+      Number.isInteger(amountTotal) &&
+      amountTotal >= 0
+        ? amountTotal / 100
+        : verified.conversionValue;
+
+    return {
+      ok: true,
+      checkoutSessionId: sessionId,
+      purchasedPlanSlug: verified.purchasedPlanSlug,
+      ...(conversionValue != null ? { conversionValue } : {}),
+    };
   } catch (error) {
     Sentry.captureException(error, {
       tags: { feature: "billing-checkout-return" },

@@ -42,6 +42,35 @@ describe("authenticated checkout cookie verification", () => {
     expect(mocks.cookieSet).toHaveBeenCalledWith("tc_checkout_return", "", expect.objectContaining({ httpOnly: true, maxAge: 0 }));
   });
 
+  it("reports what the Session charged (amount_total), not the list price, as the conversion value", async () => {
+    const session = await mocks.retrieve();
+    // A coupon purchase: the Price still lists 2999, the buyer paid 2099.
+    mocks.retrieve.mockResolvedValue({ ...session, amount_total: 2099 });
+    expect(await verifyCheckoutReturnAction({})).toEqual({
+      ok: true, checkoutSessionId: "cs_test_return123", purchasedPlanSlug: "pro_monthly", conversionValue: 20.99,
+    });
+  });
+
+  it("reports a zero total as zero instead of falling back to the list price", async () => {
+    const session = await mocks.retrieve();
+    mocks.retrieve.mockResolvedValue({ ...session, amount_total: 0, payment_status: "no_payment_required" });
+    expect(await verifyCheckoutReturnAction({})).toMatchObject({ ok: true, conversionValue: 0 });
+  });
+
+  it.each([null, undefined, -1, 20.5])("falls back to the list price when amount_total is %j", async (amountTotal) => {
+    const session = await mocks.retrieve();
+    mocks.retrieve.mockResolvedValue({ ...session, amount_total: amountTotal });
+    expect(await verifyCheckoutReturnAction({})).toMatchObject({ ok: true, conversionValue: 29.99 });
+  });
+
+  it("returns nothing but the bound id, the plan and the value to the browser", async () => {
+    const session = await mocks.retrieve();
+    mocks.retrieve.mockResolvedValue({ ...session, amount_total: 2999, customer: "cus_private", subscription: "sub_private" });
+    const result = await verifyCheckoutReturnAction({});
+    expect(Object.keys(result).sort()).toEqual(["checkoutSessionId", "conversionValue", "ok", "purchasedPlanSlug"]);
+    expect(JSON.stringify(result)).not.toMatch(/cus_private|sub_private/);
+  });
+
   it("does not retrieve or clear a cookie when the visitor is signed out", async () => {
     mocks.user.mockResolvedValue({ data: { user: null } });
     expect(await verifyCheckoutReturnAction({})).toMatchObject({ ok: false, code: "SIGN_IN_REQUIRED" });
