@@ -216,7 +216,7 @@ export async function GET() {
             .join(", ")}`,
         ]
       : []),
-    `  - Free analyzer at ${siteUrl}/analyze: paste an address or a Zillow/Redfin link; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
+    `  - Free analyzer at ${siteUrl}/analyze: enter an address (or paste a Zillow/Redfin link), the asking price and a bedroom count; the first full decision (cash flow, DSCR, cap rate, Offer Ceiling) needs no account`,
     "  - Methodology page documenting the analyzer's core formulas",
     `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
   ].join("\n");

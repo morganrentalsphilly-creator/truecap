@@ -351,8 +351,8 @@ export default function VsHostawayPage() {
               </IntentPrefetchLink>{" "}
               covers the STR-specific adjustments — seasonality, cleaning, and
               turnover. When you want cap rate, DSCR and cash flow computed from an
-              address, the asking price and a bedroom count instead of by hand, run
-              the full{" "}
+              address, the asking price and the nightly rate and occupancy you
+              enter instead of by hand, run the full{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"

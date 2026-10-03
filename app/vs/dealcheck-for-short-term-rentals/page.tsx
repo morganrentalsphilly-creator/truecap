@@ -251,7 +251,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
               <IntentPrefetchLink href="/blog/best-short-term-rental-analysis-tool-2026" className="tc-link">best short-term rental analysis tools for 2026</IntentPrefetchLink>
               {" "}covers where the ADR and occupancy data should come from. For a quick first-pass check, our{" "}
               <Link href="/analyze" prefetch={false} className="tc-link">free deal analyzer</Link>
-              {" "}returns cap rate, cash flow, and DSCR from an address, the asking price and a bedroom count.
+              {" "}returns cap rate, cash flow, and DSCR from an address, the asking price and the nightly rate and occupancy you enter.
             </p>
           </div>
         </Section>
