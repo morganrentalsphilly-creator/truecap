@@ -25,13 +25,3 @@ export function anonymousDecisionPresentationGrantMatches(
     grantedFormSnapshot !== null && currentFormSnapshot === grantedFormSnapshot
   );
 }
-
-/**
- * Shown on the page when the claim comes back RATE_LIMITED: new no-signup
- * decisions are capped per hour for each network address (the cap lives in
- * app/actions/anonymous-decision.ts and is not restated here as a number).
- * It states the limit and the way to continue now; a new free account starts
- * the no-card trial, which includes complete decisions.
- */
-export const ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE =
-  "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again in an hour.";
