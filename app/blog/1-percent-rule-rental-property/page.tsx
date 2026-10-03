@@ -31,6 +31,7 @@ import {
   ArticlePage,
   LedgerFigure,
   LedgerVerdict,
+  UnderTitleAnalyzeLink,
 } from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { FaqSection } from "@/components/marketing/faq-section";
@@ -219,6 +220,7 @@ export default function OnePercentRulePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
+            <UnderTitleAnalyzeLink />
             <p className={ARTICLE_LEDE}>
               Glance at a listing price and a rent figure and you can screen a
               rental in about three seconds: is the monthly rent at least 1% of

@@ -124,11 +124,13 @@ describe("sitewide passive-conversion CTA", () => {
             ? [`${dir}/${entry.name}`]
             : [],
       );
+    const mounting: string[] = [];
     for (const path of [...walk("app"), ...walk("components")]) {
       // Comments removed: a doc comment naming the part is not a mount.
       const source = read(path).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
       const mounts = [...source.matchAll(/<UnderTitleAnalyzeLink\b[^>]*>/g)];
       if (mounts.length === 0) continue;
+      mounting.push(path);
       expect(mounts, path).toHaveLength(1);
       expect(mounts[0][0], path).toBe("<UnderTitleAnalyzeLink />");
       if (path.startsWith("app/blog/")) {
@@ -136,6 +138,11 @@ describe("sitewide passive-conversion CTA", () => {
         expect(before.lastIndexOf("<header"), `${path}: in the post header`).toBeGreaterThan(before.lastIndexOf("</header>"));
       }
     }
+    expect(mounting).toEqual(
+      expect.arrayContaining([
+        "app/blog/1-percent-rule-rental-property/page.tsx",
+      ]),
+    );
   });
 
   it("uses the shared CTA without signup detours, overlays, or sticky bars", () => {
