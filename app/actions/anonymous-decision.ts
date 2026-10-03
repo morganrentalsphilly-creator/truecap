@@ -65,7 +65,7 @@ export async function claimAnonymousDecisionAction(
         ok: false,
         code: "LIMIT_REACHED",
         message:
-          "This browser's no-signup decision has been used. Create a free account for three complete Pro deals and one comparison — no card.",
+          "This browser's no-signup decision has been used. Create a free account for three complete Pro analyses and one comparison — no card.",
       };
     }
     return { ok: true, expiresAt: current.expiresAt, repeated: true };

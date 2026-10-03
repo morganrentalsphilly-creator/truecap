@@ -58,13 +58,15 @@ describe("the trial's numbers are read from lib/product-access (P2-14)", () => {
   // used keeps its wording: what a locked visitor reads is not changed by a
   // sweep. Its two number words are tied to the limits here instead, so a
   // limit change reddens this case until the sentence is rewritten.
+  // Wave 6: the founder allowed one change to that string, its noun, so the
+  // message says "Pro analyses" like the trial strip and the pricing pages.
   it("the used-decision message still spells the limits, and the words match them", () => {
     const WORDS = ["zero", "one", "two", "three", "four", "five", "six"];
     const anonymous = read("app/actions/anonymous-decision.ts");
     expect(anonymous).toContain(
-      `Create a free account for ${WORDS[PRODUCT_EVALUATION_DEAL_LIMIT]} complete Pro deals and ${WORDS[PRODUCT_EVALUATION_COMPARISON_LIMIT]} comparison — no card.`,
+      `Create a free account for ${WORDS[PRODUCT_EVALUATION_DEAL_LIMIT]} complete Pro analyses and ${WORDS[PRODUCT_EVALUATION_COMPARISON_LIMIT]} comparison — no card.`,
     );
-    expect(anonymous).not.toMatch(/\b\d+ complete Pro deals?\b|\b\d+ comparisons?\b/);
+    expect(anonymous).not.toMatch(/\b\d+ complete Pro (?:deals?|analys[ie]s)\b|\bcomplete Pro deals?\b|\b\d+ comparisons?\b/);
   });
 
   it("the constants are the numbers those sentences printed before", () => {
