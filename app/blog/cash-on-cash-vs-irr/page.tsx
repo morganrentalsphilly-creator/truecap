@@ -8,13 +8,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -91,26 +102,24 @@ export default function CashOnCashVsIrrPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               {TITLE}
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -118,7 +127,8 @@ export default function CashOnCashVsIrrPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Cash-on-cash and IRR are both return metrics for rental real
               estate. They answer completely different questions, and treating
               them as interchangeable can make a weak deal look stronger than it
@@ -126,14 +136,14 @@ export default function CashOnCashVsIrrPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               Cash-on-cash: this year&apos;s return on this year&apos;s cash
             </h2>
             <p>
               <Link
                 href="/glossary/cash-on-cash-return"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Cash-on-cash (CoC)
               </Link>{" "}
@@ -155,13 +165,13 @@ export default function CashOnCashVsIrrPost() {
               reduction should be read from the actual amortization schedule.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               IRR: the time-weighted return across the whole hold
             </h2>
             <p>
               <Link
                 href="/glossary/irr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Internal Rate of Return (IRR)
               </Link>{" "}
@@ -178,7 +188,7 @@ export default function CashOnCashVsIrrPost() {
               reliable as those cash-flow and exit assumptions.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               When each one can mislead
             </h2>
             <p>
@@ -208,7 +218,7 @@ export default function CashOnCashVsIrrPost() {
               classification, basis, limitations (see the rental-loss limits in{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS Publication 527
               </a>
@@ -217,7 +227,7 @@ export default function CashOnCashVsIrrPost() {
               scenario.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Which metric to lead with on which deal
             </h2>
             <p>
@@ -226,7 +236,7 @@ export default function CashOnCashVsIrrPost() {
               the metro&apos;s{" "}
               <a
                 href="https://www.fhfa.gov/document/d/hpi/fhfa-house-price-index-report-2026q2"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 recent price history
               </a>{" "}
@@ -245,7 +255,7 @@ export default function CashOnCashVsIrrPost() {
               <strong>
                 <Link
                   href="/glossary/brrrr"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   BRRRR
                 </Link>{" "}
@@ -258,14 +268,14 @@ export default function CashOnCashVsIrrPost() {
               recycle; IRR alone smears it across the hold. (See{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how to refinance a rental property
               </Link>{" "}
               for the cash-out workflow.)
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The practical workflow
             </h2>
             <p>
@@ -288,7 +298,7 @@ export default function CashOnCashVsIrrPost() {
               The{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -299,7 +309,7 @@ export default function CashOnCashVsIrrPost() {
               case separately with explicit exit assumptions; TrueCap
               doesn&apos;t offer an integrated exit-scenario model.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -315,13 +325,12 @@ export default function CashOnCashVsIrrPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
