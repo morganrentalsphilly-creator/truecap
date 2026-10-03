@@ -159,6 +159,7 @@ export default async function CityStrategyPage({
     combo.strategy === "brrrr" || combo.strategy === "house-hack"
       ? combo.strategy
       : "buy-hold";
+  const heading = `${combo.strategyLabel} screening in ${combo.cityName}`;
 
   return (
     <div className={DATA_PAGE_ROOT_CLASS}>
@@ -169,17 +170,11 @@ export default async function CityStrategyPage({
       <main id="main" tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
         {/* The head on PageHero, in the market pages' order. The H1's words
             are the page's own ("{strategy} screening in {city}"); most
-            strategy labels are lowercase, so the block's first letter is
-            capitalised in CSS and the text stays as written. Under it: the
-            place and strategy line (the old eyebrow's words), the breadcrumb
-            as a meta line, and the one analyze link (P2-80). */}
-        <PageHero
-          title={
-            <span className="block first-letter:uppercase">
-              {combo.strategyLabel} screening in {combo.cityName}
-            </span>
-          }
-        >
+            strategy labels are lowercase, so the first letter is capitalised
+            in the string itself (P2-53), with no uppercase utility. Under
+            it: the place and strategy line (the old eyebrow's words), the
+            breadcrumb as a meta line, and the one analyze link (P2-80). */}
+        <PageHero title={heading.charAt(0).toUpperCase() + heading.slice(1)}>
           <p className={ARTICLE_META}>
             {combo.cityName}, {combo.state} · {combo.strategyLabel}
           </p>
