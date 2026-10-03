@@ -90,6 +90,11 @@ const PRESENTATION_ATTRS: ReadonlySet<string> = new Set([
   "color",
   "as",
   "asChild",
+  // Which element a part renders its title as (Note titleAs="h2"), and the
+  // element id a part gives its heading (CloseSection headingId="..."): the
+  // same kind of choice as `as` and `id` above, passed through a prop.
+  "titleAs",
+  "headingId",
   "prefetch",
   "target",
   "rel",
