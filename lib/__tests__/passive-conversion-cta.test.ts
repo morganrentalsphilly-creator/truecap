@@ -112,8 +112,10 @@ describe("sitewide passive-conversion CTA", () => {
       'export { UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";',
     );
 
-    // Every mount is the propless tag, at most one per page file, and in a
-    // post it sits in the post's own <header> (under the H1, never in the body).
+    // Every mount is the propless tag, at most one per page file. In a post
+    // it sits in the post's own <header> (under the H1, never in the body);
+    // on the topic hubs, which share app/blog/ but are PageHero pages with
+    // no <header>, it is the hero's `actions`.
     const walk = (dir: string): string[] =>
       readdirSync(join(process.cwd(), dir), { withFileTypes: true }).flatMap((entry) =>
         entry.isDirectory()
@@ -133,7 +135,10 @@ describe("sitewide passive-conversion CTA", () => {
       mounting.push(path);
       expect(mounts, path).toHaveLength(1);
       expect(mounts[0][0], path).toBe("<UnderTitleAnalyzeLink />");
-      if (path.startsWith("app/blog/")) {
+      if (path.startsWith("app/blog/topics/")) {
+        expect(source, `${path}: in the hero's actions slot`).toContain("actions={<UnderTitleAnalyzeLink />}");
+        expect(source.slice(0, mounts[0].index).lastIndexOf("<PageHero"), `${path}: on the PageHero`).toBeGreaterThan(-1);
+      } else if (path.startsWith("app/blog/")) {
         const before = source.slice(0, mounts[0].index);
         expect(before.lastIndexOf("<header"), `${path}: in the post header`).toBeGreaterThan(before.lastIndexOf("</header>"));
       }
@@ -142,6 +147,10 @@ describe("sitewide passive-conversion CTA", () => {
       expect.arrayContaining([
         "app/blog/1-percent-rule-rental-property/page.tsx",
         "app/tools/1-percent-rule-calculator/page.tsx",
+        // The hubs (wave 6): /glossary, /blog/topics and each topic hub.
+        "app/glossary/page.tsx",
+        "app/blog/topics/page.tsx",
+        "app/blog/topics/[topic]/page.tsx",
       ]),
     );
   });

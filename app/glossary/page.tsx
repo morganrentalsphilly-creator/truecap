@@ -21,7 +21,7 @@ import Link from "next/link";
 // Internal links prefetch on hover or keyboard focus, not as they scroll into
 // view; the /analyze link stays next/link with prefetch={false}.
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ActionRow, CloseSection, Note, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, Note, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { Section } from "@/components/marketing/section";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -395,6 +395,7 @@ export default function GlossaryPage() {
         <PageHero
           title="Real Estate Glossary"
           lede="Plain-English definitions of every rental-property analysis term. Cross-linked to the calculators and the long-form posts so you can dig as deep as you want on any concept."
+          actions={<UnderTitleAnalyzeLink />}
         />
 
         {/* Jump-to nav: every term as a ruled link at least 44px tall, in
