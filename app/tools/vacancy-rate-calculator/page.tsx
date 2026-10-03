@@ -3,6 +3,15 @@
  *
  * Targets: "vacancy rate calculator", "rental vacancy rate",
  * "how to calculate vacancy rate", "what is a good vacancy rate".
+ *
+ * On the calculator page template (DESIGN.md "Components"; the reference is
+ * /tools/1-percent-rule-calculator): PageHero with the widget as its aside,
+ * the breadcrumb under the H1, the guide in a 68ch reading column
+ * (ArticleBody, prose-ledger) with the next-step links on rules (RuledList),
+ * the analyzer CTA where the guide ends, the FAQ as ruled rows (FaqSection;
+ * the page keeps its own FAQPage node), then the embed invite and the
+ * related links in the same column. The copy stays here, in the page, where
+ * the copy guards read it.
  */
 
 import type { Metadata } from "next";
@@ -11,6 +20,18 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VacancyRateCalculatorWidget } from "@/components/tools/vacancy-rate-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import {
+  PageHero,
+  RuledList,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -118,7 +139,9 @@ export default function VacancyRateCalculatorPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
@@ -128,164 +151,182 @@ export default function VacancyRateCalculatorPage() {
         toolPath="/tools/vacancy-rate-calculator"
       />
 
-      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li>
-              <IntentPrefetchLink href="/" className="hover:text-foreground">
-                Home
-              </IntentPrefetchLink>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li>
-              <IntentPrefetchLink href="/tools" className="hover:text-foreground">
-                Tools
-              </IntentPrefetchLink>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">
-              Vacancy Rate Calculator
-            </li>
-          </ol>
-        </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The calculator in the first screen: the widget sits beside the H1
+            from 1024px and under the lede on phones. The breadcrumb is the
+            visible half of the breadcrumb schema and sits under the H1,
+            never above it. The hero's action is the one short analyzer link
+            under the H1 (P2-80). */}
+        <PageHero
+          title="Rental property vacancy rate calculator"
+          lede={
+            <p>
+              The Census Bureau&apos;s{" "}
+              <a
+                href={HVS_RENTAL_VACANCY.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tc-link"
+              >
+                Housing Vacancy Survey
+              </a>{" "}
+              put the national rental vacancy rate at {HVS_RENTAL_VACANCY.rate} in{" "}
+              {HVS_RENTAL_VACANCY.period}. A pro forma that assumes 5% sits below
+              that. This calculator converts vacant days + turnover cost into an
+              effective vacancy rate to use in your underwrite.
+            </p>
+          }
+          actions={<UnderTitleAnalyzeLink />}
+          aside={<VacancyRateCalculatorWidget />}
+        >
+          <nav aria-label="Breadcrumb" className={ARTICLE_META}>
+            <ol className="flex flex-wrap items-center gap-x-2">
+              <li>
+                <IntentPrefetchLink href="/" className={ARTICLE_META_LINK}>
+                  Home
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>
+                  Tools
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li aria-current="page">Vacancy rate calculator</li>
+            </ol>
+          </nav>
+        </PageHero>
 
-        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-          Rental Property Vacancy Rate Calculator
-        </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          The Census Bureau&apos;s{" "}
-          <a
-            href={HVS_RENTAL_VACANCY.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tc-link"
-          >
-            Housing Vacancy Survey
-          </a>{" "}
-          put the national rental vacancy rate at {HVS_RENTAL_VACANCY.rate} in{" "}
-          {HVS_RENTAL_VACANCY.period}. A pro forma that assumes 5% sits below
-          that. This calculator converts vacant days + turnover cost into an
-          effective vacancy rate to use in your underwrite.
-        </p>
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <article className="max-w-[68ch]">
+            <ArticleBody>
+              <h2>How to model vacancy</h2>
+              <p>
+                Three checks before you settle on a vacancy assumption:
+              </p>
+              <ul>
+                <li>
+                  <strong>Include turnover cost.</strong> At $1,500 a month, a
+                  14-day vacancy with $400 of cleaning and paint costs as much as
+                  about 22 vacant days. Counting only the vacant days leaves that
+                  out.
+                </li>
+                <li>
+                  <strong>Match the property.</strong> Vacancy varies by property,
+                  lease terms, submarket, season and management. A national or
+                  metro figure is a starting point, not the number for one
+                  building.
+                </li>
+                <li>
+                  <strong>Verify with a local PM.</strong> Ask a property manager
+                  for 12-month historical vacancy on comparable units in your
+                  submarket, and use it in place of the figure in a seller&apos;s
+                  pro forma.
+                </li>
+              </ul>
+              <p>
+                Vacancy is part of your{" "}
+                <IntentPrefetchLink
+                  href="/glossary/operating-expense-ratio"
+                  className="tc-link"
+                >
+                  effective gross income calculation
+                </IntentPrefetchLink>
+                , which feeds into{" "}
+                <IntentPrefetchLink
+                  href="/glossary/noi"
+                  className="tc-link"
+                >
+                  NOI
+                </IntentPrefetchLink>{" "}
+                and{" "}
+                <IntentPrefetchLink
+                  href="/glossary/cap-rate"
+                  className="tc-link"
+                >
+                  cap rate
+                </IntentPrefetchLink>
+                . On a property whose annual rent is 12% of its price,
+                understating vacancy by 3 points overstates the cap rate by about
+                a third of a point.
+              </p>
 
-        <div className="mt-8">
-          <VacancyRateCalculatorWidget />
-        </div>
+              {/* The next-step links as rows on rules (they were pills);
+                  not-prose, so they keep RuledList's own type. */}
+              <h2>Where your vacancy number goes next</h2>
+              <RuledList
+                className="not-prose my-8"
+                items={[
+                  {
+                    term: (
+                      <IntentPrefetchLink
+                        href="/tools/break-even-calculator"
+                        className="tc-link"
+                      >
+                        Break-even calculator
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink
+                        href="/blog/how-to-calculate-noi-rental-property"
+                        className="tc-link"
+                      >
+                        How to calculate NOI
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink
+                        href="/blog/how-to-calculate-cap-rate"
+                        className="tc-link"
+                      >
+                        How to calculate cap rate
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink
+                        href="/blog/how-to-calculate-cash-on-cash-return"
+                        className="tc-link"
+                      >
+                        How to calculate cash-on-cash
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                ]}
+              />
+            </ArticleBody>
 
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
-            How to model vacancy
-          </h2>
-          <p className="text-base leading-relaxed text-foreground">
-            Three checks before you settle on a vacancy assumption:
-          </p>
-          <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
-            <li>
-              <strong>Include turnover cost.</strong> At $1,500 a month, a
-              14-day vacancy with $400 of cleaning and paint costs as much as
-              about 22 vacant days. Counting only the vacant days leaves that
-              out.
-            </li>
-            <li>
-              <strong>Match the property.</strong> Vacancy varies by property,
-              lease terms, submarket, season and management. A national or
-              metro figure is a starting point, not the number for one
-              building.
-            </li>
-            <li>
-              <strong>Verify with a local PM.</strong> Ask a property manager
-              for 12-month historical vacancy on comparable units in your
-              submarket, and use it in place of the figure in a seller&apos;s
-              pro forma.
-            </li>
-          </ul>
-          <p className="mt-3 text-base leading-relaxed text-foreground">
-            Vacancy is part of your{" "}
-            <IntentPrefetchLink
-              href="/glossary/operating-expense-ratio"
-              className="text-primary font-semibold hover:underline"
-            >
-              effective gross income calculation
-            </IntentPrefetchLink>
-            , which feeds into{" "}
-            <IntentPrefetchLink
-              href="/glossary/noi"
-              className="text-primary font-semibold hover:underline"
-            >
-              NOI
-            </IntentPrefetchLink>{" "}
-            and{" "}
-            <IntentPrefetchLink
-              href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
-              cap rate
-            </IntentPrefetchLink>
-            . On a property whose annual rent is 12% of its price,
-            understating vacancy by 3 points overstates the cap rate by about
-            a third of a point.
-          </p>
-        </section>
+            {/* The analyzer CTA where the guide ends, inside the article. */}
+            <ToolsConversionCta calculatorName="Vacancy rate calculator" />
 
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">
-            Frequently asked questions
-          </h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-            {FAQS.map((f) => (
-              <details key={f.q} className="group p-5">
-                <summary className="cursor-pointer text-base font-bold text-foreground group-open:text-primary">
-                  {f.q}
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {f.a}
-                </p>
-              </details>
-            ))}
+            {/* The page's own FAQPage node (faqLd above) stays the one in
+                the document, so FaqSection emits none. */}
+            <FaqSection
+              id="vr-faq"
+              variant="inline"
+              heading="Frequently asked questions"
+              items={FAQS}
+              structuredData={false}
+            />
+          </article>
+
+          {/* The tail shares the reading column; each block spaces itself
+              from the one above (mt-12). */}
+          <div className="max-w-[68ch]">
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget. See the component header. */}
+            <ToolEmbedInvite slug="vacancy-rate-calculator" />
+
+            <RelatedContent kind="tool" slug="vacancy-rate-calculator" title="Vacancy Rate Calculator" className="mt-12" />
           </div>
-        </section>
-
-        <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
-            Where your vacancy number goes next
-          </h2>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <IntentPrefetchLink
-              href="/tools/break-even-calculator"
-              className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-            >
-              Break-even calculator
-            </IntentPrefetchLink>
-            <IntentPrefetchLink
-              href="/blog/how-to-calculate-noi-rental-property"
-              className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-            >
-              How to calculate NOI
-            </IntentPrefetchLink>
-            <IntentPrefetchLink
-              href="/blog/how-to-calculate-cap-rate"
-              className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-            >
-              How to calculate cap rate
-            </IntentPrefetchLink>
-            <IntentPrefetchLink
-              href="/blog/how-to-calculate-cash-on-cash-return"
-              className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-            >
-              How to calculate cash-on-cash
-            </IntentPrefetchLink>
-          </div>
-        </section>
-
-        {/* Backlink engine — quiet, collapsed, renders nothing if this
-
-            tool has no embeddable widget. See the component header. */}
-
-        <ToolEmbedInvite slug="vacancy-rate-calculator" />
-
-
-        <ToolsConversionCta calculatorName="Vacancy rate calculator" />
-        <RelatedContent kind="tool" slug="vacancy-rate-calculator" title="Vacancy Rate Calculator" className="mt-10" />
+        </Section>
       </main>
       <SiteFooter />
     </div>

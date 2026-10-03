@@ -34,7 +34,10 @@ import {
   TwoPercentRuleWidget,
   twoPercentRuleFieldErrors,
 } from "@/components/tools/two-percent-rule-widget";
-import { VacancyRateCalculatorWidget } from "@/components/tools/vacancy-rate-calculator-widget";
+import {
+  VacancyRateCalculatorWidget,
+  vacancyRateFieldErrors,
+} from "@/components/tools/vacancy-rate-calculator-widget";
 import { FEATURE_CATALOG } from "@/lib/entitlements-catalog";
 import { allToolNumbersValid } from "@/lib/public-tool-validation";
 
@@ -509,6 +512,58 @@ describe("P2-48 and P2-72: the GRM calculator", () => {
     expect(html).toContain('id="grm-rent"');
     expect(html).toContain('min="0" max="100000000"');
     expect(html).toContain('min="0" max="1000000"');
+    expect(html).not.toMatch(INVALID_ATTR);
+    expect(html).not.toContain('role="alert"');
+  });
+});
+
+describe("P2-48 and P2-72: the vacancy rate calculator", () => {
+  // Before the template fan-out a negative rent printed "-$636 lost per
+  // year" and "Aggressive (low)" with no message on the field, 500 vacant
+  // days a year were accepted, and the result was not a live region.
+  const DEFAULTS = { monthlyRent: "1500", vacantDays: "21", turnoverCost: "400" };
+  const errors = (patch: Partial<typeof DEFAULTS>) =>
+    Object.fromEntries(
+      Object.entries(vacancyRateFieldErrors({ ...DEFAULTS, ...patch })).filter(([, v]) => v !== null),
+    );
+
+  it("the defaults, zero and a cleared field are not errors", () => {
+    expect(errors({})).toEqual({});
+    expect(errors({ vacantDays: "0", turnoverCost: "0" })).toEqual({});
+    expect(errors({ monthlyRent: "", vacantDays: "", turnoverCost: "" })).toEqual({});
+    expect(errors({ vacantDays: "365" })).toEqual({});
+  });
+
+  it.each([
+    [{ monthlyRent: "-1500" }, { monthlyRent: "Monthly rent must be at least 0." }],
+    [{ monthlyRent: "99999999999999" }, { monthlyRent: "Monthly rent must be 1,000,000 or less." }],
+    [{ vacantDays: "-21" }, { vacantDays: "Vacant days per year must be at least 0." }],
+    [{ vacantDays: "500" }, { vacantDays: "Vacant days per year must be 365 or less." }],
+    [{ turnoverCost: "-400" }, { turnoverCost: "Turnover cost must be at least 0." }],
+    [{ turnoverCost: "99999999999999" }, { turnoverCost: "Turnover cost must be 1,000,000 or less." }],
+  ] as const)("%o is an error on that field", (patch, expected) => {
+    expect(errors(patch)).toEqual(expected);
+  });
+
+  it("withholds the rate and the breakdown while a field is in error, and keeps the arithmetic", () => {
+    const source = code("components/tools/vacancy-rate-calculator-widget.tsx");
+    expect(source).toContain('figure={hasFieldError ? "—" : fmtPct(result.vacancyPct)}');
+    expect(source).toContain('"Fix the highlighted inputs to calculate."');
+    expect(source).toContain('hasFieldError && "hidden"');
+    for (const field of ["monthlyRent", "vacantDays", "turnoverCost"]) {
+      expect(source, field).toContain(`error={errors.${field}}`);
+    }
+    expect(source).toContain("const dailyRent = annualRent / 365;");
+    expect(source).toContain("const totalLoss = lostRent + turnover;");
+    expect(source).toContain("const vacancyPct = annualRent > 0 ? (totalLoss / annualRent) * 100 : 0;");
+  });
+
+  it("renders its defaults with bounds, no error and one announced result", () => {
+    const html = renderToStaticMarkup(createElement(VacancyRateCalculatorWidget));
+    expect(html.match(/aria-live="polite"/g)).toHaveLength(1);
+    for (const id of ["vr-rent", "vr-days", "vr-turn"]) expect(html).toContain(`id="${id}"`);
+    expect(html.match(/min="0" max="1000000"/g)).toHaveLength(2);
+    expect(html).toContain('min="0" max="365"');
     expect(html).not.toMatch(INVALID_ATTR);
     expect(html).not.toContain('role="alert"');
   });
