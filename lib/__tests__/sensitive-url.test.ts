@@ -6,6 +6,9 @@ import {
   sanitizeSensitiveQuery,
   sanitizeSensitiveUrl,
   shouldKeepThirdPartyTelemetryDisabled,
+  shouldKeepCookielessPageAnalyticsDisabled,
+  isCountedNextLocation,
+  COUNTED_NEXT_DESTINATIONS,
   hasSensitiveQueryParameter,
   isSensitiveTelemetryLocation,
 } from "@/lib/sensitive-url";
@@ -17,6 +20,8 @@ import {
   scrubSentryRequestUrl,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
+import { sanitizeVercelAnalyticsEvent } from "@/components/analytics/vercel-analytics";
+import { CHECKOUT_PLAN_SLUGS } from "@/lib/pricing-checkout-resume";
 
 describe("sensitive URL scrubbing", () => {
   it("removes checkout and OAuth capabilities while preserving attribution", () => {
@@ -150,6 +155,12 @@ describe("sensitive URL scrubbing", () => {
         shouldKeepThirdPartyTelemetryDisabled(location, false),
         location,
       ).toBe(true);
+      // The cookieless page-analytics gate exempts two exact `next` values
+      // (see the allowlist tests below) and nothing in this list.
+      expect(
+        shouldKeepCookielessPageAnalyticsDisabled(location, false),
+        location,
+      ).toBe(true);
     }
     expect(hasSensitiveQueryParameter("/pricing?utm_source=ad")).toBe(false);
     expect(
@@ -182,6 +193,11 @@ describe("sensitive URL scrubbing", () => {
       sanitizeSensitiveUrl(
         "/auth/sign-up?next=%2Fdashboard%2Fsaved-analyses%2Fprivate-id&plan=pro",
       ),
+    ).toBe("/auth/sign-up?plan=pro");
+    // A counted `next` (the allowlist below) is removed from the reported
+    // URL exactly like any other.
+    expect(
+      sanitizeSensitiveUrl("/auth/sign-up?next=%2Fdashboard%2Fnew&plan=pro"),
     ).toBe("/auth/sign-up?plan=pro");
     expect(
       sanitizeSensitiveQuery({
@@ -414,5 +430,140 @@ describe("bearer-token share routes never reach analytics", () => {
         path,
       ).toContain(expected);
     }
+  });
+});
+
+describe("sign-up and login URLs with an allowlisted next stay counted (P1-49)", () => {
+  const enc = encodeURIComponent;
+  const pricingReturn = (slug: string) => `/pricing?checkout=${slug}#plans`;
+
+  it("allowlists /dashboard/new and one pricing return per checkout plan slug, nothing else", () => {
+    expect([...COUNTED_NEXT_DESTINATIONS].sort()).toEqual(
+      ["/dashboard/new", ...CHECKOUT_PLAN_SLUGS.map(pricingReturn)].sort(),
+    );
+  });
+
+  it("keeps cookieless page analytics on for the two allowlisted shapes", () => {
+    const counted = [
+      // As the in-product prompts write it (router.push, unencoded).
+      "/auth/sign-up?next=/dashboard/new",
+      // As useSearchParams().toString() hands it to the mount.
+      "/auth/sign-up?next=%2Fdashboard%2Fnew",
+      "/auth/login?next=%2Fdashboard%2Fnew",
+      // /pricing and /for-agents plan buttons: plan and billing ride along.
+      "/auth/sign-up?plan=agent-pro&billing=annual&next=%2Fdashboard%2Fnew",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&utm_source=google&utm_medium=cpc",
+      ...CHECKOUT_PLAN_SLUGS.flatMap((slug) => [
+        `/auth/sign-up?next=${enc(pricingReturn(slug))}`,
+        `/auth/login?next=${enc(pricingReturn(slug))}`,
+      ]),
+    ];
+    for (const location of counted) {
+      expect(isCountedNextLocation(location), location).toBe(true);
+      expect(
+        shouldKeepCookielessPageAnalyticsDisabled(location, false),
+        location,
+      ).toBe(false);
+      // Google tags and PostHog use the strict gate: still off.
+      expect(
+        shouldKeepThirdPartyTelemetryDisabled(location, false),
+        location,
+      ).toBe(true);
+      expect(isSensitiveTelemetryLocation(location), location).toBe(true);
+    }
+  });
+
+  it("never reports next: the Vercel beforeSend hook removes it from counted URLs", () => {
+    for (const next of COUNTED_NEXT_DESTINATIONS) {
+      const url = `https://usetruecap.com/auth/sign-up?plan=pro&next=${enc(next)}&utm_medium=cpc`;
+      for (const type of ["pageview", "event"] as const) {
+        const sent = sanitizeVercelAnalyticsEvent({ type, url });
+        expect(sent.url).toBe(
+          "https://usetruecap.com/auth/sign-up?plan=pro&utm_medium=cpc",
+        );
+        expect(sent.url).not.toMatch(/next|dashboard|pricing|checkout/);
+      }
+    }
+  });
+
+  it("switches telemetry off for every other next value", () => {
+    const refused = [
+      // Open redirects and other origins.
+      "/auth/sign-up?next=https%3A%2F%2Fevil.example%2Fdashboard%2Fnew",
+      "/auth/sign-up?next=%2F%2Fevil.example%2Fdashboard%2Fnew",
+      "/auth/sign-up?next=%2F%5Cevil.example",
+      "//evil.example/auth/sign-up?next=%2Fdashboard%2Fnew",
+      "https://evil.example/auth/sign-up?next=%2Fdashboard%2Fnew",
+      // A deal URL, a share token, a search.
+      "/auth/login?next=%2Fdashboard%2Fsaved-analyses%2F1e8f40a1-f878-45ce-9297-c8f386d8ad67",
+      "/auth/login?next=%2Fdashboard%2Fsaved-analyses%2Fprivate-id",
+      "/auth/sign-up?next=%2Fs%2Fprivate-token",
+      "/auth/sign-up?next=%2Fd%2Fprivate-snapshot",
+      "/auth/login?next=%2Ffeedback%2Ftestimonial%3Ftoken%3Dabc",
+      "/auth/sign-up?next=%2Fdashboard%2Fsaved-analyses",
+      "/auth/sign-up?next=%2F",
+      "/auth/sign-up?next=",
+      // Prefix, suffix, case and traversal variants of the allowed values.
+      "/auth/sign-up?next=%2Fdashboard%2Fnew%2F",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew%3Faddress%3D123%2520Main%2520St",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew%23x",
+      "/auth/sign-up?next=%2Fdashboard%2Fnewer",
+      "/auth/sign-up?next=%2FDashboard%2Fnew",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew%2F..%2Fsaved-analyses%2Fprivate-id",
+      "/auth/sign-up?next=%20%2Fdashboard%2Fnew",
+      "/auth/sign-up?next=%252Fdashboard%252Fnew",
+      // Pricing return: unknown or unsold slug, extra parameter, no hash.
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro%23plans",
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Denterprise_monthly%23plans",
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly",
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%26coupon%3DFALL%23plans",
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%26email%3Da%2540b.co%23plans",
+      "/auth/sign-up?next=%2Fpricing%3Fcheckout%3Dpro_monthly%23plans-x",
+      "/auth/sign-up?next=%2Fpricing",
+      // Unencoded inner query: the browser splits it, so next is not exact.
+      "/auth/sign-up?next=/pricing?checkout=pro_monthly#plans",
+      // Two next values, or next in another case.
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&next=%2Fs%2Fprivate-token",
+      "/auth/sign-up?next=%2Fs%2Fprivate-token&next=%2Fdashboard%2Fnew",
+      "/auth/sign-up?NEXT=%2Fdashboard%2Fnew",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&Next=%2Fs%2Fprivate-token",
+      // An allowed next beside another sensitive parameter.
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&email=a%40b.co",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&code=oauth-secret",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&token_hash=secret",
+      "/auth/sign-up?next=%2Fdashboard%2Fnew&address=123%20Main%20St",
+      // An allowed next on any page that is not sign-up or login.
+      "/auth/callback?next=%2Fdashboard%2Fnew",
+      "/auth/sign-up/extra?next=%2Fdashboard%2Fnew",
+      "/auth/sign-up/?next=%2Fdashboard%2Fnew",
+      "/pricing?next=%2Fdashboard%2Fnew",
+      "/s/private-token?next=%2Fdashboard%2Fnew",
+      "/?next=%2Fdashboard%2Fnew",
+    ];
+    for (const location of refused) {
+      expect(isCountedNextLocation(location), location).toBe(false);
+      expect(
+        shouldKeepCookielessPageAnalyticsDisabled(location, false),
+        location,
+      ).toBe(true);
+      expect(
+        shouldKeepThirdPartyTelemetryDisabled(location, false),
+        location,
+      ).toBe(true);
+    }
+  });
+
+  it("stays off for the rest of a document that already saw a sensitive location", () => {
+    expect(
+      shouldKeepCookielessPageAnalyticsDisabled(
+        "/auth/sign-up?next=%2Fdashboard%2Fnew",
+        true,
+      ),
+    ).toBe(true);
+    expect(shouldKeepCookielessPageAnalyticsDisabled("/pricing", true)).toBe(true);
+    expect(shouldKeepCookielessPageAnalyticsDisabled("/pricing", false)).toBe(false);
+    expect(
+      shouldKeepCookielessPageAnalyticsDisabled("/d/private-snapshot", false),
+    ).toBe(true);
   });
 });

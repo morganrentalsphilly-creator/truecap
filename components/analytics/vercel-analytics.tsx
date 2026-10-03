@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
   sanitizeSensitiveUrl,
-  shouldKeepThirdPartyTelemetryDisabled,
+  shouldKeepCookielessPageAnalyticsDisabled,
 } from "@/lib/sensitive-url";
 import { stripAdClickIds } from "@/lib/analytics/ad-click-ids";
 import { recordCookieConsentChoice } from "@/lib/analytics/site-events";
@@ -24,13 +24,19 @@ export function sanitizeVercelAnalyticsEvent<T extends BeforeSendEvent>(
   return { ...event, url: stripAdClickIds(sanitizeSensitiveUrl(event.url)) };
 }
 
-/** Vercel pageviews share the same URL privacy boundary as PostHog/Sentry. */
+/**
+ * Vercel pageviews share the same URL privacy boundary as PostHog/Sentry,
+ * with one exception that applies to this mount only: sign-up and login URLs
+ * whose `next` is exactly /dashboard/new or a pricing checkout return stay
+ * counted (`isCountedNextLocation` in lib/sensitive-url.ts). `next` is still
+ * removed from the reported URL by `sanitizeVercelAnalyticsEvent` above.
+ */
 function TrueCapVercelAnalyticsInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const location = `${pathname}${searchParams?.size ? `?${searchParams.toString()}` : ""}`;
   const [sensitiveRouteSeen, setSensitiveRouteSeen] = useState(false);
-  const disabledForDocument = shouldKeepThirdPartyTelemetryDisabled(
+  const disabledForDocument = shouldKeepCookielessPageAnalyticsDisabled(
     location,
     sensitiveRouteSeen,
   );

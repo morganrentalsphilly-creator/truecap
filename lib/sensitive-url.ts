@@ -1,3 +1,8 @@
+import {
+  CHECKOUT_PLAN_SLUGS,
+  buildCheckoutReturnPath,
+} from "@/lib/pricing-checkout-resume";
+
 /**
  * Query parameters that can carry credentials, checkout capabilities, or
  * OAuth grants. They must never be retained in analytics/error-reporting
@@ -97,6 +102,73 @@ export function shouldKeepThirdPartyTelemetryDisabled(
   wasDisabled: boolean,
 ): boolean {
   return wasDisabled || isSensitiveTelemetryLocation(location);
+}
+
+/**
+ * The only auth pages, and the only `next` values, on which cookieless page
+ * analytics may stay mounted although `next` is a sensitive parameter
+ * (founder decision 2026-10-03, audit row P1-49). Every in-product sign-up
+ * prompt links to /auth/sign-up?next=/dashboard/new and every /pricing plan
+ * button to /auth/sign-up?next=/pricing?checkout=<plan>#plans, so with the
+ * gate above those sign-ups had no transport at all. These values are fixed
+ * strings that name a public route and a catalog plan slug; they cannot hold
+ * an address, a deal id, a share token or another site.
+ */
+const COUNTED_NEXT_AUTH_PATHS: ReadonlySet<string> = new Set([
+  "/auth/sign-up",
+  "/auth/login",
+]);
+
+/** Exact decoded `next` values. Built from the checkout slug list so a plan
+ * that is not sold cannot be counted and a new one is picked up. */
+export const COUNTED_NEXT_DESTINATIONS: ReadonlySet<string> = new Set([
+  "/dashboard/new",
+  ...CHECKOUT_PLAN_SLUGS.map((slug) => buildCheckoutReturnPath(slug, "")),
+]);
+
+/**
+ * True when the location is /auth/sign-up or /auth/login, carries exactly one
+ * `next` whose decoded value is on the list above, and carries no other
+ * sensitive parameter. Whole-string equality only: no prefix match, no
+ * normalisation, no case folding. Anything that cannot be parsed is false.
+ */
+export function isCountedNextLocation(value: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(value, "https://truecap.invalid");
+  } catch {
+    return false;
+  }
+  if (parsed.origin !== "https://truecap.invalid") return false;
+  if (!COUNTED_NEXT_AUTH_PATHS.has(parsed.pathname)) return false;
+  let nextCount = 0;
+  for (const key of parsed.searchParams.keys()) {
+    if (key === "next") {
+      nextCount += 1;
+      continue;
+    }
+    if (SENSITIVE_QUERY_PARAMETER_SET.has(key.toLowerCase())) return false;
+  }
+  if (nextCount !== 1) return false;
+  return COUNTED_NEXT_DESTINATIONS.has(parsed.searchParams.get("next") ?? "");
+}
+
+/**
+ * The gate for the Vercel Web Analytics mount ONLY
+ * (components/analytics/vercel-analytics.tsx). Identical to
+ * `shouldKeepThirdPartyTelemetryDisabled` except that a counted `next`
+ * location does not switch it off. GTM, the Google Ads tag and PostHog keep
+ * using the strict predicate, so they stay off on every `next` URL.
+ * `sanitizeSensitiveUrl` still removes `next` from every URL that is
+ * reported, counted or not.
+ */
+export function shouldKeepCookielessPageAnalyticsDisabled(
+  location: string,
+  wasDisabled: boolean,
+): boolean {
+  if (wasDisabled) return true;
+  if (isCountedNextLocation(location)) return false;
+  return isSensitiveTelemetryLocation(location);
 }
 
 /**
