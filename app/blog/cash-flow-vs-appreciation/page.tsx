@@ -17,15 +17,27 @@
 import type { Metadata } from "next";
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -85,7 +97,7 @@ const FHFA_METRO_HPI_URL =
 const IRS_PUB_527_URL = "https://www.irs.gov/publications/p527";
 const IRS_FORM_8824_INSTRUCTIONS_URL = "https://www.irs.gov/instructions/i8824";
 
-const SOURCE_LINK_CLASS = "text-primary font-semibold hover:underline";
+const SOURCE_LINK_CLASS = "tc-link";
 
 const FAQS: { q: string; a: string }[] = [
   {
@@ -253,453 +265,451 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
-
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <p>
-            Walk into any real-estate investor meetup and you&apos;ll find two
-            tribes. The cash-flow people think appreciation investors are
-            gamblers. The appreciation people think cash-flow investors are
-            penny-pinchers leaving real wealth on the table. Both are partly
-            right, and the truth is more interesting than either camp wants to
-            admit.
-          </p>
-
-          <p>
-            This post runs the math on both strategies over a realistic 10-year
-            hold, in three different market environments, with{" "}
-            <a href={PMMS_URL} className={SOURCE_LINK_CLASS}>
-              2026 borrowing costs
-            </a>
-            . By the end you&apos;ll know which one fits your situation and
-            what to actually optimize for.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Defining the terms</h2>
-          <p>
-            <strong>Cash-flow investing</strong>: buy in markets where the
-            property generates positive{" "}
-            <Link
-              href="/glossary/monthly-cash-flow"
-              className="text-primary font-semibold hover:underline"
-            >
-              monthly cash flow
-            </Link>{" "}
-            after every expense + the mortgage. Optimize for{" "}
-            <Link
-              href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
-              cap rate
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
-            >
-              DSCR
-            </Link>
-            . Typical markets: Midwest cash-flow cities like{" "}
-            <Link
-              href="/markets/cleveland"
-              className="text-primary font-semibold hover:underline"
-            >
-              Cleveland
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/markets/indianapolis"
-              className="text-primary font-semibold hover:underline"
-            >
-              Indianapolis
-            </Link>
-            , older Sun Belt multifamily, blue-collar suburbs. The label
-            describes today&apos;s rent relative to price, not a growth
-            forecast:{" "}
-            <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
-              FHFA&apos;s house price index has Cleveland and Indianapolis up
-              about 7.7% a year over the 10 years to mid-2026
-            </a>
-            .
-          </p>
-          <p>
-            <strong>Appreciation investing</strong>: buy in markets where price
-            growth is fast and reliable, even if monthly cash flow is thin or
-            slightly negative. Optimize for total return over 5-10 years, not
-            monthly income. Typical markets: coastal Tier-1, fast-growing Sun
-            Belt primary cities, supply- constrained metros.
-          </p>
-          <p>
-            <strong>Deals don&apos;t have to be pure either</strong>. A 6% cap
-            rate property with 3% appreciation has both. The real question is
-            which side of the bet you weight more heavily when picking deals.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            The 4 sources of rental return
-          </h2>
-          <p>
-            Before we compare, name the components. Every rental property
-            generates total return from four buckets, and the cash-flow vs
-            appreciation debate often ignores two of them:
-          </p>
-          <ol>
-            <li>
-              <strong>
-                <Link
-                  href="/glossary/monthly-cash-flow"
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Cash flow
-                </Link>
-              </strong>{" "}
-              — net monthly income after all expenses + mortgage. Run any
-              deal&apos;s number in 30 seconds in the{" "}
-              <Link
-                href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
-              >
-                TrueCap analyzer
-              </Link>
-              .
-            </li>
-            <li>
-              <strong>Principal paydown</strong> — the portion of scheduled debt
-              service that reduces the loan balance. Its return contribution
-              depends on the actual amortization schedule and cash invested.
-            </li>
-            <li>
-              <strong>Appreciation</strong> — property value growth. Unrealized
-              until you sell or refinance.
-            </li>
-            <li>
-              <strong>
-                <Link
-                  href="/glossary/tax-savings"
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Tax effects
-                </Link>
-              </strong>{" "}
-              —{" "}
-              <a href={IRS_PUB_527_URL} className={SOURCE_LINK_CLASS}>
-                taxpayer-specific deductions, limitations, and sale treatment
-              </a>{" "}
-              can change the timing and amount of tax. They are not a fixed
-              return component. See{" "}
-              <Link
-                href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
-              >
-                rental property tax deductions
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
+              {TITLE}
+            </h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
               </Link>{" "}
-              for an educational overview.
-            </li>
-          </ol>
-          <p>
-            Total return = sum of all four. The cash-flow tribe usually counts
-            buckets 1 and 4 and discounts 3. The appreciation tribe counts 3
-            heavily and downplays 1. Both miss bucket 2 entirely.
-          </p>
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-          <h2 className="text-2xl sm:text-3xl">
-            10-year comparison: 3 markets
-          </h2>
-          <p>
-            Same investor, same $400k purchase, 25% down, a 30-year fixed loan
-            at 7% (about $1,996 a month in principal and interest), 10-year
-            hold. Different cap rates and appreciation assumptions for each
-            market. To keep the arithmetic checkable, rent and expenses stay
-            flat for all 10 years, and closing and selling costs are left out.
-            For scale, Freddie Mac&apos;s weekly 30-year fixed average was{" "}
-            <a href={PMMS_URL} className={SOURCE_LINK_CLASS}>
-              7.03% on Sept. 24, 2026
-            </a>
-            . Run your own rate and down payment through the{" "}
-            <Link
-              href="/tools/mortgage-payment-calculator"
-              className="text-primary font-semibold hover:underline"
-            >
-              mortgage payment calculator
-            </Link>{" "}
-            before assuming this 7% scenario matches your loan.
-          </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
-                    Market type
-                  </th>
-                  <th className="text-left p-3 font-bold text-foreground">
-                    Cash flow (10y)
-                  </th>
-                  <th className="text-left p-3 font-bold text-foreground">
-                    Principal paydown
-                  </th>
-                  <th className="text-left p-3 font-bold text-foreground">
-                    Appreciation
-                  </th>
-                  <th className="text-left p-3 font-bold text-foreground">
-                    Total return on $100k cash
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr>
-                  <td>
-                    <strong className="text-foreground">Cash-flow heavy</strong>
-                    <div className="text-2xs text-muted-foreground">
-                      8% cap · 1% appreciation
-                    </div>
-                  </td>
-                  <td>~$80,000</td>
-                  <td>~$43,000</td>
-                  <td>~$42,000</td>
-                  <td>~165%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <strong className="text-foreground">Balanced</strong>
-                    <div className="text-2xs text-muted-foreground">
-                      6% cap · 3% appreciation
-                    </div>
-                  </td>
-                  <td>~$0</td>
-                  <td>~$43,000</td>
-                  <td>~$138,000</td>
-                  <td>~181%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <strong className="text-foreground">
-                      Appreciation heavy
-                    </strong>
-                    <div className="text-2xs text-muted-foreground">
-                      4% cap · 5% appreciation
-                    </div>
-                  </td>
-                  <td>~−$80,000</td>
-                  <td>~$43,000</td>
-                  <td>~$252,000</td>
-                  <td>~215%</td>
-                </tr>
-              </tbody>
-            </table>
-          </ScrollX>
-          <p>
-            <em>
-              Illustrative pre-tax scenario only. Total return is cash flow
-              plus principal paydown plus appreciation, divided by the $100k
-              down payment. It excludes taxpayer-specific tax effects and
-              assumes the stated appreciation occurs. Actual results depend on
-              property facts, loan terms, operating results, and disposition
-              costs.
-            </em>
-          </p>
+          <ArticleBody>
+            <p>
+              Walk into any real-estate investor meetup and you&apos;ll find two
+              tribes. The cash-flow people think appreciation investors are
+              gamblers. The appreciation people think cash-flow investors are
+              penny-pinchers leaving real wealth on the table. Both are partly
+              right, and the truth is more interesting than either camp wants to
+              admit.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            What the table actually shows
-          </h2>
-          <p>Three takeaways most strategy debates miss:</p>
-
-          <h3>1. Appreciation wins on paper when it happens</h3>
-          <p>
-            5% annual appreciation compounded over 10 years on a $400k property
-            is $252k of value growth — massively more than any cash flow stream
-            could match. If you genuinely believe in 5%+ appreciation for your
-            market and you can stomach the negative monthly cash flow, the math
-            favors appreciation — though in this table about $80k of negative
-            cash flow gives back nearly a third of that $252k.
-          </p>
-
-          <h3>2. Principal paydown is huge and ignored</h3>
-          <p>
-            ~$43k of principal paydown over 10 years on a $300k, 30-year loan
-            at 7%. That&apos;s the same across all three strategies — every
-            month, your tenant builds your equity. On the balanced row,
-            principal paydown is far bigger than cash flow itself. Most
-            comparisons skip this entirely.
-          </p>
-
-          <h3>3. Cash flow protects the downside</h3>
-          <p>
-            The appreciation-heavy row has about -$80k cash flow over 10 years
-            — you&apos;re feeding the property about $660 out of pocket every
-            month. If life changes (job loss, market dip, forced sale), you
-            don&apos;t have the same modeled cushion. Positive modeled cash flow can improve
-            resilience, but it is not bulletproof: rent, vacancy, collections,
-            expenses, capital work, financing, and sale proceeds can all differ
-            from the scenario.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">The 2026 plot twist</h2>
-          <p>
-            All of the above assumes appreciation actually happens. Historical
-            periods produced{" "}
-            <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
-              different results by market
-            </a>
-            , but none establishes a future path. Current rates and
-            year-over-year price changes also move continuously. Underwrite flat, upside, and
-            downside appreciation cases using current local evidence rather than
-            treating a national narrative as a forecast.
-          </p>
-          <p>
-            If you&apos;re betting on appreciation in 2026, you&apos;re making
-            an active forecast call. The historical national average (
-            <a href={FHFA_NATIONAL_HPI_URL} className={SOURCE_LINK_CLASS}>
-              about 4.6% a year over the last 30 years in FHFA&apos;s index
-            </a>
-            ,{" "}
-            <a href={CPI_URL} className={SOURCE_LINK_CLASS}>
-              roughly 2% after inflation
-            </a>
-            ) doesn&apos;t apply in every market — and you&apos;re paying for
-            it with NEGATIVE monthly cash flow in the appreciation scenario
-            above. Get the appreciation forecast wrong and the deal is a real
-            loss.
-          </p>
-          <p>
-            With 30-year mortgage rates{" "}
-            <a href={MORTGAGE30US_URL} className={SOURCE_LINK_CLASS}>
-              averaging about 6.4% so far in 2026 (through Sept. 24) versus about
-              4.5% in 2018
-            </a>{" "}
-            (Freddie Mac PMMS), cash flow deserves more weight than it did
-            then. Today&apos;s rent and expenses can be checked before you buy;
-            appreciation is a guess.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Which strategy fits you</h2>
-          <p>Honest answers to honest questions:</p>
-          <ul>
-            <li>
-              <strong>How long can you hold?</strong> Appreciation plays need a
-              long hold to have a fair chance of outperforming. If you might
-              need to sell within a few years, favor cash flow.
-            </li>
-            <li>
-              <strong>Can you survive a forced sale?</strong> If a job loss or
-              life event would force you to liquidate during a dip, appreciation
-              strategies become dangerous. Cash flow gives you the option to
-              wait it out.
-            </li>
-            <li>
-              <strong>
-                Can you carry the property without relying on a tax result?
-              </strong>{" "}
-              <a href={IRS_PUB_527_URL} className={SOURCE_LINK_CLASS}>
-                Tax eligibility and loss timing are taxpayer-specific
+            <p>
+              This post runs the math on both strategies over a realistic 10-year
+              hold, in three different market environments, with{" "}
+              <a href={PMMS_URL} className={SOURCE_LINK_CLASS}>
+                2026 borrowing costs
               </a>
-              . Base the operating decision on verified cash obligations, then
-              review tax scenarios with an adviser.
-            </li>
-            <li>
-              <strong>What&apos;s your conviction on the market?</strong> If you
-              don&apos;t have a specific reason to believe Market X will
-              appreciate, don&apos;t buy there as an appreciation play. Cash
-              flow markets give you a deal that works even with 0% appreciation.
-            </li>
-          </ul>
+              . By the end you&apos;ll know which one fits your situation and
+              what to actually optimize for.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">The hybrid sweet spot</h2>
-          <p>
-            The boring-but-right answer: look for properties whose current
-            operating cash flow does not depend on an optimistic exit. Model
-            principal paydown from the actual loan, treat appreciation as a
-            scenario rather than a promise, and keep taxpayer-specific tax
-            effects outside the property-level screen.
-          </p>
-          <p>
-            Markets to test for that balance in 2026 include{" "}
-            <Link
-              href="/markets/atlanta"
-              className="text-primary font-semibold hover:underline"
-            >
-              Atlanta
-            </Link>
-            ,{" "}
-            <Link
-              href="/markets/charlotte"
-              className="text-primary font-semibold hover:underline"
-            >
-              Charlotte
-            </Link>
-            , and{" "}
-            <Link
-              href="/markets/tampa"
-              className="text-primary font-semibold hover:underline"
-            >
-              Tampa
-            </Link>
-            . See each market&apos;s page for HUD Fair Market Rent (FY2026)
-            benchmarks and a sample underwrite, and note that{" "}
-            <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
-              FHFA&apos;s house price index shows all three between about 0% and
-              +2% over the year to mid-2026
-            </a>
-            .
-          </p>
-          <p>
-            Picking that hybrid sweet spot deal requires actually computing all
-            four return components for a specific property, in a specific
-            market, at your specific financing — not just anchoring on a
-            strategy.
-          </p>
+            <h2>Defining the terms</h2>
+            <p>
+              <strong>Cash-flow investing</strong>: buy in markets where the
+              property generates positive{" "}
+              <Link
+                href="/glossary/monthly-cash-flow"
+                className="tc-link"
+              >
+                monthly cash flow
+              </Link>{" "}
+              after every expense + the mortgage. Optimize for{" "}
+              <Link
+                href="/glossary/cap-rate"
+                className="tc-link"
+              >
+                cap rate
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/glossary/dscr"
+                className="tc-link"
+              >
+                DSCR
+              </Link>
+              . Typical markets: Midwest cash-flow cities like{" "}
+              <Link
+                href="/markets/cleveland"
+                className="tc-link"
+              >
+                Cleveland
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/markets/indianapolis"
+                className="tc-link"
+              >
+                Indianapolis
+              </Link>
+              , older Sun Belt multifamily, blue-collar suburbs. The label
+              describes today&apos;s rent relative to price, not a growth
+              forecast:{" "}
+              <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
+                FHFA&apos;s house price index has Cleveland and Indianapolis up
+                about 7.7% a year over the 10 years to mid-2026
+              </a>
+              .
+            </p>
+            <p>
+              <strong>Appreciation investing</strong>: buy in markets where price
+              growth is fast and reliable, even if monthly cash flow is thin or
+              slightly negative. Optimize for total return over 5-10 years, not
+              monthly income. Typical markets: coastal Tier-1, fast-growing Sun
+              Belt primary cities, supply- constrained metros.
+            </p>
+            <p>
+              <strong>Deals don&apos;t have to be pure either</strong>. A 6% cap
+              rate property with 3% appreciation has both. The real question is
+              which side of the bet you weight more heavily when picking deals.
+            </p>
 
-          <div className="not-prose"></div>
+            <h2>
+              The 4 sources of rental return
+            </h2>
+            <p>
+              Before we compare, name the components. Every rental property
+              generates total return from four buckets, and the cash-flow vs
+              appreciation debate often ignores two of them:
+            </p>
+            <ol>
+              <li>
+                <strong>
+                  <Link
+                    href="/glossary/monthly-cash-flow"
+                    className="tc-link"
+                  >
+                    Cash flow
+                  </Link>
+                </strong>{" "}
+                — net monthly income after all expenses + mortgage. Run any
+                deal&apos;s number in 30 seconds in the{" "}
+                <Link
+                  href="/analyze" prefetch={false}
+                  className="tc-link"
+                >
+                  TrueCap analyzer
+                </Link>
+                .
+              </li>
+              <li>
+                <strong>Principal paydown</strong> — the portion of scheduled debt
+                service that reduces the loan balance. Its return contribution
+                depends on the actual amortization schedule and cash invested.
+              </li>
+              <li>
+                <strong>Appreciation</strong> — property value growth. Unrealized
+                until you sell or refinance.
+              </li>
+              <li>
+                <strong>
+                  <Link
+                    href="/glossary/tax-savings"
+                    className="tc-link"
+                  >
+                    Tax effects
+                  </Link>
+                </strong>{" "}
+                —{" "}
+                <a href={IRS_PUB_527_URL} className={SOURCE_LINK_CLASS}>
+                  taxpayer-specific deductions, limitations, and sale treatment
+                </a>{" "}
+                can change the timing and amount of tax. They are not a fixed
+                return component. See{" "}
+                <Link
+                  href="/blog/rental-property-tax-deductions"
+                  className="tc-link"
+                >
+                  rental property tax deductions
+                </Link>{" "}
+                for an educational overview.
+              </li>
+            </ol>
+            <p>
+              Total return = sum of all four. The cash-flow tribe usually counts
+              buckets 1 and 4 and discounts 3. The appreciation tribe counts 3
+              heavily and downplays 1. Both miss bucket 2 entirely.
+            </p>
 
-          <p>
-            TrueCap screens pre-tax operating cash flow, loan coverage, and
-            Buy Box fit. Appreciation, disposition, and tax outcomes
-            require separate, explicitly sourced scenarios and professional
-            advice where appropriate.
-          </p>
+            <h2>
+              10-year comparison: 3 markets
+            </h2>
+            <p>
+              Same investor, same $400k purchase, 25% down, a 30-year fixed loan
+              at 7% (about $1,996 a month in principal and interest), 10-year
+              hold. Different cap rates and appreciation assumptions for each
+              market. To keep the arithmetic checkable, rent and expenses stay
+              flat for all 10 years, and closing and selling costs are left out.
+              For scale, Freddie Mac&apos;s weekly 30-year fixed average was{" "}
+              <a href={PMMS_URL} className={SOURCE_LINK_CLASS}>
+                7.03% on Sept. 24, 2026
+              </a>
+              . Run your own rate and down payment through the{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="tc-link"
+              >
+                mortgage payment calculator
+              </Link>{" "}
+              before assuming this 7% scenario matches your loan.
+            </p>
+            <ArticleTable label="Data table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      Market type
+                    </th>
+                    <th>
+                      Cash flow (10y)
+                    </th>
+                    <th>
+                      Principal paydown
+                    </th>
+                    <th>
+                      Appreciation
+                    </th>
+                    <th>
+                      Total return on $100k cash
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Cash-flow heavy</strong>
+                      <div className="text-xs text-muted-foreground">
+                        8% cap · 1% appreciation
+                      </div>
+                    </td>
+                    <td>~$80,000</td>
+                    <td>~$43,000</td>
+                    <td>~$42,000</td>
+                    <td>~165%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Balanced</strong>
+                      <div className="text-xs text-muted-foreground">
+                        6% cap · 3% appreciation
+                      </div>
+                    </td>
+                    <td>~$0</td>
+                    <td>~$43,000</td>
+                    <td>~$138,000</td>
+                    <td>~181%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Appreciation heavy
+                      </strong>
+                      <div className="text-xs text-muted-foreground">
+                        4% cap · 5% appreciation
+                      </div>
+                    </td>
+                    <td>~−$80,000</td>
+                    <td>~$43,000</td>
+                    <td>~$252,000</td>
+                    <td>~215%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ArticleTable>
+            <p>
+              <em>
+                Illustrative pre-tax scenario only. Total return is cash flow
+                plus principal paydown plus appreciation, divided by the $100k
+                down payment. It excludes taxpayer-specific tax effects and
+                assumes the stated appreciation occurs. Actual results depend on
+                property facts, loan terms, operating results, and disposition
+                costs.
+              </em>
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                <FaqAnswer answer={f.a} />
-              </p>
-            </details>
-          ))}
+            <h2>
+              What the table actually shows
+            </h2>
+            <p>Three takeaways most strategy debates miss:</p>
+
+            <h3>1. Appreciation wins on paper when it happens</h3>
+            <p>
+              5% annual appreciation compounded over 10 years on a $400k property
+              is $252k of value growth — massively more than any cash flow stream
+              could match. If you genuinely believe in 5%+ appreciation for your
+              market and you can stomach the negative monthly cash flow, the math
+              favors appreciation — though in this table about $80k of negative
+              cash flow gives back nearly a third of that $252k.
+            </p>
+
+            <h3>2. Principal paydown is huge and ignored</h3>
+            <p>
+              ~$43k of principal paydown over 10 years on a $300k, 30-year loan
+              at 7%. That&apos;s the same across all three strategies — every
+              month, your tenant builds your equity. On the balanced row,
+              principal paydown is far bigger than cash flow itself. Most
+              comparisons skip this entirely.
+            </p>
+
+            <h3>3. Cash flow protects the downside</h3>
+            <p>
+              The appreciation-heavy row has about -$80k cash flow over 10 years
+              — you&apos;re feeding the property about $660 out of pocket every
+              month. If life changes (job loss, market dip, forced sale), you
+              don&apos;t have the same modeled cushion. Positive modeled cash flow can improve
+              resilience, but it is not bulletproof: rent, vacancy, collections,
+              expenses, capital work, financing, and sale proceeds can all differ
+              from the scenario.
+            </p>
+
+            <h2>The 2026 plot twist</h2>
+            <p>
+              All of the above assumes appreciation actually happens. Historical
+              periods produced{" "}
+              <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
+                different results by market
+              </a>
+              , but none establishes a future path. Current rates and
+              year-over-year price changes also move continuously. Underwrite flat, upside, and
+              downside appreciation cases using current local evidence rather than
+              treating a national narrative as a forecast.
+            </p>
+            <p>
+              If you&apos;re betting on appreciation in 2026, you&apos;re making
+              an active forecast call. The historical national average (
+              <a href={FHFA_NATIONAL_HPI_URL} className={SOURCE_LINK_CLASS}>
+                about 4.6% a year over the last 30 years in FHFA&apos;s index
+              </a>
+              ,{" "}
+              <a href={CPI_URL} className={SOURCE_LINK_CLASS}>
+                roughly 2% after inflation
+              </a>
+              ) doesn&apos;t apply in every market — and you&apos;re paying for
+              it with NEGATIVE monthly cash flow in the appreciation scenario
+              above. Get the appreciation forecast wrong and the deal is a real
+              loss.
+            </p>
+            <p>
+              With 30-year mortgage rates{" "}
+              <a href={MORTGAGE30US_URL} className={SOURCE_LINK_CLASS}>
+                averaging about 6.4% so far in 2026 (through Sept. 24) versus about
+                4.5% in 2018
+              </a>{" "}
+              (Freddie Mac PMMS), cash flow deserves more weight than it did
+              then. Today&apos;s rent and expenses can be checked before you buy;
+              appreciation is a guess.
+            </p>
+
+            <h2>Which strategy fits you</h2>
+            <p>Honest answers to honest questions:</p>
+            <ul>
+              <li>
+                <strong>How long can you hold?</strong> Appreciation plays need a
+                long hold to have a fair chance of outperforming. If you might
+                need to sell within a few years, favor cash flow.
+              </li>
+              <li>
+                <strong>Can you survive a forced sale?</strong> If a job loss or
+                life event would force you to liquidate during a dip, appreciation
+                strategies become dangerous. Cash flow gives you the option to
+                wait it out.
+              </li>
+              <li>
+                <strong>
+                  Can you carry the property without relying on a tax result?
+                </strong>{" "}
+                <a href={IRS_PUB_527_URL} className={SOURCE_LINK_CLASS}>
+                  Tax eligibility and loss timing are taxpayer-specific
+                </a>
+                . Base the operating decision on verified cash obligations, then
+                review tax scenarios with an adviser.
+              </li>
+              <li>
+                <strong>What&apos;s your conviction on the market?</strong> If you
+                don&apos;t have a specific reason to believe Market X will
+                appreciate, don&apos;t buy there as an appreciation play. Cash
+                flow markets give you a deal that works even with 0% appreciation.
+              </li>
+            </ul>
+
+            <h2>The hybrid sweet spot</h2>
+            <p>
+              The boring-but-right answer: look for properties whose current
+              operating cash flow does not depend on an optimistic exit. Model
+              principal paydown from the actual loan, treat appreciation as a
+              scenario rather than a promise, and keep taxpayer-specific tax
+              effects outside the property-level screen.
+            </p>
+            <p>
+              Markets to test for that balance in 2026 include{" "}
+              <Link
+                href="/markets/atlanta"
+                className="tc-link"
+              >
+                Atlanta
+              </Link>
+              ,{" "}
+              <Link
+                href="/markets/charlotte"
+                className="tc-link"
+              >
+                Charlotte
+              </Link>
+              , and{" "}
+              <Link
+                href="/markets/tampa"
+                className="tc-link"
+              >
+                Tampa
+              </Link>
+              . See each market&apos;s page for HUD Fair Market Rent (FY2026)
+              benchmarks and a sample underwrite, and note that{" "}
+              <a href={FHFA_METRO_HPI_URL} className={SOURCE_LINK_CLASS}>
+                FHFA&apos;s house price index shows all three between about 0% and
+                +2% over the year to mid-2026
+              </a>
+              .
+            </p>
+            <p>
+              Picking that hybrid sweet spot deal requires actually computing all
+              four return components for a specific property, in a specific
+              market, at your specific financing — not just anchoring on a
+              strategy.
+            </p>
+
+            <p>
+              TrueCap screens pre-tax operating cash flow, loan coverage, and
+              Buy Box fit. Appreciation, disposition, and tax outcomes
+              require separate, explicitly sourced scenarios and professional
+              advice where appropriate.
+            </p>
+
+          </ArticleBody>
+
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            renderAnswer={(item) => <FaqAnswer answer={item.a} />}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -743,39 +753,38 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               What&apos;s a good cap rate in 2026 →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Cap rate vs CoC vs DSCR →
             </Link>{" "}
             ·{" "}
             <Link
               href="/glossary"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Glossary →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
