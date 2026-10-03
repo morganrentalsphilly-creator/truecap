@@ -32,7 +32,8 @@
  *     (lib/report-data-builder.ts sets inputConfidence to null)
  *   - the rerun writes the deal's values, without their source labels, to the
  *     analyzer's draft and opens /analyze (runWithAssumptions). With the
- *     address hidden (the Share dialog's default) the address is dropped, and
+ *     address hidden (the Share dialog's default, except for a Client link,
+ *     where the agent chooses) the address is dropped, and
  *     the analyzer needs one before it runs.
  */
 
