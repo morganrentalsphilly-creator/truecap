@@ -16,10 +16,23 @@
  *
  * Does not write to the form - exposes its total via an optional
  * onTotalChange callback so an enclosing panel can consume the total.
+ *
+ * Two renderings of the same state and the same estimate:
+ *   - "card" (the default): the card the signed-in analyzer's strategies
+ *     panel mounts. Its markup is unchanged, and
+ *     lib/__tests__/tools-template-t2.test.tsx pins its rendered HTML.
+ *   - "tool": the public /tools/rehab-cost-estimator page, set on the
+ *     calculator parts (components/tools/tool-parts.tsx) like the 1% rule
+ *     widget: no card, the fields at the 48px Field size, the work items as
+ *     rows on rules, the total as the key figure in DM Mono over the double
+ *     rule. Same words, same inputs, same estimateRehab call.
  */
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { Hammer, ChevronDown, ChevronUp } from "lucide-react";
+import { LedgerFigure } from "@/components/ledger/ledger-parts";
+import { ToolFrame, ToolResult } from "@/components/tools/tool-parts";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -37,6 +50,11 @@ interface RehabEstimatorCardProps {
   defaultBathCount?: number | null;
   /** Called whenever the computed total changes - for downstream cards. */
   onTotalChange?: (total: number, breakdown: RehabResult) => void;
+  /**
+   * "card" (default): the analyzer's card, exactly as before. "tool": the
+   * public tool page's rendering on the calculator parts.
+   */
+  variant?: "card" | "tool";
 }
 
 const CATEGORY_LABELS: Record<RehabWorkItem["category"], string> = {
@@ -49,10 +67,18 @@ const CATEGORY_LABELS: Record<RehabWorkItem["category"], string> = {
 
 const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
+// The "tool" rendering's field, as ToolNumberField sets one (DESIGN.md
+// "Field"): a sentence-case label at 600, a 48px input with 16px text at
+// every width. Written here because these three fields keep a placeholder,
+// which ToolNumberField does not take.
+const TOOL_LABEL_CLASS = "text-sm leading-snug font-semibold text-foreground";
+const TOOL_INPUT_CLASS = "h-12 text-base lg:text-base";
+
 export function RehabEstimatorCard({
   defaultSqft,
   defaultBathCount,
   onTotalChange,
+  variant = "card",
 }: RehabEstimatorCardProps) {
   const [sqftInput, setSqftInput] = useState<string>(
     defaultSqft && defaultSqft > 0 ? String(defaultSqft) : ""
@@ -126,6 +152,160 @@ export function RehabEstimatorCard({
     "systems",
     "structural",
   ];
+
+  if (variant === "tool") {
+    const headingId = `${uid}-heading`;
+    const itemsId = `${uid}-items`;
+    return (
+      // The page shows an H1 naming the estimator, so the widget's own
+      // heading is for the outline only.
+      <ToolFrame aria-labelledby={headingId}>
+        <h2 id={headingId} className="sr-only">
+          Rehab cost estimator
+        </h2>
+        <p className="max-w-[68ch] text-pretty text-sm text-muted-foreground">
+          Directional planning defaults: switch items on or off and set the
+          square footage, bath count and contingency. Not bid-quality pricing and
+          not current market data. Get local contractor bids before committing to
+          a number.
+        </p>
+
+        <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-3">
+          <div className="min-w-0">
+            <Label htmlFor={sqftId} className={TOOL_LABEL_CLASS}>
+              Sq ft
+            </Label>
+            <div className="mt-2">
+              <Input
+                id={sqftId}
+                type="number"
+                inputMode="numeric"
+                step="50"
+                value={sqftInput}
+                onChange={(e) => setSqftInput(e.target.value)}
+                placeholder="1850"
+                className={TOOL_INPUT_CLASS}
+              />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <Label htmlFor={bathId} className={TOOL_LABEL_CLASS}>
+              Baths
+            </Label>
+            <div className="mt-2">
+              <Input
+                id={bathId}
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                value={bathInput}
+                onChange={(e) => setBathInput(e.target.value)}
+                placeholder="2"
+                className={TOOL_INPUT_CLASS}
+              />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <Label htmlFor={contingencyId} className={TOOL_LABEL_CLASS}>
+              Contingency
+            </Label>
+            <div className="relative mt-2">
+              <Input
+                id={contingencyId}
+                type="number"
+                inputMode="numeric"
+                step="1"
+                value={contingency}
+                onChange={(e) => setContingency(e.target.value)}
+                placeholder="10"
+                className={cn(TOOL_INPUT_CLASS, "pr-8")}
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground"
+              >
+                %
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* The catalog's switch: a 48px outline button that says what it
+            will do, with its state in aria-expanded instead of a chevron. */}
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={itemsId}
+          onClick={() => setExpanded((e) => !e)}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "cta" }),
+            "mt-6 w-full sm:w-auto",
+          )}
+        >
+          {expanded
+            ? "Collapse"
+            : selected.size > 0
+              ? `${selected.size} items selected`
+              : "Pick work items"}
+        </button>
+
+        {expanded && (
+          <div id={itemsId} className="mt-6 space-y-6">
+            {orderedCategories.map((cat) => (
+              <div key={cat}>
+                <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">
+                  {CATEGORY_LABELS[cat]}
+                </p>
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 @2xl:grid-cols-2">
+                  {grouped[cat].map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex min-h-12 cursor-pointer items-center justify-between gap-3 border-b border-rule-soft py-2"
+                    >
+                      <span className="flex min-w-0 items-center gap-3 text-base text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(item.id)}
+                          onChange={() => toggle(item.id)}
+                          className="size-5 shrink-0 accent-primary"
+                        />
+                        <span className="min-w-0">{item.label}</span>
+                      </span>
+                      <LedgerFigure className="shrink-0 text-sm text-muted-foreground">
+                        {item.defaultCostPerSqft
+                          ? `$${item.defaultCostPerSqft}/sqft`
+                          : item.flatCost
+                            ? `${fmt(item.flatCost)}${item.perBath ? "/bath" : ""}`
+                            : ""}
+                      </LedgerFigure>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* The total opens on the rule under the inputs; ToolResult reads it
+            out (a polite live region) when an edit changes it. */}
+        <ToolResult
+          className="mt-8 border-t border-border pt-5"
+          label="Estimated rehab cost"
+          figure={fmt(result.total)}
+          note={
+            result.subtotal > 0 ? (
+              <>
+                <span className="block">Subtotal: {fmt(result.subtotal)}</span>
+                <span className="block">
+                  +{result.contingencyPct}% contingency: {fmt(result.contingency)}
+                </span>
+              </>
+            ) : undefined
+          }
+        />
+      </ToolFrame>
+    );
+  }
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
