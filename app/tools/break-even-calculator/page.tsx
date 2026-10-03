@@ -3,6 +3,16 @@
  *
  * Targets: "rental property break-even calculator", "rental property
  * break even point", "how long until rental property pays for itself".
+ *
+ * On the calculator page template (DESIGN.md "Components"; the reference is
+ * /tools/1-percent-rule-calculator): PageHero with the widget as its aside,
+ * the breadcrumb under the H1, the guide in a 68ch reading column
+ * (ArticleBody, prose-ledger) with the formula printed on rules
+ * (ToolFormula) and the related links on rules (RuledList), the analyzer
+ * CTA where the guide ends, the FAQ as ruled rows (FaqSection; the page
+ * keeps its own FAQPage node), then the embed invite and the related links
+ * in the same column. The copy stays here, in the page, where the copy
+ * guards read it.
  */
 
 import type { Metadata } from "next";
@@ -11,6 +21,19 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BreakEvenCalculatorWidget } from "@/components/tools/break-even-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import { ToolFormula } from "@/components/tools/tool-parts";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import {
+  PageHero,
+  RuledList,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { RelatedContent } from "@/components/marketing/related-content";
@@ -100,82 +123,120 @@ export default function BreakEvenCalculatorPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={ld} />
       <JsonLd data={faqLd} />
       <JsonLd data={appLd} />
       <ToolBreadcrumbSchema toolName="Break-Even Calculator" toolPath="/tools/break-even-calculator" />
 
-      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><IntentPrefetchLink href="/" className="hover:text-foreground">Home</IntentPrefetchLink></li>
-            <li aria-hidden="true">›</li>
-            <li><IntentPrefetchLink href="/tools" className="hover:text-foreground">Tools</IntentPrefetchLink></li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">Break-Even Calculator</li>
-          </ol>
-        </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The calculator in the first screen: the widget sits beside the H1
+            from 1024px and under the lede on phones. The breadcrumb is the
+            visible half of the breadcrumb schema and sits under the H1,
+            never above it. The hero's action is the one short analyzer link
+            under the H1 (P2-80). */}
+        <PageHero
+          title="Rental property break-even calculator"
+          lede="Estimate how many months the entered monthly net cash flow would take to recover the entered down payment, closing costs, and initial repairs. The result assumes cash flow stays constant and excludes appreciation, principal paydown, taxes, and sale proceeds."
+          actions={<UnderTitleAnalyzeLink />}
+          aside={<BreakEvenCalculatorWidget />}
+        >
+          <nav aria-label="Breadcrumb" className={ARTICLE_META}>
+            <ol className="flex flex-wrap items-center gap-x-2">
+              <li><IntentPrefetchLink href="/" className={ARTICLE_META_LINK}>Home</IntentPrefetchLink></li>
+              <li aria-hidden="true">›</li>
+              <li><IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>Tools</IntentPrefetchLink></li>
+              <li aria-hidden="true">›</li>
+              <li aria-current="page">Break-even calculator</li>
+            </ol>
+          </nav>
+        </PageHero>
 
-        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-          Rental Property Break-Even Calculator
-        </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Estimate how many months the entered monthly net cash flow would take to recover the entered down payment, closing costs, and initial repairs. The result assumes cash flow stays constant and excludes appreciation, principal paydown, taxes, and sale proceeds.
-        </p>
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <article className="max-w-[68ch]">
+            <ArticleBody>
+              <h2>How break-even is calculated</h2>
+              <ToolFormula formula="Break-even months = Total cash invested ÷ Monthly net cash flow" />
+              <p>
+                Total cash invested = down payment + closing costs + initial repairs/rehab. Monthly net cash flow = rent minus all operating expenses minus mortgage P&amp;I. Divide one by the other and you get the number of months until you&apos;ve gotten your initial investment back, purely from rental income.
+              </p>
+              <p>
+                Worked example: you put $60,000 down on a $300,000 property + $8,000 closing + $5,000 initial repairs = $73,000 invested. Monthly cash flow $450. Break-even = $73,000 ÷ $450 = 162 months = 13.5 years.
+              </p>
 
-        <div className="mt-8">
-          <BreakEvenCalculatorWidget />
-        </div>
+              {/* The related links as rows on rules (they were pills);
+                  not-prose, so they keep RuledList's own type. */}
+              <h2>Related metrics and calculators</h2>
+              <RuledList
+                className="not-prose my-8"
+                items={[
+                  {
+                    term: (
+                      <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="tc-link">
+                        Cash-on-cash return
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink href="/glossary/cap-rate" className="tc-link">
+                        Cap rate
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink href="/glossary/irr" className="tc-link">
+                        IRR
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="tc-link">
+                        Mortgage payment calculator
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                  {
+                    term: (
+                      <IntentPrefetchLink href="/tools/closing-cost-calculator" className="tc-link">
+                        Closing cost calculator
+                      </IntentPrefetchLink>
+                    ),
+                  },
+                ]}
+              />
+            </ArticleBody>
 
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">How break-even is calculated</h2>
-          <div className="rounded-xl border border-border bg-muted/30 p-5">
-            <code className="text-sm sm:text-base text-foreground font-mono">
-              Break-even months = Total cash invested ÷ Monthly net cash flow
-            </code>
+            {/* The analyzer CTA where the guide ends, inside the article. */}
+            <ToolsConversionCta calculatorName="Break-even calculator" />
+
+            {/* The page's own FAQPage node (faqLd above) stays the one in
+                the document, so FaqSection emits none. */}
+            <FaqSection
+              id="be-faq"
+              variant="inline"
+              heading="Frequently asked questions"
+              items={FAQS}
+              structuredData={false}
+            />
+          </article>
+
+          {/* The tail shares the reading column; each block spaces itself
+              from the one above (mt-12). */}
+          <div className="max-w-[68ch]">
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget. See the component header. */}
+            <ToolEmbedInvite slug="break-even-calculator" />
+
+            <RelatedContent kind="tool" slug="break-even-calculator" title="Break-Even Calculator" className="mt-12" />
           </div>
-          <p className="mt-4 text-base leading-relaxed text-foreground">
-            Total cash invested = down payment + closing costs + initial repairs/rehab. Monthly net cash flow = rent minus all operating expenses minus mortgage P&amp;I. Divide one by the other and you get the number of months until you&apos;ve gotten your initial investment back, purely from rental income.
-          </p>
-          <p className="mt-3 text-base leading-relaxed text-foreground">
-            Worked example: you put $60,000 down on a $300,000 property + $8,000 closing + $5,000 initial repairs = $73,000 invested. Monthly cash flow $450. Break-even = $73,000 ÷ $450 = 162 months = 13.5 years.
-          </p>
-        </section>
-
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">Frequently asked questions</h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-            {FAQS.map((f) => (
-              <details key={f.q} className="group p-5">
-                <summary className="cursor-pointer text-base font-bold text-foreground group-open:text-primary">{f.q}</summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related metrics and calculators</h2>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</IntentPrefetchLink>
-            <IntentPrefetchLink href="/glossary/cap-rate" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate</IntentPrefetchLink>
-            <IntentPrefetchLink href="/glossary/irr" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</IntentPrefetchLink>
-            <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment calculator</IntentPrefetchLink>
-            <IntentPrefetchLink href="/tools/closing-cost-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Closing cost calculator</IntentPrefetchLink>
-          </div>
-        </section>
-
-        {/* Backlink engine — quiet, collapsed, renders nothing if this
-
-            tool has no embeddable widget. See the component header. */}
-
-        <ToolEmbedInvite slug="break-even-calculator" />
-
-
-        <ToolsConversionCta calculatorName="Break-even calculator" />
-        <RelatedContent kind="tool" slug="break-even-calculator" title="Break-Even Calculator" className="mt-10" />
+        </Section>
       </main>
       <SiteFooter />
     </div>
