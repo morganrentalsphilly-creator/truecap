@@ -14,15 +14,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -125,28 +138,24 @@ export default function BreakEvenOccupancyPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -154,7 +163,8 @@ export default function BreakEvenOccupancyPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Cap rate and cash-on-cash tell you what a rental earns when
               everything goes right. Break-even occupancy tells you the opposite —
               how far rent can fall or vacancy can climb before the property stops
@@ -162,7 +172,7 @@ export default function BreakEvenOccupancyPost() {
               in{" "}
               <a
                 href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 multifamily loan underwriting
               </a>
@@ -170,14 +180,14 @@ export default function BreakEvenOccupancyPost() {
               of roughly{" "}
               <a
                 href="https://www.freddiemac.com/pmms"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 7% mortgage rates
               </a>{" "}
               and modest rent growth (
               <a
                 href="https://www.bls.gov/news.release/cpi.t02.htm"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rent of primary residence up 2.7% in the year to August 2026
               </a>
@@ -187,10 +197,8 @@ export default function BreakEvenOccupancyPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Two different &quot;break-evens&quot; — don&apos;t confuse them
-            </h2>
+          <ArticleBody>
+            <h2>Two different &quot;break-evens&quot; — don&apos;t confuse them</h2>
             <p>
               The word &quot;break-even&quot; gets attached to two completely
               different rental metrics, so it is worth separating them up front.
@@ -199,7 +207,7 @@ export default function BreakEvenOccupancyPost() {
               closing costs, and initial repairs. That is what TrueCap&apos;s{" "}
               <Link
                 href="/tools/break-even-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 break-even calculator
               </Link>{" "}
@@ -214,19 +222,12 @@ export default function BreakEvenOccupancyPost() {
               Both matter, and the rest of this post is about the second.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The formula
-            </h2>
+            <h2>The formula</h2>
             <p>
               Break-even occupancy is the share of full rent you have to collect to
               exactly cover everything the property costs to run and finance:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Break-even occupancy = (Operating expenses + Debt service) ÷ Gross
-                potential rent
-              </code>
-            </div>
+            <ToolFormula formula="Break-even occupancy = (Operating expenses + Debt service) ÷ Gross potential rent" />
             <p>
               Three pieces, all annual.{" "}
               <strong>Gross potential rent</strong> is what the property collects at
@@ -249,16 +250,14 @@ export default function BreakEvenOccupancyPost() {
               that is a guideline, not a law.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked example: a duplex with a real cushion
-            </h2>
+            <h2>A worked example: a duplex with a real cushion</h2>
             <p>
               Take a $300,000 duplex, 25% down ($75,000), financing $225,000 at 7%
               over 30 years. That principal-and-interest payment runs about $1,497 a
               month, or $17,964 a year (run your own number on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -267,57 +266,53 @@ export default function BreakEvenOccupancyPost() {
               pays water, with operating expenses laid out like this:
             </p>
 
-            <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+            <ArticleTable label="Data table" stickyFirstColumn={false}>
+              <table>
                 <thead>
                   <tr>
-                    <th className="text-left">Annual operating expense</th>
+                    <th>Annual operating expense</th>
                     <th className="text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>Property taxes</td>
-                    <td className="text-right">$3,600</td>
+                    <td className="whitespace-nowrap text-right">$3,600</td>
                   </tr>
                   <tr>
                     <td>Insurance</td>
-                    <td className="text-right">$2,000</td>
+                    <td className="whitespace-nowrap text-right">$2,000</td>
                   </tr>
                   <tr>
                     <td>Repairs &amp; maintenance</td>
-                    <td className="text-right">$2,400</td>
+                    <td className="whitespace-nowrap text-right">$2,400</td>
                   </tr>
                   <tr>
                     <td>Capital reserves</td>
-                    <td className="text-right">$1,680</td>
+                    <td className="whitespace-nowrap text-right">$1,680</td>
                   </tr>
                   <tr>
                     <td>Water / lawn / admin</td>
-                    <td className="text-right">$1,220</td>
+                    <td className="whitespace-nowrap text-right">$1,220</td>
                   </tr>
                   <tr>
                     <td>
                       <strong>Total operating expenses</strong>
                     </td>
-                    <td className="text-right">
+                    <td className="whitespace-nowrap text-right">
                       <strong>$10,900</strong>
                     </td>
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               Now plug in. Operating expenses ($10,900) plus debt service ($17,964)
               equal $28,864 a year of fixed cost to keep the lights on and the loan
               current. Against $33,600 of gross potential rent:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                $28,864 ÷ $33,600 = 0.859 → break-even occupancy ≈ 86%
-              </code>
-            </div>
+            <ToolFormula formula="$28,864 ÷ $33,600 = 0.859 → break-even occupancy ≈ 86%" />
             <p>
               So the duplex pays for itself as long as you collect at least 86% of
               full rent. You can lose up to <strong>14%</strong> of gross rent to
@@ -328,9 +323,7 @@ export default function BreakEvenOccupancyPost() {
               margin of safety, and it is the thing cap rate alone never shows you.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The dollar version: break-even rent
-            </h2>
+            <h2>The dollar version: break-even rent</h2>
             <p>
               The same math flips into a rent floor, which some investors find more
               tangible than a percentage. At full occupancy, the property breaks
@@ -346,7 +339,7 @@ export default function BreakEvenOccupancyPost() {
               instinct behind the{" "}
               <Link
                 href="/blog/1-percent-rule-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1% rule
               </Link>
@@ -354,9 +347,7 @@ export default function BreakEvenOccupancyPost() {
               blanket screen.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The clean bridge: break-even occupancy is where DSCR hits 1.0
-            </h2>
+            <h2>The clean bridge: break-even occupancy is where DSCR hits 1.0</h2>
             <p>
               Here is the relationship worth memorizing. Debt-service coverage ratio
               is net operating income divided by debt service. At the exact
@@ -372,7 +363,7 @@ export default function BreakEvenOccupancyPost() {
               $33,600 × 0.86 ≈ $28,900; subtract $10,900 of operating expenses and{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>{" "}
@@ -380,7 +371,7 @@ export default function BreakEvenOccupancyPost() {
               for a{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -391,7 +382,7 @@ export default function BreakEvenOccupancyPost() {
               (
               <a
                 href="https://mf.freddiemac.com/docs/product/fixed_rate.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac&apos;s conventional multifamily loans, for example,
                 require at least 1.25x
@@ -401,9 +392,7 @@ export default function BreakEvenOccupancyPost() {
               want to know which one a given deal is failing.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              When the cushion collapses: the overpaid twin
-            </h2>
+            <h2>When the cushion collapses: the overpaid twin</h2>
             <p>
               Break-even occupancy is most useful as a comparison. Take the exact
               same duplex — same two units, same $2,800 of rent — but assume you win
@@ -415,11 +404,11 @@ export default function BreakEvenOccupancyPost() {
               $11,380. Same income, heavier cost:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Metric</th>
+                  <tr>
+                    <th>Metric</th>
                     <th className="text-right">$300k (disciplined)</th>
                     <th className="text-right">$340k (overpaid)</th>
                   </tr>
@@ -453,7 +442,7 @@ export default function BreakEvenOccupancyPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               At $340,000, fixed cost is $31,744 and break-even occupancy jumps to
@@ -467,9 +456,7 @@ export default function BreakEvenOccupancyPost() {
               bad luck the building can absorb.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Putting it to work in an underwrite
-            </h2>
+            <h2>Putting it to work in an underwrite</h2>
             <p>
               The practical move is to compute break-even occupancy and then hold it
               up against the vacancy you actually expect. If your market runs 6%
@@ -482,7 +469,7 @@ export default function BreakEvenOccupancyPost() {
               in{" "}
               <Link
                 href="/blog/vacancy-rate-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 what vacancy rate to assume
               </Link>
@@ -507,7 +494,7 @@ export default function BreakEvenOccupancyPost() {
               heuristics you may already use. The{" "}
               <Link
                 href="/blog/50-percent-rule-rentals"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 50% rule
               </Link>{" "}
@@ -518,21 +505,20 @@ export default function BreakEvenOccupancyPost() {
               a little and a deal that can take a punch.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Break-even occupancy is the cheapest insurance in underwriting: one
               division that tells you how much vacancy, turnover, and non-payment a
@@ -540,14 +526,14 @@ export default function BreakEvenOccupancyPost() {
               expenses and debt service, divide by full rent, and compare the result
               to the vacancy you actually expect. A disciplined purchase price buys
               you cushion; an aggressive one spends it. The full{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               runs this for you — enter a property and it returns cash flow, cap
               rate, DSCR, and the occupancy your deal needs to stay above water, so
               you see the downside before you sign, not after the first vacancy.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -571,13 +557,12 @@ export default function BreakEvenOccupancyPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
