@@ -9,13 +9,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -119,28 +131,24 @@ export default function VacancyRatePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "short",
               day: "numeric",
@@ -148,7 +156,8 @@ export default function VacancyRatePost() {
             · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             Vacancy is the most quietly manipulated line in rental
             underwriting. Sellers set it to 0%. Gurus default it to 5%.
             Most investors copy whichever number they saw first — on the
@@ -159,10 +168,8 @@ export default function VacancyRatePost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What vacancy actually measures (it&apos;s not just empty units)
-          </h2>
+        <ArticleBody>
+          <h2>What vacancy actually measures (it&apos;s not just empty units)</h2>
           <p>
             <strong>Physical vacancy</strong> is the obvious one: days the
             unit sits empty between tenants, as a share of the year. One
@@ -199,7 +206,7 @@ export default function VacancyRatePost() {
             standard tricks covered in{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to read a rental property pro forma
             </Link>
@@ -207,9 +214,7 @@ export default function VacancyRatePost() {
             the mortgage.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The turnover math: derive the number, don&apos;t pick it
-          </h2>
+          <h2>The turnover math: derive the number, don&apos;t pick it</h2>
           <p>
             A defensible vacancy assumption is just two estimates multiplied
             together:
@@ -251,7 +256,7 @@ export default function VacancyRatePost() {
             maximization for most small landlords. The{" "}
             <Link
               href="/tools/vacancy-rate-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               vacancy rate calculator
             </Link>{" "}
@@ -259,9 +264,7 @@ export default function VacancyRatePost() {
             rate.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What 5 points of vacancy does to a real deal
-          </h2>
+          <h2>What 5 points of vacancy does to a real deal</h2>
           <p>
             A $300,000 duplex, $1,400/unit, 25% down, $225,000 loan at 7%
             over 30 years (P&amp;I ≈ $1,497/month). Monthly operating
@@ -298,14 +301,14 @@ export default function VacancyRatePost() {
             numbers in the free{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
             at both your base case and base-plus-five.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <h2>
             The DSCR loan wrinkle: your lender&apos;s formula may ignore
             vacancy
           </h2>
@@ -313,7 +316,7 @@ export default function VacancyRatePost() {
             Here&apos;s the part that surprises investors using{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR loans
             </Link>
@@ -332,16 +335,14 @@ export default function VacancyRatePost() {
             Run both versions in the{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
             before you treat an approval as validation of the deal.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Sanity checks by property class (not answers)
-          </h2>
+          <h2>Sanity checks by property class (not answers)</h2>
           <ul>
             <li>
               <strong>A-class, stable metro:</strong> long tenancies and fast
@@ -368,7 +369,7 @@ export default function VacancyRatePost() {
             The Census Bureau&apos;s national rental vacancy figure{" "}
             <a
               href="https://www.census.gov/housing/hvs/data/histtab1.xlsx"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               was 7.3% in the second quarter of 2026, after running 6.3-7.2%
               from 2023 through 2025
@@ -377,7 +378,7 @@ export default function VacancyRatePost() {
             with each other: in that same quarter,{" "}
             <a
               href="https://www.census.gov/housing/hvs/data/rates/tab4_msa_26_rvr.xlsx"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               13 of the 75 largest metros were under 4% and 15 were over 10%
             </a>
@@ -388,21 +389,19 @@ export default function VacancyRatePost() {
             — and the same conversation helps you decide whether{" "}
             <Link
               href="/blog/property-management-yes-or-no"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               hiring a PM
             </Link>{" "}
             pencils at all.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Where to find the real number before you buy
-          </h2>
+          <h2>Where to find the real number before you buy</h2>
           <p>
             For an{" "}
             <Link
               href="/blog/buying-rental-property-with-tenants"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               occupied property
             </Link>
@@ -437,16 +436,14 @@ export default function VacancyRatePost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            One common modeling mistake: double-counting (or zero-counting)
-          </h2>
+          <h2>One common modeling mistake: double-counting (or zero-counting)</h2>
           <p>
             Vacancy is an income-side adjustment — it reduces collected rent
             before operating expenses. Two errors show up constantly in
             homemade spreadsheets. First, investors using the{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
@@ -462,9 +459,7 @@ export default function VacancyRatePost() {
             real underwrite. Never both, never neither.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            How operators actually push vacancy down
-          </h2>
+          <h2>How operators actually push vacancy down</h2>
           <p>
             <strong>Test price against current comps and lease-up evidence.</strong>{" "}
             A lower asking rent can reduce lease-up time in some cases, but the
@@ -493,25 +488,24 @@ export default function VacancyRatePost() {
             neither a score nor address history guarantees payment or renewal.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            FAQ
-          </h2>
-          {FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                {f.q}
-              </h3>
-              <p>{f.a}</p>
-            </div>
-          ))}
+        </ArticleBody>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Put the number in context
-          </h2>
+        {/* faqLd above is the one FAQPage node for these rows. */}
+        <FaqSection
+          id="faq"
+          variant="inline"
+          heading="FAQ"
+          items={FAQS}
+          structuredData={false}
+          contact={null}
+        />
+
+        <ArticleBody className="mt-16">
+          <h2>Put the number in context</h2>
           <p>
             Vacancy is one line, but it touches everything downstream — NOI,
             cap rate, cash flow, DSCR, and Buy Box fit. The full{" "}
-            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>{" "}
             carries your vacancy assumption through all of it in one pass,
@@ -519,27 +513,27 @@ export default function VacancyRatePost() {
             move. Related reading:{" "}
             <Link
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to underwrite a rental in 60 seconds
             </Link>
             ,{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               the 50% rule
             </Link>
             , and{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               reading a pro forma
             </Link>
             .
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -555,13 +549,12 @@ export default function VacancyRatePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
