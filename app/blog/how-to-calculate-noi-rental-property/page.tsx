@@ -18,11 +18,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -148,49 +161,49 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Net operating income is the number every other rental metric is
-            built on — cap rate, DSCR, and the value of any 5+ unit building all
-            key off it. Get NOI wrong and everything downstream is wrong too.
-            Here&apos;s the formula, a full line-by-line example on a $250K
-            duplex, and the three ways people get it wrong.
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              Net operating income is the number every other rental metric is
+              built on — cap rate, DSCR, and the value of any 5+ unit building all
+              key off it. Get NOI wrong and everything downstream is wrong too.
+              Here&apos;s the formula, a full line-by-line example on a $250K
+              duplex, and the three ways people get it wrong.
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <h2 className="text-2xl sm:text-3xl">The NOI formula</h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-base sm:text-lg font-mono">
-              <span className="font-bold">NOI</span> = Effective gross income −
-              Operating expenses
-            </div>
-          </div>
+          <ArticleBody>
+          <h2>The NOI formula</h2>
+          <ToolFormula
+            formula={
+              <>
+                <span>NOI</span> = Effective gross income −
+                Operating expenses
+              </>
+            }
+          />
           <p>
             Two moving parts, and the whole game is in defining each one
             honestly. Effective gross income is what the building actually
@@ -207,7 +220,7 @@ export default function BlogPost() {
             point. Their{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cash-on-cash returns and DSCRs
             </Link>{" "}
@@ -215,7 +228,7 @@ export default function BlogPost() {
             number, and that number is NOI.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Step 1: Build effective gross income
           </h2>
           <p>
@@ -236,14 +249,14 @@ export default function BlogPost() {
               property turns over. For reference, the{" "}
               <a
                 href="https://www.census.gov/housing/hvs/files/qtr226/Q226press.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 national rental vacancy rate was 7.3% in Q2 2026
               </a>{" "}
               (Census Bureau), and{" "}
               <a
                 href="https://mfguide.fanniemae.com/fnmf-pdf/download/7526"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae&apos;s multifamily underwriting
               </a>{" "}
@@ -251,7 +264,7 @@ export default function BlogPost() {
               and bad debt combined — but you should{" "}
               <Link
                 href="/blog/vacancy-rate-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 derive vacancy from turnover math
               </Link>{" "}
@@ -270,7 +283,7 @@ export default function BlogPost() {
             operating expense gets measured against.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Step 2: Subtract every operating expense
           </h2>
           <p>
@@ -285,7 +298,7 @@ export default function BlogPost() {
               results in a reassessment and higher taxes (
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae&apos;s Selling Guide
               </a>{" "}
@@ -299,7 +312,7 @@ export default function BlogPost() {
               homeowner&apos;s policy.{" "}
               <a
                 href="https://home.treasury.gov/news/press-releases/jy2791"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Premiums have jumped in much of the country
               </a>
@@ -336,7 +349,7 @@ export default function BlogPost() {
             The one genuinely debated line is the{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               CapEx reserve
             </Link>{" "}
@@ -346,7 +359,7 @@ export default function BlogPost() {
             quote (though not the cash that leaves your account).
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What is NOT in NOI</h2>
+          <h2>What is NOT in NOI</h2>
           <p>
             Four things people wrongly subtract. Memorize the exclusions:
           </p>
@@ -360,14 +373,14 @@ export default function BlogPost() {
               <strong>Depreciation.</strong> A non-cash{" "}
               <a
                 href="https://www.irs.gov/instructions/i1040se"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 tax deduction
               </a>
               . It belongs on your{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E
               </Link>
@@ -385,7 +398,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Worked example: a $250K duplex
           </h2>
           <p>
@@ -417,18 +430,20 @@ export default function BlogPost() {
               <strong>Total operating expenses: $14,200</strong>
             </li>
           </ul>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-base sm:text-lg font-mono">
-              <span className="font-bold">NOI</span> = $28,500 − $14,200 ={" "}
-              <span className="font-bold">$14,300</span>
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>NOI</span> = $28,500 − $14,200 ={" "}
+                <span>$14,300</span>
+              </>
+            }
+          />
           <p>
             That $14,300 is the building&apos;s pre-financing earning power.
             Note the{" "}
             <Link
               href="/glossary/operating-expense-ratio"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               operating expense ratio
             </Link>
@@ -438,14 +453,14 @@ export default function BlogPost() {
             skipped. The old{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
             is exactly this expense-ratio heuristic in disguise.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The CapEx classification trap
           </h2>
           <p>
@@ -462,7 +477,7 @@ export default function BlogPost() {
               Some lenders work this way —{" "}
               <a
                 href="https://mfguide.fanniemae.com/fnmf-pdf/download/7526"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae&apos;s multifamily guide
               </a>{" "}
@@ -482,7 +497,7 @@ export default function BlogPost() {
             classification is a labeling choice, not a cash choice.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             NOI drives cap rate, DSCR, and value
           </h2>
           <p>
@@ -496,7 +511,7 @@ export default function BlogPost() {
             full method — and the tricks brokers use to inflate it — is in{" "}
             <Link
               href="/blog/how-to-calculate-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to calculate cap rate
             </Link>
@@ -513,7 +528,7 @@ export default function BlogPost() {
             $2,500 ÷ $1,672 = <strong>1.50</strong> — ask any{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR lender
             </Link>{" "}
@@ -536,14 +551,14 @@ export default function BlogPost() {
             (One-to-four-unit homes are still{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               priced by sales comps
             </a>
             , and Fannie Mae does not accept an appraisal that{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               relies on the income approach alone
             </a>
@@ -551,19 +566,21 @@ export default function BlogPost() {
             the comp price cash-flows.)
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             NOI vs cash flow: the last step
           </h2>
           <p>
             NOI is the building; cash flow is your seat in it. Subtract debt
             service from NOI:
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-base sm:text-lg font-mono">
-              Cash flow = $14,300 − $14,970 ={" "}
-              <span className="font-bold">−$670 / year</span>
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                Cash flow = $14,300 − $14,970 ={" "}
+                <span>−$670 / year</span>
+              </>
+            }
+          />
           <p>
             So this &ldquo;5.7% cap&rdquo; duplex is mildly cash-flow negative
             at 25% down and an assumed 7% — not because the building is bad, but because
@@ -576,7 +593,7 @@ export default function BlogPost() {
             financing tells you whether <em>you</em> do.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Three ways people get NOI wrong
           </h2>
           <ul>
@@ -599,54 +616,48 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <div className="not-prose"></div>
-
           <p className="text-sm text-muted-foreground mt-6">
             Related reading:{" "}
             <Link
               href="/blog/how-to-calculate-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               How to calculate cap rate
             </Link>
             ,{" "}
             <Link
               href="/blog/how-to-calculate-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               How to calculate DSCR
             </Link>
             ,{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               CapEx &amp; maintenance reserves
             </Link>
             ,{" "}
             <Link
               href="/glossary/noi"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI (glossary)
             </Link>
             .
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -688,9 +699,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -701,10 +709,12 @@ export default function BlogPost() {
             10-year projection in one pass.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
