@@ -114,6 +114,22 @@ describe("content hub touch targets", () => {
     expect(strategyGuides).toContain(
       "inline-flex min-h-11 min-w-11 items-center rounded-sm",
     );
+    // city-strategy-guides.tsx writes the data pages' link-group strings out
+    // (safe-market-page.tsx imports it, so it cannot import them back). Pin
+    // each copy to the shared const so the two cannot drift.
+    const template = read("components/marketing/safe-market-page.tsx");
+    for (const name of [
+      "DATA_LINK_GROUP_CLASS",
+      "DATA_LINK_GROUP_LABEL_CLASS",
+      "DATA_LINK_ROW_CLASS",
+      "DATA_TAG_LINK_CLASS",
+    ]) {
+      const shared = new RegExp(`export const ${name} =\\s*"([^"]*)"`).exec(
+        template,
+      )?.[1];
+      expect(shared, name).toBeTruthy();
+      expect(strategyGuides, name).toContain(`className="${shared}"`);
+    }
   });
 
   it("keeps native disclosure summaries touch-sized and focus-visible", () => {
