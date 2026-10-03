@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 const USE_CASES: readonly RuledListItem[] = [
   {
     term: "Triage listings with a consistent first pass",
-    detail: "For a supported address and asking price, review editable cap rate, cash-on-cash, and DSCR assumptions. The result is a preliminary screen, not a finding that a property pencils.",
+    detail: "For a supported address and asking price, review editable cap rate, cash-on-cash, and DSCR assumptions.",
   },
   {
     term: "See year-1 vs year-10 in one view",
@@ -73,16 +73,16 @@ const USE_CASES: readonly RuledListItem[] = [
   },
   {
     term: "Stress-test before you offer",
-    detail: "The Pro sensitivity grid shows how modeled metrics respond when rent moves ±10%, vacancy moves ±5pp, and rates move ±1pp. It does not determine that a deal pencils or recommend an offer.",
+    detail: "The Pro sensitivity grid shows how modeled metrics respond when rent moves ±10%, vacancy moves ±5pp, and rates move ±1pp.",
   },
 ];
 
 // A real sequence (paste, adjust, calculate, project, stress-test, save), so
 // it is numbered.
 const WORKFLOW_STEPS = [
-  "Paste the listing address. A HUD rent benchmark and the FRED owner-occupied mortgage-rate benchmark can pre-fill; enter a local property-tax bill or reviewed rate manually.",
+  "Enter the listing address, the asking price and a bedroom count. A HUD rent benchmark can pre-fill the rent. The Buy & Hold starter supplies an interest rate and a property-tax rate, labeled with the starter's name. They are placeholders: replace them with your quoted rate and the local tax bill.",
   "Adjust the financing (down %, term, rate) to match the offer you're considering.",
-  "Run the analysis: cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
+  "Run the analysis to see cap rate, CoC, DSCR and monthly cash flow.",
   "Pro: open the 10-year planning projection to review cash flow and equity under the entered growth assumptions.",
   "Pro: stress-test in the Sensitivity grid before you write the offer.",
   "Save the deal. The portfolio rollup in My Deals shows your aggregate cash flow across everything you're considering.",
@@ -103,11 +103,11 @@ const OVER_A_SPREADSHEET: readonly RuledListItem[] = [
   },
   {
     term: "Portfolio view.",
-    detail: "Save 10 deals, see total cash flow + weighted cap rate across the book.",
+    detail: "Save your deals, see total cash flow + weighted cap rate across the book.",
   },
   {
     term: "Traceable screening defaults.",
-    detail: "HUD rent and FRED rate benchmarks show their sources; property tax stays a manual local input. Replace every first-pass value with property-specific evidence before offering.",
+    detail: "The HUD rent benchmark shows its source, and the Buy & Hold starter's interest rate and property-tax rate carry the starter's name. Replace every first-pass value with property-specific evidence before offering.",
   },
 ];
 
@@ -142,7 +142,7 @@ export default function ForBuyAndHoldPage() {
               </Link>
             </ActionRow>
           }
-          note="Free screen: no card or signup"
+          note="Free screen: no card or signup. Your first complete decision includes the Offer Ceiling."
           aside={
             // Real product screenshot from the free sample deal (Phase 4),
             // set as a document: a rule, no browser chrome. It is the hero's
@@ -246,8 +246,8 @@ export default function ForBuyAndHoldPage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              for quick listing triage — cap rate, cash-on-cash, and DSCR from one
-              address.
+              for quick listing triage — cap rate, cash-on-cash, and DSCR from an
+              address, the asking price and a bedroom count.
             </p>
           </div>
         </Section>
