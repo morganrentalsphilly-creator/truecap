@@ -53,7 +53,6 @@ const decode = (html: string) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-/** Visible text of the rendered page: tags and JSON-LD dropped, entities decoded. */
 /**
  * One visible FAQ row as the article frame's FaqSection renders it: the
  * question in the summary's one <span> (the disclosure mark, an aria-hidden
@@ -62,6 +61,7 @@ const decode = (html: string) =>
 const FAQ_ROW =
   /<details[^>]*><summary[^>]*><span[^>]*>([^<]*)<\/span><svg aria-hidden="true"[^>]*>(?:<path[^>]*><\/path>)+<\/svg><\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g;
 
+/** Visible text of the rendered page: tags and JSON-LD dropped, entities decoded. */
 const visibleText = (html: string) =>
   decode(
     html
