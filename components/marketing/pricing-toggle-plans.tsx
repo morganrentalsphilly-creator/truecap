@@ -524,9 +524,10 @@ export function PricingTogglePlans({
  * Every string here is pinned (pricing-copy-guards.test.ts and the
  * authenticated e2e specs): restyle, never reword.
  * The signed-out sentence was reworded for row P1-07 ("Pro analyses" plus
- * the rerun sentence) with its pin; the signed-in allowance keeps the older
- * noun, which formatPricingEvaluationAllowance (lib/pricing-evaluation.ts)
- * writes and an e2e spec pins. Changing it there is an open item.
+ * the rerun sentence) with its pin; the signed-in allowance says "Pro
+ * analyses" too, written by formatPricingEvaluationAllowance
+ * (lib/pricing-evaluation.ts) and pinned by
+ * e2e/authenticated-audit-account.spec.ts.
  */
 function PricingTrialTerms({
   isAuthenticated,

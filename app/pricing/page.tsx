@@ -4,11 +4,12 @@
  * feature table, the value stack, product shots, the DealCheck comparison,
  * FAQ. Amounts come only from
  * lib/public-pricing.ts and the Stripe display prices. For
- * unauthenticated visitors the CTA routes to
- * /auth/sign-up?next=/pricing?checkout=<plan>#plans, so they come back
- * here and PricingPlanButtons auto-resumes the exact checkout they
- * started (the param is read client-side via window.location, not through
- * useSearchParams); for
+ * unauthenticated visitors the paid CTA is a full-document link to
+ * /auth/sign-up?plan=<plan>&billing=<billing>&next=/dashboard/new
+ * (PricingPlanButtons). A signed-in free visitor who lands on
+ * /pricing?checkout=<plan>#plans still has that exact checkout
+ * auto-resumed (the param is read client-side via window.location, not
+ * through useSearchParams); for
  * authenticated free users the CTA triggers Stripe checkout directly
  * via the existing billing action. A Stripe cancel returns with
  * ?billing=checkout_cancelled (CheckoutCancelledBanner below), which
