@@ -102,7 +102,7 @@ describe("anonymous first-decision security contract", () => {
       /anonymousGrant\.code === "RATE_LIMITED"\s+\? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE\s+: anonymousGrant\.message/,
     );
     expect(ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE).toBe(
-      "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again within the hour.",
+      "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again in an hour.",
     );
     const toastAt = analyzer.indexOf("? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE");
     const toast = analyzer.slice(toastAt, toastAt + 900);
