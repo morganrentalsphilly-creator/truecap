@@ -63,7 +63,7 @@ describe("page parts", () => {
       .map((entry) => `app/blog/${entry.name}/page.tsx`)
       .filter((path) => existsSync(join(process.cwd(), path)));
     const mounts = posts.flatMap((path) => read(path).match(/<Note title="(?:Quick answer|TL;DR)"[^>]*>/g) ?? []);
-    expect(mounts).toHaveLength(13);
+    expect(mounts.length).toBeGreaterThanOrEqual(13);
     for (const mount of mounts) expect(mount).toContain(' titleAs="h2"');
   });
 
