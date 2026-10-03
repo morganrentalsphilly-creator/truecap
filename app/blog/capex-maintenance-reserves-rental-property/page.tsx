@@ -9,13 +9,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -119,28 +131,24 @@ export default function CapexReservesPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "short",
               day: "numeric",
@@ -148,7 +156,8 @@ export default function CapexReservesPost() {
             · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             CapEx is where marginal deals go to die. A property can
             &quot;cash flow&quot; $150 a month for three years and then hand
             the entire gain back in one afternoon when the HVAC fails.
@@ -159,10 +168,8 @@ export default function CapexReservesPost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Maintenance vs CapEx: two budgets, two tax treatments
-          </h2>
+        <ArticleBody>
+          <h2>Maintenance vs CapEx: two budgets, two tax treatments</h2>
           <p>
             <strong>Maintenance</strong> (repairs) keeps the property in its
             current condition: the $180 service call, the $90 garbage
@@ -170,7 +177,7 @@ export default function CapexReservesPost() {
             frequent, individually small, and — usefully — generally{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               deductible in the year you pay it
             </a>
@@ -183,7 +190,7 @@ export default function CapexReservesPost() {
             immediately:{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               building components like a roof or furnace are depreciated over
               27.5 years, while appliances and carpeting are 5-year property
@@ -191,7 +198,7 @@ export default function CapexReservesPost() {
             that may qualify for the special depreciation allowance (
             <a
               href="https://www.irs.gov/publications/p946"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               restored to 100% for qualified property acquired and placed in
               service after January 19, 2025
@@ -199,7 +206,7 @@ export default function CapexReservesPost() {
             ). The de minimis safe harbor lets you expense items costing{" "}
             <a
               href="https://www.irs.gov/businesses/small-businesses-self-employed/tangible-property-final-regulations"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               up to $2,500 per invoice or item
             </a>{" "}
@@ -207,7 +214,7 @@ export default function CapexReservesPost() {
             time — the full breakdown is in{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               rental property tax deductions
             </Link>{" "}
@@ -218,9 +225,7 @@ export default function CapexReservesPost() {
             by an expense they could have scheduled five years in advance.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Why percent-of-rent rules quietly fail
-          </h2>
+          <h2>Why percent-of-rent rules quietly fail</h2>
           <p>
             The common defaults — 5% of rent for maintenance, 5-10% for capex
             — share one fatal assumption: that wear scales with rent. It
@@ -228,14 +233,14 @@ export default function CapexReservesPost() {
             a 1,400 sq ft house rents for $1,100 in{" "}
             <Link
               href="/markets/cleveland"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Cleveland
             </Link>{" "}
             instead of $2,800 in{" "}
             <Link
               href="/markets/phoenix"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Phoenix
             </Link>
@@ -253,7 +258,7 @@ export default function CapexReservesPost() {
             mistake as treating the{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
@@ -261,9 +266,7 @@ export default function CapexReservesPost() {
             pass, dangerous as a final answer.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The component method: derive the reserve, don&apos;t guess it
-          </h2>
+          <h2>The component method: derive the reserve, don&apos;t guess it</h2>
           <p>
             For each big-ticket component, divide replacement cost by useful
             life. Here&apos;s the full schedule for a 1,400 sq ft, 3-bed
@@ -271,7 +274,7 @@ export default function CapexReservesPost() {
             own contractor quotes). The useful lives follow{" "}
             <a
               href="https://www.hud.gov/sites/documents/eul_for_cna_e_tool.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               HUD&apos;s estimated useful life table for capital needs
               assessments
@@ -341,23 +344,21 @@ export default function CapexReservesPost() {
             re-run the division. The{" "}
             <Link
               href="/tools/rehab-cost-estimator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               rehab cost estimator
             </Link>{" "}
             prices the component replacements, and the framework in{" "}
             <Link
               href="/blog/how-to-estimate-rehab-costs"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to estimate rehab costs
             </Link>{" "}
             covers the walkthrough itself.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What honest reserves do to a real deal
-          </h2>
+          <h2>What honest reserves do to a real deal</h2>
           <p>
             A $220,000 single-family renting for $1,950/month. 25% down,
             $165,000 loan at 7% over 30 years (P&amp;I ≈ $1,098/month).
@@ -377,7 +378,7 @@ export default function CapexReservesPost() {
               rate 5.6%, cash flow ≈ <strong>−$80/month</strong>,{" "}
               <Link
                 href="/glossary/dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -393,23 +394,21 @@ export default function CapexReservesPost() {
             vacancy line is in{" "}
             <Link
               href="/blog/vacancy-rate-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               what vacancy rate to assume
             </Link>
             . Run your own numbers both ways in the free{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
             before trusting either one.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The NOI convention trap
-          </h2>
+          <h2>The NOI convention trap</h2>
           <p>
             Here&apos;s a wrinkle that bites investors comparing cap rates:
             by appraisal convention, <strong>NOI is calculated before
@@ -425,30 +424,28 @@ export default function CapexReservesPost() {
             glossary entries for{" "}
             <Link
               href="/glossary/noi"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>{" "}
             and{" "}
             <Link
               href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cap rate
             </Link>{" "}
             spell out which convention each number follows, and{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               reading a pro forma
             </Link>{" "}
             covers the other seven places seller math drifts optimistic.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            How much cash to hold, and when to fund it
-          </h2>
+          <h2>How much cash to hold, and when to fund it</h2>
           <p>
             The monthly reserve answers &quot;what does this property really
             earn?&quot; A separate question is &quot;how much cash do I need
@@ -464,7 +461,7 @@ export default function CapexReservesPost() {
               (
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae&apos;s DU requires six months&apos; reserves on an
                 investment-property transaction
@@ -482,7 +479,7 @@ export default function CapexReservesPost() {
               belongs in your cash-to-close math right next to{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 closing costs
               </Link>
@@ -496,9 +493,7 @@ export default function CapexReservesPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Four mistakes that show up constantly
-          </h2>
+          <h2>Four mistakes that show up constantly</h2>
           <p>
             <strong>Double-counting with the 50% rule.</strong> The classic
             heuristic already includes maintenance, capex, and vacancy.
@@ -529,26 +524,25 @@ export default function CapexReservesPost() {
             won&apos;t be in a few years.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            FAQ
-          </h2>
-          {FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                {f.q}
-              </h3>
-              <p>{f.a}</p>
-            </div>
-          ))}
+        </ArticleBody>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Put the reserve in context
-          </h2>
+        {/* faqLd above is the one FAQPage node for these rows. */}
+        <FaqSection
+          id="faq"
+          variant="inline"
+          heading="FAQ"
+          items={FAQS}
+          structuredData={false}
+          contact={null}
+        />
+
+        <ArticleBody className="mt-16">
+          <h2>Put the reserve in context</h2>
           <p>
             CapEx is one line, but it compounds through everything
             downstream — NOI, cap rate, cash flow, DSCR, and whether the
             modeled return still holds after a future roof. The full{" "}
-            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>{" "}
             carries your maintenance and capex assumptions through the
@@ -557,27 +551,27 @@ export default function CapexReservesPost() {
             picture move. Related reading:{" "}
             <Link
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to underwrite a rental in 60 seconds
             </Link>
             ,{" "}
             <Link
               href="/blog/how-to-estimate-rehab-costs"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               estimating rehab costs
             </Link>
             , and{" "}
             <Link
               href="/blog/vacancy-rate-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               what vacancy rate to assume
             </Link>
             .
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -605,13 +599,12 @@ export default function CapexReservesPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
