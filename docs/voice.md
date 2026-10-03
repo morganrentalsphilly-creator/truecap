@@ -44,9 +44,9 @@ TrueCap is a tool a real estate agent uses to screen rental listings for investo
 The agent-first hero from the 2026-09-29 copy pass. These lines are quoted from the code so a copy pass can check them. If this block and the code disagree, the code is what is live: ask the founder which one changes, and do not restore a line from here.
 
 - Headline (`HOMEPAGE_HEADLINES.decision_system` in `lib/marketing-offer-config.ts`): "Stop forwarding listings. Start sending deals that already pencil."
-- Subhead (`components/marketing/marketing-hero.tsx`): "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
+- Subhead (`components/marketing/marketing-hero.tsx`): "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
 - Under the CTA: "Free. No account. Your first full decision is included."
-- Investor cue, visible in the first screen at desktop and at 390px: "Buying for your own portfolio? Same analyzer, your own Buy Box." followed by the link "For investors".
+- Investor cue, above the address form at every width so it is in the first screen at desktop and at 390px: "Buying for your own portfolio? Same analyzer, your own Buy Box." followed by the link "For investors".
 - The earlier investor headline, "Know your walk-away price before you make the offer.", is retired on the homepage. Do not bring it back there.
 
 ## Checks
