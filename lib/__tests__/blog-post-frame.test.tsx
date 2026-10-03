@@ -71,6 +71,17 @@ describe("/blog/1-percent-rule-rental-property renders in the article frame", ()
     expect(main).not.toContain("←");
   });
 
+  it("holds the one under-H1 analyze link in the header, after the byline and before the lede (P2-80)", () => {
+    const header = html.slice(h1, html.indexOf("</header>", h1));
+    const link = /<p class="mt-1 text-base"><a [^>]*href="\/analyze"[^>]*>Analyze a deal free<\/a><\/p>/g;
+    const found = [...header.matchAll(link)];
+    expect(found).toHaveLength(1);
+    expect(found[0][0]).toContain('class="tc-link inline-flex min-h-11 items-center font-medium"');
+    expect(found[0].index).toBeGreaterThan(header.indexOf("By <a"));
+    expect(found[0].index).toBeLessThan(header.indexOf("Glance at a listing price"));
+    expect(source).toMatch(/<BlogByline \/>\s*<UnderTitleAnalyzeLink \/>\s*<p className=\{ARTICLE_LEDE\}>/);
+  });
+
   it("sets the body in prose-ledger with bare H2s", () => {
     expect(count(main, 'class="prose prose-ledger max-w-none"')).toBe(1);
     expect(count(main, 'class="prose prose-ledger max-w-none mt-16"')).toBe(1);
