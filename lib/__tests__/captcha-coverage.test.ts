@@ -153,9 +153,8 @@ describe("a spent captcha token is never sent twice", () => {
 
   /**
    * components/profile/profile-form.tsx also calls requestPasswordResetAction
-   * with a token and does not reset yet (a failed send followed by a retry
-   * sends the spent token). That file belongs to another package; the fix is
-   * handed off, and the file joins this list when it lands.
+   * with a token. Its state has its own names (resetCaptchaToken,
+   * resetCaptchaRef), so it has its own case below with the same assertions.
    */
   const FORMS = [
     ["login", "components/auth/login-form.tsx", 2],
@@ -186,6 +185,21 @@ describe("a spent captcha token is never sent twice", () => {
       for (const w of widgets) expect(w[0]).toContain("ref={captchaRef}");
     },
   );
+
+  it("profile password card resets the widget after the call that carried the token", () => {
+    const src = read("components/profile/profile-form.tsx");
+    expect(src).toMatch(/const resetCaptchaRef = useRef<CaptchaWidgetHandle>\(null\)/);
+    const sends = [...src.matchAll(/captchaToken: resetCaptchaToken \?\? undefined/g)];
+    expect(sends).toHaveLength(1);
+    const rest = src.slice(sends[0].index);
+    const body = rest.slice(0, rest.search(/\n  \};\n/)); // the handler's closing brace
+    const fin = body.indexOf("} finally {");
+    expect(fin, "profile-form.tsx: no finally after the call").toBeGreaterThan(-1);
+    expect(body.slice(fin)).toContain("resetCaptchaRef.current?.reset();");
+    const widgets = [...src.matchAll(/<CaptchaWidget\b[\s\S]*?\/>/g)];
+    expect(widgets).toHaveLength(1);
+    expect(widgets[0][0]).toContain("ref={resetCaptchaRef}");
+  });
 
   it("the confirmation panel keeps a widget mounted for the resend", () => {
     const src = read("components/auth/sign-up-form.tsx");
