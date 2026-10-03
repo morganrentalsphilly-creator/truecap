@@ -610,7 +610,12 @@ export function FocusedDecisionSummary({
           rangePreview?.downsideFeasible && rangePreview.lower != null
           ? {
               label: "Review your targets",
-              reason: `A modeled range of ${money(rangePreview.lower)}–${money(rangePreview.upper)} still meets your targets; the exact Offer Ceiling is not part of this preview. Record the investment decision yourself.`,
+              // This branch renders when the deal MISSES its targets, so the
+              // sentence cannot say the range "meets your targets". The range
+              // is solved on the return targets alone (a price cap or cash
+              // limit is left out: lib/offer-ceiling.ts
+              // buildOfferCeilingRangePreview), hence "on your return targets".
+              reason: `On your return targets, the modeled Offer Ceiling falls between ${money(rangePreview.lower)} and ${money(rangePreview.upper)}; this preview does not show the exact number. Record the investment decision yourself.`,
             }
           : rangePreview
             ? {
@@ -928,7 +933,11 @@ export function FocusedDecisionSummary({
               ? canTunePriceCeiling
                 ? "Choose at least one criterion to calculate an Offer Ceiling."
                 : "TrueCap Pro calculates the highest price that still clears the targets you choose — like the examples above — plus the binding constraint and a screening range."
-              : "The highest price that still meets the criteria shown."}
+              : !canShowPriceCeiling &&
+                  rangePreview?.downsideFeasible &&
+                  rangePreview.lower != null
+                ? "On the return criteria shown, the highest price that still meets them falls in this range."
+                : "The highest price that still meets the criteria shown."}
           </p>
           {/* Anonymous range-preview reveal (2026-09 positioning pass).
               Presentation only: the server already decided this request gets
