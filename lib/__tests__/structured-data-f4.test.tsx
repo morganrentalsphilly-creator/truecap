@@ -70,20 +70,33 @@ const MANY_PAGES_MS = 60_000;
 type Node = Record<string, unknown>;
 type Faq = { q: string; a: string };
 
+/** The streaming prerender: it waits for every Suspense boundary, so the HTML holds the content, not the fallbacks. */
+async function renderSettled(element: ReactElement | Promise<ReactElement>): Promise<string> {
+  const { prerenderToNodeStream } = await import("react-dom/static");
+  const { prelude } = await prerenderToNodeStream(await element);
+  let html = "";
+  for await (const chunk of prelude) html += chunk.toString();
+  return html;
+}
+
 async function render(element: ReactElement | Promise<ReactElement>): Promise<string> {
   const node = await element;
   try {
     return renderToStaticMarkup(node);
   } catch (error) {
-    // A server component that suspends (pricing's async islands) needs the streaming prerender.
+    // A server component that suspends outside a boundary needs the streaming prerender.
     if (!/suspended/i.test(String((error as Error).message))) throw error;
-    const { prerenderToNodeStream } = await import("react-dom/static");
-    const { prelude } = await prerenderToNodeStream(node);
-    let html = "";
-    for await (const chunk of prelude) html += chunk.toString();
-    return html;
+    return renderSettled(node);
   }
 }
+
+/**
+ * /pricing reads the session and the Stripe prices inside Suspense boundaries
+ * (its plan cards and its Offers JSON-LD stream after the hero), so a static
+ * render would return the fallbacks without throwing. It always takes the
+ * settled render, which is what the whole response carries.
+ */
+const renderPricing = async () => renderSettled((await import("@/app/pricing/page")).default());
 
 /** Every JSON-LD node on the page (top-level blocks, @graph members, nested objects). */
 function ldNodes(html: string): Node[] {
@@ -209,7 +222,7 @@ function faqSample(): Array<[string, () => Promise<string>]> {
   for (const slug of TOOL_SLUGS) pages.push([`/tools/${slug}`, () => renderTool(slug)]);
   pages.push(["/tools/rental-property-spreadsheet", () => renderTool("rental-property-spreadsheet")]);
   pages.push(["/", async () => render((await import("@/app/page")).default())]);
-  pages.push(["/pricing", async () => render((await import("@/app/pricing/page")).default())]);
+  pages.push(["/pricing", renderPricing]);
   pages.push(["/why-truecap", async () => render((await import("@/app/why-truecap/page")).default())]);
   for (const city of everyNth(MARKET_CITIES, 25)) {
     pages.push([`/markets/${city.slug}`, async () => render((await import("@/app/markets/[city]/page")).default({ params: Promise.resolve({ city: city.slug }) }))]);
@@ -380,7 +393,10 @@ describe("tools: one application entity with a stable @id", { timeout: 30_000 },
   });
 
   it("/pricing declares its Offers on the homepage's product entity (/#software), not on a second app", async () => {
-    const pricing = await render((await import("@/app/pricing/page")).default());
+    const pricing = await renderPricing();
+    // The settled render holds the streamed parts, not their fallbacks.
+    expect(pricing).toContain('<article id="pro"');
+    expect(pricing).toContain("data-pricing-trial-terms");
     const apps = ldNodes(pricing).filter((node) => !isRef(node) && typeOf(node).some((t) => APP_TYPES.includes(t)));
     expect(apps.map((app) => app["@id"])).toEqual([`${SITE}/#software`]);
     const home = await render((await import("@/app/page")).default());
