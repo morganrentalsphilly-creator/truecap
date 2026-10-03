@@ -53,6 +53,17 @@ export const HERO_EMPTY_HELPER = `Paste an address or a ${SUPPORTED_LISTING_SITE
 export const HERO_LISTING_ERROR = `Paste a supported ${SUPPORTED_LISTING_SITES_TEXT} property link`;
 
 /**
+ * What a pasted listing link does, said once under the hero's form. The link
+ * is never fetched: the address is read from it (lib/listing-url.ts) and a
+ * visitor with no account types the asking price and bedrooms. The lookup that
+ * fills them runs only for a signed-in Pro or Agent Pro subscriber
+ * (app/actions/property-comps.ts, `proOnly`), which is what the analyzer's
+ * own listing-link help says (components/investcalc/listing-link-input.tsx).
+ */
+export const HERO_LISTING_EXPECTATION =
+  "A listing link fills in the address. You enter the asking price and bedrooms; Pro and Agent Pro can fill them from an active listing.";
+
+/**
  * Carries a listing link rather than a street address. The link may sit
  * anywhere in the text: a phone share sheet pastes "Check out this home"
  * and then the link, and that sentence must not become the address.
@@ -310,6 +321,18 @@ export function HeroAddressForm({
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {opening ? "Opening the analyzer with your property." : ""}
       </p>
+
+      {/* Sits AFTER the form, so it cannot move the field or the button: at
+          375x629 the button ends a few pixels above the cookie bar. Hero
+          only; the closing form is reached after the page has explained it. */}
+      {isHero ? (
+        <p
+          data-hero-listing-expectation=""
+          className="mt-2 text-pretty text-sm text-muted-foreground"
+        >
+          {HERO_LISTING_EXPECTATION}
+        </p>
+      ) : null}
 
       {/* The one secondary action: a real link, so it works before hydration
           and for crawlers. /analyze?sample=1 runs the sample deal in the
