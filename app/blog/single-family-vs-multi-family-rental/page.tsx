@@ -116,7 +116,7 @@ export default function SfrVsMfrPost() {
           </p>
           <BlogByline />
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            Single-family vs multi-family is one of the most common questions in rental investing — and one of the most poorly-answered. The honest answer isn&apos;t &quot;multi-family always wins on cash flow&quot; or &quot;SFRs are safer.&quot; The answer is: it depends on your stage, your market, and what you&apos;re actually trying to build. Here&apos;s the honest comparison.
+            Single-family vs multi-family is one of the most common questions in rental investing — and one of the most poorly-answered. The honest answer isn&apos;t &quot;multi-family always wins on cash flow&quot; or &quot;SFRs are safer.&quot; The answer is: it depends on your stage, your market, and what you&apos;re actually trying to build. Here&apos;s the comparison.
           </p>
         </header>
 
@@ -139,7 +139,7 @@ export default function SfrVsMfrPost() {
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The honest side-by-side
+            The side-by-side
           </h2>
           <p>
             An illustrative example (made-up inputs, not market data) for one hypothetical neighborhood:
