@@ -8,13 +8,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -95,26 +106,22 @@ export default function FiftyPercentRulePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -122,7 +129,8 @@ export default function FiftyPercentRulePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               The 50% rule says: operating expenses (everything except debt
               service) typically run ~50% of gross rent. So NOI ≈ rent × 0.5,
               and your cash flow is whatever&apos;s left after your mortgage
@@ -130,23 +138,21 @@ export default function FiftyPercentRulePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the rule actually says
-            </h2>
+          <ArticleBody>
+            <h2>What the rule actually says</h2>
             <p>
               The 50% rule, a long-standing investor rule of thumb, is a
               shorthand for estimating{" "}
               <Link
                 href="/glossary/noi"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Net Operating Income (NOI)
               </Link>{" "}
               without itemizing every expense — see our{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 line-by-line NOI walkthrough
               </Link>{" "}
@@ -160,35 +166,35 @@ export default function FiftyPercentRulePost() {
               P&amp;I:{" "}
               <Link
                 href="/glossary/property-tax"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 property tax
               </Link>
               , insurance,{" "}
               <Link
                 href="/glossary/maintenance-reserve"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 maintenance
               </Link>
               ,{" "}
               <Link
                 href="/glossary/vacancy"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 vacancy reserve
               </Link>
               ,{" "}
               <Link
                 href="/glossary/management-fee"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 management fee
               </Link>
               ,{" "}
               <Link
                 href="/glossary/capex"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 CapEx reserve
               </Link>
@@ -201,7 +207,7 @@ export default function FiftyPercentRulePost() {
               the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>{" "}
@@ -209,9 +215,7 @@ export default function FiftyPercentRulePost() {
               minute.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where it works well
-            </h2>
+            <h2>Where it works well</h2>
             <p>
               The 50% rule is most defensible as a starting assumption for a
               specific kind of property:
@@ -223,7 +227,7 @@ export default function FiftyPercentRulePost() {
                 and{" "}
                 <a
                   href="https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   similar Southern markets such as Memphis
                 </a>
@@ -257,26 +261,22 @@ export default function FiftyPercentRulePost() {
               own numbers.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where it lies (loudly)
-            </h2>
+            <h2>Where it lies (loudly)</h2>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
-              Texas / Illinois — high property tax
-            </h3>
+            <h3>Texas / Illinois — high property tax</h3>
             <p>
               Texas property tax runs well above the national norm (Census ACS
               2024 puts the state&apos;s{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US48"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median real-estate-tax bill at $4,108
               </a>
               , against{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=010XX00US"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 $3,211 nationally
               </a>
@@ -284,7 +284,7 @@ export default function FiftyPercentRulePost() {
               pull the actual tax bill. Illinois runs higher still, with a{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US17"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2024 median bill of $5,399
               </a>
@@ -301,23 +301,21 @@ export default function FiftyPercentRulePost() {
               See the{" "}
               <Link
                 href="/markets/dallas"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Dallas-Fort Worth market guide
               </Link>{" "}
               and the{" "}
               <Link
                 href="/markets/houston"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Houston market guide
               </Link>{" "}
               for the parcel-level tax math.
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
-              Florida — insurance
-            </h3>
+            <h3>Florida — insurance</h3>
             <p>
               Florida premiums can vary sharply by exact location, roof and
               building characteristics, coverage, wind mitigation, flood
@@ -330,51 +328,49 @@ export default function FiftyPercentRulePost() {
               See the{" "}
               <Link
                 href="/markets/tampa"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Tampa market guide
               </Link>{" "}
               for the binding-quote workflow.
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
-              Pre-1940 housing stock — CapEx
-            </h3>
+            <h3>Pre-1940 housing stock — CapEx</h3>
             <p>
               The 50% rule has no separate CapEx line, so it can&apos;t flex
               for older buildings. Pre-1940 housing, which makes up much of
               the stock in{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US3916000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Cleveland
               </a>
               ,{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4260000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Philadelphia
               </a>
               ,{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2622000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Detroit
               </a>
               ,{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US4261000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Pittsburgh
               </a>{" "}
               and{" "}
               <a
                 href="https://data.census.gov/table/ACSDT1Y2024.B25034?g=160XX00US2404000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Baltimore
               </a>
@@ -386,9 +382,7 @@ export default function FiftyPercentRulePost() {
               the flat percentage up.
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
-              Short-term rentals (Airbnb / VRBO)
-            </h3>
+            <h3>Short-term rentals (Airbnb / VRBO)</h3>
             <p>
               STRs carry expense lines a long-term rental doesn&apos;t
               (cleaning per turnover, higher insurance, higher management
@@ -396,16 +390,14 @@ export default function FiftyPercentRulePost() {
               doesn&apos;t apply; use{" "}
               <Link
                 href="/blog/short-term-rental-underwriting-playbook"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 STR-specific underwriting
               </Link>
               .
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
-              High HOA condos
-            </h3>
+            <h3>High HOA condos</h3>
             <p>
               An HOA of $400/mo on a $1,800/mo rental is already 22% of gross
               rent before any other expense. Add tax, insurance, maintenance,
@@ -414,9 +406,7 @@ export default function FiftyPercentRulePost() {
               expenses well past 50%.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where it lies (quietly)
-            </h2>
+            <h2>Where it lies (quietly)</h2>
             <p>
               Owner-occupant house hacks, BRRRR mid-stabilization, properties
               with utilities included, properties with significant vacancy risk
@@ -426,9 +416,7 @@ export default function FiftyPercentRulePost() {
               without explicit adjustment.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to actually use it
-            </h2>
+            <h2>How to actually use it</h2>
             <p>
               The 50% rule is a{" "}
               <strong>triage tool, not a final-decision tool</strong>. Use it in
@@ -436,7 +424,7 @@ export default function FiftyPercentRulePost() {
               underwrite (the free{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -470,7 +458,7 @@ export default function FiftyPercentRulePost() {
               property through{" "}
               <Link
                 href="/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap
               </Link>{" "}
@@ -481,9 +469,7 @@ export default function FiftyPercentRulePost() {
               underwrite before relying on the result.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A better triage filter
-            </h2>
+            <h2>A better triage filter</h2>
             <p>
               If you want a faster + more accurate triage than the 50% rule:
             </p>
@@ -492,7 +478,7 @@ export default function FiftyPercentRulePost() {
                 For high-property-tax states such as Texas, Illinois and{" "}
                 <a
                   href="https://data.census.gov/table/ACSDT1Y2024.B25103?g=040XX00US34"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   New Jersey
                 </a>
@@ -506,7 +492,7 @@ export default function FiftyPercentRulePost() {
                 For{" "}
                 <a
                   href="https://home.treasury.gov/system/files/311/Analyses_of_US_Homeowners_Insurance_Markets_2018-2022_Climate-Related_Risks_and_Other_Factors_0.pdf"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   hurricane-exposed coastal areas
                 </a>{" "}
@@ -523,7 +509,7 @@ export default function FiftyPercentRulePost() {
               see our walkthrough of{" "}
               <Link
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 underwriting a rental in 60 seconds
               </Link>
@@ -538,9 +524,7 @@ export default function FiftyPercentRulePost() {
               assessments). Always do the full underwrite.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+            <h2>The bottom line</h2>
             <p>
               The 50% rule is commonly associated with older workforce-rental
               heuristics, but its accuracy is property-specific. Use it only as
@@ -553,7 +537,7 @@ export default function FiftyPercentRulePost() {
               investors who lose money on it use it as the actual
               underwriting calculation in markets where it&apos;s badly wrong.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -605,13 +589,12 @@ export default function FiftyPercentRulePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
