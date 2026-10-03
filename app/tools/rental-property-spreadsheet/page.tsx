@@ -22,15 +22,38 @@
  * entry, it is listed manually in app/sitemap.ts and linked manually
  * from the site footer. If the file is regenerated, keep the defaults
  * in sync with lib/investcalc-schema.ts defaultValues.
+ *
+ * Layout: the calculator page template (DESIGN.md "Components"; the 1% rule
+ * calculator is the reference), with the download where a calculator's
+ * widget sits: beside the H1 in PageHero, on the 2px ink rule (ToolFrame),
+ * its link a plain 48px button. The guide runs in a 68ch reading column
+ * (ArticleBody), the FAQ is ruled rows (FaqSection; the page keeps its own
+ * FAQPage node), the second download prompt follows it on a rule in the
+ * same column, and the page closes once on the heavy rule (CloseSection).
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ArrowUpRight, Check, Download, FileSpreadsheet } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
+import { ToolFrame } from "@/components/tools/tool-parts";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -134,7 +157,9 @@ export default function RentalPropertySpreadsheetPage() {
   };
 
   return (
-    <>
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema
         toolPath="/tools/rental-property-spreadsheet"
@@ -143,65 +168,57 @@ export default function RentalPropertySpreadsheetPage() {
       <JsonLd data={spreadsheetLd} />
       <JsonLd data={faqLd} />
 
-      <div className="min-h-screen bg-background">
-        <main
-          id="main"
-          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
-        >
-          {/* H1 */}
-          <header className="mb-6 sm:mb-8">
-            <IntentPrefetchLink
-              href="/tools"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Free tools
-            </IntentPrefetchLink>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
-              Free Rental Property Spreadsheet
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              A real Excel deal analyzer — cash flow, cap rate, cash-on-cash,
-              DSCR, and a 10-year projection, with honest expense reserves built
-              in. Direct download. No email gate, no signup, no &ldquo;free
-              trial.&rdquo;
-            </p>
-          </header>
-
-          {/* Download card — this page's "calculator above the fold" */}
-          <section className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
-              <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <FileSpreadsheet className="h-7 w-7 text-primary" aria-hidden />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg sm:text-xl font-extrabold text-foreground">
-                  TrueCap Rental Property Analyzer
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                  .xlsx · 3 tabs · works in Excel, Google Sheets, Apple Numbers,
-                  and LibreOffice. Uses TrueCap&apos;s core buy-and-hold
-                  screening conventions.
-                </p>
-              </div>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The download in the first screen, where a calculator's widget
+            sits: beside the H1 from 1024px, under the lede on phones. The
+            hub link is the visible half of the breadcrumb schema and sits
+            under the H1, never above it. The one short analyzer link under
+            the H1 is P2-80's; the page's own action is the download. */}
+        <PageHero
+          title="Free rental property spreadsheet"
+          lede="A real Excel deal analyzer — cash flow, cap rate, cash-on-cash, DSCR, and a 10-year projection, with honest expense reserves built in. Direct download. No email gate, no signup, no “free trial.”"
+          actions={<UnderTitleAnalyzeLink />}
+          aside={
+            // Download block — this page's "calculator above the fold"
+            <ToolFrame aria-labelledby="spreadsheet-download-heading">
+              <h2
+                id="spreadsheet-download-heading"
+                className="font-display text-balance text-h3-sm sm:text-2xl"
+              >
+                TrueCap Rental Property Analyzer
+              </h2>
+              <p className="mt-2 max-w-[52ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                .xlsx · 3 tabs · works in Excel, Google Sheets, Apple Numbers,
+                and LibreOffice. Uses TrueCap&apos;s core buy-and-hold
+                screening conventions.
+              </p>
               <a
                 href={DOWNLOAD_PATH}
                 download
-                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity shrink-0"
+                className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
               >
-                <Download className="w-4 h-4" aria-hidden />
                 Download the spreadsheet
               </a>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              No email required — the button downloads the file directly. Prefer
-              Google Sheets? Upload the file to Drive and open it; every formula
-              converts cleanly.
-            </p>
-          </section>
+              <p className="mt-4 max-w-[52ch] text-pretty text-sm text-muted-foreground">
+                No email required — the button downloads the file directly. Prefer
+                Google Sheets? Upload the file to Drive and open it; every formula
+                converts cleanly.
+              </p>
+            </ToolFrame>
+          }
+        >
+          <p className={ARTICLE_META}>
+            <IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>
+              Free tools
+            </IntentPrefetchLink>
+          </p>
+        </PageHero>
 
-          {/* Long-form content */}
-          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <article className="max-w-[68ch]">
+            <ArticleBody>
+            <h2>
               Why this spreadsheet is un-gated
             </h2>
             <p>
@@ -212,7 +229,7 @@ export default function RentalPropertySpreadsheetPage() {
               of you will eventually want the faster version (
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 type an address, get the same analysis in 60 seconds
               </Link>
@@ -226,7 +243,7 @@ export default function RentalPropertySpreadsheetPage() {
               does not make this workbook&apos;s model more complete than it is.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">What&apos;s in each tab</h2>
+            <h2>What&apos;s in each tab</h2>
             <h3>Tab 1 — Deal Analyzer</h3>
             <p>
               The core underwrite on one screen. You edit the inputs — purchase
@@ -287,7 +304,7 @@ export default function RentalPropertySpreadsheetPage() {
               DSCR?&rdquo;
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">A worked example</h2>
+            <h2>A worked example</h2>
             <p>
               The spreadsheet ships with a worked example deal: a $250,000
               single-family rental at $2,400/mo rent, bought with 20% down at
@@ -302,7 +319,7 @@ export default function RentalPropertySpreadsheetPage() {
               surfaces by default.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">
+            <h2>
               The conventions, stated plainly
             </h2>
             <p>
@@ -312,7 +329,7 @@ export default function RentalPropertySpreadsheetPage() {
               TrueCap and documented in our{" "}
               <IntentPrefetchLink
                 href="/methodology"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 methodology
               </IntentPrefetchLink>
@@ -322,14 +339,14 @@ export default function RentalPropertySpreadsheetPage() {
               <li>
                 <IntentPrefetchLink
                   href="/glossary/noi"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   NOI
                 </IntentPrefetchLink>{" "}
                 and{" "}
                 <IntentPrefetchLink
                   href="/glossary/dscr"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   DSCR
                 </IntentPrefetchLink>{" "}
@@ -340,7 +357,7 @@ export default function RentalPropertySpreadsheetPage() {
               <li>
                 <IntentPrefetchLink
                   href="/glossary/monthly-cash-flow"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   Cash flow
                 </IntentPrefetchLink>{" "}
@@ -358,7 +375,7 @@ export default function RentalPropertySpreadsheetPage() {
               know what you&apos;re looking at.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">
+            <h2>
               Or skip the spreadsheet — type an address instead
             </h2>
             <p>
@@ -372,7 +389,7 @@ export default function RentalPropertySpreadsheetPage() {
               The{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -389,102 +406,95 @@ export default function RentalPropertySpreadsheetPage() {
               comparison, see{" "}
               <IntentPrefetchLink
                 href="/vs/excel"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap vs. Excel
               </IntentPrefetchLink>
               .
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
-            <div className="not-prose space-y-4">
-              {FAQS.map((f) => (
-                <details
-                  key={f.q}
-                  className="bg-card border border-border rounded-lg p-4 group"
-                >
-                  <summary className="font-semibold text-foreground cursor-pointer list-none flex items-start justify-between gap-3">
-                    <span>{f.q}</span>
-                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">
-                      +
-                    </span>
-                  </summary>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">
-                    {f.a}
-                  </p>
-                </details>
-              ))}
-            </div>
+            </ArticleBody>
+
+            {/* The analyzer CTA where the guide hands off to TrueCap, inside
+                the article, so the page closes once, on the CloseSection
+                below. */}
+            <ToolsConversionCta
+              calculatorName="Rental property spreadsheet"
+              hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+            />
+
+            {/* The page's FAQPage node is faqLd above, built from the same
+                FAQS, so the section emits none of its own. */}
+            <FaqSection
+              id="spreadsheet-faq"
+              variant="inline"
+              heading="Frequently asked questions"
+              items={FAQS}
+              structuredData={false}
+            />
+
+            {/* Second download prompt after the content, in the reading
+                column: a heading, one line and the same plain button. */}
+            <section aria-labelledby="spreadsheet-grab-heading" className="mt-16">
+              <SectionHeading id="spreadsheet-grab-heading">
+                Grab the spreadsheet
+              </SectionHeading>
+              <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+                Direct .xlsx download — no email, no signup. Yours to keep, copy,
+                and share.
+              </p>
+              <a
+                href={DOWNLOAD_PATH}
+                download
+                className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
+              >
+                Download the spreadsheet
+              </a>
+            </section>
+
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget (this page has none). See the
+                component header. */}
+            <ToolEmbedInvite slug="rental-property-spreadsheet" />
           </article>
+        </Section>
 
-          {/* Second download prompt after the content */}
-          <section className="mt-10 sm:mt-12 rounded-2xl border border-border bg-card p-6 sm:p-8 text-center">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-2">
-              Grab the spreadsheet
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-5">
-              Direct .xlsx download — no email, no signup. Yours to keep, copy,
-              and share.
-            </p>
-            <a
-              href={DOWNLOAD_PATH}
-              download
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              <Download className="w-4 h-4" aria-hidden />
-              Download the spreadsheet
-            </a>
-          </section>
-
-          {/* CTA */}
-          <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-              Run the full analysis — free
-            </h2>
-            <p className="text-sm sm:text-base opacity-90 mb-4">
-              The spreadsheet is the manual version. TrueCap takes an address,
-              can pre-fill editable rent and rate benchmarks, keeps property tax
-              as a manual local input, runs the same math, and adds PMI
-              modeling, 10-year cash-flow and equity projections, sensitivity,
-              Offer Ceiling, and a Deal score.
-            </p>
-            <ul className="text-sm space-y-1.5 mb-5 opacity-90">
-              {[
-                "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "Editable HUD rent + FRED rate benchmarks; manual local property tax",
-                "10-year projection with rent + expense growth (Pro)",
-                "Downside sensitivity and Offer Ceiling (included in your first decision, Pro after)",
-                "Deal score (0–100) with a factor breakdown",
-                "Free to start — no credit card",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/analyze" prefetch={false}
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-            >
-              Open the full TrueCap analyzer
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </section>
-
-          {/* Footer */}
-          {/* Backlink engine — quiet, collapsed, renders nothing if this
-              tool has no embeddable widget. See the component header. */}
-          <ToolEmbedInvite slug="rental-property-spreadsheet" />
-
-          <ToolsConversionCta
-            calculatorName="Rental property spreadsheet"
-            hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
-          />
-
-        </main>
-        <SiteFooter />
-      </div>
-    </>
+        <CloseSection
+          heading="Run the full analysis — free"
+          headingId="spreadsheet-close-heading"
+          lede="The spreadsheet is the manual version. TrueCap takes an address, can pre-fill editable rent and rate benchmarks, keeps property tax as a manual local input, runs the same math, and adds PMI modeling, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, and a Deal score."
+          actions={
+            <>
+              <ul className="border-t-2 border-foreground">
+                {[
+                  "Cash flow, cap rate, CoC, DSCR — auto-calculated",
+                  "Editable HUD rent + FRED rate benchmarks; manual local property tax",
+                  "10-year projection with rent + expense growth (Pro)",
+                  "Downside sensitivity and Offer Ceiling (included in your first decision, Pro after)",
+                  "Deal score (0–100) with a factor breakdown",
+                  "Free to start — no credit card",
+                ].map((line) => (
+                  <li
+                    key={line}
+                    className="border-b border-rule-soft py-3 text-pretty text-base"
+                  >
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <ActionRow className="mt-6">
+                <Link
+                  href="/analyze" prefetch={false}
+                  className={buttonVariants({ size: "cta" })}
+                >
+                  Open the full TrueCap analyzer
+                </Link>
+              </ActionRow>
+            </>
+          }
+        />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
