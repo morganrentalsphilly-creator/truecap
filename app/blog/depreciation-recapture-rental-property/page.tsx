@@ -13,13 +13,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -146,7 +158,7 @@ function FaqAnswer({ answer }: { answer: string }) {
       {answer.slice(0, at)}
       <a
         href={HOME_SALE_SOURCE_URL}
-        className="text-primary font-semibold hover:underline"
+        className="tc-link"
       >
         {HOME_SALE_SOURCE_PHRASE}
       </a>
@@ -202,28 +214,24 @@ export default function DepreciationRecapturePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -231,7 +239,8 @@ export default function DepreciationRecapturePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Depreciation can reduce taxable rental income and adjusted basis.
               A later sale can then produce multiple categories of gain with
               different federal and state treatment. The worked example below is
@@ -240,15 +249,13 @@ export default function DepreciationRecapturePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What depreciation recapture actually is
-            </h2>
+          <ArticleBody>
+            <h2>What depreciation recapture actually is</h2>
             <p>
               Residential rental buildings are generally recovered over{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 27.5 years under MACRS, while land is not depreciable
               </a>
@@ -260,7 +267,7 @@ export default function DepreciationRecapturePost() {
               That modeled non-cash expense helps explain why cash flow and{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E
               </Link>{" "}
@@ -269,7 +276,7 @@ export default function DepreciationRecapturePost() {
             <p>
               <a
                 href="https://www.irs.gov/publications/p551"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Depreciation generally reduces adjusted basis
               </a>
@@ -281,9 +288,7 @@ export default function DepreciationRecapturePost() {
               complete sale calculation, not a flat surcharge.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Records that drive the calculation
-            </h2>
+            <h2>Records that drive the calculation</h2>
             <p>
               A preliminary calculation starts with several records, but the tax
               result requires more than three figures:
@@ -295,7 +300,7 @@ export default function DepreciationRecapturePost() {
                 General categories are discussed in the{" "}
                 <Link
                   href="/blog/closing-costs-investment-property"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   closing-cost breakdown
                 </Link>
@@ -306,7 +311,7 @@ export default function DepreciationRecapturePost() {
                 depreciation history, including{" "}
                 <a
                   href="https://www.irs.gov/publications/p946"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   allowed-or-allowable
                 </a>{" "}
@@ -325,14 +330,12 @@ export default function DepreciationRecapturePost() {
               be reconciled before character and tax are determined.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why the gain may have more than one character
-            </h2>
+            <h2>Why the gain may have more than one character</h2>
             <p>
               A sale can include{" "}
               <a
                 href="https://www.irs.gov/publications/p544"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 unrecaptured Section 1250 gain, Section 1245 recapture
               </a>
@@ -348,9 +351,7 @@ export default function DepreciationRecapturePost() {
               characterized before deciding what a sale would cost after tax.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A simplified worked example: the $250K rental sold for $360K
-            </h2>
+            <h2>A simplified worked example: the $250K rental sold for $360K</h2>
             <p>
               Assume, solely for illustration, a <strong>$250,000</strong>
               purchase with a supported $50,000 land allocation and $200,000
@@ -394,7 +395,7 @@ export default function DepreciationRecapturePost() {
                 $72,727, assigned the{" "}
                 <a
                   href="https://www.irs.gov/taxtopics/tc409"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   25% maximum rate for unrecaptured section 1250 gain
                 </a>{" "}
@@ -404,7 +405,7 @@ export default function DepreciationRecapturePost() {
                 <strong>Remaining modeled gain:</strong> $85,000, assigned the{" "}
                 <a
                   href="https://www.irs.gov/taxtopics/tc409"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   15% long-term capital gain rate
                 </a>{" "}
@@ -428,7 +429,7 @@ export default function DepreciationRecapturePost() {
               described in the{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rental-property tax guide
               </Link>{" "}
@@ -436,9 +437,7 @@ export default function DepreciationRecapturePost() {
               listing agreement, not after.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Do not treat 25% as a universal sale-tax rate
-            </h2>
+            <h2>Do not treat 25% as a universal sale-tax rate</h2>
             <p>
               The worked example uses 25% as a sensitivity assumption for one
               modeled component. It is not a rate quote or a substitute for the
@@ -454,9 +453,7 @@ export default function DepreciationRecapturePost() {
               analysis.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              &quot;Allowed or allowable&quot;: you can&apos;t skip your way out
-            </h2>
+            <h2>&quot;Allowed or allowable&quot;: you can&apos;t skip your way out</h2>
             <p>
               Allowed-or-allowable depreciation can reduce adjusted basis even
               when the return history is incomplete. If prior-year depreciation
@@ -465,22 +462,20 @@ export default function DepreciationRecapturePost() {
               facts. Have a qualified professional determine whether an{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 amended return, accounting-method procedure
               </a>
               , or another treatment applies before filing or selling.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Cost segregation raises the stakes — and changes the rate
-            </h2>
+            <h2>Cost segregation raises the stakes — and changes the rate</h2>
             <p>
               Cost-segregation and accelerated-depreciation decisions can change
               both timing and the character of a later disposition.{" "}
               <Link
                 href="/blog/bonus-depreciation-rental-property-2026"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Bonus depreciation and cost segregation
               </Link>{" "}
@@ -488,7 +483,7 @@ export default function DepreciationRecapturePost() {
               Some components can receive{" "}
               <a
                 href="https://www.irs.gov/publications/p544"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Section 1245 treatment
               </a>{" "}
@@ -504,22 +499,20 @@ export default function DepreciationRecapturePost() {
               with qualified advisers before accelerating deductions.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Five disposition issues to model before choosing a structure
-            </h2>
+            <h2>Five disposition issues to model before choosing a structure</h2>
             <p>
               <strong>1. A possible 1031 exchange.</strong> A qualifying
               exchange{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 may postpone recognition of some gain
               </a>
               , but property eligibility, deadlines, basis,{" "}
               <a
                 href="https://www.irs.gov/instructions/i8824"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 liabilities, cash or other property received
               </a>
@@ -528,7 +521,7 @@ export default function DepreciationRecapturePost() {
               the mechanics and limitations are in{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1031 exchange basics
               </Link>
@@ -539,7 +532,7 @@ export default function DepreciationRecapturePost() {
               may change when some gain is recognized, but{" "}
               <a
                 href="https://www.irs.gov/publications/p537"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 depreciation recapture is generally reported in the year of sale
               </a>
@@ -551,7 +544,7 @@ export default function DepreciationRecapturePost() {
               <strong>3. Passive-loss carryforwards.</strong> A qualifying{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section469&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 fully taxable disposition of an entire interest to an unrelated party
               </a>{" "}
@@ -565,7 +558,7 @@ export default function DepreciationRecapturePost() {
               losses, filing status,{" "}
               <a
                 href="https://www.irs.gov/taxtopics/tc559"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net-investment-income-tax exposure
               </a>
@@ -578,7 +571,7 @@ export default function DepreciationRecapturePost() {
               <strong>5. Estate and gift planning.</strong>{" "}
               <a
                 href="https://www.irs.gov/publications/p551"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Basis at death or after a gift
               </a>{" "}
@@ -589,14 +582,12 @@ export default function DepreciationRecapturePost() {
               entity, debt, and estate plan with qualified advisers.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Underwrite the exit, not just the entry
-            </h2>
+            <h2>Underwrite the exit, not just the entry</h2>
             <p>
               Disposition tax can change an after-tax return. A modeled pre-tax{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 return on investment
               </Link>{" "}
@@ -606,37 +597,35 @@ export default function DepreciationRecapturePost() {
               deduction side, see{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 the 14 rental tax deductions
               </Link>
               , and for how it all lands on the return each April,{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 the Schedule E walkthrough
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>
-                  <FaqAnswer answer={f.a} />
-                </p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            renderAnswer={(item) => <FaqAnswer answer={item.a} />}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Depreciation can reduce adjusted basis, but a sale requires the
               complete basis, character, limitation, and transaction analysis.
@@ -644,7 +633,7 @@ export default function DepreciationRecapturePost() {
               before listing or transferring the property. The{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -652,18 +641,17 @@ export default function DepreciationRecapturePost() {
               does not currently expose a sale-tax or exit module. Build the
               disposition scenario with a qualified tax adviser before listing.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
