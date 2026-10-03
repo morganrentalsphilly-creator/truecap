@@ -26,7 +26,7 @@ import {
   ARTICLE_META_NEXT,
   ArticleBody,
 } from "@/components/marketing/article";
-import { ActionRow, Note, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, Note, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -161,6 +161,7 @@ export default function PlaybookPage() {
         <PageHero
           title="From screening deals to a submitted offer."
           lede="You&apos;ve analyzed twenty deals and offered on none. The math was never the blocker — the process was. Here is the whole path, written down: five steps, one action each, scripts included."
+          actions={<UnderTitleAnalyzeLink />}
         >
           <p className={ARTICLE_META}>The First Offer Playbook</p>
           <nav

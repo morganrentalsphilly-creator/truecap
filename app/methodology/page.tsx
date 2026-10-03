@@ -21,7 +21,7 @@ import {
   ArticlePage,
   ToolFormula,
 } from "@/components/marketing/article";
-import { ActionRow, CloseSection, PageHero } from "@/components/marketing/page-parts";
+import { ActionRow, CloseSection, PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -115,6 +115,7 @@ export default function MethodologyPage() {
         <PageHero
           title="Methodology"
           lede="The formulas, upstream public sources, product defaults, and known limitations behind a TrueCap rental screen. Read this before relying on an output."
+          actions={<UnderTitleAnalyzeLink />}
         >
           <p className={ARTICLE_META}>
             {TRUECAP_UNDERWRITING_STANDARD_NAME} v

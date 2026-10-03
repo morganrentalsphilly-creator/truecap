@@ -500,7 +500,8 @@ describe("P2-56: /methodology is set from the rollout parts", () => {
     const html = mainOf(renderToStaticMarkup(MethodologyPage()));
     expect(html.match(/<h1\b/g)).toHaveLength(1);
     expect(text(html.slice(0, html.indexOf("</section>")))).toMatch(
-      /^Methodology\s?The formulas, .* before relying on an output\.\s?TrueCap Underwriting Standard v\d+(?:\.\d+)*$/,
+      // The one under-title analyze link (wave 6) sits between the lede and the version line.
+      /^Methodology\s?The formulas, .* before relying on an output\.\s?Analyze a deal free\s?TrueCap Underwriting Standard v\d+(?:\.\d+)*$/,
     );
     const close = html.slice(html.indexOf(">Try it</h2>"));
     expect([...close.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map((m) => m[1])).toEqual(["/analyze", "/tools", "/glossary"]);
@@ -516,8 +517,9 @@ describe("P2-56: /playbook is set from the rollout parts and keeps its capture a
     expect(source).toContain("<ArticleBody>");
     expect(source).not.toMatch(/lucide-react/);
     expect(source).not.toMatch(/\buppercase\b|\bbg-gradient|\brounded-(?:xl|2xl|full)\b|brand-(?:blue|green)-light|tracking-widest/);
-    // The playbook's name is the meta line inside the hero, after the title and lede.
-    expect(source).toMatch(/<PageHero\s+title="[^"]+"\s+lede="[^"]+"\s*>\s*<p className=\{ARTICLE_META\}>The First Offer Playbook<\/p>/);
+    // The playbook's name is the meta line inside the hero, after the title, the lede
+    // and the one under-title analyze link (wave 6), which is the hero's action.
+    expect(source).toMatch(/<PageHero\s+title="[^"]+"\s+lede="[^"]+"\s+actions=\{<UnderTitleAnalyzeLink \/>\}\s*>\s*<p className=\{ARTICLE_META\}>The First Offer Playbook<\/p>/);
   });
 
   it("the step links are 44px text links and the analyzer CTA and capture mount once, unchanged", () => {
