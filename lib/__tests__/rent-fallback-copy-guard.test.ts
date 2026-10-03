@@ -45,6 +45,9 @@ const PAGES: Array<{ file: string; page: string; fullLadder: boolean }> = [
   { file: "lib/agent-faqs.ts", page: "/for-agents, /why-truecap and the homepage FAQ", fullLadder: true },
   { file: "app/vs/zillow-rent-estimate/page.tsx", page: "/vs/zillow-rent-estimate", fullLadder: true },
   { file: "app/vs/mashvisor/page.tsx", page: "/vs/mashvisor", fullLadder: true },
+  { file: "app/vs/rentometer/page.tsx", page: "/vs/rentometer", fullLadder: true },
+  // STATE_PAGE_GUIDANCE.fmr: the HUD section of every /states/<slug> page.
+  { file: "lib/markets/indexability.ts", page: "/states/<slug>", fullLadder: true },
 ];
 
 /** The two-outcome sentences this row removed. */
@@ -92,6 +95,10 @@ const AREA_FILL_FILES = [
   "components/marketing/comparison-faq.tsx",
   "app/vs/stessa/page.tsx",
   "app/blog/best-rental-property-calculator-2026/page.tsx",
+  "app/blog/section-8-rental-property-investing/page.tsx",
+  "app/vs/mashvisor-for-short-term-rentals/page.tsx",
+  "app/vs/biggerpockets-for-house-hacking/page.tsx",
+  "lib/markets/indexability.ts",
 ];
 const AREA_FILL = [
   /\bHUD area (?:rent )?benchmark\b/i,
@@ -99,6 +106,10 @@ const AREA_FILL = [
   /\beditable area benchmark\b/i,
   /\bArea rent and a national\b/,
   /HUD Fair Market Rent as an editable area benchmark/i,
+  /HUD Fair\s+Market Rent area benchmark/i,
+  /TrueCap(?:&apos;|')s area benchmark/i,
+  // A TrueCap cell that names the fill "HUD FMR": the statewide figure is not one.
+  /\btruecap: "[^"]*\bHUD FMR\b/,
 ];
 
 /** docs/voice.md rule 10, applied to the sentence that carries the ladder. */

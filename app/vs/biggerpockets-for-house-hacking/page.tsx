@@ -113,7 +113,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Starting values (rent/rate/tax)",
-    truecap: "HUD FMR per unit + FRED rate + manual local property tax",
+    truecap: "HUD rent benchmark per unit + FRED rate + manual local property tax",
     biggerpockets:
       "Entered by hand in the rental form; a separate Rent Estimator calculator is listed",
     winner: "truecap",

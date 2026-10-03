@@ -123,7 +123,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Public records data",
-    truecap: "Limited (HUD FMR + FRED)",
+    truecap: "Limited (HUD rent benchmark + FRED)",
     propstream: "Yes: over 160 million public records (as of October 2026)",
     winner: "propstream",
   },

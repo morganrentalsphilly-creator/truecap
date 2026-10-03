@@ -245,7 +245,7 @@ export default function Section8RentalPost() {
             </p>
             <ul>
               <li>
-                <strong>Rent: use written property-specific inputs.</strong> HUD FMR and TrueCap&apos;s area benchmark are starting references only. Obtain the current payment standard, utility allowance, requested-rent decision, approved contract rent, and current unassisted comps from the relevant sources.
+                <strong>Rent: use written property-specific inputs.</strong> HUD FMR and TrueCap&apos;s HUD rent benchmark are starting references only. Obtain the current payment standard, utility allowance, requested-rent decision, approved contract rent, and current unassisted comps from the relevant sources.
               </li>
               <li>
                 <strong>Vacancy and lease-up:</strong> derive assumptions from property, manager, and PHA history, then add explicit paperwork, inspection, correction, and collection downside cases. Model them with the{" "}

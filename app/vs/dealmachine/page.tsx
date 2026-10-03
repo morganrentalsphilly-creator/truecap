@@ -128,7 +128,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Property data + lists",
-    truecap: "Limited (HUD FMR + FRED)",
+    truecap: "Limited (HUD rent benchmark + FRED)",
     dealmachine: "Yes, 150M+ searchable properties with saved searches and lists",
     winner: "dealmachine",
   },
