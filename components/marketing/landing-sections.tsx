@@ -500,7 +500,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is TrueCap really free?",
-    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: up to ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Pro is for knowing what to offer on every deal: Buy Box fit, the Offer Ceiling, downside checks, comparisons, and reports.`,
+    a: `Yes. Your first complete decision needs no account or card. Create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with no card: ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis. Pro is for knowing what to offer on every deal: Buy Box fit, the Offer Ceiling, downside checks, comparisons, and reports.`,
   },
   {
     q: "Do I need a credit card?",
@@ -516,7 +516,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the free trial work?",
-    a: `Create an account and you get ${PRODUCT_EVALUATION_DAYS} days, up to ${PRODUCT_EVALUATION_DEAL_LIMIT} completed Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card is collected, nothing auto-renews, and checkout shows the amount before a paid subscription begins.`,
+    a: `Create an account and you get ${PRODUCT_EVALUATION_DAYS} days, ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis. No card is collected, nothing auto-renews, and checkout shows the amount before a paid subscription begins.`,
   },
   {
     q: "Is this financial advice?",

@@ -204,8 +204,9 @@ export default function ForInvestorsPage() {
             <>
               Free. No account. Your first full decision is included. A free
               account adds a {PRODUCT_EVALUATION_DAYS}-day trial with{" "}
-              {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
-              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card.
+              {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
+              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. A
+              rerun with changed inputs counts as a new analysis.
             </>
           }
           aside={

@@ -46,6 +46,26 @@ describe("trial wording says what is metered (P1-07)", () => {
     );
   });
 
+  it("the homepage FAQ answers and the /for-investors hero note", () => {
+    // Wave 6 integration: the two investor FAQ answers and the hero note
+    // said "up to N Pro deals" / "completed Pro deals" beside a Pro card
+    // that said "Pro analyses".
+    const landing = read("components/marketing/landing-sections.tsx");
+    expect(landing).toContain(
+      "free trial with no card: ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+    );
+    expect(landing).toContain(
+      "days, ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+    );
+    expect(landing).not.toMatch(/Pro deals\b[^\n]*comparison/);
+    const investors = flat(read("app/for-investors/page.tsx"));
+    expect(investors).toContain(
+      '{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "} {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. A rerun with changed inputs counts as a new analysis.',
+    );
+    expect(investors).not.toMatch(/Pro deals\b/);
+    expect(investors).not.toMatch(/\b\d+ Pro (?:analyses|deals)\b/);
+  });
+
   it("/for-agents, in the pricing lede and the free-trial cell", () => {
     const page = flat(read("app/for-agents/page.tsx"));
     expect(page).toContain("{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and");
