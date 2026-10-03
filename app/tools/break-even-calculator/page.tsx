@@ -176,35 +176,35 @@ export default function BreakEvenCalculatorPage() {
                 items={[
                   {
                     term: (
-                      <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="tc-link">
+                      <IntentPrefetchLink href="/glossary/cash-on-cash-return" className="tc-link inline-flex min-h-11 items-center">
                         Cash-on-cash return
                       </IntentPrefetchLink>
                     ),
                   },
                   {
                     term: (
-                      <IntentPrefetchLink href="/glossary/cap-rate" className="tc-link">
+                      <IntentPrefetchLink href="/glossary/cap-rate" className="tc-link inline-flex min-h-11 items-center">
                         Cap rate
                       </IntentPrefetchLink>
                     ),
                   },
                   {
                     term: (
-                      <IntentPrefetchLink href="/glossary/irr" className="tc-link">
+                      <IntentPrefetchLink href="/glossary/irr" className="tc-link inline-flex min-h-11 items-center">
                         IRR
                       </IntentPrefetchLink>
                     ),
                   },
                   {
                     term: (
-                      <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="tc-link">
+                      <IntentPrefetchLink href="/tools/mortgage-payment-calculator" className="tc-link inline-flex min-h-11 items-center">
                         Mortgage payment calculator
                       </IntentPrefetchLink>
                     ),
                   },
                   {
                     term: (
-                      <IntentPrefetchLink href="/tools/closing-cost-calculator" className="tc-link">
+                      <IntentPrefetchLink href="/tools/closing-cost-calculator" className="tc-link inline-flex min-h-11 items-center">
                         Closing cost calculator
                       </IntentPrefetchLink>
                     ),
