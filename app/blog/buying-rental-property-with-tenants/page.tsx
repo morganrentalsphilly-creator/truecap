@@ -14,13 +14,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -136,28 +148,26 @@ export default function BuyingRentalWithTenantsPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               {TITLE_PLAIN}
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -165,7 +175,8 @@ export default function BuyingRentalWithTenantsPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               A tenant-occupied listing reads like a gift: rent from day one, no
               lease-up gap, a tenant already screened by someone else. And
               sometimes it is. But you&apos;re not just buying a building —
@@ -177,8 +188,8 @@ export default function BuyingRentalWithTenantsPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               Start with the actual tenancy and controlling local rules
             </h2>
             <p>
@@ -190,7 +201,7 @@ export default function BuyingRentalWithTenantsPost() {
               After a foreclosure, the federal{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section5220&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Protecting Tenants at Foreclosure Act
               </a>{" "}
@@ -210,7 +221,7 @@ export default function BuyingRentalWithTenantsPost() {
               in the purchase contract and closing documents.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Underwrite the rent you&apos;re buying, not the rent in the ad
             </h2>
             <p>
@@ -225,7 +236,7 @@ export default function BuyingRentalWithTenantsPost() {
               after following the verification process in the{" "}
               <Link
                 href="/blog/how-to-estimate-rent-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rent estimation guide
               </Link>
@@ -240,7 +251,7 @@ export default function BuyingRentalWithTenantsPost() {
               achievable rent is supported. Run both through the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -258,7 +269,7 @@ export default function BuyingRentalWithTenantsPost() {
               program-specific method: Fannie Mae&apos;s{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-3.1-08/rental-income"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rental-income rules
               </a>
@@ -268,14 +279,14 @@ export default function BuyingRentalWithTenantsPost() {
               worksheet in writing; a lower accepted rent can move the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
               or pricing, but neither outcome is universal.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               A hypothetical turnover sensitivity
             </h2>
             <p>
@@ -294,14 +305,14 @@ export default function BuyingRentalWithTenantsPost() {
               outcome; the{" "}
               <Link
                 href="/blog/vacancy-rate-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 vacancy rate guide
               </Link>{" "}
               shows how turnover timing affects a modeled year.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The records to reconcile before closing
             </h2>
             <p>
@@ -315,7 +326,7 @@ export default function BuyingRentalWithTenantsPost() {
               what was collected and when, not just what was scheduled. The{" "}
               <Link
                 href="/blog/how-to-read-a-rent-roll"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rent roll guide
               </Link>{" "}
@@ -327,7 +338,7 @@ export default function BuyingRentalWithTenantsPost() {
               generic form has the same legal effect everywhere.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Closing checklist: deposits, prorations, and notices
             </h2>
             <p>
@@ -342,7 +353,7 @@ export default function BuyingRentalWithTenantsPost() {
               verification for the tenant.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Compare only lawful post-closing rent scenarios
             </h2>
             <p>
@@ -353,7 +364,7 @@ export default function BuyingRentalWithTenantsPost() {
               anti-discrimination (including the federal{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title42-section3604&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fair Housing Act
               </a>
@@ -363,7 +374,7 @@ export default function BuyingRentalWithTenantsPost() {
               the inherited tenant uses a{" "}
               <Link
                 href="/blog/section-8-rental-property-investing"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Section 8 voucher
               </Link>
@@ -372,7 +383,7 @@ export default function BuyingRentalWithTenantsPost() {
               amount, notice rules, and timing. Under HUD&apos;s{" "}
               <a
                 href="https://www.hud.gov/sites/dfiles/OCHCO/documents/52641A.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 voucher tenancy addendum
               </a>
@@ -381,14 +392,14 @@ export default function BuyingRentalWithTenantsPost() {
               housing authority{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-G/section-982.308"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 at least 60 days before it takes effect
               </a>
               , and the new rent must still pass its{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rent-reasonableness test
               </a>
@@ -396,10 +407,10 @@ export default function BuyingRentalWithTenantsPost() {
               certain upside.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Five mistakes buyers make with inherited tenants
             </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <ul>
               <li>
                 <strong>Underwriting the pro-forma rent.</strong> The listing
                 may show a higher figure than the lease and collection record.
@@ -434,7 +445,7 @@ export default function BuyingRentalWithTenantsPost() {
                 example, requires the veteran to certify an intent to{" "}
                 <a
                   href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section3704&num=0&edition=prelim"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   move into the property personally within a reasonable time
                 </a>
@@ -444,19 +455,20 @@ export default function BuyingRentalWithTenantsPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+            </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            {/* faqLd above is the one FAQPage node for these rows. */}
+            <FaqSection
+              id="faq"
+              variant="inline"
+              heading="FAQ"
+              items={FAQS}
+              structuredData={false}
+              contact={null}
+            />
+
+            <ArticleBody className="mt-16">
+            <h2>
               The bottom line
             </h2>
             <p>
@@ -470,7 +482,7 @@ export default function BuyingRentalWithTenantsPost() {
               through the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -478,7 +490,7 @@ export default function BuyingRentalWithTenantsPost() {
               Tenancy rights, deposit rules, notices, rent restrictions, subsidy
               rules, and closing duties vary by jurisdiction and facts.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -516,13 +528,12 @@ export default function BuyingRentalWithTenantsPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
