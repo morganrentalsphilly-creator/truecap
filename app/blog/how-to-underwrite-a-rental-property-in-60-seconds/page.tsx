@@ -15,11 +15,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -141,392 +154,405 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
-
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <p>
-            A fast first pass can organize a handful of inputs, compute standard
-            ratios, and expose the assumptions most likely to change the result.
-            It cannot complete the property-specific diligence or choose the
-            investment. This post separates the quick screen from that deeper
-            work.
-          </p>
-
-          <p>
-            The goal isn&apos;t to make a final buy decision in 60 seconds.
-            It&apos;s to <em>triage</em>: organize the projected metrics,
-            compare them with criteria you choose, and identify the facts that
-            need deeper verification before you decide what to do next.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">The five numbers you need</h2>
-          <p>
-            A preliminary screen starts with five input groups. Some may appear
-            in a listing; others require a lease, assessor record, insurance or
-            lender quote, inspection, or an explicit starting assumption.
-          </p>
-          <ol>
-            <li>
-              <strong>Purchase price.</strong> The asking price. You&apos;ll
-              later run scenarios against a negotiated price too, but start with
-              what the seller wants.
-            </li>
-            <li>
-              <strong>Monthly gross rent.</strong> If the property is occupied,
-              record the current lease amount separately. If vacant, enter an
-              estimated market rent supported by recent comparable properties.{" "}
-              <a
-                href="https://www.govinfo.gov/content/pkg/FR-2026-09-01/html/2026-17891.htm"
-                className="text-primary font-semibold hover:underline"
-              >
-                HUD Fair Market Rent
-              </a>{" "}
-              is an area-wide 40th-percentile gross rent, utilities included.
-              It can provide labeled area context, but it is
-              not a floor or a property-specific rent comp. Where the tenant
-              pays utilities, it can overstate the rent the owner collects.
-            </li>
-            <li>
-              <strong>Operating expenses (annualized).</strong>{" "}
-              <Link
-                href="/glossary/property-tax"
-                className="text-primary font-semibold hover:underline"
-              >
-                Property tax
-              </Link>
-              ,
-              <Link
-                href="/glossary/insurance"
-                className="text-primary font-semibold hover:underline"
-              >
-                {" "}
-                insurance
-              </Link>
-              ,{" "}
-              <Link
-                href="/glossary/maintenance-reserve"
-                className="text-primary font-semibold hover:underline"
-              >
-                maintenance
-              </Link>
-              , management, HOA, owner-paid utilities. Two allowances sit
-              beside them: a{" "}
-              <Link
-                href="/glossary/vacancy"
-                className="text-primary font-semibold hover:underline"
-              >
-                vacancy allowance
-              </Link>
-              , which comes off the rent before NOI, and a{" "}
-              <Link
-                href="/glossary/capex"
-                className="text-primary font-semibold hover:underline"
-              >
-                replacement reserve
-              </Link>
-              , which TrueCap keeps below NOI and takes out of cash flow. A{" "}
-              <Link
-                href="/blog/50-percent-rule-rentals"
-                className="text-primary font-semibold hover:underline"
-              >
-                broad expense-ratio rule
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
+              {TITLE}
+            </h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
               </Link>{" "}
-              can be a labeled triage check, but it must not replace the
-              individual categories or turn missing costs into zero.
-            </li>
-            <li>
-              <strong>Financing terms.</strong> Down payment percentage,
-              interest rate, amortization term, and loan fees. Use a clearly
-              labeled benchmark for an early screen, then replace it with the
-              written quote and terms for the loan you may use. The national
-              30-year rate TrueCap pre-fills comes from{" "}
-              <a
-                href="https://www.freddiemac.com/pmms/about-pmms"
-                className="text-primary font-semibold hover:underline"
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
+
+          <ArticleBody>
+            <p>
+              A fast first pass can organize a handful of inputs, compute standard
+              ratios, and expose the assumptions most likely to change the result.
+              It cannot complete the property-specific diligence or choose the
+              investment. This post separates the quick screen from that deeper
+              work.
+            </p>
+
+            <p>
+              The goal isn&apos;t to make a final buy decision in 60 seconds.
+              It&apos;s to <em>triage</em>: organize the projected metrics,
+              compare them with criteria you choose, and identify the facts that
+              need deeper verification before you decide what to do next.
+            </p>
+
+            <h2>The five numbers you need</h2>
+            <p>
+              A preliminary screen starts with five input groups. Some may appear
+              in a listing; others require a lease, assessor record, insurance or
+              lender quote, inspection, or an explicit starting assumption.
+            </p>
+            <ol>
+              <li>
+                <strong>Purchase price.</strong> The asking price. You&apos;ll
+                later run scenarios against a negotiated price too, but start with
+                what the seller wants.
+              </li>
+              <li>
+                <strong>Monthly gross rent.</strong> If the property is occupied,
+                record the current lease amount separately. If vacant, enter an
+                estimated market rent supported by recent comparable properties.{" "}
+                <a
+                  href="https://www.govinfo.gov/content/pkg/FR-2026-09-01/html/2026-17891.htm"
+                  className="tc-link"
+                >
+                  HUD Fair Market Rent
+                </a>{" "}
+                is an area-wide 40th-percentile gross rent, utilities included.
+                It can provide labeled area context, but it is
+                not a floor or a property-specific rent comp. Where the tenant
+                pays utilities, it can overstate the rent the owner collects.
+              </li>
+              <li>
+                <strong>Operating expenses (annualized).</strong>{" "}
+                <Link
+                  href="/glossary/property-tax"
+                  className="tc-link"
+                >
+                  Property tax
+                </Link>
+                ,
+                <Link
+                  href="/glossary/insurance"
+                  className="tc-link"
+                >
+                  {" "}
+                  insurance
+                </Link>
+                ,{" "}
+                <Link
+                  href="/glossary/maintenance-reserve"
+                  className="tc-link"
+                >
+                  maintenance
+                </Link>
+                , management, HOA, owner-paid utilities. Two allowances sit
+                beside them: a{" "}
+                <Link
+                  href="/glossary/vacancy"
+                  className="tc-link"
+                >
+                  vacancy allowance
+                </Link>
+                , which comes off the rent before NOI, and a{" "}
+                <Link
+                  href="/glossary/capex"
+                  className="tc-link"
+                >
+                  replacement reserve
+                </Link>
+                , which TrueCap keeps below NOI and takes out of cash flow. A{" "}
+                <Link
+                  href="/blog/50-percent-rule-rentals"
+                  className="tc-link"
+                >
+                  broad expense-ratio rule
+                </Link>{" "}
+                can be a labeled triage check, but it must not replace the
+                individual categories or turn missing costs into zero.
+              </li>
+              <li>
+                <strong>Financing terms.</strong> Down payment percentage,
+                interest rate, amortization term, and loan fees. Use a clearly
+                labeled benchmark for an early screen, then replace it with the
+                written quote and terms for the loan you may use. The national
+                30-year rate TrueCap pre-fills comes from{" "}
+                <a
+                  href="https://www.freddiemac.com/pmms/about-pmms"
+                  className="tc-link"
+                >
+                  Freddie Mac&apos;s survey of owner-occupied purchase loans
+                </a>
+                , not investor loans. For a cash purchase, model no debt service.
+              </li>
+              <li>
+                <strong>Closing costs and initial cash items.</strong> Enter
+                title, lender and transaction costs, cash-funded immediate
+                repairs, and the initial reserve separately when known. A
+                percentage default is only a starting estimate and must remain
+                labeled as such.
+              </li>
+            </ol>
+
+            <p>
+              Have those five? You&apos;re ready to compute the four metrics that
+              actually matter.
+            </p>
+
+            <h2>
+              Metric 1: The 1% rule (5 seconds)
+            </h2>
+            <p>
+              The{" "}
+              <Link
+                href="/glossary/1-percent-rule"
+                className="tc-link"
               >
-                Freddie Mac&apos;s survey of owner-occupied purchase loans
+                1% rule
+              </Link>{" "}
+              is the fastest possible screen. Divide monthly gross rent by the
+              purchase price. It compares price with gross rent only; it says
+              nothing about expenses, financing, condition, or actual cash flow.
+            </p>
+            <ToolFormula
+              formula={
+                <>
+                  Monthly Rent ÷ Purchase Price = rent-to-price percentage
+                </>
+              }
+            />
+            <p>
+              Example: $2,500/mo rent on a $250,000 property = 1.0%, which meets
+              the benchmark. $1,800/mo rent on a $300,000 property = 0.6%, which
+              does not meet it.
+            </p>
+            <p>
+              Meeting or missing the 1% reference does not establish whether the
+              property works. Continue with the complete expense and financing
+              model, then compare the result with the criteria you selected.
+            </p>
+            <p>
+              <Link
+                href="/tools/1-percent-rule-calculator"
+                className="tc-link"
+              >
+                Run the 1% rule on a deal →
+              </Link>
+            </p>
+
+            <h2>
+              Metric 2: Cap rate (15 seconds)
+            </h2>
+            <p>
+              Cap rate (capitalization rate) measures the unleveraged annual
+              return — what the property earns as a percentage of its price,
+              ignoring financing. Investors use it to compare properties before
+              financing enters the picture.
+            </p>
+            <ToolFormula
+              formula={
+                <>
+                  Cap Rate = NOI ÷ Purchase Price
+                </>
+              }
+              example={
+                <>
+                  where NOI = Annual Rent − Vacancy Allowance − Annual Operating
+                  Expenses
+                </>
+              }
+            />
+            <p>
+              Cap-rate ranges vary by property type, condition, market, lease
+              quality, expense conventions, and data date. Compare like with like
+              and verify that NOI excludes financing while including the
+              applicable operating costs.
+            </p>
+            <p>
+              Comparing cap rate with current alternatives can add context, but it
+              is not an apples-to-apples suitability rule: liquidity, leverage,
+              workload, transaction costs, taxes, condition risk, and uncertain
+              future price changes differ materially. For the full walkthrough,
+              including how to source the NOI inputs and what a market cap-rate
+              table actually tells you,{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="tc-link"
+              >
+                see the cap-rate deep dive
+              </Link>
+              .
+            </p>
+            <h2>
+              Metric 3: Cash-on-cash return (15 seconds)
+            </h2>
+            <p>
+              Cap rate ignores financing, which is great for comparing properties
+              but says nothing about the return on your own cash. Cash-on-cash
+              return measures the return on the cash <em>you actually invest</em>,
+              after the mortgage payment.
+            </p>
+            <ToolFormula
+              formula={
+                <>
+                  CoC = Annual Cash Flow ÷ Total
+                  Cash Invested
+                </>
+              }
+              example={
+                <>
+                  <span className="block">
+                    Annual Cash Flow = NOI − Debt Service − PMI (if any) −
+                    Replacement Reserve
+                  </span>
+                  <span className="block">
+                    Total Cash Invested = Down Payment + Closing Costs + Loan Fees +
+                    Initial Repairs + Initial Reserves
+                  </span>
+                </>
+              }
+            />
+            <p>
+              Cash-on-cash is specific to the stated financing and initial-cash
+              assumptions. There is no universal acceptable band. A negative
+              result means the modeled pre-tax cash flow after reserve is below
+              zero; it does not predict future appreciation or choose the next
+              step.
+            </p>
+            <h2>Metric 4: DSCR (10 seconds)</h2>
+            <p>
+              Debt Service Coverage Ratio — a coverage test multifamily lenders
+              such as{" "}
+              <a
+                href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
+                className="tc-link"
+              >
+                Fannie Mae
+              </a>{" "}
+              apply before sizing a loan; conforming one-to-four-unit mortgages
+              are qualified mainly on the borrower&apos;s{" "}
+              <a
+                href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios"
+                className="tc-link"
+              >
+                debt-to-income ratio
               </a>
-              , not investor loans. For a cash purchase, model no debt service.
-            </li>
-            <li>
-              <strong>Closing costs and initial cash items.</strong> Enter
-              title, lender and transaction costs, cash-funded immediate
-              repairs, and the initial reserve separately when known. A
-              percentage default is only a starting estimate and must remain
-              labeled as such.
-            </li>
-          </ol>
+              . DSCR is annual NOI divided by annual mortgage payments. It tells
+              you (and your lender) whether the property can service its debt
+              with operating income alone.
+            </p>
+            <ToolFormula
+              formula={
+                <>
+                  DSCR = Annual NOI ÷ Annual Debt
+                  Service
+                </>
+              }
+            />
+            <p>
+              DSCR definitions, minimums, rent evidence, expense treatment,
+              leverage, and pricing tiers vary by lender and program.{" "}
+              <a
+                href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
+                className="tc-link"
+              >
+                Fannie Mae&apos;s multifamily version
+              </a>
+              , for example, divides underwritten
+              net cash flow, not plain NOI, by debt service at the note rate or a
+              floor rate, whichever is higher. Use this ratio to test coverage
+              and downside, then obtain the lender&apos;s written formula and
+              quote; a modeled band does not establish approval or pricing.
+            </p>
 
-          <p>
-            Have those five? You&apos;re ready to compute the four metrics that
-            actually matter.
-          </p>
+            <h2>The two sanity checks</h2>
+            <p>
+              Numbers can pencil and the deal can still be a trap. Two final
+              checks before you call it.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Metric 1: The 1% rule (5 seconds)
-          </h2>
-          <p>
-            The{" "}
-            <Link
-              href="/glossary/1-percent-rule"
-              className="text-primary font-semibold hover:underline"
-            >
-              1% rule
-            </Link>{" "}
-            is the fastest possible screen. Divide monthly gross rent by the
-            purchase price. It compares price with gross rent only; it says
-            nothing about expenses, financing, condition, or actual cash flow.
-          </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              Monthly Rent ÷ Purchase Price = rent-to-price percentage
-            </div>
-          </div>
-          <p>
-            Example: $2,500/mo rent on a $250,000 property = 1.0%, which meets
-            the benchmark. $1,800/mo rent on a $300,000 property = 0.6%, which
-            does not meet it.
-          </p>
-          <p>
-            Meeting or missing the 1% reference does not establish whether the
-            property works. Continue with the complete expense and financing
-            model, then compare the result with the criteria you selected.
-          </p>
-          <p>
-            <Link
-              href="/tools/1-percent-rule-calculator"
-              className="text-primary font-semibold hover:underline"
-            >
-              Run the 1% rule on a deal →
-            </Link>
-          </p>
+            <h3>Sanity check 1: Stress-test rent and vacancy</h3>
+            <p>
+              What happens to your DSCR and cash flow if rent comes in 10% below
+              your estimate, or vacancy spikes from 5% to 10%? If a small miss on
+              either input flips the deal from positive cash flow to negative, the
+              result is highly sensitive to those assumptions. Label that risk and
+              decide how much evidence or margin your criteria require.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Metric 2: Cap rate (15 seconds)
-          </h2>
-          <p>
-            Cap rate (capitalization rate) measures the unleveraged annual
-            return — what the property earns as a percentage of its price,
-            ignoring financing. Investors use it to compare properties before
-            financing enters the picture.
-          </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">Cap Rate</span> = NOI ÷ Purchase Price
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              where NOI = Annual Rent − Vacancy Allowance − Annual Operating
-              Expenses
-            </div>
-          </div>
-          <p>
-            Cap-rate ranges vary by property type, condition, market, lease
-            quality, expense conventions, and data date. Compare like with like
-            and verify that NOI excludes financing while including the
-            applicable operating costs.
-          </p>
-          <p>
-            Comparing cap rate with current alternatives can add context, but it
-            is not an apples-to-apples suitability rule: liquidity, leverage,
-            workload, transaction costs, taxes, condition risk, and uncertain
-            future price changes differ materially. For the full walkthrough,
-            including how to source the NOI inputs and what a market cap-rate
-            table actually tells you,{" "}
-            <Link
-              href="/blog/how-to-calculate-cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
-              see the cap-rate deep dive
-            </Link>
-            .
-          </p>
-          <h2 className="text-2xl sm:text-3xl">
-            Metric 3: Cash-on-cash return (15 seconds)
-          </h2>
-          <p>
-            Cap rate ignores financing, which is great for comparing properties
-            but says nothing about the return on your own cash. Cash-on-cash
-            return measures the return on the cash <em>you actually invest</em>,
-            after the mortgage payment.
-          </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total
-              Cash Invested
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              Annual Cash Flow = NOI − Debt Service − PMI (if any) −
-              Replacement Reserve
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Total Cash Invested = Down Payment + Closing Costs + Loan Fees +
-              Initial Repairs + Initial Reserves
-            </div>
-          </div>
-          <p>
-            Cash-on-cash is specific to the stated financing and initial-cash
-            assumptions. There is no universal acceptable band. A negative
-            result means the modeled pre-tax cash flow after reserve is below
-            zero; it does not predict future appreciation or choose the next
-            step.
-          </p>
-          <h2 className="text-2xl sm:text-3xl">Metric 4: DSCR (10 seconds)</h2>
-          <p>
-            Debt Service Coverage Ratio — a coverage test multifamily lenders
-            such as{" "}
-            <a
-              href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
-              className="text-primary font-semibold hover:underline"
-            >
-              Fannie Mae
-            </a>{" "}
-            apply before sizing a loan; conforming one-to-four-unit mortgages
-            are qualified mainly on the borrower&apos;s{" "}
-            <a
-              href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios"
-              className="text-primary font-semibold hover:underline"
-            >
-              debt-to-income ratio
-            </a>
-            . DSCR is annual NOI divided by annual mortgage payments. It tells
-            you (and your lender) whether the property can service its debt
-            with operating income alone.
-          </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt
-              Service
-            </div>
-          </div>
-          <p>
-            DSCR definitions, minimums, rent evidence, expense treatment,
-            leverage, and pricing tiers vary by lender and program.{" "}
-            <a
-              href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
-              className="text-primary font-semibold hover:underline"
-            >
-              Fannie Mae&apos;s multifamily version
-            </a>
-            , for example, divides underwritten
-            net cash flow, not plain NOI, by debt service at the note rate or a
-            floor rate, whichever is higher. Use this ratio to test coverage
-            and downside, then obtain the lender&apos;s written formula and
-            quote; a modeled band does not establish approval or pricing.
-          </p>
+            <h3>Sanity check 2: Compare alternatives on the same basis</h3>
+            <p>
+              A current lower-risk yield can be one reference, but cap rate is not
+              a total-return forecast and the risks are different. Record which
+              cash flows, fees, taxes, liquidity limits, leverage, work, and
+              future value assumptions are included before comparing alternatives.
+              Comparing against a metro average is also weaker than comparing
+              against that metro specifically —{" "}
+              <Link
+                href="/markets/philadelphia"
+                className="tc-link"
+              >
+                TrueCap&apos;s Philadelphia market page
+              </Link>{" "}
+              is one example of the labeled HUD Fair Market Rent context that
+              should replace a national figure once you know the submarket.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">The two sanity checks</h2>
-          <p>
-            Numbers can pencil and the deal can still be a trap. Two final
-            checks before you call it.
-          </p>
+            <h2>Putting it together</h2>
+            <p>The 60-second workflow:</p>
+            <ol>
+              <li>Record whether the property meets the 1% benchmark.</li>
+              <li>
+                Compute cap rate and compare it with relevant market evidence.
+              </li>
+              <li>Compute cash-on-cash using the financing you expect.</li>
+              <li>
+                Compute DSCR, then compare it with the written requirements of the
+                lender and program you may use.
+              </li>
+              <li>
+                Stress-test rent and vacancy; label any assumption that changes
+                the cash-flow sign or coverage band.
+              </li>
+              <li>
+                Compare alternatives on a clearly stated, like-for-like basis.
+              </li>
+            </ol>
 
-          <h3>Sanity check 1: Stress-test rent and vacancy</h3>
-          <p>
-            What happens to your DSCR and cash flow if rent comes in 10% below
-            your estimate, or vacancy spikes from 5% to 10%? If a small miss on
-            either input flips the deal from positive cash flow to negative, the
-            result is highly sensitive to those assumptions. Label that risk and
-            decide how much evidence or margin your criteria require.
-          </p>
+            <p>
+              These checks do not choose the next step for you. They make the
+              tradeoffs visible so you can decide whether to continue with rent
+              comps, actual tax records, inspection, document review, and an
+              illustrative long-term model.
+            </p>
 
-          <h3>Sanity check 2: Compare alternatives on the same basis</h3>
-          <p>
-            A current lower-risk yield can be one reference, but cap rate is not
-            a total-return forecast and the risks are different. Record which
-            cash flows, fees, taxes, liquidity limits, leverage, work, and
-            future value assumptions are included before comparing alternatives.
-            Comparing against a metro average is also weaker than comparing
-            against that metro specifically —{" "}
-            <Link
-              href="/markets/philadelphia"
-              className="text-primary font-semibold hover:underline"
-            >
-              TrueCap&apos;s Philadelphia market page
-            </Link>{" "}
-            is one example of the labeled HUD Fair Market Rent context that
-            should replace a national figure once you know the submarket.
-          </p>
+            <p>
+              <strong>The shortcut:</strong> TrueCap computes the first-pass
+              metrics consistently and can start from labeled HUD and
+              published-rate benchmarks. Property tax is entered from a local
+              annual bill or reviewed rate; a blank field uses a 1.1% default —
+              replace it with your local number. Every estimate stays editable;
+              swap in property-specific evidence as you get it.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">Putting it together</h2>
-          <p>The 60-second workflow:</p>
-          <ol>
-            <li>Record whether the property meets the 1% benchmark.</li>
-            <li>
-              Compute cap rate and compare it with relevant market evidence.
-            </li>
-            <li>Compute cash-on-cash using the financing you expect.</li>
-            <li>
-              Compute DSCR, then compare it with the written requirements of the
-              lender and program you may use.
-            </li>
-            <li>
-              Stress-test rent and vacancy; label any assumption that changes
-              the cash-flow sign or coverage band.
-            </li>
-            <li>
-              Compare alternatives on a clearly stated, like-for-like basis.
-            </li>
-          </ol>
+          </ArticleBody>
 
-          <p>
-            These checks do not choose the next step for you. They make the
-            tradeoffs visible so you can decide whether to continue with rent
-            comps, actual tax records, inspection, document review, and an
-            illustrative long-term model.
-          </p>
-
-          <p>
-            <strong>The shortcut:</strong> TrueCap computes the first-pass
-            metrics consistently and can start from labeled HUD and
-            published-rate benchmarks. Property tax is entered from a local
-            annual bill or reviewed rate; a blank field uses a 1.1% default —
-            replace it with your local number. Every estimate stays editable;
-            swap in property-specific evidence as you get it.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -553,9 +579,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -563,10 +586,12 @@ export default function BlogPost() {
             deals. Built by one rental investor in Philadelphia.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
