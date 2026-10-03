@@ -16,16 +16,29 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -146,38 +159,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             This post compares three numbers: cap rate, cash-on-cash return,
             DSCR. They all look like &ldquo;return&rdquo; metrics. They&apos;re
@@ -191,7 +202,7 @@ export default function BlogPost() {
             for when borrowing costs are high.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Cap rate vs cash-on-cash vs DSCR — the short answer
           </h2>
           <p>
@@ -209,7 +220,7 @@ export default function BlogPost() {
               <strong>
                 <Link
                   href="/glossary/cap-rate"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   Cap rate
                 </Link>
@@ -222,7 +233,7 @@ export default function BlogPost() {
               <strong>
                 <Link
                   href="/glossary/cash-on-cash-return"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   Cash-on-cash return
                 </Link>
@@ -235,7 +246,7 @@ export default function BlogPost() {
               <strong>
                 <Link
                   href="/glossary/dscr"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   DSCR
                 </Link>
@@ -252,25 +263,29 @@ export default function BlogPost() {
             service, so DSCR drops out.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Cap rate — what it actually tells you
           </h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">Cap Rate</span> = NOI ÷ Purchase Price
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              where NOI = Annual Rent − Vacancy Allowance − Annual Operating
-              Expenses
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>Cap Rate</span> = NOI ÷ Purchase Price
+              </>
+            }
+            example={
+              <>
+                where NOI = Annual Rent − Vacancy Allowance − Annual Operating
+                Expenses
+              </>
+            }
+          />
           <p>
             Cap rate is the property&apos;s earning power as if you owned it
             free-and-clear. No mortgage, no financing, no leverage. Just rent
             in, expenses out, divided by what you paid. The numerator,{" "}
             <Link
               href="/glossary/noi"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>
@@ -306,18 +321,22 @@ export default function BlogPost() {
             earns. Cap rate alone can&apos;t tell you which of those deals
             you&apos;re looking at.
           </p>
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Cash-on-cash — what it actually tells you
           </h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total
-              Cash Invested
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              after mortgage P&amp;I, after closing costs, after rehab
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>CoC</span> = Annual Cash Flow ÷ Total
+                Cash Invested
+              </>
+            }
+            example={
+              <>
+                after mortgage P&amp;I, after closing costs, after rehab
+              </>
+            }
+          />
           <p>
             Cash-on-cash measures the return on the cash{" "}
             <em>you specifically invested</em>, after the lender takes their
@@ -336,7 +355,7 @@ export default function BlogPost() {
             result with verified alternatives: if an{" "}
             <a
               href="https://www.consumerfinance.gov/ask-cfpb/how-can-i-be-sure-my-money-is-safe-in-my-bank-account-en-1005/"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               insured savings account
             </a>{" "}
@@ -352,19 +371,21 @@ export default function BlogPost() {
             explicitly stated scenarios and keep current operating cash flow
             distinct from projected value and tax outcomes.
           </p>
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             DSCR — what it actually tells you
           </h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt
-              Service
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>DSCR</span> = Annual NOI ÷ Annual Debt
+                Service
+              </>
+            }
+          />
           <p>
             <Link
               href="/blog/how-to-calculate-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR (Debt Service Coverage Ratio)
             </Link>{" "}
@@ -380,7 +401,7 @@ export default function BlogPost() {
             while still applying their own{" "}
             <a
               href="https://mf.freddiemac.com/docs/conventional_small.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               borrower, credit, reserve, and property-eligibility requirements
             </a>
@@ -388,7 +409,7 @@ export default function BlogPost() {
             maintain a rental the owner doesn&apos;t live in is{" "}
             <a
               href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-3/"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               business-purpose credit
             </a>
@@ -399,7 +420,7 @@ export default function BlogPost() {
             approval threshold. Even one lender&apos;s minimum can vary:{" "}
             <a
               href="https://mfguide.fanniemae.com/fnmf-pdf/download/10786"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Fannie Mae&apos;s multifamily guide
             </a>{" "}
@@ -417,7 +438,7 @@ export default function BlogPost() {
             not a return metric or approval promise.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">A negative-leverage scenario</h2>
+          <h2>A negative-leverage scenario</h2>
           <p>
             Negative leverage can occur when the effective cost of borrowing
             exceeds the property&apos;s modeled unlevered operating yield.
@@ -440,26 +461,26 @@ export default function BlogPost() {
             the downside.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Side-by-side comparison</h2>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[560px] text-sm">
+          <h2>Side-by-side comparison</h2>
+          <ArticleTable label="Data table">
+            <table className="min-w-[560px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     What it measures
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Cap rate
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Cash-on-cash
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     DSCR
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td className="text-muted-foreground">Includes financing?</td>
                   <td>No</td>
@@ -494,9 +515,9 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
 
-          <h2 className="text-2xl sm:text-3xl">So which one matters most?</h2>
+          <h2>So which one matters most?</h2>
           <p>
             None is universally first. Read the three together and keep their
             inputs, formulas, and limitations visible.
@@ -513,21 +534,17 @@ export default function BlogPost() {
             sensitivity grid, and the Offer Ceiling: the highest price that
             still meets your targets. Run a real deal in 60 seconds.
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -554,9 +571,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -565,10 +579,12 @@ export default function BlogPost() {
             cash-flow and equity projection, sensitivity, and Offer Ceiling.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
