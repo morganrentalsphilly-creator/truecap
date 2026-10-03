@@ -577,7 +577,6 @@ export default function BestDealCheckAlternativesPost() {
               </Link>{" "}
               marks the rows DealCheck wins, because it wins several.
             </p>
-
           </ArticleBody>
 
           {/* faqSchema above is the one FAQPage node for these rows. */}
