@@ -117,7 +117,7 @@ describe("the frame's parts for converted posts", () => {
     // The reference post imports its parts from the frame only.
     const post = read("app/blog/1-percent-rule-rental-property/page.tsx");
     expect(post).not.toMatch(/from "@\/components\/(?:tools|ledger)\//);
-    expect(post).toMatch(/UnderTitleAnalyzeLink,\n\} from "@\/components\/marketing\/article";/);
+    expect(post).toMatch(/import \{[^}]*\bUnderTitleAnalyzeLink\b[^}]*\} from "@\/components\/marketing\/article";/);
   });
 
   it("passes verify-static's whole-file rules on the reference post with the new import", async () => {
