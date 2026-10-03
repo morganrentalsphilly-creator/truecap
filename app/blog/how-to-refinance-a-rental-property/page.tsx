@@ -8,6 +8,18 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
@@ -15,7 +27,6 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -85,33 +96,44 @@ export default function RefinancePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2"><Link href="/blog" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">← Blog</Link></div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">{TITLE}</h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} · {READING_TIME} min read
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}{" "}
+            · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             Refinancing can change a rental&apos;s payment, term, risk, or available
             equity, but it also adds quote-specific costs and underwriting risk.
             Here&apos;s how to compare the structures without assuming approval.
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The three reasons to refinance</h2>
+        <ArticleBody>
+          <h2>The three reasons to refinance</h2>
           <p>
             Refi exists for three core jobs. Be honest about which one applies to your situation — they have different math.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 1: Rate-and-term refi to lower the payment</h3>
+          <h3>Reason 1: Rate-and-term refi to lower the payment</h3>
           <p>
             If a current written quote is meaningfully better than the existing
             note, a rate-and-term refinance may lower the payment. The result
@@ -130,10 +152,10 @@ export default function RefinancePost() {
             the appropriate decision may differ.
           </p>
           <p>
-            See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact. Before requesting quotes, run the entered balance, rate, and term through the <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">mortgage payment calculator</Link> to see the PITI breakdown to compare against the lender&apos;s written payment estimate.
+            See our <Link href="/glossary/interest-rate" className="tc-link">interest rate</Link> and <Link href="/glossary/loan-term" className="tc-link">loan term</Link> glossary entries for more on how rate + term interact. Before requesting quotes, run the entered balance, rate, and term through the <Link href="/tools/mortgage-payment-calculator" className="tc-link">mortgage payment calculator</Link> to see the PITI breakdown to compare against the lender&apos;s written payment estimate.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 2: Cash-out refi to recycle capital</h3>
+          <h3>Reason 2: Cash-out refi to recycle capital</h3>
           <p>
             If the lender accepts a higher appraised value and approves a
             cash-out loan, some eligible equity may become net proceeds after
@@ -147,7 +169,7 @@ export default function RefinancePost() {
             reference, Freddie Mac&apos;s{" "}
             <a
               href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               maximum LTV for a cash-out refinance
             </a>{" "}
@@ -163,12 +185,12 @@ export default function RefinancePost() {
           </p>
           <p>
             Cash-out refinancing is one possible capital-recycling step in a{" "}
-            <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR strategy</Link>, subject to appraisal, proceeds, and approval.
+            <Link href="/blog/brrrr-method-explained" className="tc-link">BRRRR strategy</Link>, subject to appraisal, proceeds, and approval.
             Seasoning and the eligible value basis vary by program. Under
             Fannie Mae&apos;s{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cash-out refinance rules
             </a>
@@ -178,7 +200,7 @@ export default function RefinancePost() {
             delayed-financing exception covers some recent cash purchases.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 3: Restructure terms</h3>
+          <h3>Reason 3: Restructure terms</h3>
           <p>
             Sometimes the goal isn&apos;t saving money or pulling equity — it&apos;s changing the structure. Common cases:
           </p>
@@ -189,8 +211,8 @@ export default function RefinancePost() {
             <li><strong>Changing borrower or entity</strong> — some products permit entity borrowing, but title, existing-loan, insurance, tax, guaranty, and legal consequences require lender and professional review</li>
           </ul>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The loan types available</h2>
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Conventional (Fannie Mae / Freddie Mac)</h3>
+          <h2>The loan types available</h2>
+          <h3>Conventional (Fannie Mae / Freddie Mac)</h3>
           <p>
             Eligible conventional agency programs may offer competitive
             pricing, but DTI, documentation, reserves, appraisal, occupancy,
@@ -198,7 +220,7 @@ export default function RefinancePost() {
             Mae&apos;s{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               minimum reserve requirements
             </a>
@@ -212,12 +234,12 @@ export default function RefinancePost() {
             program guide and written quote.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">DSCR (non-QM)</h3>
+          <h3>DSCR (non-QM)</h3>
           <p>
-            See our <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans deep dive</Link> for the full picture. These programs primarily underwrite the property&apos;s coverage rather than using personal DTI as the main ratio, while still reviewing borrower and property risks. They can be useful when conventional income rules or financed-property limits constrain a file. Pricing, leverage, documentation, recourse, and prepayment terms vary, so compare current written quotes. See the <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> glossary entry for the math.
+            See our <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="tc-link">DSCR loans deep dive</Link> for the full picture. These programs primarily underwrite the property&apos;s coverage rather than using personal DTI as the main ratio, while still reviewing borrower and property risks. They can be useful when conventional income rules or financed-property limits constrain a file. Pricing, leverage, documentation, recourse, and prepayment terms vary, so compare current written quotes. See the <Link href="/glossary/dscr" className="tc-link">DSCR</Link> glossary entry for the math.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Commercial / portfolio loans</h3>
+          <h3>Commercial / portfolio loans</h3>
           <p>
             Commercial and portfolio structures may address properties or
             borrower situations outside a selected conventional program, but
@@ -226,7 +248,7 @@ export default function RefinancePost() {
             total cost and exit risk.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">The refi process — stages to plan for</h2>
+          <h2>The refi process — stages to plan for</h2>
           <p>
             This is a process outline, not a promised timeline. Lender workload,
             appraisal availability, property complexity, title, insurance,
@@ -247,20 +269,20 @@ export default function RefinancePost() {
             maturity to an advertised turnaround.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Five refinance mistakes to avoid</h2>
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">1. Refi-ing too early (before break-even works)</h3>
+          <h2>Five refinance mistakes to avoid</h2>
+          <h3>1. Refi-ing too early (before break-even works)</h3>
           <p>
             If you&apos;ll sell or refinance again before the modeled break-even,
             quoted costs may exceed the projected savings. Run the complete
             break-even comparison before committing.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">2. Not shopping 3+ lenders</h3>
+          <h3>2. Not shopping 3+ lenders</h3>
           <p>
             The{" "}
             <a
               href="https://www.consumerfinance.gov/consumer-tools/mortgages/shopping-for-a-mortgage/"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               CFPB&apos;s mortgage-shopping guide
             </a>{" "}
@@ -273,7 +295,7 @@ export default function RefinancePost() {
             term; actual quote spreads and realized savings vary.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">3. Pulling too much cash out at the top of the market</h3>
+          <h3>3. Pulling too much cash out at the top of the market</h3>
           <p>
             In a simplified illustration that ignores principal paydown, a loan
             initially at 75% LTV would be about 88% LTV after a 15% value
@@ -281,11 +303,11 @@ export default function RefinancePost() {
             Stress-test a lower appraisal and leave a liquidity buffer. How much
             cushion to build in depends on the market: appraised values swing
             further in appreciation-driven metros like{" "}
-            <Link href="/markets/phoenix" className="text-primary font-semibold hover:underline">Phoenix</Link> than in cash-flow markets where price moves less year to year.
+            <Link href="/markets/phoenix" className="tc-link">Phoenix</Link> than in cash-flow markets where price moves less year to year.
             The FHFA{" "}
             <a
               href="https://fred.stlouisfed.org/data/ATNHPIUS38060Q.txt"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               house price index for the Phoenix metro
             </a>{" "}
@@ -293,7 +315,7 @@ export default function RefinancePost() {
             quarter of 2011, while the{" "}
             <a
               href="https://fred.stlouisfed.org/data/ATNHPIUS32820Q.txt"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               index for the Memphis metro
             </a>{" "}
@@ -301,7 +323,7 @@ export default function RefinancePost() {
             quarter of 2012.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">4. Ignoring DSCR options when conventional won&apos;t fit</h3>
+          <h3>4. Ignoring DSCR options when conventional won&apos;t fit</h3>
           <p>
             When a file does not fit a selected conventional program, a DSCR or
             portfolio program may be another option. Eligibility, pricing,
@@ -309,7 +331,7 @@ export default function RefinancePost() {
             approval remain lender- and file-specific.
           </p>
 
-          <h3 className="text-xl font-bold text-foreground mt-6 mb-2">5. Refusing to refi for &quot;just&quot; 50bp</h3>
+          <h3>5. Refusing to refi for &quot;just&quot; 50bp</h3>
           <p>
             In this stated illustration, a $400k, 30-year loan held 10 years at
             6.5% versus 7.0% changes the modeled payment by about $133/month and
@@ -319,27 +341,27 @@ export default function RefinancePost() {
             rather than treating 50bp as an automatic refinance signal.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">Run the math before you commit</h2>
+          <h2>Run the math before you commit</h2>
           <p>
             Refi decisions hinge on rate, term, closing costs, and hold period.
             For the simple break-even, enter the quoted closing costs, set the
             down payment and rehab to $0, and enter the modeled monthly savings
-            as the monthly net cash flow in the <Link href="/tools/break-even-calculator" className="text-primary font-semibold hover:underline">break-even calculator</Link>. Then run
-            the property in <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> once with the existing loan terms and
+            as the monthly net cash flow in the <Link href="/tools/break-even-calculator" className="tc-link">break-even calculator</Link>. Then run
+            the property in <Link href="/" className="tc-link">TrueCap</Link> once with the existing loan terms and
             once with the quoted new terms to compare modeled cash flow and
             interest. TrueCap is not a lender quote, appraisal,
             underwriting decision, or approval; replace every assumption with
             the current written terms for your file.
           </p>
           <p>
-            Related reading: <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs CoC vs DSCR</Link> for how refi changes each metric, and <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="text-primary font-semibold hover:underline">DSCR loans explained</Link> for when DSCR refi is the right choice.
+            Related reading: <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="tc-link">cap rate vs CoC vs DSCR</Link> for how refi changes each metric, and <Link href="/blog/how-to-calculate-dscr#dscr-loans" className="tc-link">DSCR loans explained</Link> for when DSCR refi is the right choice.
           </p>
           <p className="text-sm text-muted-foreground">
             Verify current written pricing, leverage, seasoning, value basis,
             appraisal, DSCR or DTI treatment, credit, reserves, documentation,
             recourse, prepayment terms, costs, and timing with the lender.
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -371,11 +393,12 @@ export default function RefinancePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
