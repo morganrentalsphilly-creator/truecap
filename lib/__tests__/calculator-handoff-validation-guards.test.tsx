@@ -27,6 +27,10 @@ import {
   seventyPercentRuleFieldErrors,
 } from "@/components/tools/seventy-percent-rule-widget";
 import { ToolResult } from "@/components/tools/tool-parts";
+import {
+  TwoPercentRuleWidget,
+  twoPercentRuleFieldErrors,
+} from "@/components/tools/two-percent-rule-widget";
 import { VacancyRateCalculatorWidget } from "@/components/tools/vacancy-rate-calculator-widget";
 import { FEATURE_CATALOG } from "@/lib/entitlements-catalog";
 import { allToolNumbersValid } from "@/lib/public-tool-validation";
@@ -404,5 +408,63 @@ describe("P2-48 and P2-72: the 1% rule calculator", () => {
     expect(widget.match(/aria-live="polite"/g)).toHaveLength(1);
     expect(widget).toContain('min="0" max="100000000"');
     expect(widget).toContain('min="0" max="1000000"');
+  });
+});
+
+describe("P2-47, P2-48 and P2-72: the 2% rule calculator", () => {
+  // Before the template fan-out the handoff was a 14px text link between a
+  // sparkle and an arrow, the two fields took any number with no message, and
+  // the result was not a live region.
+  it("hands off with the 1% rule widget's button, and the old link's words as label and note", () => {
+    const source = code("components/tools/two-percent-rule-widget.tsx");
+    expect(source).not.toMatch(/\b(?:Sparkles|ArrowUpRight|AlertTriangle)\b/);
+    expect(source).not.toContain("lucide-react");
+    const html = renderToStaticMarkup(createElement(TwoPercentRuleWidget));
+    const anchors = [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)];
+    expect(anchors).toHaveLength(1);
+    const [, attrs, inner] = anchors[0];
+    expect(attrs).toMatch(/\shref="\/analyze\?from=2-percent-rule-calculator"/);
+    expect(textOf(inner)).toBe("Run the full analysis with these numbers");
+    expect(attrs).toMatch(/class="[^"]*\bmin-h-12\b[^"]*\bw-full\b[^"]*\bsm:w-auto\b/);
+    expect(attrs).toContain('aria-describedby="twopct-handoff-note"');
+    const note = /<p id="twopct-handoff-note"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1];
+    expect(note && textOf(note)).toBe("cap rate, CoC, DSCR, cash flow — free in TrueCap");
+  });
+
+  it("a cleared field is not an error; zero, a negative and an absurd value are", () => {
+    expect(twoPercentRuleFieldErrors({ price: "120000", rent: "1500" })).toEqual({ price: null, rent: null });
+    expect(twoPercentRuleFieldErrors({ price: "", rent: "" })).toEqual({ price: null, rent: null });
+    expect(twoPercentRuleFieldErrors({ price: "-120000", rent: "-1500" })).toEqual({
+      price: "Purchase price must be greater than 0.",
+      rent: "Monthly rent must be greater than 0.",
+    });
+    expect(twoPercentRuleFieldErrors({ price: "0", rent: "1500" }).price).toBe(
+      "Purchase price must be greater than 0.",
+    );
+    expect(twoPercentRuleFieldErrors({ price: "1", rent: "99999999999999" })).toEqual({
+      price: null,
+      rent: "Monthly rent must be 1,000,000 or less.",
+    });
+    expect(twoPercentRuleFieldErrors({ price: "999999999999999", rent: "1500" }).price).toBe(
+      "Purchase price must be 100,000,000 or less.",
+    );
+  });
+
+  it("gives no ratio from a rejected value, keeps the ratio, and announces the result", () => {
+    const source = code("components/tools/two-percent-rule-widget.tsx");
+    expect(source).toContain("if (hasFieldError) return { ratio: null, meetsTwo: false, meetsOne: false };");
+    expect(source).toContain("error={priceError}");
+    expect(source).toContain("error={rentError}");
+    // The ratio and both bars are unchanged.
+    expect(source).toContain("const value = (r / p) * 100;");
+    expect(source).toContain("meetsTwo: value >= 2, meetsOne: value >= 1");
+    const html = renderToStaticMarkup(createElement(TwoPercentRuleWidget));
+    expect(html.match(/aria-live="polite"/g)).toHaveLength(1);
+    expect(html).toContain('id="twopct-price"');
+    expect(html).toContain('id="twopct-rent"');
+    expect(html).toContain('min="0" max="100000000"');
+    expect(html).toContain('min="0" max="1000000"');
+    expect(html).not.toMatch(INVALID_ATTR);
+    expect(html).not.toContain('role="alert"');
   });
 });
