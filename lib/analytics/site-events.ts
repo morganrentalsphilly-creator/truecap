@@ -32,8 +32,8 @@ export type SiteEventProps = {
    *
    * It is NOT the same number as the `signup_completed` rows in
    * seo_conversions (seo/scripts/signups.ts, read by the SEO dashboard):
-   * those are built from auth.users and count CONFIRMED accounts with a
-   * first-touch record only. Expect this event to read higher for email
+   * those are built from auth.users and count CONFIRMED accounts whose
+   * first-touch record has an organic source only. Expect this event to read higher for email
    * sign-ups. The name is kept because the dashboards, the SEO control
    * plane's event_name check and docs/analytics.md all read it.
    */
