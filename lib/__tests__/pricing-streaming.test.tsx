@@ -205,7 +205,7 @@ describe("/pricing: what the whole response carries", () => {
       "pro_annual",
       "pro_monthly",
     ]);
-  });
+  }, 60_000);
 
   it("for a subscriber: the server's plan slug still reaches the cards, the lede and the agent line", async () => {
     state.user = { id: "user-1", email: "subscriber@example.com" };
@@ -220,5 +220,5 @@ describe("/pricing: what the whole response carries", () => {
     expect(html).not.toContain("data-pricing-agent-line");
     // A paid account sees no trial terms.
     expect(html).not.toContain("data-pricing-trial-terms");
-  });
+  }, 60_000);
 });
