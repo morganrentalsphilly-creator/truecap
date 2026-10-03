@@ -449,8 +449,8 @@ export default function VsStessaPage() {
             <>
               TrueCap free covers cap rate, CoC, model DSCR, monthly cash
               flow, up to five saves, read-only share links, and the due-diligence
-              checklist/document vault. Your first complete decision also includes the Offer Ceiling.
-              Pro adds sensitivity, the Offer Ceiling,
+              checklist/document vault. Your first complete decision also
+              includes the Offer Ceiling. Pro adds sensitivity, the Offer Ceiling,
               10-year projections, focused comparison, Buy Box screening,
               co-branding, and PDF reports. See live pricing for current terms.
             </>

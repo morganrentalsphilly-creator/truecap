@@ -388,8 +388,8 @@ export default function VsMashvisorPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, monthly cash flow, and
-              plain read-only share links. Your first complete decision also includes the Offer Ceiling.
-              Pro adds co-branding, 10-year cash-flow
+              plain read-only share links. Your first complete decision also
+              includes the Offer Ceiling. Pro adds co-branding, 10-year cash-flow
               and equity projections, sensitivity, Offer Ceiling, saved-deal
               comparison, and included PDFs. No card to start.
             </>
