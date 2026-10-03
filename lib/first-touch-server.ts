@@ -5,8 +5,10 @@ import { z } from "zod";
 import {
   FIRST_TOUCH_REFERRAL_SOURCES,
   LANDING_SECTIONS,
+  isFirstTouchReferralSource,
   splitFirstTouchCookie,
   type FirstTouch,
+  type FirstTouchReferralSource,
 } from "@/lib/first-touch";
 
 /**
@@ -70,6 +72,43 @@ export async function persistFirstTouch(input: {
   });
   if (error) throw error;
   return "written";
+}
+
+/**
+ * The coarse first-touch SOURCE stored on the account at sign-up, read back
+ * from `user.app_metadata` (which `auth.getUser()` already returns and only
+ * the service role can write). Returns one of FIRST_TOUCH_REFERRAL_SOURCES or
+ * null. The landing section and the version are not returned. Anything that
+ * is not exactly one of the nine source tokens (a missing record, a wrong
+ * type, free text, an oversized string) is null, so the caller can never
+ * forward a URL, a click id or a campaign string.
+ */
+export function readStoredFirstTouchSource(
+  appMetadata: unknown,
+): FirstTouchReferralSource | null {
+  if (!appMetadata || typeof appMetadata !== "object") return null;
+  const stored = (appMetadata as Record<string, unknown>).tc_first_touch;
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) {
+    return null;
+  }
+  const source = (stored as Record<string, unknown>).source;
+  return isFirstTouchReferralSource(source) ? source : null;
+}
+
+/**
+ * The one key the subscription Checkout Session adds to
+ * `subscription_data.metadata` so revenue can be split by channel in Stripe
+ * (audit row P2-117): `first_touch_source`, whose value is one of
+ * FIRST_TOUCH_REFERRAL_SOURCES (direct, organic_search, organic_ai,
+ * organic_social, paid_search, paid_social, email, external_referral,
+ * campaign). An empty object when the account has no valid record, so the key
+ * is absent and never an empty or placeholder string.
+ */
+export function firstTouchSubscriptionMetadata(
+  appMetadata: unknown,
+): { first_touch_source?: FirstTouchReferralSource } {
+  const source = readStoredFirstTouchSource(appMetadata);
+  return source ? { first_touch_source: source } : {};
 }
 
 /** Short, non-identifying failure detail (an Auth error code or HTTP status). */
