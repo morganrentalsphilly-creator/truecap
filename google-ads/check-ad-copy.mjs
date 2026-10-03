@@ -238,11 +238,14 @@ for (const text of adText) {
   }
   const days = text.match(/(\d+)[- ]days?\b/);
   if (days && Number(days[1]) !== trial.days) fail(`"${text}": the trial is ${trial.days} days`);
-  const deals = text.match(/(\d+) Pro deals?/);
-  if (deals && Number(deals[1]) !== trial.deals) fail(`"${text}": the trial covers ${trial.deals} Pro deals`);
+  // The trial is counted in Pro analyses, the noun the site uses (a rerun
+  // with changed inputs counts as a new one). "Pro deals" is the retired noun.
+  if (/\bPro deals?\b/i.test(text)) fail(`"${text}": says "Pro deals"; the trial is counted in Pro analyses`);
+  const deals = text.match(/(\d+) (?:free )?Pro analyses\b/);
+  if (deals && Number(deals[1]) !== trial.deals) fail(`"${text}": the trial covers ${trial.deals} Pro analyses`);
   // Google shows a line on its own: a trial length without the allowance
   // reads as that many days of Pro.
-  if (days && !deals) fail(`"${text}": states the trial length without its allowance (${trial.deals} Pro deals)`);
+  if (days && !deals) fail(`"${text}": states the trial length without its allowance (${trial.deals} Pro analyses)`);
   const comparisons = text.match(/(\d+) comparisons?/);
   if (comparisons && Number(comparisons[1]) !== trial.comparisons) {
     fail(`"${text}": the trial covers ${trial.comparisons} comparison`);
@@ -284,7 +287,7 @@ for (const adGroup of adGroups) {
 }
 console.log(`sitelinks: ${sitelinks.length}, callouts: ${callouts.length} (longest ${longest(callouts)})`);
 console.log(`catalog prices: ${priceLabels.join(", ")}`);
-console.log(`trial: ${trial.days} days, ${trial.deals} Pro deals, ${trial.comparisons} comparison; roster ${maxClients}; Buy Boxes ${maxBuyBoxes}`);
+console.log(`trial: ${trial.days} days, ${trial.deals} Pro analyses, ${trial.comparisons} comparison; roster ${maxClients}; Buy Boxes ${maxBuyBoxes}`);
 console.log(`retired /tools paths checked: ${retiredPaths.length}`);
 console.log(`the word "free" in ad text: ${allowFree ? "allowed (--allow-free)" : "not allowed"}`);
 

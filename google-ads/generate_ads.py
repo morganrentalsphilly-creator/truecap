@@ -18,9 +18,11 @@ lib/product-facts.ts and lib/public-pricing.ts.
 The colors and wordmark are the earlier brand (#5248D4 purple, Lato).
 
 Do not upload 02_60_second_speed_landscape_1200x628.png, or
-instagram-posts/30_try_free.png, until the founder rules on the speed claim
-and the address-only promise (report rows P2-19 and P1-14): the image says
-"60s from address" and the post says "4 minutes".
+instagram-posts/30_try_free.png. The founder ruled on 2026-10-03 that no time
+figure is published (report row P2-19) and that the promise names an address,
+the asking price and a bedroom count (row P1-14): the image says "60s from
+address" and the post says "4 minutes". concept_60_second below still draws
+the old words; redraw it without the figure or retire it before any use.
 
 Run:  python3 generate_ads.py
 Outputs into google-ads/creatives/.

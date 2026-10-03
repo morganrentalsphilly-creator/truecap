@@ -17,7 +17,7 @@ places:
 | Agent Pro, monthly | $59.99 | `PUBLIC_AGENT_PRO_MONTHLY_USD` in `lib/public-pricing.ts` |
 | Agent Pro, annual | $590 | `PUBLIC_AGENT_PRO_ANNUAL_USD` in `lib/public-pricing.ts` |
 | Trial length | 21 days | `PRODUCT_EVALUATION_DAYS` in `lib/product-access.ts` |
-| Trial allowance | 3 Pro deals, 1 comparison | `PRODUCT_EVALUATION_DEAL_LIMIT`, `PRODUCT_EVALUATION_COMPARISON_LIMIT` in `lib/product-access.ts` |
+| Trial allowance | 3 Pro analyses, 1 comparison | `PRODUCT_EVALUATION_DEAL_LIMIT`, `PRODUCT_EVALUATION_COMPARISON_LIMIT` in `lib/product-access.ts` |
 | Trial needs a card | no | `PRODUCT_PLAN_FACTS.evaluation.cardRequired` in `lib/product-facts.ts` |
 | Trial covers the roster or co-branding | no | `evaluationFeatures` in `lib/entitlements.ts`, and the trial answer in `lib/agent-faqs.ts` |
 | Client roster | up to 100 clients | `MAX_CLIENTS` in `app/actions/agent-clients.ts` |
@@ -41,18 +41,19 @@ decided by the founder. The two positions:
 - **Keep `free` as a negative (how this file is written).** Leave the copy as it is.
 - **Remove `free` from the negatives.** Then these lines may be added, and each
   is true today: headlines `Analyze a deal free`, `First deal free, no account`
-  and `21-day free trial, 3 Pro deals`; callouts `First deal free` and
-  `Free trial: 3 Pro deals`. Expect clicks from people who want a free tool only.
+  and `Free trial, 3 Pro analyses`; callouts `First deal free` and
+  `3 free Pro analyses`. Expect clicks from people who want a free tool only.
 
 ## Rules every line follows
 
 - Sentence case. No exclamation marks.
 - Headlines are 30 characters or fewer, descriptions 90 or fewer, display
   paths 15 or fewer, sitelink text 25 or fewer, sitelink description lines 35
-  or fewer, callouts 25 or fewer. Counted by `check-ad-copy.mjs` on 2026-10-02.
+  or fewer, callouts 25 or fewer. Counted by `check-ad-copy.mjs` on 2026-10-03,
+  after the trial lines took the noun "Pro analyses".
 - Google shows headlines in any order and any combination. Each line is true
   on its own, so a line that states the trial's length also states its
-  allowance (3 Pro deals).
+  allowance (3 Pro analyses).
 - Final URLs carry no query string. Each campaign sets a Final URL suffix with
   `utm_medium=cpc` (`docs/analytics.md`, "Ad URLs"; the suffix is in
   `README.md`).
@@ -133,7 +134,7 @@ Descriptions
 Agent Pro keeps a roster of up to 100 clients and up to 12 Buy Boxes per account.
 Assign a saved deal to a client. It is screened against that client's Buy Box.
 The share page carries your logo and brand color. TrueCap stays named as the method.
-The 21-day no-card trial covers 3 Pro deals and 1 comparison, not the roster or branding.
+The 21-day no-card trial covers 3 Pro analyses and 1 comparison, not roster or branding.
 ```
 
 ---
@@ -162,7 +163,7 @@ Each input shows its source
 See what could break the deal
 What to verify before offering
 First deal needs no account
-Trial: 3 Pro deals in 21 days
+Trial: 3 Pro analyses, 21 days
 Pro is $29.99 a month
 Pro is $300 a year
 The math is published
@@ -174,7 +175,7 @@ Descriptions
 Enter the address, price and rent. See cash flow, cap rate, CoC, DSCR and a Deal score.
 The Offer Ceiling is the highest price that still meets your targets.
 Rent starts from a HUD figure, the rate from FRED. Replace both with your own.
-First full decision needs no account. A new account adds 3 Pro deals in 21 days, no card.
+First decision needs no account. A new account adds 3 Pro analyses in 21 days, no card.
 ```
 
 ### Ad group I2: what to offer on a rental
@@ -196,7 +197,7 @@ Every assumption is editable
 Each input shows its source
 Your inputs, published math
 First deal needs no account
-Trial: 3 Pro deals in 21 days
+Trial: 3 Pro analyses, 21 days
 Pro is $29.99 a month
 Pro is $300 a year
 The math is published
@@ -208,7 +209,7 @@ Descriptions
 The Offer Ceiling is the highest price that still meets your targets.
 Your first deal shows the exact Offer Ceiling with no account. Pro keeps it on every deal.
 On Pro, save a Buy Box with your cash flow, DSCR and price targets.
-Pro is $29.99 a month or $300 a year. The no-card trial covers 3 Pro deals in 21 days.
+Pro is $29.99 a month or $300 a year. The no-card trial is 3 Pro analyses in 21 days.
 ```
 
 ---
