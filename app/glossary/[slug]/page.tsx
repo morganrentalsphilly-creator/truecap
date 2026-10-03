@@ -9,11 +9,25 @@
  *
  * Internal links to related terms compound the topic-cluster SEO
  * signal — Google's algorithm rewards densely-linked subject matter.
+ *
+ * Layout (DESIGN.md): PageHero with the definition as the lede and the one
+ * short analyzer link under the H1, then the sections in a 68ch reading
+ * column (ArticleBody, the formula on rules, related terms as ruled rows)
+ * and the page's single SeoAnalyzerCta.
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  ARTICLE_META,
+  ARTICLE_META_NEXT,
+  ArticleBody,
+  ToolFormula,
+} from "@/components/marketing/article";
+// Internal links prefetch on hover or keyboard focus, not as they scroll into view.
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { PageHero, RuledList, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
@@ -33,6 +47,9 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { glossaryTermSetRef } from "@/lib/seo/glossary-ld";
 import { isLinkablePath, linkableToolFor } from "@/lib/seo/link-policy";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+
+/** A breadcrumb link: the meta line's link (ARTICLE_META_LINK: a tc-link, 44px tall), padded to 44px wide for a short word. */
+const BREADCRUMB_LINK_CLASS = "tc-link -mx-2 -my-3 inline-block px-2 py-3";
 
 // Pre-render all glossary pages at build time for max SEO crawlability.
 export async function generateStaticParams() {
@@ -253,162 +270,159 @@ export default async function GlossaryTermPage({
 
       <Header />
 
-      <main id="main">
-        <article className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-            <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-              <li>
-                <Link href="/" className="hover:text-foreground">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">›</li>
-              <li>
-                <Link href="/glossary" className="hover:text-foreground">
-                  Glossary
-                </Link>
-              </li>
-              <li aria-hidden="true">›</li>
-              <li className="font-semibold text-foreground">{entry.term}</li>
-            </ol>
-          </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <article>
+          {/* The hero: the term, then the definition (and its benchmark) as
+              the lede, then the one short analyzer link (P2-80). The
+              breadcrumb and the category sit under them as meta lines;
+              nothing sits above the H1. */}
+          <PageHero
+            title={entry.term}
+            lede={
+              <>
+                <p>{entry.definition}</p>
+                {entry.benchmark ? (
+                  <p className="mt-3 text-muted-foreground">{entry.benchmark}</p>
+                ) : null}
+              </>
+            }
+            actions={<UnderTitleAnalyzeLink />}
+          >
+            {/* Breadcrumb */}
+            <nav aria-label="Breadcrumb" className={ARTICLE_META}>
+              <ol className="flex flex-wrap items-center gap-x-2">
+                <li>
+                  <IntentPrefetchLink href="/" className={BREADCRUMB_LINK_CLASS}>
+                    Home
+                  </IntentPrefetchLink>
+                </li>
+                <li aria-hidden="true">›</li>
+                <li>
+                  <IntentPrefetchLink href="/glossary" className={BREADCRUMB_LINK_CLASS}>
+                    Glossary
+                  </IntentPrefetchLink>
+                </li>
+                <li aria-hidden="true">›</li>
+                <li aria-current="page" className="text-foreground">
+                  {entry.term}
+                </li>
+              </ol>
+            </nav>
 
-          {/* Category eyebrow */}
-          <p className="text-2xs uppercase tracking-widest text-primary font-bold">
-            {GLOSSARY_CATEGORY_LABELS[entry.category]}
-          </p>
-
-          {/* H1 */}
-          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-            {entry.term}
-          </h1>
-
-          {/* Lead — definition + optional benchmark */}
-          <div className="mt-5 space-y-3 text-lg leading-relaxed text-foreground">
-            <p>{entry.definition}</p>
-            {entry.benchmark ? (
-              <p className="text-muted-foreground italic">{entry.benchmark}</p>
-            ) : null}
-          </div>
-
-          {/* Formula */}
-          {entry.formula ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-extrabold text-foreground mb-3">
-                How it&apos;s calculated
-              </h2>
-              <div className="rounded-xl border border-border bg-muted/30 p-5">
-                <code className="text-base text-foreground font-mono">
-                  {entry.formula}
-                </code>
-              </div>
-            </section>
-          ) : null}
-
-          {/* Example */}
-          {entry.example ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-extrabold text-foreground mb-3">
-                Example
-              </h2>
-              <p className="text-foreground leading-relaxed">{entry.example}</p>
-            </section>
-          ) : null}
-
-          {/* The entry's calculator (lib/glossary.ts toolUrl), released only. */}
-          {tool ? (
-            <p className="mt-6 text-base leading-relaxed text-foreground" data-glossary-tool-link="">
-              Run the numbers with the{" "}
-              <Link
-                href={`/tools/${tool.slug}`}
-                className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
-              >
-                {tool.title}
-              </Link>
-              .
+            {/* Category: a meta line, sentence case as the label is written. */}
+            <p className={ARTICLE_META_NEXT}>
+              {GLOSSARY_CATEGORY_LABELS[entry.category]}
             </p>
-          ) : null}
+          </PageHero>
 
-          {/* Why it matters */}
-          {entry.whyItMatters ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-extrabold text-foreground mb-3">
-                Why {entry.term} matters
-              </h2>
-              <p className="text-foreground leading-relaxed">
-                {entry.whyItMatters}
+          {/* rule="none": PageHero's bottom rule already separates the head. */}
+          <Section rule="none" rhythm="tight">
+            <div className="max-w-[68ch]">
+              {/* Each block is a heading and its text straight in the body
+                  (no wrapper), so the first one sits flush with the top of the
+                  column, as prose-ledger sets its first child. */}
+              <ArticleBody>
+                {/* Formula */}
+                {entry.formula ? (
+                  <>
+                    <h2>How it&apos;s calculated</h2>
+                    <ToolFormula formula={entry.formula} />
+                  </>
+                ) : null}
+
+                {/* Example */}
+                {entry.example ? (
+                  <>
+                    <h2>Example</h2>
+                    <p>{entry.example}</p>
+                  </>
+                ) : null}
+
+                {/* The entry's calculator (lib/glossary.ts toolUrl), released only. */}
+                {tool ? (
+                  <p data-glossary-tool-link="">
+                    Run the numbers with the{" "}
+                    <IntentPrefetchLink href={`/tools/${tool.slug}`} className="tc-link">
+                      {tool.title}
+                    </IntentPrefetchLink>
+                    .
+                  </p>
+                ) : null}
+
+                {/* Why it matters */}
+                {entry.whyItMatters ? (
+                  <>
+                    <h2>Why {entry.term} matters</h2>
+                    <p>{entry.whyItMatters}</p>
+                  </>
+                ) : null}
+
+                {/* How to check it (Phase 8): the verification step for the number. */}
+                {entry.howToCheck ? (
+                  <>
+                    <h2 data-glossary-how-to-check="">How to check {entry.term} before you rely on it</h2>
+                    <p>{entry.howToCheck}</p>
+                  </>
+                ) : null}
+
+                {/* Related terms: term-and-detail rows on rules, not cards;
+                    not-prose, so they keep RuledList's own type. */}
+                {relatedEntries.length > 0 ? (
+                  <>
+                    <h2>Related terms</h2>
+                    <RuledList
+                      columns={2}
+                      className="not-prose my-8"
+                      items={relatedEntries.map((r) => ({
+                        key: r.slug,
+                        term: (
+                          <IntentPrefetchLink
+                            href={`/glossary/${r.slug}`}
+                            className="tc-link -my-2 inline-block max-w-full py-2"
+                          >
+                            {r.term}
+                          </IntentPrefetchLink>
+                        ),
+                        detail: (
+                          <>
+                            {r.definition.slice(0, 100)}
+                            {r.definition.length > 100 ? "…" : ""}
+                          </>
+                        ),
+                      }))}
+                    />
+                  </>
+                ) : null}
+              </ArticleBody>
+              <div className="mt-12">
+                <SeoAnalyzerCta
+                  context={inProduct ? `the ${entry.term} math on a real deal` : undefined}
+                  utmSource="glossary"
+                />
+              </div>
+
+              {/* Back to glossary */}
+              <p className="mt-8 text-base">
+                <IntentPrefetchLink
+                  href="/glossary"
+                  className="tc-link inline-flex min-h-11 min-w-11 items-center"
+                >
+                  ← Glossary
+                </IntentPrefetchLink>
               </p>
-            </section>
-          ) : null}
-
-          {/* How to check it (Phase 8): the verification step for the number. */}
-          {entry.howToCheck ? (
-            <section className="mt-10" data-glossary-how-to-check>
-              <h2 className="text-xl font-extrabold text-foreground mb-3">
-                How to check {entry.term} before you rely on it
-              </h2>
-              <p className="text-foreground leading-relaxed">
-                {entry.howToCheck}
-              </p>
-            </section>
-          ) : null}
-
-          {/* Related terms */}
-          {relatedEntries.length > 0 ? (
-            <section className="mt-10">
-              <h2 className="text-xl font-extrabold text-foreground mb-4">
-                Related terms
-              </h2>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {relatedEntries.map((r) => (
-                  <li key={r.slug}>
-                    <Link
-                      href={`/glossary/${r.slug}`}
-                      className="block rounded-xl border border-border bg-card p-4 hover:border-primary/40 transition-colors"
-                    >
-                      <p className="text-sm font-bold text-foreground">
-                        {r.term}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                        {r.definition.slice(0, 100)}
-                        {r.definition.length > 100 ? "…" : ""}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          <div className="mt-10">
-            <SeoAnalyzerCta
-              context={inProduct ? `the ${entry.term} math on a real deal` : undefined}
-              utmSource="glossary"
-            />
-          </div>
-
-          {/* Back to glossary */}
-          <div className="mt-12 pt-6 border-t border-border">
-            <Link
-              href="/glossary"
-              className="text-sm text-muted-foreground hover:text-foreground font-semibold"
-            >
-              ← Glossary
-            </Link>
-          </div>
-          {/* Where the term shows up in the product (true for every entry in
-              its category) + tag-driven related links (Phase 8.4). */}
-          {inProduct ? (
-            <section className="mt-10" aria-labelledby="in-truecap">
-              <h2 id="in-truecap" className="text-xl font-extrabold text-foreground mb-3">
-                Where {entry.term} shows up in TrueCap
-              </h2>
-              <p className="text-base leading-relaxed text-muted-foreground">
-                {inProduct}
-              </p>
-            </section>
-          ) : null}
-          <RelatedContent kind="glossary" slug={entry.slug} title={entry.term} className="mt-10" />
+              {/* Where the term shows up in the product (true for every entry in
+                  its category) + tag-driven related links (Phase 8.4). */}
+              {inProduct ? (
+                <ArticleBody className="mt-6">
+                  <section aria-labelledby="in-truecap">
+                    <h2 id="in-truecap">Where {entry.term} shows up in TrueCap</h2>
+                    <p>{inProduct}</p>
+                  </section>
+                </ArticleBody>
+              ) : null}
+              <RelatedContent kind="glossary" slug={entry.slug} title={entry.term} className="mt-10" />
+            </div>
+          </Section>
         </article>
       </main>
 
