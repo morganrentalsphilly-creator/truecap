@@ -196,6 +196,35 @@ describe("no-card product evaluation", () => {
     expect(plans).toContain("checkoutReady=");
   });
 
+  // Audit row P2-122: the signed-in button says "Subscribe — $X today" and
+  // nothing beside it said the charge recurs. The fine print under the cards
+  // says so for a signed-in visitor, with the catalog's amounts for the
+  // period the toggle shows (never a typed figure) and where to cancel.
+  // lib/__tests__/agent-pro-card-billing.test.tsx renders it.
+  it("states automatic renewal beside the signed-in Subscribe buttons, from the catalog amounts", () => {
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    const start = plans.indexOf('<p data-pricing-renewal-terms=""');
+    expect(start).toBeGreaterThan(-1);
+    const sentence = plans.slice(start, plans.indexOf("</p>", start)).replace(/\s+/g, " ");
+    expect(sentence).toContain(
+      'A subscription renews automatically each {period === "monthly" ? "month" : "year"} at the price shown ({proOfferName} {proChargeToday}',
+    );
+    expect(sentence).toContain("{showAgentPro ? `, Agent Pro ${agentChargeToday}` : \"\"}");
+    expect(sentence).toContain("until you cancel from your profile.");
+    expect(sentence).not.toMatch(/\$\d/);
+    // Signed-in only, inside the block a paying subscriber never sees.
+    const block = plans.slice(plans.indexOf('data-pricing-trial-terms=""'), start);
+    expect(block).toMatch(/\{isAuthenticated \? \(\s*$/);
+    for (const [name, monthly, annual] of [
+      ["proChargeToday", "PUBLIC_PRO_MONTHLY_USD", "PUBLIC_PRO_ANNUAL_USD"],
+      ["agentChargeToday", "PUBLIC_AGENT_PRO_MONTHLY_USD", "PUBLIC_AGENT_PRO_ANNUAL_USD"],
+    ] as const) {
+      expect(plans.replace(/\s+/g, " ")).toContain(
+        `const ${name} = period === "monthly" ? formatPublicUsd(${monthly}) : formatPublicUsd(${annual});`,
+      );
+    }
+  });
+
   it("fails closed when subscription history cannot be verified", () => {
     const entitlements = read("../../lib/entitlements.ts");
     const historyHelper = entitlements.slice(

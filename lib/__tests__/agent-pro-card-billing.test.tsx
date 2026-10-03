@@ -155,3 +155,30 @@ describe("/pricing Agent Pro card", () => {
     expect(agentCard(renderPlans())).toContain("md:scroll-mt-28");
   });
 });
+
+// Row P2-122: the signed-in Subscribe button says only "today".
+describe("/pricing renewal sentence", () => {
+  const renewal = (html: string) =>
+    /<p data-pricing-renewal-terms=""[^>]*>(.*?)<\/p>/
+      .exec(html)?.[1]
+      .replace(/<!-- -->/g, "") ?? null;
+
+  it("is absent for a signed-out visitor and for a subscriber", () => {
+    expect(renewal(renderPlans())).toBeNull();
+    expect(
+      renewal(renderPlans({ isAuthenticated: true, activePaidPlanSlug: "pro_annual" })),
+    ).toBeNull();
+  });
+
+  it("gives a signed-in visitor the annual catalog amounts on the annual toggle", () => {
+    expect(renewal(renderPlans({ isAuthenticated: true }))).toBe(
+      `A subscription renews automatically each year at the price shown (Pro ${formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}, Agent Pro ${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)}) until you cancel from your profile.`,
+    );
+  });
+
+  it("names only Pro when Agent Pro is not on the page", () => {
+    expect(renewal(renderPlans({ isAuthenticated: true, agentProConfigured: false }))).toBe(
+      `A subscription renews automatically each year at the price shown (Pro ${formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}) until you cancel from your profile.`,
+    );
+  });
+});
