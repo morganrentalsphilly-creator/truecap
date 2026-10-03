@@ -9,13 +9,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -129,28 +141,24 @@ export default function PitiExplainedPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -158,7 +166,8 @@ export default function PitiExplainedPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Almost every mortgage calculator hands you a
               principal-and-interest number and calls it your payment. It
               isn&apos;t. The amount that actually leaves your account each
@@ -171,10 +180,8 @@ export default function PitiExplainedPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What PITI stands for
-            </h2>
+          <ArticleBody>
+            <h2>What PITI stands for</h2>
             <p>
               PITI breaks the housing payment into four parts:{" "}
               <strong>P</strong>rincipal, <strong>I</strong>nterest,{" "}
@@ -188,7 +195,7 @@ export default function PitiExplainedPost() {
               bill can become a lien on the property (in{" "}
               <a
                 href="https://www.hud.gov/sites/documents/12-11ml.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 some states, one that takes priority over the first mortgage
               </a>
@@ -203,16 +210,14 @@ export default function PitiExplainedPost() {
               cover. Fannie Mae, for example,{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 measures reserves in months of PITIA
               </a>
               ; ask a DSCR lender whether its ratio includes association dues.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The worked example: a $250k single-family rental
-            </h2>
+            <h2>The worked example: a $250k single-family rental</h2>
             <p>
               Take a $250,000 single-family rental bought as a
               non-owner-occupied investment with 25% down ($62,500), financing
@@ -229,7 +234,7 @@ export default function PitiExplainedPost() {
               and term with the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -240,14 +245,14 @@ export default function PitiExplainedPost() {
               county. Take each state&apos;s Census Bureau{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median tax bill
               </a>{" "}
               as a share of its{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median home value
               </a>
@@ -257,28 +262,28 @@ export default function PitiExplainedPost() {
               (see the county tables of median tax bills for{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US34$0500000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 New Jersey
               </a>{" "}
               and{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25103&g=040XX00US17$0500000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Illinois
               </a>{" "}
               and of median home values for{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US34$0500000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 New Jersey
               </a>{" "}
               and{" "}
               <a
                 href="https://data.census.gov/api/access/data/table?id=ACSDT5Y2023.B25077&g=040XX00US17$0500000"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Illinois
               </a>
@@ -309,15 +314,13 @@ export default function PitiExplainedPost() {
               single repair or vacancy.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How escrow actually works
-            </h2>
+            <h2>How escrow actually works</h2>
             <p>
               You don&apos;t write the county a check once a year. With an
               escrow (impound) account, the servicer collects{" "}
               <a
                 href="https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-B/section-1024.17"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 one-twelfth
               </a>{" "}
@@ -336,7 +339,7 @@ export default function PitiExplainedPost() {
               statement, covered in the{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 closing costs breakdown
               </Link>
@@ -351,7 +354,7 @@ export default function PitiExplainedPost() {
             <p>
               <a
                 href="https://www.consumerfinance.gov/ask-cfpb/what-is-an-escrow-or-impound-account-en-140/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Many lenders require escrow
               </a>
@@ -362,9 +365,7 @@ export default function PitiExplainedPost() {
               escrowed or not, the $400 is part of your monthly carry.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The reassessment trap on the tax line
-            </h2>
+            <h2>The reassessment trap on the tax line</h2>
             <p>
               The most expensive PITI mistake is copying the property-tax figure
               straight off the listing or the seller&apos;s last bill. In some
@@ -386,9 +387,7 @@ export default function PitiExplainedPost() {
               reassessment on transfer.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How investment-property PITI differs from a primary residence
-            </h2>
+            <h2>How investment-property PITI differs from a primary residence</h2>
             <p>
               The four letters are the same, but the numbers behind them shift
               when the property is a rental:
@@ -400,7 +399,7 @@ export default function PitiExplainedPost() {
                 because Fannie Mae applies{" "}
                 <a
                   href="https://selling-guide.fanniemae.com/sel/b2-1.1-01/occupancy-types"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   extra loan-level price adjustments to investment properties
                 </a>
@@ -412,14 +411,14 @@ export default function PitiExplainedPost() {
                 loans allow{" "}
                 <a
                   href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   as little as 15% down on a single-family
                 </a>{" "}
                 (with{" "}
                 <a
                   href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   mortgage insurance above 80% LTV
                 </a>
@@ -428,7 +427,7 @@ export default function PitiExplainedPost() {
                 insurance.{" "}
                 <Link
                   href="/glossary/house-hack"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   House-hackers
                 </Link>{" "}
@@ -436,7 +435,7 @@ export default function PitiExplainedPost() {
                 until they reach{" "}
                 <a
                   href="https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   ~20% equity
                 </a>
@@ -457,9 +456,7 @@ export default function PitiExplainedPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              From PITI to DSCR
-            </h2>
+            <h2>From PITI to DSCR</h2>
             <p>
               Some DSCR programs use a rent-to-PITIA ratio, while other lender
               and investor formulas differ. In this illustration, our rental
@@ -478,23 +475,21 @@ export default function PitiExplainedPost() {
               in{" "}
               <Link
                 href="/blog/how-to-calculate-dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how to calculate DSCR
               </Link>
               , or run a property through the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              PITI is the floor, not the all-in cost
-            </h2>
+            <h2>PITI is the floor, not the all-in cost</h2>
             <p>
               Here&apos;s the line that separates investors who keep their
               properties from the ones who get surprised: PITI is the{" "}
@@ -514,7 +509,7 @@ export default function PitiExplainedPost() {
                 <strong>Maintenance + CapEx</strong> (10% of rent): $210 — see{" "}
                 <Link
                   href="/blog/capex-maintenance-reserves-rental-property"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   how much to budget for reserves
                 </Link>
@@ -534,9 +529,7 @@ export default function PitiExplainedPost() {
               ratio a lender accepts is not the same thing as a good deal.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Break-even: how much rent does PITI demand?
-            </h2>
+            <h2>Break-even: how much rent does PITI demand?</h2>
             <p>
               Flip the question around. With self-management and the reserve
               assumptions above, your fixed monthly outflow is the $1,647 PITI
@@ -547,7 +540,7 @@ export default function PitiExplainedPost() {
               hike at renewal eats a big slice of that margin. The{" "}
               <Link
                 href="/tools/break-even-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 break-even calculator
               </Link>{" "}
@@ -560,16 +553,14 @@ export default function PitiExplainedPost() {
               the property before financing. If that distinction is fuzzy, the{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 NOI walkthrough
               </Link>{" "}
               draws the line clearly.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A quick way to estimate PITI on any listing
-            </h2>
+            <h2>A quick way to estimate PITI on any listing</h2>
             <p>You can get within a few percent in under a minute:</p>
             <ul>
               <li>
@@ -582,14 +573,14 @@ export default function PitiExplainedPost() {
                 American Community Survey puts the{" "}
                 <a
                   href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   U.S. median tax bill
                 </a>{" "}
                 at about 0.9% of the{" "}
                 <a
                   href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   U.S. median home value
                 </a>
@@ -611,7 +602,7 @@ export default function PitiExplainedPost() {
               plus $150 insurance = $1,647. The full{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -621,21 +612,20 @@ export default function PitiExplainedPost() {
               Buy Box fit in one pass.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               PITI is the honest version of &quot;the payment&quot; — the loan
               plus the two ownership costs that ride with it — and on a rental
@@ -647,13 +637,13 @@ export default function PitiExplainedPost() {
               sit on top. Get PITI right and the rest of the underwrite —{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>
               , break-even, cash flow — falls into place.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -725,13 +715,12 @@ export default function PitiExplainedPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
