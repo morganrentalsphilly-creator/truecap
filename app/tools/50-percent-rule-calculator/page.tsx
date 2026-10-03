@@ -261,7 +261,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               checks the income side — is the rent big enough relative to the
               price? The 50% rule checks the expense side — does the rent
               survive operating costs and the mortgage? A listing that clears
-              both in under a minute has earned the full underwrite; the
+              both has earned the full underwrite; the
               stricter{" "}
               <Link
                 href="/tools/2-percent-rule-calculator"
