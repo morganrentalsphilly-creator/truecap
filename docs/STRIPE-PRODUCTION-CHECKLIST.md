@@ -102,8 +102,8 @@ the same settings, but its creation gates must remain off while new Pack sales
 are temporarily unavailable:
 
 - Display name: **TrueCap**
-- Background: **#F7FAFC**
-- Primary button: **#0B3B60**
+- Background: **#EFECE8**
+- Primary button: **#0066BA**
 - Font: **Inter**
 - Border: **Rounded**
 - Logo: `https://usetruecap.com/Logo-png-w.png`
