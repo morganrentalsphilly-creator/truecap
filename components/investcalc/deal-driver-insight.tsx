@@ -59,14 +59,16 @@ const DRIVER_ADVICE: Record<string, { noun: string; risk: string }> = {
  * figure, or, when the address has no county match, the statewide average of
  * HUD's area figures (enrich-property's meta.rent.stateAverage); an adopted
  * RentCast estimate also feeds marketRentEstimate. Each is named for what it
- * is, the same way Input Confidence names it on the same screen.
+ * is.
  */
 export type MarketRentSource = "hud-area" | "hud-statewide" | "rentcast";
 
 const BENCHMARK_NAME: Record<MarketRentSource, string> = {
   "hud-area": "HUD area benchmark",
   "hud-statewide": "HUD statewide average",
-  rentcast: "RentCast market-rent estimate",
+  // Not named for its vendor: naming RentCast waits on its written consent
+  // (API terms 3.4; the founder's call).
+  rentcast: "automated market-rent estimate",
 };
 
 export function DealDriverInsight({
