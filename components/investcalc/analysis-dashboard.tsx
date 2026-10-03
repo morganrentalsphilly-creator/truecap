@@ -3062,7 +3062,16 @@ function ProFeaturePreview({
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
-      <div className="pointer-events-none select-none space-y-5 blur-[3px] opacity-70">
+      {/* The blurred layer is decoration for sighted visitors. It carries the
+          deal's real figures, which a screen reader used to read out before
+          the unlock heading: aria-hidden and inert keep it out of the
+          accessibility tree, the tab order and find-in-page. */}
+      <div
+        aria-hidden="true"
+        inert
+        data-pro-preview-blur=""
+        className="pointer-events-none select-none space-y-5 blur-[3px] opacity-70"
+      >
         <div className="grid gap-3 md:grid-cols-3">
           {copy.metrics.map((metric, index) => {
             const tileValue = previewValues
