@@ -676,7 +676,6 @@ export default function BestRentalPropertyCalculator2026Post() {
                 formulas.
               </li>
             </ul>
-
           </ArticleBody>
 
           {/* faqSchema above is the one FAQPage node for these rows. */}
