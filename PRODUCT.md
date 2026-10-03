@@ -63,15 +63,27 @@ portfolio? Same analyzer, your own Buy Box." Neighbouring tools (DealCheck,
 the BiggerPockets calculator, spreadsheets, brokerage stacks) return metrics
 or manage transactions. TrueCap solves the price from the client's own targets,
 screens each listing against a specific client's Buy Box, and publishes the
-math on /methodology. A competitor cannot truthfully copy the Offer Ceiling
-derived from the targets, the per-client screening with the reason for a miss,
-and the labeled sources (HUD FMR, FRED rate, TrueCap default, Your input)
-[repo][copy pass].
+core formulas on /methodology [repo][copy pass].
+
+The one first-screen reason to pick TrueCap over DealCheck is sourced numbers
+and published math: every input carries a visible source label (HUD FMR, FRED
+rate, TrueCap default, Your input) and the core formulas are published on
+/methodology. The Offer Ceiling, screening against criteria and branded
+reports are not that reason: the 2026-10 audit found DealCheck's homepage
+promising an offer calculator, criteria screening and branded reports (report
+row P2-01), so copy must not say a competitor cannot offer them [founder
+answer, 2026-10-03].
 
 ## Operating Context
 
 - Entry: an address (Google Places autocomplete) or a supported listing link,
-  on /analyze (no account) or /dashboard/new (signed in) [repo].
+  on /analyze (no account) or /dashboard/new (signed in) [repo]. An address
+  alone produces no numbers: the analyzer also asks for the asking price and a
+  bedroom count (HUD rent is looked up by bedrooms; typing the rent works
+  too). The settled phrase for copy is "from an address, the asking price and
+  a bedroom count"; do not write "from an address", "from one address" or
+  "from a single address" on their own. The homepage title is unaffected
+  [founder answer, 2026-10-03; repo: lib/hero-handoff.ts].
 - Starting values: HUD Fair Market Rent by ZIP or county for rent; the FRED
   30-year owner-occupied rate for the mortgage rate; property tax is never
   auto-filled, and a blank field uses a 1.1%-of-price default the copy tells
@@ -126,7 +138,9 @@ and the labeled sources (HUD FMR, FRED rate, TrueCap default, Your input)
   [brief][docs/voice.md rule 3].
 - Always light: no dark theme and no toggle [brief].
 - Copy-pass guardrails that design work must keep [brief][copy pass]: the
-  primary CTA reads "Analyze a deal free" everywhere; the investor cue is
+  primary CTA reads "Analyze a deal free" on the homepage and /for-agents
+  (investor and SEO surfaces may read "Analyze a property free") [founder
+  answer, 2026-10-03]; the investor cue is
   visible in the homepage hero's first screen at desktop and at 390px; "For
   investors" stays in the header; the homepage URL, the title-tag core phrase
   ("Rental Property Calculator & Max Offer | TrueCap") and the topical nouns
