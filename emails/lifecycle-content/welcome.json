@@ -1,7 +1,7 @@
 {
   "key": "welcome",
   "subject": "Welcome to TrueCap — start your first property screen",
-  "preheader": "Enter an address, the asking price and a bedroom count, then review cap rate, cash flow, Buy Box fit, and a Deal score.",
+  "preheader": "Enter an address, the asking price and a bedroom count to run your first screen.",
   "headline": "You're in. Start with one property and verify the inputs.",
   "body": [
     "Welcome to TrueCap. Enter a U.S. address, the asking price and a bedroom count, then review cap rate, cash-on-cash, DSCR, monthly cash flow, Buy Box fit, and a Deal score. Rent and mortgage rate can start from labeled HUD/FRED benchmarks; property tax is a manual local input. Verify every material input before relying on the result.",
