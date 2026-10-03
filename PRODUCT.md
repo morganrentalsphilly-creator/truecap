@@ -71,8 +71,8 @@ rate, TrueCap default, Your input) and the core formulas are published on
 /methodology. The Offer Ceiling, screening against criteria and branded
 reports are not that reason: the 2026-10 audit found DealCheck's homepage
 promising an offer calculator, criteria screening and branded reports (report
-row P2-01), so copy must not say a competitor cannot offer them [founder
-answer, 2026-10-03].
+row P2-01), so copy must not say a competitor cannot offer them [report's
+recommended option, accepted by the founder 2026-10-03].
 
 ## Operating Context
 
@@ -83,7 +83,8 @@ answer, 2026-10-03].
   too). The settled phrase for copy is "from an address, the asking price and
   a bedroom count"; do not write "from an address", "from one address" or
   "from a single address" on their own. The homepage title is unaffected
-  [founder answer, 2026-10-03; repo: lib/hero-handoff.ts].
+  [report's recommended option, accepted by the founder 2026-10-03; repo:
+  lib/hero-handoff.ts].
 - Starting values: HUD Fair Market Rent by ZIP or county for rent; the FRED
   30-year owner-occupied rate for the mortgage rate; property tax is never
   auto-filled, and a blank field uses a 1.1%-of-price default the copy tells
