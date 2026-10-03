@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import * as Article from "@/components/marketing/article";
 import { PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
 import { ToolFormula } from "@/components/tools/tool-parts";
+import OnePercentRuleCalculatorPage from "@/app/tools/1-percent-rule-calculator/page";
 
 /**
  * The shared parts the template fan-out (fix batch 20) builds on, added to
@@ -45,6 +46,16 @@ describe("UnderTitleAnalyzeLink", () => {
     expect(link).toBeGreaterThan(h1);
     expect(link).toBeLessThan(html.indexOf("<p>After</p>"));
     expect(html).toContain(`<div class="mt-6 sm:mt-7">${LINK_HTML}</div>`);
+  });
+
+  it("is the 1% calculator's hero action: under the H1 and lede, before the hub line and the widget", () => {
+    const html = renderToStaticMarkup(<OnePercentRuleCalculatorPage />);
+    const hero = html.slice(html.indexOf("<section data-page-hero"), html.indexOf("</section>", html.indexOf("<section data-page-hero")));
+    expect(count(hero, LINK_HTML)).toBe(1);
+    expect(hero.indexOf(LINK_HTML)).toBeGreaterThan(hero.indexOf("</h1>"));
+    expect(hero.indexOf(LINK_HTML)).toBeGreaterThan(hero.indexOf("The 5-second filter"));
+    expect(hero.indexOf(LINK_HTML)).toBeLessThan(hero.indexOf(">Free tools</a>"));
+    expect(hero.indexOf(LINK_HTML)).toBeLessThan(hero.indexOf('id="onepct-price"'));
   });
 });
 
