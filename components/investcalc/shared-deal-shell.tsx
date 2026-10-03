@@ -3,6 +3,7 @@
  *
  *   /d/[encoded]  legacy stateless links (payload in the URL, being retired)
  *   /s/[token]    opaque server-backed shares (payload in public_shares)
+ *   /memo/[token] a memo lead's own emailed decision (shareSurface "memo_link")
  *
  * Extracted from the /d/ page so the two routes cannot drift: same banner,
  * same read-only view, same lead capture, same disclaimer footer.
@@ -124,7 +125,7 @@ export function SharedDealShell({
   specialistAnalysisCaptured?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
   /** Coarse analytics source only; never pass a share token or account id. */
-  shareSurface: "opaque_share" | "legacy_share" | "portal_share";
+  shareSurface: "opaque_share" | "legacy_share" | "portal_share" | "memo_link";
   /** Present only for a revocable /s capability. The client sends it back to
    * the auth-gated action, which re-resolves revocation and expiry at click. */
   copyShareToken?: string;
@@ -133,9 +134,13 @@ export function SharedDealShell({
     analysis.access === "pro"
       ? analysis.result.tenYearProjectionVersion
       : undefined;
+  // A memo link is the visitor's OWN decision, not something shared with
+  // them: it is labelled as theirs and stays out of the share-recipient
+  // funnel (shared_analysis_opened).
+  const isMemo = shareSurface === "memo_link";
   return (
     <div className="min-h-screen bg-background">
-      <TrackSharedDealView referralSource={shareSurface} />
+      {isMemo ? null : <TrackSharedDealView referralSource={shareSurface} />}
       {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
       {agent ? (
         <div
@@ -154,7 +159,7 @@ export function SharedDealShell({
         </div>
       ) : (
         <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
-          Shared via{" "}
+          {isMemo ? "Your decision memo from" : "Shared via"}{" "}
           <Link href="/" className="font-bold underline underline-offset-2">
             TrueCap
           </Link>
@@ -207,7 +212,9 @@ export function SharedDealShell({
             >
               {inputsSource === "live-saved"
                 ? `This view uses the agent’s current saved inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"}. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`
-                : `The inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"} were captured when this view was shared. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`}
+                : isMemo
+                  ? "These are the inputs you entered when you requested this memo. TrueCap outputs were recomputed server-side when you opened it using the labeled standard."
+                  : `The inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"} were captured when this view was shared. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`}
               {legacyMethodologyWarning
                 ? " This link uses a legacy publication format; ask the owner to refresh it before relying on it for a decision."
                 : ""}

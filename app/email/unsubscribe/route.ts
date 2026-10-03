@@ -63,7 +63,7 @@ export async function GET(request: Request) {
   if (!recipient) return reply("This unsubscribe link is not valid.", 400);
   const series =
     recipient.kind === "drip"
-      ? "TrueCap checklist and playbook emails"
+      ? "TrueCap memo, checklist and playbook emails"
       : "TrueCap account emails (onboarding, tips, offers and feedback requests)";
   return page(
     `<h1 style="font-size:1.25rem">Unsubscribe from ${series}?</h1><p>Product and billing notices still arrive. Nothing changes until you confirm.</p><form method="post" action="/email/unsubscribe"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="font:inherit;padding:.5rem 1rem">Unsubscribe</button></form>`,
@@ -90,10 +90,19 @@ export async function POST(request: Request) {
     if (recipient.kind === "drip") {
       const result = await suppressDripEmail(admin, recipient.emailHash, process.env.RESEND_API_KEY ?? null);
       if (!result.suppressed) return reply("Could not update your preference right now. Please try this link again.", 503);
+      // The same hashed address may be a memo lead: stamp the row so the
+      // sequence exits there too (the suppression above is what actually
+      // blocks sends; this keeps the lead record honest). Best-effort.
+      await admin
+        .from("memo_leads")
+        .update({ unsubscribed_at: new Date().toISOString() })
+        .eq("email_hash", recipient.emailHash)
+        .is("unsubscribed_at", null)
+        .then(() => undefined, () => undefined);
       if (result.failed > 0) {
         return reply("Your opt-out is saved, but some queued emails could not be cancelled yet. Please try this link again.", 503);
       }
-      return reply("You're unsubscribed from TrueCap checklist and playbook emails. Product and billing notices still arrive.", 200);
+      return reply("You're unsubscribed from TrueCap memo, checklist and playbook emails. Product and billing notices still arrive.", 200);
     }
     // False means the opt-out was not stored (the column is not there yet).
     // Every lifecycle email links here, so "unsubscribed" is only said once

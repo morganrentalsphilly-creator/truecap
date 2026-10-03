@@ -569,7 +569,9 @@ describe("refund/dispute enforcement stays wired to every release gate", () => {
     expect(lookup).toContain("try {");
     expect(lookup).toContain("catch (error)");
     expect(billing).toContain(
-      "const appliedCoupon = creditCoupon ?? offerCoupon ?? annualCoupon",
+      // Pack credit still outranks every discount offer, including the
+      // trial-end annual offer (lib/trial-end-offer.ts).
+      "const appliedCoupon = creditCoupon ?? trialEndCoupon ?? offerCoupon ?? annualCoupon",
     );
   });
 });

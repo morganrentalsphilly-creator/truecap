@@ -46,6 +46,13 @@ export const LIFECYCLE_FOOTER_REASON =
  * summary toggles on that page hide until their migrations are applied.
  */
 export const LIFECYCLE_SETTINGS_LABEL = "Account settings";
+/**
+ * Footer reason for a memo lead (lib/funnel-sequences.ts, sequence
+ * "memo_lead"): an address with no account, so the account line would be
+ * untrue and there is no settings page to link.
+ */
+export const MEMO_LEAD_FOOTER_REASON =
+  "You're getting this email because you asked TrueCap for a decision memo.";
 
 export type LifecycleEmailProps = {
   preheader: string;
@@ -64,6 +71,10 @@ export type LifecycleEmailProps = {
   unsubscribeUrl?: string | null;
   /** The sender's postal address, from EMAIL_POSTAL_ADDRESS. */
   postalAddress?: string | null;
+  /** Why the recipient gets this email. Defaults to the account line. */
+  footerReason?: string;
+  /** False for a recipient with no account (a memo lead): no settings link. */
+  showSettingsLink?: boolean;
 };
 
 export default function LifecycleEmail({
@@ -77,6 +88,8 @@ export default function LifecycleEmail({
   manageUrl,
   unsubscribeUrl,
   postalAddress,
+  footerReason = LIFECYCLE_FOOTER_REASON,
+  showSettingsLink = true,
 }: LifecycleEmailProps) {
   return (
     <Html>
@@ -153,7 +166,7 @@ export default function LifecycleEmail({
           >
             TrueCap · Rental property underwriting
             <br />
-            {LIFECYCLE_FOOTER_REASON}
+            {footerReason}
             <br />
             {unsubscribeUrl ? (
               <>
@@ -163,12 +176,14 @@ export default function LifecycleEmail({
                 >
                   Unsubscribe
                 </Link>
-                {" · "}
+                {showSettingsLink ? " · " : null}
               </>
             ) : null}
-            <Link href={manageUrl} style={{ color: SUB, textDecoration: "underline" }}>
-              {LIFECYCLE_SETTINGS_LABEL}
-            </Link>
+            {showSettingsLink ? (
+              <Link href={manageUrl} style={{ color: SUB, textDecoration: "underline" }}>
+                {LIFECYCLE_SETTINGS_LABEL}
+              </Link>
+            ) : null}
             {postalAddress ? (
               <>
                 <br />

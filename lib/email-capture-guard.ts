@@ -110,11 +110,12 @@ const KEY_NAMESPACE = "truecap:email-capture:v1";
  * Surface namespaces keep per-surface email caps independent: someone who
  * gave their email to the post-analysis checklist ("pae") can still request
  * the playbook/verification course (historical namespace "mip") — but each surface's own 30-day
- * duplicate cap holds. IP and global buckets are shared across surfaces by
+ * duplicate cap holds. "memo" is the decision-memo capture
+ * (app/actions/memo-lead-capture.ts). IP and global buckets are shared across surfaces by
  * passing the same namespace behavior through the SAME RPC, so total
  * outbound volume stays bounded no matter how many surfaces exist.
  */
-export type CaptureSurface = "pae" | "mip";
+export type CaptureSurface = "pae" | "mip" | "memo";
 
 export function buildBucketKey(
   kind: "email" | "ip",

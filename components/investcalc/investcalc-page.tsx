@@ -212,6 +212,11 @@ import {
 } from "@/app/actions/deal-score";
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { claimAnonymousDecisionAction } from "@/app/actions/anonymous-decision";
+import { MemoEmailCapture } from "@/components/marketing/memo-email-capture";
+import {
+  TrialUpgradeNudge,
+  type TrialUpgradeNudgeKind,
+} from "@/components/marketing/trial-upgrade-nudge";
 import {
   ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   ANONYMOUS_DECISION_INPUT_BOUND_NOTE,
@@ -959,6 +964,7 @@ export function InvestCalcPage({
   isAuthenticated = false,
   userAnalysisDefaults = null,
   advocacyContractEligible = false,
+  memoCaptureEnabled = false,
   initialSavedDeal = null,
 }: {
   canSaveDeals?: boolean;
@@ -988,6 +994,9 @@ export function InvestCalcPage({
   /** Server-derived internal rollout eligibility. This is not an entitlement
    * and must remain false for anonymous/public renders. */
   advocacyContractEligible?: boolean;
+  /** FUNNEL_MEMO_CAPTURE, read by the server route. Only the anonymous
+   * analyzer passes true; the form also needs a live no-signup decision. */
+  memoCaptureEnabled?: boolean;
   /** Owner-scoped saved row resolved by the authenticated server route from
    * /?savedDeal=<id>. Keeping the ID in the URL makes reopen refresh-safe. */
   initialSavedDeal?: GetSavedDealForEditingResult | null;
@@ -1068,6 +1077,10 @@ export function InvestCalcPage({
   // live form state. Updated everywhere `analysisResult` is set.
   const [analysisValues, setAnalysisValues] =
     useState<InvestmentFormValues | null>(null);
+  // Set from consumeProductEvaluationUsageAction (FUNNEL_UPGRADE_NUDGE): the
+  // run that used the last trial deal, or a run refused at the limit.
+  const [trialUpgradeNudge, setTrialUpgradeNudge] =
+    useState<TrialUpgradeNudgeKind | null>(null);
   const [savedMethodologyLabel, setSavedMethodologyLabel] = useState<
     string | null
   >(null);
@@ -6384,9 +6397,11 @@ export function InvestCalcPage({
             description: usage.message,
             variant: usage.code === "SERVER_ERROR" ? "destructive" : "warning",
           });
+          setTrialUpgradeNudge(usage.upgradeNudge ?? null);
           router.refresh();
           return;
         }
+        setTrialUpgradeNudge(usage.upgradeNudge ?? null);
         if (
           usage.access === "evaluation" &&
           usage.wasNewUsage &&
@@ -10779,6 +10794,14 @@ export function InvestCalcPage({
           ) : null}
         </form>
 
+        {/* A fourth trial deal was refused, so there is no result to attach
+            the card to: it sits where the result would have been. */}
+        {trialUpgradeNudge === "limit_reached" && !isCalculating ? (
+          <div className="mt-8">
+            <TrialUpgradeNudge kind="limit_reached" />
+          </div>
+        ) : null}
+
         {/* Results - wrapped in an error boundary so a render bug in
             any child (waterfall, mortgage compare, projections, etc.)
             cannot blank the whole post-calc surface. The fallback
@@ -10804,6 +10827,9 @@ export function InvestCalcPage({
                 non-blocking amber strip says so — with a jump straight to the
                 first invalid field. Disappears the moment the form parses
                 again (the recompute clears the flag). */}
+              {trialUpgradeNudge === "third_deal" && analysisResult && !isCalculating ? (
+                <TrialUpgradeNudge kind="third_deal" />
+              ) : null}
               {analysisResult && !isCalculating && staleResultsWarning ? (
                 <div
                   role="status"
@@ -11049,6 +11075,18 @@ export function InvestCalcPage({
                   }
                 />
               </AnalysisErrorBoundary>
+              {/* Anonymous free decision only (never the sample preview):
+                  one field to email this memo. Inline under the result, so a
+                  failed send can never hide the analysis. */}
+              {memoCaptureEnabled &&
+              !isAuthenticated &&
+              anonymousDecisionGrantAvailable &&
+              !isSampleProPreview ? (
+                <MemoEmailCapture
+                  getValues={() => analysisValues}
+                  maoTarget={analysisMaoTarget}
+                />
+              ) : null}
             </div>
           )}
       </main>

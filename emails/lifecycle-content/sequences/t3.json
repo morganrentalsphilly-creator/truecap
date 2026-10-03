@@ -1,0 +1,49 @@
+{
+  "key": "T3",
+  "investor": {
+    "subject": "A deal, start to finish",
+    "preheader": "Screen, set targets, stress it, decide.",
+    "headline": "A deal, start to finish",
+    "body": [
+      {
+        "if": "has_deal",
+        "text": "Pick one of your saved deals and walk it through four steps."
+      },
+      {
+        "unless": "has_deal",
+        "text": "You have not saved a deal yet, so here is the walk-through on the sample property."
+      },
+      "1. Screen it. Check that rent, taxes, and insurance are numbers you can source, not defaults.",
+      "2. Set your targets. The Offer Ceiling is the highest price that still meets them.",
+      "3. Stress it. The downside view shows which assumption hurts most if it is wrong.",
+      "4. Decide. If asking is above your ceiling, you know the gap and what would have to change to close it."
+    ],
+    "cta_text": "Open your saved deals",
+    "cta_path": "/dashboard/saved-analyses",
+    "cta_path_no_deal": "/sample-decision-memo",
+    "cta_text_no_deal": "See the sample decision"
+  },
+  "agent": {
+    "subject": "A client deal, start to finish",
+    "preheader": "Screen, set targets, stress it, send it.",
+    "headline": "A client deal, start to finish",
+    "body": [
+      {
+        "if": "has_deal",
+        "text": "Pick one of your saved deals and walk it through four steps."
+      },
+      {
+        "unless": "has_deal",
+        "text": "You have not saved a deal yet, so here is the walk-through on the sample property."
+      },
+      "1. Screen it. Check that rent, taxes, and insurance are numbers you can source, not defaults.",
+      "2. Set the client's targets. The Offer Ceiling is the highest price that still meets them.",
+      "3. Stress it. The downside view shows which assumption hurts most if it is wrong.",
+      "4. Send it. Share a read-only link or a memo. On Agent Pro both carry your logo, and the deal sits on that client's page in your roster."
+    ],
+    "cta_text": "Open your saved deals",
+    "cta_path": "/dashboard/saved-analyses",
+    "cta_path_no_deal": "/sample-decision-memo",
+    "cta_text_no_deal": "See the sample decision"
+  }
+}

@@ -511,6 +511,32 @@ Email content is JSON in `emails/content/*.json` (weekly) and
 React Email template at `emails/weekly-digest.tsx`. Don't bypass the
 JSON content layer and hardcode email copy in the template.
 
+### 3.8a Funnel sequences — memo leads + trial, on the lifecycle estate
+
+`docs/funnel-leaks-plan.md` is the design record (its section 4 is the
+current state). Three env flags, each
+`on|off`, all dark by default: `FUNNEL_MEMO_CAPTURE`, `FUNNEL_SEQUENCES`,
+`FUNNEL_UPGRADE_NUDGE` (`lib/funnel-flags.ts`).
+
+- **Memo capture** (`app/actions/memo-lead-capture.ts`) is the one anonymous
+  capture surface the founder re-authorized (2026-10-03). It stores a
+  `memo_leads` row (raw email + input snapshot, service-role only, deleted
+  after 180 days unless converted) and sends ONE email. It does not add
+  anyone to a Resend audience — the newsletter stays canceled (§3.8).
+- **Sequences** (`lib/funnel-sequences.ts`, pure + unit-tested) run inside
+  the lifecycle cron behind the same send gate, opt-outs and pacing as every
+  other lifecycle email (`lib/email/lifecycle-compliance.ts`). With the flag on, the
+  trial sequence (T0–T6) REPLACES welcome, the 30-day drip and the pro nudge.
+  Copy is JSON in `emails/lifecycle-content/sequences/` — don't hardcode it.
+  One log for both audiences: a `lifecycle_email_log` row has `user_id` OR
+  `lead_id`. Past-window steps are retired, never sent late.
+- **Trial-end offer**: `lib/trial-end-offer.ts` decides at checkout, from the
+  buyer's own `product_evaluations.started_at` (days 18–23, Pro annual only,
+  50% off the first year).
+  The coupon is created in the Stripe dashboard; never create one in code.
+- `/memo/[token]` is a bearer-token page like `/s/[token]`: keep it in
+  `lib/sensitive-url.ts`, `app/robots.ts`, and the PostHog path classifier.
+
 ### 3.9 Sentry filters — add to `ignoreErrors`, don't disable
 
 `instrumentation-client.ts` carries an `ignoreErrors` list for the

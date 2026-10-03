@@ -1,0 +1,27 @@
+{
+  "key": "T2",
+  "investor": {
+    "subject": "Your ceiling, a comparison, a report",
+    "preheader": "Three things to try this week.",
+    "headline": "Three things to try this week",
+    "body": [
+      "Offer Ceiling: the highest price that still meets your targets. Set the targets once and it recalculates for every deal.",
+      "Compare: put two deals side by side. Your trial includes one comparison, so pick the two you are deciding between.",
+      "Report: export a PDF with the numbers and the assumptions behind them. It is written for a lender or a partner to read without you in the room."
+    ],
+    "cta_text": "Compare two deals",
+    "cta_path": "/dashboard/compare"
+  },
+  "agent": {
+    "subject": "A ceiling, a comparison, a client report",
+    "preheader": "Three things to try this week.",
+    "headline": "Three things to try this week",
+    "body": [
+      "Offer Ceiling: the highest price that still meets a client's targets. Set their targets once and it recalculates for every listing.",
+      "Compare: put two listings side by side. Your trial includes one comparison, so pick the two a client is deciding between.",
+      "Report: export a PDF with the numbers and the assumptions behind them. On Agent Pro it carries your logo."
+    ],
+    "cta_text": "Compare two listings",
+    "cta_path": "/dashboard/compare"
+  }
+}

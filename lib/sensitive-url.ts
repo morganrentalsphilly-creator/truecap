@@ -67,7 +67,7 @@ const UUID_PATH_SEGMENT_PATTERN =
 
 /** Shared snapshots and bearer-token pages must never use DOM autocapture. */
 export const SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN =
-  /\/(?:d|s|portal)\/[^/?#\s]+|\/embed(?:\/|[?#\s]|$)/i;
+  /\/(?:d|s|portal|memo)\/[^/?#\s]+|\/embed(?:\/|[?#\s]|$)/i;
 
 /** True when a location contains any query value that must not be visible to
  * an arbitrary third-party script (GTM containers can read location directly,
@@ -191,6 +191,12 @@ const SENSITIVE_ROUTE_SEGMENTS = Object.freeze([
     // list above and inherited no redaction.
     pattern: /\/s\/[^/?#\s]+/gi,
     replacement: "/s/[token]",
+  },
+  {
+    // A memo lead's own decision (app/memo/[token]); the signed token is the
+    // only credential for that row.
+    pattern: /\/memo\/[^/?#\s]+/gi,
+    replacement: "/memo/[token]",
   },
   {
     pattern: /\/portal\/[^/?#\s]+\/d\/[^/?#\s]+/gi,

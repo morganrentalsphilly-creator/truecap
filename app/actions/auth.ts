@@ -125,7 +125,12 @@ export async function signUpAction(
   // they started after confirming — not on the homepage with the intent
   // dropped. Re-validated server-side (internal paths only); omitted or
   // invalid falls back to "/", the pre-existing behavior.
-  nextPath?: unknown
+  nextPath?: unknown,
+  // "agent" when the visitor arrived through the Agent Pro path
+  // (/for-agents → /auth/sign-up?plan=agent-pro). Stored as user metadata so
+  // the trial email sequence uses agent framing. A preference, not an
+  // entitlement — nothing gates on it.
+  signupIntent?: unknown
 ): Promise<AuthActionResult> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
@@ -146,6 +151,7 @@ export async function signUpAction(
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+      ...(signupIntent === "agent" ? { data: { signup_intent: "agent" } } : {}),
       ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
     },
   });

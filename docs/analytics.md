@@ -22,6 +22,12 @@ Properties are minimal and never personal: no addresses, emails, prices, or unde
 | `testimonial_prompt_shown` | The in-product testimonial prompt, once per user | `source` |
 | `testimonial_submitted` | The prompt's submit succeeded | `consent` |
 | `cookie_consent_choice` | The cookie banner's Accept or Reject (the X and Escape count as reject), from `components/analytics/vercel-analytics.tsx`, which listens for the banner's decision event. Not sent from a document where Vercel Analytics is off: share, portal and embed routes, and any URL that carries a sensitive query parameter (for example `price`, `rent`, `address`, `code`, `token`, or a `next` that is not one of the two counted values described under Consent), until the next full page load | `choice` (granted / denied) |
+| `memo_requested` | "Email me this decision memo" submit, under the anonymous free decision on `/analyze` | `source` (analyze_result) |
+| `memo_sent` | Server, once the memo email was accepted by Resend | `has_ceiling` |
+| `sequence_email_sent` | Server, per memo-lead (L1–L4) or trial (T0–T6) email actually sent | `sequence` (memo_lead / trial), `step`, `variant` (investor / agent) |
+| `upgrade_nudge_shown` | The inline upgrade card rendered for a trial account | `placement` (third_deal / limit_reached) |
+| `upgrade_nudge_clicked` | Its "See Pro plans" link | `placement` |
+| `trial_offer_redeemed` | Stripe webhook, when a completed checkout carried the trial-end annual coupon | `plan` |
 | `primary_cta_clicked` | A click on a primary call to action: the hero and final address forms, the sticky bar, `AnalyzeCtaLink`, `ScrollToFormButton`, and the analyzer button on content pages (`TrackedContentCtaLink`) | `source` (hero_address / hero_listing / final_address / final_listing / sticky_bar / content_inline_cta / the link's own `analyticsSource`, for example vs_hero) |
 
 ## The five weekly ratios
@@ -35,6 +41,17 @@ Read Vercel Analytics (Custom Events) or GA4 (the same names arrive through `dat
 5. `trial_started` → `checkout_completed` — the paid step.
 
 `visit` is Vercel's page-view count for `/` plus `/analyze`.
+
+## Funnel-leak features
+
+The two targets from `docs/funnel-leaks-plan.md` read off the ratios above: analysis → account is ratio 3 (`analysis_completed` → `signup_completed`, target 20% → 30%), trial → paid is ratio 5 (`trial_started` → `checkout_completed`, target 8% → 11%). The new events explain movement in them:
+
+- Memo capture: `memo_requested` / `analysis_completed` is the capture rate; `memo_sent` / `memo_requested` is delivery (a gap means rate limits, Turnstile, or Resend).
+- Email attribution: every sequence link carries `utm_source=lifecycle&utm_medium=email&utm_campaign=memo_lead|trial&utm_content=<step>` (for example `l2`, `t4`). `sequence_email_sent` by `step` is the denominator.
+- Lead conversion is also in the database: `select count(*) filter (where converted_user_id is not null)::float / count(*) from memo_leads`.
+- Upgrade card: `upgrade_nudge_clicked` / `upgrade_nudge_shown` by `placement`.
+- Shared deals and memo pages: no click event exists, because Vercel Analytics and the Google tags are off on `/s`, `/d`, `/portal` and `/memo`. Count sessions that land on `/analyze` with `utm_source=shared_deal`, then `analysis_completed`.
+- Trial-end offer: `trial_offer_redeemed` / `sequence_email_sent` where `step` is T4 or T5.
 
 ## Consent
 

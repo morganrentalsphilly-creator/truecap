@@ -1,0 +1,43 @@
+{
+  "key": "T1",
+  "investor": {
+    "subject": "What could break your latest deal",
+    "preheader": "The assumption that moves your cash flow most.",
+    "headline": "What could break this deal",
+    "body": [
+      {
+        "if": "breaker_sentence",
+        "text": "Your most recent deal is {{address}}. {{breaker_sentence}}"
+      },
+      {
+        "unless": "breaker_sentence",
+        "text": "Once you have run a deal, open its downside view. It reruns the numbers with lower rent, higher vacancy, and a higher rate, and shows which one costs you the most."
+      },
+      "That is a preset stress, not a prediction. If you have a lease, a rate quote, or the vacancy history, enter it and the range tightens."
+    ],
+    "cta_text": "Open your deals",
+    "cta_path": "/dashboard/saved-analyses",
+    "cta_path_no_deal": "/dashboard/new",
+    "cta_text_no_deal": "Analyze a listing"
+  },
+  "agent": {
+    "subject": "What could break your client's deal",
+    "preheader": "The assumption that moves the cash flow most.",
+    "headline": "What could break this deal",
+    "body": [
+      {
+        "if": "breaker_sentence",
+        "text": "Your most recent deal is {{address}}. {{breaker_sentence}}"
+      },
+      {
+        "unless": "breaker_sentence",
+        "text": "Once you have run a deal, open its downside view. It reruns the numbers with lower rent, higher vacancy, and a higher rate, and shows which one costs the most."
+      },
+      "That is a preset stress, not a prediction. It is the first thing a careful investor client asks about, so it is worth having the answer ready."
+    ],
+    "cta_text": "Open your deals",
+    "cta_path": "/dashboard/saved-analyses",
+    "cta_path_no_deal": "/dashboard/new",
+    "cta_text_no_deal": "Analyze a listing"
+  }
+}

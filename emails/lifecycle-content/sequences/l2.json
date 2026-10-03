@@ -1,0 +1,35 @@
+{
+  "key": "L2",
+  "investor": {
+    "subject": "How the Offer Ceiling works",
+    "preheader": "The highest price that still meets your targets.",
+    "headline": "How the Offer Ceiling works",
+    "body": [
+      "The Offer Ceiling is the highest price that still meets your targets. TrueCap holds your rent, expenses, and financing fixed and solves for the price at which every target is just met.",
+      {
+        "if": "offer_ceiling",
+        "text": "For {{address}} that price is {{offer_ceiling}}, against targets of {{ceiling_target}}."
+      },
+      "Change a target and the ceiling moves. Raise the cash flow you want and it drops. Find better financing and it rises.",
+      "A free account saves this deal so you can edit the targets and inputs instead of starting over. No card."
+    ],
+    "cta_text": "Create a free account",
+    "cta_path": "/auth/sign-up"
+  },
+  "agent": {
+    "subject": "How the Offer Ceiling works",
+    "preheader": "The highest price that still meets your client's targets.",
+    "headline": "How the Offer Ceiling works",
+    "body": [
+      "The Offer Ceiling is the highest price that still meets the buyer's targets. TrueCap holds rent, expenses, and financing fixed and solves for the price at which every target is just met.",
+      {
+        "if": "offer_ceiling",
+        "text": "For {{address}} that price is {{offer_ceiling}}, against targets of {{ceiling_target}}."
+      },
+      "It gives an investor client a number to anchor an offer on, with the assumptions behind it visible.",
+      "A free account saves this deal so you can edit the targets and inputs for each client. No card."
+    ],
+    "cta_text": "Create a free account",
+    "cta_path": "/auth/sign-up"
+  }
+}

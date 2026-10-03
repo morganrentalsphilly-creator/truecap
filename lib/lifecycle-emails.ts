@@ -97,12 +97,18 @@ export function daysBetween(fromIso: string, now: Date): number {
  */
 export function selectDueLifecycleEmail(
   user: LifecycleUserState,
-  now: Date = new Date()
+  now: Date = new Date(),
+  // onboarding: false when FUNNEL_SEQUENCES is on — the trial sequence
+  // (lib/funnel-sequences.ts, T0..T6) then REPLACES welcome, the 30-day drip
+  // and the pro nudge, so none of those three may be selected. Win-back is
+  // unaffected.
+  options: { onboarding?: boolean } = {}
 ): DueLifecycleEmail | null {
   const sent = new Set(user.sentKeys);
+  const onboarding = options.onboarding !== false;
 
   // 1) Welcome — once, only after the account is confirmed.
-  if (user.confirmed && !sent.has("welcome")) {
+  if (onboarding && user.confirmed && !sent.has("welcome")) {
     return { userId: user.userId, email: user.email, kind: "welcome", key: "welcome" };
   }
 
@@ -111,7 +117,7 @@ export function selectDueLifecycleEmail(
   //    are never sent from here; the cron retires them via expiredDripKeys.
   //    Free users only: the drip is a Pro-conversion sequence, so pitching
   //    "upgrade to Pro" at users who already pay is wrong.
-  if (user.confirmed && user.plan === "free") {
+  if (onboarding && user.confirmed && user.plan === "free") {
     const daysSinceSignup = daysBetween(user.signupAt, now);
     for (let d = 1; d <= MAX_DRIP_DAY; d++) {
       if (
@@ -134,6 +140,7 @@ export function selectDueLifecycleEmail(
   //    onboarding drip without upgrading. (Free users have no per-user
   //    activity signal — they can't save deals — so this is age-based.)
   if (
+    onboarding &&
     user.plan === "free" &&
     daysBetween(user.signupAt, now) >= PRO_NUDGE_AFTER_DAYS &&
     !sent.has("pro_nudge")

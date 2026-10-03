@@ -1,0 +1,27 @@
+{
+  "key": "T0",
+  "investor": {
+    "subject": "Welcome to TrueCap. Start with one listing",
+    "preheader": "Paste a real listing first.",
+    "headline": "Start with one real listing",
+    "body": [
+      "Your free trial is on: 21 days, three complete Pro deals, one comparison. No card, and nothing renews.",
+      "The one thing to do first is paste a listing you are actually considering. A real deal shows you more in two minutes than a sample does.",
+      "You get cash flow, DSCR, and the Offer Ceiling: the highest price that still meets your targets. Every assumption is labeled and editable."
+    ],
+    "cta_text": "Analyze a real listing",
+    "cta_path": "/dashboard/new"
+  },
+  "agent": {
+    "subject": "Welcome to TrueCap. Start with one listing",
+    "preheader": "Paste a listing a client is considering.",
+    "headline": "Start with one client listing",
+    "body": [
+      "Your free trial is on: 21 days, three complete Pro deals, one comparison. No card, and nothing renews.",
+      "The one thing to do first is paste a listing one of your investor clients is considering. A real deal shows you more in two minutes than a sample does.",
+      "You get cash flow, DSCR, and the Offer Ceiling: the highest price that still meets that client's targets. Every assumption is labeled and editable."
+    ],
+    "cta_text": "Analyze a client listing",
+    "cta_path": "/dashboard/new"
+  }
+}

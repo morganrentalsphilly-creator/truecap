@@ -12,6 +12,7 @@ const REQUIRED_PRIVATE_PREFIXES = [
   "/settings/",
   "/d/",
   "/s/",
+  "/memo/",
   "/portal/",
   "/embed/brand/",
   "/home-authed",

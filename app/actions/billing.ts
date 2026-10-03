@@ -23,6 +23,10 @@ import { firstTouchSubscriptionMetadata } from "@/lib/first-touch-server";
 import { stripePriceMatchesCatalog } from "@/lib/public-pricing";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
 import {
+  resolveTrialEndAnnualCoupon,
+  trialEndOfferConfigured,
+} from "@/lib/trial-end-offer";
+import {
   findEligiblePackCredit,
   getPackCreditCouponId,
   stripePackCreditCouponMatchesCatalog,
@@ -616,7 +620,25 @@ export async function createCheckoutSessionAction(
       }
     }
     const creditCoupon = packCredit ? packCreditCouponId : null;
-    const appliedCoupon = creditCoupon ?? offerCoupon ?? annualCoupon;
+    // Trial-end annual offer (emails T4/T5): days 18–23 of the buyer's own
+    // no-card evaluation, Pro annual only, decided here from their
+    // product_evaluations row — never from anything the client sent. It takes
+    // the single discount slot ahead of the campaign and standard annual
+    // coupons; a failed read degrades to the normal price.
+    let trialEndCoupon: string | null = null;
+    if (trialEndOfferConfigured()) {
+      const { data: evaluation } = await supabase
+        .from("product_evaluations")
+        .select("started_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      trialEndCoupon = resolveTrialEndAnnualCoupon({
+        planSlug: parsed.data.planSlug,
+        trialStartedAt: (evaluation?.started_at as string | null | undefined) ?? null,
+      });
+    }
+    // prettier-ignore
+    const appliedCoupon = creditCoupon ?? trialEndCoupon ?? offerCoupon ?? annualCoupon;
     let checkoutProfileCustomerId = profile?.stripe_customer_id ?? null;
     const acquireInput = {
       userId: user.id,
