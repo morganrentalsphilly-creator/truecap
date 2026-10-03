@@ -132,7 +132,7 @@ export function ListingLinkInput({
           className="mt-2 text-xs leading-relaxed text-muted-foreground"
         >
           Filling the asking price and property facts from a listing link needs
-          a paid plan. On this account, type them in.{" "}
+          a Pro or Agent Pro subscription. On this account, type them in.{" "}
           <Link
             href="/pricing"
             className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -175,8 +175,8 @@ export function ListingLinkInput({
         className="mt-0.5 text-2xs text-muted-foreground"
       >
         {SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts the address. When
-        available, a signed-in lookup on a paid plan can also fill the active
-        asking price and property facts; other values remain labeled estimates. It never imports
+        available, a signed-in lookup on Pro or Agent Pro can also fill the
+        active asking price and property facts; other values remain labeled estimates. It never imports
         listing photos, seller claims, or the actual tax bill. Review every
         value before relying on it.
       </p>
