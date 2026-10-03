@@ -935,10 +935,11 @@ export async function PdfProUpsell() {
           }
           footnote={
             <>
-              Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:
-              up to {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and{" "}
-              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card and no
-              automatic subscription.
+              Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:{" "}
+              {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
+              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with
+              changed inputs counts as a new analysis. No card and no automatic
+              subscription.
             </>
           }
         />

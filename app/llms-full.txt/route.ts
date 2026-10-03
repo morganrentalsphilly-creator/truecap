@@ -147,7 +147,7 @@ export async function GET() {
     `Single Deal: ${planFacts.singleDeal}`,
     `Pro: ${planFacts.pro}`,
     `Agent Pro: ${planFacts.agentPro}`,
-    `New accounts get a ${planFacts.evaluationDays}-day free trial covering ${planFacts.evaluationDealLimit} Pro deals and ${planFacts.evaluationComparisonLimit} comparison. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
+    `New accounts get a ${planFacts.evaluationDays}-day free trial covering ${planFacts.evaluationDealLimit} Pro analyses and ${planFacts.evaluationComparisonLimit} comparison. A rerun with changed inputs counts as a new analysis. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
     "",
     'TrueCap content documents its product methods and provides educational material, not investment, appraisal, lending, tax, or legal advice. Verify time-sensitive claims, linked sources, publication dates, and property-specific inputs before citing or relying on a page. Preferred citation format: "[Title](URL) — TrueCap".',
   ].join("\n");

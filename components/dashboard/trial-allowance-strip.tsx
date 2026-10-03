@@ -1,9 +1,7 @@
 import Link from "next/link";
 
-import {
-  formatPricingEvaluationAllowance,
-  summarizePricingEvaluation,
-} from "@/lib/pricing-evaluation";
+import { TrialAllowanceCount } from "@/components/dashboard/trial-allowance-count";
+import { summarizePricingEvaluation } from "@/lib/pricing-evaluation";
 import type { ProductAccessState } from "@/lib/product-access";
 
 /**
@@ -11,6 +9,9 @@ import type { ProductAccessState } from "@/lib/product-access";
  * Pro deal analyses and one full comparison" was promised at sign-up and on
  * /pricing, then never shown again inside the product). Renders nothing
  * unless a no-card evaluation is active — invisible until useful.
+ *
+ * The count is a small client part so it follows each newly metered run on
+ * the page instead of staying at the number the page loaded with.
  */
 export function TrialAllowanceStrip({
   access,
@@ -19,7 +20,6 @@ export function TrialAllowanceStrip({
 }) {
   if (!access || access.kind !== "evaluation") return null;
   const summary = summarizePricingEvaluation(access);
-  const allowance = formatPricingEvaluationAllowance(summary);
   const endsOn = access.evaluationExpiresAt
     ? access.evaluationExpiresAt.toLocaleDateString("en-US", {
         month: "short",
@@ -34,10 +34,10 @@ export function TrialAllowanceStrip({
       className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-4 pt-4 text-xs text-muted-foreground sm:px-6"
     >
       <span className="font-semibold text-foreground">Free trial:</span>
-      <span>
-        {allowance ?? "Pro allowance used"}
-        {endsOn ? ` · ends ${endsOn}` : ""}
-      </span>
+      <TrialAllowanceCount
+        initial={summary}
+        suffix={endsOn ? ` · ends ${endsOn}` : ""}
+      />
       <Link
         href="/pricing"
         className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-2 hover:underline"
