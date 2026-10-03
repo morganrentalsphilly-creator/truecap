@@ -49,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
   description:
-    "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. Honest comparison for small landlords.",
+    "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. A comparison for small landlords.",
   keywords: [
     "yardi breeze alternative",
     "yardi breeze vs buildium",
@@ -166,7 +166,7 @@ export default function VsYardiBreezePage() {
     name: "Yardi Breeze vs TrueCap (2026): PM vs Analysis",
     url: `${siteUrl}/vs/yardi-breeze`,
     description:
-      "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. Honest comparison for small landlords.",
+      "Yardi Breeze runs your portfolio after closing. TrueCap underwrites deals before. A comparison for small landlords.",
     dateModified: lastmodFor("/vs/yardi-breeze"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

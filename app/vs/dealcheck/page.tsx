@@ -51,7 +51,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "DealCheck Alternative for Rental Analysis (2026)",
   description:
-    "A fair TrueCap vs DealCheck workflow comparison: first screen, assumptions, purchase criteria, offer calculation, downside, and mobile access.",
+    "A TrueCap vs DealCheck workflow comparison: first screen, assumptions, purchase criteria, offer calculation, downside, and mobile access.",
   keywords: [
     "dealcheck alternative",
     "dealcheck vs truecap",

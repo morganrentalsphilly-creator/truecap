@@ -49,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Excel vs TrueCap for Rental Analysis (2026)",
   description:
-    "Honest comparison of TrueCap vs Excel/Google Sheets for rental property analysis. Speed, accuracy, mobile, sharing — and when a spreadsheet still wins.",
+    "A comparison of TrueCap vs Excel/Google Sheets for rental property analysis. Speed, accuracy, mobile, sharing — and when a spreadsheet still wins.",
   keywords: [
     "rental property excel template",
     "rental analysis spreadsheet",

@@ -50,7 +50,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Free BiggerPockets Calculator Alternative (2026)",
   description:
-    "A fair TrueCap vs BiggerPockets calculator workflow comparison: address-first screening, detailed analysis, decision packaging, and ecosystem tradeoffs.",
+    "A TrueCap vs BiggerPockets calculator workflow comparison: address-first screening, detailed analysis, decision packaging, and ecosystem tradeoffs.",
   keywords: [
     "biggerpockets calculator alternative",
     "biggerpockets calculator vs truecap",

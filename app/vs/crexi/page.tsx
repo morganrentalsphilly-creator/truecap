@@ -149,7 +149,7 @@ export default function VsCrexiPage() {
     name: "Crexi vs TrueCap (2026): Commercial vs Rental",
     url: `${siteUrl}/vs/crexi`,
     description:
-      "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes — honest comparison.",
+      "Crexi is the commercial real-estate marketplace + intelligence platform. TrueCap is residential rental underwriting. Different asset classes.",
     dateModified: lastmodFor("/vs/crexi"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };
