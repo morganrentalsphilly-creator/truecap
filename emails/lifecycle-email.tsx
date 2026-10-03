@@ -13,8 +13,9 @@
  * never typed in this file, and a marketing sender that has no address does
  * not send. The one billing notice (trial_day10) has no unsubscribe link.
  *
- * Brand mirrors emails/rate-alert.tsx — #5248D4 primary, white card on
- * #F1F5F9, "TrueCap." wordmark.
+ * Colours mirror emails/rate-alert.tsx, the site palette from DESIGN.md: Signal Blue
+ * #0066ba for the action, ink #1b1b1b and Ink 2 #51504c for text, a raised
+ * card #f6f5f2 on paper #efece8, "TrueCap." wordmark.
  */
 
 import {
@@ -29,9 +30,9 @@ import {
   Text,
 } from "@react-email/components";
 
-const BRAND = "#5248D4";
-const INK = "#0F172A";
-const SUB = "#475569";
+const BRAND = "#0066ba";
+const INK = "#1b1b1b";
+const SUB = "#51504c";
 
 /**
  * Footer lines shared by the HTML template and the plain-text part
@@ -83,13 +84,13 @@ export default function LifecycleEmail({
       <Preview>{preheader}</Preview>
       <Body
         style={{
-          backgroundColor: "#F1F5F9",
+          backgroundColor: "#efece8",
           margin: 0,
           fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
         }}
       >
         <Container style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px" }}>
-          <Section style={{ backgroundColor: "#FFFFFF", borderRadius: 16, overflow: "hidden" }}>
+          <Section style={{ backgroundColor: "#f6f5f2", borderRadius: 16, overflow: "hidden" }}>
             <Section style={{ backgroundColor: BRAND, height: 6, fontSize: 6, lineHeight: "6px" }}>
               &nbsp;
             </Section>
@@ -121,7 +122,7 @@ export default function LifecycleEmail({
                 style={{
                   display: "inline-block",
                   backgroundColor: BRAND,
-                  color: "#FFFFFF",
+                  color: "#fcfcfc",
                   fontWeight: 700,
                   fontSize: 15,
                   padding: "12px 22px",
