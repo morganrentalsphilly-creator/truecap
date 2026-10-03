@@ -353,7 +353,8 @@ export default function VsHostfullyPage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              computes them from an address, the asking price and a bedroom count.
+              computes them from an address, the asking price and the nightly
+              rate and occupancy you enter.
             </p>
           </div>
         </Section>

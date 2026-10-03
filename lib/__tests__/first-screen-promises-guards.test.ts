@@ -71,11 +71,40 @@ describe("the address promise names what the analyzer asks for (P1-14)", () => {
       "app/page.tsx",
       "app/home-authed/page.tsx",
       "app/llms.txt/route.ts",
+      "app/vs/page.tsx",
+      "app/blog/topics/[topic]/page.tsx",
     ]) {
       expect(flat(file), file).toContain(SETTLED);
     }
+    // Sentence-initial on the 404 page and in llms-full.txt.
+    expect(flat("app/not-found.tsx")).toContain(
+      "An address, the asking price and a bedroom count: 60-second underwrite.",
+    );
+    expect(flat("app/llms-full.txt/route.ts")).toContain(
+      "An address, the asking price and a bedroom count. Four answers",
+    );
     // /analyze: the social descriptions, twice (og and twitter).
     expect(flat("app/analyze/page.tsx").split(`from ${SETTLED}. No account.`)).toHaveLength(3);
+  });
+
+  it("short-term rental pages name the nightly rate and occupancy, not bedrooms", () => {
+    // In the short-term play the income comes from the nightly rate and
+    // occupancy the visitor enters (lib/investor-strategies.ts, incomeMode
+    // "str"); a bedroom count only looks up a long-term HUD rent.
+    expect(read("lib/investor-strategies.ts")).toContain(
+      "enter nightly rate and occupancy; revenue is modeled as ADR × occupancy",
+    );
+    for (const file of [
+      "app/blog/best-short-term-rental-analysis-tool-2026/page.tsx",
+      "app/vs/dealcheck-for-short-term-rentals/page.tsx",
+      "app/vs/hostaway/page.tsx",
+      "app/vs/hostfully/page.tsx",
+    ]) {
+      expect(flat(file), file).toContain(
+        "an address, the asking price and the nightly rate and occupancy you enter",
+      );
+      expect(flat(file), file).not.toContain(SETTLED);
+    }
   });
 
   it("the analyzer still asks for exactly those fields", () => {

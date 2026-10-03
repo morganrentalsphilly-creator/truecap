@@ -467,7 +467,8 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                 TrueCap analyzer
               </Link>{" "}
               returns DSCR, cash-on-cash and monthly cash flow from an address,
-              the asking price and a bedroom count — then walk through the full nightly-rate math in our{" "}
+              the asking price and the nightly rate and occupancy you enter —
+              then walk through the full nightly-rate math in our{" "}
               <Link
                 href="/blog/short-term-rental-underwriting-playbook"
                 className="tc-link"
