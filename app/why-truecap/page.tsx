@@ -101,8 +101,8 @@ export default function WhyTrueCapPage() {
           lede={
             <>
               Type an address, the asking price and a bedroom count, and get
-              cap rate, cash flow, DSCR, and a plain-English verdict in 60
-              seconds. No card, no signup.
+              cap rate, cash flow, DSCR, and a plain-English verdict. No card,
+              no signup.
             </>
           }
           actions={analyzeAction}

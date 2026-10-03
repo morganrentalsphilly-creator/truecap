@@ -8,7 +8,7 @@ By TrueCap · built by a Philadelphia rental investor
 
 ## Bio
 
-TrueCap is built by one person, a rental investor in Philadelphia. It started as the tool he wanted for his own underwriting — a way to get from an address to a source-labeled first-pass answer in about a minute — and it's still how he runs the deals he considers.
+TrueCap is built by one person, a rental investor in Philadelphia. It started as the tool he wanted for his own underwriting — a way to get from an address to a source-labeled first-pass answer — and it's still how he runs the deals he considers.
 
 ## Rules
 

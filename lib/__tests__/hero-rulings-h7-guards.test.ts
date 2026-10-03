@@ -113,7 +113,12 @@ describe("no page states how long a TrueCap analysis takes (P2-19)", () => {
     /takes about a minute (?:per property|in the)/,
     /in about a minute instead of half an hour/,
     /Both promise underwriting in seconds/,
-    /in [35] seconds/,
+    // The two rule-of-thumb calculators' own descriptions (the figure was the
+    // calculator's, removed with the rest; a manual rule of thumb elsewhere
+    // may still be called a 5-second filter).
+    /1% rule in 5 seconds|screening filter in 5 seconds|cash flow in 3 seconds/,
+    /verdict in 60 seconds/,
+    /answer in about a minute/,
   ];
 
   it("none of the retired speed sentences is back", () => {
@@ -137,6 +142,8 @@ describe("no page states how long a TrueCap analysis takes (P2-19)", () => {
       "app/for-investors/page.tsx",
       "app/for-investors/opengraph-image.tsx",
       "app/about/page.tsx",
+      "app/why-truecap/page.tsx",
+      "lib/author.ts",
       "app/not-found.tsx",
       "app/llms.txt/route.ts",
       "app/vs/page.tsx",
