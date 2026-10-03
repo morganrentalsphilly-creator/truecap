@@ -18,15 +18,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -140,28 +153,24 @@ export default function PropertyTaxReassessmentPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -169,7 +178,8 @@ export default function PropertyTaxReassessmentPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               The property-tax line on a listing is one of the largest operating
               expenses in a rental underwrite — and one of the most quietly
               wrong. The number you see is the <em>seller&apos;s</em> bill, set
@@ -184,10 +194,8 @@ export default function PropertyTaxReassessmentPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Assessed value is not market value
-            </h2>
+          <ArticleBody>
+            <h2>Assessed value is not market value</h2>
             <p>
               Property taxes are charged on a property&apos;s{" "}
               <strong>assessed value</strong>, which is the county&apos;s
@@ -197,7 +205,7 @@ export default function PropertyTaxReassessmentPost() {
               climb —{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 California limits the annual increase to 2%
               </a>
@@ -209,7 +217,7 @@ export default function PropertyTaxReassessmentPost() {
               fixed amount off the taxable value —{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 a benefit that does not apply to a rental
               </a>
@@ -222,9 +230,7 @@ export default function PropertyTaxReassessmentPost() {
               real, but it describes the seller&apos;s situation, not yours.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What a sale actually triggers
-            </h2>
+            <h2>What a sale actually triggers</h2>
             <p>
               In some states — California and Michigan among them — a
               change of ownership is a{" "}
@@ -240,7 +246,7 @@ export default function PropertyTaxReassessmentPost() {
               assessor{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 sets a new base-year value equal to your purchase price, then
                 caps growth at 2% a year
@@ -249,7 +255,7 @@ export default function PropertyTaxReassessmentPost() {
               a base that may date back decades. Michigan{" "}
               <a
                 href="https://www.michigan.gov/taxes/property/change-ownership"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 &quot;uncaps&quot; taxable value in the year after a transfer
               </a>
@@ -257,7 +263,7 @@ export default function PropertyTaxReassessmentPost() {
               triggers the reset: right away through a{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/supplemental-assessment/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 supplemental bill in California
               </a>
@@ -279,38 +285,32 @@ export default function PropertyTaxReassessmentPost() {
               temporary gift, not the baseline.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The formula — and the shortcut
-            </h2>
+            <h2>The formula — and the shortcut</h2>
             <p>
               The full mechanic is three numbers multiplied together, with the
               mill rate stated per $1,000:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Annual tax = Market value × Assessment ratio × Mill rate ÷ 1,000
-              </code>
-            </div>
+            <ToolFormula formula="Annual tax = Market value × Assessment ratio × Mill rate ÷ 1,000" />
             <p>
               The <strong>assessment ratio</strong> is the fraction of market
               value a county taxes (some{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 assess at 100%
               </a>
               ;{" "}
               <a
                 href="https://codes.ohio.gov/ohio-administrative-code/rule-5703-25-05"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Ohio uses 35%
               </a>
               ;{" "}
               <a
                 href="https://www.dor.ms.gov/county-services/property-tax-frequently-asked-questions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Mississippi uses 10% for owner-occupied homes and 15% for other
                 real property, including rentals
@@ -322,11 +322,7 @@ export default function PropertyTaxReassessmentPost() {
               should — but for underwriting there is a faster move that folds
               them into one number:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Real annual tax ≈ Purchase price × Local effective tax rate
-              </code>
-            </div>
+            <ToolFormula formula="Real annual tax ≈ Purchase price × Local effective tax rate" />
             <p>
               The <strong>effective tax rate</strong> is taxes actually paid
               divided by market value — it already bakes in the assessment ratio
@@ -338,9 +334,7 @@ export default function PropertyTaxReassessmentPost() {
               county, so this is a local number, not a national one.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked example: the duplex that flips negative
-            </h2>
+            <h2>A worked example: the duplex that flips negative</h2>
             <p>
               Take a $400,000 duplex. You put 25% down ($100,000) and finance
               $300,000 at an illustrative 7.5% over 30 years (use your own
@@ -348,7 +342,7 @@ export default function PropertyTaxReassessmentPost() {
               $2,098 a month, or about $25,170 a year (check it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -367,11 +361,11 @@ export default function PropertyTaxReassessmentPost() {
               Here is what that single number does to the whole underwrite:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Annual figure</th>
+                  <tr>
+                    <th>Annual figure</th>
                     <th className="text-right">Seller&apos;s bill ($3,400)</th>
                     <th className="text-right">Reassessed ($6,000)</th>
                   </tr>
@@ -426,21 +420,21 @@ export default function PropertyTaxReassessmentPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               On the seller&apos;s bill the deal looks like a thin but real
               winner: a 6.3%{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cap rate
               </Link>
               , a{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -448,7 +442,7 @@ export default function PropertyTaxReassessmentPost() {
               the tax bill you will actually pay and{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>{" "}
@@ -461,9 +455,7 @@ export default function PropertyTaxReassessmentPost() {
               into one you would walk from.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The cash you forget at closing: the supplemental bill
-            </h2>
+            <h2>The cash you forget at closing: the supplemental bill</h2>
             <p>
               In reassessment-on-sale states there is a second, smaller
               surprise. The annual bill resets at the next cycle, but the county
@@ -473,7 +465,7 @@ export default function PropertyTaxReassessmentPost() {
               term;{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/supplemental-assessment/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 two if you close between January 1 and May 31
               </a>
@@ -486,16 +478,14 @@ export default function PropertyTaxReassessmentPost() {
               numbers, but it absolutely belongs in your{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-to-close and first-year reserves
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to get the real number before you write the offer
-            </h2>
+            <h2>How to get the real number before you write the offer</h2>
             <p>
               You do not need the assessor to bless your figure before you make
               an offer — you need a defensible estimate, and there are three
@@ -516,14 +506,14 @@ export default function PropertyTaxReassessmentPost() {
               a clever title structure dodges the reassessment —{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/pdf/pub29.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 a purchase is a change of ownership regardless of who signs
               </a>
               . California&apos;s{" "}
               <a
                 href="https://www.boe.ca.gov/proptaxes/leopexclusions.htm"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 proportional transfer exclusion
               </a>
@@ -544,7 +534,7 @@ export default function PropertyTaxReassessmentPost() {
               soft expense line. Taxes, like{" "}
               <Link
                 href="/blog/rental-property-insurance"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 insurance
               </Link>
@@ -553,7 +543,7 @@ export default function PropertyTaxReassessmentPost() {
               honest figure through the free{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -561,21 +551,20 @@ export default function PropertyTaxReassessmentPost() {
               the seller&apos;s tax history flatters.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               The property-tax line on a listing is the seller&apos;s number,
               not yours, and underwriting to it is one of the most expensive
@@ -588,7 +577,7 @@ export default function PropertyTaxReassessmentPost() {
               a closing-year cost. The full{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -600,7 +589,7 @@ export default function PropertyTaxReassessmentPost() {
               exemptions with the county and a local professional before you
               close.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -632,13 +621,12 @@ export default function PropertyTaxReassessmentPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
