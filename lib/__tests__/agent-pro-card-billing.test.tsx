@@ -36,6 +36,8 @@ import {
   formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
   PUBLIC_AGENT_PRO_MONTHLY_USD,
+  PUBLIC_PRO_ANNUAL_USD,
+  PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
 
 function renderPlans(overrides: Partial<Parameters<typeof PricingTogglePlans>[0]> = {}) {
@@ -82,6 +84,53 @@ describe("/pricing Agent Pro card", () => {
     );
     expect(card).toContain("$49.17");
     expect(card).toContain("billed annually ($590)");
+  });
+
+  // Row P2-13: the saving was printed on the Pro card only, rounded up to the
+  // dollar, under a toggle percentage worked out from the Pro prices.
+  it("prints each paid plan's own annual saving, to the cent, from its two catalog prices", () => {
+    const cents = (monthly: number, annual: number) => Math.round(monthly * 1200 - annual * 100);
+    const label = (monthly: number, annual: number) =>
+      `Save $${(cents(monthly, annual) / 100).toFixed(2)}/yr`;
+    const proSaving = label(PUBLIC_PRO_MONTHLY_USD, PUBLIC_PRO_ANNUAL_USD);
+    const agentSaving = label(PUBLIC_AGENT_PRO_MONTHLY_USD, PUBLIC_AGENT_PRO_ANNUAL_USD);
+    expect(proSaving).not.toBe(agentSaving);
+
+    const html = renderPlans();
+    const pro = html.slice(html.indexOf('<article id="pro"'), html.indexOf('<article id="agent-pro"'));
+    expect(pro).toContain(
+      `billed annually (${formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}) · ${proSaving}`,
+    );
+    expect(pro).not.toContain(agentSaving);
+    const agent = agentCard(html);
+    expect(agent).toContain(
+      `billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)}) · ${agentSaving}`,
+    );
+    expect(agent).not.toContain(proSaving);
+    // The same figures when Stripe's display prices resolved.
+    const resolved = renderPlans({
+      monthly: { amountLabel: formatPublicUsd(PUBLIC_PRO_MONTHLY_USD), period: "month" },
+      annual: { amountLabel: formatPublicUsd(PUBLIC_PRO_ANNUAL_USD), period: "year" },
+      agentMonthly: { amountLabel: formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD), period: "month" },
+      agentAnnual: { amountLabel: formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD), period: "year" },
+    });
+    expect(resolved).toContain(proSaving);
+    expect(agentCard(resolved)).toContain(agentSaving);
+  });
+
+  it("gives the billing toggle no figure, so it is true beside both paid cards", () => {
+    const html = renderPlans();
+    const toggle = html.slice(html.indexOf('role="group"'), html.indexOf("<article"));
+    const text = toggle.replace(/<[^>]+>/g, "|").replace(/^[^|]*\|/, "");
+    expect(text).toContain("Annual |costs less");
+    expect(text).not.toMatch(/\d|%/);
+    const source = readFileSync(
+      join(process.cwd(), "components/marketing/pricing-toggle-plans.tsx"),
+      "utf8",
+    );
+    // No saving is typed by hand, and none is rounded to the dollar.
+    expect(source).not.toMatch(/Save \$\d/);
+    expect(source).not.toMatch(/annualSavingsPct|months free/);
   });
 
   it("keeps signed-in checkout gated on the resolved annual price", () => {

@@ -166,6 +166,20 @@ const PERIOD_BUTTON =
 const PERIOD_BUTTON_PRESSED = "border-foreground bg-band text-foreground";
 const PERIOD_BUTTON_IDLE = "border-transparent text-muted-foreground hover:text-foreground";
 
+/**
+ * What a year on the annual price saves over twelve monthly charges, to the
+ * cent, from the plan's own two catalog prices (lib/public-pricing.ts). A
+ * Stripe display price is shown only when it equals the catalog amount
+ * (lib/stripe/display-prices.ts), so the catalog pair is the pair on the card.
+ */
+function annualSavingUsd(monthlyUsd: number, annualUsd: number): number {
+  return Math.max(0, Math.round((monthlyUsd * 12 - annualUsd) * 100) / 100);
+}
+
+function annualSavingLabel(savingUsd: number): string | null {
+  return savingUsd > 0 ? `Save ${formatPublicUsd(savingUsd)}/yr` : null;
+}
+
 function parsePriceAmount(p: ResolvedPrice): number | null {
   if (!p) return null;
   const match = p.amountLabel.match(/[\d.]+/);
@@ -208,42 +222,29 @@ export function PricingTogglePlans({
     trackEvent("pricing_viewed", properties);
   }, []);
 
-  const monthlyAmount = parsePriceAmount(monthly) ?? PUBLIC_PRO_MONTHLY_USD;
   const annualAmount = parsePriceAmount(annual) ?? PUBLIC_PRO_ANNUAL_USD;
 
   // Derived display values
   const annualMonthlyEquivalent =
     annualAmount != null ? annualAmount / 12 : null;
-  const monthsFreeWithAnnual =
-    monthlyAmount && annualAmount
-      ? Math.max(0, Math.round((monthlyAmount * 12 - annualAmount) / monthlyAmount))
-      : null;
-  const annualSavingsPct =
-    monthlyAmount && annualAmount
-      ? Math.max(0, Math.round((1 - annualAmount / (monthlyAmount * 12)) * 100))
-      : null;
-  // Dollar-amount annual savings — concrete numbers convert better
-  // than percentages. "Save $48/yr" beats "Save 20%" in every A/B
-  // test I've seen on SaaS pricing pages.
-  const annualSavingsDollars =
-    monthlyAmount && annualAmount
-      ? Math.max(0, Math.round(monthlyAmount * 12 - annualAmount))
-      : null;
-  // The annual saving, stated in the Pro card's price note after the annual
-  // charge (it was a pill floating above the card's heading). Prefer the
-  // dollar-amount savings when available because concrete numbers convert
-  // better than percentages. Falls back to "X months free" or % savings.
-  const annualSavingsLabel =
-    period === "annual" && (annualSavingsPct ?? 0) > 0
-      ? annualSavingsDollars && annualSavingsDollars > 0
-        ? `Save $${annualSavingsDollars}/yr`
-        : monthsFreeWithAnnual && monthsFreeWithAnnual > 0
-          ? `${monthsFreeWithAnnual} months free`
-          : `Save ${annualSavingsPct}%`
-      : null;
-
   // Agent Pro exists on the page only when its price resolved (env configured).
   const showAgentPro = agentProConfigured;
+  // Each paid plan's own annual saving, stated in its card's price note after
+  // the annual charge. The Pro figure used to be rounded to the dollar and
+  // printed on the Pro card only, and the toggle carried a percentage worked
+  // out from the Pro prices, which was not Agent Pro's.
+  const proAnnualSavingUsd = annualSavingUsd(PUBLIC_PRO_MONTHLY_USD, PUBLIC_PRO_ANNUAL_USD);
+  const agentAnnualSavingUsd = annualSavingUsd(
+    PUBLIC_AGENT_PRO_MONTHLY_USD,
+    PUBLIC_AGENT_PRO_ANNUAL_USD,
+  );
+  const proAnnualSavingLabel = period === "annual" ? annualSavingLabel(proAnnualSavingUsd) : null;
+  const agentAnnualSavingLabel =
+    period === "annual" ? annualSavingLabel(agentAnnualSavingUsd) : null;
+  // The toggle's note carries no figure, so it is true beside every paid card
+  // on the page; it shows only while each of them costs less paid annually.
+  const annualCostsLess =
+    proAnnualSavingUsd > 0 && (!showAgentPro || agentAnnualSavingUsd > 0);
   const agentMonthlyAmount = parsePriceAmount(agentMonthly);
   const agentAnnualAmount = parsePriceAmount(agentAnnual);
   const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
@@ -335,9 +336,9 @@ export function PricingTogglePlans({
             period === "annual" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
           )}
         >
-          Annual
-          {annualSavingsPct && annualSavingsPct > 0 ? (
-            <span className="text-sm font-semibold">−{annualSavingsPct}%</span>
+          Annual{" "}
+          {annualCostsLess ? (
+            <span className="text-sm font-semibold">costs less</span>
           ) : null}
         </button>
       </div>
@@ -402,8 +403,8 @@ export function PricingTogglePlans({
           price={proCard.priceTop}
           period={proCard.priceSub}
           priceNote={
-            annualSavingsLabel
-              ? `${proCard.subline} · ${annualSavingsLabel}`
+            proAnnualSavingLabel
+              ? `${proCard.subline} · ${proAnnualSavingLabel}`
               : proCard.subline
           }
           // A block span, so the caption's wrap is balanced ("Everything in
@@ -463,7 +464,11 @@ export function PricingTogglePlans({
             }
             price={agentCard.priceTop}
             period={agentCard.priceSub}
-            priceNote={agentCard.subline}
+            priceNote={
+              agentAnnualSavingLabel
+                ? `${agentCard.subline} · ${agentAnnualSavingLabel}`
+                : agentCard.subline
+            }
             answersCaption="What changes for your workflow"
             answers={[...AGENT_PRO_FEATURES, ...AGENT_PRO_WORKFLOW].map((f) => ({ term: f }))}
             note={
