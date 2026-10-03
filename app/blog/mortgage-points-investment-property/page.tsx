@@ -14,15 +14,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -132,28 +145,26 @@ export default function MortgagePointsPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               {TITLE}
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -161,7 +172,8 @@ export default function MortgagePointsPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               A lender may offer several combinations of rate, points, credits,
               and fees. The only reliable comparison uses same-day written
               options for the actual borrower and property. This guide preserves
@@ -170,15 +182,15 @@ export default function MortgagePointsPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               What a point actually buys
             </h2>
             <p>
               A quote may use one point to mean{" "}
               <a
                 href="https://www.consumerfinance.gov/ask-cfpb/how-should-i-use-lender-credits-and-points-also-called-discount-points-en-136/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>1% of the loan amount</strong>
               </a>
@@ -186,15 +198,16 @@ export default function MortgagePointsPost() {
               charge is a discount point, origination charge, or another fee,
               and read the rate change from the lender&apos;s written ladder:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Point charge = quoted percentage × loan amount
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Rate change per point = lender&apos;s written quote, not a fixed
-                rule
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Point charge = quoted percentage × loan amount
+                  <br />
+                  Rate change per point = lender&apos;s written quote, not a fixed
+                  rule
+                </>
+              }
+            />
             <p>
               In the hypothetical below, a $200,000 loan makes one quoted point
               $2,000. The rate change, however, is an assumption supplied by the
@@ -213,18 +226,20 @@ export default function MortgagePointsPost() {
               automatically preferable for a short expected hold.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The break-even, worked
             </h2>
             <p>
               A simple screening ratio estimates how long monthly payment
               savings take to recover the incremental upfront cost.
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Break-even (months) = Cost of points ÷ Monthly payment savings
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Break-even (months) = Cost of points ÷ Monthly payment savings
+                </>
+              }
+            />
             <p>
               The following hypothetical uses a $200,000, 30-year loan, a 7.0%
               base-rate assumption, and an assumed 0.25-percentage-point rate
@@ -232,18 +247,18 @@ export default function MortgagePointsPost() {
               the payment arithmetic on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
               :
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Points (cost)</th>
+                  <tr>
+                    <th>Points (cost)</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">P&amp;I / mo</th>
                     <th className="text-right">Saved / mo</th>
@@ -281,7 +296,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               Under those assumptions, one point trims the payment about $33 per
@@ -291,7 +306,7 @@ export default function MortgagePointsPost() {
               loan is sold, refinanced, modified, prepaid, or otherwise ends.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Why the break-even barely moves in this hypothetical
             </h2>
             <p>
@@ -301,11 +316,11 @@ export default function MortgagePointsPost() {
               Calculate each pair of actual quotes separately.
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Rate cut per point</th>
+                  <tr>
+                    <th>Rate cut per point</th>
                     <th className="text-right">Saved / mo (1 pt)</th>
                     <th className="text-right">Break-even</th>
                   </tr>
@@ -328,7 +343,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               These three assumed ladders show that the break-even can change
@@ -337,7 +352,7 @@ export default function MortgagePointsPost() {
               ladder and the expected hold and exit scenarios.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Tax treatment must come from the actual charge and loan
             </h2>
             <p>
@@ -345,7 +360,7 @@ export default function MortgagePointsPost() {
               every charge called a point is prepaid interest.{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS Publication 527
               </a>{" "}
@@ -356,7 +371,7 @@ export default function MortgagePointsPost() {
               law. The{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rental-property tax guide
               </Link>{" "}
@@ -371,14 +386,14 @@ export default function MortgagePointsPost() {
               break-even.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               How points can change a modeled DSCR
             </h2>
             <p>
               A lower modeled rate reduces the payment and can increase a{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 debt-service-coverage ratio
               </Link>
@@ -389,11 +404,11 @@ export default function MortgagePointsPost() {
               NOI:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Points</th>
+                  <tr>
+                    <th>Points</th>
                     <th className="text-right">Rate</th>
                     <th className="text-right">Annual debt service</th>
                     <th className="text-right">DSCR</th>
@@ -422,7 +437,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               In the example, two points move modeled DSCR from 1.14 to 1.20. If
@@ -430,7 +445,7 @@ export default function MortgagePointsPost() {
               every other input, the change could affect the file. Actual{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR-loan programs
               </Link>{" "}
@@ -439,7 +454,7 @@ export default function MortgagePointsPost() {
               terms before paying non-refundable fees.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               What points do to cash-on-cash
             </h2>
             <p>
@@ -447,7 +462,7 @@ export default function MortgagePointsPost() {
               the deal. Run both effects through{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash
               </Link>{" "}
@@ -455,11 +470,11 @@ export default function MortgagePointsPost() {
               $18,200 NOI:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Scenario</th>
+                  <tr>
+                    <th>Scenario</th>
                     <th className="text-right">Cash in</th>
                     <th className="text-right">Cash flow / mo</th>
                     <th className="text-right">Cash-on-cash</th>
@@ -480,7 +495,7 @@ export default function MortgagePointsPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               Under the hypothetical inputs, cash-on-cash rises from 3.88% to
@@ -492,7 +507,7 @@ export default function MortgagePointsPost() {
               not the first-year ratio alone.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               A refinance-before-break-even scenario
             </h2>
             <p>
@@ -509,7 +524,7 @@ export default function MortgagePointsPost() {
               including a possible sale, payoff, or{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinance the rental
               </Link>
@@ -520,14 +535,14 @@ export default function MortgagePointsPost() {
               costs, and the modeled{" "}
               <Link
                 href="/blog/negative-leverage-real-estate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 loan constant
               </Link>{" "}
               over the same time horizons.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               A decision checklist for the written options
             </h2>
             <p>
@@ -543,7 +558,7 @@ export default function MortgagePointsPost() {
               lender-credit option, required reserves, and a larger{" "}
               <Link
                 href="/blog/how-much-down-payment-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 down payment
               </Link>
@@ -554,19 +569,20 @@ export default function MortgagePointsPost() {
               permanent rate reduction.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+            </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            {/* faqLd above is the one FAQPage node for these rows. */}
+            <FaqSection
+              id="faq"
+              variant="inline"
+              heading="FAQ"
+              items={FAQS}
+              structuredData={false}
+              contact={null}
+            />
+
+            <ArticleBody className="mt-16">
+            <h2>
               The bottom line
             </h2>
             <p>
@@ -579,7 +595,7 @@ export default function MortgagePointsPost() {
               changes a{" "}
               <Link
                 href="/blog/piti-explained-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 payment-driven DSCR
               </Link>
@@ -587,7 +603,7 @@ export default function MortgagePointsPost() {
               relying on the model. The{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -597,7 +613,7 @@ export default function MortgagePointsPost() {
               Reconcile the model with the final lender documents before
               committing funds.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -613,13 +629,12 @@ export default function MortgagePointsPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
