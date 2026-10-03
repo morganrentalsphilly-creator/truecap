@@ -3,8 +3,9 @@ import "server-only";
 /**
  * Token primitives for opaque public shares (/s/[token]).
  *
- * The raw token is the ONLY secret: it appears in the minted URL and nowhere
- * else. The database stores its sha256 — so a database read alone cannot
+ * The raw token is the ONLY secret: it appears in the minted URL and, as
+ * og:url, in the head of the page that URL serves, and nowhere else. The
+ * database stores its sha256 — so a database read alone cannot
  * reconstruct working share links, and tokens can't be enumerated (256 bits of
  * entropy, non-sequential).
  *

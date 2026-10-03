@@ -103,8 +103,7 @@ final_source_code/
 │   │                             # /update-password, /callback, /sign-out
 │   ├── s/[token]/                # Current opaque, revocable shared-deal viewer
 │   ├── d/[encoded]/              # Legacy stateless viewer; decode compatibility only
-│   │   ├── page.tsx
-│   │   └── opengraph-image.tsx   # static, privacy-safe card; never decodes the link
+│   │   └── page.tsx              # names the shared deal-free card /og/share (§3.6)
 │   ├── dashboard/                # Pro dashboard (entitlement-gated)
 │   ├── saved-analyses/           # Pro saved deals
 │   ├── compare/                  # Pro deal compare
@@ -363,11 +362,11 @@ function. Do not duplicate cash-flow / cap-rate / DSCR math in a component.
 Verdict thresholds (Strong / Solid / Mixed / Marginal / Negative, and
 the "Strong Buy / Buy / Neutral / Risky / Avoid" tier) live in
 `lib/verdict.ts`. **There is no second classifier to keep in sync.**
-`app/d/[encoded]/opengraph-image.tsx` used to carry its own copy, and it
+The legacy share link's card used to carry its own copy, and it
 drifted on cash purchases: the share card said "Strong Buy" while the
-page said otherwise. That card is now static and shows no verdict or
-number at all (§3.6), so nothing outside `lib/verdict.ts` classifies a
-deal. Don't reintroduce a local classifier; import `getDealTier`.
+page said otherwise. The share links' card is now static and shows no
+verdict or number at all (§3.6), so nothing outside `lib/verdict.ts`
+classifies a deal. Don't reintroduce a local classifier; import `getDealTier`.
 
 Cash purchases are a load-bearing edge case: `monthlyPayment <= 0`
 means DSCR is undefined. `calc-analysis` returns 0 for DSCR in that
@@ -410,18 +409,20 @@ co-rotate them in env-management scripts.
 ### 3.6 OG images — shared templates, fail-safe to the plain frame
 
 OG images live next to the page they belong to (`opengraph-image.tsx`)
-and use Next.js's built-in convention. There are 130 card files. All but
-one are a few lines of configuration (headline, tagline, slug) handed to
+and use Next.js's built-in convention. There are 130 card files. Each
+is a few lines of configuration (headline, tagline, slug) handed to
 a shared template in `lib/og/`: `blog-og-template.tsx` (73 posts),
 `vs-og-template.tsx` (38 comparison pages), `tool-og-template.tsx`
 (11 tool pages and the /tools hub) and `persona-og-template.tsx` (/analyze, /pricing and
 the four persona pages). Every template draws on one frame,
 `lib/og/newsprint.tsx` (Newsprint paper, Archivo, DM Mono).
 
-The exception is `app/d/[encoded]/opengraph-image.tsx`: a static,
-privacy-safe card for legacy share links. It never decodes the URL, so
-no address, price, metric or verdict reaches a crawler's preview cache.
-The homepage and /for-agents cards are route handlers
+The share links' card is a route handler, `app/og/share/route.tsx`: one
+static, deal-free card for `/s/[token]` and the legacy `/d/[encoded]`,
+drawn from constants on the `lib/og/newsprint.tsx` frame. It reads no
+request, so no address, price, metric or verdict reaches a crawler's
+preview cache.
+The homepage and /for-agents cards are route handlers too
 (`app/og/home/route.tsx`, `app/og/for-agents/route.tsx`), not file
 images: a root-level file image would be inherited by every child
 segment.
@@ -475,8 +476,8 @@ export type SharePayload = {
   new caller to `encodeShareLink`; current creation must use the authenticated
   opaque mint action.
 - The `/d/[encoded]` route calls `decodeShareLink`, then re-validates via
-  `releasedInvestmentFormSchema.safeParse`. Its OG image never decodes the
-  link (§3.6).
+  `releasedInvestmentFormSchema.safeParse`. Its metadata never decodes the
+  link and names the shared card `/og/share` (§3.6).
 - **Never modify the legacy payload format** without keeping backwards-compatible
   decoding. Existing links in the wild rely on `v: 1`. New fields go on
   `meta` (optional) or behind a new `v: 2` decoder that runs alongside
@@ -629,7 +630,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `app/api/dashboard/search-suggestions/route.ts` — dashboard search autocomplete.
 - `app/auth/callback/route.ts` — Supabase OAuth callback.
 - `app/auth/sign-out/route.ts` — sign-out handler.
-- `app/d/[encoded]/page.tsx` + `opengraph-image.tsx` — legacy share link viewer + its static, privacy-safe card (§3.6).
+- `app/d/[encoded]/page.tsx` — legacy share link viewer. Its preview card is the shared, deal-free `app/og/share/route.tsx` (§3.6).
 
 ### Frontend entry points
 
@@ -694,12 +695,10 @@ When adding a fourth such feature, replicate this layout. Shared shells
    inputs, or bearer links; use opaque IDs where possible.
 
 5. **Changing the social card look in one file.** The blog, /vs, tool and
-   persona cards and the two route-handler cards (`app/og/home`,
-   `app/og/for-agents`) all draw on one frame, `lib/og/newsprint.tsx`,
-   through the templates in `lib/og/` (§3.6): change the palette or layout
-   there, not in a card file. The legacy `/d/[encoded]/opengraph-image.tsx`
-   is the one card with its own inline styles; if the brand color or layout
-   language changes, update it by hand.
+   persona cards and the three route-handler cards (`app/og/home`,
+   `app/og/for-agents`, `app/og/share`) all draw on one frame,
+   `lib/og/newsprint.tsx`, through the templates in `lib/og/` (§3.6):
+   change the palette or layout there, not in a card file.
 
 6. **Using `console.log` for production debugging.** Sentry log
    forwarding is dev-only (`enableLogs: process.env.NODE_ENV !== "production"`).

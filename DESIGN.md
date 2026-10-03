@@ -580,11 +580,9 @@ top: the artifact leads and the explanation happens on the artifact.
    Offer Ceiling rows; what the client receives is section 4's.
 3. **Where the numbers come from:** a source table (HUD rent, FRED rate,
    property tax as your input with its 1.1% fallback flagged). Dense rhythm.
-4. **What the client receives:** the real memo screenshot shown as a document,
-   no browser frame, with the co-branding facts beside it. The memo shown is
-   the 2026-09-06 screenshot, in the app's previous style, until
-   `public/product/*` is regenerated after the rollout; whether a raster
-   belongs in the ledger world at all is an open checkpoint-3 decision.
+4. **What the client receives:** page 1 of the real PDF report for the sample
+   deal, shown as a document, no browser frame, with the co-branding facts
+   beside it (`scripts/render-pdf-cover-shot.ts`).
 5. **Plans:** Free, Pro and Agent Pro as the page's only cards, prices from the
    catalog, the comparison table under them.
 6. **Built by a rental investor:** kept, in a narrow column between rules. The

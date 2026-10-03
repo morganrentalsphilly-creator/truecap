@@ -5,7 +5,6 @@
  *   - the live tier pill in the WhatIfSliders
  *   - the breakpoint solver's "what would make it Solid" target
  *   - the verdict paragraph on the PDF cover page
- *   - the OG image classifier mirror in app/d/[encoded]/opengraph-image.tsx
  *
  * If the tier boundaries silently shift, every one of those surfaces
  * shows a different answer for the same deal. These tests pin the

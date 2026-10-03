@@ -22,8 +22,8 @@
  * banned outright — see lib/pipeline.ts "Passed", lib/buy-box.ts `pass`, and
  * the hero's "clears at asking").
  *
- * Edge-safe: pure data + pure functions, no server imports, so
- * app/d/[encoded]/opengraph-image.tsx (runtime = "edge") can consume it.
+ * Edge-safe: pure data + pure functions, no server imports, so an edge
+ * route or a social card can consume it.
  */
 
 import type { DealRecommendation } from "@/lib/deal-score";

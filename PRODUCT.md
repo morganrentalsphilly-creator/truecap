@@ -170,7 +170,9 @@ recommended option, accepted by the founder 2026-10-03].
 
 - Real product screenshots from the no-account sample flow in `public/product/`
   (verdict, memo, where-the-rent-goes; desktop and mobile) with `manifest.json`,
-  captured by `scripts/capture-screenshots.ts` [repo].
+  captured by `scripts/capture-screenshots.ts`, and `pdf-cover.webp`, page 1
+  of the unbranded PDF report for the sample deal, written by
+  `scripts/render-pdf-cover-shot.ts` and not listed in `manifest.json` [repo].
 - A synthetic sample deal (`lib/sample-deal.ts`) that runs through the real
   engine: asking $265,000, Offer Ceiling $236,000, targets cash flow ≥ $750/mo
   and DSCR ≥ 1.25, binding target cash flow. Its address is deliberately not a
