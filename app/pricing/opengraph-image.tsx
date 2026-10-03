@@ -28,7 +28,7 @@ export default function Image() {
   return renderPersonaOgImage({
     label: "Pricing",
     headline: `Overpaying by ${PRICING_OUTCOME_EXAMPLE.overpayPct}% on a ${formatUsdWhole(PRICING_OUTCOME_EXAMPLE.purchasePriceUsd)} rental costs ${formatUsdWhole(PRICING_OUTCOME_EXAMPLE.overpayUsd)} before you collect a dollar of rent.`,
-    subhead: `Complete a rental decision free, then create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison.`,
+    subhead: `Complete a rental decision free, then create an account for a ${PRODUCT_EVALUATION_DAYS}-day free trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison.`,
     path: "/pricing",
   });
 }

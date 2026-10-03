@@ -118,10 +118,13 @@ describe("no-card product evaluation", () => {
     // The deal and comparison limits are interpolated from lib/product-access
     // beside the day count. They were typed as words ("three ... one"), which
     // a limit change would have left stale on /pricing and on sign-up.
-    expect(plans).toContain("includes {PRODUCT_EVALUATION_DEAL_LIMIT} complete");
+    // Row P1-07: the terms line uses the noun every other trial surface uses
+    // ("Pro analyses") and says what counts as one. It pinned "includes
+    // {limit} complete" and "Pro deals and {limit} comparison." before.
     expect(plans).toMatch(
-      /Pro deals and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\./,
+      /free trial includes \{PRODUCT_EVALUATION_DEAL_LIMIT\} Pro\s+analyses and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\. A rerun with changed inputs\s+counts as a new analysis\./,
     );
+    expect(plans).not.toMatch(/Pro\s+deals and/);
     expect(signup).toContain(
       "Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and",
     );

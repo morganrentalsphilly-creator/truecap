@@ -74,6 +74,32 @@ describe("trial wording says what is metered (P1-07)", () => {
     expect(page).not.toMatch(/Pro deals\b/);
   });
 
+  it("/pricing: the description, the card, the lede, the FAQ answer and the terms line", () => {
+    const page = read("app/pricing/page.tsx");
+    const card = read("app/pricing/opengraph-image.tsx");
+    const plans = flat(read("components/marketing/pricing-toggle-plans.tsx"));
+    expect(page).toContain(
+      "-day free trial with ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison.`",
+    );
+    expect(card).toContain(
+      "-day free trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison.`",
+    );
+    expect(page).toContain(
+      "days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} analyses, and ${EVALUATION_FACTS.comparisonLimit} comparison",
+    );
+    expect(page).toContain(
+      "days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. A rerun with changed inputs counts as a new analysis.",
+    );
+    expect(plans).toContain(
+      "{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+    );
+    for (const source of [page, card, plans]) {
+      expect(source).not.toMatch(/(?:Pro|proOfferName\}) deals\b[^\n]*comparison/);
+      expect(source).not.toMatch(/Pro deal analyses/);
+      expect(source).not.toMatch(/\b\d+ Pro (?:analyses|deals)\b/);
+    }
+  });
+
   it("llms-full.txt", () => {
     const route = read("app/llms-full.txt/route.ts");
     expect(route).toContain(
