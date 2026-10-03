@@ -50,7 +50,10 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "Am I giving investment advice?",
-    a: "No. TrueCap applies published formulas to labeled inputs. You supply the property facts; the client can rerun the deal in the free analyzer and change every assumption, and the decision is theirs. Every share page and report carries the not-investment-advice disclaimer.",
+    // States what the software does. Whether an agent's own conduct counts as
+    // advice is for their license, not for this answer (it used to open "No.").
+    // The question text is selected by exact match on the homepage: keep it.
+    a: "TrueCap does not give investment advice: it applies published formulas to labeled inputs. You supply the property facts; the client can rerun the deal in the free analyzer and change every assumption, and the decision is theirs. Every share page and report carries the not-investment-advice disclaimer. What you say to a client stays a matter for your license and your brokerage.",
   },
   {
     q: "Do my clients need a TrueCap account to view what I send?",
@@ -74,7 +77,7 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "I only get a few investor clients a year. Is it worth it?",
-    a: `Start free. The first decision needs no account, and a free account gets a ${PRODUCT_EVALUATION_DAYS}-day trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Subscribe to Agent Pro when a client is worth a roster entry, monthly or annually, and cancel from your profile when the season ends.`,
+    a: `Start free. The first decision needs no account, and a free account gets a ${PRODUCT_EVALUATION_DAYS}-day trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Subscribe to Agent Pro when a client is worth a roster entry, monthly or annually, and cancel from your profile when the season ends.`,
   },
   {
     q: "My brokerage already gives me tools.",
@@ -92,10 +95,15 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
     // "The free trial", not a trial of Agent Pro: the trial is Pro deal
     // analyses, and Agent Pro's roster is never part of it.
     q: "What does the free trial include, and do I need a card?",
-    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} complete Pro deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings. Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
+    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings; a rerun with changed inputs counts as a new analysis. Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
   },
   {
     q: "Can I cancel?",
-    a: "Yes. Cancel anytime from your profile. Agent Pro stays active until the end of the period you've paid for, then the account downgrades to Free and your saved work stays readable.",
+    // What a downgraded account keeps, read from the gates: saved deals stay
+    // readable on Free; the Clients page and roster actions need
+    // client_buy_box (app/dashboard/clients/page.tsx, app/actions/
+    // agent-clients.ts) and Buy Boxes need buy_box (app/actions/
+    // user-buy-boxes.ts). Nothing is deleted on downgrade.
+    a: "Yes. Cancel anytime from your profile. Agent Pro stays active until the end of the period you've paid for, then the account downgrades to Free. Your saved deals stay readable. Your client roster and Buy Boxes are kept but are not shown on Free, and they return when you resubscribe.",
   },
 ];
