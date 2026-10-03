@@ -206,6 +206,22 @@ describe("range state is true for a deal that misses its targets (P1-71)", () =>
     expect(summary).toContain(
       "On the return criteria shown, the highest price that still meets them falls in this range.",
     );
+    // The caption says "this range" only when the headline prints the range.
+    expect(summary).toContain(": offerCeilingHeadlineIsRange");
+    const flag = summary.slice(
+      summary.indexOf("const offerCeilingHeadlineIsRange ="),
+      summary.indexOf("const offerCeilingHeadline = "),
+    );
+    for (const condition of [
+      'targetResolutionState !== "loading"',
+      'targetResolutionState !== "error"',
+      "!isOfferCeilingLoading",
+      "!offerCeilingError",
+      "!canShowPriceCeiling",
+      "rangePreview?.downsideFeasible",
+    ]) {
+      expect(flag).toContain(condition);
+    }
   });
 
   it("the preview is still solved on the return targets alone", () => {

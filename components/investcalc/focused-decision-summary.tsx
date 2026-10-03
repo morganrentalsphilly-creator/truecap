@@ -808,6 +808,17 @@ export function FocusedDecisionSummary({
     telemetryKey,
   ]);
 
+  // True only when the headline below prints the range itself, so the caption
+  // never points at "this range" under a loading, error or no-range headline.
+  const offerCeilingHeadlineIsRange =
+    targetAdopted &&
+    targetResolutionState !== "loading" &&
+    targetResolutionState !== "error" &&
+    !isOfferCeilingLoading &&
+    !offerCeilingError &&
+    !canShowPriceCeiling &&
+    Boolean(rangePreview?.downsideFeasible) &&
+    rangePreview?.lower != null;
   const offerCeilingHeadline = !targetAdopted
     ? canTunePriceCeiling
       ? "Choose criteria"
@@ -933,9 +944,7 @@ export function FocusedDecisionSummary({
               ? canTunePriceCeiling
                 ? "Choose at least one criterion to calculate an Offer Ceiling."
                 : "TrueCap Pro calculates the highest price that still clears the targets you choose — like the examples above — plus the binding constraint and a screening range."
-              : !canShowPriceCeiling &&
-                  rangePreview?.downsideFeasible &&
-                  rangePreview.lower != null
+              : offerCeilingHeadlineIsRange
                 ? "On the return criteria shown, the highest price that still meets them falls in this range."
                 : "The highest price that still meets the criteria shown."}
           </p>
