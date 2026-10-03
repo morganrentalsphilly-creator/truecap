@@ -34,4 +34,4 @@ export function anonymousDecisionPresentationGrantMatches(
  * the no-card trial, which includes complete decisions.
  */
 export const ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE =
-  "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again within the hour.";
+  "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again in an hour.";
