@@ -162,7 +162,6 @@ const FEATURE_COMPARISON: Array<
   ["Save deals", PRODUCT_PLAN_FACTS.free.savedDealLimit, "Unlimited"],
   ["Compare deals side-by-side", false, "Up to 4"],
   ["Co-branded share pages + PDFs", false, true],
-  ["Priority support", false, true],
   // Agent Pro only (lib/entitlements-catalog.ts client_buy_box). These rows
   // keep the [label, free, pro] shape the catalog guard parses; the Agent Pro
   // cell comes from AGENT_PRO_CELLS below.

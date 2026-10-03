@@ -43,7 +43,7 @@ const roiCalculatorSource = readFileSync(
 
 /**
  * /pricing rows mapped to the catalog feature they describe. Rows with no
- * entitlement flag (priority support, due-diligence checklist, alerts) are
+ * entitlement flag (due-diligence checklist, alerts) are
  * deliberately absent — there is nothing in the catalog to check them against.
  */
 const PRICING_ROW_TO_FEATURE: { row: string; key: FeatureKey }[] = [
