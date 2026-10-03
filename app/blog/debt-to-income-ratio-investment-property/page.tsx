@@ -19,15 +19,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -131,28 +144,24 @@ export default function DtiInvestmentPropertyPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -160,13 +169,14 @@ export default function DtiInvestmentPropertyPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Debt-to-income can be an important ratio in{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="tc-link">
                 conventional
               </a>{" "}
               and{" "}
-              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="tc-link">
                 FHA
               </a>{" "}
               underwriting, alongside credit, reserves, LTV, property, income,
@@ -183,20 +193,18 @@ export default function DtiInvestmentPropertyPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What DTI actually measures
-            </h2>
+          <ArticleBody>
+            <h2>What DTI actually measures</h2>
             <p>
               Debt-to-income ratio is your recurring monthly debt divided by
               your gross (pre-tax) monthly income, expressed as a percentage.{" "}
-              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="tc-link">
                 Some programs look at two versions
               </a>
               . The <strong>front-end</strong> ratio is just your housing
               payment over your income. The <strong>back-end</strong> ratio
               adds{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-02/debt-income-ratios" className="tc-link">
                 applicable recurring obligations under the program&apos;s rules
               </a>
               , which may include the
@@ -206,11 +214,7 @@ export default function DtiInvestmentPropertyPost() {
               ratio, but the lender&apos;s program determines which obligations and
               housing costs count.
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Back-end DTI = Total monthly debt payments ÷ Gross monthly income
-              </code>
-            </div>
+            <ToolFormula formula="Back-end DTI = Total monthly debt payments ÷ Gross monthly income" />
             <p>
               No single DTI ceiling guarantees approval. Automated findings and
               lender overlays depend on the selected program, occupancy, income,
@@ -220,18 +224,16 @@ export default function DtiInvestmentPropertyPost() {
               the lender for your file.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The illustrative 75% rental-income treatment
-            </h2>
+            <h2>The illustrative 75% rental-income treatment</h2>
             <p>
               A common agency-style example for some one-to-four-unit scenarios
               uses{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="tc-link">
                 <strong>75% of eligible gross rent</strong>
               </a>
               . The 25% cut works like an allowance for vacancy and
               maintenance: FHA&apos;s{" "}
-              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="tc-link">
                 self-sufficiency test for three- and four-unit properties
                 subtracts at least 25% of fair market rent for vacancies and
                 maintenance
@@ -242,7 +244,7 @@ export default function DtiInvestmentPropertyPost() {
               for the{" "}
               <Link
                 href="/tools/vacancy-rate-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 vacancy and repair reserves
               </Link>{" "}
@@ -255,24 +257,24 @@ export default function DtiInvestmentPropertyPost() {
               insurance, and any HOA dues, together abbreviated{" "}
               <Link
                 href="/blog/piti-explained-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 PITIA
               </Link>
               . What is left is your <strong>net rental income</strong>, and its
               sign is everything:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Illustrative net rental income = (0.75 × Eligible rent) − PITIA
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Positive → added to your income
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Negative → added to your debts
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Illustrative net rental income = (0.75 × Eligible rent) − PITIA
+                  <br />
+                  Positive → added to your income
+                  <br />
+                  Negative → added to your debts
+                </>
+              }
+            />
             <p>
               Under this illustration, a rental improves the modeled DTI only
               when 75% of eligible rent clears its <em>full</em> payment
@@ -282,7 +284,7 @@ export default function DtiInvestmentPropertyPost() {
             </p>
             <p>
               One current wrinkle: under{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="tc-link">
                 Fannie Mae&apos;s rental-income guidance
               </a>
               , a positive result counts as qualifying income only when the
@@ -292,9 +294,7 @@ export default function DtiInvestmentPropertyPost() {
               result is added to your monthly obligations either way.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Illustrative example: buying a standalone rental
-            </h2>
+            <h2>Illustrative example: buying a standalone rental</h2>
             <p>
               Assume a $250,000 single-family rental, 25% down, a $187,500 loan at
               a hypothetical 7.25%
@@ -302,32 +302,29 @@ export default function DtiInvestmentPropertyPost() {
               month — you can confirm it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>{" "}
               — plus $250 of property tax and $125 of landlord insurance, for a
               PITIA of <strong>$1,654</strong>. It rents for $2,100.
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Credited rent = 0.75 × $2,100 = $1,575
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Net rental income = $1,575 − $1,654 = −$79/mo
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Credited rent = 0.75 × $2,100 = $1,575
+                  <br />
+                  Net rental income = $1,575 − $1,654 = −$79/mo
+                </>
+              }
+            />
             <p>
               That $79 shortfall gets added to your monthly debts. Now suppose
               you earn $8,000 a month gross and already carry $3,100 of other
               obligations — your own home&apos;s payment, a car note, and student
               loans. Fold the rental in:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                DTI = ($3,100 + $79) ÷ $8,000 = 39.7%
-              </code>
-            </div>
+            <ToolFormula formula="DTI = ($3,100 + $79) ÷ $8,000 = 39.7%" />
             <p>
               At 39.7%, the illustration falls below its chosen 45% screen. That
               does not establish eligibility or approval. Notice what the property did: it added
@@ -335,7 +332,7 @@ export default function DtiInvestmentPropertyPost() {
               renting for $446 a month more than its payment. In your own{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash math
               </Link>{" "}
@@ -344,17 +341,15 @@ export default function DtiInvestmentPropertyPost() {
               negative on the application.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the 25% haircut actually costs you
-            </h2>
+            <h2>What the 25% haircut actually costs you</h2>
             <p>
               To see the haircut&apos;s bite, run the same property both ways —
               once crediting the full rent, once at 75%:
             </p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
+                  <tr>
                     <th className="text-left">Method</th>
                     <th className="text-right">Credited rent</th>
                     <th className="text-right">Net vs PITIA</th>
@@ -376,7 +371,7 @@ export default function DtiInvestmentPropertyPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               Three points of modeled DTI hang on that one assumption. On a file
               near its applicable program limit, that difference can affect the
@@ -386,15 +381,13 @@ export default function DtiInvestmentPropertyPost() {
               income worksheet before relying on it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Illustrative house-hack version
-            </h2>
+            <h2>Illustrative house-hack version</h2>
             <p>
               The 75% rule feels like a tax until you buy a property you live in.
               On an owner-occupied two-to-four unit — the classic{" "}
               <Link
                 href="/blog/house-hacking-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 house hack
               </Link>{" "}
@@ -405,25 +398,26 @@ export default function DtiInvestmentPropertyPost() {
             </p>
             <p>
               Say you buy a $350,000 duplex with{" "}
-              <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="text-primary font-semibold hover:underline">
+              <a href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages" className="tc-link">
                 5% down on an owner-occupied conventional loan
               </a>{" "}
               — a $332,500 loan at 6.75%, about $2,157 in principal and
               interest, plus $365 tax, $150 insurance, and $139 of{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance" className="tc-link">
                 PMI for low-down-payment financing
               </a>
               : a $2,811 PITIA. You live in one side; the other rents for
               $1,700.
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-1">
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Rental credit = 0.75 × $1,700 = $1,275 → added to income
-              </code>
-              <code className="block text-sm sm:text-base text-foreground font-mono">
-                Qualifying income = $6,500 + $1,275 = $7,775/mo
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Rental credit = 0.75 × $1,700 = $1,275 → added to income
+                  <br />
+                  Qualifying income = $6,500 + $1,275 = $7,775/mo
+                </>
+              }
+            />
             <p>
               With $700 of other monthly debts, your back-end ratio is
               ($2,811 + $700) ÷ $7,775 = <strong>45.2%</strong> under the stated
@@ -435,7 +429,7 @@ export default function DtiInvestmentPropertyPost() {
               The tenant&apos;s modeled rent credit drives the difference. This is
               the structural edge house hacking has over a standalone rental
               purchase:{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="tc-link">
                 the rent counts as income
               </a>{" "}
               against a low owner-occupant down payment, instead of merely
@@ -444,9 +438,7 @@ export default function DtiInvestmentPropertyPost() {
               too, so ask the lender which treatment your file gets.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How you prove the rent
-            </h2>
+            <h2>How you prove the rent</h2>
             <p>
               A lender will require acceptable evidence for the rent figure.
               Which documents and calculations apply depend on the program,
@@ -456,13 +448,13 @@ export default function DtiInvestmentPropertyPost() {
               <strong>A property you&apos;re buying, no history.</strong> The
               selected agency workflow may use the appraiser&apos;s market-rent
               opinion, such as a{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="tc-link">
                 Single-Family Comparable Rent Schedule (Form 1007) for one unit
                 or the Form 1025 appraisal report for two to four units
               </a>{" "}
               (replaced by the redesigned appraisal report&apos;s Rental
               Information section for appraisals{" "}
-              <a href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign" className="text-primary font-semibold hover:underline">
+              <a href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign" className="tc-link">
                 submitted on or after Nov. 2, 2026
               </a>
               ), together with an eligible lease. Which value
@@ -474,27 +466,27 @@ export default function DtiInvestmentPropertyPost() {
               appears on your filed returns&apos;{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E
               </Link>{" "}
               (
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-01/rental-income" className="tc-link">
                 the most recent year for Fannie Mae
               </a>
               ;{" "}
-              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="text-primary font-semibold hover:underline">
+              <a href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18-Redline.pdf" className="tc-link">
                 two years for FHA
               </a>
               ), a program may use tax returns and a rental-income worksheet.
               Some methods start with reported net income and{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property" className="tc-link">
                 adjust eligible non-cash or already-counted lines
               </a>
               , which may include{" "}
               <Link
                 href="/blog/rental-property-tax-deductions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 depreciation
               </Link>{" "}
@@ -506,7 +498,7 @@ export default function DtiInvestmentPropertyPost() {
             <p>
               One thing DTI doesn&apos;t capture but your lender checks
               separately: <strong>reserves.</strong>{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements" className="tc-link">
                 Financed investment properties may require program-specific
                 reserves
               </a>{" "}
@@ -516,19 +508,17 @@ export default function DtiInvestmentPropertyPost() {
               treatment with the lender.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              When DTI constrains the file: compare DSCR programs
-            </h2>
+            <h2>When DTI constrains the file: compare DSCR programs</h2>
             <p>
               A borrower may eventually encounter a DTI, documentation, or{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower" className="tc-link">
                 financed-property constraint
               </a>{" "}
               under a selected conventional program. One alternative to
               investigate is a{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR loan
               </Link>
@@ -537,7 +527,7 @@ export default function DtiInvestmentPropertyPost() {
               whether its rent covers its debt service, measured by the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 debt-service-coverage ratio
               </Link>
@@ -552,7 +542,7 @@ export default function DtiInvestmentPropertyPost() {
               conventional financing. The{" "}
               <Link
                 href="/blog/hard-money-vs-dscr-loan"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 choice between hard money and a DSCR loan
               </Link>{" "}
@@ -561,9 +551,7 @@ export default function DtiInvestmentPropertyPost() {
               economics.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Five ways to get under the line
-            </h2>
+            <h2>Five ways to get under the line</h2>
             <p>
               If a conventional file is close to its applicable limit, possible
               levers to discuss with the lender include paying down eligible
@@ -577,7 +565,7 @@ export default function DtiInvestmentPropertyPost() {
               rent clears its PITIA flips from a debt to an income line.{" "}
               <strong>Document all your income</strong> — bonus, overtime, and
               side income may enlarge the denominator when it satisfies the{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-3.1-01/general-income-information" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-3.1-01/general-income-information" className="tc-link">
                 program&apos;s history, stability, and documentation rules
               </a>
               . And when
@@ -586,28 +574,27 @@ export default function DtiInvestmentPropertyPost() {
               same move you make when you{" "}
               <Link
                 href="/blog/how-much-down-payment-investment-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 size a down payment
               </Link>
               : less debt, smaller payment, better coverage.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Rental income may affect DTI through different lease, appraisal,
               and tax-return methods. The 75%-minus-PITIA calculation in this
@@ -615,7 +602,7 @@ export default function DtiInvestmentPropertyPost() {
               lender to calculate the actual file, and compare DSCR or portfolio
               programs without assuming that property coverage guarantees a
               loan. The{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               models payment, coverage, and cash flow from user-entered
@@ -624,7 +611,7 @@ export default function DtiInvestmentPropertyPost() {
               program guide and the lender&apos;s written calculation against
               your own file before you make an offer.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -680,13 +667,12 @@ export default function DtiInvestmentPropertyPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
