@@ -265,6 +265,7 @@ describe("P2-48: the mortgage calculator rejects negative and absurd inputs", ()
     const field = code("components/tools/tool-number-field.tsx");
     expect(field).toContain("aria-invalid={error ? true : undefined}");
     expect(field).toContain("aria-describedby={describedBy}");
+    expect(field).toContain("error ? errorId : null");
     expect(field).toMatch(/<p id=\{errorId\} role="alert"/);
     const html = renderToStaticMarkup(createElement(MortgagePaymentWidget));
     // P2-72: the result is a live region. At the defaults it reads the payment.
