@@ -20,9 +20,18 @@
  * Uses Turnstile's explicit render API so React owns the container. The token
  * is reported up via onToken; Turnstile tokens expire (~5 min), and the
  * expired-callback reports null so the form disables submit until re-solved.
+ *
+ * A TOKEN WORKS ONCE. Supabase checks the captcha before the credentials and
+ * Cloudflare rejects a replayed token ("timeout-or-duplicate"), so a token
+ * that has travelled with one server call is spent whether that call
+ * succeeded or failed. The widget therefore exposes reset() through its ref:
+ * every form calls it after each server call that carried the token. reset()
+ * reports null first (submit is disabled again) and then asks Turnstile for a
+ * new token, which arrives through the same callback. It is never called on
+ * unmount: unmount removes the widget.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 
 export const CAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
@@ -42,8 +51,37 @@ type TurnstileApi = {
       size: "flexible";
     }
   ) => string;
+  reset: (widgetId: string) => void;
   remove: (widgetId: string) => void;
 };
+
+/** What a form holds on the widget: `ref.current?.reset()` after every server
+ *  call that carried the token. */
+export type CaptchaWidgetHandle = {
+  reset: () => void;
+};
+
+/**
+ * Throw away the token a server call just used and ask Turnstile for a new
+ * one. The null goes out FIRST, so the form's submit is disabled before the
+ * new challenge starts and no click can send the spent token (or none at all)
+ * in between; the new token then arrives through the widget's own callback.
+ * With no rendered widget (captcha not configured, script blocked, widget not
+ * mounted yet) there is nothing to ask, and only the null is reported.
+ */
+export function resetCaptcha(
+  api: Pick<TurnstileApi, "reset"> | null | undefined,
+  widgetId: string | null,
+  onToken: (token: string | null) => void,
+): void {
+  onToken(null);
+  if (!api || !widgetId) return;
+  try {
+    api.reset(widgetId);
+  } catch {
+    /* widget already gone */
+  }
+}
 
 declare global {
   interface Window {
@@ -98,7 +136,10 @@ function loadScript(): Promise<TurnstileApi | null> {
 export function CaptchaWidget({
   onToken,
   onUnavailable,
+  ref,
 }: {
+  /** Gives the form `reset()`; see CaptchaWidgetHandle. */
+  ref?: Ref<CaptchaWidgetHandle>;
   onToken: (token: string | null) => void;
   /**
    * Fired when Turnstile cannot run at all (script blocked, timed out, or the
@@ -121,6 +162,22 @@ export function CaptchaWidget({
   useEffect(() => {
     onUnavailableRef.current = onUnavailable;
   }, [onUnavailable]);
+
+  // The rendered widget's id, kept for reset(). Null until Turnstile has
+  // rendered and again after unmount.
+  const widgetIdRef = useRef<string | null>(null);
+  useImperativeHandle(
+    ref,
+    () => ({
+      reset: () => {
+        if (!captchaEnabled) return;
+        resetCaptcha(window.turnstile, widgetIdRef.current, (token) =>
+          onTokenRef.current(token),
+        );
+      },
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (!captchaEnabled) return;
@@ -146,9 +203,11 @@ export function CaptchaWidget({
         theme: "light",
         size: "flexible",
       });
+      widgetIdRef.current = widgetId;
     });
     return () => {
       cancelled = true;
+      widgetIdRef.current = null;
       if (widgetId && window.turnstile) {
         try {
           window.turnstile.remove(widgetId);

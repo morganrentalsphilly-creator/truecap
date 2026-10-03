@@ -125,3 +125,88 @@ describe("the captcha widget cannot lock users out", () => {
     expect(src).toMatch(/Unavailable\s*&&\s*!/);
   });
 });
+
+/**
+ * A token works once (go-to-market audit, row P1-41): Supabase checks the
+ * captcha before the credentials and Cloudflare rejects a replayed token. So
+ * every server call that carried the token is followed by a widget reset, and
+ * anything that sends a token waits for the new one.
+ */
+describe("a spent captcha token is never sent twice", () => {
+  const widget = read("components/auth/captcha-widget.tsx");
+
+  it("the widget exposes reset() and clears the token before asking for a new one", () => {
+    expect(widget).toContain("export type CaptchaWidgetHandle");
+    expect(widget).toContain("useImperativeHandle(");
+    const fn = widget.slice(widget.indexOf("export function resetCaptcha("));
+    const cleared = fn.indexOf("onToken(null);");
+    const asked = fn.indexOf("api.reset(widgetId)");
+    expect(cleared).toBeGreaterThan(-1);
+    expect(asked).toBeGreaterThan(cleared);
+  });
+
+  it("unmount removes the widget and does not reset it", () => {
+    const cleanup = widget.slice(widget.indexOf("return () => {"), widget.indexOf("if (!captchaEnabled) return null;"));
+    expect(cleanup).toContain("window.turnstile.remove(widgetId)");
+    expect(cleanup).not.toMatch(/\.reset\(/);
+  });
+
+  /**
+   * components/profile/profile-form.tsx also calls requestPasswordResetAction
+   * with a token and does not reset yet (a failed send followed by a retry
+   * sends the spent token). That file belongs to another package; the fix is
+   * handed off, and the file joins this list when it lands.
+   */
+  const FORMS = [
+    ["login", "components/auth/login-form.tsx", 2],
+    ["sign-up", "components/auth/sign-up-form.tsx", 2],
+    ["forgot-password", "components/auth/forgot-password-form.tsx", 1],
+  ] as const;
+
+  it.each(FORMS)(
+    "%s resets the widget after every call that carried the token",
+    (_label, file, calls) => {
+      const src = read(file);
+      expect(src).toMatch(/const captchaRef = useRef<CaptchaWidgetHandle>\(null\)/);
+      // Each call that sends the token, and the reset that follows it in the
+      // same function's `finally` (so it runs on success, failure and throw).
+      const sends = [...src.matchAll(/captchaToken: captchaToken \?\? undefined/g)];
+      expect(sends).toHaveLength(calls);
+      for (const send of sends) {
+        const rest = src.slice(send.index);
+        const end = rest.search(/\n  \}\n/); // the enclosing handler's closing brace
+        const body = rest.slice(0, end);
+        const fin = body.indexOf("} finally {");
+        expect(fin, `${file}: no finally after the call`).toBeGreaterThan(-1);
+        expect(body.slice(fin)).toContain("captchaRef.current?.reset();");
+      }
+      // Every mounted widget is the one the ref resets.
+      const widgets = [...src.matchAll(/<CaptchaWidget\b[\s\S]*?\/>/g)];
+      expect(widgets.length).toBeGreaterThan(0);
+      for (const w of widgets) expect(w[0]).toContain("ref={captchaRef}");
+    },
+  );
+
+  it("the confirmation panel keeps a widget mounted for the resend", () => {
+    const src = read("components/auth/sign-up-form.tsx");
+    const panel = src.slice(
+      src.indexOf("if (confirmationSentTo) {"),
+      src.indexOf("Your {PRODUCT_EVALUATION_DAYS}-day free trial"),
+    );
+    expect(panel).toContain("Confirm your email to finish");
+    expect(panel).toMatch(/<CaptchaWidget\s+ref=\{captchaRef\}/);
+    expect(panel.indexOf("<CaptchaWidget")).toBeLessThan(panel.indexOf("Resend the confirmation email"));
+  });
+
+  it.each([
+    ["login", "components/auth/login-form.tsx", "onClick={handleResendConfirmation}"],
+    ["sign-up", "components/auth/sign-up-form.tsx", "onClick={handleResendConfirmation}"],
+  ])("%s: the resend button waits for a token like submit does", (_label, file, anchor) => {
+    const src = read(file);
+    const i = src.indexOf(anchor);
+    expect(i).toBeGreaterThan(-1);
+    expect(src.slice(i, i + 420)).toMatch(
+      /isResending\s*\|\|\s*\(captchaEnabled && !captchaUnavailable && !captchaToken\)/,
+    );
+  });
+});
