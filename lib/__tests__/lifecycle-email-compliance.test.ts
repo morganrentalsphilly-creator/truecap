@@ -664,13 +664,35 @@ describe("the legacy trial emails", () => {
     expect(notice!.html).toContain(TEST_POSTAL_ADDRESS);
   });
 
-  it("does not schedule the pitch while the postal address is unset; the billing notice keeps its rule", async () => {
+  // Founder answer 2: nothing sends until EMAIL_POSTAL_ADDRESS is set. The
+  // day-10 billing notice is gated on LIFECYCLE_EMAILS_MODE like the pitch,
+  // so it waits for the address too.
+  it("schedules neither trial email while the postal address is unset, and reads nothing", async () => {
     vi.stubEnv("EMAIL_POSTAL_ADDRESS", "");
     useDatabase({ users: [user(1, 0)], profiles: [profile(1)] });
-    expect(await scheduleTrialOnboardingEmails(db.admin, input)).toEqual({ scheduled: 1, skipped: 1 });
-    expect(sent.map((mail) => mail.subject)).toEqual(["Review the billing date for your legacy Stripe trial"]);
-    expect(db.log().map((row) => row.email_key)).toEqual(["trial_day10"]);
-    expect(logLines).toEqual(["[lifecycle] BLOCKED — trial_day1 not scheduled: EMAIL_POSTAL_ADDRESS is not set"]);
+    expect(await scheduleTrialOnboardingEmails(db.admin, input)).toEqual({
+      scheduled: 0,
+      skipped: 2,
+      reason: "postal_address_missing",
+    });
+    expect(transport).not.toHaveBeenCalled();
+    expect(db.operations).toEqual([]);
+    expect(db.log()).toHaveLength(0);
+    expect(logLines).toEqual(["[lifecycle] BLOCKED — trial emails not scheduled: EMAIL_POSTAL_ADDRESS is not set"]);
+  });
+
+  it("schedules neither trial email while the unsubscribe link cannot be signed", async () => {
+    vi.stubEnv("SHARE_LINK_SECRET", "");
+    useDatabase({ users: [user(1, 0)], profiles: [profile(1)] });
+    expect(await scheduleTrialOnboardingEmails(db.admin, input)).toEqual({
+      scheduled: 0,
+      skipped: 2,
+      reason: "unsubscribe_unsignable",
+    });
+    expect(transport).not.toHaveBeenCalled();
+    expect(db.operations).toEqual([]);
+    expect(logLines).toHaveLength(1);
+    expect(logLines[0]).toMatch(/^\[lifecycle\] BLOCKED — trial emails not scheduled: the unsubscribe link cannot be signed/);
   });
 
   it("does not schedule the pitch for an opted-out user; the billing notice still goes", async () => {

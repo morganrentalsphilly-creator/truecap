@@ -26,9 +26,13 @@ import "server-only";
  *     (profiles.marketing_opt_out). When any of those fails it is not
  *     claimed and not scheduled, and one line is logged.
  *   - trial_day10 is a billing notice: it tells a subscriber to check the
- *     date and amount of an upcoming charge. Its sending rule is unchanged,
- *     it is sent to opted-out users too, and it carries no unsubscribe link
- *     (the postal address is printed when one is set).
+ *     date and amount of an upcoming charge. It is sent to opted-out users
+ *     too and carries no unsubscribe link.
+ *
+ * Neither email is claimed or scheduled while EMAIL_POSTAL_ADDRESS is unset
+ * or the unsubscribe link cannot be signed (lifecycleComplianceBlock), the
+ * billing notice included: nothing in the lifecycle program sends until the
+ * address is set (founder answer 2, 2026-10-02). A blocked call logs one line.
  */
 
 import { promises as fs } from "node:fs";
@@ -41,6 +45,7 @@ import {
   buildLifecycleUnsubscribeHeaders,
   buildLifecycleUnsubscribeUrl,
   describeLifecycleBlock,
+  lifecycleComplianceBlock,
   lifecycleSendGate,
   readEmailPostalAddress,
   resolveLifecycleMode,
@@ -134,9 +139,9 @@ export async function scheduleTrialOnboardingEmails(
 ): Promise<TrialEmailsResult> {
   if (!lifecycleEmailsLive())
     return { scheduled: 0, skipped: 2, reason: "mode_off" };
-  // Both approved lifecycle templates currently restate the optional refund
-  // guarantee. Never schedule them while that separate marketing promise is
-  // dark; a later guarantee-free template can replace this fail-closed gate.
+  // Neither template restates the refund guarantee since the 2026-10-02
+  // rewrite of trial-day1.json. The gate stays fail-closed until the founder
+  // decides whether the legacy trial emails send at all.
   if (!getMarketingOfferConfig().guaranteeEnabled) {
     return { scheduled: 0, skipped: 2, reason: "guarantee_disabled" };
   }
@@ -150,6 +155,15 @@ export async function scheduleTrialOnboardingEmails(
     process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"
   ).replace(/\/+$/, "");
   const manageUrl = `${siteUrl}/settings`;
+  // No address or no signable link: neither email is claimed or scheduled,
+  // the billing notice included, and nothing is read from the database.
+  const complianceBlock = lifecycleComplianceBlock(siteUrl);
+  if (complianceBlock) {
+    console.log(
+      `[lifecycle] BLOCKED — trial emails not scheduled: ${describeLifecycleBlock(complianceBlock)}`,
+    );
+    return { scheduled: 0, skipped: TRIAL_EMAILS.length, reason: complianceBlock };
+  }
   const postalAddress = readEmailPostalAddress();
   const unsubscribeUrl = buildLifecycleUnsubscribeUrl(siteUrl, input.userId);
   const pitchBlockedBy = await pitchBlock(admin, siteUrl, input.userId);
