@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,6 +21,7 @@ import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import {
   CaptchaWidget,
   captchaEnabled,
+  type CaptchaWidgetHandle,
 } from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,12 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // A Turnstile token works once. Every server call below that carries it is
+  // followed by captchaRef.current?.reset(), which clears the token (submit
+  // and resend are disabled) and asks the mounted widget for a new one. The
+  // form and the confirmation panel each mount a widget on this ref; only one
+  // of the two is on screen at a time.
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
   // Turnstile could not run (blocked/timed out). Stop waiting for a token —
   // a captcha the user cannot solve must not be a permanent lockout. Supabase
   // still enforces server-side, so this only changes the failure MODE from a
@@ -191,6 +198,10 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       });
     } finally {
       setIsSubmitting(false);
+      // The token went with the request and is spent whatever the outcome.
+      // Cleared here so neither a retry nor the confirmation panel's resend
+      // can send it again.
+      captchaRef.current?.reset();
     }
   }
 
@@ -223,6 +234,8 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       });
     } finally {
       setIsResending(false);
+      // Spent with the resend; the next one needs a new token.
+      captchaRef.current?.reset();
     }
   }
 
@@ -239,13 +252,23 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           {hasPendingDeal ? " — your analysis will be saved automatically" : ""}
           . Check the spam folder if it hasn&apos;t arrived in a minute.
         </p>
+        {/* The form's widget unmounted with the form, and its token was spent
+            by the sign-up call. This one issues the token the resend sends. */}
+        <CaptchaWidget
+          ref={captchaRef}
+          onToken={setCaptchaToken}
+          onUnavailable={() => setCaptchaUnavailable(true)}
+        />
         <Button
           type="button"
           variant="outline"
           size="cta"
           className="w-full"
           onClick={handleResendConfirmation}
-          disabled={isResending}
+          disabled={
+            isResending ||
+            (captchaEnabled && !captchaUnavailable && !captchaToken)
+          }
         >
           {isResending ? (
             <>
@@ -496,6 +519,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           ) : null}
 
           <CaptchaWidget
+            ref={captchaRef}
             onToken={setCaptchaToken}
             onUnavailable={() => setCaptchaUnavailable(true)}
           />

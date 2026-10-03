@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { requestPasswordResetAction } from "@/app/actions/auth";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schema";
-import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
+import {
+  CaptchaWidget,
+  captchaEnabled,
+  type CaptchaWidgetHandle,
+} from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +28,9 @@ export function ForgotPasswordForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // A Turnstile token works once: reset after the request that carried it, so
+  // a retry sends a new one.
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
   // Turnstile could not run (blocked/timed out). Stop waiting for a token —
   // a captcha the user cannot solve must not be a permanent lockout. Supabase
   // still enforces server-side, so this only changes the failure MODE from a
@@ -66,6 +73,8 @@ export function ForgotPasswordForm() {
       });
     } finally {
       setIsSubmitting(false);
+      // Spent with the request, whatever the outcome.
+      captchaRef.current?.reset();
     }
   }
 
@@ -106,7 +115,11 @@ export function ForgotPasswordForm() {
             </FormItem>
           )}
         />
-        <CaptchaWidget onToken={setCaptchaToken} onUnavailable={() => setCaptchaUnavailable(true)} />
+        <CaptchaWidget
+          ref={captchaRef}
+          onToken={setCaptchaToken}
+          onUnavailable={() => setCaptchaUnavailable(true)}
+        />
 
         <Button
           type="submit"

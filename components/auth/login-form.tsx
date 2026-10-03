@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,11 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { resendConfirmationAction, signInAction } from "@/app/actions/auth";
 import { internalNextPathOrNull, loginSchema, safeInternalNextPath, type LoginInput } from "@/lib/auth-schema";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
-import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
+import {
+  CaptchaWidget,
+  captchaEnabled,
+  type CaptchaWidgetHandle,
+} from "@/components/auth/captcha-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +32,10 @@ export function LoginForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // A Turnstile token works once. Every server call below that carries it is
+  // followed by captchaRef.current?.reset(), which clears the token (submit
+  // and resend are disabled) and asks the widget for a new one.
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
   // Turnstile could not run (blocked/timed out). Stop waiting for a token —
   // a captcha the user cannot solve must not be a permanent lockout. Supabase
   // still enforces server-side, so this only changes the failure MODE from a
@@ -134,6 +142,10 @@ export function LoginForm() {
       // ALWAYS re-enable the form. The bug this replaces left the button and
       // both inputs disabled forever whenever the await threw.
       setIsSubmitting(false);
+      // The token went with the request and is spent whatever the outcome: a
+      // retry (or the resend below) with it is rejected before the password
+      // is even looked at.
+      captchaRef.current?.reset();
     }
   }
 
@@ -170,6 +182,8 @@ export function LoginForm() {
       });
     } finally {
       setIsResending(false);
+      // Spent with the resend; the next resend or sign-in needs a new one.
+      captchaRef.current?.reset();
     }
   }
 
@@ -262,7 +276,9 @@ export function LoginForm() {
             <button
               type="button"
               onClick={handleResendConfirmation}
-              disabled={isResending}
+              // Waits for a token like the submit button does: the sign-in
+              // attempt that opened this box spent the previous one.
+              disabled={isResending || (captchaEnabled && !captchaUnavailable && !captchaToken)}
               className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-input px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-background disabled:opacity-50"
             >
               {isResending ? (
@@ -295,7 +311,11 @@ export function LoginForm() {
           </div>
         ) : null}
 
-        <CaptchaWidget onToken={setCaptchaToken} onUnavailable={() => setCaptchaUnavailable(true)} />
+        <CaptchaWidget
+          ref={captchaRef}
+          onToken={setCaptchaToken}
+          onUnavailable={() => setCaptchaUnavailable(true)}
+        />
 
         <Button
           type="submit"
