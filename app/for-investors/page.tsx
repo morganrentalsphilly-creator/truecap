@@ -117,7 +117,7 @@ const WHAT_YOU_GET = [
   },
   {
     term: "What is my Offer Ceiling?",
-    detail: "The highest price that still meets your targets under the assumptions shown. Not a recommended offer; your line, computed.",
+    detail: "The highest price that still meets your targets under the assumptions shown.",
   },
   {
     term: "What could make it fail?",
