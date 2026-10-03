@@ -1,8 +1,8 @@
 # TrueCap branded email templates
 
 Five HTML email templates for Supabase Auth, in the TrueCap site's colours.
-All templates are responsive, tested in the major email clients, and use only
-inline styles so they render correctly in Gmail / Apple Mail / Outlook.
+All templates are responsive and use only inline styles. The 2026-10-03
+recolour was rendered to disk and has not been re-tested in mail clients.
 
 ```
 supabase/
