@@ -118,19 +118,17 @@ describe("article tables survive a 375px viewport", () => {
       } catch {
         continue;
       }
-      for (const match of source.matchAll(/<ScrollX([^>]*)>\s*<table([^>]*)>([\s\S]*?)<\/table>/g)) {
-        const head = /<thead>([\s\S]*?)<\/thead>/.exec(match[3]);
+      for (const match of source.matchAll(/<(ScrollX|ArticleTable)([^>]*)>\s*<table([^>]*)>([\s\S]*?)<\/table>/g)) {
+        const [, wrapper, props, tableProps, body] = match;
+        const head = /<thead>([\s\S]*?)<\/thead>/.exec(body);
         if (!head) continue;
         const columns = (head[1].match(/<th\b/g) ?? []).length;
-        if (columns === 2 && /min-w-\[/.test(match[2])) {
-          offenders.push(`${slug.name}: two-column table keeps a min-width`);
-        }
-        if (columns >= 3 && !/stickyFirstColumn/.test(match[1])) {
-          offenders.push(`${slug.name}: ${columns}-column table without stickyFirstColumn`);
-        }
-        if (columns >= 3 && !/\bcue\b/.test(match[1])) {
-          offenders.push(`${slug.name}: ${columns}-column table without a scroll cue`);
-        }
+        // ArticleTable always cues, and pins unless stickyFirstColumn={false}.
+        const pinned = wrapper === "ArticleTable" ? !/stickyFirstColumn=\{false\}/.test(props) : /stickyFirstColumn/.test(props);
+        const cued = wrapper === "ArticleTable" || /\bcue\b/.test(props);
+        if (columns === 2 && /min-w-\[/.test(tableProps)) offenders.push(`${slug.name}: two-column table keeps a min-width`);
+        if (columns >= 3 && !pinned) offenders.push(`${slug.name}: ${columns}-column table without stickyFirstColumn`);
+        if (columns >= 3 && !cued) offenders.push(`${slug.name}: ${columns}-column table without a scroll cue`);
       }
     }
     expect(offenders).toEqual([]);
