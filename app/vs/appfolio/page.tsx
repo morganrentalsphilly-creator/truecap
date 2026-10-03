@@ -364,7 +364,8 @@ export default function VsAppfolioPage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              computes them from an address. Our guide on{" "}
+              computes them from an address, the asking price and a bedroom count.
+              Our guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
@@ -389,6 +390,7 @@ export default function VsAppfolioPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Your first complete decision also includes the Offer Ceiling.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
               the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.

@@ -372,7 +372,8 @@ export default function VsPropstreamPage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              prices it — cap rate, DSCR, cash flow — from the address alone.
+              prices it — cap rate, DSCR, cash flow — from the address, the
+              asking price and a bedroom count.
             </p>
           </div>
         </Section>
@@ -390,6 +391,7 @@ export default function VsPropstreamPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Your first complete decision also includes the Offer Ceiling.
               Pro adds 10-year cash-flow and equity projections, sensitivity, the
               Offer Ceiling, co-branded share links, and PDF reports; see live
               pricing for current terms. No card to start.

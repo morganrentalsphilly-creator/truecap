@@ -394,8 +394,8 @@ export default function VsAvailPage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              computes cap rate, cash-on-cash, and DSCR from an address. Our guide
-              on{" "}
+              computes cap rate, cash-on-cash, and DSCR from an address, the asking
+              price and a bedroom count. Our guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
@@ -420,7 +420,8 @@ export default function VsAvailPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, monthly cash flow, and
-              plain read-only share links. Pro adds 10-year cash-flow and
+              plain read-only share links. Your first complete decision also includes the Offer Ceiling.
+              Pro adds 10-year cash-flow and
               equity projections, sensitivity, Offer Ceiling, co-branding, and
               included PDFs. New one-time PDF checkout is temporarily unavailable.
               No card to start.

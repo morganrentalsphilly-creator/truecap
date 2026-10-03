@@ -323,8 +323,9 @@ export default function VsDealCheckPage() {
           <div className={VS_PROSE}>
             <ul>
               <li>
-                <strong>Start with less setup.</strong> Enter an address for a
-                first-pass screen, then refine the assumptions that matter.
+                <strong>Start with less setup.</strong> Enter an address, the
+                asking price and a bedroom count for a first-pass screen, then
+                refine the assumptions that matter.
               </li>
               <li>
                 <strong>See where the inputs came from.</strong> TrueCap labels

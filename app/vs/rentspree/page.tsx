@@ -351,7 +351,8 @@ export default function VsRentspreePage() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              produces all three from an address, in an analysis you can share.
+              produces all three from an address, the asking price and a bedroom
+              count, in an analysis you can share.
             </p>
           </div>
         </Section>
@@ -369,6 +370,7 @@ export default function VsRentspreePage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Your first complete decision also includes the Offer Ceiling.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
               the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.
