@@ -343,7 +343,7 @@ export default function BlogPost() {
                 href="/tools/1-percent-rule-calculator"
                 className="tc-link"
               >
-                Run the 1% rule on a deal →
+                Run the 1% rule on a deal
               </Link>
             </p>
 

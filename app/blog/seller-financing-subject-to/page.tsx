@@ -454,21 +454,21 @@ export default function BlogPost() {
               href="/blog/cash-out-refinance-vs-heloc-rental"
               className="tc-link"
             >
-              Cash-out refi vs HELOC →
+              Cash-out refi vs HELOC
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-refinance-a-rental-property"
               className="tc-link"
             >
-              How to refinance a rental →
+              How to refinance a rental
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
               className="tc-link"
             >
-              DSCR loans explained →
+              DSCR loans explained
             </Link>
           </p>
         </footer>

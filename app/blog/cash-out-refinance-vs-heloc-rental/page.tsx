@@ -499,21 +499,21 @@ export default function BlogPost() {
               href="/blog/how-to-refinance-a-rental-property"
               className="tc-link"
             >
-              How to refinance a rental →
+              How to refinance a rental
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/brrrr-method-explained"
               className="tc-link"
             >
-              The BRRRR method →
+              The BRRRR method
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
               className="tc-link"
             >
-              DSCR loans explained →
+              DSCR loans explained
             </Link>
           </p>
         </footer>

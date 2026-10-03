@@ -761,21 +761,21 @@ export default function BlogPost() {
               href="/blog/what-is-a-good-cap-rate"
               className="tc-link"
             >
-              What&apos;s a good cap rate in 2026 →
+              What&apos;s a good cap rate in 2026
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
               className="tc-link"
             >
-              Cap rate vs CoC vs DSCR →
+              Cap rate vs CoC vs DSCR
             </Link>{" "}
             ·{" "}
             <Link
               href="/glossary"
               className="tc-link"
             >
-              Glossary →
+              Glossary
             </Link>
           </p>
         </footer>

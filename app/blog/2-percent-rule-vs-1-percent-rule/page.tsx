@@ -632,14 +632,14 @@ export default function BlogPost() {
               href="/blog/1-percent-rule-rental-property"
               className="tc-link"
             >
-              The 1% rule in 2026 →
+              The 1% rule in 2026
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
               className="tc-link"
             >
-              Gross rent multiplier explained →
+              Gross rent multiplier explained
             </Link>
           </p>
         </footer>
