@@ -301,8 +301,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p>
               <strong>TrueCap</strong> offers a free core analyzer and paid Pro
               plans. A free signed-in account can create read-only share links
-              and includes one sale and rent comps lookup; Pro includes 50 comps
-              lookups per month plus 10-year cash-flow and equity projections,
+              and includes one sale and rent comps lookup; Pro includes up to 50
+              comps lookups per month plus 10-year cash-flow and equity projections,
               sensitivity, an Offer Ceiling, and saved-deal comparison. PDF
               export is included with Pro. See the live pricing page for current
               rates and limits.

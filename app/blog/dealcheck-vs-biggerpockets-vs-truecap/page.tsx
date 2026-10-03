@@ -190,7 +190,7 @@ export default function ThreeWayComparisonPost() {
               >
                 house hacking guide
               </a>{" "}
-              mentions 5 free calculator reports. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
+              mentions 5 free calculator reports. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds up to 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, comparison, and reports. Choose based on the workflow you need, then verify current plan terms before subscribing.
             </p>
             <p className="mt-3">
               Access and pricing change. Check the official{" "}
@@ -252,7 +252,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Pricing (paid tier comparison)</h2>
             <ul>
-              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
+              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, up to 50 comps lookups per month, 10-year cash-flow and equity projections, sensitivity, an Offer Ceiling, editing, unlimited saves, and comparison tools.</li>
               <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
               <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
             </ul>
