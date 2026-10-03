@@ -46,8 +46,13 @@ export function PricingPlanButtons({
   const [pending, setPending] = useState(false);
   // Set when the server found the buyer's own open Checkout Session for
   // another plan or billing period. The card then offers that checkout or a
-  // fresh one for this plan, in place of the Subscribe button.
+  // fresh one for the plan they asked for, in place of the Subscribe button.
+  // The requested plan is stored because this instance outlives the
+  // Monthly/Annual toggle (its `slot` changes): the choice shows only on the
+  // plan it was raised for, so toggling to the open plan itself shows the
+  // normal button, which resumes that checkout.
   const [openCheckout, setOpenCheckout] = useState<{
+    requestedPlanSlug: CheckoutPlanSlug;
     openPlanSlug: CheckoutPlanSlug;
     resumeUrl: string;
   } | null>(null);
@@ -79,6 +84,7 @@ export function PricingPlanButtons({
         if (!result.ok) {
           if (result.code === "CHECKOUT_OPEN_OTHER_PLAN") {
             setOpenCheckout({
+              requestedPlanSlug: planSlug,
               openPlanSlug: result.openPlanSlug,
               resumeUrl: result.resumeUrl,
             });
@@ -144,16 +150,16 @@ export function PricingPlanButtons({
     );
   }
 
-  if (openCheckout) {
+  if (openCheckout && openCheckout.requestedPlanSlug === slot) {
     return (
       <OpenCheckoutChoice
         openPlanSlug={openCheckout.openPlanSlug}
-        requestedPlanSlug={slot}
+        requestedPlanSlug={openCheckout.requestedPlanSlug}
         pending={pending}
         onResume={() => {
           window.location.href = openCheckout.resumeUrl;
         }}
-        onStartOver={() => startCheckout(slot, true)}
+        onStartOver={() => startCheckout(openCheckout.requestedPlanSlug, true)}
       />
     );
   }
